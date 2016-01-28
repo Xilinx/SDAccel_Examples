@@ -1,0 +1,11 @@
+===================================
+Configuration Memory information
+===================================
+File Format        MCS
+Interface          BPIX16
+Size               1024M
+Start Address      0x00000000
+End Address        0x3FFFFFFF
+
+Addr1         Addr2         Date                    File(s)
+0x00000000    0x00AA6767    Oct 13 13:36:47 2015    /proj/mpmc/sandboxes/juliank/RDI_juliank_sdaccel_platform/HEAD/data/sdaccel/board_support/alpha_data/v7/vc690-xdma_2.0/src/.Xil/Vivado-14308-eurus22/dsa/xilinx_adm-pcie-7v3_1ddr_2_0.bit
