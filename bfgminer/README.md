@@ -6,8 +6,9 @@ application.  It includes one pre-built binary for the
 xilinx:adm-pcie-7v3:1ddr:2.1 dsa and SDAccel 2015.4.
 
 The main algorithm characteristics of this application are
+
 1. SHA256 double hashing with poclbm kernel
-4. Achieved performance = 80 Megahashes / second
+2. Achieved performance = 80 Megahashes / second
 
 Changelog
 ----------
