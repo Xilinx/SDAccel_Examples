@@ -5,6 +5,7 @@ This is an optimized implementation of a 12-bit histogram equalizer
 targeting execution on an SDAccel supported FPGA acceleration card.
 
 The main algorithm characteristics of this application are
+
 1. 12-bit grayscale histrogram depth
 2. Input image size of 2048 x 1080
 3. Target performance = 120 frames / second
