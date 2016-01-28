@@ -4,6 +4,7 @@ Nearest Neighbor Linear Search Example
 This is an optimized implementation of a nearest neighbor linear search
 algorithm targeting execution on a SDAccel supported FPGA acceleration card.
 The main algorithm characteristics of this application are
+
 1. 256 distance measurements per cycle (compile time configurable)
 2. Achieved performance = 37.5 Gigameasurements / second <sup>1</sup>
 
