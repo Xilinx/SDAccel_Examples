@@ -28,7 +28,7 @@ The target board can be changed by editing *medianFilter.tcl*
 Executing the Application
 ---------------------------
 ```
-medianFilter.exe medianFilter.xclbin data/inputImage.bmp
+medianFilter_example.exe medianFilter.xclbin data/inputImage.bmp
 ```
 
 Files in the Example
