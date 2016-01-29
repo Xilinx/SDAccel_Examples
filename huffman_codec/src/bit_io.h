@@ -10,7 +10,9 @@
 
 #include <string>
 #include <vector>
-#include "base.h"
+
+typedef unsigned char u8;
+typedef unsigned int u32;
 
 using namespace std;
 

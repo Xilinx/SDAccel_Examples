@@ -57,7 +57,7 @@ int BitStorage::read(int count_bits) const {
 	assert(count_bits > 0);
 
 	//adjust count
-	count_bits = MATHMIN(count_bits, (m_bitwise_count - m_bitwise_index));
+	count_bits = min<int>(count_bits, (m_bitwise_count - m_bitwise_index));
 
 	//read count bits from storage and increment the index
 	assert((m_bitwise_index + count_bits) <= m_bitwise_count);

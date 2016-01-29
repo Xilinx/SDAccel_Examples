@@ -24,9 +24,9 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PARENT_DIR}/cmake/")
 #set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} src/3rdparty/xirpower)
 
 #opencl path                    
-set(XILINX_SDACCEL "/proj/xbuilds/2015.4_sdaccel_daily_latest/installs/lin64/SDAccel/2015.4")
-set(OpenCL_INCPATH ${XILINX_SDACCEL}/runtime/include/1_2/)
-set(OpenCL_LIBPATH ${XILINX_SDACCEL}/runtime/lib/x86_64/)
+##set(XILINX_SDACCEL "/proj/xbuilds/2015.4_sdaccel_daily_latest/installs/lin64/SDAccel/2015.4")
+#set(OpenCL_INCPATH ${XILINX_SDACCEL}/runtime/include/1_2/)
+#set(OpenCL_LIBPATH ${XILINX_SDACCEL}/runtime/lib/x86_64/)
 MESSAGE( STATUS "OpenCL_INCPATH=" ${OpenCL_INCPATH})
 MESSAGE( STATUS "OpenCL_LIBPATH=" ${OpenCL_LIBPATH})
 
@@ -83,4 +83,4 @@ endif()
 # Linking
 ###############################
 add_executable(huffman_host.exe ${SRC})
-target_link_libraries(huffman_host.exe ${OPENCL_LIBRARIES} ${ZeroMQ_LIBRARY_DIRS} crypto ssl)
+target_link_libraries(huffman_host.exe ${OPENCL_LIBRARIES} )
