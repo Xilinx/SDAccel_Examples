@@ -28,7 +28,7 @@ The target board can be changed by editing *watermarking.tcl*
 Executing the Application
 ---------------------------
 ```
-watermarking_example.exe watermarking.xclbin data/inputImage.bmp
+watermarking_example.exe data/inputImage.bmp watermarking.xclbin 
 ```
 
 Files in the Example
