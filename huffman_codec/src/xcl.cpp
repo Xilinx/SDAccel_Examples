@@ -1,6 +1,6 @@
 /*******************************************************************************
 Vendor: Xilinx
-Associated Filename: xcl.c
+Associated Filename: xcl.cpp
 Purpose: SDAccel histogram equalization example
 Revision History: December 6, 2015
 
@@ -122,7 +122,7 @@ xcl_world xcl_world_single(cl_device_type device_type) {
 	}
 
 	int i;
-	for(i = 0; i < num_platforms; i++) {
+	for(i = 0; i < (int)num_platforms; i++) {
 		err = clGetDeviceIDs(platform_ids[i], device_type,
 							 1, &world.device_id, NULL);
 		if (err == CL_SUCCESS) {
@@ -133,7 +133,7 @@ xcl_world xcl_world_single(cl_device_type device_type) {
 
 	free(platform_ids);
 
-	if (i == num_platforms) {
+	if (i == (int)num_platforms) {
 		printf("Error: Failed to create a device group\n");
 		printf("Test failed\n");
 		exit(EXIT_FAILURE);

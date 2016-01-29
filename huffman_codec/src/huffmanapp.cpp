@@ -1,10 +1,19 @@
 #include <assert.h>
 #include <string.h>
+#include <stdio.h>
+#include "logger.h"
 #include "huffmanapp.h"
 #include "simplebmp.h"
 #include "huffmancodec.h"
-#include "logger.h"
 #include "huffmancodec_opencl_cpu.h"
+#include "xcl.h"
+
+#if defined(__linux__) || defined(linux)
+	#include "sys/time.h"
+#elif defined(WIN32)
+	#include "windows.h"
+#endif
+
 
 #define ROUNDS 10
 //ROUNDS <= 10 valid
@@ -13,38 +22,11 @@ using namespace sda;
 using namespace sda::cl;
 
 /////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
 //load_file_to_memory
-//Allocated memory for and load file from disk memory
-//Return value
-// 0   Success
-//-1   Failure to open file
-//-2   Failure to allocate memory
-int load_file_to_memory(const char *filename, char **result, size_t *inputsize) {
-	int size = 0;
-	FILE *f = fopen(filename, "rb");
-	if (f == NULL) {
-		*result = NULL;
-		return -1; // -1 means file opening fail
-	}
-	fseek(f, 0, SEEK_END);
-	size = ftell(f);
-	fseek(f, 0, SEEK_SET);
-	*result = (char *) malloc(size + 1);
-	if (size != (int)fread(*result, sizeof(char), size, f)) {
-		free(*result);
-		return -2; // -2 means file reading fail
-	}
-	fclose(f);
-	(*result)[size] = 0;
-	if (inputsize != NULL)
-		(*inputsize) = size;
-	return 0;
-}
 
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-HuffmanApp::HuffmanApp() :
-	BenchApp() {
+
+HuffmanApp::HuffmanApp() {
 	// TODO Auto-generated constructor stub
 
 }
@@ -53,28 +35,59 @@ HuffmanApp::HuffmanApp(const string& vendor_name,
 			   const string& device_name,
 			   int selected_device,
 			   const string& strKernelFP,
-			   const string& strBitmapFP) :
-			   	   BenchApp(vendor_name, device_name, selected_device, strKernelFP)
+			   const string& strBitmapFP)
 {
 	//store path to input bitmap
 	m_strBitmapFP = strBitmapFP;
 
-
-	//create the kernels
-	if (!CreateKernelByName(m_clprogram, "encode", m_clKernelHuffmanEncoder)) {
-		LogError("Unable to create the encode kernel");
-		abort();
+	if(strstr(strKernelFP.c_str(), ".xclbin") != NULL) {
+		LogInfo("order xilinx device");
+		m_world = xcl_world_single(CL_DEVICE_TYPE_ACCELERATOR);
+	} else {
+		LogInfo("order cpu device");
+		m_world = xcl_world_single(CL_DEVICE_TYPE_CPU);
 	}
 
-	if (!CreateKernelByName(m_clprogram, "decode", m_clKernelHuffmanDecoder)) {
-		LogError("Unable to create the decode kernel");
-		abort();
-	}
+	//kernels
+    m_clKernelHuffmanEncoder  = xcl_import_binary(m_world, strKernelFP.c_str(), "encode");
+    m_clKernelHuffmanDecoder  = xcl_import_binary(m_world, strKernelFP.c_str(), "decode");
+
 }
 
 HuffmanApp::~HuffmanApp() {
 	// TODO Auto-generated destructor stub
 	cleanup();
+}
+
+void HuffmanApp::cleanup() {
+
+	clReleaseKernel(m_clKernelHuffmanDecoder);
+	clReleaseKernel(m_clKernelHuffmanEncoder);
+	xcl_release_world(m_world);
+}
+
+double HuffmanApp::timestamp() {
+	double ms = 0.0;
+	#if  defined(__linux__) || defined(linux)
+		timeval time;
+		gettimeofday(&time, NULL);
+		ms = (time.tv_sec * 1000.0) + (time.tv_usec / 1000.0);
+	#elif defined(WIN32)
+		SYSTEMTIME time;
+		GetSystemTime(&time);
+		ms = (time.wSeconds * 1000) + time.wMilliseconds;
+	#endif
+	return ms;
+}
+
+double HuffmanApp::computeEventDurationInMS(const cl_event& event) {
+	cl_ulong ts_start = 0, ts_end = 0;
+	double duration = 0;
+	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &ts_start, NULL);
+	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &ts_end, NULL);
+	duration += (cl_double)(ts_end-ts_start)*(cl_double)(1e-06);
+
+	return duration;
 }
 
 bool HuffmanApp::unit_test_kernel_cpu() {
@@ -182,14 +195,15 @@ bool HuffmanApp::invoke_kernel(bool encode,
 	//create input and output buffers size for 24 bpp image
 	cl_int err;
 	cl_mem mem_input;
-	mem_input = clCreateBuffer(m_clcontext, CL_MEM_READ_WRITE, sz_input, NULL, &err);
+
+	mem_input = clCreateBuffer(m_world.context, CL_MEM_READ_WRITE, sz_input, NULL, &err);
 	if (err != CL_SUCCESS) {
 		LogError("Error: Failed to allocate OpenCL source buffer of size %lu", sz_input);
 		return false;
 	}
 
 	cl_mem mem_output;
-	mem_output = clCreateBuffer(m_clcontext, CL_MEM_READ_WRITE, sz_input, NULL, &err);
+	mem_output = clCreateBuffer(m_world.context, CL_MEM_READ_WRITE, sz_input, NULL, &err);
 	if (err != CL_SUCCESS) {
 		LogError("Failed to allocate worst case OpenCL output buffer of size %lu",
 				sz_input);
@@ -197,7 +211,7 @@ bool HuffmanApp::invoke_kernel(bool encode,
 	}
 
 	cl_mem mem_sz_output;
-	mem_sz_output = clCreateBuffer(m_clcontext, CL_MEM_READ_WRITE, sizeof(u32), NULL, &err);
+	mem_sz_output = clCreateBuffer(m_world.context, CL_MEM_READ_WRITE, sizeof(u32), NULL, &err);
 	if (err != CL_SUCCESS) {
 		LogError("Failed to allocate worst case OpenCL output buffer of size %lu",
 				sizeof(u32));
@@ -206,7 +220,7 @@ bool HuffmanApp::invoke_kernel(bool encode,
 
 
 	//copy input dataset to OpenCL buffer
-	err = clEnqueueWriteBuffer(m_clcommandqs[0], mem_input, CL_TRUE, 0,
+	err = clEnqueueWriteBuffer(m_world.command_queue, mem_input, CL_TRUE, 0,
 							   sz_input, vec_input.data(), 0, NULL, NULL);
 	if (err != CL_SUCCESS) {
 		LogError("Failed to copy input dataset to OpenCL buffer");
@@ -214,7 +228,7 @@ bool HuffmanApp::invoke_kernel(bool encode,
 	}
 
 	//finish all memory writes
-	clFinish(m_clcommandqs[0]);
+	clFinish(m_world.command_queue);
 
 	//execute kernel
 	/*!
@@ -270,30 +284,30 @@ bool HuffmanApp::invoke_kernel(bool encode,
 	local[0] = 1;
 
 	//call once to guarentee that all buffers are migrated to device memory
-	err = clEnqueueNDRangeKernel(m_clcommandqs[0], kernel, 1, NULL, global,
+	err = clEnqueueNDRangeKernel(m_world.command_queue, kernel, 1, NULL, global,
 			local, 0, NULL, &events[evtHostWrite]);
 	if (err != CL_SUCCESS) {
 		LogError("[EX1] Failed to execute kernel %d", err);
 		LogError("Test failed");
 		return false;
 	}
-	clFinish(m_clcommandqs[0]);
+	clFinish(m_world.command_queue);
 
 	//read output size
-	err = clEnqueueReadBuffer(m_clcommandqs[0], mem_sz_output, CL_TRUE, 0,
+	err = clEnqueueReadBuffer(m_world.command_queue, mem_sz_output, CL_TRUE, 0,
 			sizeof(u32), (void *) &sz_output, 0, NULL, NULL);
 	if (err != CL_SUCCESS) {
 		LogError("Failed to read output size buffer %d", err);
 		LogError("Test failed");
 		return false;
 	}
-	clFinish(m_clcommandqs[0]);
+	clFinish(m_world.command_queue);
 
 	//resize output-buffer
 	releaseMemObject(mem_output);
 
 	vec_output.resize(sz_output);
-	mem_output = clCreateBuffer(m_clcontext, CL_MEM_READ_WRITE, sz_output, NULL, &err);
+	mem_output = clCreateBuffer(m_world.context, CL_MEM_READ_WRITE, sz_output, NULL, &err);
 	if (err != CL_SUCCESS) {
 		LogError("Failed to allocate worst case OpenCL output buffer of size %lu", sz_output);
 		return false;
@@ -325,7 +339,7 @@ bool HuffmanApp::invoke_kernel(bool encode,
 	}
 
 	//call a second time to measure on-chip throughput
-	err = clEnqueueNDRangeKernel(m_clcommandqs[0], kernel, 1, NULL, global,
+	err = clEnqueueNDRangeKernel(m_world.command_queue, kernel, 1, NULL, global,
 			local, 0, NULL, &events[evtKernelExec]);
 	if (err != CL_SUCCESS) {
 		LogError("[EX2] Failed to execute kernel %d", err);
@@ -333,17 +347,17 @@ bool HuffmanApp::invoke_kernel(bool encode,
 		return false;
 	}
 
-	clFinish(m_clcommandqs[0]);
+	clFinish(m_world.command_queue);
 
 	//copy results back from OpenCL buffer
-	err = clEnqueueReadBuffer(m_clcommandqs[0], mem_output, CL_TRUE, 0,
+	err = clEnqueueReadBuffer(m_world.command_queue, mem_output, CL_TRUE, 0,
 			sz_output, (void *) vec_output.data(), 0, NULL, &events[evtHostRead]);
 	if (err != CL_SUCCESS) {
 		LogError("Failed to read output size buffer %d", err);
 		LogError("Test failed");
 		return false;
 	}
-	clFinish(m_clcommandqs[0]);
+	clFinish(m_world.command_queue);
 
 
 	//cleanup
@@ -358,9 +372,6 @@ bool HuffmanApp::invoke_kernel(bool encode,
 
 
 bool HuffmanApp::run(int idevice, int nruns) {
-	if (idevice < 0 || idevice >= (int) m_numdevices)
-		return false;
-
 	if (nruns <= 0)
 		return false;
 
@@ -386,7 +397,7 @@ bool HuffmanApp::run(int idevice, int nruns) {
 		durations[i] = 0.0;
 
 	//start time stamps
-	double startMS = ProfileController::timestamp();
+	double startMS = timestamp();
 
 	vector<u8> vec_in(buffer, buffer + szInputBuffer);
 	vector<u8> vec_encoded_data;
@@ -401,7 +412,7 @@ bool HuffmanApp::run(int idevice, int nruns) {
 
 	//collect times
 	for(int i=0; i < evtCount; i++) {
-		durations[i] += ProfileController::GetEventDurationInMS(events[i]);
+		durations[i] += computeEventDurationInMS(events[i]);
 	}
 
 
@@ -414,7 +425,7 @@ bool HuffmanApp::run(int idevice, int nruns) {
 
 	//collect times
 	for(int i=0; i < evtCount; i++) {
-		durations[i] += ProfileController::GetEventDurationInMS(events[i]);
+		durations[i] += computeEventDurationInMS(events[i]);
 	}
 
 
@@ -436,20 +447,9 @@ bool HuffmanApp::run(int idevice, int nruns) {
 	*/
 
 
+	double h2d_rate = 0.0;
+	double d2h_rate = 0.0;
 
-	//set stats to valid data
-	if (m_full_device_names.size() > 0)
-		m_sp_prof->data().m_full_device_name = m_full_device_names[0];
-	m_sp_prof->data().m_full_vendor_name = m_full_vendor_name;
-	m_sp_prof->data().m_number_of_runs = nruns;
-	m_sp_prof->data().m_totalMS = ProfileController::timestamp() - startMS;
-	m_sp_prof->data().m_tHostWriteMS = durations[evtHostWrite];
-	m_sp_prof->data().m_tKernelExecMS = durations[evtKernelExec];
-	m_sp_prof->data().m_tHostReadMS = durations[evtHostRead];
-	m_sp_prof->data().m_avg_temp_deg = 0;
-	m_sp_prof->data().m_power_watts = 0;
-	m_sp_prof->data().m_h2d_tx_rate_mbits_psec = 0;
-	m_sp_prof->data().m_d2h_tx_rate_mbits_psec = 0;
 
 	//compute transfer rate for host write
 	if(durations[evtHostWrite] > 0) {
@@ -459,8 +459,7 @@ bool HuffmanApp::run(int idevice, int nruns) {
 		double tmp = (sz_bytes * 8.0) / (durations[evtHostWrite] / 1000.0);
 
 		//mega-bits per second
-		tmp = tmp / (1024.0 * 1024.0);
-		m_sp_prof->data().m_h2d_tx_rate_mbits_psec = tmp;
+		h2d_rate = tmp / (1024.0 * 1024.0);
 	}
 
 	//compute transfer rate for host read
@@ -471,11 +470,19 @@ bool HuffmanApp::run(int idevice, int nruns) {
 		double tmp = (sz_bytes * 8.0) / (durations[evtHostRead] / 1000.0);
 
 		//mega-bits per second
-		tmp = tmp / (1024.0 * 1024.0);
-		m_sp_prof->data().m_d2h_tx_rate_mbits_psec = tmp;
+		d2h_rate = tmp / (1024.0 * 1024.0);
 	}
 
-	m_sp_prof->data().setValid(true);
+
+	//set stats to valid data
+	LogInfo("Number of runs = %d", nruns);
+	LogInfo("Total time in [ms] = %f", timestamp() - startMS);
+	LogInfo("Host write [ms] = %f", durations[evtHostWrite]);
+	LogInfo("Kernel exec [ms] = %f", durations[evtKernelExec]);
+	LogInfo("Host read [ms] = %f", durations[evtHostRead]);
+	LogInfo("TX rate host --> device [mbps] = %f", h2d_rate);
+	LogInfo("TX rate device --> host [mbps] = %f", d2h_rate);
+
 
 	//write decoded bmp
 	string strOutputFP = "decoded.bmp";

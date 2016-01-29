@@ -46,8 +46,8 @@ ALL TIMES.
 
 #pragma once
 
-#include <xcl.h>
-#include <CL/opencl.h>
+//#include <xcl.h>
+#include "CL/opencl.h"
 
 typedef struct {
 	cl_platform_id platform_id;

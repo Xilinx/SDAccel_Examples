@@ -6,6 +6,7 @@
  */
 #include <limits.h>
 #include <iostream>
+#include <stdio.h>
 #include "huffmancodec_opencl_cpu.h"
 
 

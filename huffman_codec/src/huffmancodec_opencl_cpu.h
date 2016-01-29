@@ -15,9 +15,9 @@
 	#define __global
 #endif
 
-#include "base.h"
+#include "bit_io.h"
 
-void encode(/* __global */ uchar* in_data, uint size_in_data, /* __global */ uchar* out_data, /* __global */ uint* size_out_data, uchar fetch_size_only);
-void decode(/* __global */ uchar* in_data, uint size_in_data, /* __global */ uchar* out_data, /* __global */ uint* size_out_data, uchar fetch_size_only);
+void encode(/* __global */ u8* in_data, u32 size_in_data, /* __global */ u8* out_data, /* __global */ u32* size_out_data, u8 fetch_size_only);
+void decode(/* __global */ u8* in_data, u32 size_in_data, /* __global */ u8* out_data, /* __global */ u32* size_out_data, u8 fetch_size_only);
 
 #endif /* HUFFMANCODEC_OPENCL_CPU_H_ */

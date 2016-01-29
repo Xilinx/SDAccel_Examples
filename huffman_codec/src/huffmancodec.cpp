@@ -10,6 +10,7 @@
 #include <queue>
 #include <stack>
 #include <sstream>
+#include <stdio.h>
 #include "huffmancodec.h"
 #include "huffmancodec_opencl_cpu.h"
 #include "logger.h"
@@ -307,7 +308,8 @@ int HuffmanCodec::encode_naive(const vector<u8>& in_data, vector<u8>& out_data) 
 
 	//cleanup
 	for(u32 i=0; i < storage.size(); i++) {
-		SAFE_DELETE(storage[i]);
+		delete storage[i];
+		storage[i] = NULL;
 	}
 
 	return true;
@@ -501,7 +503,8 @@ int HuffmanCodec::decode_naive(const vector<u8>& in_data, vector<u8>& out_data) 
 
 	//cleanup
 	for(u32 i=0; i < storage.size(); i++) {
-		SAFE_DELETE(storage[i]);
+		delete storage[i];
+		storage[i] = NULL;
 	}
 
 	return true;

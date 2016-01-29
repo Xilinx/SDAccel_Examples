@@ -8,11 +8,11 @@
 #ifndef HUFFMANCODEC_H_
 #define HUFFMANCODEC_H_
 
-#include "base.h"
 #include <map>
 #include <vector>
 #include <string>
 #include <iostream>
+#include "bit_io.h"
 
 
 using namespace std;

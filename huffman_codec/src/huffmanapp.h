@@ -1,10 +1,14 @@
 #ifndef AESAPP_H_
 #define AESAPP_H_
 
-#include "benchapp.h"
-#include "base.h"
+#include <string>
+#include <vector>
+#include "bit_io.h"
+#include "xcl.h"
 
 #define COMPUTE_UNITS 1
+
+using namespace std;
 
 namespace sda {
 namespace cl {
@@ -12,7 +16,7 @@ namespace cl {
 /*!
  *
  */
-class HuffmanApp : public BenchApp {
+class HuffmanApp {
 public:
 	HuffmanApp();
 	HuffmanApp(const string& vendor_name,
@@ -28,15 +32,21 @@ public:
 
 	bool invoke_kernel(bool encode, const vector<u8>& vec_input, vector<u8>& vec_output, cl_event events[evtCount]);
 
+
+	static double timestamp();
+	static double computeEventDurationInMS(const cl_event& event);
 	static bool unit_test_kernel_cpu();
 	static bool unit_test_naive();
 
+
 protected:
+	void cleanup();
 	bool releaseMemObject(cl_mem &obj);
 
 private:
 	string m_strBitmapFP;
 
+	xcl_world m_world;
 	cl_kernel m_clKernelHuffmanEncoder;
 	cl_kernel m_clKernelHuffmanDecoder;
 };

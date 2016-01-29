@@ -11,8 +11,14 @@
 #include <string>
 #include <vector>
 
-typedef unsigned char u8;
-typedef unsigned int u32;
+typedef unsigned char		u8;
+typedef unsigned char		uchar;
+typedef unsigned short		u16;
+typedef unsigned int		u32;
+typedef unsigned int		uint;
+typedef			 char		i8;
+typedef			 short		i16;
+typedef			 int		i32;
 
 using namespace std;
 
