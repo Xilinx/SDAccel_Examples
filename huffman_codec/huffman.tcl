@@ -19,14 +19,21 @@ set_property file_type "c header files" [get_files "src/xcl.h"]
 set_property file_type "c header files" [get_files "src/bit_io.h"]
 #set_property file_type "c header files" [get_files "equalizer.h"]
 
-# Kernel Definition
+# Kernel Definitions
 create_kernel -type clc encode
-add_files -kernel [get_kernels encode] "src/krnl_huffman.cl"
+add_files -kernel [get_kernels encode] "src/krnl_huffman_singleptr.cl"
+
+create_kernel -type clc decode
+add_files -kernel [get_kernels decode] "src/krnl_huffman_singleptr.cl"
+
 
 # Define Binary Containers
 create_opencl_binary bin_huffman
 set_property region "OCL_REGION_0" [get_opencl_binary bin_huffman]
-create_compute_unit -opencl_binary [get_opencl_binary bin_huffman] -kernel [get_kernels encode] -name cu_huffman0
+
+# Compute Units [1 per kernel]
+create_compute_unit -opencl_binary [get_opencl_binary bin_huffman] -kernel [get_kernels encode] -name cu_huffman_encode0
+create_compute_unit -opencl_binary [get_opencl_binary bin_huffman] -kernel [get_kernels decode] -name cu_huffman_decode0
 
 # Compile the design for CPU based emulation
 compile_emulation -flow cpu -opencl_binary [get_opencl_binary bin_huffman]
