@@ -188,6 +188,7 @@ bool HuffmanApp::invoke_kernel(bool encode,
 	u32 sz_input = vec_input.size();
 	u32 sz_output = 0;
 
+	LogInfo("Creating input/output buffers");
 //	__kernel
 //	__attribute__ ((reqd_work_group_size(1,1,1)))
 //	void encode(__global uchar* in_data, uint size_in_data, __global uchar* out_data, __global uint* size_out_data, uchar fetch_size_only)
@@ -218,7 +219,7 @@ bool HuffmanApp::invoke_kernel(bool encode,
 		return false;
 	}
 
-
+	LogInfo("Write input data to device buffer");
 	//copy input dataset to OpenCL buffer
 	err = clEnqueueWriteBuffer(m_world.command_queue, mem_input, CL_TRUE, 0,
 							   sz_input, vec_input.data(), 0, NULL, NULL);
@@ -283,6 +284,8 @@ bool HuffmanApp::invoke_kernel(bool encode,
 	global[0] = 1;
 	local[0] = 1;
 
+	LogInfo("EX1: to make sure all buffers are migrated to device");
+
 	//call once to guarentee that all buffers are migrated to device memory
 	err = clEnqueueNDRangeKernel(m_world.command_queue, kernel, 1, NULL, global,
 			local, 0, NULL, &events[evtHostWrite]);
@@ -292,6 +295,7 @@ bool HuffmanApp::invoke_kernel(bool encode,
 		return false;
 	}
 	clFinish(m_world.command_queue);
+
 
 	//read output size
 	err = clEnqueueReadBuffer(m_world.command_queue, mem_sz_output, CL_TRUE, 0,
@@ -338,6 +342,8 @@ bool HuffmanApp::invoke_kernel(bool encode,
 		return false;
 	}
 
+	LogInfo("EX2: Real execution of the algorithm to fill the output");
+
 	//call a second time to measure on-chip throughput
 	err = clEnqueueNDRangeKernel(m_world.command_queue, kernel, 1, NULL, global,
 			local, 0, NULL, &events[evtKernelExec]);
@@ -365,6 +371,7 @@ bool HuffmanApp::invoke_kernel(bool encode,
 	releaseMemObject(mem_output);
 	releaseMemObject(mem_sz_output);
 
+
 	return true;
 }
 
@@ -386,9 +393,11 @@ bool HuffmanApp::run(int idevice, int nruns) {
 		return false;
 	}
 
+
 	//input buffer size
 	u32 szInputBuffer = inputbmp.height * inputbmp.width * 3;
 	u8* buffer = reinterpret_cast<u8*>(inputbmp.pixels);
+	LogInfo("Read input data successfully. size = %u", szInputBuffer);
 
 	//timings
 	cl_event events[evtCount];
@@ -404,6 +413,7 @@ bool HuffmanApp::run(int idevice, int nruns) {
 	vector<u8> vec_decoded_data;
 
 	//encode image
+	LogInfo("Invoking encoder");
 	bool res = invoke_kernel(true, vec_in, vec_encoded_data, &events[0]);
 	if(!res) {
 		LogError("Failed to encode the input. Test Failed");
@@ -417,6 +427,7 @@ bool HuffmanApp::run(int idevice, int nruns) {
 
 
 	//decode image
+	LogInfo("Invoking decoder");
 	res |= invoke_kernel(false, vec_encoded_data, vec_decoded_data, &events[0]);
 	if(!res) {
 		LogError("Failed to decode the output. Test Failed");
