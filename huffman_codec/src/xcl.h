@@ -1,8 +1,8 @@
 /*******************************************************************************
 Vendor: Xilinx
 Associated Filename: xcl.h
-Purpose: SDAccel histogram equalization example
-Revision History: December 6, 2015
+Purpose: SDAccel huffman codec example
+Revision History: January 29, 2016
 
 *******************************************************************************
 Copyright (C) 2015 XILINX, Inc.
