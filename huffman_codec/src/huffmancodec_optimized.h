@@ -1,6 +1,6 @@
 /*******************************************************************************
 Vendor: Xilinx
-Associated Filename: huffmanapp.h
+Associated Filename: huffmancodec_optimized.h
 Purpose: SDAccel huffman codec example
 Revision History: January 29, 2016
 
@@ -50,6 +50,7 @@ ALL TIMES.
 #include <vector>
 #include "bit_io.h"
 #include "xcl.h"
+#include "huffmancodec_naive.h"
 
 #define COMPUTE_UNITS 1
 
@@ -61,27 +62,28 @@ namespace cl {
 /*!
  *
  */
-class HuffmanApp {
+class HuffmanOptimized : public ICodec {
 public:
-	HuffmanApp();
-	HuffmanApp(const string& vendor_name,
+	HuffmanOptimized();
+	HuffmanOptimized(const string& vendor_name,
 		   const string& device_name,
 		   int selected_device,
 		   const string& strKernelFP,
 		   const string& strBitmapFP);
-	virtual ~HuffmanApp();
+	virtual ~HuffmanOptimized();
 
 	enum EvBreakDown {evtHostWrite = 0, evtKernelExec = 1, evtHostRead = 2, evtCount = 3};
 
-	bool run(int idevice, int nruns);
+	//overide interface funcs
+	int enc(const vector<u8>& in_data, vector<u8>& out_data);
+	int dec(const vector<u8>& in_data, vector<u8>& out_data);
 
-	bool invoke_kernel(bool encode, const vector<u8>& vec_input, vector<u8>& vec_output, cl_event events[evtCount]);
+	bool run(int idevice, int nruns);
+	bool invoke_kernel(cl_kernel krnl, const vector<u8>& vec_input, vector<u8>& vec_output, cl_event events[evtCount]);
 
 
 	static double timestamp();
 	static double computeEventDurationInMS(const cl_event& event);
-	static bool unit_test_kernel_cpu();
-	static bool unit_test_naive();
 
 
 protected:

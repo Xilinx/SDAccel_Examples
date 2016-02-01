@@ -1,6 +1,6 @@
 /*******************************************************************************
 Vendor: Xilinx
-Associated Filename: huffmancodec_opencl_cpu.cpp
+Associated Filename: huffmancodec_optimized_cpuonly.cpp
 Purpose: SDAccel huffman codec example
 Revision History: January 29, 2016
 
@@ -42,11 +42,15 @@ THIS COPYRIGHT NOTICE AND DISCLAIMER MUST BE RETAINED AS PART OF THIS FILE AT
 ALL TIMES.
 
 *******************************************************************************/
-
-#include <limits.h>
-#include <iostream>
+#include "huffmancodec_optimized_cpuonly.h"
 #include <stdio.h>
-#include "huffmancodec_opencl_cpu.h"
+#include <limits.h>
+
+#ifdef __ECLIPSE__
+#define kernel
+#define global
+#define __constant
+#endif
 
 
 #define OFFSET_WEIGHT 0
@@ -65,7 +69,7 @@ ALL TIMES.
 //Max nodes count = 2N-1
 #define MAX_TREE_NODES MAX_TREE_LEAVES * 2
 
-const u16 C_INVALID_LINK = (u16)-1;
+//__constant const u16 C_INVALID_LINK = (u16)-1;
 
 struct FLAT_HTREE {
 	u32 weight;
@@ -119,22 +123,16 @@ int find_next_min(u32* pht, u32 count, const u8* visited) {
 }
 
 //returns 1 if the pointer is incremented otherwise 0
-u8 bit_writer(/* __global */ u8** pptr, u32* p_total_bit_count, u8 bit) {
+u8 bit_writer(/* __global */ u8* ptr, u32* p_total_bit_count, u8 bit) {
 	u8 bit_index = (*p_total_bit_count) % 8;
 
 	if(bit == 1)
-		(**pptr) |= (1 << bit_index);
+		(*ptr) |= (1 << bit_index);
 
 	(*p_total_bit_count)++;
 
 	//push new byte
-	if(bit_index == 7) {
-		(*pptr)++;
-		**pptr = 0;
-		return 1;
-	}
-
-	return 0;
+	return (bit_index == 7);
 }
 
 u8 is_bit_set(u8 byte, u8 index) {
@@ -142,60 +140,71 @@ u8 is_bit_set(u8 byte, u8 index) {
 }
 
 
-u8 multiple_bits_writer(/* __global */ u8** pptr, u32* p_total_bit_count, u32 bits, u32 len) {
+u8 multiple_bits_writer(/* __global */ u8* ptr, u32* p_total_bit_count, u32 bits, u32 len) {
 	u8 bytes_written = 0;
+
 	if(len == 0)
 		return 0;
 
 	//order is msb to lsb
 	for(int i = (int)len - 1; i >= 0; i--)
-	//for(int i = 0; i < (int)len; i++)
 	{
 		u8 b = (bits >> i) & 0x01;
-		bytes_written += bit_writer(pptr, p_total_bit_count, b);
+		bool full = bit_writer(ptr, p_total_bit_count, b);
+
+		if(full) {
+			bytes_written++;
+			ptr++;
+			*ptr = 0;
+		}
 	}
 
 	return bytes_written;
 }
 
 
-int bit_reader(/* __global */ u8** pptr, u32* p_total_bits_read, u32 count_bits) {
+int bit_reader(/* __global */ u8* ptr, u32* p_total_bits_read, u32 count_bits, u32* output) {
 	if(count_bits == 0)
 		return 0;
 
-	int output = 0;
+	*output = 0;
+	int nbytes = 0;
 	for(u32 i = 0; i < count_bits; i++) {
 		//u32 byte_index = (*p_total_bits_read) >> 3;
 		u32 bit_index = (*p_total_bits_read) % 8;
 		(*p_total_bits_read) ++;
 
-		u8 msb = is_bit_set(**pptr, bit_index);
-		output = (output << 1) + msb;
+		u8 msb = is_bit_set(*ptr, bit_index);
+		*output = ((*output) << 1) + msb;
 
 		if(bit_index == 7) {
-			(*pptr)++;
+			ptr++;
+			nbytes ++;
 		}
 	}
 
-	return output;
+	return nbytes;
 }
 
 
-void write_word(/* __global */ u8** pptr, u32 word) {
-	//u8* ptr = *pptr;
+inline int write_word(/* __global */ u8* ptr, u32 word) {
 	for(int i=0; i < 4; i++) {
-		**pptr = (u8)(word >> (i * 8)) & 0xffff;
-		(*pptr)++;
+		*ptr = (u8)(word >> (i * 8)) & 0xffff;
+		ptr++;
 	}
+
+	return 4;
 }
 
-inline void read_word(/* __global */ u8** pptr, u32* pword) {
-	//u8* ptr = *pptr;
+inline int read_word(/* __global */ u8* ptr, u32* pword) {
+
 	*pword = 0;
 	for(int i=0; i < 4; i++) {
-		(*pword) |= ((**pptr) << (i * 8));
-		(*pptr)++;
+		(*pword) |= ((*ptr) << (i * 8));
+		ptr++;
 	}
+
+	return 4;
 }
 
 
@@ -204,6 +213,8 @@ inline void read_word(/* __global */ u8** pptr, u32* pword) {
 //__attribute__ ((reqd_work_group_size(1,1,1)))
 void encode(/* __global */ uchar* in_data, uint size_in_data, /* __global */ uchar* out_data, /* __global */ uint* size_out_data, uchar fetch_size_only)
 {
+	const u16 C_INVALID_LINK = (u16)-1;
+
 	//storage for huffman tree
 	u32 ht[MAX_TREE_NODES * ENTRY_STRIDE];
 	u32 ht_current = 0;
@@ -384,7 +395,8 @@ void encode(/* __global */ uchar* in_data, uint size_in_data, /* __global */ uch
 
 	//MSG LEN
 	/* __global */ u8* ptr = &out_data[0];
-	write_word(&ptr, size_in_data);
+	write_word(ptr, size_in_data);
+	ptr += 4;
 
 	//S
 	*ptr = ctLeaves;
@@ -409,7 +421,9 @@ void encode(/* __global */ uchar* in_data, uint size_in_data, /* __global */ uch
 		struct FLAT_HTREE node;
 		read_ht_node(&ht[i * ENTRY_STRIDE], &node);
 
-		total_bytes += multiple_bits_writer(&ptr, &total_bits_written, node.code, node.bitlen);
+		int nbytes = multiple_bits_writer(ptr, &total_bits_written, node.code, node.bitlen);
+		ptr += nbytes;
+		total_bytes += nbytes;
 	}
 
 	//check if need to increment
@@ -425,7 +439,8 @@ void encode(/* __global */ uchar* in_data, uint size_in_data, /* __global */ uch
 	u8 payload_rem = total_payload_bits % 8;
 
 	//Payload SIZE
-	write_word(&ptr, total_payload_bytes);
+	write_word(ptr, total_payload_bytes);
+	ptr += 4;
 
 	//Payload REM
 	*ptr = payload_rem;
@@ -442,7 +457,9 @@ void encode(/* __global */ uchar* in_data, uint size_in_data, /* __global */ uch
 		read_ht_node(&ht[ht_index * ENTRY_STRIDE], &node);
 
 		//count the output bits
-		total_bytes += multiple_bits_writer(&ptr, &total_bits_written, node.code, node.bitlen);
+		int nbytes = multiple_bits_writer(ptr, &total_bits_written, node.code, node.bitlen);
+		ptr += nbytes;
+		total_bytes += nbytes;
 	}
 }
 
@@ -451,7 +468,9 @@ void encode(/* __global */ uchar* in_data, uint size_in_data, /* __global */ uch
  */
 //__kernel
 //__attribute__ ((reqd_work_group_size(1,1,1)))
-void decode(/* __global */ uchar* in_data, uint size_in_data, /* __global */ uchar* out_data, /* __global */ uint* size_out_data, uchar fetch_size_only) {
+void decode(/* __global */ uchar* in_data, uint size_in_data, /* __global */ uchar* out_data, /*__global*/ uint* size_out_data, uchar fetch_size_only) {
+
+	const u16 C_INVALID_LINK = (u16)-1;
 	//output = header + payload
 	/*!
 	 * Byte Count 			| Description
@@ -495,7 +514,8 @@ void decode(/* __global */ uchar* in_data, uint size_in_data, /* __global */ uch
 	//MSG_LEN
 	/* __global */ u8* ptr = &in_data[0];
 	u32 msg_len = 0;
-	read_word(&ptr, &msg_len);
+	read_word(ptr, &msg_len);
+	ptr += 4;
 
 	//return outsize
 	if(fetch_size_only) {
@@ -526,7 +546,8 @@ void decode(/* __global */ uchar* in_data, uint size_in_data, /* __global */ uch
 	u32 total_bits_read = 0;
 	for(u32 i=0; i<ctLeaves; i++) {
 		//read bitcode
-		leaf_bitcodes[i] = bit_reader(&ptr, &total_bits_read, leaf_bitlen[i]);
+		int nbytes = bit_reader(ptr, &total_bits_read, leaf_bitlen[i], &leaf_bitcodes[i]);
+		ptr += nbytes;
 
 		//check
 		if(total_bits_read >= total_bitcodes_bits)
@@ -630,7 +651,8 @@ void decode(/* __global */ uchar* in_data, uint size_in_data, /* __global */ uch
 
 	//Payload Size
 	u32 total_payload_bytes = 0;
-	read_word(&ptr, &total_payload_bytes);
+	read_word(ptr, &total_payload_bytes);
+	ptr += 4;
 
 	u8 payload_rem = *ptr;
 	ptr++;
@@ -649,7 +671,9 @@ void decode(/* __global */ uchar* in_data, uint size_in_data, /* __global */ uch
 	read_ht_node(&ht[current * ENTRY_STRIDE], &node);
 
 	while(total_bits_read < total_payload_bits) {
-		u8 bit = bit_reader(&ptr, &total_bits_read, 1);
+		u32 bit = 0;
+		int nbytes = bit_reader(ptr, &total_bits_read, 1, &bit);
+		ptr += nbytes;
 
 		//pick direction
 		if (bit && (node.rc != C_INVALID_LINK))
@@ -672,4 +696,3 @@ void decode(/* __global */ uchar* in_data, uint size_in_data, /* __global */ uch
 	}
 
 }
-

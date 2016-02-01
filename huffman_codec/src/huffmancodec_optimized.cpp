@@ -1,6 +1,6 @@
 /*******************************************************************************
 Vendor: Xilinx
-Associated Filename: huffmanapp.cpp
+Associated Filename: huffmancodec_optimized.cpp
 Purpose: SDAccel huffman codec example
 Revision History: January 29, 2016
 
@@ -47,10 +47,8 @@ ALL TIMES.
 #include <string.h>
 #include <stdio.h>
 #include "logger.h"
-#include "huffmanapp.h"
+#include "huffmancodec_optimized.h"
 #include "simplebmp.h"
-#include "huffmancodec.h"
-#include "huffmancodec_opencl_cpu.h"
 #include "xcl.h"
 
 #if defined(__linux__) || defined(linux)
@@ -71,12 +69,12 @@ using namespace sda::cl;
 //load_file_to_memory
 
 
-HuffmanApp::HuffmanApp() {
+HuffmanOptimized::HuffmanOptimized() {
 	// TODO Auto-generated constructor stub
 
 }
 
-HuffmanApp::HuffmanApp(const string& vendor_name,
+HuffmanOptimized::HuffmanOptimized(const string& vendor_name,
 			   const string& device_name,
 			   int selected_device,
 			   const string& strKernelFP,
@@ -99,19 +97,19 @@ HuffmanApp::HuffmanApp(const string& vendor_name,
 
 }
 
-HuffmanApp::~HuffmanApp() {
+HuffmanOptimized::~HuffmanOptimized() {
 	// TODO Auto-generated destructor stub
 	cleanup();
 }
 
-void HuffmanApp::cleanup() {
+void HuffmanOptimized::cleanup() {
 
 	clReleaseKernel(m_clKernelHuffmanDecoder);
 	clReleaseKernel(m_clKernelHuffmanEncoder);
 	xcl_release_world(m_world);
 }
 
-double HuffmanApp::timestamp() {
+double HuffmanOptimized::timestamp() {
 	double ms = 0.0;
 	#if  defined(__linux__) || defined(linux)
 		timeval time;
@@ -125,7 +123,7 @@ double HuffmanApp::timestamp() {
 	return ms;
 }
 
-double HuffmanApp::computeEventDurationInMS(const cl_event& event) {
+double HuffmanOptimized::computeEventDurationInMS(const cl_event& event) {
 	cl_ulong ts_start = 0, ts_end = 0;
 	double duration = 0;
 	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &ts_start, NULL);
@@ -135,73 +133,8 @@ double HuffmanApp::computeEventDurationInMS(const cl_event& event) {
 	return duration;
 }
 
-bool HuffmanApp::unit_test_kernel_cpu() {
-	string msgs[] = {"AABBCCCC",
-					 "Xilinx SDAccel Benchmarking",
-					 "Hello Pourya Shirazian",
-					 "The quick brown fox jumps over the lazy dog."};
 
-	LogInfo("Start unit tests for kernels on the CPU");
-
-	HuffmanCodec codec;
-	u32 total = sizeof(msgs) / sizeof(msgs[0]);
-	u32 ctPassed = 0;
-	for(u32 i = 0; i < total; i++) {
-		vector<u8> encoded_data;
-		string out_str;
-		codec.kernel_encode_string(msgs[i], encoded_data);
-
-		codec.kernel_decode_string(encoded_data, out_str);
-
-		if(msgs[i] == out_str) {
-			LogInfo("Test [%u of %u] PASS", i+1, total);
-			ctPassed++;
-		}
-		else
-		{
-			LogError("Test [%u of %u] Failed! (input: %s, output: %s)", msgs[i].c_str(), out_str.c_str());
-		}
-	}
-
-	LogInfo("End unit tests for kernels on the CPU");
-
-	return(ctPassed == total);
-}
-
-/*!
- * Unit test for the huffman cpu version
- */
-bool HuffmanApp::unit_test_naive() {
-	string msgs[] = {"aabbcccc",
-					 "Xilinx SDAccel Benchmarking",
-					 "Hello Pourya Shirazian",
-					 "The quick brown fox jumps over the lazy dog."};
-
-
-	HuffmanCodec codec;
-	u32 ctPassed = 0;
-	u32 total = sizeof(msgs) / sizeof(msgs[0]);
-	for(u32 i = 0; i < total; i++) {
-		vector<u8> data_out;
-		string out_str;
-
-		int res = codec.encode_naive(msgs[i], data_out);
-		res &= codec.decode_naive(data_out, out_str);
-
-		if(msgs[i] == out_str) {
-			LogInfo("Test [%u of %u] PASS", i+1, total);
-			ctPassed++;
-		}
-		else
-		{
-			LogError("Test [%u of %u] Failed! (input: %s, output: %s)", msgs[i].c_str(), out_str.c_str());
-		}
-	}
-
-	return (ctPassed == total);
-}
-
-bool HuffmanApp::releaseMemObject(cl_mem &obj)
+bool HuffmanOptimized::releaseMemObject(cl_mem &obj)
 {
   cl_int   err = 0;
   bool     returnStatus = true;    // true if successful
@@ -221,14 +154,12 @@ bool HuffmanApp::releaseMemObject(cl_mem &obj)
   return returnStatus;
 }
 
-bool HuffmanApp::invoke_kernel(bool encode,
+bool HuffmanOptimized::invoke_kernel(cl_kernel krnl,
 							   const vector<u8>& vec_input,
 							   vector<u8>& vec_output,
 							   cl_event events[evtCount]) {
 	if(vec_input.size() == 0)
 		return false;
-
-	cl_kernel kernel = encode ? m_clKernelHuffmanEncoder : m_clKernelHuffmanDecoder;
 
 	u32 sz_input = vec_input.size();
 	u32 sz_output = 0;
@@ -287,28 +218,28 @@ bool HuffmanApp::invoke_kernel(bool encode,
 	 * 			   uchar fetch_size_only)
 	 */
 	err = 0;
-	err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &mem_input);
+	err = clSetKernelArg(krnl, 0, sizeof(cl_mem), &mem_input);
 	if (err != CL_SUCCESS) {
 		LogError("Failed to set kernel argument [0] input_buffer! %d", err);
 		LogError("Test failed");
 		return false;
 	}
 
-	err |= clSetKernelArg(kernel, 1, sizeof(u32), &sz_input);
+	err |= clSetKernelArg(krnl, 1, sizeof(u32), &sz_input);
 	if (err != CL_SUCCESS) {
 		LogError("Failed to set kernel argument [1] sz_input! %d", err);
 		LogError("Test failed");
 		return false;
 	}
 
-	err |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &mem_output);
+	err |= clSetKernelArg(krnl, 2, sizeof(cl_mem), &mem_output);
 	if (err != CL_SUCCESS) {
 		LogError("Failed to set kernel argument [2] output_buffer! %d", err);
 		LogError("Test failed");
 		return false;
 	}
 
-	err |= clSetKernelArg(kernel, 3, sizeof(cl_mem), &mem_sz_output);
+	err |= clSetKernelArg(krnl, 3, sizeof(cl_mem), &mem_sz_output);
 	if (err != CL_SUCCESS) {
 		LogError("Failed to set kernel argument [3] sz_output! %d", err);
 		LogError("Test failed");
@@ -317,7 +248,7 @@ bool HuffmanApp::invoke_kernel(bool encode,
 
 	//enable fetch size
 	u8 fetch_size_only = 1;
-	err |= clSetKernelArg(kernel, 4, sizeof(u8), &fetch_size_only);
+	err |= clSetKernelArg(krnl, 4, sizeof(u8), &fetch_size_only);
 	if (err != CL_SUCCESS) {
 		LogError("Failed to set kernel argument [4] fetch_size_only! %d", err);
 		LogError("Test failed");
@@ -332,7 +263,7 @@ bool HuffmanApp::invoke_kernel(bool encode,
 	LogInfo("EX1: to make sure all buffers are migrated to device");
 
 	//call once to guarentee that all buffers are migrated to device memory
-	err = clEnqueueNDRangeKernel(m_world.command_queue, kernel, 1, NULL, global,
+	err = clEnqueueNDRangeKernel(m_world.command_queue, krnl, 1, NULL, global,
 			local, 0, NULL, &events[evtHostWrite]);
 	if (err != CL_SUCCESS) {
 		LogError("[EX1] Failed to execute kernel %d", err);
@@ -341,6 +272,8 @@ bool HuffmanApp::invoke_kernel(bool encode,
 	}
 	clFinish(m_world.command_queue);
 
+
+	LogInfo("EX1: Readback the output size required for the actual kernel execution");
 
 	//read output size
 	err = clEnqueueReadBuffer(m_world.command_queue, mem_sz_output, CL_TRUE, 0,
@@ -351,6 +284,9 @@ bool HuffmanApp::invoke_kernel(bool encode,
 		return false;
 	}
 	clFinish(m_world.command_queue);
+
+
+	LogInfo("EX1: sz_input = %u, sz_output = %u", sz_input, sz_output);
 
 	//resize output-buffer
 	releaseMemObject(mem_output);
@@ -363,7 +299,7 @@ bool HuffmanApp::invoke_kernel(bool encode,
 	}
 
 	//set output again
-	err |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &mem_output);
+	err |= clSetKernelArg(krnl, 2, sizeof(cl_mem), &mem_output);
 	if (err != CL_SUCCESS) {
 		LogError("Failed to set kernel argument [2] output_buffer! %d", err);
 		LogError("Test failed");
@@ -371,7 +307,7 @@ bool HuffmanApp::invoke_kernel(bool encode,
 	}
 
 	//set output size again
-	err |= clSetKernelArg(kernel, 3, sizeof(cl_mem), &mem_sz_output);
+	err |= clSetKernelArg(krnl, 3, sizeof(cl_mem), &mem_sz_output);
 	if (err != CL_SUCCESS) {
 		LogError("Failed to set kernel argument [3] sz_output! %d", err);
 		LogError("Test failed");
@@ -380,7 +316,7 @@ bool HuffmanApp::invoke_kernel(bool encode,
 
 	//disable fetch size
 	fetch_size_only = 0;
-	err |= clSetKernelArg(kernel, 4, sizeof(u8), &fetch_size_only);
+	err |= clSetKernelArg(krnl, 4, sizeof(u8), &fetch_size_only);
 	if (err != CL_SUCCESS) {
 		LogError("Failed to set kernel argument [4] fetch_size_only! %d", err);
 		LogError("Test failed");
@@ -390,7 +326,7 @@ bool HuffmanApp::invoke_kernel(bool encode,
 	LogInfo("EX2: Real execution of the algorithm to fill the output");
 
 	//call a second time to measure on-chip throughput
-	err = clEnqueueNDRangeKernel(m_world.command_queue, kernel, 1, NULL, global,
+	err = clEnqueueNDRangeKernel(m_world.command_queue, krnl, 1, NULL, global,
 			local, 0, NULL, &events[evtKernelExec]);
 	if (err != CL_SUCCESS) {
 		LogError("[EX2] Failed to execute kernel %d", err);
@@ -400,6 +336,8 @@ bool HuffmanApp::invoke_kernel(bool encode,
 
 	clFinish(m_world.command_queue);
 
+
+	LogInfo("EX2: Readback the results from codec");
 	//copy results back from OpenCL buffer
 	err = clEnqueueReadBuffer(m_world.command_queue, mem_output, CL_TRUE, 0,
 			sz_output, (void *) vec_output.data(), 0, NULL, &events[evtHostRead]);
@@ -419,15 +357,74 @@ bool HuffmanApp::invoke_kernel(bool encode,
 	return true;
 }
 
+int HuffmanOptimized::enc(const vector<u8>& in_data, vector<u8>& out_data) {
+	//timings
+	cl_event events[evtCount];
+	double durations[evtCount];
+	for(int i=0; i < evtCount; i++)
+		durations[i] = 0.0;
 
+	//start time stamps
+	double startMS = timestamp();
 
+	//encode image
+	LogInfo("Invoking encoder");
+	bool res = invoke_kernel(m_clKernelHuffmanEncoder, in_data, out_data, &events[0]);
+	if(!res) {
+		LogError("Failed to encode the input. Test Failed");
+		return false;
+	}
 
-bool HuffmanApp::run(int idevice, int nruns) {
+	//collect times
+	for(int i=0; i < evtCount; i++) {
+		durations[i] += computeEventDurationInMS(events[i]);
+	}
+
+	LogInfo("Total time in [ms] = %f", timestamp() - startMS);
+	LogInfo("Host write [ms] = %f", durations[evtHostWrite]);
+	LogInfo("Kernel exec [ms] = %f", durations[evtKernelExec]);
+	LogInfo("Host read [ms] = %f", durations[evtHostRead]);
+
+	return true;
+}
+
+int HuffmanOptimized::dec(const vector<u8>& in_data, vector<u8>& out_data) {
+	//timings
+	cl_event events[evtCount];
+	double durations[evtCount];
+	for(int i=0; i < evtCount; i++)
+		durations[i] = 0.0;
+
+	//start time stamps
+	double startMS = timestamp();
+
+	//encode image
+	LogInfo("Invoking encoder");
+	bool res = invoke_kernel(m_clKernelHuffmanDecoder, in_data, out_data, &events[0]);
+	if(!res) {
+		LogError("Failed to encode the input. Test Failed");
+		return false;
+	}
+
+	//collect times
+	for(int i=0; i < evtCount; i++) {
+		durations[i] += computeEventDurationInMS(events[i]);
+	}
+
+	LogInfo("Total time in [ms] = %f", timestamp() - startMS);
+	LogInfo("Host write [ms] = %f", durations[evtHostWrite]);
+	LogInfo("Kernel exec [ms] = %f", durations[evtKernelExec]);
+	LogInfo("Host read [ms] = %f", durations[evtHostRead]);
+
+	return true;
+}
+
+bool HuffmanOptimized::run(int idevice, int nruns) {
 	if (nruns <= 0)
 		return false;
 
-	assert(unit_test_kernel_cpu());
-
+	//read input
+	LogInfo("Reading input image = %s", m_strBitmapFP.c_str());
 
 	int err;
 	struct bmp_t inputbmp;
@@ -458,7 +455,7 @@ bool HuffmanApp::run(int idevice, int nruns) {
 
 	//encode image
 	LogInfo("Invoking encoder");
-	bool res = invoke_kernel(true, vec_in, vec_encoded_data, &events[0]);
+	bool res = invoke_kernel(m_clKernelHuffmanEncoder, vec_in, vec_encoded_data, &events[0]);
 	if(!res) {
 		LogError("Failed to encode the input. Test Failed");
 		return false;
@@ -472,7 +469,7 @@ bool HuffmanApp::run(int idevice, int nruns) {
 
 	//decode image
 	LogInfo("Invoking decoder");
-	res |= invoke_kernel(false, vec_encoded_data, vec_decoded_data, &events[0]);
+	res |= invoke_kernel(m_clKernelHuffmanDecoder, vec_encoded_data, vec_decoded_data, &events[0]);
 	if(!res) {
 		LogError("Failed to decode the output. Test Failed");
 		return false;
@@ -483,28 +480,8 @@ bool HuffmanApp::run(int idevice, int nruns) {
 		durations[i] += computeEventDurationInMS(events[i]);
 	}
 
-
-	//using the standard impl
-	/*
-	HuffmanCodec codec;
-	u32 szEncoded = 0;
-	u32 szDecoded = 0;
-
-	//encode
-	encode(vec_in.data(), vec_in.size(), vec_encoded_data.data(), &szEncoded, true);
-	vec_encoded_data.resize(szEncoded);
-	encode(vec_in.data(), vec_in.size(), vec_encoded_data.data(), &szEncoded, false);
-	LogInfo("Encoded image. Org Size %u, Compact Size %u", vec_in.size(), vec_encoded_data.size());
-
-	decode(vec_encoded_data.data(), vec_encoded_data.size(), vec_decoded_data.data(), &szDecoded, true);
-	vec_decoded_data.resize(szDecoded);
-	decode(vec_encoded_data.data(), vec_encoded_data.size(), vec_decoded_data.data(), &szDecoded, false);
-	*/
-
-
 	double h2d_rate = 0.0;
 	double d2h_rate = 0.0;
-
 
 	//compute transfer rate for host write
 	if(durations[evtHostWrite] > 0) {

@@ -1,6 +1,6 @@
 /*******************************************************************************
 Vendor: Xilinx
-Associated Filename: huffmancodec.h
+Associated Filename: huffmancodec_naive.h
 Purpose: SDAccel huffman codec example
 Revision History: January 29, 2016
 
@@ -57,14 +57,29 @@ using namespace std;
 
 namespace sda {
 
+class ICodec {
+public:
+	virtual int enc(const vector<u8>& in_data, vector<u8>& out_data) = 0;
+	virtual int dec(const vector<u8>& in_data, vector<u8>& out_data) = 0;
+
+	int enc_str(const string& in_str, vector<u8>& out_data);
+	int dec_str(const vector<u8>& in_data, string& out_str);
+
+	//utils
+	static void vector_to_string(const vector<u8>& in_vec, string& out_str);
+	static void string_to_vector(const string& in_str, vector<u8>& out_vec);
+
+	static string binary_string(u8 value);
+	static int bit_length(u8 value);
+};
 
 /*!
  * CPU based decoded/encoder for Canonical Huffman implementation
  */
-class HuffmanCodec {
+class HuffmanNaiveImpl : public ICodec {
 public:
-	HuffmanCodec();
-	virtual ~HuffmanCodec();
+	HuffmanNaiveImpl();
+	virtual ~HuffmanNaiveImpl();
 
 	//HTree<data, weight, code>
 	typedef u8 Symbol;
@@ -105,36 +120,20 @@ public:
 	};
 
 
-	//kernel in c
-	static int kernel_decode_string(const vector<u8>& in_data, string& out_str);
-	static int kernel_encode_string(const string& in_str, vector<u8>& out_data);
-
-	//int kernel_decode_test(const vector<u8>& out_data, string& out_str);
-
 	/*!
 	 * Encodes canonical huffman
 	 */
-	int encode_naive(const vector<u8>& in_data, vector<u8>& out_data);
-	int encode_naive(const string& in_str, vector<u8>& out_data);
+	int enc(const vector<u8>& in_data, vector<u8>& out_data);
 
 	/*!
 	 * Decodes canonical huffman
 	 */
-	int decode_naive(const vector<u8>& in_data, vector<u8>& out_data);
-	int decode_naive(const vector<u8>& in_data, string& out_str);
+	int dec(const vector<u8>& in_data, vector<u8>& out_data);
 
 	//verbose
 	void set_verbose(bool enable) { m_verbose = true;}
 	bool verbose() const { return m_verbose;}
 
-	static bool write_binary_file(const vector<u8>& data, const string& strFP);
-
-	//utils
-	static void vector_to_string(const vector<u8>& in_vec, string& out_str);
-	static void string_to_vector(const string& in_str, vector<u8>& out_vec);
-
-	static string binary_string(u8 value);
-	static int bit_length(u8 value);
 
 	static void print_huffman_tree(const HTreeNode* root);
 protected:
@@ -145,12 +144,12 @@ protected:
 	static int htree_depth_recursive(const HTreeNode* root, int current_depth);
 
 
-
 protected:
 	vector<HTreeNode*> m_leaves;
 	bool m_verbose;
 
 };
+
 
 }
 

@@ -45,9 +45,11 @@ ALL TIMES.
 
 #include <iostream>
 #include <assert.h>
-#include "huffmanapp.h"
 #include "cmdlineparser.h"
 #include "logger.h"
+#include "huffmancodec_naive.h"
+#include "huffmancodec_optimized_cpuonly.h"
+#include "huffmancodec_optimized.h"
 
 using namespace std;
 using namespace sda;
@@ -55,8 +57,57 @@ using namespace sda::cl;
 using namespace sda::utils;
 
 
+static bool unit_test_codec(ICodec* pHuffmanCodec) {
+	if(pHuffmanCodec == NULL)
+		return false;
+
+	string msgs[] = {"AABBCCCC",
+					 "Xilinx SDAccel Benchmarking",
+					 "Hello Pourya Shirazian",
+					 "The quick brown fox jumps over the lazy dog."};
+
+	u32 total = sizeof(msgs) / sizeof(msgs[0]);
+	u32 ctPassed = 0;
+	for(u32 i = 0; i < total; i++) {
+		vector<u8> encoded_data;
+		string out_str;
+
+		int res = pHuffmanCodec->enc_str(msgs[i], encoded_data);
+		res &= pHuffmanCodec->dec_str(encoded_data, out_str);
+
+		if(msgs[i] == out_str) {
+			LogInfo("Test [%u of %u] PASS", i+1, total);
+			ctPassed++;
+		}
+		else
+		{
+			LogError("Test [%u of %u] Failed! (input: %s, output: %s)", msgs[i].c_str(), out_str.c_str());
+		}
+	}
+
+	LogInfo("End unit tests for kernels on the CPU");
+
+	return(ctPassed == total);
+}
+
+
 int main(int argc, char* argv[]) {
 	LogInfo("Xilinx Canonical Huffman Codec Application");
+
+	{
+		LogInfo("Unit test naive impl");
+		HuffmanNaiveImpl naive;
+		assert(unit_test_codec(&naive));
+
+
+		LogInfo("Unit test optimized cpu-only");
+		HuffmanOptimizedCPUOnly cpuonly;
+		assert(unit_test_codec(&cpuonly));
+	}
+
+
+
+
 	string strKernelFullPath = sda::GetApplicationPath() + "/";
 
 	//parse commandline
@@ -95,7 +146,10 @@ int main(int argc, char* argv[]) {
 
 	LogInfo("Chosen kernel file is %s", strKernelFullPath.c_str());
 	LogInfo("Chosen Platform = %s, Device Name: %s, Device Index: [%d]", strPlatformName.c_str(), strDeviceName.c_str(), idxSelectedDevice);
-	HuffmanApp huffman(strPlatformName, strDeviceName, idxSelectedDevice, strKernelFullPath, strBitmapFP);
+	HuffmanOptimized huffman(strPlatformName, strDeviceName, idxSelectedDevice, strKernelFullPath, strBitmapFP);
+
+	LogInfo("Perform some unit tests before the actual image decode, encode");
+	unit_test_codec(&huffman);
 
 	//Execute benchmark application
 	bool res = huffman.run(0, nruns);

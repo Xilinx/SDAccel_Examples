@@ -1,6 +1,6 @@
 /*******************************************************************************
 Vendor: Xilinx
-Associated Filename: huffmancodec.cpp
+Associated Filename: huffmancodec_naive.cpp
 Purpose: SDAccel huffman codec example
 Revision History: January 29, 2016
 
@@ -50,8 +50,8 @@ ALL TIMES.
 #include <stack>
 #include <sstream>
 #include <stdio.h>
-#include "huffmancodec.h"
-#include "huffmancodec_opencl_cpu.h"
+#include "huffmancodec_naive.h"
+#include "huffmancodec_optimized_cpuonly.h"
 #include "logger.h"
 #include "bit_io.h"
 
@@ -59,16 +59,72 @@ using namespace std;
 
 namespace sda {
 
-HuffmanCodec::HuffmanCodec() {
+//////////////////////////////////////////////////////////////////////////////
+int ICodec::enc_str(const string& in_str, vector<u8>& out_data) {
+	vector<u8> in_data;
+	string_to_vector(in_str, in_data);
+
+	return enc(in_data, out_data);
+}
+
+int ICodec::dec_str(const vector<u8>& in_data, string& out_str) {
+
+	vector<u8> out_data;
+	if(!dec(in_data, out_data)) {
+		LogError("Unable to decode the string!");
+	}
+
+	vector_to_string(out_data, out_str);
+	return true;
+}
+
+
+void ICodec::vector_to_string(const vector<u8>& in_vec, string& out_str) {
+	stringstream ss;
+	for(u32 i=0; i < in_vec.size(); i++) {
+		ss << in_vec[i];
+	}
+
+	out_str = ss.str();
+}
+
+void ICodec::string_to_vector(const string& in_str, vector<u8>& out_vec) {
+	out_vec.resize(in_str.length());
+
+	for(u8 i=0; i < out_vec.size(); i++) {
+		out_vec[i] = static_cast<u8>(in_str[i]);
+	}
+}
+
+
+int ICodec::bit_length(u8 value) {
+	int count = 0;
+	for(int i=0; i < 8; i++) {
+		 if( (value & (1 << i)) != 0)
+			 count = i;
+	}
+
+	return count + 1;
+}
+
+string ICodec::binary_string(u8 value) {
+	std::bitset<8> x(value);
+	stringstream ss;
+	ss << x;
+	return ss.str();
+}
+
+//////////////////////////////////////////////////////////////////////////////
+HuffmanNaiveImpl::HuffmanNaiveImpl() {
 	// TODO Auto-generated constructor stub
 	m_verbose = false;
 }
 
-HuffmanCodec::~HuffmanCodec() {
+HuffmanNaiveImpl::~HuffmanNaiveImpl() {
 	// TODO Auto-generated destructor stub
 }
 
-int HuffmanCodec::compute_huffmancodes_recursive(HTreeNode* parent) {
+int HuffmanNaiveImpl::compute_huffmancodes_recursive(HTreeNode* parent) {
 	if(!parent)
 		return false;
 
@@ -94,7 +150,22 @@ int HuffmanCodec::compute_huffmancodes_recursive(HTreeNode* parent) {
 	return ctUpdated;
 }
 
-string HuffmanCodec::htree_symbols_tostring(const HTreeNode* pnode, bool inhex) {
+string HuffmanNaiveImpl::bitcode_to_string(const BitCode& code) {
+	string str = "";
+
+	for(u32 i=0; i < code.bitlen; i++) {
+
+		u8 bit = (code.code >> i) & 0x01;
+		if(bit)
+			str = "1" + str;
+		else
+			str = "0" + str;
+	}
+	return str;
+}
+
+
+string HuffmanNaiveImpl::htree_symbols_tostring(const HTreeNode* pnode, bool inhex) {
 	if(!pnode)
 		return string("");
 
@@ -116,7 +187,7 @@ string HuffmanCodec::htree_symbols_tostring(const HTreeNode* pnode, bool inhex) 
 	return str;
 }
 
-void HuffmanCodec::print_codebook(const CodeBook& book) {
+void HuffmanNaiveImpl::print_codebook(const CodeBook& book) {
 	//print codebook
 	int counter = 0;
 	for(CodeBook::const_iterator it = book.begin();
@@ -128,46 +199,8 @@ void HuffmanCodec::print_codebook(const CodeBook& book) {
 	}
 }
 
-string HuffmanCodec::bitcode_to_string(const BitCode& code) {
-	string str = "";
 
-	for(u32 i=0; i < code.bitlen; i++) {
-
-		u8 bit = (code.code >> i) & 0x01;
-		if(bit)
-			str = "1" + str;
-		else
-			str = "0" + str;
-	}
-	return str;
-}
-
-int HuffmanCodec::bit_length(u8 value) {
-	int count = 0;
-	for(int i=0; i < 8; i++) {
-		 if( (value & (1 << i)) != 0)
-			 count = i;
-	}
-
-	return count + 1;
-}
-
-string HuffmanCodec::binary_string(u8 value) {
-	std::bitset<8> x(value);
-	stringstream ss;
-	ss << x;
-	return ss.str();
-}
-
-
-int HuffmanCodec::encode_naive(const string& in_str, vector<u8>& out_data) {
-	vector<u8> in_data;
-	string_to_vector(in_str, in_data);
-
-	return encode_naive(in_data, out_data);
-}
-
-int HuffmanCodec::encode_naive(const vector<u8>& in_data, vector<u8>& out_data) {
+int HuffmanNaiveImpl::enc(const vector<u8>& in_data, vector<u8>& out_data) {
 
 	if(in_data.size() == 0)
 		return false;
@@ -354,18 +387,7 @@ int HuffmanCodec::encode_naive(const vector<u8>& in_data, vector<u8>& out_data) 
 	return true;
 }
 
-int HuffmanCodec::decode_naive(const vector<u8>& in_data, string& out_str) {
-
-	vector<u8> out_data;
-	if(!decode_naive(in_data, out_data)) {
-		LogError("Unable to decode the string!");
-	}
-
-	vector_to_string(out_data, out_str);
-	return true;
-}
-
-int HuffmanCodec::decode_naive(const vector<u8>& in_data, vector<u8>& out_data) {
+int HuffmanNaiveImpl::dec(const vector<u8>& in_data, vector<u8>& out_data) {
 	vector<u8>::const_iterator it = in_data.begin();
 
 	//in[0] = number of bit-lengths fields
@@ -549,24 +571,8 @@ int HuffmanCodec::decode_naive(const vector<u8>& in_data, vector<u8>& out_data) 
 	return true;
 }
 
-void HuffmanCodec::vector_to_string(const vector<u8>& in_vec, string& out_str) {
-	stringstream ss;
-	for(u32 i=0; i < in_vec.size(); i++) {
-		ss << in_vec[i];
-	}
 
-	out_str = ss.str();
-}
-
-void HuffmanCodec::string_to_vector(const string& in_str, vector<u8>& out_vec) {
-	out_vec.resize(in_str.length());
-
-	for(u8 i=0; i < out_vec.size(); i++) {
-		out_vec[i] = static_cast<u8>(in_str[i]);
-	}
-}
-
-void HuffmanCodec::print_huffman_tree(const HTreeNode* root) {
+void HuffmanNaiveImpl::print_huffman_tree(const HTreeNode* root) {
 	queue<HTreeNode*> q;
 	queue<int> qlevels;
 	queue<int> qtabs;
@@ -632,38 +638,7 @@ void HuffmanCodec::print_huffman_tree(const HTreeNode* root) {
 }
 
 
-
-
-int HuffmanCodec::kernel_encode_string(const string& in_str, vector<u8>& out_data) {
-	vector<u8> in_data;
-	string_to_vector(in_str, in_data);
-
-	u32 size_out_data = 0;
-	encode(&in_data[0], in_data.size(), &out_data[0], &size_out_data, true);
-
-	//resize output array
-	out_data.resize(size_out_data);
-	encode(&in_data[0], in_data.size(), &out_data[0], &size_out_data, false);
-
-	return (int)size_out_data;
-}
-
-int HuffmanCodec::kernel_decode_string(const vector<u8>& in_data, string& out_str) {
-	vector<u8> out_data;
-
-	u32 size_out_data = 0;
-	decode(const_cast<u8*>(&in_data[0]), in_data.size(), &out_data[0], &size_out_data, true);
-
-	//resize output array
-	out_data.resize(size_out_data);
-	decode(const_cast<u8*>(&in_data[0]), in_data.size(), &out_data[0], &size_out_data, false);
-
-	vector_to_string(out_data, out_str);
-
-	return (int)size_out_data;
-}
-
-int HuffmanCodec::htree_depth_recursive(const HTreeNode* root, int current_depth) {
+int HuffmanNaiveImpl::htree_depth_recursive(const HTreeNode* root, int current_depth) {
 	if(root->left && root->right) {
 		int depth_left = htree_depth_recursive(root->left, current_depth + 1);
 		int depth_right = htree_depth_recursive(root->right, current_depth + 1);
@@ -674,8 +649,7 @@ int HuffmanCodec::htree_depth_recursive(const HTreeNode* root, int current_depth
 		return current_depth;
 }
 
-bool HuffmanCodec::write_binary_file(const vector<u8>& data, const string& strFP) {
-	return false;
-}
+
+///////////////////////////////////////////////////////////////////////////////////////////////
 
 }

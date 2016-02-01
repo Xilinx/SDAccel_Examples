@@ -1,6 +1,6 @@
 /*******************************************************************************
 Vendor: Xilinx
-Associated Filename: huffmancodec_opencl_cpu.h
+Associated Filename: huffmancodec_optimized_cpuonly.h
 Purpose: SDAccel huffman codec example
 Revision History: January 29, 2016
 
@@ -46,6 +46,8 @@ ALL TIMES.
 #ifndef HUFFMANCODEC_OPENCL_CPU_H_
 #define HUFFMANCODEC_OPENCL_CPU_H_
 
+#include "huffmancodec_naive.h"
+
 #ifdef __ECLIPSE__
 	#define kernel
 	#define global
@@ -53,9 +55,54 @@ ALL TIMES.
 	#define __global
 #endif
 
-#include "bit_io.h"
+
 
 void encode(/* __global */ u8* in_data, u32 size_in_data, /* __global */ u8* out_data, /* __global */ u32* size_out_data, u8 fetch_size_only);
 void decode(/* __global */ u8* in_data, u32 size_in_data, /* __global */ u8* out_data, /* __global */ u32* size_out_data, u8 fetch_size_only);
+
+namespace sda {
+
+
+class HuffmanOptimizedCPUOnly : public ICodec {
+public:
+	HuffmanOptimizedCPUOnly() {
+	}
+
+	virtual ~HuffmanOptimizedCPUOnly() {
+	}
+
+	/*!
+	 * Encodes canonical huffman
+	 */
+	int enc(const vector<u8>& in_data, vector<u8>& out_data) {
+		u32 size_out_data = 0;
+		encode(const_cast<u8 *>(&in_data[0]), in_data.size(), &out_data[0], &size_out_data, true);
+
+		//resize output array
+		out_data.resize(size_out_data);
+		encode(const_cast<u8 *>(&in_data[0]), in_data.size(), &out_data[0], &size_out_data, false);
+
+		return (int)size_out_data;
+	}
+
+	/*!
+	 * Decodes canonical huffman
+	 */
+	int dec(const vector<u8>& in_data, vector<u8>& out_data) {
+		u32 size_out_data = 0;
+		decode(const_cast<u8*>(&in_data[0]), in_data.size(), &out_data[0], &size_out_data, true);
+
+		//resize output array
+		out_data.resize(size_out_data);
+		decode(const_cast<u8*>(&in_data[0]), in_data.size(), &out_data[0], &size_out_data, false);
+
+		return (int)size_out_data;
+	}
+
+};
+
+
+
+}
 
 #endif /* HUFFMANCODEC_OPENCL_CPU_H_ */
