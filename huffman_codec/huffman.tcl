@@ -6,7 +6,7 @@ create_solution -name huffman_example -dir . -force
 add_device -vbnv xilinx:adm-pcie-7v3:1ddr:2.1
 
 # Execution arguments for the application
-set args "-p Xilinx -d xilinx:adm-pcie-7v3:1ddr:2.1 -k bin_huffman.xclbin -b $::env(PWD)/data/rect_32.bmp"
+set args "-p Xilinx -d fpga0 -k bin_huffman.xclbin -b $::env(PWD)/data/rect_32.bmp"
 
 # Host Compiler Flags
 set_property -name host_cflags -value "-g -O0 -std=c++0x -I$::env(PWD)/src -I$::env(XILINX_SDACCEL)/include" -objects [current_solution]
@@ -37,7 +37,7 @@ create_compute_unit -opencl_binary [get_opencl_binary bin_huffman] -kernel [get_
 
 # Compile the design for CPU based emulation
 compile_emulation -flow cpu -opencl_binary [get_opencl_binary bin_huffman]
-run_emulation -flow cpu -args $args
+#run_emulation -flow cpu -args $args
 
 # Create estimated resource usage and latency report
 report_estimate
