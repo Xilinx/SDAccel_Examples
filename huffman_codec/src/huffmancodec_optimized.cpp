@@ -83,12 +83,15 @@ HuffmanOptimized::HuffmanOptimized(const string& vendor_name,
 	//store path to input bitmap
 	m_strBitmapFP = strBitmapFP;
 
-	if(strstr(strKernelFP.c_str(), ".xclbin") != NULL) {
-		LogInfo("order xilinx device");
-		m_world = xcl_world_single(CL_DEVICE_TYPE_ACCELERATOR);
-	} else {
-		LogInfo("order cpu device");
-		m_world = xcl_world_single(CL_DEVICE_TYPE_CPU);
+
+	//list available platforms
+	xcl_list_platforms();
+
+	//list available devices
+	if(xcl_list_devices(vendor_name.c_str()) > 0) {
+
+		//get device by name
+		assert(xcl_world_vendor_devtype(vendor_name.c_str(), CL_DEVICE_TYPE_ACCELERATOR, m_world));
 	}
 
 	//kernels

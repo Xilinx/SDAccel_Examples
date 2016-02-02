@@ -56,6 +56,73 @@ typedef struct {
 	cl_command_queue command_queue;
 } xcl_world;
 
+/* xcl_list_platforms
+ *
+ * Description:
+ * 	enumerates all available platforms on the current system.
+ *
+ * 	Inputs:
+ * 	 None
+ *
+ * 	Returns:
+ * 	 Count of platforms discovered on this machine.
+ */
+int xcl_list_platforms();
+
+/* xcl_list_devices
+ *
+ * Description:
+ * 	enumerates all available devices on the current system for the
+ * 	specified platform vendor.
+ *
+ * 	Inputs:
+ * 	 vendor_name - the name of the platform vendor e.g. Xilinx
+ * 	 p_matched_platform_id - optional variable to fetch the matched platform id
+ *
+ * 	Returns:
+ * 	 Count of devices discovered on this machine for the given vendor_name.
+ */
+int xcl_list_devices(const char* vendor_name, cl_platform_id* p_matched_platform_id = NULL);
+
+
+/* xcl_world_vendor
+ *
+ * Description:
+ * 	Setup an xcl_world by matching a specified platform vendor name, in-case
+ * 	there are multiple platform providers on a system. The device is finally
+ * 	selected based on its type.
+ *
+ * 	Inputs:
+ * 	 vendor_name - the name of the platform vendor e.g. Xilinx
+ * 	 device_type - the type of device (i.e. CL_DEVICE_TYPE_ACCELERATOR)
+ * 	 world - the world structure to be filled as output
+ *
+ * 	Returns:
+ * 	 True if the search finishes successfully
+ */
+bool xcl_world_vendor_devtype(const char* vendor_name, cl_device_type device_type, xcl_world& world);
+
+
+/* xcl_world_vendor_devname
+ *
+ * Description:
+ * 	Setup an xcl_world by matching a specified platform vendor name, in-case
+ * 	there are multiple platform providers on a system. The device is finally
+ * 	selected based on its name.
+ *
+ * 	Inputs:
+ * 	 vendor_name - the name of the platform vendor e.g. Xilinx
+ * 	 device_name - the name sub string of the full device name
+ * 	 world - the world structure to be filled as output
+ *
+ * 	Returns:
+ * 	 True if the search finishes successfully
+ */
+bool xcl_world_vendor_devname(const char* vendor_name, const char* device_name, xcl_world& world);
+
+
+
+
 /* xcl_world_single
  *
  * Description:

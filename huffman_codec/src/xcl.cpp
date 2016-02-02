@@ -94,10 +94,358 @@ static int load_file_to_memory(const char *filename, char **result) {
 	return size;
 }
 
+
+int xcl_list_platforms() {
+
+	char buffer[256];
+	cl_uint num_platforms;
+	cl_platform_id* clPlatformIDs;
+	cl_int ciErrNum;
+
+	printf("===========================================\n");
+	printf("[%s]\n", __func__);
+
+	//Get OpenCL platform count
+	ciErrNum = clGetPlatformIDs(0, NULL, &num_platforms);
+	if (ciErrNum != CL_SUCCESS) {
+		printf("Error: no platforms available or OpenCL install broken");
+		printf("Test failed\n");
+		return -1;
+	}
+
+	//if no platform found then return
+	if (num_platforms == 0) {
+		printf("Error: no platforms available or OpenCL install broken");
+		printf("Test failed\n");
+		return -1;
+	}
+
+	printf("Number of platforms installed = [%i]\n", num_platforms);
+
+	//if there's a platform or more, make space for ID's
+	clPlatformIDs = (cl_platform_id*) malloc(num_platforms * sizeof(cl_platform_id));
+	if (clPlatformIDs == NULL) {
+		printf("Error: Failed to allocate memory for cl_platform IDs");
+		printf("Test failed\n");
+		return -1;
+	}
+
+	//get platform info for each platform
+	ciErrNum = clGetPlatformIDs(num_platforms, clPlatformIDs, NULL);
+	for (cl_uint i = 0; i < num_platforms; i++) {
+		ciErrNum = clGetPlatformInfo(clPlatformIDs[i], CL_PLATFORM_NAME, 256,
+				&buffer, NULL);
+		if (ciErrNum == CL_SUCCESS) {
+			printf("platform [%i] vendor = [%s]\n", i, buffer);
+
+		}
+	}
+
+	return num_platforms;
+}
+
+
+int xcl_list_devices(const char* vendor_name, cl_platform_id* p_matched_platform_id) {
+	char buffer[256];
+	cl_uint num_platforms;
+	cl_platform_id* clPlatformIDs;
+	cl_int ciErrNum;
+	cl_platform_id matched_platform_id = 0;
+
+	printf("===========================================\n");
+	printf("[%s] vendor_name = [%s] \n", __func__, vendor_name);
+
+	//Get OpenCL platform count
+	ciErrNum = clGetPlatformIDs(0, NULL, &num_platforms);
+	if (ciErrNum != CL_SUCCESS) {
+		printf("Error: no platforms available or OpenCL install broken");
+		printf("Test failed\n");
+		return -1;
+	}
+
+	//if no platform found then return
+	if (num_platforms == 0) {
+		printf("Error: no platforms available or OpenCL install broken");
+		printf("Test failed\n");
+		return -1;
+	}
+
+	printf("Number of platforms installed = [%i]\n", num_platforms);
+
+	//if there's a platform or more, make space for ID's
+	clPlatformIDs = (cl_platform_id*) malloc(num_platforms * sizeof(cl_platform_id));
+	if (clPlatformIDs == NULL) {
+		printf("Error: Failed to allocate memory for cl_platform IDs");
+		printf("Test failed\n");
+		return -1;
+	}
+
+	//get platform info for each platform
+	ciErrNum = clGetPlatformIDs(num_platforms, clPlatformIDs, NULL);
+	for (cl_uint i = 0; i < num_platforms; i++) {
+		ciErrNum = clGetPlatformInfo(clPlatformIDs[i], CL_PLATFORM_NAME, 256,
+				&buffer, NULL);
+		if (ciErrNum == CL_SUCCESS) {
+			printf("platform [%i] vendor = [%s]\n", i, buffer);
+
+			if (strstr(buffer, vendor_name) != NULL) {
+				printf("platform [%i] matched! vendor = [%s] query = [%s]\n", i, buffer, vendor_name);
+				matched_platform_id = clPlatformIDs[i];
+
+				if(p_matched_platform_id) {
+					*p_matched_platform_id = matched_platform_id;
+				}
+				break;
+			}
+		}
+	}
+
+	if(matched_platform_id == 0) {
+		printf("Error: Failed to match the requested platform vendor name");
+		printf("Test failed\n");
+		return -1;
+	}
+
+	cl_uint num_device_ids = 0;
+	ciErrNum = clGetDeviceIDs(matched_platform_id, CL_DEVICE_TYPE_ALL, 0, NULL,
+							  &num_device_ids);
+	if (ciErrNum != CL_SUCCESS) {
+		printf("Error: Failed to get number of device ids.");
+		printf("Test failed\n");
+		return -1;
+	}
+
+	//holds all devices
+	cl_device_id* device_ids = (cl_device_id*) malloc(sizeof(cl_device_id) * num_device_ids);
+
+	ciErrNum = clGetDeviceIDs(matched_platform_id, CL_DEVICE_TYPE_ALL, num_device_ids,
+			device_ids, NULL);
+	if (ciErrNum != CL_SUCCESS) {
+		free(device_ids);
+		printf("Error: Failed to get device ids.");
+		printf("Test failed\n");
+		return -1;
+	}
+
+	//iterate over devices
+	for (int i = 0; i < (int)num_device_ids; i++) {
+		size_t device_name_size;
+		ciErrNum = clGetDeviceInfo(device_ids[i], CL_DEVICE_NAME, 0, NULL, &device_name_size);
+		if (ciErrNum != CL_SUCCESS) {
+			printf("Error: Failed to get device name size.");
+			printf("Test failed\n");
+			return -1;
+		}
+
+		char *pStrDeviceName = (char*) malloc(sizeof(char) * device_name_size);
+		if (pStrDeviceName == NULL) {
+			printf("Error: Failed to allocate memory to hold device name.");
+			printf("Test failed\n");
+			return -1;
+		}
+
+		ciErrNum = clGetDeviceInfo(device_ids[i], CL_DEVICE_NAME, device_name_size,
+				pStrDeviceName, NULL);
+		if (ciErrNum != CL_SUCCESS) {
+			free(pStrDeviceName);
+			printf("Error: Failed to get device name");
+			printf("Test failed\n");
+			return -1;
+		}
+
+
+		printf("Device [%i] name = [%s]\n", i, pStrDeviceName);
+
+		free(pStrDeviceName);
+	}
+
+	return num_device_ids;
+}
+
+
+bool xcl_world_vendor_devtype(const char* vendor_name, cl_device_type device_type, xcl_world& world) {
+
+	int num_device_ids = 0;
+
+	printf("===========================================\n");
+	printf("[%s] vendor_name = [%s] \n", __func__, vendor_name);
+
+	num_device_ids = xcl_list_devices(vendor_name, &world.platform_id);
+	if(num_device_ids <= 0) {
+		printf("Error: Failed to get devices for platform: %s\n", vendor_name);
+		printf("Test failed\n");
+		return false;
+	}
+
+	//holds all devices
+	cl_device_id* device_ids = (cl_device_id*) malloc(sizeof(cl_device_id) * num_device_ids);
+
+	cl_int ciErrNum = clGetDeviceIDs(world.platform_id, device_type, num_device_ids, device_ids, NULL);
+	if (ciErrNum != CL_SUCCESS) {
+		free(device_ids);
+		printf("Error: Failed to get device ids.");
+		printf("Test failed\n");
+		return false;
+	}
+
+	//iterate over devices
+	for (int i = 0; i < (int)num_device_ids; i++) {
+		size_t device_name_size;
+		ciErrNum = clGetDeviceInfo(device_ids[i], CL_DEVICE_NAME, 0, NULL, &device_name_size);
+		if (ciErrNum != CL_SUCCESS) {
+			printf("Error: Failed to get device name size.");
+			printf("Test failed\n");
+			return false;
+		}
+
+		char *pStrDeviceName = (char*) malloc(sizeof(char) * device_name_size);
+		if (pStrDeviceName == NULL) {
+			printf("Error: Failed to allocate memory to hold device name.");
+			printf("Test failed\n");
+			return false;
+		}
+
+		ciErrNum = clGetDeviceInfo(device_ids[i], CL_DEVICE_NAME, device_name_size,
+				pStrDeviceName, NULL);
+		if (ciErrNum != CL_SUCCESS) {
+			free(pStrDeviceName);
+			printf("Error: Failed to get device name");
+			printf("Test failed\n");
+			return false;
+		}
+
+
+		printf("Matching Device [%i] name = %s\n", i, pStrDeviceName);
+		world.device_id = device_ids[i];
+
+		free(pStrDeviceName);
+
+		break;
+	}
+
+	//create context
+	world.context = clCreateContext(0, 1, &world.device_id,
+	                                NULL, NULL, &ciErrNum);
+	if (ciErrNum != CL_SUCCESS) {
+		printf("Error: Failed to create a compute context!\n");
+		printf("Test failed\n");
+		return false;
+	}
+
+	//create command q
+	world.command_queue = clCreateCommandQueue(world.context,
+	                                           world.device_id,
+	                                           CL_QUEUE_PROFILING_ENABLE,
+	                                           &ciErrNum);
+	if (ciErrNum != CL_SUCCESS) {
+		printf("Error: Failed to create a command queue!\n");
+		printf("Test failed\n");
+		return false;
+	}
+
+
+	return true;
+}
+
+
+bool xcl_world_vendor_devname(const char* vendor_name, const char* device_name, xcl_world& world) {
+	int num_device_ids = 0;
+	world.platform_id = 0;
+	world.device_id = 0;
+
+	printf("===========================================\n");
+	printf("[%s] vendor_name = [%s], device_name = [%s]\n", __func__, vendor_name, device_name);
+
+	num_device_ids = xcl_list_devices(vendor_name, &world.platform_id);
+	if(num_device_ids <= 0) {
+		printf("Error: Failed to get devices for platform: %s\n", vendor_name);
+		printf("Test failed\n");
+		return false;
+	}
+
+	//holds all devices
+	cl_device_id* device_ids = (cl_device_id*) malloc(sizeof(cl_device_id) * num_device_ids);
+
+	cl_int ciErrNum = clGetDeviceIDs(world.platform_id, CL_DEVICE_TYPE_ALL, num_device_ids, device_ids, NULL);
+	if (ciErrNum != CL_SUCCESS) {
+		free(device_ids);
+		printf("Error: Failed to get device ids.");
+		printf("Test failed\n");
+		return false;
+	}
+
+	//iterate over devices
+	for (int i = 0; i < (int)num_device_ids; i++) {
+		size_t device_name_size;
+		ciErrNum = clGetDeviceInfo(device_ids[i], CL_DEVICE_NAME, 0, NULL, &device_name_size);
+		if (ciErrNum != CL_SUCCESS) {
+			printf("Error: Failed to get device name size.");
+			printf("Test failed\n");
+			return false;
+		}
+
+		char *pStrDeviceName = (char*) malloc(sizeof(char) * device_name_size);
+		if (pStrDeviceName == NULL) {
+			printf("Error: Failed to allocate memory to hold device name.");
+			printf("Test failed\n");
+			return false;
+		}
+
+		ciErrNum = clGetDeviceInfo(device_ids[i], CL_DEVICE_NAME, device_name_size,
+				pStrDeviceName, NULL);
+		if (ciErrNum != CL_SUCCESS) {
+			free(pStrDeviceName);
+			printf("Error: Failed to get device name");
+			printf("Test failed\n");
+			return false;
+		}
+
+		if(strstr(pStrDeviceName, device_name) != NULL) {
+			printf("Matching Device [%i] name = %s\n", i, pStrDeviceName);
+			world.device_id = device_ids[i];
+			free(pStrDeviceName);
+
+			break;
+		}
+
+
+		free(pStrDeviceName);
+
+		break;
+	}
+
+	//create context
+	world.context = clCreateContext(0, 1, &world.device_id,
+	                                NULL, NULL, &ciErrNum);
+	if (ciErrNum != CL_SUCCESS) {
+		printf("Error: Failed to create a compute context!\n");
+		printf("Test failed\n");
+		return false;
+	}
+
+	//create command q
+	world.command_queue = clCreateCommandQueue(world.context,
+	                                           world.device_id,
+	                                           CL_QUEUE_PROFILING_ENABLE,
+	                                           &ciErrNum);
+	if (ciErrNum != CL_SUCCESS) {
+		printf("Error: Failed to create a command queue!\n");
+		printf("Test failed\n");
+		return false;
+	}
+
+
+	return true;
+}
+
+
 xcl_world xcl_world_single(cl_device_type device_type) {
 	int err;
 	xcl_world world;
 	cl_uint num_platforms;
+
+	printf("===========================================\n");
+	printf("[%s]\n", __func__);
 
 	err = clGetPlatformIDs(0, NULL, &num_platforms);
 	if (err != CL_SUCCESS) {
@@ -159,6 +507,7 @@ xcl_world xcl_world_single(cl_device_type device_type) {
 
 	return world;
 }
+
 
 void xcl_release_world(xcl_world world) {
 	clReleaseCommandQueue(world.command_queue);
