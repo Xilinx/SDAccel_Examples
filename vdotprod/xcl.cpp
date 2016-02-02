@@ -1,7 +1,7 @@
 /*******************************************************************************
 Vendor: Xilinx
 Associated Filename: xcl.cpp
-Purpose: SDAccel huffman codec example
+Purpose: SDAccel Applications Framework
 Revision History: January 29, 2016
 
 *******************************************************************************

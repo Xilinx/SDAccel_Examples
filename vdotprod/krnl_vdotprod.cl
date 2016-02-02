@@ -1,7 +1,7 @@
 /*******************************************************************************
 Vendor: Xilinx
-Associated Filename: krnl_vadd.cl
-Purpose: SDAccel vector addition
+Associated Filename: krnl_vdotprod.cl
+Purpose: SDAccel dot product example
 Revision History: January 28, 2016
 
 *******************************************************************************

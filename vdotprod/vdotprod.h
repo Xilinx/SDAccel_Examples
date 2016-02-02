@@ -1,7 +1,7 @@
 /*******************************************************************************
 Vendor: Xilinx
-Associated Filename: vadd.h
-Purpose: SDAccel vector addition
+Associated Filename: vdotprod.h
+Purpose: SDAccel dot product example
 Revision History: January 28, 2016
 
 *******************************************************************************
