@@ -1,4 +1,4 @@
-name: huffman
+name: aes_decrypt
 sys_path_root: "/proj/picasso/pourya/gauntlet_ws/"
 
 src:
