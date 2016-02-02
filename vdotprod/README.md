@@ -1,7 +1,7 @@
-Vector Addition Example
+Vector Dot-Product Example
 ===============================
 
-This is a simple example of vector addition.
+This is a simple example of vector dotproduct operation.
 The purpose of this code is to introduce the user to application development
 in SDAccel.
 
@@ -17,26 +17,26 @@ This application is compiled using the SDAccel script mode.
 To compile the application:
 
 ```
-sdaccel vadd.tcl
+sdaccel vdotprod.tcl
 ```
-The target board can be changed by editing *vadd.tcl*
+The target board can be changed by editing *vdotprod.tcl*
 
 Executing the Application
 ---------------------------
 ```
-vector_addition.exe bin_vadd.xclbin
+vector_dotproduct.exe bin_vdotprod.xclbin
 ```
 
 Files in the Example
 ---------------------
 Application host code
-- vadd.cpp
-- vadd.h
-- xcl.c
+- vdotprod.cpp
+- vdotprod.h
+- xcl.cpp
 - xcl.h
 
 Kernel code
-- krnl_vadd.cl
+- krnl_vdotprod.cl
 
 Compilation Script
-- vadd.tcl
+- vdotprod.tcl
