@@ -1,0 +1,15 @@
+name: huffman
+sys_path_root: "/proj/picasso/pourya/gauntlet_ws/"
+
+src:
+    - "./src"
+
+pkg:
+    - "./aesdecrypt_example/pkg"
+
+compute_units: 1
+kernel_names:
+    - krnl_aes_decrypt 
+   
+accelerators:
+    - fpga
