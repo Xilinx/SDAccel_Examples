@@ -156,86 +156,6 @@ bool RSAApp::invoke_kernel(cl_kernel kernel,cl_uint *message,cl_uint *Cp,cl_uint
       cl_uint sizeInBytes = 16* sizeof(cl_uint);
       int status;
       int i;
-	/////////////////////////////////////////////////////////////////
-	// Allocate and initialize memory used by host 
-	/////////////////////////////////////////////////////////////////
-       cl_uint * messagearray = (cl_uint *) malloc(2*sizeInBytes);
-	if(messagearray == NULL)
-	{
-		printf("Error: Failed to allocate output memory on host (messagearray)\n");
-		return false; 
-	}
-
-
-cl_uint * Cparray = (cl_uint *) malloc(sizeInBytes);
-	if(Cparray == NULL)
-	{
-		printf("Error: Failed to allocate output memory on host (Cparray)\n");
-		return false; 
-	}
-cl_uint *   Cqarray = (cl_uint *) malloc(sizeInBytes);
-	if(Cqarray == NULL)
-	{
-		printf("Error: Failed to allocate output memory on host (Cqarray)\n");
-		return false; 
-	}
-cl_uint *   parray = (cl_uint *) malloc(sizeInBytes);
-	if(parray == NULL)
-	{
-		printf("Error: Failed to allocate output memory on host (parray)\n");
-		return false; 
-	}
-cl_uint *  qarray = (cl_uint *) malloc(sizeInBytes);
-	if(qarray == NULL)
-	{
-		printf("Error: Failed to allocate output memory on host (qarray)\n");
-		return false; 
-	}
-cl_uint *  dmp1array = (cl_uint *) malloc(sizeInBytes);
-	if(dmp1array == NULL)
-	{
-		printf("Error: Failed to allocate output memory on host (dmp1array)\n");
-		return false; 
-	}
-cl_uint *  dmq1array = (cl_uint *) malloc(sizeInBytes);
-	if(dmq1array == NULL)
-	{
-		printf("Error: Failed to allocate output memory on host (dmq1array)\n");
-		return false; 
-	}
-cl_uint * iqmparray=(cl_uint *) malloc(sizeInBytes);
-	if(iqmparray == NULL)
-	{
-		printf("Error: Failed to allocate output memory on host (iqmparray)\n");
-		return false; 
-	}
-cl_uint *   r2parray = (cl_uint *) malloc(sizeInBytes);
-	if(r2parray == NULL)
-	{
-		printf("Error: Failed to allocate output memory on host (r2parray)\n");
-		return false; 
-	}
-cl_uint * r2qarray = (cl_uint *) malloc(sizeInBytes);
-	if(r2qarray == NULL)
-	{
-		printf("Error: Failed to allocate output memory on host (r2qarray)\n");
-		return false; 
-	}
-
-	memset(messagearray, 0,2*sizeInBytes);
- for(i=0;i<16;i++)
-	{
-		Cparray[i]=Cp[i%16];
-		Cqarray[i]=Cq[i%16];
-		parray[i]=p[i%16];
-		qarray[i]=q[i%16];
-		dmp1array[i]=dmp1[i%16];
-		dmq1array[i]=dmq1[i%16];
-		iqmparray[i]=iqmp[i%16];
-		r2parray[i]=r2p[i%16];
-		r2qarray[i]=r2q[i%16];
-	}
-
 
 	/////////////////////////////////////////////////////////////////
 	// Create OpenCL memory buffers
@@ -245,7 +165,7 @@ cl_mem messageBuffer = clCreateBuffer(
 				      m_world.context, 
                       CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR,
                      2*sizeInBytes,
-                      messagearray, 
+                      message, 
                       &status);
     if(status != CL_SUCCESS) 
 	{ 
@@ -258,7 +178,7 @@ cl_mem CpBuffer  = clCreateBuffer(
 				      m_world.context, 
                       CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
                      sizeInBytes,
-                      Cparray, 
+                      Cp, 
                       &status);
     if(status != CL_SUCCESS) 
 	{ 
@@ -270,7 +190,7 @@ cl_mem CqBuffer = clCreateBuffer(
 				      m_world.context, 
                       CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
                      sizeInBytes,
-                      Cqarray, 
+                      Cq, 
                       &status);
     if(status != CL_SUCCESS) 
 	{ 
@@ -282,7 +202,7 @@ cl_mem dmp1Buffer= clCreateBuffer(
 				      m_world.context, 
                       CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
                      sizeInBytes,
-                      dmp1array, 
+                      dmp1, 
                       &status);
     if(status != CL_SUCCESS) 
 	{ 
@@ -294,7 +214,7 @@ cl_mem dmq1Buffer = clCreateBuffer(
 				      m_world.context, 
                       CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
                      sizeInBytes,
-                      dmq1array, 
+                      dmq1, 
                       &status);
     if(status != CL_SUCCESS) 
 	{ 
@@ -306,7 +226,7 @@ cl_mem pBuffer = clCreateBuffer(
 				      m_world.context, 
                       CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
                      sizeInBytes,
-                      parray, 
+                      p, 
                       &status);
     if(status != CL_SUCCESS) 
 	{ 
@@ -317,7 +237,7 @@ cl_mem qBuffer = clCreateBuffer(
 				     m_world.context, 
                       CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
                      sizeInBytes,
-                      qarray, 
+                      q, 
                       &status);
     if(status != CL_SUCCESS) 
 	{ 
@@ -328,7 +248,7 @@ cl_mem r2pBuffer = clCreateBuffer(
 				      m_world.context, 
                       CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
                      sizeInBytes,
-                      r2parray, 
+                      r2p, 
                       &status);
     if(status != CL_SUCCESS) 
 	{ 
@@ -339,7 +259,7 @@ cl_mem r2qBuffer = clCreateBuffer(
 				      m_world.context, 
                       CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
                      sizeInBytes,
-                      r2qarray, 
+                      r2q, 
                       &status);
     if(status != CL_SUCCESS) 
 	{ 
@@ -351,7 +271,7 @@ cl_mem iqmpBuffer=clCreateBuffer(
 				      m_world.context, 
                       CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
                      sizeInBytes,
-                      iqmparray, 
+                      iqmp, 
                       &status);
     if(status != CL_SUCCESS) 
 	{ 
@@ -471,7 +391,7 @@ cl_mem iqmpBuffer=clCreateBuffer(
 
 	//read output size
 	err = clEnqueueReadBuffer(m_world.command_queue, messageBuffer, CL_TRUE, 0,
-			 2*sizeInBytes, messagearray,0, NULL, NULL);
+			 2*sizeInBytes, message,0, NULL, NULL);
 	if (err != CL_SUCCESS) {
 		LogError("Failed to read output messageBuffer %d", err);
 		LogError("Test failed");
@@ -495,7 +415,7 @@ cl_mem iqmpBuffer=clCreateBuffer(
 	//copy results back from OpenCL buffer
 	err = clEnqueueReadBuffer(m_world.command_queue, messageBuffer, CL_TRUE, 0,
 			2*sizeInBytes,
-                messagearray,
+                message,
 			0, NULL, &events[evtHostRead]);
 	if (err != CL_SUCCESS) {
 		LogError("Failed to read output size buffer %d", err);
@@ -620,6 +540,8 @@ bool RSAApp::run(int idevice, int nruns) {
         memcpy(Cq,temp4,64);
 	print_big_number(Cq, n_size/8, "\n C mod q");
 	
+        print_big_number((uint *)p, n_size/8, "\n p");
+        print_big_number((uint *)q, n_size/8, "\n q");
 	BN_CTX_end(ctx);
 	BN_CTX_free(ctx);
 	
@@ -641,7 +563,7 @@ bool RSAApp::run(int idevice, int nruns) {
 	LogInfo("Invoking rsa");
 	bool res = invoke_kernel(m_clKernelRSA, message, Cp, Cq, (uint *)p,(uint *) q, (uint *)dmp1, (uint *)dmq1, (uint *)iqmp,r2p,r2q,&events[0]);
 	if(!res) {
-		LogError("Failed to encode the input. Test Failed");
+		LogError("Failed to decrypt the ciphertext. Test Failed");
 		return false;
 	}
 
@@ -685,8 +607,7 @@ bool RSAApp::run(int idevice, int nruns) {
 	LogInfo("Host read [ms] = %f", durations[evtHostRead]);
 	LogInfo("TX rate host --> device [mbps] = %f", h2d_rate);
 	LogInfo("TX rate device --> host [mbps] = %f", d2h_rate);
-      
-   //memcpy(message, messagearray,32);
+
 	print_big_number(message, 32, "message");
     	output_data_to_file(m_strOutputFP.c_str(), message);
         free(temp1);

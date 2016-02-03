@@ -48,7 +48,7 @@ typedef unsigned char  u8;
 typedef unsigned short u16;
 typedef unsigned int  u32;
 typedef unsigned long u64;
-//static u32 k; //k record # of multiplication needed
+
 
  // Compute the 2adic inverse of x
 //inverse %2^32
@@ -293,7 +293,7 @@ void rsa(__global u32 *z,__global u32 *Cpg, __global u32 *Cqg, __global u32 *pg,
 
  	redc(a, a, n, d, workspace,16); // a = r%n
 		
-__attribute__((xcl_pipeline_loop))
+//__attribute__((xcl_pipeline_loop))
   for(i=16; i >0 ; --i)
   {
    	 ex = expo[i-1]; 
@@ -322,7 +322,7 @@ __attribute__((xcl_pipeline_loop))
 		expo[i]=dmp1g[i+16*id];//expo is exponent
 	}
 
-	d = inv2adic(n[0]); //
+	d = inv2adic(n[0]);
 
   	mulredc(t, t, a, n, d, workspace, 16); // t = tr %n=, montgomery multiplicaiton, t ordinary to montgomery form
 	
@@ -330,7 +330,7 @@ __attribute__((xcl_pipeline_loop))
  	redc(a, a, n, d, workspace,16); // a = r%n
 	
 //left-to-right binary exponentiation
-__attribute__((xcl_pipeline_loop))
+//__attribute__((xcl_pipeline_loop))
   for(i=16; i >0 ; --i)
   {
    	 ex = expo[i-1]; 
