@@ -1,11 +1,10 @@
-AES Decryption Example
+SHA1 Example
 ===============================
 
-This is an optimized implementation of an AES-128 ECB Encrypt in Software, followed 
-by OpenCL Decryption targeting execution on an SDAccel supported FPGA acceleration card.
+This is an optimized implementation of SHA1 secure hash algorithm targeting 
+execution on an SDAccel supported FPGA acceleration card.
 
-
-Achieved performance was measured on an Alpha Data ADM-PCI-7v3 card.
+Achieved performance was measured on an Alpha Data ADM-PCI-7v3 card.
 
 Changelog
 ----------
@@ -17,26 +16,24 @@ This application is compiled using the SDAccel script mode.
 To compile the application:
 
 ```
-sdaccel aes_decrypt.tcl
+sdaccel sha1.tcl
 ```
-The target board can be changed by editing *huffman.tcl*
+The target board can be changed by editing *sha1.tcl*
 
 Executing the Application
 ---------------------------
 ```
-aesdecrypt_example.exe --platform Xilinx --device fpga0 --kernel bin_aes_decrypt.xclbin data/input.bmp
+sha1_example.exe --platform Xilinx --device fpga0 --kernel bin_sha1.xclbin
 ```
 
 Files in the Example
 ---------------------
-Example data
-- data/input.bmp
 
 Application host code
-- aes_app.cpp
-- aes_app.h
-- aes_ecb.cpp
-- aes_ecb.h
+- sha1_app.cpp
+- sha1_app.h
+- sha1.c
+- sha1.h
 - main.cpp
 - common/xcl.cpp
 - common/xcl.h
@@ -44,11 +41,9 @@ Application host code
 - common/logger.h
 - common/cmdlineparser.cpp
 - common/cmdlineparser.h
-- common/simplebmp.cpp
-- common/simplebmp.h
 
 Kernel code
-- krnl_aes.cl
+- krnl_sha1.cl
 
 Compilation Script
-- aes_decrypt.tcl
+- sha1.tcl

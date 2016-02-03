@@ -7,27 +7,29 @@
 #include <string>
 #include <ctime>
 #include <vector>
-#include <openssl/sha.h>
-#include <string.h>
+#include <string>
+#include <cstring>
 
-#include "zmq.hpp"
-#include <jsonxx.h>
 #include "sha1.h"
-
-#include "benchapp.h"
-#include "profiler.h"
 #include "cmdlineparser.h"
+#include "logger.h"
+#include "sha1_app.h"
+
 
 using namespace std;
 using namespace sda;
-using namespace sda::cl;
 using namespace sda::utils;
 
-#define SHA1_PUB 1
+//#define SHA1_PUB 1
 typedef unsigned char u8;
 
 //graceful close
 volatile sig_atomic_t g_done = 0;
+
+#ifdef SHA1_PUB
+	#include "zmq.hpp"
+	#include <jsonxx.h>
+#endif
 
 void term(int signum)
 {
@@ -335,14 +337,15 @@ double sha1_parallel(sha1 &host, double timelimit, const string& zmq_port) {
 			}
 		}
 
-		/* After timeout stop */
-		/*
-		 if (std::clock() > timeout) {
-		 //Stop counting blocks immediately
-		 blocks_complete = blocks;
-		 break;
+		 /* After timeout stop */		
+		 if (std::clock() > timeout && timelimit > 0.0) {
+			 //Stop counting blocks immediately
+			 LogInfo("Timeout reached! Stopping...");
+			 blocks_complete = blocks;
+			 g_done = 1;
+			 break;
 		 }
-		 */
+		
 		blocks_complete = blocks;
 
 		events[i % 20] = runners[i % 20].run(buf[i % 20], mds[i % 20]);
@@ -386,7 +389,7 @@ double sha1_parallel(sha1 &host, double timelimit, const string& zmq_port) {
 /* Run SHA1 in a single and parallel mode */
 int main(int argc, char** argv) {
 	//parse commandline
-	LogInfo("Xilinx SHA1 benchmark started");
+	LogInfo("Xilinx SHA1 Example Application");
 	struct sigaction action;
 	memset(&action, 0, sizeof(struct sigaction));
 	action.sa_handler = term;
@@ -398,16 +401,17 @@ int main(int argc, char** argv) {
 	//parse commandline
 	CmdLineParser parser;
 	parser.addSwitch("--platform-name", "-p", "OpenCl platform vendor name", "Xilinx");
-	parser.addSwitch("--zmq-pub-port", "-z", "ZeroMQ publisher port for web visualization", "5010");
 	parser.addSwitch("--device-name", "-d", "OpenCl device name", "fpga0");
 	parser.addSwitch("--kernel-file", "-k", "OpenCl kernel file to use");
 	parser.addSwitch("--select-device", "-s", "Select from multiple matched devices [0-based index]", "0");
-	parser.addSwitch("--output", "-o", "results output file", "result.json");
+	parser.addSwitch("--time-limit", "-t", "Time limit in seconds, -1 means run forever", "20");
+	parser.addSwitch("--zmq-pub-port", "-z", "ZeroMQ publisher port for web visualization", "5010");
 	parser.setDefaultKey("--kernel-file");
+	
+	//parse all command line options
 	parser.parse(argc, argv);
 
-	double timelimit = 60.0 * 5.0;
-
+	double timelimit = parser.value_to_double("time-limit");
 	string str_platform = parser.value("platform-name");
 	string str_device = parser.value("device-name");
 	string str_kernel = parser.value("kernel-file");
@@ -415,7 +419,8 @@ int main(int argc, char** argv) {
 
 	LogInfo("Platform: %s, Device: %s", str_platform.c_str(), str_device.c_str());
 	LogInfo("Kernel FP: %s", str_kernel.c_str());
-	LogInfo("ZMQ PORT: %s", str_zmq_port.c_str());
+	LogInfo("ZMQ PORT: %s", str_zmq_port.c_str());	
+	LogInfo("Running for [%f] seconds...", timelimit);
 
 	{
 		sha1 fpga(str_platform, str_device, str_kernel.c_str());

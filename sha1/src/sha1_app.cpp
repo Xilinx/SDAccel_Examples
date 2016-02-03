@@ -5,7 +5,7 @@
 #include <fstream>
 #include <streambuf>
 
-#include "sha1.h"
+#include "sha1_app.h"
 
 using namespace std;
 

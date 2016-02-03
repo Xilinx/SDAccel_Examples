@@ -1,37 +1,48 @@
-create_solution -name sha1_sc15_7v3 -force
+# SDAccel Application Example - SHA1
+create_solution -name sha1_example -dir . -force
+
+# Target a Xilinx FPGA board
 add_device -vbnv xilinx:adm-pcie-7v3:1ddr:2.0
 
-set_param compiler.generateExtraRunData true
-set_param compiler.preserveHlsOutput 1
+# Execution arguments for the application
+set args "-p Xilinx -d fpga0 -k bin_sha1.xclbin"
 
-set currdir [pwd]
-set commondir ${currdir}/src
-set jsondir ${commondir}/3rdparty/jsonxx
-set zmqdir /opt/platform/machine
-set env(LD_LIBRARY_PATH) ${zmqdir}/lib:$env(LD_LIBRARY_PATH)
+# Host Compiler Flags
+set_property -name host_cflags -value "-g -O0 -std=c++0x -I$::env(PWD)/src -I$::env(PWD)/src/common -I$::env(XILINX_SDACCEL)/include" -objects [current_solution]
 
-set_property -name host_cflags -value "-std=c++0x -g -O0 -Wall -I $zmqdir/include -I $jsondir -I $commondir -I/usr/include -lcrypto -lssl -L $zmqdir/lib -lzmq" -objects [current_solution]
-add_files "src/main.cpp src/sha1.h src/sha1.cpp"
-add_files "src/benchapp.cpp src/cmdlineparser.cpp src/logger.cpp src/profiler.cpp src/3rdparty/jsonxx/jsonxx.cc"
-set_property file_type "c header files" [get_files "src/sha1.h"]
+# Host common source files
+add_files "src/common/xcl.h src/common/xcl.cpp  src/common/cmdlineparser.h src/common/cmdlineparser.cpp src/common/logger.h src/common/logger.cpp"
 
-create_opencl_binary sha1
-set_property region "OCL_REGION_0" [get_opencl_binary sha1]
+add_files "src/sha1_app.h src/sha1_app.cpp src/oswendian.h src/sha1.h src/sha1.c src/main.cpp"
+set_property file_type "c header files" [get_files "src/common/xcl.h"]
+set_property file_type "c header files" [get_files "src/sha1_app.h"]
 
+
+# Kernel Definitions
 create_kernel -type clc dev_sha1_update
 add_files -kernel [get_kernels dev_sha1_update] "src/krnl_sha1.cl"
 
-create_compute_unit -opencl_binary [get_opencl_binary sha1] -kernel [get_kernels dev_sha1_update] -name sha1_update0
-create_compute_unit -opencl_binary [get_opencl_binary sha1] -kernel [get_kernels dev_sha1_update] -name sha1_update1
 
-compile_emulation -flow cpu -opencl_binary [get_opencl_binary sha1]
-run_emulation -flow cpu -args "sha1.xclbin"
+# Define Binary Containers
+create_opencl_binary bin_sha1
+set_property region "OCL_REGION_0" [get_opencl_binary bin_sha1]
 
+# Compute Units [1 per kernel]
+create_compute_unit -opencl_binary [get_opencl_binary bin_sha1] -kernel [get_kernels dev_sha1_update] -name cu_sha10
+
+# Compile the design for CPU based emulation
+compile_emulation -flow cpu -opencl_binary [get_opencl_binary bin_sha1]
+run_emulation -flow cpu -args $args
+
+# Create estimated resource usage and latency report
 report_estimate
 
-compile_emulation -flow hardware -opencl_binary [get_opencl_binary sha1]
-#run_emulation -flow hardware -args "sha1.xclbin"
+# Compile the design for Hardware Emulation
+compile_emulation -flow hardware -opencl_binary [get_opencl_binary bin_sha1]
+run_emulation -flow hardware -args $args
 
-#build_system
-#package_system
+# Compile the design for execution on the FPGA board
+build_system
 
+# Create the board deployment package for the application
+package_system
