@@ -1,11 +1,11 @@
+/*
+  SHA-1 in C
+  By Steve Reid <steve@edmweb.com>
+  100% Public Domain
+*/
+
 #ifndef _SHA1_H_
 #define _SHA1_H_
-
-/*
-SHA-1 in C
-By Steve Reid <steve@edmweb.com>
-100% Public Domain
-*/
 
 #ifdef HAVE_LIBNSS
 # include <nss.h>
