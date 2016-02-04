@@ -106,11 +106,11 @@ int main(int argc, char* argv[]) {
 	}
 
 	LogInfo("Perform the sobel filter on accelerator");
-	EdgeDetectFilter edgedetect(strPlatformName, strDeviceName, idxSelectedDevice, strKernelFullPath);
+	output = strBitmapFP + "_edges_fpga.bmp";
 
-	//Execute benchmark application
-	string output;
-	bool res = edgedetect.run(strBitmapFP, output);
+	//setup
+	EdgeDetectFilter edgedetect(strPlatformName, strDeviceName, idxSelectedDevice, strKernelFullPath);
+	res = edgedetect.run(strBitmapFP, output);
 	if(!res) {
 		LogError("An error occurred when running benchmark on device 0");
 		return -1;

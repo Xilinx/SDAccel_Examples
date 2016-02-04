@@ -10,6 +10,7 @@
 #include "simplebmp.h"
 #include "logger.h"
 
+using namespace sda;
 
 
 #if defined(__linux__) || defined(linux)
@@ -66,22 +67,72 @@ EdgeDetectFilter::EdgeDetectFilter(const string& vendor_name,
 
 EdgeDetectFilter::~EdgeDetectFilter() {
 	// TODO Auto-generated destructor stub
+	clReleaseKernel(m_clKrnlSobel);
+	xcl_release_world(m_world);
 }
 
-
-//bool EdgeDetectFilter::run(int idevice, int nruns) {
-//
-//}
 
 bool EdgeDetectFilter::run(const string& strInput, string& strOutput) {
 	int err;
 	struct bmp_t inputbmp;
 	err = readbmp((char*)strInput.c_str(), &inputbmp);
 	if (err != 0) {
-		LogError("failed to read imput.bmp");
+		LogError("failed to read input [%s]", strInput.c_str());
 		return false;
 	}
-	size_t inputbmpsize = inputbmp.height * inputbmp.width * 3;
 
-	return false;
+	int nchannels = (inputbmp.header.dibdepth >> 3);
+	size_t inputbmpsize = inputbmp.height * inputbmp.width * nchannels;
+
+	struct bmp_t outputbmp;
+	outputbmp.pixels = (uint32_t *) malloc(inputbmpsize);
+	outputbmp.width = inputbmp.width;
+	outputbmp.height = inputbmp.height;
+	if (outputbmp.pixels == NULL) {
+		LogError("Failed to allocate memory for output.bmp");
+		return false;
+	}
+
+
+	//void krnl_sobel(global u8* in_pixels, int nchannels, int width, int height, global u8* out_pixels)
+	cl_mem buffer_inpixels = xcl_malloc(m_world, CL_MEM_READ_ONLY, inputbmpsize);
+	cl_mem buffer_outpixels = xcl_malloc(m_world, CL_MEM_WRITE_ONLY, inputbmpsize);
+
+	//copy input to device
+    xcl_memcpy_to_device(m_world, buffer_inpixels, inputbmp.pixels, inputbmpsize);
+
+	//bool bres = apply(reinterpret_cast<u8*>(inputbmp.pixels), nchannels, inputbmp.width, inputbmp.height, (u8*)outputbmp.pixels);
+    clSetKernelArg(m_clKrnlSobel, 0, sizeof(cl_mem), &buffer_inpixels);
+    clSetKernelArg(m_clKrnlSobel, 1, sizeof(int), &nchannels);
+    clSetKernelArg(m_clKrnlSobel, 2, sizeof(int), &inputbmp.width);
+    clSetKernelArg(m_clKrnlSobel, 3, sizeof(int), &inputbmp.height);
+    clSetKernelArg(m_clKrnlSobel, 4, sizeof(cl_mem), &buffer_outpixels);
+
+    //Launch the kernel
+    unsigned long duration = xcl_run_kernel3d(m_world, m_clKrnlSobel, 1, 1, 1);
+
+    //Copy result to local buffer
+    xcl_memcpy_from_device(m_world, outputbmp.pixels, buffer_outpixels, inputbmpsize);
+
+    //release all mem buffers
+    clReleaseMemObject(buffer_inpixels);
+    clReleaseMemObject(buffer_outpixels);
+
+
+	//store
+	err = writebmp(const_cast<char*>(strOutput.c_str()), &outputbmp);
+	if (err != 0) {
+		LogError("failed to write output [%s]", strOutput.c_str());
+		return false;
+	}
+
+
+	//cleanup
+	free(outputbmp.pixels);
+
+	//perf results
+	LogInfo("Kernel exec duration: [%.2f]", duration);
+
+
+	return true;
 }
