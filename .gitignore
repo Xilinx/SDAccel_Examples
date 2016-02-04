@@ -1,4 +1,5 @@
 *.xclbin
+*.jou
 sdaccel_profile_summary.html
 sdaccel_profile_summary.csv
 _xocc_*/

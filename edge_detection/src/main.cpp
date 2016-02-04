@@ -1,7 +1,7 @@
 /*******************************************************************************
 Vendor: Xilinx
 Associated Filename: main.cpp
-Purpose: AES Decrypt SDAccel Application Example
+Purpose: Edge Detection SDAccel Application Example
 Revision History: January 29, 2016
 
 *******************************************************************************
@@ -45,20 +45,21 @@ ALL TIMES.
 
 
 #include <iostream>
-#include "aes_app.h"
+#include "edgedetection_app.h"
 #include "cmdlineparser.h"
 #include "logger.h"
+#include "sobel_cpuonly.h"
 
 using namespace std;
 using namespace sda;
-using namespace sda::cl;
+//using namespace sda::cl;
 using namespace sda::utils;
 
 
 //pass cmd line options to select opencl device
 int main(int argc, char* argv[]) {
 
-	LogInfo("Xilinx AES-Decrypt Application started");
+	LogInfo("Xilinx Edge-Detection Application started");
 	string strKernelFullPath = sda::GetApplicationPath() + "/";
 
 	//parse commandline
@@ -95,16 +96,28 @@ int main(int argc, char* argv[]) {
 
 	LogInfo("Chosen kernel file is %s", strKernelFullPath.c_str());
 	LogInfo("Chosen Platform = %s, Device Name: %s, Device Index: [%d]", strPlatformName.c_str(), strDeviceName.c_str(), idxSelectedDevice);
-	AesApp aesapp(strPlatformName, strDeviceName, idxSelectedDevice, strKernelFullPath, strBitmapFP);
+
+	LogInfo("Perform the sobel filter on cpu");
+	string output = strBitmapFP + "_edges_cpuonly.bmp";
+	bool res = Sobel::apply(strBitmapFP, output);
+	if(!res) {
+		LogError("There was an error on the filter execution");
+		return 1;
+	}
+
+	LogInfo("Perform the sobel filter on accelerator");
+	EdgeDetectFilter edgedetect(strPlatformName, strDeviceName, idxSelectedDevice, strKernelFullPath);
 
 	//Execute benchmark application
-	bool res = aesapp.run(0, nruns);
+	string output;
+	bool res = edgedetect.run(strBitmapFP, output);
 	if(!res) {
 		LogError("An error occurred when running benchmark on device 0");
 		return -1;
 	}
 
-	
+
+	LogInfo("Output image is stored at [%s]", output.c_str());
 	LogInfo("finished");
 
 	return 0;

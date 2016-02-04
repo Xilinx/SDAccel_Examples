@@ -1,8 +1,7 @@
-AES Decryption Example
+Edge Detection Example
 ===============================
 
-This is an optimized implementation of an AES-128 ECB Encrypt in Software, followed 
-by OpenCL Decryption targeting execution on an SDAccel supported FPGA acceleration card.
+This is an optimized implementation of a Sobel Filter for edge detection.
 
 
 Achieved performance was measured on an Alpha Data ADM-PCI-7v3 card.
@@ -17,14 +16,14 @@ This application is compiled using the SDAccel script mode.
 To compile the application:
 
 ```
-sdaccel aes_decrypt.tcl
+sdaccel edge_detection.tcl
 ```
 The target board can be changed by editing *huffman.tcl*
 
 Executing the Application
 ---------------------------
 ```
-aesdecrypt_example.exe --platform Xilinx --device fpga0 --kernel bin_aes_decrypt.xclbin data/input.bmp
+edgedetection_example.exe --platform Xilinx --device fpga0 --kernel bin_sobelfilter.xclbin data/input.bmp
 ```
 
 Files in the Example
@@ -48,7 +47,7 @@ Application host code
 - common/simplebmp.h
 
 Kernel code
-- krnl_aes.cl
+- krnl_sobelfilter.cl
 
 Compilation Script
-- aes_decrypt.tcl
+- edge_detection.tcl
