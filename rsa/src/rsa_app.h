@@ -82,7 +82,7 @@ public:
 
 	bool run(int idevice, int nruns);
 
-	bool invoke_kernel(cl_kernel kernel, uint *message, uint * ciphertext, uint * d, uint * n,uint * r2, cl_event events[evtCount]);
+	bool invoke_kernel(cl_kernel kernel, cl_uint *message,cl_uint *Cp,cl_uint *Cq, cl_uint *p, cl_uint *q, cl_uint *dmp1, cl_uint *dmq1, cl_uint *iqmp, cl_uint *r2p, cl_uint *r2q, cl_event events[evtCount]);
 
 	static double timestamp();
 	static double computeEventDurationInMS(const cl_event& event);
