@@ -278,6 +278,7 @@ void rsa(__global u32 *z,__global u32 *Cpg, __global u32 *Cqg, __global u32 *pg,
         local u32 iqmp[16] __attribute__((xcl_array_partitioning(complete,1)));
         local u32 a[16] __attribute__((xcl_array_partitioning(complete,1)));
 	int i,j;
+__attribute__((xcl_pipeline_loop))
 	for(i=0;i<32;i++)
 	{
 		product[i]=0;
@@ -301,7 +302,6 @@ void rsa(__global u32 *z,__global u32 *Cpg, __global u32 *Cqg, __global u32 *pg,
 
  	redc(a, a, n, d, workspace,16); // a = r%n
 		
-__attribute__((xcl_pipeline_loop))
   for(i=16; i >0 ; --i)
   {
    	 ex = expo[i-1]; 
@@ -336,7 +336,7 @@ __attribute__((xcl_pipeline_loop))
  	redc(a, a, n, d, workspace,16); // a = r%n
 	
 //left-to-right binary exponentiation
-__attribute__((xcl_pipeline_loop))
+
   for(i=16; i >0 ; --i)
   {
    	 ex = expo[i-1]; 
@@ -356,6 +356,7 @@ __attribute__((xcl_pipeline_loop))
 
   redc(a,a,n,d, workspace,16); //a=a%n, montgomery back to ordinary
 
+__attribute__((xcl_pipeline_loop))
  for(i=0;i<16;i++)
 		m1[i]=a[i]; //store Cp^dp % p
 
