@@ -52,7 +52,7 @@ typedef unsigned long u64;
 
  // Compute the 2adic inverse of x
 //inverse %2^32
-u32 inv2adic(u32 x)
+inline u32 inv2adic(u32 x)
 
 {
 
@@ -67,10 +67,11 @@ u32 inv2adic(u32 x)
 }
 
 //z=x-y
-u32 sub_n(u32 *z, u32 *x, u32 *y,int N)
+inline u32 sub_n(local u32 *z, local u32 *x, local u32 *y,int N)
 {
  	u32 cy=0, temp;
   	int i;
+__attribute__((xcl_pipeline_loop))
    for (i=0; i<N; i++)
   {
     //Use temp to handle the case where the output variable is the same as
@@ -82,13 +83,13 @@ u32 sub_n(u32 *z, u32 *x, u32 *y,int N)
 	return cy;
 }
   
-u32 add_n(u32 *z, u32 *x, u32 *y,int N) 
+inline u32 add_n(local u32 *z,local  u32 *x, local u32 *y,int N) 
 {
   u32 carry = 0;
   u32 new_carry = 0;
   u32 temp;
   unsigned i;
-
+__attribute__((xcl_pipeline_loop))
   for (i=0; i <N; i++)
   {
     //Broken into two steps to handle the case where one of the operands
@@ -106,7 +107,7 @@ u32 add_n(u32 *z, u32 *x, u32 *y,int N)
 }
 
 //decide if x is greater than y
-int cmp_ge_n(u32 *x, u32 *y,int N)
+inline int cmp_ge_n(local u32 *x, local u32 *y,int N)
 
 {
 	int i;
@@ -115,7 +116,7 @@ int cmp_ge_n(u32 *x, u32 *y,int N)
 	return 1;
  	 }
 
-
+__attribute__((xcl_pipeline_loop))
   for(i=N-1; i >= 0; --i){
 	if(x[i] > y[i]){
   		return 1;
@@ -130,14 +131,14 @@ int cmp_ge_n(u32 *x, u32 *y,int N)
 }
 
 //z[]=z[]+x[]y
-u32 addmul_1(u32 *z, u32 *x, u32 y, int N)
+inline u32 addmul_1(local u32 *z, local u32 *x,u32 y, int N)
 {
   int i;
   u32 cy;
   u64 prod;
 
   cy = 0;
-//#pragma unroll
+__attribute__((xcl_pipeline_loop))
   for(i=0; i < N; i++)
   {
     prod = (u64)x[i]*(u64)y;
@@ -150,14 +151,15 @@ u32 addmul_1(u32 *z, u32 *x, u32 y, int N)
 }
 
 //mimic openssl bn_mul_normal
- void mul_n(u32 *z,u32 *x, u32 *y, int N)
+ void mul_n(local u32 *z,local u32 *x, local u32 *y, int N)
 
 {
-	u32 *rr;
+	local u32 *rr;
 	 int i=N;
 	
 	rr=&(z[N]);
 	rr[0]=addmul_1(z,x,y[0],N);
+__attribute__((xcl_pipeline_loop))
 	for(;;)
 	{	
   		if(--i<=0)return;
@@ -176,17 +178,17 @@ u32 addmul_1(u32 *z, u32 *x, u32 y, int N)
 }
 
 //z=x*y/R%n
-void mulredc(u32 *z, u32 *x, u32 *y, u32 *n, const u32 d, u32 *t,int N)
+void mulredc(local u32 *z, local u32 *x, local u32 *y, local u32 *n, const u32 d, local u32 *t,int N)
 {
 	//k+=1;
   int i,j;
   u32 m, cy;
   u64 aux;
-//#pragma unroll
+
   for(i=0; i < N+2; i++)
     t[i] = 0;
 
-//#pragma unroll
+__attribute__((xcl_pipeline_loop))
   for(i=0; i < N; i++)
   {
     cy = addmul_1(t, x, y[i],N); // t += x*y[i]
@@ -223,7 +225,7 @@ void mulredc(u32 *z, u32 *x, u32 *y, u32 *n, const u32 d, u32 *t,int N)
 }
 
 //z=xR(-1)%n montgomery reduction
-void redc(u32 *z, u32 *x, u32 *n, const u32 d, u32 *t,int N)
+void redc(local u32 *z,local u32 *x,local u32 *n, const u32 d,local u32 *t,int N)
 
 {
 	int i,j;
@@ -233,7 +235,7 @@ void redc(u32 *z, u32 *x, u32 *n, const u32 d, u32 *t,int N)
     t[i] = x[i];
 
   t[N] = 0;
-
+__attribute__((xcl_pipeline_loop))
  for(i=0; i < N; i++)
   {
     m = t[0]*d;
@@ -262,7 +264,19 @@ __attribute__ ((reqd_work_group_size(1,1,1)))
 void rsa(__global u32 *z,__global u32 *Cpg, __global u32 *Cqg, __global u32 *pg, __global u32 *qg, __global u32 *dmp1g,__global u32 *dmq1g,__global u32 *iqmpg,__global u32 *r2pg,__global u32 *r2qg)
 	{
 	
-	u32  d,ex,expo[16],product[32],m1[16],m2[32],workspace[18],dtemp[16],a[16],q[16],r2p[16], n[16],t[16],iqmp[16];
+	u32  d,ex;
+	local u32 dtemp[16] __attribute__((xcl_array_partitioning(complete,1)));
+        local u32 workspace[18] __attribute__((xcl_array_partitioning(complete,1)));
+        local u32 expo[16] __attribute__((xcl_array_partitioning(complete,1)));
+        local u32 q[16] __attribute__((xcl_array_partitioning(complete,1)));
+        local u32 product[32] __attribute__((xcl_array_partitioning(complete,1)));
+        local u32 r2p[16] __attribute__((xcl_array_partitioning(complete,1)));
+        local u32 m1[16] __attribute__((xcl_array_partitioning(complete,1)));
+        local u32 m2[32] __attribute__((xcl_array_partitioning(complete,1)));
+        local u32 n[16] __attribute__((xcl_array_partitioning(complete,1)));
+        local u32 t[16] __attribute__((xcl_array_partitioning(complete,1)));
+        local u32 iqmp[16] __attribute__((xcl_array_partitioning(complete,1)));
+        local u32 a[16] __attribute__((xcl_array_partitioning(complete,1)));
 	int i,j;
 	for(i=0;i<32;i++)
 	{
@@ -271,20 +285,14 @@ void rsa(__global u32 *z,__global u32 *Cpg, __global u32 *Cqg, __global u32 *pg,
 	}
 	int id = get_global_id(0);
 
-	for(i=0; i < 16; i++)
-	{
-		q[i] = qg[i+16*id];	
-		iqmp[i]=iqmpg[i+16*id];
-		r2p[i]=r2pg[i+16*id];
-	}
+                async_work_group_copy(q, qg+16*id, 16, 0);
+                async_work_group_copy(iqmp, iqmpg+16*id, 16, 0);
+                async_work_group_copy(r2p, r2pg+16*id, 16, 0);
 
-	for(i=0; i < 16; i++)
-	{
-    		t[i] =Cqg[i+16*id];//t is ciphertext  
-		a[i]=r2qg[i+16*id];//R^2 for montgomery multiplicaiton
-		n[i]=qg[i+16*id];//n is moduli
-		expo[i]=dmq1g[i+16*id];//expo is exponent
-	}
+		async_work_group_copy(t, Cqg+16*id, 16, 0);
+		async_work_group_copy(a, r2qg+16*id, 16, 0);
+		async_work_group_copy(n, qg+16*id, 16, 0);
+		async_work_group_copy(expo, dmq1g+16*id, 16, 0);
 
 	d = inv2adic(n[0]); //C0797221
 
@@ -293,7 +301,7 @@ void rsa(__global u32 *z,__global u32 *Cpg, __global u32 *Cqg, __global u32 *pg,
 
  	redc(a, a, n, d, workspace,16); // a = r%n
 		
-//__attribute__((xcl_pipeline_loop))
+__attribute__((xcl_pipeline_loop))
   for(i=16; i >0 ; --i)
   {
    	 ex = expo[i-1]; 
@@ -314,13 +322,11 @@ void rsa(__global u32 *z,__global u32 *Cpg, __global u32 *Cqg, __global u32 *pg,
  	for(i=0;i<16;i++)
 		m2[i]=a[i]; //store Cq^dq % q
 
-	for(i=0; i < 16; i++)
-	{
-    		t[i] =Cpg[i+16*id];//t is ciphertext  
-		a[i]=r2pg[i+16*id];//R^2 for montgomery multiplicaiton
-		n[i]=pg[i+16*id];//n is moduli
-		expo[i]=dmp1g[i+16*id];//expo is exponent
-	}
+		async_work_group_copy(t, Cpg+16*id, 16, 0);
+		async_work_group_copy(a, r2pg+16*id, 16, 0);
+		async_work_group_copy(n, pg+16*id, 16, 0);
+		async_work_group_copy(expo, dmp1g+16*id, 16, 0);
+
 
 	d = inv2adic(n[0]);
 
@@ -330,7 +336,7 @@ void rsa(__global u32 *z,__global u32 *Cpg, __global u32 *Cqg, __global u32 *pg,
  	redc(a, a, n, d, workspace,16); // a = r%n
 	
 //left-to-right binary exponentiation
-//__attribute__((xcl_pipeline_loop))
+__attribute__((xcl_pipeline_loop))
   for(i=16; i >0 ; --i)
   {
    	 ex = expo[i-1]; 
@@ -367,8 +373,8 @@ void rsa(__global u32 *z,__global u32 *Cpg, __global u32 *Cqg, __global u32 *pg,
 	mul_n(product,m1,q,16); //h*q
 	add_n(product,product,m2,32);	//m=m2+hq
 
- 	for(i=0; i < 32; i++)
-    		z[i+32*id] =product[i];
+        async_work_group_copy(z+32*id, product, 32, 0);
+		
 	
 }
  

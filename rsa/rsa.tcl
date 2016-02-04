@@ -9,6 +9,8 @@ set args "-p Xilinx -d fpga0 -k bin_rsa.xclbin -i $::env(PWD)/data/0_0_1024_key.
 
 # Host Compiler Flags
 set_property -name host_cflags -value "-DRSA_1024 -g -O3 -Wall -std=c++0x  -I$::env(PWD)/src -I$::env(XILINX_SDACCEL)/include -lssl -lcrypto -ldl" -objects [current_solution]
+set_param compiler.preserveHlsOutput 1
+set_param compiler.generateExtraRunData true
 
 # Host source files
 add_files "src/cmdlineparser.h src/cmdlineparser.cpp src/rsa_app.h src/rsa_app.cpp"
@@ -19,6 +21,8 @@ set_property file_type "c header files" [get_files "common.h"]
 
 # Kernel Definitions
 create_kernel -type clc rsa
+set_property max_memory_ports true [get_kernels rsa]
+set_property memory_port_Data_width 512 [get_kernels rsa]
 add_files -kernel [get_kernels rsa] "src/krnl_rsa.cl"
 
 
