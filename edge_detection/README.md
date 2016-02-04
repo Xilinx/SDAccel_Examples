@@ -6,6 +6,11 @@ This is an optimized implementation of a Sobel Filter for edge detection.
 
 Achieved performance was measured on an Alpha Data ADM-PCI-7v3 card.
 
+Output
+----------
+![alt tag](https://raw.gitenterprise.xilinx.com/SDx-Hub/apps/master/edge_detection/data/lola.bmp)
+![alt tag](https://raw.gitenterprise.xilinx.com/SDx-Hub/apps/master/edge_detection/results/lola_edges.bmp)
+
 Changelog
 ----------
 1/29/2016 - Initial Release
