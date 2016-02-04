@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 #project name
-project(aesdecrypt_host.exe)
+project(edgedetection_host.exe)
 
 ###############################
 # Custom find modules
@@ -43,12 +43,10 @@ include_directories(src src/common/ )
 # Add source files
 ###############################
 file(GLOB SRC
-	src/xcl.h
-	src/xcl.cpp
-	src/aes_ecb.h
-	src/aes_ecb.cpp
-	src/aes_app.h
-	src/aes_app.cpp
+	src/edgedetection_app.h
+	src/edgedetection_app.cpp
+	src/sobel_cpuonly.h
+	src/sobel_cpuonly.cpp
 	src/main.cpp	
 	src/common/xcl.h
 	src/common/xcl.cpp
@@ -77,5 +75,5 @@ endif()
 ###############################
 # Linking
 ###############################
-add_executable(aesdecrypt_host.exe ${SRC})
-target_link_libraries(aesdecrypt_host.exe ${OPENCL_LIBRARIES} )
+add_executable(edgedetection_host.exe ${SRC})
+target_link_libraries(edgedetection_host.exe ${OPENCL_LIBRARIES} )

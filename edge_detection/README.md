@@ -37,10 +37,10 @@ Example data
 - data/input.bmp
 
 Application host code
-- aes_app.cpp
-- aes_app.h
-- aes_ecb.cpp
-- aes_ecb.h
+- edgedetection_app.cpp
+- edgedetection_app.h
+- sobel_cpuonly.cpp
+- sobel_cpuonly.h
 - main.cpp
 - common/xcl.cpp
 - common/xcl.h
