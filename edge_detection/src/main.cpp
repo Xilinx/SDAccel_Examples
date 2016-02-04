@@ -1,7 +1,7 @@
 /*******************************************************************************
 Vendor: Xilinx
-Associated Filename: main.cpp
-Purpose: Edge Detection SDAccel Application Example
+Associated Filename: sobel_cpuonly.h
+Purpose: SDAccel edge detection application example
 Revision History: January 29, 2016
 
 *******************************************************************************

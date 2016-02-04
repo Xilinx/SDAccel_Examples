@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 #project name
-project(aesdecrypt_host.exe)
+project(edgedetection_host.exe)
 
 ###############################
 # Custom find modules
@@ -10,14 +10,23 @@ project(aesdecrypt_host.exe)
 MESSAGE( STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR} )
 
 ##parent dir
+##get_filename_component(PARENT_DIR ${CMAKE_CURRENT_SOURCE_DIR} PATH)
+##get_filename_component(PARENT_DIR ${PARENT_DIR} PATH)
 set(PARENT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 MESSAGE( STATUS "PARENT_DIR: " ${PARENT_DIR})
 
+##common
+#set(GAUNTLET_COMMON_SRC ${GAUNTLET_COMMON_SRC} "${PARENT_DIR}/common/")
+#MESSAGE( STATUS "GAUNTLET_COMMON_SRC: " ${GAUNTLET_COMMON_SRC})
 
 ##cmake
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PARENT_DIR}/cmake/")
+#set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} src/3rdparty/xirpower)
 
 #opencl path                    
+##set(XILINX_SDACCEL "/proj/xbuilds/2015.4_sdaccel_daily_latest/installs/lin64/SDAccel/2015.4")
+#set(OpenCL_INCPATH ${XILINX_SDACCEL}/runtime/include/1_2/)
+#set(OpenCL_LIBPATH ${XILINX_SDACCEL}/runtime/lib/x86_64/)
 MESSAGE( STATUS "OpenCL_INCPATH=" ${OpenCL_INCPATH})
 MESSAGE( STATUS "OpenCL_LIBPATH=" ${OpenCL_LIBPATH})
 
@@ -43,13 +52,6 @@ include_directories(src src/common/ )
 # Add source files
 ###############################
 file(GLOB SRC
-	src/xcl.h
-	src/xcl.cpp
-	src/aes_ecb.h
-	src/aes_ecb.cpp
-	src/aes_app.h
-	src/aes_app.cpp
-	src/main.cpp	
 	src/common/xcl.h
 	src/common/xcl.cpp
 	src/common/cmdlineparser.h
@@ -57,7 +59,12 @@ file(GLOB SRC
 	src/common/logger.h
 	src/common/logger.cpp
 	src/common/simplebmp.h
-	src/common/simplebmp.cpp"
+	src/common/simplebmp.cpp
+	src/edgedetection_app.h
+	src/edgedetection_app.cpp
+	src/sobel_cpuonly.h
+	src/sobel_cpuonly.cpp
+	src/main.cpp	
 	)
 
 ###############################
@@ -77,5 +84,5 @@ endif()
 ###############################
 # Linking
 ###############################
-add_executable(aesdecrypt_host.exe ${SRC})
-target_link_libraries(aesdecrypt_host.exe ${OPENCL_LIBRARIES} )
+add_executable(edgedetection_host.exe ${SRC})
+target_link_libraries(edgedetection_host.exe ${OPENCL_LIBRARIES} )

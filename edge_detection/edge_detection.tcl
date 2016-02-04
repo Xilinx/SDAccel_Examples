@@ -4,7 +4,7 @@ create_solution -name edgedetection_example -dir . -force
 add_device -vbnv xilinx:adm-pcie-7v3:1ddr:2.0
 
 # Execution arguments for the application
-set args "-p Xilinx -d fpga0 -k bin_sobelfilter.xclbin -b $::env(PWD)/data/lola.bmp"
+set args "-p Xilinx -d fpga0 -k bin_sobelfilter.xclbin -b $::env(PWD)/data/eiffel.bmp"
 
 # Host Compiler Flags
 set_property -name host_cflags -value "-g -O0 -std=c++0x -I$::env(PWD)/src -I$::env(PWD)/src/common -I$::env(XILINX_SDACCEL)/include" -objects [current_solution]
