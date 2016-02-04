@@ -114,6 +114,8 @@ void krnl_sobel(global u8* in_pixels, int nchannels, int width, int height, glob
 	//GY MASK ROW [1] = -1, -2, -1
 	//GY MASK ROW [2] =  0,  0,  0
 	//GY MASK ROW [3] =  1,  2,  1
+
+	//original sobel weights
 	int GX[3][3] = {
 			{-1, 0, 1},
 			{-2, 0, 2},
@@ -125,6 +127,22 @@ void krnl_sobel(global u8* in_pixels, int nchannels, int width, int height, glob
 			{ 0, 0, 0},
 			{ 1,  2,  1}
 	};
+	
+
+	//Scharr weights
+	/*
+	int GX[3][3] = {
+			{3, 0, -3},
+			{10, 0, -10},
+			{3, 0, -3}
+	};
+
+	int GY[3][3] = {
+			{3, 10, 3},
+			{ 0, 0, 0},
+			{-3, -10, -3}
+	};
+	*/
 
 	//internal frame format is:
 	//1- BGR pixels

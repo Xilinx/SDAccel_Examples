@@ -28,13 +28,14 @@ The target board can be changed by editing *huffman.tcl*
 Executing the Application
 ---------------------------
 ```
-edgedetection_example.exe --platform Xilinx --device fpga0 --kernel bin_sobelfilter.xclbin data/input.bmp
+edgedetection_example.exe --platform Xilinx --device fpga0 --kernel bin_sobelfilter.xclbin data/lola.bmp
 ```
 
 Files in the Example
 ---------------------
 Example data
-- data/input.bmp
+- data/lola.bmp
+- data/vase.bmp
 
 Application host code
 - edgedetection_app.cpp
