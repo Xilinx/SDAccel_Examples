@@ -36,6 +36,7 @@ Files in the Example
 Example data
 - data/lola.bmp
 - data/vase.bmp
+- data/eiffel.bmp
 
 Application host code
 - edgedetection_app.cpp
