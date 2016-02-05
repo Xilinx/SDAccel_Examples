@@ -48,7 +48,7 @@ typedef unsigned char  u8;
 typedef unsigned short u16;
 typedef unsigned int  u32;
 typedef unsigned long u64;
-
+#define N 16
 
  // Compute the 2adic inverse of x
 //inverse %2^32
@@ -67,7 +67,7 @@ inline u32 inv2adic(u32 x)
 }
 
 //z=x-y
-inline u32 sub_n(local u32 *z, local u32 *x, local u32 *y,int N)
+inline u32 sub_n(local u32 *z, local u32 *x, local u32 *y)
 {
  	u32 cy=0, temp;
   	int i;
@@ -83,7 +83,7 @@ __attribute__((xcl_pipeline_loop))
 	return cy;
 }
   
-inline u32 add_n(local u32 *z,local  u32 *x, local u32 *y,int N) 
+inline u32 add_16(local u32 *z,local  u32 *x, local u32 *y) 
 {
   u32 carry = 0;
   u32 new_carry = 0;
@@ -106,8 +106,31 @@ __attribute__((xcl_pipeline_loop))
   return carry;
 }
 
+inline u32 add_32(local u32 *z,local  u32 *x, local u32 *y) 
+{
+  u32 carry = 0;
+  u32 new_carry = 0;
+  u32 temp;
+  unsigned i;
+__attribute__((xcl_pipeline_loop))
+  for (i=0; i <32; i++)
+  {
+    //Broken into two steps to handle the case where one of the operands
+    //is also the result variable
+    temp = x[i] + y[i];
+    new_carry = (temp < x[i]);
+
+   z[i] = temp + carry;
+    //Check for new_carry first as the probability that it will be
+    //true is higher. And if it is, then the second compare can be skipped
+    carry = (new_carry || (z[i] < temp));
+  }
+
+  return carry;
+}
+
 //decide if x is greater than y
-inline int cmp_ge_n(local u32 *x, local u32 *y,int N)
+inline int cmp_ge_n(local u32 *x, local u32 *y)
 
 {
 	int i;
@@ -131,7 +154,7 @@ __attribute__((xcl_pipeline_loop))
 }
 
 //z[]=z[]+x[]y
-inline u32 addmul_1(local u32 *z, local u32 *x,u32 y, int N)
+inline u32 addmul_1(local u32 *z, local u32 *x,u32 y)
 {
   int i;
   u32 cy;
@@ -151,25 +174,25 @@ __attribute__((xcl_pipeline_loop))
 }
 
 //mimic openssl bn_mul_normal
- void mul_n(local u32 *z,local u32 *x, local u32 *y, int N)
+ void mul_n(local u32 *z,local u32 *x, local u32 *y)
 
 {
 	local u32 *rr;
 	 int i=N;
 	
 	rr=&(z[N]);
-	rr[0]=addmul_1(z,x,y[0],N);
+	rr[0]=addmul_1(z,x,y[0]);
 __attribute__((xcl_pipeline_loop))
 	for(;;)
 	{	
   		if(--i<=0)return;
-   	 		rr[1] = addmul_1(&(z[1]) , x, y[1],N); 
+   	 		rr[1] = addmul_1(&(z[1]) , x, y[1]); 
 		if(--i<=0)return;
-			rr[2] = addmul_1(&(z[2]), x, y[2],N);
+			rr[2] = addmul_1(&(z[2]), x, y[2]);
 		if(--i<=0)return;
-			rr[3] = addmul_1(&(z[3]), x, y[3],N);
+			rr[3] = addmul_1(&(z[3]), x, y[3]);
 		if(--i<=0)return;
-			rr[4] = addmul_1(&(z[4]), x, y[4],N);
+			rr[4] = addmul_1(&(z[4]), x, y[4]);
 		rr+=4;
 		z+=4;
 		y+=4;
@@ -178,7 +201,7 @@ __attribute__((xcl_pipeline_loop))
 }
 
 //z=x*y/R%n
-void mulredc(local u32 *z, local u32 *x, local u32 *y, local u32 *n, const u32 d, local u32 *t,int N)
+void mulredc(local u32 *z, local u32 *x, local u32 *y, local u32 *n, const u32 d, local u32 *t)
 {
 	//k+=1;
   int i,j;
@@ -191,7 +214,7 @@ void mulredc(local u32 *z, local u32 *x, local u32 *y, local u32 *n, const u32 d
 __attribute__((xcl_pipeline_loop))
   for(i=0; i < N; i++)
   {
-    cy = addmul_1(t, x, y[i],N); // t += x*y[i]
+    cy = addmul_1(t, x, y[i]); // t += x*y[i]
 	
     aux = (u64)t[N] + cy;
     t[N] = aux;
@@ -199,7 +222,7 @@ __attribute__((xcl_pipeline_loop))
 	
     m = t[0]*d;
 	
-    cy = addmul_1(t, n, m,N);//t+=n*t[0]*d
+    cy = addmul_1(t, n, m);//t+=n*t[0]*d
     aux = (u64)t[N] + cy;
 	
     t[N] = aux;
@@ -214,9 +237,9 @@ __attribute__((xcl_pipeline_loop))
 
 // Final fix --- executed about half the time
 
-  if(cmp_ge_n(t, n,N)){
+  if(cmp_ge_n(t, n)){
 	
-    	sub_n(t, t, n,N);  //t=t-n
+    	sub_n(t, t, n);  //t=t-n
 	
 	}
 
@@ -225,7 +248,7 @@ __attribute__((xcl_pipeline_loop))
 }
 
 //z=xR(-1)%n montgomery reduction
-void redc(local u32 *z,local u32 *x,local u32 *n, const u32 d,local u32 *t,int N)
+void redc(local u32 *z,local u32 *x,local u32 *n, const u32 d,local u32 *t)
 
 {
 	int i,j;
@@ -239,7 +262,7 @@ __attribute__((xcl_pipeline_loop))
  for(i=0; i < N; i++)
   {
     m = t[0]*d;
-    t[N] = addmul_1(t, n, m,N);
+    t[N] = addmul_1(t, n, m);
                        
     for(j=0; j < N; j++) // shift,/2^32
       t[j] = t[j+1];
@@ -247,9 +270,9 @@ __attribute__((xcl_pipeline_loop))
     t[N] = 0;
   }
 
-if(cmp_ge_n(t, n, N)){
+if(cmp_ge_n(t, n)){
 	
-	sub_n(t, t, n,N);
+	sub_n(t, t, n);
 	
 	} 
 
@@ -278,6 +301,7 @@ void rsa(__global u32 *z,__global u32 *Cpg, __global u32 *Cqg, __global u32 *pg,
         local u32 iqmp[16] __attribute__((xcl_array_partitioning(complete,1)));
         local u32 a[16] __attribute__((xcl_array_partitioning(complete,1)));
 	int i,j;
+__attribute__((xcl_pipeline_loop))
 	for(i=0;i<32;i++)
 	{
 		product[i]=0;
@@ -296,12 +320,11 @@ void rsa(__global u32 *z,__global u32 *Cpg, __global u32 *Cqg, __global u32 *pg,
 
 	d = inv2adic(n[0]); //C0797221
 
-  	mulredc(t, t, a, n, d, workspace, 16); // t = tr %n=, montgomery multiplicaiton, t ordinary to montgomery form
+  	mulredc(t, t, a, n, d, workspace); // t = tr %n=, montgomery multiplicaiton, t ordinary to montgomery form
 	
 
- 	redc(a, a, n, d, workspace,16); // a = r%n
+ 	redc(a, a, n, d, workspace); // a = r%n
 		
-__attribute__((xcl_pipeline_loop))
   for(i=16; i >0 ; --i)
   {
    	 ex = expo[i-1]; 
@@ -309,15 +332,15 @@ __attribute__((xcl_pipeline_loop))
     	for(j=0; j<32; j++)
    	 {
       		
-        	mulredc(a, a, a, n, d, workspace, 16);// a=a*a*d%n
+        	mulredc(a, a, a, n, d, workspace);// a=a*a*d%n
 		
 		if(ex&(0x80000000>>j))
-      		{mulredc(a, a, t, n, d, workspace, 16); // a=a*t
+      		{mulredc(a, a, t, n, d, workspace); // a=a*t
       		
 		}
     	 }              
     }
- 	 redc(a,a,n,d, workspace,16); //a=a%n, montgomery back to ordinary
+ 	 redc(a,a,n,d, workspace); //a=a%n, montgomery back to ordinary
 
  	for(i=0;i<16;i++)
 		m2[i]=a[i]; //store Cq^dq % q
@@ -330,13 +353,13 @@ __attribute__((xcl_pipeline_loop))
 
 	d = inv2adic(n[0]);
 
-  	mulredc(t, t, a, n, d, workspace, 16); // t = tr %n=, montgomery multiplicaiton, t ordinary to montgomery form
+  	mulredc(t, t, a, n, d, workspace); // t = tr %n=, montgomery multiplicaiton, t ordinary to montgomery form
 	
 
- 	redc(a, a, n, d, workspace,16); // a = r%n
+ 	redc(a, a, n, d, workspace); // a = r%n
 	
 //left-to-right binary exponentiation
-__attribute__((xcl_pipeline_loop))
+
   for(i=16; i >0 ; --i)
   {
    	 ex = expo[i-1]; 
@@ -344,34 +367,35 @@ __attribute__((xcl_pipeline_loop))
     	for(j=0; j<32; j++)
    	 {
       		
-        	mulredc(a, a, a, n, d, workspace, 16);// a=a*a*d%n
+        	mulredc(a, a, a, n, d, workspace);// a=a*a*d%n
 		
 		if(ex&(0x80000000>>j))
-      		{mulredc(a, a, t, n, d, workspace, 16); // a=a*t
+      		{mulredc(a, a, t, n, d, workspace); // a=a*t
       		
 		}
     	 }              
 	
     }
 
-  redc(a,a,n,d, workspace,16); //a=a%n, montgomery back to ordinary
+  redc(a,a,n,d, workspace); //a=a%n, montgomery back to ordinary
 
+__attribute__((xcl_pipeline_loop))
  for(i=0;i<16;i++)
 		m1[i]=a[i]; //store Cp^dp % p
 
-	u32 borrow=sub_n(m1,m1,m2,16);
+	u32 borrow=sub_n(m1,m1,m2);
 	if(borrow)
 	{
-		add_n(m1,m1,n,16);
+		add_16(m1,m1,n);
 
 	}
 
-	mulredc(m1,m1,r2p,n,d,workspace,16);
-	mulredc(dtemp,iqmp,r2p,n,d,workspace,16);
-	mulredc(m1,m1,dtemp,n,d,workspace,16);
-	redc(m1,m1,n,d,workspace,16); //h=(m1-m2)iqmp %p
-	mul_n(product,m1,q,16); //h*q
-	add_n(product,product,m2,32);	//m=m2+hq
+	mulredc(m1,m1,r2p,n,d,workspace);
+	mulredc(dtemp,iqmp,r2p,n,d,workspace);
+	mulredc(m1,m1,dtemp,n,d,workspace);
+	redc(m1,m1,n,d,workspace); //h=(m1-m2)iqmp %p
+	mul_n(product,m1,q); //h*q
+	add_32(product,product,m2);	//m=m2+hq
 
         async_work_group_copy(z+32*id, product, 32, 0);
 		
