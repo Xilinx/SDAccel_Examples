@@ -7,10 +7,10 @@ within the Xilinx network. Each directory in the repository contains one complet
 The available applications are
 
 1. **AES Decryption:**
-Optimized implementation of an AES-128 ECB Encrypt in Software, followed by OpenCL Decryption targeting execution on an SDAccel supported FPGA acceleration card.
+Optimized implementation of an AES-128 ECB Encrypt in Software, followed by OpenCL Decryption.
 
 2. **Bitcoin Miner:**
-This is a patch and build infrastructure for building the bfgminer application. Original code is Open Source.
+This is a patch and build infrastructure for building the bfgminer application.
 
 3. **Edge Detection:**
 Implementation of a Sobel Edge Detector.
@@ -46,7 +46,7 @@ Example of vector addition in OpenCL.
 Example of vector dotproduct operation.
 
 14. **Vector Mult/Add:**
-Example of reusing data stored in the DDR across kernels in different binary containers.
+Reuse of data stored in the DDR across kernels in different binary containers.
 
 15. **Watermarking:**
-Example of image watermarking. 
+Example of image watermarking.
