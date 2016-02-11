@@ -447,6 +447,7 @@ xcl_world xcl_world_single(cl_device_type device_type) {
 	printf("===========================================\n");
 	printf("[%s]\n", __func__);
 
+	printf("[clGetPlatformIDs(0, NULL, &num_platforms)]\n");
 	err = clGetPlatformIDs(0, NULL, &num_platforms);
 	if (err != CL_SUCCESS) {
 		printf("Error: no platforms available or OpenCL install broken");
@@ -462,6 +463,8 @@ xcl_world xcl_world_single(cl_device_type device_type) {
 		exit(EXIT_FAILURE);
 	}
 
+	printf("%d platforms discovered.\n", num_platforms);
+	printf("[clGetPlatformIDs(num_platforms, platform_ids, NULL)]\n");
 	err = clGetPlatformIDs(num_platforms, platform_ids, NULL);
 	if (err != CL_SUCCESS) {
 		printf("Error: Failed to find an OpenCL platform!\n");
@@ -471,6 +474,7 @@ xcl_world xcl_world_single(cl_device_type device_type) {
 
 	int i;
 	for(i = 0; i < (int)num_platforms; i++) {
+		printf("[clGetDeviceIDs(platform_ids[i], device_type, 1, &world.device_id, NULL)]\n");
 		err = clGetDeviceIDs(platform_ids[i], device_type,
 							 1, &world.device_id, NULL);
 		if (err == CL_SUCCESS) {
@@ -487,6 +491,7 @@ xcl_world xcl_world_single(cl_device_type device_type) {
 		exit(EXIT_FAILURE);
 	}
 
+	printf("[clCreateContext(0, 1, &world.device_id, NULL, NULL, &err);]\n");
 	world.context = clCreateContext(0, 1, &world.device_id,
 	                                NULL, NULL, &err);
 	if (err != CL_SUCCESS) {
@@ -495,6 +500,8 @@ xcl_world xcl_world_single(cl_device_type device_type) {
 		exit(EXIT_FAILURE);
 	}
 
+
+	printf("[clCreateCommandQueue]\n");
 	world.command_queue = clCreateCommandQueue(world.context,
 	                                           world.device_id,
 	                                           CL_QUEUE_PROFILING_ENABLE,
