@@ -2,7 +2,7 @@ SHA1 Example
 ===============================
 
 This is an optimized implementation of SHA1 secure hash algorithm targeting 
-execution on an SDAccel supported FPGA acceleration card.
+execution on an SDAccel supported FPGA acceleration card. 
 
 Achieved performance was measured on an Alpha Data ADM-PCI-7v3 card.
 
