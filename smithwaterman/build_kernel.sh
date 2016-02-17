@@ -40,4 +40,4 @@ fi
 echo "INFO: SDACCEL_ROOT=${SDACCEL_ROOT}"
 
 echo "INFO: Building kernel..."
-sdaccel HWBuild_Systolic_kernel.tcl
+sdaccel smithwaterman_hw_systolic.tcl
