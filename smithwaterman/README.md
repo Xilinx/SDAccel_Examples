@@ -36,25 +36,23 @@ The target board can be changed by editing *smithwaterman_hw_systolic.tcl*
 Executing the Application
 ---------------------------
 ```
-huffman_host.exe --platform Xilinx --device fpga0 --kernel bin_huffman.xclbin data/rect_1024.bmp
+smithwaterman_host.exe --platform Xilinx --device fpga0 --kernel opencl_sw_maxscore.xclbin
 ```
 
 Files in the Example
 ---------------------
-Example data
-- data/race_1024.bmp
 
 Application host code
-- huffmanapp.cpp
-- huffmanapp.h
-- huffmancodec.cpp
-- huffmancodec.h
+- genseq.cpp
+- matcharray.cpp
+- matcharray.h
+- smithwaterman.cpp
+- smithwaterman.h
 - main.cpp
-- xcl.c
-- xcl.h
 
 Kernel code
-- krnl_huffman_singleptr.cl
+- src/opencl_sw_maxscore_basic.cpp
+- src/opencl_sw_maxscore_systolic.cpp
 
 Compilation Script
-- huffman.tcl
+- smithwaterman_hw_systolic.tcl
