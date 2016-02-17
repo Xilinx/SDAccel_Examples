@@ -1,4 +1,4 @@
-Huffman Codec Example
+Smithwaterman Example
 ===============================
 
 This is an optimized implementation of the smithwaterman algorithm
