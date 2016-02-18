@@ -50,3 +50,7 @@ Reuse of data stored in the DDR across kernels in different binary containers.
 
 15. **Watermarking:**
 Example of image watermarking.
+
+16. **Smithwaterman:**
+Implementation of smithwaterman sequence alignment algorithm.
+
