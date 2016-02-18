@@ -23,7 +23,7 @@ To compile the application:
 ```
 sdaccel edge_detection.tcl
 ```
-The target board can be changed by editing *huffman.tcl*
+The target board can be changed by editing *edge_detection.tcl*
 
 Executing the Application
 ---------------------------
