@@ -6,8 +6,8 @@ targeting execution on an SDAccel supported FPGA acceleration card.
 
 The main algorithm characteristics of this application are
 1. watermarking windown 10x10
-2. Input image size of 128 x 128
-3. Achieved performance = 0.163ms on image size 128x128
+2. Input image size of 64x64
+3. Achieved performance = 0.163ms on image size 64x64
 
 Achieved performance was measured on an Alpha Data ADM-PCI-7v3 card.
 

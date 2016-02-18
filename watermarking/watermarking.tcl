@@ -1,5 +1,5 @@
 # SDAccel Application Example - watermarking
-# 128 x 128 image size
+# 64 x 64 image size
 
 create_solution -name watermarking_example -dir . -force
 # Target a Xilinx FPGA board

@@ -48,8 +48,8 @@ ALL TIMES.
 #define WATERMARK_HEIGHT 10
 #define WATERMARK_WIDTH 10
 #define MAX_WIDTH  512
-#define height 128
-#define width 128
+#define height 64
+#define width 64
 
 int saturatedAdd(int x, int y)
 {

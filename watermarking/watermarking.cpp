@@ -79,8 +79,8 @@ int main(int argc, char* argv[])
   //  final image
   std::cout << "Reading input image...\n";
   const char* bitmapFilename = argv[1] ;
-  int width = 128 ; // Default size
-  int height = 128 ; // Default size
+  int width = 64 ; // Default size
+  int height = 64 ; // Default size
 
   BitmapInterface image(bitmapFilename) ;
   
