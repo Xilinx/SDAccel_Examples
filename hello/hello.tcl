@@ -28,7 +28,7 @@
 
 create_solution -name hello_app -dir . -force
 # Target a Xilinx FPGA board
-add_device -vbnv xilinx:adm-pcie-7v3:1ddr:2.0
+add_device -vbnv xilinx:adm-pcie-7v3:1ddr:2.1
 
 # Execution arguments for the application
 set args "bin_hello.xclbin"
