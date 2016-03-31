@@ -151,13 +151,15 @@ int main(int argc, char* argv[])
     clReleaseKernel(krnl);
     xcl_release_world(world);
 
-// OPENCL HOST CODE AREA END
-
-    cv::namedWindow("Image");
     std::cout << "Kernel Duration: " << duration << " ns" << std::endl;
 
+		
+	//on jenkins we can not open a display 
+	/*
+    cv::namedWindow("Image");
     cv::imshow("Image",result_eq);
     cv::waitKey(0);
+	*/
 
     return 0;
 }
