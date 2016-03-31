@@ -1,7 +1,7 @@
 # SDAccel Application Example - Edge Detection
 create_solution -name edgedetection_example -dir . -force
 # Target a Xilinx FPGA board
-add_device -vbnv xilinx:adm-pcie-7v3:1ddr:2.0
+add_device -vbnv xilinx:adm-pcie-7v3:1ddr:2.1
 
 # Execution arguments for the application
 set args "-p Xilinx -d fpga0 -k bin_sobelfilter.xclbin -b $::env(PWD)/data/eiffel.bmp"

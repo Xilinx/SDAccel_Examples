@@ -1,6 +1,6 @@
 # Define the solution for SDAccel
 create_solution -name sol_linear_search -dir . -force
-add_device -vbnv xilinx:adm-pcie-7v3:1ddr:2.0
+add_device -vbnv xilinx:adm-pcie-7v3:1ddr:2.1
 
 set args "bin_linear_search.xclbin $::env(PWD)/queries.txt $::env(PWD)/queries.txt"
 

@@ -3,7 +3,7 @@
 # 2048 x 1080 image size
 create_solution -name histogram_example -dir . -force
 # Target a Xilinx FPGA board
-add_device -vbnv xilinx:adm-pcie-7v3:1ddr:2.0
+add_device -vbnv xilinx:adm-pcie-7v3:1ddr:2.1
 
 # Execution arguments for the application
 set args "bin_equalizer.xclbin $::env(PWD)/data/race_2k.bmp"

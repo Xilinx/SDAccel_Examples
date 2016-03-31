@@ -2,7 +2,7 @@
 # 1024 bits decryption
 create_solution -name rsa_example -dir . -force
 # Target a Xilinx FPGA board
-add_device -vbnv xilinx:adm-pcie-7v3:1ddr:2.0
+add_device -vbnv xilinx:adm-pcie-7v3:1ddr:2.1
 
 # Execution arguments for the application
 set args "-p Xilinx -d fpga0 -k bin_rsa.xclbin -i $::env(PWD)/data/0_0_1024_key.cip -o $::env(PWD)/data/0_out.msg -y $::env(PWD)/data/0_1024_key.pem"

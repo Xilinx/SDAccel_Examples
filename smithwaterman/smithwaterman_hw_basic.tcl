@@ -2,7 +2,7 @@
 create_solution -name opencl_sw_maxscore_basic_fpga -dir . -force
 
 #1a. Set the fpga_device for the solution (Virtex7 FPGA)
-add_device xilinx:adm-pcie-7v3:1ddr:2.0
+add_device xilinx:adm-pcie-7v3:1ddr:2.1
 
 set currdir [pwd]
 set commondir ${currdir}/common
