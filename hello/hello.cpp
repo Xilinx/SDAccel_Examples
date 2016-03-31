@@ -43,6 +43,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <xcl.h>
 #include <hello.h>
 
+typedef unsigned char u8;
+
 int main(int argc, char* argv[])
 {
 
@@ -70,7 +72,7 @@ int main(int argc, char* argv[])
     size_t vector_size_bytes = sizeof(char) * LENGTH;
     cl_mem buffer_a = xcl_malloc(world, CL_MEM_READ_ONLY, vector_size_bytes);
 
-    int *source_a = (int *) malloc(vector_size_bytes);
+    char* source_a = (char *) malloc(vector_size_bytes);
 
 
     /* Create the test data and run the vector addition locally */
