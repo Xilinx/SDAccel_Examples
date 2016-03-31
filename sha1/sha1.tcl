@@ -5,7 +5,7 @@ create_solution -name sha1_example -dir . -force
 add_device -vbnv xilinx:adm-pcie-7v3:1ddr:2.1
 
 # Execution arguments for the application
-set args "-p Xilinx -d fpga0 -k bin_sha1.xclbin"
+set args "-p Xilinx -d fpga0 -k bin_sha1.xclbin -t 1"
 
 # Host Compiler Flags
 set_property -name host_cflags -value "-g -O0 -std=c++0x -I$::env(PWD)/src -I$::env(PWD)/src/common -I$::env(XILINX_SDACCEL)/include" -objects [current_solution]
@@ -32,14 +32,14 @@ create_compute_unit -opencl_binary [get_opencl_binary bin_sha1] -kernel [get_ker
 
 # Compile the design for CPU based emulation
 compile_emulation -flow cpu -opencl_binary [get_opencl_binary bin_sha1]
-run_emulation -flow cpu -args $args
+#run_emulation -flow cpu -args $args
 
 # Create estimated resource usage and latency report
 report_estimate
 
 # Compile the design for Hardware Emulation
 compile_emulation -flow hardware -opencl_binary [get_opencl_binary bin_sha1]
-run_emulation -flow hardware -args $args
+#run_emulation -flow hardware -args $args
 
 # Compile the design for execution on the FPGA board
 build_system
