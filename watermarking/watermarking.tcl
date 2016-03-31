@@ -35,8 +35,8 @@ run_emulation -flow cpu -args $args
 report_estimate
 
 # Compile the design for Hardware Emulation
-compile_emulation -flow hardware -opencl_binary [get_opencl_binary bin_watermarking]
-run_emulation -flow hardware -args $args
+#compile_emulation -flow hardware -opencl_binary [get_opencl_binary bin_watermarking]
+#run_emulation -flow hardware -args $args
 
 # Compile the design for execution on the FPGA board
 build_system
