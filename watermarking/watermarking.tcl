@@ -21,7 +21,7 @@ set_property file_type "c header files" [get_files "oclHelper.h"]
 # Kernel Definition
 create_kernel applyWatermark -type clc
 add_files -kernel [get_kernels applyWatermark] "krnl_watermarking.cl"
-
+set_property max_memory_ports true [get_kernels applyWatermark]
 # Define Binary Containers
 create_opencl_binary bin_watermarking
 set_property region "OCL_REGION_0" [get_opencl_binary bin_watermarking]
