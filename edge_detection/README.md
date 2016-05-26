@@ -55,7 +55,7 @@ Application host code
 - common/simplebmp.h
 
 Kernel code
-- krnl_sobelfilter.cl
+- krnl_sobelfilter_pipelined_asyncmem.cl
 
 Compilation Script
-- edge_detection.tcl
+- edge_detection_ku3_dsa2.1.tcl
