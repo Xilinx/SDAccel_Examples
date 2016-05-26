@@ -9,8 +9,8 @@ Average roundtrip time per image is 250 (ms).
 
 Output
 ----------
-![alt tag](https://raw.gitenterprise.xilinx.com/SDx-Hub/apps/master/edge_detection/data/lola.bmp)
-![alt tag](https://raw.gitenterprise.xilinx.com/SDx-Hub/apps/master/edge_detection/results/lola_edges.bmp)
+![alt tag](https://raw.gitenterprise.xilinx.com/SDx-Hub/apps/master/edge_detection/data/input/lola.bmp)
+![alt tag](https://raw.gitenterprise.xilinx.com/SDx-Hub/apps/master/edge_detection/data/output/lola.bmp)
 
 Changelog
 ----------
