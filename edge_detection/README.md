@@ -4,7 +4,8 @@ Edge Detection Example
 This is an optimized implementation of a Sobel Filter for edge detection.
 
 
-Achieved performance was measured on an Alpha Data ADM-PCI-7v3 card.
+Achieved performance was measured on an Alpha Data ADM-PCI-ku3 card.
+Average roundtrip time per image is 250 (ms). 
 
 Output
 ----------
@@ -21,7 +22,7 @@ This application is compiled using the SDAccel script mode.
 To compile the application:
 
 ```
-sdaccel edge_detection.tcl
+sdaccel edge_detection_ku3_dsa2.1.tcl
 ```
 The target board can be changed by editing *edge_detection.tcl*
 

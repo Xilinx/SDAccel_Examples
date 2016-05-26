@@ -1,0 +1,78 @@
+SDAccel Profile Summary
+Generated on: 2016-05-25 14:45:57
+Profiled application: edgedetection_example.exe
+Target platform: Xilinx
+Target devices: xilinx:adm-pcie-ku3:1ddr:2.1-0
+Flow mode: CPU Emulation
+Tool version: 2016.1
+
+OpenCL API Calls
+API Name,Number Of Calls,Total Time (ms),Minimum Time (ms),Average Time (ms),Maximum Time (ms),
+clFinish,2,424.796,0.002,212.398,424.794,
+clCreateProgramWithBinary,1,22.878,22.878,22.878,22.878,
+clGetPlatformIDs,7,4.627,0.001,0.661,4.619,
+clWaitForEvents,2,0.393,0.165,0.1965,0.228,
+clEnqueueReadBuffer,1,0.245,0.245,0.245,0.245,
+clEnqueueWriteBuffer,1,0.189,0.189,0.189,0.189,
+clEnqueueNDRangeKernel,1,0.028,0.028,0.028,0.028,
+clReleaseMemObject,2,0.015,0.002,0.0075,0.013,
+clGetDeviceIDs,5,0.011,0.001,0.0022,0.005,
+clGetDeviceInfo,6,0.011,0.001,0.00183333,0.004,
+clReleaseContext,2,0.01,0.002,0.005,0.008,
+clCreateBuffer,2,0.01,0.002,0.005,0.008,
+clCreateContext,1,0.01,0.01,0.01,0.01,
+clSetKernelArg,5,0.01,0.001,0.002,0.003,
+clReleaseCommandQueue,1,0.009,0.009,0.009,0.009,
+clCreateKernel,1,0.009,0.009,0.009,0.009,
+clCreateCommandQueue,1,0.009,0.009,0.009,0.009,
+clGetPlatformInfo,3,0.007,0.001,0.00233333,0.005,
+clReleaseProgram,1,0.006,0.006,0.006,0.006,
+clReleaseKernel,1,0.005,0.005,0.005,0.005,
+clBuildProgram,1,0.004,0.004,0.004,0.004,
+clGetEventProfilingInfo,2,0.004,0.001,0.002,0.003,
+clRetainContext,1,0.002,0.002,0.002,0.002,
+
+
+Kernel Execution
+Kernel,Number Of Enqueues,Total Time (ms),Minimum Time (ms),Average Time (ms),Maximum Time (ms),
+krnl_sobel,1,424.49,424.49,424.49,424.49,
+
+
+Compute Unit Utilization
+Device,Compute Unit,Kernel,Global Work Size,Local Work Size,Number Of Calls,Total Time (ms),Minimum Time (ms),Average Time (ms),Maximum Time (ms),
+xilinx:adm-pcie-ku3:1ddr:2.1-0,cu_sobelfilter0,krnl_sobel,1:1:1,1:1:1,1,424.468,424.468,424.468,424.468,
+
+
+Data Transfer: Host and Global Memory
+Context:Number of Devices,Transfer Type,Number Of Transfers,Transfer Rate (MB/s),Average Bandwidth Utilization (%),Average Size (KB),Total Time (ms),Average Time (ms),
+
+
+Data Transfer: Kernels and Global Memory
+Device,Transfer Type,Number Of Transfers,Transfer Rate (MB/s),Average Bandwidth Utilization (%),Average Size (KB),Average Time (ns),
+
+
+Top Data Transfer: Kernels and Global Memory
+Device,Kernel Name,Number of Transfers,Average Bytes per Transfer,Transfer Efficiency (%),Total Data Transfer (MB),Total Write (MB),Total Read (MB),Transfer Rate (MB/s),Average Bandwidth Utilization (%),
+
+
+Top Kernel Execution
+Kernel Instance Address,Kernel,Context ID,Command Queue ID,Device Name,Start Time (ms),Duration (ms),Global Work Size,Local Work Size,
+204192176,krnl_sobel,0,0,xilinx:adm-pcie-ku3:1ddr:2.1-0,37.439,424.49,1:1:1,1:1:1,
+
+
+Top Buffer Writes
+Buffer Address,Context ID,Command Queue ID,Start Time (ms),Duration (ms),Buffer Size (KB),Writing Rate(MB/s),
+204197536,0,0,36.95,0.121,262.144,2166.48,
+
+
+Top Buffer Reads
+Buffer Address,Context ID,Command Queue ID,Start Time (ms),Duration (ms),Buffer Size (KB),Reading Rate(MB/s),
+204201488,0,0,591.017,0.21,262.144,1248.3,
+
+
+PRC Parameters
+Parameter,Element,Value,
+DEVICE_EXEC_TIME,xilinx:adm-pcie-ku3:1ddr:2.1-0,424.490000,
+CU_CALLS,xilinx:adm-pcie-ku3:1ddr:2.1-0|cu_sobelfilter0,1,
+
+

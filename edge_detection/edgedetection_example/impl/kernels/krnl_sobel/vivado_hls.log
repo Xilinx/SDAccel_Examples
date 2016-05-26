@@ -1,0 +1,278 @@
+================================================================
+  Vivado(TM) HLS - High-Level Synthesis from C, C++ and SystemC
+  Version 2016.1
+  Build 1538259 on Tue May 24 16:02:59 MDT 2016
+  Copyright (C) 1986-2016 Xilinx, Inc. All Rights Reserved.
+================================================================
+INFO: [HLS 200-10] Running '/proj/xbuilds/2016.1_sdaccel_daily_latest/installs/lin64/SDAccel/2016.1/Vivado_HLS/bin/unwrapped/lnx64.o/vivado_hls'
+INFO: [HLS 200-10] For user 'pouryas' on host 'xsjrdevl54' (Linux_x86_64 version 2.6.18-371.4.1.el5) on Wed May 25 14:46:09 PDT 2016
+INFO: [HLS 200-10] On os "Red Hat Enterprise Linux Client release 5.9 (Tikanga)"
+INFO: [HLS 200-10] In directory '/proj/picasso/pourya/playground/edge_detection/edgedetection_example/impl/kernels/krnl_sobel'
+INFO: [HLS 200-10] Creating and opening project '/proj/picasso/pourya/playground/edge_detection/edgedetection_example/impl/kernels/krnl_sobel/krnl_sobel'.
+INFO: [HLS 200-10] Adding design file '/proj/picasso/pourya/playground/edge_detection/src/krnl_sobelfilter_pipelined_asyncmem.cl' to the project
+INFO: [HLS 200-10] Creating and opening solution '/proj/picasso/pourya/playground/edge_detection/edgedetection_example/impl/kernels/krnl_sobel/krnl_sobel/solution_OCL_REGION_0'.
+INFO: [HLS 200-10] Setting target device to 'xcku060-ffva1156-2-e'
+INFO: [SYN 201-201] Setting up clock 'default' with a period of 5ns.
+INFO: [SYN 201-201] Setting up clock 'default' with an uncertainty of 1.35ns.
+INFO: [HLS 200-10] Analyzing design file '/proj/picasso/pourya/playground/edge_detection/src/krnl_sobelfilter_pipelined_asyncmem.cl' ... 
+INFO: [HLS 200-111] Finished Checking Pragmas Time (s): cpu = 00:00:00.81 ; elapsed = 00:00:02 . Memory (MB): peak = 390.938 ; gain = 51.957 ; free physical = 1888 ; free virtual = 113626
+INFO: [HLS 200-111] Finished Linking Time (s): cpu = 00:00:00.94 ; elapsed = 00:00:02 . Memory (MB): peak = 390.938 ; gain = 51.957 ; free physical = 1880 ; free virtual = 113621
+INFO: [HLS 200-10] Starting code transformations ...
+INFO: [XFORM 203-603] Inlining function 'ap_fixed_base<54, 31, false, (ap_q_mode)5, (ap_o_mode)3, 0>::operator<<' into 'hls::cast_IEEE754<unsigned char, float>' (/wrk/2016.sub/2016.1_sdaccel/continuous/2016_05_24_1570644/src/products/hls/hls_lib/src/hls/hls_round.h:395).
+INFO: [XFORM 203-603] Inlining function 'ap_fixed_base<1, 9, false, (ap_q_mode)5, (ap_o_mode)0, 0>::overflow_adjust' into 'ap_fixed_base<1, 9, false, (ap_q_mode)5, (ap_o_mode)0, 0>::ap_fixed_base<31, 31, false, (ap_q_mode)5, (ap_o_mode)3, 0>' ().
+INFO: [XFORM 203-603] Inlining function '__hls_fptoui_float_i8' into 'krnl_sobel' (/proj/picasso/pourya/playground/edge_detection/src/krnl_sobelfilter_pipelined_asyncmem.cl:203).
+INFO: [XFORM 203-603] Inlining function 'hls::cast_IEEE754<unsigned char, float>' into 'krnl_sobel' (/wrk/2016.sub/2016.1_sdaccel/continuous/2016_05_24_1570644/src/products/hls/hls_lib/src/lib_floatconversion.cpp:47->/proj/picasso/pourya/playground/edge_detection/src/krnl_sobelfilter_pipelined_asyncmem.cl:203).
+INFO: [XFORM 203-603] Inlining function 'fp_struct<float>::mantissa' into 'krnl_sobel' (/wrk/2016.sub/2016.1_sdaccel/continuous/2016_05_24_1570644/src/products/hls/hls_lib/src/hls/hls_round.h:392->/wrk/2016.sub/2016.1_sdaccel/continuous/2016_05_24_1570644/src/products/hls/hls_lib/src/lib_floatconversion.cpp:47->/proj/picasso/pourya/playground/edge_detection/src/krnl_sobelfilter_pipelined_asyncmem.cl:203).
+INFO: [XFORM 203-603] Inlining function 'fp_struct<float>::expv' into 'krnl_sobel' (/wrk/2016.sub/2016.1_sdaccel/continuous/2016_05_24_1570644/src/products/hls/hls_lib/src/hls/hls_round.h:395->/wrk/2016.sub/2016.1_sdaccel/continuous/2016_05_24_1570644/src/products/hls/hls_lib/src/lib_floatconversion.cpp:47->/proj/picasso/pourya/playground/edge_detection/src/krnl_sobelfilter_pipelined_asyncmem.cl:203).
+INFO: [XFORM 203-603] Inlining function 'fp_struct<float>::expv' into 'krnl_sobel' (/wrk/2016.sub/2016.1_sdaccel/continuous/2016_05_24_1570644/src/products/hls/hls_lib/src/hls/hls_round.h:400->/wrk/2016.sub/2016.1_sdaccel/continuous/2016_05_24_1570644/src/products/hls/hls_lib/src/lib_floatconversion.cpp:47->/proj/picasso/pourya/playground/edge_detection/src/krnl_sobelfilter_pipelined_asyncmem.cl:203).
+INFO: [XFORM 203-603] Inlining function 'fp_struct<float>::__signbit' into 'krnl_sobel' (/wrk/2016.sub/2016.1_sdaccel/continuous/2016_05_24_1570644/src/products/hls/hls_lib/src/hls/hls_round.h:402->/wrk/2016.sub/2016.1_sdaccel/continuous/2016_05_24_1570644/src/products/hls/hls_lib/src/lib_floatconversion.cpp:47->/proj/picasso/pourya/playground/edge_detection/src/krnl_sobelfilter_pipelined_asyncmem.cl:203).
+INFO: [HLS 200-111] Finished Standard Transforms Time (s): cpu = 00:00:42 ; elapsed = 00:00:45 . Memory (MB): peak = 2007.113 ; gain = 1668.133 ; free physical = 993 ; free virtual = 112781
+INFO: [HLS 200-10] Checking synthesizability ...
+INFO: [HLS 200-111] Finished Checking Synthesizability Time (s): cpu = 00:00:43 ; elapsed = 00:00:46 . Memory (MB): peak = 2007.113 ; gain = 1668.133 ; free physical = 986 ; free virtual = 112781
+INFO: [XFORM 203-502] Unrolling all sub-loops inside loop 'Loop-5.2' (/proj/picasso/pourya/playground/edge_detection/src/krnl_sobelfilter_pipelined_asyncmem.cl:134) in function 'krnl_sobel' for pipelining.
+INFO: [XFORM 203-502] Unrolling all sub-loops inside loop 'Loop-8.2' (/proj/picasso/pourya/playground/edge_detection/src/krnl_sobelfilter_pipelined_asyncmem.cl:182) in function 'krnl_sobel' for pipelining.
+INFO: [XFORM 203-501] Unrolling loop 'Loop-5.2.1' (/proj/picasso/pourya/playground/edge_detection/src/krnl_sobelfilter_pipelined_asyncmem.cl:141) in function 'krnl_sobel' completely.
+INFO: [XFORM 203-501] Unrolling loop 'Loop-5.2.2' in function 'krnl_sobel' completely.
+INFO: [XFORM 203-501] Unrolling loop 'Loop-5.2.2.1' in function 'krnl_sobel' completely.
+INFO: [XFORM 203-501] Unrolling loop 'Loop-5.2.3' in function 'krnl_sobel' completely.
+WARNING: [XFORM 203-503] Cannot unroll loop 'Loop-5.2.4' in function 'krnl_sobel' completely: variable loop bound.
+WARNING: [XFORM 203-503] Cannot unroll loop 'Loop-5.2.5' in function 'krnl_sobel' completely: variable loop bound.
+INFO: [XFORM 203-501] Unrolling loop 'Loop-8.2.1' (/proj/picasso/pourya/playground/edge_detection/src/krnl_sobelfilter_pipelined_asyncmem.cl:189) in function 'krnl_sobel' completely.
+INFO: [XFORM 203-501] Unrolling loop 'Loop-8.2.2' in function 'krnl_sobel' completely.
+INFO: [XFORM 203-501] Unrolling loop 'Loop-8.2.2.1' in function 'krnl_sobel' completely.
+INFO: [XFORM 203-501] Unrolling loop 'Loop-8.2.3' in function 'krnl_sobel' completely.
+WARNING: [XFORM 203-503] Cannot unroll loop 'Loop-8.2.4' in function 'krnl_sobel' completely: variable loop bound.
+WARNING: [XFORM 203-503] Cannot unroll loop 'Loop-8.2.5' in function 'krnl_sobel' completely: variable loop bound.
+INFO: [XFORM 203-102] Partitioning array '.cast.i.1' automatically.
+INFO: [XFORM 203-102] Partitioning array '.cast.i.2' automatically.
+INFO: [XFORM 203-102] Partitioning array '.cast.i.3' automatically.
+INFO: [XFORM 203-102] Partitioning array '.cast.i.4' automatically.
+INFO: [XFORM 203-102] Partitioning array '.cast.i.5' automatically.
+INFO: [XFORM 203-102] Partitioning array '.cast.i.6' automatically.
+INFO: [XFORM 203-102] Partitioning array '.cast.i.7' automatically.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 25 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 91 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 5 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 5 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (/proj/picasso/pourya/playground/edge_detection/src/krnl_sobelfilter_pipelined_asyncmem.cl:203:62) to (/proj/picasso/pourya/playground/edge_detection/src/krnl_sobelfilter_pipelined_asyncmem.cl:182:31) in function 'krnl_sobel'... converting 4 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 25 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 47 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 91 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 5 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock in function 'krnl_sobel'... converting 5 basic blocks.
+INFO: [XFORM 203-11] Balancing expressions in function 'krnl_sobel' (/proj/picasso/pourya/playground/edge_detection/src/krnl_sobelfilter_pipelined_asyncmem.cl:46:31)...12 expression(s) balanced.
+INFO: [HLS 200-111] Finished Pre-synthesis Time (s): cpu = 00:02:20 ; elapsed = 00:02:24 . Memory (MB): peak = 2007.113 ; gain = 1668.133 ; free physical = 368 ; free virtual = 111698
+WARNING: [XFORM 203-542] Cannot flatten a loop nest 'Loop-2' (/proj/picasso/pourya/playground/edge_detection/src/krnl_sobelfilter_pipelined_asyncmem.cl:111:13) in function 'krnl_sobel' : 
+WARNING: [XFORM 203-542] the outer loop is not a perfect loop because there is nontrivial logic before entering the inner loop.
+WARNING: [XFORM 203-542] Cannot flatten a loop nest 'Loop-5.2' (/proj/picasso/pourya/playground/edge_detection/src/krnl_sobelfilter_pipelined_asyncmem.cl:134:14) in function 'krnl_sobel' : 
+WARNING: [XFORM 203-542] more than one sub loop.
+WARNING: [XFORM 203-542] Cannot flatten a loop nest 'Loop-5' (/proj/picasso/pourya/playground/edge_detection/src/krnl_sobelfilter_pipelined_asyncmem.cl:124:13) in function 'krnl_sobel' : 
+WARNING: [XFORM 203-542] more than one sub loop.
+WARNING: [XFORM 203-542] Cannot flatten a loop nest 'Loop-8.2' (/proj/picasso/pourya/playground/edge_detection/src/krnl_sobelfilter_pipelined_asyncmem.cl:182:14) in function 'krnl_sobel' : 
+WARNING: [XFORM 203-542] more than one sub loop.
+WARNING: [XFORM 203-542] Cannot flatten a loop nest 'Loop-8' (/proj/picasso/pourya/playground/edge_detection/src/krnl_sobelfilter_pipelined_asyncmem.cl:172:13) in function 'krnl_sobel' : 
+WARNING: [XFORM 203-542] more than one sub loop.
+INFO: [XFORM 203-811] Inferring bus burst write of variable length on port 'gmem'.
+INFO: [XFORM 203-811] Inferring bus burst read of variable length on port 'gmem'.
+INFO: [XFORM 203-811] Inferring bus burst read of variable length on port 'gmem'.
+INFO: [XFORM 203-811] Inferring bus burst read of variable length on port 'gmem'.
+INFO: [XFORM 203-811] Inferring bus burst read of variable length on port 'gmem'.
+INFO: [XFORM 203-811] Inferring bus burst read of variable length on port 'gmem'.
+INFO: [XFORM 203-811] Inferring bus burst read of variable length on port 'gmem'.
+INFO: [XFORM 203-811] Inferring bus burst write of variable length on port 'gmem'.
+INFO: [HLS 200-111] Finished Architecture Synthesis Time (s): cpu = 00:03:53 ; elapsed = 00:03:58 . Memory (MB): peak = 2007.113 ; gain = 1668.133 ; free physical = 372 ; free virtual = 111099
+INFO: [HLS 200-10] Starting hardware synthesis ...
+INFO: [HLS 200-10] Synthesizing 'krnl_sobel' ...
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-10] -- Implementing module 'krnl_sobel' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'memcpy.gmem.krnl_sobel.resbuf'.
+WARNING: [SCHED 204-69] Unable to schedule 'load' operation ('resbuf_load_5', /proj/picasso/pourya/playground/edge_detection/src/krnl_sobelfilter_pipelined_asyncmem.cl:111) on array 'resbuf' due to limited memory ports.
+INFO: [SCHED 204-61] Pipelining result: Target II: 1, Final II: 2, Depth: 5.
+INFO: [SCHED 204-61] Pipelining loop 'memcpy.krnl_sobel.rowbuf0.gmem'.
+WARNING: [SCHED 204-69] Unable to schedule 'store' operation (krnl_sobel_compute_unit:46) of variable 'get_part2', krnl_sobel_compute_unit:46 on array 'rowbuf0' due to limited memory ports.
+INFO: [SCHED 204-61] Pipelining result: Target II: 1, Final II: 2, Depth: 4.
+INFO: [SCHED 204-61] Pipelining loop 'memcpy.krnl_sobel.rowbuf1.gmem'.
+WARNING: [SCHED 204-69] Unable to schedule 'store' operation (krnl_sobel_compute_unit:46) of variable 'get_part4', krnl_sobel_compute_unit:46 on array 'rowbuf1' due to limited memory ports.
+INFO: [SCHED 204-61] Pipelining result: Target II: 1, Final II: 2, Depth: 4.
+INFO: [SCHED 204-61] Pipelining loop 'memcpy.krnl_sobel.rowbuf2.gmem'.
+WARNING: [SCHED 204-69] Unable to schedule 'store' operation (krnl_sobel_compute_unit:46) of variable 'get_part20', krnl_sobel_compute_unit:46 on array 'rowbuf2' due to limited memory ports.
+INFO: [SCHED 204-61] Pipelining result: Target II: 1, Final II: 2, Depth: 4.
+WARNING: [SCHED 204-65] Unable to satisfy pipeline directive: Loop contains subloop(s) not being unrolled or flattened.
+INFO: [SCHED 204-61] Pipelining loop 'memcpy.krnl_sobel.rowbuf0.gmem'.
+WARNING: [SCHED 204-69] Unable to schedule 'store' operation (krnl_sobel_compute_unit:46) of variable 'get_part14', krnl_sobel_compute_unit:46 on array 'rowbuf0' due to limited memory ports.
+INFO: [SCHED 204-61] Pipelining result: Target II: 1, Final II: 2, Depth: 4.
+INFO: [SCHED 204-61] Pipelining loop 'memcpy.krnl_sobel.rowbuf1.gmem'.
+WARNING: [SCHED 204-69] Unable to schedule 'store' operation (krnl_sobel_compute_unit:46) of variable 'get_part27', krnl_sobel_compute_unit:46 on array 'rowbuf1' due to limited memory ports.
+INFO: [SCHED 204-61] Pipelining result: Target II: 1, Final II: 2, Depth: 4.
+INFO: [SCHED 204-61] Pipelining loop 'memcpy.krnl_sobel.rowbuf2.gmem'.
+WARNING: [SCHED 204-69] Unable to schedule 'store' operation (krnl_sobel_compute_unit:46) of variable 'get_part34', krnl_sobel_compute_unit:46 on array 'rowbuf2' due to limited memory ports.
+INFO: [SCHED 204-61] Pipelining result: Target II: 1, Final II: 2, Depth: 4.
+WARNING: [SCHED 204-65] Unable to satisfy pipeline directive: Loop contains subloop(s) not being unrolled or flattened.
+INFO: [SCHED 204-61] Pipelining loop 'memcpy.gmem.krnl_sobel.resbuf'.
+WARNING: [SCHED 204-69] Unable to schedule 'load' operation ('resbuf_load_15', /proj/picasso/pourya/playground/edge_detection/src/krnl_sobelfilter_pipelined_asyncmem.cl:172) on array 'resbuf' due to limited memory ports.
+INFO: [SCHED 204-61] Pipelining result: Target II: 1, Final II: 2, Depth: 5.
+WARNING: [SCHED 204-21] Estimated clock period (4.95ns) exceeds the target (target clock period: 5ns, clock uncertainty: 1.35ns, effective delay budget: 3.65ns).
+WARNING: [SCHED 204-21] The critical path consists of the following:
+	'mul' operation ('tmp_109', /proj/picasso/pourya/playground/edge_detection/src/krnl_sobelfilter_pipelined_asyncmem.cl:151) (4.95 ns)
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111]  Elapsed time: 485.66 seconds; current allocated memory: 727.087 MB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111]  Elapsed time: 379.67 seconds; current allocated memory: 886.251 MB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-10] -- Generating RTL for module 'krnl_sobel' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [RTGEN 206-500] Setting interface mode on port 'krnl_sobel/gmem' to 'm_axi'.
+INFO: [RTGEN 206-500] Setting interface mode on port 'krnl_sobel/in_pixels' to 's_axilite & ap_none'.
+INFO: [RTGEN 206-500] Setting interface mode on port 'krnl_sobel/nchannels' to 's_axilite & ap_none'.
+INFO: [RTGEN 206-500] Setting interface mode on port 'krnl_sobel/width' to 's_axilite & ap_none'.
+INFO: [RTGEN 206-500] Setting interface mode on port 'krnl_sobel/height' to 's_axilite & ap_none'.
+INFO: [RTGEN 206-500] Setting interface mode on port 'krnl_sobel/out_pixels' to 's_axilite & ap_none'.
+INFO: [RTGEN 206-500] Setting interface mode on function 'krnl_sobel' to 's_axilite & ap_ctrl_hs'.
+INFO: [RTGEN 206-100] Bundling port 'return', 'in_pixels', 'nchannels', 'width', 'height' and 'out_pixels' to AXI-Lite port control.
+INFO: [RTGEN 206-100] Generating core module 'krnl_sobel_faddfsub_32ns_32ns_32_8_full_dsp': 1 instance(s).
+INFO: [RTGEN 206-100] Generating core module 'krnl_sobel_fcmp_32ns_32ns_1_1': 2 instance(s).
+INFO: [RTGEN 206-100] Generating core module 'krnl_sobel_fdiv_32ns_32ns_32_16': 1 instance(s).
+INFO: [RTGEN 206-100] Generating core module 'krnl_sobel_fmul_32ns_32ns_32_5_max_dsp': 1 instance(s).
+INFO: [RTGEN 206-100] Generating core module 'krnl_sobel_mul_31ns_32s_32_7': 4 instance(s).
+INFO: [RTGEN 206-100] Generating core module 'krnl_sobel_mul_32s_32s_32_7': 1 instance(s).
+INFO: [RTGEN 206-100] Generating core module 'krnl_sobel_mul_mul_16ns_16ns_32_2': 4 instance(s).
+INFO: [RTGEN 206-100] Generating core module 'krnl_sobel_sitofp_32ns_32_6': 2 instance(s).
+INFO: [RTGEN 206-100] Finished creating RTL model for 'krnl_sobel'.
+INFO: [HLS 200-111]  Elapsed time: 189.07 seconds; current allocated memory: 1.102 GB.
+INFO: [RTMG 210-282] Generating pipelined core: 'krnl_sobel_mul_32s_32s_32_7_MulnS_0'
+INFO: [RTMG 210-282] Generating pipelined core: 'krnl_sobel_mul_31ns_32s_32_7_MulnS_1'
+INFO: [RTMG 210-278] Implementing memory 'krnl_sobel_resbuf_ram' using block RAMs with power-on initialization.
+INFO: [RTMG 210-278] Implementing memory 'krnl_sobel_pos_1_ram' using block RAMs with power-on initialization.
+INFO: [HLS 200-111] Finished generating all RTL models Time (s): cpu = 00:19:00 ; elapsed = 00:19:22 . Memory (MB): peak = 2534.691 ; gain = 2195.711 ; free physical = 5578 ; free virtual = 116588
+INFO: [SYSC 207-301] Generating SystemC RTL for krnl_sobel.
+INFO: [VHDL 208-304] Generating VHDL RTL for krnl_sobel.
+INFO: [VLOG 209-307] Generating Verilog RTL for krnl_sobel.
+INFO: [IMPL 213-8] Exporting RTL as an IP in IP-XACT.
+
+WARNING: Unable to find common Xilinx tools. Automatic updates and 
+         license management will be disabled.
+
+
+****** Vivado v2016.1_sda (64-bit)
+  **** SW Build 1569787 on Mon May 23 16:30:32 MDT 2016
+  **** IP Build 1570477 on Tue May 24 12:58:35 MDT 2016
+    ** Copyright 1986-2016 Xilinx, Inc. All Rights Reserved.
+
+source run_ippack.tcl -notrace
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository '/proj/xbuilds/2016.1_sdaccel_daily_latest/installs/lin64/SDAccel/2016.1/Vivado/data/ip'.
+INFO: [IP_Flow 19-1686] Generating 'Synthesis' target for IP 'krnl_sobel_ap_fcmp_0_no_dsp_32'...
+INFO: [IP_Flow 19-1686] Generating 'Simulation' target for IP 'krnl_sobel_ap_fcmp_0_no_dsp_32'...
+INFO: [IP_Flow 19-1686] Generating 'Synthesis' target for IP 'krnl_sobel_ap_fdiv_14_no_dsp_32'...
+INFO: [IP_Flow 19-1686] Generating 'Simulation' target for IP 'krnl_sobel_ap_fdiv_14_no_dsp_32'...
+INFO: [IP_Flow 19-1686] Generating 'Synthesis' target for IP 'krnl_sobel_ap_sitofp_4_no_dsp_32'...
+INFO: [IP_Flow 19-1686] Generating 'Simulation' target for IP 'krnl_sobel_ap_sitofp_4_no_dsp_32'...
+INFO: [IP_Flow 19-1686] Generating 'Synthesis' target for IP 'krnl_sobel_ap_faddfsub_6_full_dsp_32'...
+INFO: [IP_Flow 19-1686] Generating 'Simulation' target for IP 'krnl_sobel_ap_faddfsub_6_full_dsp_32'...
+INFO: [IP_Flow 19-1686] Generating 'Synthesis' target for IP 'krnl_sobel_ap_fmul_3_max_dsp_32'...
+INFO: [IP_Flow 19-1686] Generating 'Simulation' target for IP 'krnl_sobel_ap_fmul_3_max_dsp_32'...
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository '/proj/xbuilds/2016.1_sdaccel_daily_latest/installs/lin64/SDAccel/2016.1/Vivado/data/ip'.
+WARNING: [Vivado 12-4404] Packaging IP from Vivado to be used with external tools is a beta feature in the current release. The cpu emulation flow is not enabled when using a packaged XO file with SDAccel.
+INFO: [Common 17-206] Exiting Vivado at Wed May 25 15:07:37 2016...
+Vivado HLS completed successfully
+INFO: [HLS 200-112] Total elapsed time: 1330.62 seconds; peak allocated memory: 1.102 GB.

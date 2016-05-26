@@ -1,0 +1,25 @@
+Copyright 1986-2016 Xilinx, Inc. All Rights Reserved.
+-------------------------------------------------------------------------------------------------
+| Tool Version : sdaccel v.2016.1_sda (lin64) Build 1570644 Tue May 24 15:58:01 MDT 2016
+| Date         : Thu May 26 05:42:50 2016
+| Host         : xsjrdevl54 running 64-bit Red Hat Enterprise Linux Client release 5.9 (Tikanga)
+-------------------------------------------------------------------------------------------------
+
+SDAccel Solution Summary Report
+
+Table of Contents
+-----------------
+1. Table of Detailed Reports
+
+1. Table of Detailed Reports
+----------------------------
+
+Table of Detailed Reports
++----------------------+--------------------------------------------------------------------------------+
+| Report               | Explanation                                                                    |
++----------------------+--------------------------------------------------------------------------------+
+| system_estimate.xtxt | Estimated latency, clock frequency, and resource usage data generated after    |
+|                      | compilation of your kernels.                                                   |
++----------------------+--------------------------------------------------------------------------------+
+
+

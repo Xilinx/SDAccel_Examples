@@ -45,9 +45,12 @@ ALL TIMES.
 
 #include <vector>
 #include <cstdlib>
+#include <float.h>
+#include <math.h>
 #include "sobel_cpuonly.h"
 #include "simplebmp.h"
 #include "logger.h"
+#include "lodepng.h"
 
 //BGR
 #define BLUE_COMP 0
@@ -73,33 +76,52 @@ bool Sobel::apply(const string& input, const string& output) {
 	}
 
 	int nchannels = (inputbmp.header.dibdepth >> 3);
-	size_t inputbmpsize = inputbmp.height * inputbmp.width * nchannels;
 
-	struct bmp_t outputbmp;
-	outputbmp.pixels = (uint32_t *) malloc(inputbmpsize);
-	outputbmp.width = inputbmp.width;
-	outputbmp.height = inputbmp.height;
-	if (outputbmp.pixels == NULL) {
-		LogError("Failed to allocate memory for output.bmp");
+    //convert to grayscale image
+    size_t szGrayImage = inputbmp.width * inputbmp.height;
+	size_t szColorImage = szGrayImage * nchannels;
+
+    //color to gray    
+    vector<unsigned char> vGreyImage;
+    vGreyImage.resize(szGrayImage);
+    std::fill(vGreyImage.begin(), vGreyImage.end(), 0);
+
+    unsigned char* pbuf = reinterpret_cast<unsigned char*>(inputbmp.pixels);
+
+    for(int j=0; j < inputbmp.height; j++) {
+        for(int i=0; i < inputbmp.width; i++) {
+            
+            size_t pixel_index = j * inputbmp.width + i;
+            unsigned char* pd = &pbuf[pixel_index * nchannels];
+            
+            
+            //BGR to grayscale
+            vGreyImage[pixel_index] = sqrt((pd[0] * pd[0] + pd[1] * pd[1] + pd[2] * pd[2]) / 3.0);            
+        }
+    }	
+
+    vector<unsigned char> vSobelImage;
+    vSobelImage.resize(szGrayImage);
+
+	bool bres = apply(vGreyImage.data(), 1, inputbmp.width, inputbmp.height, vSobelImage.data());
+
+	//store
+    string strGreyFP = input + "_cpu_grey.png";
+    int error = lodepng::encode(strGreyFP.c_str(), vGreyImage.data(), inputbmp.width, inputbmp.height, LCT_GREY, 8);
+	if (error != 0) {
+		LogError("failed to write grey image [%s]", strGreyFP.c_str());
 		return false;
 	}
 
-	bool bres = apply(reinterpret_cast<u8*>(inputbmp.pixels), nchannels, inputbmp.width, inputbmp.height, (u8*)outputbmp.pixels);
-
-	//store
-	err = writebmp(const_cast<char*>(output.c_str()), &outputbmp);
-	if (err != 0) {
-		LogError("failed to write output [%s]", output.c_str());
-		bres = false;
+    error = lodepng::encode(output.c_str(), vSobelImage.data(), inputbmp.width, inputbmp.height, LCT_GREY, 8);
+	if (error != 0) {
+		LogError("failed to write grey image [%s]", output.c_str());
+		return false;
 	}
 
 	return bres;
 }
 
-
-//bool Sobel::convert_to_packed_rgba(const u8* in_pixels, u8 nchannels, int width, int height, u32* out_packed) {
-//
-//}
 
 u32 Sobel::pack_from_bgr_to_rgba(const u8* in_pixels) {
 
@@ -143,12 +165,7 @@ void Sobel::unpack_from_rgba_to_bgr(u32 rgba, u8* out_pixels) {
 
 bool Sobel::apply(const u8* in_pixels, u8 nchannels, int width, int height, u8* out_pixels) {
 
-	//GX MASK ROW [1] = -1,  0,  1
-	//GX MASK ROW [2] = -2,  0,  2
-	//GX MASK ROW [3] = -1,  0,  1
-	//GY MASK ROW [1] = -1, -2, -1
-	//GY MASK ROW [2] =  0,  0,  0
-	//GY MASK ROW [3] =  1,  2,  1
+	//original sobel weights
 	int GX[3][3] = {
 			{-1, 0, 1},
 			{-2, 0, 2},
@@ -156,78 +173,87 @@ bool Sobel::apply(const u8* in_pixels, u8 nchannels, int width, int height, u8* 
 	};
 
 	int GY[3][3] = {
-			{-1, -2, -1},
+			{1, 2, 1},
 			{ 0, 0, 0},
-			{ 1,  2,  1}
+			{ -1,  -2,  -1}
 	};
+	
+	u16 sumx = 0;
+	u16 sumy = 0;
+	float sum = 0;
+    float ming = FLT_MAX;
+    float maxg = FLT_MIN;
 
-	//internal frame format is:
-	//1- BGR pixels
-	//2- lower-left corner is origin
-
-	int sum = 0;
-	int sumx = 0;
-	int sumy = 0;
-
-	//loop over height and width
+    //reset output to zero
 	for(int y=0; y < height; y++) {
 		for(int x=0; x < width; x++) {
+			int current = (x + y * width) * nchannels;
+			out_pixels[current] = 255;
+        }
+    }   
+
+	//loop over height and width and compute min and max gradients
+	for(int y=1; y < height - 1; y++) {
+		for(int x=1; x < width - 1; x++) {
 
 			//reset for this pixel
 			sumx = 0;
 			sumy = 0;
 
-			//u32 rgba = pack_from_bgr_to_rgba(&in_pixels[current]);
+			//approximate the X gradient
+			for(int i=-1; i<=1; i++) {
+				for(int j=-1; j<=1; j++) {
 
-			//check boundaries
-			if(x == 0 || x == width - 1)
-				sum = 0;
-			else if(y == 0 || y == height - 1)
-				sum = 0;
-			else
-			{
-				//approximate the X gradient
-				for(int i=-1; i<=1; i++) {
-					for(int j=-1; j<=1; j++) {
-						//use i offset for x
-						//use j offset for y
-						int dx = (x + i + (y + j) * width) * nchannels;
-						u32 pdx = pack_from_bgr_to_rgba(&in_pixels[dx]);
+					//use j offset for y
+					//use i offset for x
+					int dx = (x + i + (y + j) * width) * nchannels;
+					u8 pdx = in_pixels[dx];
 
-						//perform convolution
-						sumx += GX[i + 1][j + 1] * pdx;
-					}
+					//perform convolution
+					sumx += GX[i+1][j+1] * pdx;
+					sumy += GY[i+1][j+1] * pdx;
 				}
-
-
-				//approximate the Y gradient
-				for(int i=-1; i<=1; i++) {
-					for(int j=-1; j<=1; j++) {
-						//use i offset for x
-						//use j offset for y
-						int dy = (x + i + (y + j) * width) * nchannels;
-						u32 pdy = pack_from_bgr_to_rgba(&in_pixels[dy]);
-
-						//perform convolution
-						sumy += GY[i + 1][j + 1] * pdy;
-					}
-				}
-
-				//sum
-				sum = abs(sumx) + abs(sumy);
-
-				//clamp
-				if(sum > 255)
-					sum = 255;
-				if(sum < 0)
-					sum = 0;
 			}
 
+           sum = sqrt((float)(sumx*sumx) + (float)(sumy*sumy));            
+            if(sum > maxg) 
+                maxg = sum;
+            if(sum < ming)
+                ming = sum;
+		}
+	}
+
+    printf("INFO: MIN VAL = %.2f MAX VAL = %.2f \n", ming, maxg);
+
+   
+	for(int y=1; y < height - 1; y++) {
+		for(int x=1; x < width - 1; x++) {
+
+			//reset for this pixel
+			sumx = 0;
+			sumy = 0;
+
+			//approximate the X gradient
+			for(int j=-1; j<=1; j++) {
+			    for(int i=-1; i<=1; i++) {
+					//use j offset for y
+					//use i offset for x
+					int dx = (x + i + (y + j) * width) * nchannels;
+					u8 pdx = in_pixels[dx];
+
+					//perform convolution
+					sumx += GX[i+1][j+1] * pdx;
+				    sumy += GY[i+1][j+1] * pdx;
+				}
+			}
+
+            sum = sqrt((float)(sumx*sumx) + (float)(sumy*sumy));
+            
 			//store
 			int current = (x + y * width) * nchannels;
-			out_pixels[current] = 255 - (u8)(sum);
-			out_pixels[current+1] = 255 - (u8)(sum);
-			out_pixels[current+2] = 255 - (u8)(sum);
+			u8 intensity = (u8)(255.0f * (sum -  ming) / (maxg - ming));
+			out_pixels[current] = 255 - intensity;
+
 		}
 	}
 

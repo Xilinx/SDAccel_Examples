@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="edgedetection_example" dir="/proj/picasso/pourya/playground/edge_detection">
+  <property name="dsas" value="xilinx:adm-pcie-ku3:1ddr:2.1;"/>
+  <property name="host_cflags" value="-g -O0 -std=c++0x -I/proj/picasso/pourya/playground/edge_detection/src -I/proj/picasso/pourya/playground/edge_detection/src/common -I/proj/xbuilds/2016.1_sdaccel_daily_latest/installs/lin64/SDAccel/2016.1/include"/>
+  <host>
+    <src name="/proj/picasso/pourya/playground/edge_detection/src/common/xcl.h" type="c header files"/>
+    <src name="/proj/picasso/pourya/playground/edge_detection/src/common/xcl.cpp"/>
+    <src name="/proj/picasso/pourya/playground/edge_detection/src/common/cmdlineparser.h" type="c header files"/>
+    <src name="/proj/picasso/pourya/playground/edge_detection/src/common/cmdlineparser.cpp"/>
+    <src name="/proj/picasso/pourya/playground/edge_detection/src/common/logger.h" type="c header files"/>
+    <src name="/proj/picasso/pourya/playground/edge_detection/src/common/logger.cpp"/>
+    <src name="/proj/picasso/pourya/playground/edge_detection/src/common/simplebmp.h" type="c header files"/>
+    <src name="/proj/picasso/pourya/playground/edge_detection/src/common/simplebmp.cpp"/>
+    <src name="/proj/picasso/pourya/playground/edge_detection/src/common/lodepng.h" type="c header files"/>
+    <src name="/proj/picasso/pourya/playground/edge_detection/src/common/lodepng.cpp"/>
+    <src name="/proj/picasso/pourya/playground/edge_detection/src/edgedetection_app.h" type="c header files"/>
+    <src name="/proj/picasso/pourya/playground/edge_detection/src/edgedetection_app.cpp"/>
+    <src name="/proj/picasso/pourya/playground/edge_detection/src/main.cpp"/>
+    <src name="/proj/picasso/pourya/playground/edge_detection/src/sobel_cpuonly.h" type="c header files"/>
+    <src name="/proj/picasso/pourya/playground/edge_detection/src/sobel_cpuonly.cpp"/>
+  </host>
+  <kernels>
+    <kernel name="krnl_sobel" type="clc">
+      <src name="/proj/picasso/pourya/playground/edge_detection/src/krnl_sobelfilter_pipelined_asyncmem.cl"/>
+    </kernel>
+  </kernels>
+  <opencl_binaries>
+    <opencl_binary name="bin_sobelfilter" device="fpga0">
+      <compute_unit name="cu_sobelfilter0" kernel="krnl_sobel"/>
+      <property name="region" value="OCL_REGION_0"/>
+    </opencl_binary>
+  </opencl_binaries>
+</project>

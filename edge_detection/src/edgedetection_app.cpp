@@ -43,9 +43,11 @@ ALL TIMES.
 
 *******************************************************************************/
 
+#include <algorithm>
 #include <assert.h>
 #include "edgedetection_app.h"
 #include "simplebmp.h"
+#include "lodepng.h"
 #include "logger.h"
 
 using namespace sda;
@@ -100,77 +102,115 @@ EdgeDetectFilter::EdgeDetectFilter(const string& vendor_name,
 
 	//kernels
     m_clKrnlSobel  = xcl_import_binary(m_world, strKernelFP.c_str(), "krnl_sobel");
+    //m_clKrnlGreyScale = xcl_import_binary(m_world, strKernelFP.c_str(), "krnl_greyscale");
 }
 
 
 EdgeDetectFilter::~EdgeDetectFilter() {
 	// TODO Auto-generated destructor stub
 	clReleaseKernel(m_clKrnlSobel);
+	//clReleaseKernel(m_clKrnlGreyScale);	
 	xcl_release_world(m_world);
 }
 
 
 bool EdgeDetectFilter::run(const string& strInput, string& strOutput) {
-	int err;
+	int error;
 	struct bmp_t inputbmp;
-	err = readbmp((char*)strInput.c_str(), &inputbmp);
-	if (err != 0) {
+	error = readbmp((char*)strInput.c_str(), &inputbmp);
+	if (error != 0) {
 		LogError("failed to read input [%s]", strInput.c_str());
 		return false;
 	}
 
 	int nchannels = (inputbmp.header.dibdepth >> 3);
-	size_t inputbmpsize = inputbmp.height * inputbmp.width * nchannels;
 
-	struct bmp_t outputbmp;
-	outputbmp.pixels = (uint32_t *) malloc(inputbmpsize);
-	outputbmp.width = inputbmp.width;
-	outputbmp.height = inputbmp.height;
-	if (outputbmp.pixels == NULL) {
-		LogError("Failed to allocate memory for output.bmp");
-		return false;
-	}
+    //convert to grayscale image
+    size_t szGreyImage = inputbmp.width * inputbmp.height;
+	size_t szColorImage = szGreyImage * nchannels;
+    vector<unsigned char> vGreyImage;
+    vGreyImage.resize(szGreyImage);
 
+    unsigned char* pbuf = reinterpret_cast<unsigned char*>(inputbmp.pixels);
+    for(int j=0; j < inputbmp.height; j++) {
+        for(int i=0; i < inputbmp.width; i++) {
+            
+            size_t pixel_index = j * inputbmp.width + i;
+            unsigned char* pd = &pbuf[pixel_index * nchannels];
+            
+            
+            //BGR to grayscale
+            vGreyImage[pixel_index] = sqrt((pd[0] * pd[0] + pd[1] * pd[1] + pd[2] * pd[2]) / 3.0);            
+        }
+    }	
 
+ 
 	//void krnl_sobel(global u8* in_pixels, int nchannels, int width, int height, global u8* out_pixels)
-	cl_mem buffer_inpixels = xcl_malloc(m_world, CL_MEM_READ_ONLY, inputbmpsize);
-	cl_mem buffer_outpixels = xcl_malloc(m_world, CL_MEM_WRITE_ONLY, inputbmpsize);
+	//cl_mem buffer_in_rgba = xcl_malloc(m_world, CL_MEM_READ_ONLY, szColorImage);
+	cl_mem buffer_in_grey = xcl_malloc(m_world, CL_MEM_READ_ONLY, szGreyImage);
+	cl_mem buffer_out_sobel = xcl_malloc(m_world, CL_MEM_WRITE_ONLY, szGreyImage);
 
+	xcl_memcpy_to_device(m_world, buffer_in_grey, &vGreyImage[0], szGreyImage);
+
+	/*
 	//copy input to device
-    xcl_memcpy_to_device(m_world, buffer_inpixels, inputbmp.pixels, inputbmpsize);
+    xcl_memcpy_to_device(m_world, buffer_in_rgba, pbuf, szColorImage);
 
-	//bool bres = apply(reinterpret_cast<u8*>(inputbmp.pixels), nchannels, inputbmp.width, inputbmp.height, (u8*)outputbmp.pixels);
-    clSetKernelArg(m_clKrnlSobel, 0, sizeof(cl_mem), &buffer_inpixels);
+	//execute kernel: greyscale
+    clSetKernelArg(m_clKrnlGreyScale, 0, sizeof(cl_mem), &buffer_in_rgba);
+    clSetKernelArg(m_clKrnlGreyScale, 1, sizeof(int), &nchannels);
+    clSetKernelArg(m_clKrnlGreyScale, 2, sizeof(int), &inputbmp.width);
+    clSetKernelArg(m_clKrnlGreyScale, 3, sizeof(int), &inputbmp.height);
+    clSetKernelArg(m_clKrnlGreyScale, 4, sizeof(cl_mem), &buffer_inout_grey);
+
+    //Launch the kernel
+    unsigned long duration = xcl_run_kernel3d(m_world, m_clKrnlGreyScale, 1, 1, 1);
+	*/
+
+	//execute kernel: sobel
+    nchannels = 1;
+    clSetKernelArg(m_clKrnlSobel, 0, sizeof(cl_mem), &buffer_in_grey);
     clSetKernelArg(m_clKrnlSobel, 1, sizeof(int), &nchannels);
     clSetKernelArg(m_clKrnlSobel, 2, sizeof(int), &inputbmp.width);
     clSetKernelArg(m_clKrnlSobel, 3, sizeof(int), &inputbmp.height);
-    clSetKernelArg(m_clKrnlSobel, 4, sizeof(cl_mem), &buffer_outpixels);
+    clSetKernelArg(m_clKrnlSobel, 4, sizeof(cl_mem), &buffer_out_sobel);
 
     //Launch the kernel
     unsigned long duration = xcl_run_kernel3d(m_world, m_clKrnlSobel, 1, 1, 1);
 
-    //Copy result to local buffer
-    xcl_memcpy_from_device(m_world, outputbmp.pixels, buffer_outpixels, inputbmpsize);
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//readback grey image    
+    //xcl_memcpy_from_device(m_world, vGreyImage.data(), buffer_inout_grey, szGreyImage);
 
-    //release all mem buffers
-    clReleaseMemObject(buffer_inpixels);
-    clReleaseMemObject(buffer_outpixels);
+	string strGreyFP = strInput + "grey.png";	
+    error = lodepng::encode(strGreyFP.c_str(), vGreyImage.data(), inputbmp.width, inputbmp.height, LCT_GREY, 8);
+	if (error != 0) {
+		LogError("failed to write grey image [%s]", strGreyFP.c_str());
+		return false;
+	}
 
+    //readback sobel image
+    vector<unsigned char> vSobelImage;
+    vSobelImage.resize(szGreyImage);
+    xcl_memcpy_from_device(m_world, vSobelImage.data(), buffer_out_sobel, szGreyImage);
 
-	//store
-	err = writebmp(const_cast<char*>(strOutput.c_str()), &outputbmp);
-	if (err != 0) {
+    error = lodepng::encode(strOutput.c_str(), vSobelImage.data(), inputbmp.width, inputbmp.height, LCT_GREY, 8);
+	if (error != 0) {
 		LogError("failed to write output [%s]", strOutput.c_str());
 		return false;
 	}
 
+    //release all mem buffers
+    //clReleaseMemObject(buffer_in_rgba);
+	clReleaseMemObject(buffer_in_grey);    
+	clReleaseMemObject(buffer_out_sobel);
 
 	//cleanup
-	free(outputbmp.pixels);
-
+	vSobelImage.resize(0);
+	vGreyImage.resize(0);
+    
 	//perf results
 	LogInfo("Kernel exec duration: [%.2f]", duration);
-
 
 	return true;
 }

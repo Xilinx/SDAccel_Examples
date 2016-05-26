@@ -98,7 +98,7 @@ int main(int argc, char* argv[]) {
 	LogInfo("Chosen Platform = %s, Device Name: %s, Device Index: [%d]", strPlatformName.c_str(), strDeviceName.c_str(), idxSelectedDevice);
 
 	LogInfo("Perform the sobel filter on cpu");
-	string output = strBitmapFP + "_edges_cpuonly.bmp";
+	string output = strBitmapFP + "_edges_cpuonly.png";
 	bool res = Sobel::apply(strBitmapFP, output);
 	if(!res) {
 		LogError("There was an error on the filter execution");
@@ -106,7 +106,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	LogInfo("Perform the sobel filter on accelerator");
-	output = strBitmapFP + "_edges_fpga.bmp";
+	output = strBitmapFP + "_edges_fpga.png";
 
 	//setup
 	EdgeDetectFilter edgedetect(strPlatformName, strDeviceName, idxSelectedDevice, strKernelFullPath);

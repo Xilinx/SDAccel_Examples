@@ -1,0 +1,8 @@
+INFO: [main.cpp:62] TIME: [Wed May 25 14:45:57 2016] Xilinx Edge-Detection Application started
+INFO: [main.cpp:97] TIME: [Wed May 25 14:45:57 2016] Chosen kernel file is /proj/picasso/pourya/playground/edge_detection/edgedetection_example/impl/sim/cpu_em/bin_sobelfilter.xclbin
+INFO: [main.cpp:98] TIME: [Wed May 25 14:45:57 2016] Chosen Platform = Xilinx, Device Name: fpga0, Device Index: [0]
+INFO: [main.cpp:100] TIME: [Wed May 25 14:45:57 2016] Perform the sobel filter on cpu
+INFO: [main.cpp:108] TIME: [Wed May 25 14:45:57 2016] Perform the sobel filter on accelerator
+INFO: [edgedetection_app.cpp:213] TIME: [Wed May 25 14:45:58 2016] Kernel exec duration: [0.00]
+INFO: [main.cpp:120] TIME: [Wed May 25 14:45:58 2016] Output image is stored at [/proj/picasso/pourya/playground/edge_detection/data/lola.bmp_edges_fpga.png]
+INFO: [main.cpp:121] TIME: [Wed May 25 14:45:58 2016] finished

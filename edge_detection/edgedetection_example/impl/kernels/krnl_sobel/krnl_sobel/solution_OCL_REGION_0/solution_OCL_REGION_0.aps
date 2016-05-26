@@ -1,0 +1,27 @@
+<AutoPilot:solution xmlns:AutoPilot="com.autoesl.autopilot.solution">
+    <name>
+        <value string="solution_OCL_REGION_0"/>
+    </name>
+    <project>
+        <value string="krnl_sobel"/>
+    </project>
+    <targetInfo>
+        <TargetInfo value="xcku060:-ffva1156:-2-e"/>
+    </targetInfo>
+    <libraryList>
+        <library value="xilinx/kintexu/kintexu" name="DefaultPlatform"/>
+        <library value="xilinx/kintexu/kintexu_fpv7" name="DefaultPlatform"/>
+    </libraryList>
+    <clockList>
+        <clock default="false" name="default" uncertainty="1.350000" period="200MHz"/>
+    </clockList>
+    <config>
+        <config_rtl register_reset="1"/>
+        <config_interface m_axi_addr64="1"/>
+        <schedule model="krnl_sobel"/>
+    </config>
+    <ExportDesign askAgain="true" evaluate="false" rtl="verilog" formatName="ip_catalog">
+        <Format formatName="ip_catalog" description="" vendor="" library="" version="1.0" driver_input_dir="" display_name="" taxonomy=""/>
+    </ExportDesign>
+</AutoPilot:solution>
+

@@ -37,17 +37,17 @@ create_compute_unit -opencl_binary [get_opencl_binary bin_huffman] -kernel [get_
 
 # Compile the design for CPU based emulation
 compile_emulation -flow cpu -opencl_binary [get_opencl_binary bin_huffman]
-#run_emulation -flow cpu -args $args
+run_emulation -flow cpu -args $args
 
 # Create estimated resource usage and latency report
-report_estimate
+# report_estimate
 
 # Compile the design for Hardware Emulation
 #compile_emulation -flow hardware -opencl_binary [get_opencl_binary bin_huffman]
 #run_emulation -flow hardware -args $args
 
 # Compile the design for execution on the FPGA board
-build_system
+#build_system
 
 # Create the board deployment package for the application
-package_system
+# package_system

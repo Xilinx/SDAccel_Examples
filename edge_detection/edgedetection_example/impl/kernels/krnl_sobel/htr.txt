@@ -1,0 +1,9 @@
+#
+# sdaccel(TM)
+# htr.txt: a sdaccel-generated description of how-to-repeat the
+#          the basic steps of a run.  Note that runme.bat/sh needs
+#          to be invoked for sdaccel to track run status.
+# Copyright 1986-2016 Xilinx, Inc. All Rights Reserved.
+#
+
+vivado_hls -f krnl_sobel.tcl

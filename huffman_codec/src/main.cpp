@@ -152,6 +152,7 @@ int main(int argc, char* argv[]) {
 	unit_test_codec(&huffman);
 
 	//Execute benchmark application
+	LogInfo("Run HUFFMAN on FPGA with an image dataset. nruns = [%d]", nruns);
 	bool res = huffman.run(0, nruns);
 	if(!res) {
 		LogError("An error occurred when running benchmark on device 0");

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Root VersionMajor="1" VersionMinor="5">
+  <GenAppInfo Name="Vivado" Version="2015.4_sda" CL="1466479" TimeStamp="Sun Jan 31 13:55:46 2016"/>
+  <DSA Vendor="xilinx" BoardId="adm-pcie-ku3" Name="1ddr" VersionMajor="2" VersionMinor="1" Description="Alpha Data ADM-PCIE-KU3 Partial Reconfiguration Single DIMM PCIe Gen3 XDMA">
+    <Host Architecture="x86_64" Interface="pcie"/>
+    <Build UsesPR="true" StaticSynthCheckpoint="false"/>
+    <Board Name="alpha-data.com:adm-pcie3-ku3:1.0" Vendor="alpha-data.com" Part="XCKU060-FFVA1156-2-E">
+      <Interfaces>
+        <Interface Id="int1" Name="PCIe" Type="gen3x8"/>
+      </Interfaces>
+      <Memories>
+        <Memory Name="static_region_ddrmem" Type="ddr3" Size="8GB">
+          <Config>
+            <Param Name="AXI_ARBITRATION_SCHEME" Value="RD_PRI_REG_STARVE_LIMIT"/>
+            <Param Name="BURST_LENGTH" Value="8"/>
+            <Param Name="CAS_LATENCY" Value="11"/>
+            <Param Name="CAS_WRITE_LATENCY" Value="8"/>
+            <Param Name="DATA_WIDTH" Value="72"/>
+            <Param Name="MEMORY_PART" Value="MT18KSF1G72HZ-1G6"/>
+            <Param Name="MEM_ADDR_MAP" Value="ROW_COLUMN_BANK"/>
+            <Param Name="TIMEPERIOD_PS" Value="1250"/>
+          </Config>
+        </Memory>
+      </Memories>
+      <Images>
+        <Img Type="HDPI" File="adm-pcie3-ku3_high.jpeg"/>
+        <Img Type="MDPI" File="adm-pcie3-ku3_med.jpeg"/>
+        <Img Type="LDPI" File="adm-pcie3-ku3_low.jpeg"/>
+      </Images>
+      <Drivers>
+        <Driver Name="pcie" Vendor="xilinx" Version="1.0" Platform="lin" File="libxcldrv.so"/>
+      </Drivers>
+      <PCIeId Vendor="0x10EE" Device="0x8138" Subsystem="0x0121"/>
+    </Board>
+    <Devices>
+      <Device Name="fpga0" Type="8" FpgaDevice="kintexu:xcku060:ffva1156:-2:e">
+        <Core Name="OCL_REGION_0" Type="clc_region" ComputeUnits="10" VLNV="xilinx.com:ip:ocl_block:1.0" InstancePath="xcl_design_i/u_ocl_region" ClockFreq="200000000">
+          <Config>
+            <Param Name="BOUNDARY_VERSION" Value="2"/>
+            <Param Name="C_BASEADDR" Value="0x00000000"/>
+            <Param Name="C_HIGHADDR" Value="0x0001FFFF"/>
+            <Param Name="Component_Name" Value="xcl_design_u_ocl_region_0"/>
+            <Param Name="EDK_IPTYPE" Value="PERIPHERAL"/>
+            <Param Name="ENABLE_ADVANCED_OPTIONS" Value="1"/>
+            <Param Name="ENABLE_PROFILING" Value="true"/>
+            <Param Name="HAS_INTERRUPT" Value="false"/>
+            <Param Name="HAS_KERNEL_CLOCK" Value="true"/>
+            <Param Name="HAS_S_MEM" Value="false"/>
+            <Param Name="KERNEL_TYPE" Value="ADD_ONE"/>
+            <Param Name="KERNEL_VLNV" Value="xilinx.com:hls:memcopy"/>
+            <Param Name="M00_AXIS_RX_TDATA_NUM_BYTES" Value="8"/>
+            <Param Name="M00_AXIS_RX_TUSER_WIDTH" Value="8"/>
+            <Param Name="M01_AXIS_RX_TDATA_NUM_BYTES" Value="8"/>
+            <Param Name="M01_AXIS_RX_TUSER_WIDTH" Value="8"/>
+            <Param Name="M_ADDR_WIDTH" Value="33"/>
+            <Param Name="M_DATA_WIDTH" Value="512"/>
+            <Param Name="M_HAS_REGSLICE" Value="4"/>
+            <Param Name="M_ID_WIDTH" Value="5"/>
+            <Param Name="NUM_KERNELS" Value="1"/>
+            <Param Name="NUM_MI" Value="1"/>
+            <Param Name="NUM_M_AXIS_RX" Value="0"/>
+            <Param Name="NUM_S_AXIS_TX" Value="0"/>
+            <Param Name="S00_AXIS_TX_TDATA_NUM_BYTES" Value="8"/>
+            <Param Name="S00_AXIS_TX_TUSER_WIDTH" Value="8"/>
+            <Param Name="S01_AXIS_TX_TDATA_NUM_BYTES" Value="8"/>
+            <Param Name="S01_AXIS_TX_TUSER_WIDTH" Value="8"/>
+            <Param Name="SYNC_RESET" Value="true"/>
+            <Param Name="S_ADDR_WIDTH" Value="17"/>
+            <Param Name="S_DATA_WIDTH" Value="32"/>
+            <Param Name="S_HAS_REGSLICE" Value="0"/>
+            <Param Name="S_MEM_ADDR_WIDTH" Value="16"/>
+            <Param Name="S_MEM_DATA_WIDTH" Value="32"/>
+            <Param Name="S_MEM_ID_WIDTH" Value="1"/>
+            <Param Name="USER_WIDTH" Value="0"/>
+            <Param Name="USE_BSCAN" Value="false"/>
+            <Param Name="USE_PR" Value="true"/>
+            <Param Name="USE_SYNTH" Value="false"/>
+          </Config>
+          <Port Name="M_AXI" Type="addressable" Mode="master" Protocol="AXI4" Base="0x00000000" Range="0x0000000200000000" DataWidth="512" IdWidth="5" UserWidth="0" AddressWidth="33" MaxBurstLength="256" Frequency="200000000">
+            <AddressSegments>
+              <AddressSegment Name="M_AXI_addr_seg_0" Base="0x00000000" Range="0x200000000" Slave="static_region_ddrmem"/>
+            </AddressSegments>
+          </Port>
+          <Port Name="S_AXI" Type="addressable" Mode="slave" Protocol="AXI4LITE" Base="0x00000000" Range="0x00020000" DataWidth="32" IdWidth="0" UserWidth="0" AddressWidth="17" MaxBurstLength="1" Frequency="200000000"/>
+          <Port Name="INTERCONNECT_CLK" Type="clk" Mode="input" Frequency="200000000"/>
+          <Port Name="INTERCONNECT_RESET" Type="rst" Mode="input"/>
+          <Port Name="KERNEL_CLK" Type="clk" Mode="input" Frequency="200000000"/>
+          <Port Name="KERNEL_RESET" Type="rst" Mode="input"/>
+        </Core>
+      </Device>
+    </Devices>
+    <Files>
+      <File Type="CLEAR_BIT" Name="xilinx_adm-pcie-ku3_1ddr_2_1_pblock_u_ocl_region_partial_clear.bit"/>
+      <File Type="DCP" Name="xilinx_adm-pcie-ku3_1ddr_2_1.dcp"/>
+      <File Type="FULL_BIT" Name="xilinx_adm-pcie-ku3_1ddr_2_1.bit"/>
+      <File Type="MCS" Name="xilinx_adm-pcie-ku3_1ddr_2_1.mcs"/>
+      <File Type="PARTIAL_BIT" Name="xilinx_adm-pcie-ku3_1ddr_2_1_pblock_u_ocl_region_partial.bit"/>
+    </Files>
+  </DSA>
+</Root>

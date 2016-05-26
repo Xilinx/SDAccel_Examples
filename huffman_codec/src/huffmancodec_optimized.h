@@ -43,8 +43,8 @@ ALL TIMES.
 
 *******************************************************************************/
 
-#ifndef AESAPP_H_
-#define AESAPP_H_
+#ifndef HUFFMANAPP_H_
+#define HUFFMANAPP_H_
 
 #include <string>
 #include <vector>

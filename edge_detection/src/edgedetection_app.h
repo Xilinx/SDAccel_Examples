@@ -67,6 +67,7 @@ protected:
 	xcl_world m_world;
 
 	cl_kernel m_clKrnlSobel;
+	//cl_kernel m_clKrnlGreyScale;
 };
 
 #endif /* EDGEDETECTIONAPP_H_ */
