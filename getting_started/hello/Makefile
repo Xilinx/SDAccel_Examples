@@ -9,7 +9,7 @@ CXXFLAGS+= -std=c++0x
 XMODES:=sw_emu hw_emu hw
 
 # Supported devices
-include ../utility/boards.mk
+include ../../utility/boards.mk
 
 #XDEVICES:=xilinx:adm-pcie-7v3:1ddr:2.1 xilinx:adm-pcie-ku3:1ddr:2.1 xilinx:adm-pcie-ku3:2ddr:2.1
 # Directory for Kernel Binary Files
@@ -32,7 +32,7 @@ OPENCL_POWER_LIB:=$(XILINX_SDACCEL)/runtime/lib/ppc64le
 hello_SRCS=./src/hello.cpp ./src/xcl.c
 hello_HDRS=./src/xcl.h
 hello_EXE=hello
-hello_CXXFLAGS:=-I. -I$(OPENCL12_INCLUDE)
+hello_CXXFLAGS:=-I./src/ -I$(OPENCL12_INCLUDE)
 hello_LDFLAGS:=-L$(SDA_LIB) -L$(OPENCL_LIB) -lOpenCL -pthread
 hello_PLDFLAGS:= -L$(OPENCL_POWER_LIB) -lxilinxopencl -llmx6.0
 
@@ -47,7 +47,7 @@ EXES=hello
 XCLBINS=krnl_hello
 
 
-define mk_exe
+define mk_power
 
 $(2): $($(1)_SRCS) $($(1)_HDRS)
 	$(CPOWER) $($(1)_CXXFLAGS) -o $$@ $($(1)_SRCS) $($(1)_PLDFLAGS)
@@ -56,7 +56,7 @@ POWER_GOALS+=$(2)
 
 endef
 
-define mk_power
+define mk_exe
 
 $(2): $($(1)_SRCS) $($(1)_HDRS)
 	$(CXX) $($(1)_CXXFLAGS) -o $$@ $($(1)_SRCS) $($(1)_LDFLAGS)
@@ -83,6 +83,9 @@ $(XCLBIN_DIR)/$(1).$(2).$(subst $(COLON),$(UNDERSCORE),$(3)).xclbin: $($(1)_SRCS
 
 endef
 
+.PHONY: all
+all: all-x86
+
 $(foreach exe,$(EXES),$(eval $(call mk_exe,$(exe),$(exe).exe)))
 
 $(foreach exe,$(EXES),$(eval $(call mk_power,$(exe),$(exe)_power.exe)))
@@ -91,9 +94,8 @@ $(foreach xclbin,$(XCLBINS),$(foreach xmode, $(XMODES),$(foreach xdevice,$(X86_D
 
 $(foreach xclbin,$(XCLBINS),$(foreach xmode, $(XMODES),$(foreach xdevice,$(POWER_DEVICES),$(eval $(call mk_xclbin,$(xclbin),$(xmode),$(xdevice),$(POWER))))))
 
-.DEFAULT_GOAL: all
-.PHONY: all
-all: $(XCLBIN_GOALS) $(EXE_GOALS)
+.PHONY: all-x86
+all-x86: $(XCLBIN_GOALS) $(EXE_GOALS)
 
 .PHONY: sv_all
 sv_all: $(SV_XCLBIN_GOALS) $(POWER_GOALS) $(EXE_GOALS)
