@@ -43,14 +43,14 @@ The choices for emulation flow are
 - sw_emu = software emulation
 - hw_emu = hardware emulation
 
-4. Running the application on a board hosted by Nimbix from a remote system
+3. Running the application on a board hosted by Nimbix from a remote system
 Run the nimbix-run.py script provided in the utility/nimbix directory at the top level of this repository
 ```
 nimbix-run.py ./hello.exe ./xclbin/krnl_hello.hw.<target board>.xclbin
 ```
 Only the Alpha Data ADM-PCIE-KU3 card is supported by this method.
 
-5. Running the application from within Nimbix
+4. Running the application from within Nimbix
 Follow the instructions in the [Nimbix Getting Started Guide][]
 
 Compilation for IBM POWER servers
