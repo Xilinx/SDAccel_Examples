@@ -44,6 +44,12 @@ The choices for emulation flow are
     - hw_emu = hardware emulation
 
 3. Running the application on a board hosted by Nimbix from a remote system
+Install the Xilinx Runtime for board in Nimbix using the xbinst utility in SDAccel
+    ```
+    xbinst -x xilinx:adm-pcie-ku3:2ddr:2.1 -d .
+    mv xbinst/pkg/pcie/runtime .
+    rm -rf xbinst
+    ```
 Run the nimbix-run.py script provided in the utility/nimbix directory at the top level of this repository
     ```
     nimbix-run.py ./hello.exe ./xclbin/krnl_hello.hw.<target board>.xclbin
