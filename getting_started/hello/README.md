@@ -27,7 +27,7 @@ Application code is located in the src directory.
 Accelerator binary files are located in the xclbin directory. This directory is required by the Makefile. The contents of the directory are generated during compilation.
 
 ## 4. INSTALLATION AND OPERATING INSTRUCTIONS
-Compilation for x86 based servers
+### Compilation for x86 based servers
 
 1. make all
 Launches compilation both emulation and board execution modes of the application for all supported boards.
@@ -36,24 +36,24 @@ To limit or change the boards for compilation, edit the utility/boards.mk file l
 2. Executing emulation flows
 Set the following environment variable  XCL_EMULATION_MODE=true
 Run the application as
-```
-./hello.exe ./xclbin/krnl_hello.<emulation flow>.<target board>.xclbin
-```
+    ```
+    ./hello.exe ./xclbin/krnl_hello.<emulation flow>.<target board>.xclbin
+    ```
 The choices for emulation flow are
-- sw_emu = software emulation
-- hw_emu = hardware emulation
+    - sw_emu = software emulation
+    - hw_emu = hardware emulation
 
 3. Running the application on a board hosted by Nimbix from a remote system
 Run the nimbix-run.py script provided in the utility/nimbix directory at the top level of this repository
-```
-nimbix-run.py ./hello.exe ./xclbin/krnl_hello.hw.<target board>.xclbin
-```
+    ```
+    nimbix-run.py ./hello.exe ./xclbin/krnl_hello.hw.<target board>.xclbin
+    ```
 Only the Alpha Data ADM-PCIE-KU3 card is supported by this method.
 
 4. Running the application from within Nimbix
 Follow the instructions in the [Nimbix Getting Started Guide][]
 
-Compilation for IBM POWER servers
+### Compilation for IBM POWER servers
 1. View the SuperVessel [Walkthrough Video][]
 
 2. make sv_all
