@@ -269,7 +269,7 @@ def submit_testcase(username, apikey, testid, exe, args):
 cdir = os.getcwd()
 rundate = datetime.datetime.now();
 
-user = os.getlogin()
+user = pwd.getpwuid(os.getuid())[0]
 testid = user + "-" + rundate.strftime("%d%m%y_%S")
 
 if len(sys.argv) != 1:
