@@ -46,7 +46,7 @@ ALL TIMES.
 #include <assert.h>
 #include <string.h>
 
-#include "logger.h"
+#include "common/logger.h"
 #include "aes_app.h"
 #include "aes_ecb.h"
 

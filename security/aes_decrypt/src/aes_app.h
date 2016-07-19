@@ -47,7 +47,7 @@ ALL TIMES.
 #define AESAPP_H_
 
 #include <string>
-#include "xcl.h"
+#include "common/xcl.h"
 
 #define COMPUTE_UNITS 1
 
