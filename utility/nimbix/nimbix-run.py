@@ -278,7 +278,7 @@ else:
 	exe = os.environ['EXE']
 
 if len(sys.argv) != 1:
-	args = ' '.join(sys.argv[2:len(sys.argv)])
+	args = sys.argv[2:len(sys.argv)]
 else:
 	args = os.environ['ARGS']
 
@@ -310,7 +310,7 @@ upload_testcase(nimbix_user, nimbix_apikey, testid)
 
 print "Upload Complete"
 print
-print "Testcase: " + exe + " " + args
+print "Testcase: " + exe + " " + ' '.join(args)
 
 
 job = submit_testcase(nimbix_user, nimbix_apikey,
