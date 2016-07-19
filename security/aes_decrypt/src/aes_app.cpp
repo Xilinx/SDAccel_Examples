@@ -50,7 +50,7 @@ ALL TIMES.
 #include "aes_app.h"
 #include "aes_ecb.h"
 
-#include "simplebmp.h"
+#include "common/simplebmp.h"
 
 #if defined(__linux__) || defined(linux)
 	#include "sys/time.h"
@@ -263,7 +263,7 @@ bool AesApp::run(int idevice, int nruns) {
 		return false;
 	}
 
-	unsigned int blocks = datasetsize / 16;	
+	unsigned int blocks = datasetsize / 16;
 	err |= clSetKernelArg(m_clKernelAesDecrypt, 3, sizeof(unsigned int), &blocks);
 	if (err != CL_SUCCESS) {
 		LogError("Failed to set kernel argument [3] blocks! %d", err);
@@ -394,4 +394,3 @@ bool AesApp::run(int idevice, int nruns) {
 
 	return true;
 }
-

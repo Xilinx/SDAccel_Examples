@@ -46,8 +46,8 @@ ALL TIMES.
 
 #include <iostream>
 #include "aes_app.h"
-#include "cmdlineparser.h"
-#include "logger.h"
+#include "common/cmdlineparser.h"
+#include "common/logger.h"
 
 using namespace std;
 using namespace sda;
@@ -104,7 +104,7 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
-	
+
 	LogInfo("finished");
 
 	return 0;
