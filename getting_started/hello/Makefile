@@ -10,6 +10,7 @@ XMODES:=sw_emu hw_emu hw
 
 # Supported devices
 include ../../utility/boards.mk
+include ../../libs/xcl/xcl.mk
 
 #XDEVICES:=xilinx:adm-pcie-7v3:1ddr:2.1 xilinx:adm-pcie-ku3:1ddr:2.1 xilinx:adm-pcie-ku3:2ddr:2.1
 # Directory for Kernel Binary Files
@@ -29,10 +30,10 @@ OPENCL_LIB:=$(XILINX_SDACCEL)/runtime/lib/x86_64
 OPENCL_POWER_LIB:=$(XILINX_SDACCEL)/runtime/lib/ppc64le
 
 # hello Host Application
-hello_SRCS=./src/hello.cpp ./src/xcl.c
-hello_HDRS=./src/xcl.h
+hello_SRCS=./src/hello.cpp $(xcl_SRCS)
+hello_HDRS= $(xcl_HDRS)
 hello_EXE=hello
-hello_CXXFLAGS:=-I./src/ -I$(OPENCL12_INCLUDE)
+hello_CXXFLAGS:=-I./src/ -I$(xcl_INCLUDE) -I$(OPENCL12_INCLUDE)
 hello_LDFLAGS:=-L$(SDA_LIB) -L$(OPENCL_LIB) -lOpenCL -pthread
 hello_PLDFLAGS:= -L$(OPENCL_POWER_LIB) -lxilinxopencl -llmx6.0
 
@@ -95,10 +96,10 @@ $(foreach xclbin,$(XCLBINS),$(foreach xmode, $(XMODES),$(foreach xdevice,$(X86_D
 $(foreach xclbin,$(XCLBINS),$(foreach xmode, $(XMODES),$(foreach xdevice,$(POWER_DEVICES),$(eval $(call mk_xclbin,$(xclbin),$(xmode),$(xdevice),$(POWER))))))
 
 .PHONY: all-x86
-all-x86: $(XCLBIN_GOALS) $(EXE_GOALS)
+all-x86: $(EXE_GOALS) $(XCLBIN_GOALS)
 
 .PHONY: sv_all
-sv_all: $(SV_XCLBIN_GOALS) $(POWER_GOALS) $(EXE_GOALS)
+sv_all: $(POWER_GOALS) $(EXE_GOALS) $(SV_XCLBIN_GOALS)
 
 .PHONY: clean
 clean:
