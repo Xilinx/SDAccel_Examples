@@ -10,6 +10,9 @@ XMODES:=sw_emu hw_emu hw
 
 # Supported devices
 include ../../utility/boards.mk
+include ../../libs/xcl_cpp/xcl.mk
+include ../../libs/logger/logger.mk
+include ../../libs/cmdparser/cmdparser.mk
 
 #XDEVICES:=xilinx:adm-pcie-7v3:1ddr:2.1 xilinx:adm-pcie-ku3:1ddr:2.1 xilinx:adm-pcie-ku3:2ddr:2.1
 # Directory for Kernel Binary Files
@@ -29,10 +32,10 @@ OPENCL_LIB:=$(XILINX_SDACCEL)/runtime/lib/x86_64
 OPENCL_POWER_LIB:=$(XILINX_SDACCEL)/runtime/lib/ppc64le
 
 # hello Host Application
-sha1_SRCS=./src/common/xcl.cpp ./src/common/cmdlineparser.cpp ./src/common/logger.cpp ./src/sha1_app.cpp ./src/sha1.c ./src/main.cpp
-sha1_HDRS=./src/common/xcl.h ./src/common/cmdlineparser.h ./src/common/logger.h ./src/sha1_app.h ./src/oswedian.h ./src/sha1.h
+sha1_SRCS=./src/sha1_app.cpp ./src/sha1.c ./src/main.cpp $(logger_SRCS) $(cmdparser_SRCS) $(xcl_SRCS)
+sha1_HDRS=./src/sha1_app.h ./src/oswendian.h ./src/sha1.h $(logger_HDRS) $(cmdparser_HDRS) $(xcl_HDRS)
 sha1_EXE=sha1
-sha1_CXXFLAGS:=-I./src/ -I$(OPENCL12_INCLUDE)
+sha1_CXXFLAGS:=-I./src/ -I$(OPENCL12_INCLUDE) -I$(logger_INCLUDE) -I$(cmdparser_INCLUDE) -I$(xcl_INCLUDE)
 sha1_LDFLAGS:=-L$(SDA_LIB) -L$(OPENCL_LIB) -lOpenCL -pthread
 sha1_PLDFLAGS:= -L$(OPENCL_POWER_LIB) -lxilinxopencl -llmx6.0
 
@@ -95,10 +98,10 @@ $(foreach xclbin,$(XCLBINS),$(foreach xmode, $(XMODES),$(foreach xdevice,$(X86_D
 $(foreach xclbin,$(XCLBINS),$(foreach xmode, $(XMODES),$(foreach xdevice,$(POWER_DEVICES),$(eval $(call mk_xclbin,$(xclbin),$(xmode),$(xdevice),$(POWER))))))
 
 .PHONY: all-x86
-all-x86: $(XCLBIN_GOALS) $(EXE_GOALS)
+all-x86: $(EXE_GOALS) $(XCLBIN_GOALS)
 
 .PHONY: sv_all
-sv_all: $(SV_XCLBIN_GOALS) $(POWER_GOALS) $(EXE_GOALS)
+sv_all: $(POWER_GOALS) $(EXE_GOALS) $(SV_XCLBIN_GOALS)
 
 .PHONY: clean
 clean:

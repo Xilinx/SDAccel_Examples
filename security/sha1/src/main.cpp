@@ -1,7 +1,7 @@
 /*******************************************************************************
 Vendor: Xilinx
 Associated Filename: main.cpp
-Purpose: SHA1 Example Application 
+Purpose: SHA1 Example Application
 Revision History: January 29, 2016
 
 *******************************************************************************
@@ -56,8 +56,8 @@ ALL TIMES.
 #include <cstring>
 
 #include "sha1.h"
-#include "cmdlineparser.h"
-#include "logger.h"
+#include <cmdlineparser.h>
+#include <logger.h>
 #include "sha1_app.h"
 
 
@@ -259,7 +259,7 @@ void verify_sha1(unsigned int start, unsigned int *mds) {
 	}
 }
 
-/* sha1_single - run SHA1 once 
+/* sha1_single - run SHA1 once
  */
 void sha1_single(sha1 &host) {
 	unsigned int *buf = (unsigned int*) malloc(CHANNELS * BLOCKS * 64);
@@ -382,7 +382,7 @@ double sha1_parallel(sha1 &host, double timelimit, const string& zmq_port) {
 			}
 		}
 
-		 /* After timeout stop */		
+		 /* After timeout stop */
 		 if (std::clock() > timeout && timelimit > 0.0) {
 			 //Stop counting blocks immediately
 			 LogInfo("Timeout reached! Stopping...");
@@ -390,7 +390,7 @@ double sha1_parallel(sha1 &host, double timelimit, const string& zmq_port) {
 			 g_done = 1;
 			 break;
 		 }
-		
+
 		blocks_complete = blocks;
 
 		events[i % 20] = runners[i % 20].run(buf[i % 20], mds[i % 20]);
@@ -452,7 +452,7 @@ int main(int argc, char** argv) {
 	parser.addSwitch("--time-limit", "-t", "Time limit in seconds, -1 means run forever", "20");
 	parser.addSwitch("--zmq-pub-port", "-z", "ZeroMQ publisher port for web visualization", "5010");
 	parser.setDefaultKey("--kernel-file");
-	
+
 	//parse all command line options
 	parser.parse(argc, argv);
 
@@ -464,7 +464,7 @@ int main(int argc, char** argv) {
 
 	LogInfo("Platform: %s, Device: %s", str_platform.c_str(), str_device.c_str());
 	LogInfo("Kernel FP: %s", str_kernel.c_str());
-	LogInfo("ZMQ PORT: %s", str_zmq_port.c_str());	
+	LogInfo("ZMQ PORT: %s", str_zmq_port.c_str());
 	LogInfo("Running for [%f] seconds...", timelimit);
 
 	{
