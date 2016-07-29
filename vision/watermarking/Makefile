@@ -10,6 +10,8 @@ XMODES:=sw_emu hw_emu hw
 
 # Supported devices
 include ../../utility/boards.mk
+include ../../libs/oclHelper/oclHelper.mk
+include ../../libs/bitmap/bitmap.mk
 
 #XDEVICES:=xilinx:adm-pcie-7v3:1ddr:2.1 xilinx:adm-pcie-ku3:1ddr:2.1 xilinx:adm-pcie-ku3:2ddr:2.1
 # Directory for Kernel Binary Files
@@ -29,10 +31,10 @@ OPENCL_LIB:=$(XILINX_SDACCEL)/runtime/lib/x86_64
 OPENCL_POWER_LIB:=$(XILINX_SDACCEL)/runtime/lib/ppc64le
 
 # Watermarking Host Application
-watermark_SRCS=./src/watermarking.cpp ./src/bitmap.cpp ./src/oclErrorCodes.cpp ./src/oclHelper.cpp
-watermark_HDRS=./src/bitmap.h ./src/oclHelper.h
+watermark_SRCS=./src/watermarking.cpp $(bitmap_SRCS) $(oclHelper_SRCS)
+watermark_HDRS=$(bitmap_HDRS) $(oclHelper_HDRS)
 watermark_EXE=watermark
-watermark_CXXFLAGS:=-I./src/ -I$(OPENCL12_INCLUDE)
+watermark_CXXFLAGS:=-I./src/ -I$(OPENCL12_INCLUDE) -I$(bitmap_INCLUDE) -I$(oclHelper_INCLUDE)
 watermark_LDFLAGS:=-L$(SDA_LIB) -L$(OPENCL_LIB) -lOpenCL -pthread
 watermark_PLDFLAGS:= -L$(OPENCL_POWER_LIB) -lxilinxopencl -llmx6.0
 
@@ -95,10 +97,10 @@ $(foreach xclbin,$(XCLBINS),$(foreach xmode, $(XMODES),$(foreach xdevice,$(X86_D
 $(foreach xclbin,$(XCLBINS),$(foreach xmode, $(XMODES),$(foreach xdevice,$(POWER_DEVICES),$(eval $(call mk_xclbin,$(xclbin),$(xmode),$(xdevice),$(POWER))))))
 
 .PHONY: all-x86
-all-x86: $(XCLBIN_GOALS) $(EXE_GOALS)
+all-x86: $(EXE_GOALS) $(XCLBIN_GOALS)
 
 .PHONY: sv_all
-sv_all: $(SV_XCLBIN_GOALS) $(POWER_GOALS) $(EXE_GOALS)
+sv_all: $(POWER_GOALS) $(EXE_GOALS) $(SV_XCLBIN_GOALS) 
 
 .PHONY: clean
 clean:
