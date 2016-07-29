@@ -10,6 +10,10 @@ XMODES:=sw_emu hw_emu hw
 
 # Supported devices
 include ../../utility/boards.mk
+include ../../libs/logger/logger.mk
+include ../../libs/simplebmp/simplebmp.mk
+include ../../libs/cmdparser/cmdparser.mk
+include ../../libs/xcl_cpp/xcl.mk
 
 #XDEVICES:=xilinx:adm-pcie-7v3:1ddr:2.1 xilinx:adm-pcie-ku3:1ddr:2.1 xilinx:adm-pcie-ku3:2ddr:2.1
 # Directory for Kernel Binary Files
@@ -29,12 +33,12 @@ OPENCL_LIB:=$(XILINX_SDACCEL)/runtime/lib/x86_64
 OPENCL_POWER_LIB:=$(XILINX_SDACCEL)/runtime/lib/ppc64le
 
 # Huffman Codec Host Application
-huffman_SRCS=./src/bit_io.cpp ./src/cmdlineparser.cpp ./src/huffmancodec_naive.cpp ./src/huffmancodec_optimized_cpuonly.cpp ./src/huffmancodec_optimized.cpp \
-	./src/logger.cpp ./src/main.cpp ./src/simplebmp.cpp ./src/xcl.cpp
-huffman_HDRS=./src/bit_io.h ./src/cmdlineparser.h ./src/huffmancodec_naive.h ./src/huffmancodec_optimized_cpuonly.h ./src/huffmancodec_optimized.h \
-	./src/logger.h ./src/simplebmp.h ./src/xcl.h
+huffman_SRCS=./src/bit_io.cpp ./src/huffmancodec_naive.cpp ./src/huffmancodec_optimized_cpuonly.cpp ./src/huffmancodec_optimized.cpp \
+	./src/main.cpp $(simplebmp_SRCS) $(xcl_SRCS) $(logger_SRCS) $(cmdparser_SRCS)
+huffman_HDRS=./src/bit_io.h ./src/huffmancodec_naive.h ./src/huffmancodec_optimized_cpuonly.h ./src/huffmancodec_optimized.h \
+	$(logger_HDRS) $(simplebmp_HDRS) $(xcl_HDRS) $(cmdparser_HDRS)
 huffman_EXE=huffman_codec
-huffman_CXXFLAGS:=-I./src/ -I$(OPENCL12_INCLUDE)
+huffman_CXXFLAGS:=-I./src/ -I$(OPENCL12_INCLUDE) -I$(cmdparser_INCLUDE) -I$(xcl_INCLUDE) -I$(simplebmp_INCLUDE) -I$(logger_INCLUDE)
 huffman_LDFLAGS:=-L$(SDA_LIB) -L$(OPENCL_LIB) -lOpenCL -pthread
 huffman_PLDFLAGS:= -L$(OPENCL_POWER_LIB) -lxilinxopencl -llmx6.0
 
@@ -45,8 +49,8 @@ krnl_huffman_HDRS=
 krnl_huffman_XCLBIN=huffman
 krnl_huffman_XFLAGS=
 
-EXES=watermark
-XCLBINS=krnl_watermark
+EXES=huffman
+XCLBINS=krnl_huffman
 
 
 define mk_power
@@ -97,10 +101,10 @@ $(foreach xclbin,$(XCLBINS),$(foreach xmode, $(XMODES),$(foreach xdevice,$(X86_D
 $(foreach xclbin,$(XCLBINS),$(foreach xmode, $(XMODES),$(foreach xdevice,$(POWER_DEVICES),$(eval $(call mk_xclbin,$(xclbin),$(xmode),$(xdevice),$(POWER))))))
 
 .PHONY: all-x86
-all-x86: $(XCLBIN_GOALS) $(EXE_GOALS)
+all-x86: $(EXE_GOALS) $(XCLBIN_GOALS)
 
 .PHONY: sv_all
-sv_all: $(SV_XCLBIN_GOALS) $(POWER_GOALS) $(EXE_GOALS)
+sv_all: $(POWER_GOALS) $(EXE_GOALS) $(SV_XCLBIN_GOALS)
 
 .PHONY: clean
 clean:
