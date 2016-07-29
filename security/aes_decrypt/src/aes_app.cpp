@@ -45,12 +45,13 @@ ALL TIMES.
 
 #include <assert.h>
 #include <string.h>
+#include <stdio.h>
 
-#include "common/logger.h"
+#include <logger.h>
 #include "aes_app.h"
 #include "aes_ecb.h"
 
-#include "common/simplebmp.h"
+#include <simplebmp.h>
 
 #if defined(__linux__) || defined(linux)
 	#include "sys/time.h"

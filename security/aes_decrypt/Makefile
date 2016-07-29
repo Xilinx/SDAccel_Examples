@@ -10,6 +10,10 @@ XMODES:=sw_emu hw_emu hw
 
 # Supported devices
 include ../../utility/boards.mk
+include ../../libs/xcl_cpp/xcl.mk
+include ../../libs/logger/logger.mk
+include ../../libs/cmdparser/cmdparser.mk
+include ../../libs/simplebmp/simplebmp.mk
 
 #XDEVICES:=xilinx:adm-pcie-7v3:1ddr:2.1 xilinx:adm-pcie-ku3:1ddr:2.1 xilinx:adm-pcie-ku3:2ddr:2.1
 # Directory for Kernel Binary Files
@@ -29,10 +33,10 @@ OPENCL_LIB:=$(XILINX_SDACCEL)/runtime/lib/x86_64
 OPENCL_POWER_LIB:=$(XILINX_SDACCEL)/runtime/lib/ppc64le
 
 # hello Host Application
-aes_SRCS=./src/common/xcl.cpp ./src/common/cmdlineparser.cpp ./src/common/logger.cpp ./src/common/simplebmp.cpp ./src/aes_ecb.cpp ./src/aes_app.cpp ./src/main.cpp
-aes_HDRS=./src/aes_app.h ./src/common/xcl.h ./src/common/cmdlineparser.h ./src/common/logger.h ./src/common/simplebmp.h
+aes_SRCS=./src/aes_ecb.cpp ./src/aes_app.cpp ./src/main.cpp $(xcl_SRCS) $(cmdparser_SRCS) $(logger_SRCS) $(simplebmp_SRCS)
+aes_HDRS=./src/aes_app.h $(xcl_HDRS) $(cmdparser_HDRS) $(logger_HDRS) $(simplebmp_HDRS)
 aes_EXE=aesdecrypt
-aes_CXXFLAGS:=-I./src/ -I$(OPENCL12_INCLUDE)
+aes_CXXFLAGS:=-I./src/ -I$(OPENCL12_INCLUDE) -I$(xcl_INCLUDE) -I$(cmdparser_INCLUDE) -I$(logger_INCLUDE) -I$(simplebmp_INCLUDE)
 aes_LDFLAGS:=-L$(SDA_LIB) -L$(OPENCL_LIB) -lOpenCL -pthread
 aes_PLDFLAGS:= -L$(OPENCL_POWER_LIB) -lxilinxopencl -llmx6.0
 
@@ -95,10 +99,10 @@ $(foreach xclbin,$(XCLBINS),$(foreach xmode, $(XMODES),$(foreach xdevice,$(X86_D
 $(foreach xclbin,$(XCLBINS),$(foreach xmode, $(XMODES),$(foreach xdevice,$(POWER_DEVICES),$(eval $(call mk_xclbin,$(xclbin),$(xmode),$(xdevice),$(POWER))))))
 
 .PHONY: all-x86
-all-x86: $(XCLBIN_GOALS) $(EXE_GOALS)
+all-x86: $(EXE_GOALS) $(XCLBIN_GOALS)
 
 .PHONY: sv_all
-sv_all: $(SV_XCLBIN_GOALS) $(POWER_GOALS) $(EXE_GOALS)
+sv_all: $(POWER_GOALS) $(EXE_GOALS) $(SV_XCLBIN_GOALS)
 
 .PHONY: clean
 clean:
