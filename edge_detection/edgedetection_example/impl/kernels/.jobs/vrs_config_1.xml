@@ -1,5 +1,0 @@
-<?xml version="1.0"?>
-<Runs Version="1" Minor="0">
-	<Run Id="krnl_sobel" LaunchDir="/proj/picasso/pourya/playground/edge_detection/edgedetection_example/impl/kernels/krnl_sobel" FlowId="Build_IP" FromStepId="vivado_hls" ToStepId="vivado_hls"/>
-</Runs>
-

@@ -1,1 +1,0 @@
-./edge_detection_ku3_dsa2.1.tcl

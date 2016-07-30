@@ -1,9 +1,0 @@
-
-****** xocc v2016.1
-  **** Copyright 1986-2016 Xilinx, Inc. All Rights Reserved.
-
-INFO: [XOCC 60-585] Compiling for hardware target
-INFO: [XOCC 60-423]   Target device: xilinx:adm-pcie-ku3:1ddr:2.1
-INFO: [XOCC 60-242] Creating kernel: 'krnl_sobel'
-INFO: [XOCC 60-594] Finished kernel compilation
-INFO: [XOCC 60-586] Created krnl_sobel.xo
