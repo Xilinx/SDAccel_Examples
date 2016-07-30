@@ -10,6 +10,7 @@ XMODES:=sw_emu hw_emu hw
 
 # Supported devices
 include ../../utility/boards.mk
+include ../../libs/xcl/xcl.mk
 
 #XDEVICES:=xilinx:adm-pcie-7v3:1ddr:2.1 xilinx:adm-pcie-ku3:1ddr:2.1 xilinx:adm-pcie-ku3:2ddr:2.1
 # Directory for Kernel Binary Files
@@ -27,13 +28,14 @@ OPENCL12_INCLUDE:= $(XILINX_SDACCEL)/runtime/include/1_2
 SDA_LIB:=$(XILINX_SDACCEL)/lib/lnx64.o
 OPENCL_LIB:=$(XILINX_SDACCEL)/runtime/lib/x86_64
 OPENCL_POWER_LIB:=$(XILINX_SDACCEL)/runtime/lib/ppc64le
+OPENCV_LIB:=$(XILINX_SDACCEL)/lnx64/tools/opencv
 
 # Equalizer Host Application
-equalizer_SRCS=./src/xcl.c ./src/equalizer.cpp
-equalizer_HDRS=./src/equalizer.h ./src/xcl.h
+equalizer_SRCS=./src/equalizer.cpp $(xcl_SRCS)
+equalizer_HDRS=./src/equalizer.h $(xcl_SRCS)
 equalizer_EXE=equalizer
-equalizer_CXXFLAGS:=-I./src/ -I$(OPENCL12_INCLUDE)
-equalizer_LDFLAGS:=-L$(SDA_LIB) -L$(OPENCL_LIB) -lOpenCL -pthread
+equalizer_CXXFLAGS:=-I./src/ -I$(OPENCL12_INCLUDE) -I$(xcl_INCLUDE) -I$(XILINX_SDACCEL)/include
+equalizer_LDFLAGS:=-L$(SDA_LIB) -L$(OPENCL_LIB) -L$(OPENCV_LIB) -lOpenCL -pthread -lopencv_core -lopencv_highgui -lopencv_imgproc -lavcodec -lavformat -lavutil -lswscale
 equalizer_PLDFLAGS:= -L$(OPENCL_POWER_LIB) -lxilinxopencl -llmx6.0
 
 
@@ -95,10 +97,10 @@ $(foreach xclbin,$(XCLBINS),$(foreach xmode, $(XMODES),$(foreach xdevice,$(X86_D
 $(foreach xclbin,$(XCLBINS),$(foreach xmode, $(XMODES),$(foreach xdevice,$(POWER_DEVICES),$(eval $(call mk_xclbin,$(xclbin),$(xmode),$(xdevice),$(POWER))))))
 
 .PHONY: all-x86
-all-x86: $(XCLBIN_GOALS) $(EXE_GOALS)
+all-x86: $(EXE_GOALS) $(XCLBIN_GOALS)
 
 .PHONY: sv_all
-sv_all: $(SV_XCLBIN_GOALS) $(POWER_GOALS) $(EXE_GOALS)
+sv_all: $(POWER_GOALS) $(EXE_GOALS) $(SV_XCLBIN_GOALS)
 
 .PHONY: clean
 clean:
