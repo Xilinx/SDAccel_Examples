@@ -10,6 +10,11 @@ XMODES:=sw_emu hw_emu hw
 
 # Supported devices
 include ../../utility/boards.mk
+include ../../libs/xcl_cpp/xcl.mk
+include ../../libs/logger/logger.mk
+include ../../libs/cmdparser/cmdparser.mk
+include ../../libs/simplebmp/simplebmp.mk
+include ../../libs/lodepng/lodepng.mk
 
 #XDEVICES:=xilinx:adm-pcie-7v3:1ddr:2.1 xilinx:adm-pcie-ku3:1ddr:2.1 xilinx:adm-pcie-ku3:2ddr:2.1
 # Directory for Kernel Binary Files
@@ -29,18 +34,18 @@ OPENCL_LIB:=$(XILINX_SDACCEL)/runtime/lib/x86_64
 OPENCL_POWER_LIB:=$(XILINX_SDACCEL)/runtime/lib/ppc64le
 
 # Edge Detection Host Application
-edge_SRCS=./src/common/simplebmp.cpp ./src/common/logger.cpp ./src/common/cmdlineparser.cpp ./src/common/xcl.cpp ./src/edgedetection_app.cpp ./src/main.cpp ./src/sobel_cpuonly.cpp
-edge_HDRS=./src/sobel_cpuonly.h ./src/edgedetection_app.h ./src/common/xcl.h ./src/common/cmdlineparser.h ./src/common/logger.h ./src/common/simplebmp.h
+edge_SRCS=./src/edgedetection_app.cpp ./src/main.cpp ./src/sobel_cpuonly.cpp $(simplebmp_SRCS) $(logger_SRCS) $(cmdparser_SRCS) $(xcl_SRCS) $(lodepng_SRCS)
+edge_HDRS=./src/sobel_cpuonly.h ./src/edgedetection_app.h $(xcl_HDRS) $(cmdparser_HDRS) $(logger_HDRS) $(simplebmp_HDRS) $(lodepng_HDRS)
 edge_EXE=edge_detect
-edge_CXXFLAGS:=-I./src/ -I$(OPENCL12_INCLUDE)
+edge_CXXFLAGS:=-I./src/ -I$(OPENCL12_INCLUDE) -I$(simplebmp_INCLUDE) -I$(logger_INCLUDE) -I$(cmdparser_INCLUDE) -I$(xcl_INCLUDE) -I$(lodepng_INCLUDE)
 edge_LDFLAGS:=-L$(SDA_LIB) -L$(OPENCL_LIB) -lOpenCL -pthread
 edge_PLDFLAGS:= -L$(OPENCL_POWER_LIB) -lxilinxopencl -llmx6.0
 
 
 # Edge Detection Kernel
-krnl_edge_SRCS=./src/krnl_watermarking.cl
+krnl_edge_SRCS=./src/krnl_sobelfilter.cl
 krnl_edge_HDRS=
-krnl_edge_XCLBIN=watermark
+krnl_edge_XCLBIN=sobelfilter
 krnl_edge_XFLAGS=
 
 EXES=edge
@@ -95,10 +100,10 @@ $(foreach xclbin,$(XCLBINS),$(foreach xmode, $(XMODES),$(foreach xdevice,$(X86_D
 $(foreach xclbin,$(XCLBINS),$(foreach xmode, $(XMODES),$(foreach xdevice,$(POWER_DEVICES),$(eval $(call mk_xclbin,$(xclbin),$(xmode),$(xdevice),$(POWER))))))
 
 .PHONY: all-x86
-all-x86: $(XCLBIN_GOALS) $(EXE_GOALS)
+all-x86: $(EXE_GOALS) $(XCLBIN_GOALS)
 
 .PHONY: sv_all
-sv_all: $(SV_XCLBIN_GOALS) $(POWER_GOALS) $(EXE_GOALS)
+sv_all: $(POWER_GOALS) $(EXE_GOALS) $(SV_XCLBIN_GOALS)
 
 .PHONY: clean
 clean:

@@ -47,6 +47,7 @@ ALL TIMES.
 #define EDGEDETECTIONAPP_H_
 
 #include <string>
+#include <cmath>
 #include "xcl.h"
 
 using namespace std;

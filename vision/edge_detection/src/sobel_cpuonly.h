@@ -48,6 +48,8 @@ ALL TIMES.
 
 #include <string>
 #include <stdint.h>
+#include <stdio.h>
+
 
 using namespace std;
 
