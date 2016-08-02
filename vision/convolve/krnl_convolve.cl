@@ -74,7 +74,6 @@ bus_t short_to_bus(short in[B]) {
 	return val.b;
 }
 
-__attribute__((noinline))
 void get_coef(
 	__global bus_t *coef,
 	short coef_buf[FILTER_WIDTH*FILTER_HEIGHT]
@@ -94,24 +93,26 @@ void get_coef(
 	//printf("get_coef }\n");
 }
 
-__attribute__((noinline))
 void filter(
 	short coef_buf[FILTER_WIDTH*FILTER_HEIGHT],
-	__global bus_t* input, __global bus_t* output
+	global bus_t* input, global bus_t* output
 ) {
 	//printf("filter {\n");
 
 	/* Registers to read values from */
-	short line_reg[FILTER_HEIGHT][FILTER_WIDTH+B]
+	#define REG_WIDTH (M(FILTER_WIDTH+B-1)*B)
+
+	short line_reg[FILTER_HEIGHT][REG_WIDTH]
 		__attribute__((xcl_array_partition(complete,1)))
 		__attribute__((xcl_array_partition(complete,2)));
 
 	/* Line buffers to store values */
-	short line_buf[FILTER_HEIGHT-1][IMAGE_WIDTH-FILTER_WIDTH-B]
+	short line_buf[FILTER_HEIGHT-1][M(IMAGE_WIDTH-REG_WIDTH)*B]
 		__attribute__((xcl_array_partition(complete, 1)))
 /* The following could be used with incrementing pointers in a BRAM to reduce FF usage and hit 4k/8k image sizes */
-//		__attribute__((xcl_array_partition(cyclic, B, 2)));
-		__attribute__((xcl_array_partition(complete, 2)));
+		__attribute__((xcl_array_partition(cyclic, B, 2)));
+//		__attribute__((xcl_array_partition(complete, 2)));
+
 	__attribute__((xcl_pipeline_loop))
 	for(size_t i = 0; i < M(IMAGE_WIDTH*IMAGE_HEIGHT); i++) {
 		short input_buf[B] __attribute__((xcl_array_partition(complete, 1)));
@@ -121,24 +122,21 @@ void filter(
 
 		/* Rotate Buffers */
 		for(size_t y = 0; y < FILTER_HEIGHT-1; y++) {
-			for(size_t x = 0; x < FILTER_WIDTH; x++) {
+			for(size_t x = 0; x < REG_WIDTH - B; x++) {
 				line_reg[y][x] = line_reg[y][x+B];
 			}
 			for(size_t j = 0; j < B; j++) {
-				line_reg[y][FILTER_WIDTH+j] = line_buf[y][j];
-			}
-			for(size_t x = 0; x < IMAGE_WIDTH-FILTER_WIDTH-B-B; x++) {
-				line_buf[y][x] = line_buf[y][x+B];
+				line_reg[y][REG_WIDTH - B + j] = line_buf[y][j + B*(i % (M(IMAGE_WIDTH-REG_WIDTH)))];
 			}
 			for(size_t j = 0; j < B; j++) {
-				line_buf[y][IMAGE_WIDTH-FILTER_WIDTH-B-B+j] = line_reg[y+1][j];
+				line_buf[y][j + B*(i % (M(IMAGE_WIDTH-REG_WIDTH)))] = line_reg[y+1][j];
 			}
 		}
-		for(size_t x = 0; x < FILTER_WIDTH; x++) {
+		for(size_t x = 0; x < ((M(FILTER_WIDTH+B)-1)*B); x++) {
 			line_reg[FILTER_HEIGHT-1][x] = line_reg[FILTER_HEIGHT-1][x+B];
 		}
 		for(size_t j = 0; j < B; j++) {
-			line_reg[FILTER_HEIGHT-1][FILTER_WIDTH+j] = input_buf[j];
+			line_reg[FILTER_HEIGHT-1][REG_WIDTH - B + j] = input_buf[j];
 		}
 
 		short filter_sums[B];
@@ -148,7 +146,8 @@ void filter(
 
 			for(size_t y = 0; y < FILTER_HEIGHT; y++) {
 				for(size_t x = 0; x < FILTER_WIDTH; x++) {
-					short val = line_reg[y][x+j];
+					const size_t offset = REG_WIDTH - FILTER_WIDTH - B + 1;
+					short val = line_reg[y][offset + x + j];
 
 					sum += (int) coef_buf[y * FILTER_WIDTH + x] *
 					       (int) val;
@@ -156,10 +155,10 @@ void filter(
 			}
 
 			/* Handle Saturation */
-			if (sum >= 1<<15) {
-				sum = ((1<<15) - 1);
-			} else if (sum <= -(1<<15)) {
-				sum = -((1<<15));
+			if (sum > SHRT_MAX) {
+				sum = SHRT_MAX;
+			} else if (sum < SHRT_MIN) {
+				sum = SHRT_MIN;
 			}
 
 			filter_sums[j] = sum;
