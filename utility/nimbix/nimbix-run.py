@@ -214,10 +214,8 @@ rm -rf /data/automated_test/%s
 mkdir -p /data/automated_test/%s
 cd /data/automated_test/%s
 mirror -R .
-chmod -fR g+w .
 bye
 """ % (username, apikey, testid, testid, testid)
-
 	return lftp(cmds)
 
 def download_testcase(username, apikey, testid, job_name):
