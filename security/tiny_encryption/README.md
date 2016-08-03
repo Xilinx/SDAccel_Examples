@@ -37,7 +37,7 @@ The target board and platforms are available in the utility/boards.mk file. The 
 Executing the Application
 ---------------------------
 ```
-tinyEncryption_example.exe data/image1.bmp data/image2.bmp tinyEncryption.xclbin
+tiny.exe data/image1.bmp data/image2.bmp tinyEncryption.xclbin
 ```
 
 Files in the Example
