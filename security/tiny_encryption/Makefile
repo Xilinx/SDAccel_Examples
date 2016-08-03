@@ -35,7 +35,7 @@ OPENCL_POWER_LIB:=$(XILINX_SDACCEL)/runtime/lib/ppc64le
 tiny_SRCS=./src/tinyEncryption.cpp $(bitmap_SRCS) $(oclHelper_SRCS)
 tiny_HDRS=$(bitmap_HDRS) $(oclHelper_HDRS)
 tiny_EXE=tinyEncryption
-tiny_CXXFLAGS:=-I./src/ -I$(OPENCL12_INCLUDE)
+tiny_CXXFLAGS:=-I./src/ -I./../../libs/bitmap/ -I$(OPENCL12_INCLUDE)
 tiny_LDFLAGS:=-L$(SDA_LIB) -L$(OPENCL_LIB) -lOpenCL -pthread
 tiny_PLDFLAGS:= -L$(OPENCL_POWER_LIB) -lxilinxopencl -llmx6.0
 
