@@ -46,8 +46,8 @@ ALL TIMES.
 
 #include <iostream>
 #include "aes_app.h"
-#include "common/cmdlineparser.h"
-#include "common/logger.h"
+#include <cmdlineparser.h>
+#include <logger.h>
 
 using namespace std;
 using namespace sda;

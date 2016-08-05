@@ -1,59 +1,42 @@
-
 XCLBIN_DIR=xclbin
-
-define mk_power
-
-$(2): $($(1)_SRCS) $($(1)_HDRS)
-	$(CPOWER) $($(1)_CXXFLAGS) -o $$@ $($(1)_SRCS) $($(1)_PLDFLAGS)
-
-POWER_GOALS+=$(2)
-
-endef
 
 define mk_exe
 
 $(2): $($(1)_SRCS) $($(1)_HDRS)
-	$(CXX) $($(1)_CXXFLAGS) -o $$@ $($(1)_SRCS) $($(1)_LDFLAGS)
+	$($(3)_CXX) $(CXXFLAGS) $($(1)_CXXFLAGS) $($(1)_$(3)_CXXFLAGS) -o $$@ $($(1)_SRCS) $($(1)_LDFLAGS) $($(1)_$(3)_LDFLAGS)
 
-EXE_GOALS+=$(2)
+$(3)_EXE_GOALS+= $(2)
 
 endef
 
 COLON=:
 UNDERSCORE=_
-X86:= X86
-POWER:= POWER
 
 define mk_xclbin
 
-ifeq ($(4),X86)
-	XCLBIN_GOALS+= $(XCLBIN_DIR)/$(1).$(2).$(subst $(COLON),$(UNDERSCORE),$(3)).xclbin
-else
-	SV_XCLBIN_GOALS+= $(XCLBIN_DIR)/$(1).$(2).$(subst $(COLON),$(UNDERSCORE),$(3)).xclbin
-endif
-
 $(XCLBIN_DIR)/$(1).$(2).$(subst $(COLON),$(UNDERSCORE),$(3)).xclbin: $($(1)_SRCS) $($(1)_HDRS)
-	$(CLC) $($(1)_XFLAGS) -o $$@ -t $(2) --xdevice $(3) $($(1)_SRCS)
+	$(CLC) $(XOCCFLAGS) $($(1)_XFLAGS) -o $$@ -t $(2) --xdevice $(3) $($(1)_SRCS)
+
+$(4)_XCLBIN_GOALS+= $(XCLBIN_DIR)/$(1).$(2).$(subst $(COLON),$(UNDERSCORE),$(3)).xclbin
+
+endef
+
+define mk_all
+
+.PHONY: all-$(1)
+all-$(1): $($(1)_EXE_GOALS) $($(1)_XCLBIN_GOALS)
 
 endef
 
 .PHONY: all
-all: all-x86
+all: all-X86
 
-$(foreach exe,$(EXES),$(eval $(call mk_exe,$(exe),$(exe).exe)))
+$(foreach exe,$(EXES),$(foreach arch,$(ARCHES),$(eval $(call mk_exe,$(exe),$(exe)_$(arch).exe,$(arch)))))
 
-$(foreach exe,$(EXES),$(eval $(call mk_power,$(exe),$(exe)_power.exe)))
+$(foreach xclbin,$(XCLBINS),$(foreach xmode,$(XMODES),$(foreach arch,$(ARCHES),$(foreach xdevice,$($(arch)_DEVICES),$(eval $(call mk_xclbin,$(xclbin),$(xmode),$(xdevice),$(arch)))))))
 
-$(foreach xclbin,$(XCLBINS),$(foreach xmode, $(XMODES),$(foreach xdevice,$(X86_DEVICES),$(eval $(call mk_xclbin,$(xclbin),$(xmode),$(xdevice),$(X86))))))
-
-$(foreach xclbin,$(XCLBINS),$(foreach xmode, $(XMODES),$(foreach xdevice,$(POWER_DEVICES),$(eval $(call mk_xclbin,$(xclbin),$(xmode),$(xdevice),$(POWER))))))
-
-.PHONY: all-x86
-all-x86: $(EXE_GOALS) $(XCLBIN_GOALS)
-
-.PHONY: sv_all
-sv_all: $(POWER_GOALS) $(EXE_GOALS) $(SV_XCLBIN_GOALS)
+$(foreach arch, $(ARCHES),$(eval $(call mk_all,$(arch))))
 
 .PHONY: clean
 clean:
-	rm -rf $(EXE_GOALS) $(XCLBIN_GOALS) $(SV_XCLBIN_GOALS) sdaccel* *.ll
+	rm -rf $(foreach arch,$(ARCHES),$($(arch)_EXE_GOALS) $($(arch)_XCLBIN_GOALS)) sdaccel* *.ll _xocc_*
