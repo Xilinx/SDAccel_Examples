@@ -27,7 +27,6 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -45,9 +44,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 typedef unsigned char u8;
 
-int main(int argc, char* argv[])
-{
-
+int main(int argc, char* argv[]) {
     if(argc != 2)
     {
         std::cout << "Usage: " << argv[0] <<" <xclbin>" << std::endl;
@@ -56,7 +53,6 @@ int main(int argc, char* argv[])
 
     const char* xclbinFilename = argv[1];
 
-// OPENCL HOST CODE AREA START
     xcl_world world;
     cl_kernel krnl;
 
@@ -68,12 +64,10 @@ int main(int argc, char* argv[])
         krnl  = xcl_import_source(world, xclbinFilename, "krnl_hello");
     }
 
-
     size_t vector_size_bytes = sizeof(char) * LENGTH;
     cl_mem buffer_a = xcl_malloc(world, CL_MEM_READ_ONLY, vector_size_bytes);
 
     char* source_a = (char *) malloc(vector_size_bytes);
-
 
     /* Create the test data and run the vector addition locally */
     source_a[0] = 5;
@@ -96,5 +90,4 @@ int main(int argc, char* argv[])
     clReleaseKernel(krnl);
     xcl_release_world(world);
 
-// OPENCL HOST CODE AREA END
 }
