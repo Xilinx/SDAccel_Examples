@@ -74,17 +74,6 @@ sha1Runner::sha1Runner(cl_context context, cl_command_queue command_queue, cl_ke
 }
 
 sha1Runner::~sha1Runner() {
-  int err;
-
-  err = clReleaseMemObject(mDevGBuf);
-  if(err != CL_SUCCESS) {
-    abort();
-  }
-
-  err = clReleaseMemObject(mDevGState);
-  if(err != CL_SUCCESS) {
-    abort();
-  }
 }
 
 cl_event sha1Runner::run(const unsigned int *buf, unsigned int *mds) {
