@@ -4,3 +4,9 @@ sdaccel_profile_summary.html
 sdaccel_profile_summary.csv
 _xocc_*/
 .Xil/
+*.ll
+*.exe
+emconfig.json
+xmltmp
+dltmp
+runtime/
