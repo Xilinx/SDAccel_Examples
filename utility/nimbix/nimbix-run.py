@@ -310,6 +310,10 @@ print "Upload Complete"
 print
 print "Testcase: " + exe + " " + ' '.join(args)
 
+# Sleep for 10 seconds before trying to execute as sometimes the uploads are not
+# instantaneous
+time.sleep(10)
+
 
 job = submit_testcase(nimbix_user, nimbix_apikey,
                       testid, exe, args)
