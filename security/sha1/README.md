@@ -4,7 +4,7 @@ SHA1 Example
 This is an optimized implementation of SHA1 secure hash algorithm targeting
 execution on an SDAccel supported FPGA acceleration card.
 
-Achieved performance was measured on an Alpha Data ADM-PCI-7v3 card.
+Achieved performance was measured on an Alpha Data ADM-PCI-7v3 card.
 
 Changelog
 ----------
@@ -32,7 +32,7 @@ The target board and platforms are available in the utility/boards.mk file. The 
 Executing the Application
 ---------------------------
 ```
-sha1_example.exe --platform Xilinx --device fpga0 --kernel bin_sha1.xclbin
+sha1_example.exe --platform Xilinx --device xilinx:adm-pcie-ku3:2ddr:2.1 --kernel bin_sha1.xclbin
 ```
 
 Files in the Example
