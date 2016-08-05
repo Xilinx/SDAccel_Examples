@@ -268,7 +268,8 @@ cdir = os.getcwd()
 rundate = datetime.datetime.now();
 
 user = pwd.getpwuid(os.getuid())[0]
-testid = user + "-" + rundate.strftime("%d%m%y_%S")
+rand = os.urandom(5).encode('base-64')
+testid = user + "-" + rundate.strftime("%d%m%y_%S") + "-" + rand
 
 if len(sys.argv) != 1:
 	exe = sys.argv[1]
