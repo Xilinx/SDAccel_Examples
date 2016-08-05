@@ -38,7 +38,7 @@ The target board and platforms are available in the utility/boards.mk file. The 
 Executing the Application
 ---------------------------
 ```
-edgedetection_example.exe --platform Xilinx --device fpga0 --kernel bin_sobelfilter.xclbin data/lola.bmp
+edgedetection_example.exe --platform Xilinx --device xilinx:adm-pcie-ku3:2ddr:2.1 --kernel bin_sobelfilter.xclbin data/lola.bmp
 ```
 
 Files in the Example
