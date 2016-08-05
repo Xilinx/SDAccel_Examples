@@ -268,7 +268,7 @@ cdir = os.getcwd()
 rundate = datetime.datetime.now();
 
 user = pwd.getpwuid(os.getuid())[0]
-rand = os.urandom(5).encode('base-64')
+rand = os.urandom(4).encode('hex')
 testid = user + "-" + rundate.strftime("%d%m%y_%S") + "-" + rand
 
 if len(sys.argv) != 1:
