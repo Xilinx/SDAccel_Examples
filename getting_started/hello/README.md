@@ -34,10 +34,14 @@ Launches compilation both emulation and board execution modes of the application
 To limit or change the boards for compilation, edit the utility/boards.mk file located at the top level of this repository.
 
 2. Executing emulation flows
-Set the following environment variable  XCL_EMULATION_MODE=true
+Set the following environment variable and create a emconfig.json file
+	```
+	export XCL_EMULATION_MODE=true
+	emconfigutil --xdevice 'xilinx:adm-pcie-ku3:2ddr:2.1' --nd 1
+	```
 Run the application as
     ```
-    ./hello.exe ./xclbin/krnl_hello.<emulation flow>.<target board>.xclbin
+    ./hello_X86.exe ./xclbin/krnl_hello.<emulation flow>.xilinx_adm-pcie-ku3_2ddr_2.1.xclbin
     ```
 The choices for emulation flow are
     - sw_emu = software emulation
@@ -46,13 +50,13 @@ The choices for emulation flow are
 3. Running the application on a board hosted by Nimbix from a remote system
 Install the Xilinx Runtime for board in Nimbix using the xbinst utility in SDAccel
     ```
-    xbinst -x xilinx:adm-pcie-ku3:2ddr:2.1 -d .
+    xbinst -x 'xilinx:adm-pcie-ku3:2ddr:2.1' -d .
     mv xbinst/pkg/pcie/runtime .
     rm -rf xbinst
     ```
 Run the nimbix-run.py script provided in the utility/nimbix directory at the top level of this repository
     ```
-    nimbix-run.py ./hello.exe ./xclbin/krnl_hello.hw.<target board>.xclbin
+    ../../utility/nimbix/nimbix-run.py ./hello_X86.exe ./xclbin/krnl_hello.hw.xilinx_adm-pcie-ku3_2ddr_2.1.xclbin
     ```
 Only the Alpha Data ADM-PCIE-KU3 card is supported by this method.
 
@@ -62,7 +66,7 @@ Follow the instructions in the [Nimbix Getting Started Guide][]
 ### Compilation for IBM POWER servers
 1. View the SuperVessel [Walkthrough Video][]
 
-2. make sv_all
+2. make all-POWER
 Launches compilation both emulation and board execution modes of the application for all supported boards.
 
 ## 5. OTHER INFORMATION
@@ -81,10 +85,10 @@ The example is written by developers at [Xilinx](http://www.xilinx.com/)
 
 ## 10. REVISION HISTORY
 
-Date		|	Readme Version	|	Revision Description
-----------------|-----------------------|-------------------------
-FEB2016		|	1.0		|	Initial Xilinx release
-JUL2016     |   2.0     |   Conversion to Makefile based compilation
+Date    | Readme Version | Revision Description
+--------|----------------|-------------------------
+FEB2016 | 1.0            | Initial Xilinx release
+JUL2016 | 2.0            | Conversion to Makefile based compilation
 
 
 [3-Clause BSD License]: LICENSE.md
