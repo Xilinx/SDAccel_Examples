@@ -213,7 +213,8 @@ user %s %s
 rm -rf /data/automated_test/%s
 mkdir -p /data/automated_test/%s
 cd /data/automated_test/%s
-mirror -R .
+mirror -R -X _xocc_*/ -X .Xil/ .
+cache flush
 bye
 """ % (username, apikey, testid, testid, testid)
 	return lftp(cmds)
@@ -224,6 +225,8 @@ open sftp://drop.jarvice.com
 user %s %s
 cd /data/automated_test/%s
 mirror .
+mirror .
+cache flush
 get /data/NACC-OUTPUT/%s.txt
 rm -r /data/automated_test/%s
 bye
