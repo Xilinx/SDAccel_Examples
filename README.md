@@ -57,8 +57,6 @@ AUG2016 | 1.0            | Initial Xilinx release
 
 
 [SDAccel Forums]: https://forums.xilinx.com/t5/SDAccel/bd-p/SDx
-[SDAccel User Guides]: http://www.xilinx.com/support/documentation-navigation/developm
-ent-tools/software-development/sdaccel.html?resultsTablePreSelect=documenttype:SeeAll#
-documentation
+[SDAccel User Guides]: http://www.xilinx.com/support/documentation-navigation/development-tools/software-development/sdaccel.html?resultsTablePreSelect=documenttype:SeeAll#documentation
 
 
