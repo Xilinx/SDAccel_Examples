@@ -14,27 +14,27 @@ Welcome to the SDAccel example repository. This repository contains the latest e
 9. REVISION HISTORY
 
 
-## 1. GETTING STARTED
+### 1. GETTING STARTED
 
 Collection of examples geared at teaching the user best practices in how to use different features of SDAccel and start on their own application. 
 
-## 2. ACCELERATION
+### 2. ACCELERATION
 
 Collection of examples in processor offloading to FPGA based compute units.
 
-## 3. SECURITY
+### 3. SECURITY
 
 Collection of examples in encryption and data security. 
 
-## 4. VISION
+### 4. VISION
 
 Collection of examples in image and video processing. 
 
-## 5. LIBS
+### 5. LIBS
 
 Collection of common libraries used across all examples to assist in the quick development of application host code. 
 
-## 6. UTILITY
+### 6. UTILITY
 
 Collection of utility functions used as part of the Makefiles in all of the examples. This set includes Makefile rules and scripts to launch SDAccel compiled applications onto boards hosted by Nimbix directly from the developers terminal shell. 
 
