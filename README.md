@@ -45,8 +45,7 @@ For more information check here:
 [SDAccel User Guides][]
 
 ## 8. SUPPORT
-For questions and to get help on this project or your own projects, visit the [SDAccel
- Forums][].
+For questions and to get help on this project or your own projects, visit the [SDAccel Forums][].
 
 ## 9. REVISION HISTORY
 
