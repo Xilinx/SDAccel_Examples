@@ -1,56 +1,64 @@
-Applications Repository
-========================
+SDAccel Example Repository
+===========================
 
-SDAccel application repository is available to all users
-within the Xilinx network. Each directory in the repository contains one complete application with all required files.
+Welcome to the SDAccel example repository. This repository contains the latest examples to get you started with application optimization targeting Xilinx PCIe FPGA acceleration boards. All examples are ready to be compiled and executed on boards hosted in the Nimbix and IBM SuperVessel clouds. The repository is organized as follows:
 
-The available applications are
+1. GETTINGS STARTED
+2. ACCELERATION
+3. SECURITY
+4. VISION
+5. LIBS
+6. UTILITY
+7. OTHER INFORMATION
+8. SUPPORT
+9. REVISION HISTORY
 
-1. **AES Decryption:**
-Optimized implementation of an AES-128 ECB Encrypt in Software, followed by OpenCL Decryption.
 
-2. **Bitcoin Miner:**
-This is a patch and build infrastructure for building the bfgminer application.
+## 1. GETTING STARTED
 
-3. **Edge Detection:**
-Implementation of a Sobel Edge Detector.
+Collection of examples geared at teaching the user best practices in how to use different features of SDAccel and start on their own application. 
 
-4. **Hello:**
-Hello application demonstrating the use of printf in a kernel.
+## 2. ACCELERATION
 
-5. **Histogram Equalizer:**
-Optimized implementation of a 12-bit histogram equalizer.
+Collection of examples in processor offloading to FPGA based compute units.
 
-6. **Huffman Codec:**
-Optimized implementation of Huffman encoding/decoding algorithm.
+## 3. SECURITY
 
-7. **Median Filter:**
-Optimized implementation of a median filter for image noise reduction.
+Collection of examples in encryption and data security. 
 
-8. **Nearest Neighbor:**
-Optimized implementation of nearest neighbor linear search algorithm.
+## 4. VISION
 
-9. **RSA:**
-Optimized implementation of the RSA decryption algorithm.
+Collection of examples in image and video processing. 
 
-10. **SHA-1:**
-Optimized implementation of SHA1 secure hashing algorithm.
+## 5. LIBS
 
-11. **Tiny Encryption:**
-Optimized implementation of the tiny encryption algorithm.
+Collection of common libraries used across all examples to assist in the quick development of application host code. 
 
-12. **Vector Add:**
-Example of vector addition in OpenCL.
+## 6. UTILITY
 
-13. **Vector Dot Product:**
-Example of vector dotproduct operation.
+Collection of utility functions used as part of the Makefiles in all of the examples. This set includes Makefile rules and scripts to launch SDAccel compiled applications onto boards hosted by Nimbix directly from the developers terminal shell. 
 
-14. **Vector Mult/Add:**
-Reuse of data stored in the DDR across kernels in different binary containers.
 
-15. **Watermarking:**
-Example of image watermarking.
+## 7. OTHER INFORMATION
 
-16. **Smithwaterman:**
-Implementation of smithwaterman sequence alignment algorithm.
+For more information check here:
+[SDAccel User Guides][]
+
+## 8. SUPPORT
+For questions and to get help on this project or your own projects, visit the [SDAccel
+ Forums][].
+
+## 9. REVISION HISTORY
+
+Date    | Readme Version | Revision Description
+--------|----------------|-------------------------
+AUG2016 | 1.0            | Initial Xilinx release
+
+
+
+[SDAccel Forums]: https://forums.xilinx.com/t5/SDAccel/bd-p/SDx
+[SDAccel User Guides]: http://www.xilinx.com/support/documentation-navigation/developm
+ent-tools/software-development/sdaccel.html?resultsTablePreSelect=documenttype:SeeAll#
+documentation
+
 
