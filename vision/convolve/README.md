@@ -50,6 +50,9 @@ Run the application as
 The choices for emulation flow are
 		- sw_emu = software emulation
 		- hw_emu = hardware emulation
+*NOTE:* The software emulation flow is a functional correctness check only. It does not estimate the performance of the application in hardware.
+The hardware emulation flow is a cycle accurate simulation of the hardware generated for the application. As such, it is expected for this simulation to take a long time.
+It is recommended that for this example the user skips running hardware emulation or modifies the example to work on a reduced data set.
 3. Running the application on a board hosted by Nimbix from a remote system
 
 	Install the Xilinx Runtime for board in Nimbix using the xbinst utility in SDAccel
