@@ -31,6 +31,11 @@
             "date" : "JUL2016",
             "version": "1.0",
             "description": "Initial Xilinx Release"
+        },
+        {
+            "date" : "AUG2016",
+            "version": "2.0",
+            "description": "Added performance metrics"
         }
     ]
 

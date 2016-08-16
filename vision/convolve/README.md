@@ -90,6 +90,7 @@ This example is written by developers at
 Date | README Version | Description
 -----|----------------|------------
 JUL2016|1.0|Initial Xilinx Release
+AUG2016|2.0|Added performance metrics
 [3-Clause BSD License]: LICENSE.md
 [SDAccel Forums]: https://forums.xilinx.com/t5/SDAccel/bd-p/SDx
 [SDAccel User Guides]: http://www.xilinx.com/support/documentation-navigation/development-tools/software-development/sdaccel.html?resultsTablePreSelect=documenttype:SeeAll#documentation
