@@ -20,6 +20,7 @@ The convolve example is a performant design which showcases convolutional image 
 Board|Image Size|Frames / Second
 ----|-----|-----
 Alpha Data ADM-PCIE-7V3|1,024 x 1,024|1,000
+Alpha Data ADM-PCIE-KU3|1,024 x 1,024|1,000
 ## 2. SOFTWARE AND SYSTEM REQUIREMENTS
 Board | Software Version
 ------|---------

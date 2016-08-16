@@ -12,7 +12,13 @@
             "system" : "Alpha Data ADM-PCIE-7V3",
             "constraint" : "1,024 x 1,024",
             "metric" : "1,000"
+        },
+        {
+            "system" : "Alpha Data ADM-PCIE-KU3",
+            "constraint" : "1,024 x 1,024",
+            "metric" : "1,000"
         }
+
     ],
     "contributors" : [
         {
