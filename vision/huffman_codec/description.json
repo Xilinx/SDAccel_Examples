@@ -1,0 +1,27 @@
+{
+    "example": "Huffman Encoding/Decoding",
+    "overview" : "This is an implementation of a huffman encoding/decoding algorithm targeting execution on an SDAccel supported FPGA acceleration card.",
+    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
+    "version": ["SDAccel 2016.1"],
+    "dsa": "xilinx:adm-pcie-ku3:2ddr:2.1",
+    "em_cmd" : "./huffman_X86.exe -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:2.1' --kernel ./xclbin/krnl_huffman.<emulation type>.xilinx_adm-pcie-ku3_2ddr_2.1.xclbin data/rect_1024.bmp",
+    "hw_cmd" : "../../utility/nimbix/nimbix-run.py ./huffman_X86.exe -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:2.1' --kernel ./xclbin/krnl_huffman.hw.xilinx_adm-pcie-ku3_2ddr_2.1.xclbin data/rect_1024.bmp",
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ],
+    "revision" : [
+        {
+            "date" : "FEB2016",
+            "version": "1.0",
+            "description": "Initial Xilinx Release"
+        },
+        {
+            "date" : "JUL2016",
+            "version": "2.0",
+            "description": "Conversion to Makefile based compilation"
+        }
+    ]
+}

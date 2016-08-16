@@ -1,0 +1,36 @@
+{
+    "example" : "Nearest Neighbor Linear Search",
+    "overview" : "This is an optimized implementation of a nearest neighbor linear search algorithm targeting execution on a SDAccel supported FPGA acceleration card.",
+    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
+    "version": ["SDAccel 2016.1"],
+    "dsa": "xilinx:adm-pcie-ku3:2ddr:2.1",
+    "em_cmd" : "./nearest_X86.exe ./xclbin/krnl_nearest.<emulation flow>.xilinx_adm-pcie-ku3_2ddr_2.1.xclbin data/queries.txt data/queries.txt",
+    "hw_cmd" : "../../utility/nimbix/nimbix-run.py ./nearest_X86.exe ./xclbin/krnl_nearest.hw.xilinx_adm-pcie-ku3_2ddr_2.1.xclbin",
+    "perf_fields" : ["Board", "Measurements per Cycle", "Gigameasurements / Second"],
+    "performance": [
+        {
+            "system" : "Alpha Data ADM-PCIE-7V3",
+            "constraint" : "256",
+            "metric" : "37.5"
+        }
+    ],
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ],
+    "revision" : [
+        {
+            "date" : "FEB2016",
+            "version": "1.0",
+            "description": "Initial Xilinx Release"
+        },
+        {
+            "date" : "JUL2016",
+            "version": "2.0",
+            "description": "Conversion to Makefile based compilation"
+        }
+    ]
+
+}
