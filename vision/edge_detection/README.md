@@ -40,7 +40,7 @@ emconfigutil --xdevice 'xilinx:adm-pcie-ku3:2ddr:2.1' --nd 1
 ```
 Run the application as
 ```
-./edge_X86.exe -p Xilinx -d xilinx:adm-pcie-ku3:2ddr:2.1 -k ./xclbin/krnl_edge.<emulation type>.xilinx_adm-pcie-ku3_2ddr_2.1.xclbin data/lola.bmp
+./edge_X86.exe -p Xilinx -d xilinx:adm-pcie-ku3:2ddr:2.1 -k ./xclbin/krnl_edge.<emulation type>.xilinx_adm-pcie-ku3_2ddr_2.1.xclbin -b data/input/lola.bmp
 ```
 The choices for emulation flow are
 		- sw_emu = software emulation
@@ -58,7 +58,7 @@ rm -rf xbinst
 ```
 Run the nimbix-run.py script provided in the utility/nimbix directory at the top level of this repository
 ```
-../../utility/nimbix/nimbix-run.py ./edge_X86.exe -p Xilinx -d xilinx:adm-pcie-ku3:2ddr:2.1 -k ./xclbin/krnl_edge.hw.xilinx_adm-pcie-ku3_2ddr_2.1.xclbin data/lola.bmp
+../../utility/nimbix/nimbix-run.py ./edge_X86.exe -p Xilinx -d xilinx:adm-pcie-ku3:2ddr:2.1 -k ./xclbin/krnl_edge.hw.xilinx_adm-pcie-ku3_2ddr_2.1.xclbin -b data/input/lola.bmp
 ```
 
 	Only the Alpha Data ADM-PCIE-KU3 card is supported by this method.
