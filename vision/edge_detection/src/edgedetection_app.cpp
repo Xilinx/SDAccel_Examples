@@ -177,7 +177,7 @@ bool EdgeDetectFilter::run(const string& strInput, string& strOutput) {
 
     //Launch the kernel
     unsigned long duration = xcl_run_kernel3d(m_world, m_clKrnlSobel, 1, 1, 1);
-
+    std::cout << "Kernel Duration: " << duration << " ns" << std::endl;
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//readback grey image    
     //xcl_memcpy_from_device(m_world, vGreyImage.data(), buffer_inout_grey, szGreyImage);
@@ -210,7 +210,7 @@ bool EdgeDetectFilter::run(const string& strInput, string& strOutput) {
 	vGreyImage.resize(0);
     
 	//perf results
-	LogInfo("Kernel exec duration: [%.8f]", duration);
+	//LogInfo("Kernel exec duration: [%.8f]", duration);
 
 	return true;
 }
