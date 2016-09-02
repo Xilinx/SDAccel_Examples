@@ -210,7 +210,7 @@ bool EdgeDetectFilter::run(const string& strInput, string& strOutput) {
 	vGreyImage.resize(0);
     
 	//perf results
-	LogInfo("Kernel exec duration: [%.2f]", duration);
+	LogInfo("Kernel exec duration: [%.8f]", duration);
 
 	return true;
 }
