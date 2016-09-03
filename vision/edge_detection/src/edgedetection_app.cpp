@@ -124,7 +124,7 @@ bool EdgeDetectFilter::run(const string& strInput, string& strOutput) {
 	}
 
 	int nchannels = (inputbmp.header.dibdepth >> 3);
-
+       std::cout << "nchannels is : " << nchannels << " width is " << inputbmp.width << "height is "<< inputbmp.height<< std::endl;
     //convert to grayscale image
     size_t szGreyImage = inputbmp.width * inputbmp.height;
 	size_t szColorImage = szGreyImage * nchannels;
@@ -178,6 +178,7 @@ bool EdgeDetectFilter::run(const string& strInput, string& strOutput) {
     //Launch the kernel
     unsigned long duration = xcl_run_kernel3d(m_world, m_clKrnlSobel, 1, 1, 1);
     std::cout << "Kernel Duration: " << duration << " ns" << std::endl;
+    
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//readback grey image    
     //xcl_memcpy_from_device(m_world, vGreyImage.data(), buffer_inout_grey, szGreyImage);
