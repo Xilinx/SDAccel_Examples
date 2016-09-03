@@ -171,10 +171,10 @@ bool EdgeDetectFilter::run(const string& strInput, string& strOutput) {
     nchannels = 1;
     
     clSetKernelArg(m_clKrnlSobel, 0, sizeof(cl_mem), &buffer_in_grey);
-    //clSetKernelArg(m_clKrnlSobel, 1, sizeof(int), &nchannels);
-    //clSetKernelArg(m_clKrnlSobel, 2, sizeof(int), &inputbmp.width);
-    //clSetKernelArg(m_clKrnlSobel, 3, sizeof(int), &inputbmp.height);
-    clSetKernelArg(m_clKrnlSobel, 1, sizeof(cl_mem), &buffer_out_sobel);
+    clSetKernelArg(m_clKrnlSobel, 1, sizeof(int), &nchannels);
+    clSetKernelArg(m_clKrnlSobel, 2, sizeof(int), &inputbmp.width);
+    clSetKernelArg(m_clKrnlSobel, 3, sizeof(int), &inputbmp.height);
+    clSetKernelArg(m_clKrnlSobel, 4, sizeof(cl_mem), &buffer_out_sobel);
 
     //Launch the kernel
     unsigned long duration = xcl_run_kernel3d(m_world, m_clKrnlSobel, 1, 1, 1);
