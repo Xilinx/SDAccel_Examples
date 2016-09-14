@@ -4,8 +4,8 @@
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
     "version": ["SDAccel 2016.1"],
     "dsa": "xilinx:adm-pcie-ku3:2ddr:2.1",
-    "em_cmd": "./convolve_X86.exe <emulation flow> 'xilinx:adm-pcie-ku3:2ddr:2.1' data/input_buffer_raw.txt data/filter_buffer_raw.txt data/output_buffer_raw.txt",
-    "hw_cmd": "../../utility/nimbix/nimbix-run.py ./convolve_X86.exe hw 'xilinx:adm-pcie-ku3:2ddr:2.1' data/input_buffer_raw.txt data/filter_buffer_raw.txt data/output_buffer_raw.txt",
+    "em_cmd": "./convolve_X86.exe data/input_buffer_raw.txt data/filter_buffer_raw.txt data/output_buffer_raw.txt",
+    "hw_cmd": "../../utility/nimbix/nimbix-run.py ./convolve_X86.exe data/input_buffer_raw.txt data/filter_buffer_raw.txt data/output_buffer_raw.txt",
     "perf_fields" : ["Board", "Image Size", "Frames / Second"],
     "performance": [
         {

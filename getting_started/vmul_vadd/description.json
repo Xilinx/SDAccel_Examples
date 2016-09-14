@@ -4,8 +4,8 @@
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
     "version": ["SDAccel 2016.1"],
     "dsa": "xilinx:adm-pcie-ku3:2ddr:2.1",
-    "em_cmd" : "./vaddvmul_X86.exe ./xclbin/krnl_vmul.<emulation flow>.xilinx_adm-pcie-ku3_2ddr_2.1.xclbin ./xclbin/krnl_vadd.<emulation flow>.xilinx_adm-pcie-ku3_2ddr_2.1.xclbin",
-    "hw_cmd" : "../../utility/nimbix/nimbix-run.py ./vaddvmul_X86.exe ./xclbin/krnl_vmul.hw.xilinx_adm-pcie-ku3_2ddr_2.1.xclbin ./xclbin/krnl_vadd.hw.xilinx_adm-pcie-ku3_2ddr_2.1.xclbin",
+    "em_cmd" : "./vaddvmul_X86.exe",
+    "hw_cmd" : "../../utility/nimbix/nimbix-run.py ./vaddvmul_X86.exe",
     "contributors" : [
         {
             "group": "Xilinx",

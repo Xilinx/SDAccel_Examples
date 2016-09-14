@@ -43,44 +43,23 @@ ALL TIMES.
 
 *******************************************************************************/
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <cstring>
-#include <iostream>
-#include <iomanip>
-#include <math.h>
 
 //OpenCL includes
 #include <xcl.h>
 #include <vadd.h>
 
-int main(int argc, char* argv[])
-{
-
-    if(argc != 2)
-    {
-        std::cout << "Usage: " << argv[0] <<" <xclbin>" << std::endl;
-        return -1;
+int main(int argc, char* argv[]) {
+    if(argc != 1) {
+        printf("Usage: %s\n", argv[0]);
+        return EXIT_FAILURE;
     }
 
-    const char* xclbinFilename = argv[1];
-
-// OPENCL HOST CODE AREA START
-    xcl_world world;
-    cl_kernel krnl;
-
-    if(strstr(argv[1], ".xclbin") != NULL) {
-        world = xcl_world_single(CL_DEVICE_TYPE_ACCELERATOR);
-        krnl  = xcl_import_binary(world, xclbinFilename, "krnl_vadd");
-    } else {
-        world = xcl_world_single(CL_DEVICE_TYPE_CPU);
-        krnl  = xcl_import_source(world, xclbinFilename, "krnl_vadd");
-    }
-
+    xcl_world world    = xcl_world_single();
+    cl_program program = xcl_import_binary(world, "krnl_vadd");
+    cl_kernel krnl     = xcl_get_kernel(program, "krnl_vadd");
 
     size_t vector_size_bytes = sizeof(int) * LENGTH;
     cl_mem buffer_a = xcl_malloc(world, CL_MEM_READ_ONLY, vector_size_bytes);
@@ -128,19 +107,16 @@ int main(int argc, char* argv[])
     clReleaseKernel(krnl);
     xcl_release_world(world);
 
-// OPENCL HOST CODE AREA END
-
     /* Compare the results of the kernel to the simulation */
     int krnl_match = 0;
     for(int i = 0; i < LENGTH; i++){
         if(result_sim[i] != result_krnl[i]){
-            std::cout <<"Error: Result mismatch" << std::endl;
-            std::cout <<"i = " << i << " CPU result = " << result_sim[i] << " Krnl Result = " << result_krnl[i] << std::endl;
+            printf("Error: Result mismatch\n");
+            printf("i = %d CPU result = %d Krnl Result = %d\n", i, result_sim[i], result_krnl[i]);
             krnl_match = 1;
             break;
-        }
-        else{
-            std::cout <<"Result Match: i = " << i << " CPU result = " << result_sim[i] << " Krnl Result = " << result_krnl[i] << std::endl;
+        } else{
+            printf("Result Match: i = %d CPU result = %d Krnl Result = %d\n", i, result_sim[i], result_krnl[i]);
         }
     }
 
@@ -149,9 +125,9 @@ int main(int argc, char* argv[])
     free(result_krnl);
 
     if(krnl_match == 1)
-        return 1;
+        return EXIT_FAILURE;
     else{
-        std::cout << "Success! kernel results match cpu results." << std::endl;
-        return 0;
+        printf("Success! kernel results match cpu results.\n");
+        return EXIT_SUCCESS;
     }
 }

@@ -110,34 +110,30 @@ cv::Mat readFloatTxtFile(std::string fileName, size_t rows, size_t cols) {
 }
 
 int main(int argc, char* argv[]) {
-    if(argc != 5 && argc != 6)
+    if(argc != 3 && argc != 4)
     {
-        std::cout << "Usage: " << argv[0] <<" <xmode> <xdevice> <input> <coef> [<golden>]" << std::endl;
+        std::cout << "Usage: " << argv[0] <<"<input> <coef> [<golden>]" << std::endl;
         return EXIT_FAILURE;
     }
 
     std::cout << "Parsing Command Line..." << std::endl;
-    std::string xmode(argv[1]);
-    std::string xdevice(argv[2]);
-    std::string inputFileName(argv[3]);
-    std::string coefFileName(argv[4]);
+    std::string inputFileName(argv[1]);
+    std::string coefFileName(argv[2]);
 
     bool validate = false;
 
-    if (argc == 6) {
+    if (argc == 4) {
         validate = true;
     }
 
-    std::cout << "Finding Kernel..." << std::endl;
-    std::string xclbinFileName = getXclbinFileName("krnl_convolve", xmode, xdevice);
-
     std::cout << "Creating context..." << std::endl;
-    xcl_world world = xcl_world_single(CL_DEVICE_TYPE_ACCELERATOR);
+    xcl_world world = xcl_world_single();
+    cl_program program = xcl_import_binary(world, "krnl_convolve");
+    cl_kernel krnl = xcl_get_kernel(program, "krnl_convolve");
 
     std::cout << "Reading inputs..." << std::endl;
     cv::Mat input  = readTxtFile(inputFileName, 1024, 1024);
     cv::Mat coef   = readTxtFile(coefFileName, 11, 11);
-    cl_kernel krnl = xcl_import_binary(world, xclbinFileName.c_str(), "krnl_convolve");
 
     input /= 32;
     coef *= 1;
@@ -181,7 +177,7 @@ int main(int argc, char* argv[]) {
 
     if(validate) {
         std::cout << "Validate" << std::endl;
-        std::string goldenFileName(argv[5]);
+        std::string goldenFileName(argv[3]);
         cv::Mat golden  = readFloatTxtFile(goldenFileName, 1014, 1014);
 
         cv::imwrite("golden.bmp", golden);

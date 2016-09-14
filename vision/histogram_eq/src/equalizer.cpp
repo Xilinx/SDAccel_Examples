@@ -65,16 +65,15 @@ ALL TIMES.
 
 int main(int argc, char* argv[])
 {
-    if(argc != 3)
+    if(argc != 2)
     {
-        std::cout << "Usage: " << argv[0] <<" <xclbin> <input_image>" << std::endl;
+        std::cout << "Usage: " << argv[0] <<" <input_image>" << std::endl;
         return -1;
     }
 
     //Read the input image
     std::cout << "Reading input image..." << std::endl;
-    const char* inputFilename = argv[2];
-    const char* xclbinFilename = argv[1];
+    const char* inputFilename = argv[1];
 
     cv::Mat inputImageRaw;
 
@@ -91,17 +90,9 @@ int main(int argc, char* argv[])
     cv::Mat inputImage;
     inputImageRaw.convertTo(inputImage, CV_16U, 255);
 
-// OPENCL HOST CODE AREA START
-    xcl_world world;
-    cl_kernel krnl;
-
-    if(strstr(argv[1], ".xclbin") != NULL) {
-        world = xcl_world_single(CL_DEVICE_TYPE_ACCELERATOR);
-        krnl  = xcl_import_binary(world, xclbinFilename, "krnl_equalizer");
-    } else {
-        world = xcl_world_single(CL_DEVICE_TYPE_CPU);
-        krnl  = xcl_import_source(world, xclbinFilename, "krnl_equalizer");
-    }
+    xcl_world world = xcl_world_single();
+    cl_program program  = xcl_import_binary(world, "krnl_equalizer");
+    cl_kernel krnl = xcl_get_kernel(program, "krnl_equalizer");
 
     std::cout << "Image Size: " << inputImage.cols << "x" << inputImage.rows << std::endl;
 
@@ -153,13 +144,10 @@ int main(int argc, char* argv[])
 
     std::cout << "Kernel Duration: " << duration << " ns" << std::endl;
 
-		
-	//on jenkins we can not open a display 
-	/*
-    cv::namedWindow("Image");
-    cv::imshow("Image",result_eq);
-    cv::waitKey(0);
-	*/
+    std::string outFilename = std::string("out.bmp");
+
+    std::cout << "Writing Image to " << outFilename << std::endl;
+    cv::imwrite(outFilename.c_str(), result_eq);
 
     return 0;
 }

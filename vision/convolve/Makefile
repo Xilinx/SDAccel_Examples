@@ -15,6 +15,7 @@ convolve_POWER_LDFLAGS=$(opencl_POWER_LDFLAGS)
 
 # convolve Kernel
 krnl_convolve_SRCS=src/krnl_convolve.cl
+krnl_convolve_XFLAGS=--nk krnl_convolve:4
 
 EXES=convolve
 XCLBINS=krnl_convolve

@@ -4,8 +4,8 @@
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
     "version": ["SDAccel 2016.1"],
     "dsa": "xilinx:adm-pcie-ku3:2ddr:2.1",
-    "em_cmd" : "./nearest_X86.exe ./xclbin/krnl_nearest.<emulation flow>.xilinx_adm-pcie-ku3_2ddr_2.1.xclbin data/queries.txt data/queries.txt",
-    "hw_cmd" : "../../utility/nimbix/nimbix-run.py ./nearest_X86.exe ./xclbin/krnl_nearest.hw.xilinx_adm-pcie-ku3_2ddr_2.1.xclbin",
+    "em_cmd" : "./nearest_X86.exe data/queries.txt data/queries.txt",
+    "hw_cmd" : "../../utility/nimbix/nimbix-run.py ./nearest_X86.exe data/queries.txt data/queries.txt",
     "perf_fields" : ["Board", "Measurements per Cycle", "Gigameasurements / Second"],
     "performance": [
         {

@@ -50,7 +50,6 @@ krnl_vadd(
      __global int* c,
      const int length) {
 
-
   for(int i = 0; i < length; i++){
     c[i] = a[i] + b[i];
   }

@@ -44,7 +44,6 @@ static void* smalloc(size_t size) {
 
 	if (ptr == NULL) {
 		printf("Error: Cannot allocate memory\n");
-		printf("Test failed\n");
 		exit(EXIT_FAILURE);
 	}
 
@@ -79,15 +78,34 @@ static int load_file_to_memory(const char *filename, char **result) {
 	return size;
 }
 
-xcl_world xcl_world_single(cl_device_type device_type) {
+xcl_world xcl_world_single() {
 	int err;
 	xcl_world world;
 	cl_uint num_platforms;
 
+	char *xcl_mode = getenv("XCL_EMULATION_MODE");
+
+	int mode_len;
+	if(xcl_mode == NULL) {
+		mode_len = strlen("hw");
+		world.mode = (char*) malloc(sizeof(char)*mode_len);
+		strcpy(world.mode, "hw");
+	} else {
+		mode_len = strlen(xcl_mode);
+		world.mode = (char*) malloc(sizeof(char)*mode_len);
+	
+		strcpy(world.mode, xcl_mode);
+
+		err = setenv("XCL_EMULATION_MODE", "true", 1);
+		if(err != 0) {
+			printf("Error: cannot set XCL_EMULATION_MODE\n");
+			exit(EXIT_FAILURE);
+		}
+	}
+
 	err = clGetPlatformIDs(0, NULL, &num_platforms);
 	if (err != CL_SUCCESS) {
 		printf("Error: no platforms available or OpenCL install broken");
-		printf("Test failed\n");
 		exit(EXIT_FAILURE);
 	}
 
@@ -95,32 +113,80 @@ xcl_world xcl_world_single(cl_device_type device_type) {
 
 	if (platform_ids == NULL) {
 		printf("Error: Out of Memory\n");
-		printf("Test failed\n");
 		exit(EXIT_FAILURE);
 	}
 
 	err = clGetPlatformIDs(num_platforms, platform_ids, NULL);
 	if (err != CL_SUCCESS) {
 		printf("Error: Failed to find an OpenCL platform!\n");
-		printf("Test failed\n");
 		exit(EXIT_FAILURE);
 	}
 
 	int i;
 	for(i = 0; i < num_platforms; i++) {
-		err = clGetDeviceIDs(platform_ids[i], device_type,
-							 1, &world.device_id, NULL);
-		if (err == CL_SUCCESS) {
+		size_t platform_name_size;
+		err = clGetPlatformInfo(platform_ids[i], CL_PLATFORM_NAME, 
+		                        0, NULL, &platform_name_size);
+		if( err != CL_SUCCESS) {
+			printf("Error: Could not determine platform name!\n");
+			exit(EXIT_FAILURE);
+		}
+
+		char *platform_name = (char*) malloc(sizeof(char)*platform_name_size);
+		if(platform_name == NULL) {
+			printf("Error: out of memory!\n");
+			exit(EXIT_FAILURE);
+		}
+
+		err = clGetPlatformInfo(platform_ids[i], CL_PLATFORM_NAME,
+		                        platform_name_size, platform_name, NULL);
+		if(err != CL_SUCCESS) {
+			printf("Error: could not determine platform name!\n");
+			exit(EXIT_FAILURE);
+		}
+
+		if (!strcmp(platform_name, "Xilinx")) {
+			free(platform_name);
 			world.platform_id = platform_ids[i];
 			break;
 		}
+
+		free(platform_name);
 	}
 
 	free(platform_ids);
 
 	if (i == num_platforms) {
-		printf("Error: Failed to create a device group\n");
-		printf("Test failed\n");
+		printf("Error: Failed to find Xilinx platform\n");
+		exit(EXIT_FAILURE);
+	}
+
+	err = clGetDeviceIDs(world.platform_id, CL_DEVICE_TYPE_ALL,
+	                     1, &world.device_id, NULL);
+	if (err != CL_SUCCESS) {
+		printf("Error: could not get device ids\n");
+		exit(EXIT_FAILURE);
+	}
+
+	size_t device_name_size;
+	err = clGetDeviceInfo(world.device_id, CL_DEVICE_NAME,
+	                      0, NULL, &device_name_size);
+	if(err != CL_SUCCESS) {
+		printf("Error: could not determine device name\n");
+		exit(EXIT_FAILURE);
+	}
+
+	world.device_name = (char*) malloc(sizeof(char)*device_name_size);
+
+	if(world.device_name == NULL) {
+		printf("Error: Out of Memory!\n");
+		exit(EXIT_FAILURE);
+	}
+
+	err = clGetDeviceInfo(world.device_id, CL_DEVICE_NAME,
+	                      device_name_size, world.device_name, NULL);
+	if(err != CL_SUCCESS) {
+		printf("Error: could not determine device name\n");
 		exit(EXIT_FAILURE);
 	}
 
@@ -128,7 +194,6 @@ xcl_world xcl_world_single(cl_device_type device_type) {
 	                                NULL, NULL, &err);
 	if (err != CL_SUCCESS) {
 		printf("Error: Failed to create a compute context!\n");
-		printf("Test failed\n");
 		exit(EXIT_FAILURE);
 	}
 
@@ -138,7 +203,6 @@ xcl_world xcl_world_single(cl_device_type device_type) {
 	                                           &err);
 	if (err != CL_SUCCESS) {
 		printf("Error: Failed to create a command queue!\n");
-		printf("Test failed\n");
 		exit(EXIT_FAILURE);
 	}
 
@@ -148,16 +212,57 @@ xcl_world xcl_world_single(cl_device_type device_type) {
 void xcl_release_world(xcl_world world) {
 	clReleaseCommandQueue(world.command_queue);
 	clReleaseContext(world.context);
+	free(world.device_name);
+	free(world.mode);
 }
 
-cl_kernel xcl_import_binary(xcl_world world,
-                            const char *krnl_file,
-                            const char *krnl_name)
-{
+cl_program xcl_import_binary(xcl_world world,
+                            const char *xclbin_name
+) {
 	int err;
 
+	size_t xclbin_len = strlen(xclbin_name);
+	size_t mode_len = strlen(world.mode);
+
+	size_t device_len = strlen(world.device_name);
+	char *device_name = (char*) malloc(sizeof(char)*device_len+1);
+	if(device_name == NULL) {
+		printf("Error: Out of Memory\n");
+		exit(EXIT_FAILURE);
+	}
+
+	for(size_t i = 0; i < device_len; i++) {
+		char tmp = world.device_name[i];
+		if(tmp == ':') {
+			tmp = '_';
+		}
+		device_name[i] = tmp;
+	}
+
+	device_name[device_len] = '\0';
+
+	size_t xclbin_file_name_len = xclbin_len + mode_len + device_len + 17;
+	char *xclbin_file_name = (char*) malloc(sizeof(char)*(xclbin_len+mode_len+device_len+18));
+	if(xclbin_file_name == NULL) {
+		printf("Error: Out of Memory!\n");
+		exit(EXIT_FAILURE);
+	}
+
+	err = sprintf(xclbin_file_name, "xclbin/%s.%s.%s.xclbin", xclbin_name, world.mode, device_name);
+	if(err != xclbin_file_name_len-1) {
+		printf("Error: failed to create xclbin file name\n");
+		exit(EXIT_FAILURE);
+	}
+
+	free(device_name);
+
+	if(access(xclbin_file_name, R_OK) != 0) {
+		printf("ERROR: %s kernel not available please build\n", xclbin_file_name);
+		exit(EXIT_FAILURE);
+	}
+
 	char *krnl_bin;
-	const size_t krnl_size = load_file_to_memory(krnl_file, &krnl_bin);
+	const size_t krnl_size = load_file_to_memory(xclbin_file_name, &krnl_bin);
 
 	cl_program program = clCreateProgramWithBinary(world.context, 1,
 	                                    &world.device_id, &krnl_size,
@@ -175,33 +280,21 @@ cl_kernel xcl_import_binary(xcl_world world,
 		size_t len;
 		char buffer[2048];
 
-		printf("Error: Failed to build program executable!\n");
 		clGetProgramBuildInfo(program, world.device_id, CL_PROGRAM_BUILD_LOG,
 		                      sizeof(buffer), buffer, &len);
 		printf("%s\n", buffer);
-		printf("Test failed\n");
+		printf("Error: Failed to build program executable!\n");
 		exit(EXIT_FAILURE);
 	}
 
-	cl_kernel kernel = clCreateKernel(program, krnl_name, &err);
-	if (!kernel || err != CL_SUCCESS) {
-		printf("Error: Failed to create kernel for %s: %d\n", krnl_name, err);
-		printf("Test failed\n");
-		exit(EXIT_FAILURE);
-	}
-
-	/* if program is released, then EnqueueNDRangeKernel fails with
-	 * INVALID_KERNEL */
-	/* clReleaseProgram(program); */
 	free(krnl_bin);
 
-	return kernel;
+	return program;
 }
 
-cl_kernel xcl_import_source(xcl_world world,
-                            const char *krnl_file,
-                            const char *krnl_name)
-{
+cl_program xcl_import_source(xcl_world world,
+                            const char *krnl_file
+) {
 	int err;
 
 	char *krnl_bin;
@@ -230,27 +323,34 @@ cl_kernel xcl_import_source(xcl_world world,
 		exit(EXIT_FAILURE);
 	}
 
+	free(krnl_bin);
+
+	return program;
+}
+
+cl_kernel xcl_get_kernel(cl_program program,
+                         const char *krnl_name
+) {
+	int err;
+
 	cl_kernel kernel = clCreateKernel(program, krnl_name, &err);
 	if (!kernel || err != CL_SUCCESS) {
 		printf("Error: Failed to create kernel for %s: %d\n", krnl_name, err);
-		printf("Test failed\n");
 		exit(EXIT_FAILURE);
 	}
-
-	/* if program is released, then EnqueueNDRangeKernel fails with
-	 * INVALID_KERNEL */
-	/* clReleaseProgram(program); */
-	free(krnl_bin);
 
 	return kernel;
 }
 
-void xcl_set_kernel_arg(cl_kernel krnl, cl_uint num, size_t size, const void *ptr) {
+void xcl_set_kernel_arg(cl_kernel krnl,
+                        cl_uint num,
+                        size_t size,
+                        const void *ptr
+) {
 	int err = clSetKernelArg(krnl, num, size, ptr);
 
 	if(err != CL_SUCCESS) {
 		printf("Error: Failed to set kernel arg\n");
-		printf("Test failed\n");
 		exit(EXIT_FAILURE);
 	}
 }
@@ -260,7 +360,6 @@ cl_mem xcl_malloc(xcl_world world, cl_mem_flags flags, size_t size) {
 
 	if (!mem) {
 		printf("Error: Failed to allocate device memory!\n");
-		printf("Test failed\n");
 		exit(EXIT_FAILURE);
 	}
 
@@ -273,24 +372,24 @@ void xcl_memcpy_to_device(xcl_world world, cl_mem dest, void* src,
 	                               src, 0, NULL, NULL);
 	if (err != CL_SUCCESS) {
 		printf("Error: Failed to write to source array a!\n");
-		printf("Test failed\n");
 		exit(EXIT_FAILURE);
 	}
 }
 
-void xcl_memcpy_from_device(xcl_world world, void* dest, cl_mem src,
-                            size_t size) {
+void xcl_memcpy_from_device(xcl_world world, void* dest,
+                            cl_mem src, size_t size
+) {
 	int err = clEnqueueReadBuffer(world.command_queue, src, CL_TRUE, 0, size,
 	                              dest, 0, NULL, NULL);
 	if (err != CL_SUCCESS) {
 		printf("Error: Failed to read output array! %d\n", err);
-		printf("Test failed\n");
 		exit(EXIT_FAILURE);
 	}
 }
 
 unsigned long xcl_run_kernel3d(xcl_world world, cl_kernel krnl,
-                               size_t x, size_t y, size_t z) {
+                               size_t x, size_t y, size_t z
+) {
 	size_t size[3] = {x, y, z};
 	cl_event event;
 	unsigned long start, stop;
@@ -299,7 +398,6 @@ unsigned long xcl_run_kernel3d(xcl_world world, cl_kernel krnl,
 	                                 NULL, size, size, 0, NULL, &event);
 	if( err != CL_SUCCESS) {
 		printf("Error: failed to execute kernel! %d\n", err);
-		printf("Test failed\n");
 		exit(EXIT_FAILURE);
 	}
 

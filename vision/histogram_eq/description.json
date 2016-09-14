@@ -12,8 +12,8 @@
     "board" : ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
     "version" : ["SDAccel 2016.1"],
     "dsa" : "xilinx:adm-pcie-ku3:2ddr:2.1",
-    "em_cmd": "./equalizer_X86.exe ./xclbin/krnl_equalizer.<emulation type>.xilinx_adm-pcie-ku3_2ddr_2.1.xclbin data/race_2k.bmp",
-    "hw_cmd": "../../utility/nimbix/nimbix-run.py ./equalizer_X86.exe ./xclbin/krnl_equalizer.<emulation type>.xilinx_adm-pcie-ku3_2ddr_2.1.xclbin data/race_2k.bmp",
+    "em_cmd": "./equalizer_X86.exe data/race_2k.bmp",
+    "hw_cmd": "../../utility/nimbix/nimbix-run.py ./equalizer_X86.exe data/race_2k.bmp",
     "contributors" : [
         {
             "group": "Xilinx",

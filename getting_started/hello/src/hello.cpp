@@ -27,16 +27,9 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <cstring>
-#include <iostream>
-#include <iomanip>
-#include <math.h>
 
 //OpenCL includes
 #include <xcl.h>
@@ -45,24 +38,14 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 typedef unsigned char u8;
 
 int main(int argc, char* argv[]) {
-    if(argc != 2)
-    {
-        std::cout << "Usage: " << argv[0] <<" <xclbin>" << std::endl;
-        return -1;
+    if(argc != 1) {
+        printf("Usage: %s\n", argv[0]);
+        return EXIT_FAILURE;
     }
 
-    const char* xclbinFilename = argv[1];
-
-    xcl_world world;
-    cl_kernel krnl;
-
-    if(strstr(argv[1], ".xclbin") != NULL) {
-        world = xcl_world_single(CL_DEVICE_TYPE_ACCELERATOR);
-        krnl  = xcl_import_binary(world, xclbinFilename, "krnl_hello");
-    } else {
-        world = xcl_world_single(CL_DEVICE_TYPE_CPU);
-        krnl  = xcl_import_source(world, xclbinFilename, "krnl_hello");
-    }
+    xcl_world world = xcl_world_single();
+    cl_program program = xcl_import_binary(world, "krnl_hello");
+    cl_kernel krnl = xcl_get_kernel(program, "krnl_hello");
 
     size_t vector_size_bytes = sizeof(char) * LENGTH;
     cl_mem buffer_a = xcl_malloc(world, CL_MEM_READ_ONLY, vector_size_bytes);

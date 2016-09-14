@@ -49,7 +49,7 @@ ALL TIMES.
 #include <math.h>
 
 #include <ap_fixed.h>
-#include "xcl.h"
+#include <xcl.h>
 
 #include "linear_search.h"
 
@@ -68,18 +68,13 @@ void linear_search_read_datafile(char* filename, float* data, size_t size) {
 	fclose(fp);
 }
 
-void linear_search_init(
-	char *krnl_name, xcl_world *world, cl_kernel *krnl,
+void linear_search_init( xcl_world *world, cl_kernel *krnl,
 	cl_mem *dev_targets, cl_mem *dev_queries, cl_mem *dev_indices
 ) {
 
-	if(strstr(krnl_name, ".xclbin") != NULL) {
-		*world = xcl_world_single(CL_DEVICE_TYPE_ACCELERATOR);
-		*krnl = xcl_import_binary(*world, krnl_name, KRNL_NAME);
-	} else {
-		*world = xcl_world_single(CL_DEVICE_TYPE_ACCELERATOR);
-		*krnl = xcl_import_source(*world, krnl_name, KRNL_NAME);
-	}
+	*world = xcl_world_single();
+	cl_program program = xcl_import_binary(*world, "krnl_nearest");
+	*krnl = xcl_get_kernel(program, KRNL_NAME);
 
 	/* Create Buffers padded to 512 bit boundry */
 	*dev_targets = xcl_malloc(*world, CL_MEM_READ_ONLY, ((TARGETS * DIMS - 1) / 16 + 1) * 16 * sizeof(float));
@@ -120,20 +115,19 @@ unsigned long linear_search_exec(
 }
 
 int main(int argc, char** argv) {
-	if (!(argc == 4 || argc == 5)) {
-		printf("usage: %s <kernel> <queries.txt> <targets.txt> [<ref.txt>]\n", argv[0]);
+	if (!(argc == 3 || argc == 4)) {
+		printf("usage: %s <queries.txt> <targets.txt> [<ref.txt>]\n", argv[0]);
 		return EXIT_FAILURE;
 	}
 
-	char *krnl_filename = argv[1];
-	char *queries_filename = argv[2];
-	char *targets_filename = argv[3];
+	char *queries_filename = argv[1];
+	char *targets_filename = argv[2];
 	char *refs_filename = NULL;
 
 	int check_results = 0;
 
-	if (argc == 5) {
-		refs_filename = argv[4];
+	if (argc == 4) {
+		refs_filename = argv[3];
 		check_results = 1;
 	}
 
@@ -170,7 +164,7 @@ int main(int argc, char** argv) {
 
 	cl_mem dev_targets, dev_queries, dev_indices;
 
-	linear_search_init(krnl_filename, &world, &krnl,
+	linear_search_init(&world, &krnl,
 	    &dev_targets, &dev_queries, &dev_indices);
 
 	unsigned long duration = linear_search_exec(

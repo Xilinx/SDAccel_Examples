@@ -34,9 +34,11 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <CL/opencl.h>
 
 typedef struct {
+	char *mode;
+	char *device_name;
+	cl_context context;
 	cl_platform_id platform_id;
 	cl_device_id device_id;
-	cl_context context;
 	cl_command_queue command_queue;
 } xcl_world;
 
@@ -47,13 +49,12 @@ typedef struct {
  *   device in the system.
  *
  * Inputs:
- *   device_type - the type of device (i.e. CL_DEVICE_TYPE_ACCELERATOR)
  *
  * Returns:
  *   A struct containing the platform_id, device_id, context, and command
  *   queue.
  */
-xcl_world xcl_world_single(cl_device_type device_type);
+xcl_world xcl_world_single();
 
 /* xcl_release_world
  *
@@ -73,13 +74,13 @@ void xcl_release_world(xcl_world world);
  *
  * Inputs:
  *   world - xcl_world to import into.
- *   krnl_file - file name of the kernel to import.
+ *   xclbin_file - base name of the xclbin to import.
  *   krnl_name - name of kernel.
  *
  * Returns:
- *   An opencl kernel object that was created from krnl_name file.
+ *   An opencl program object that was created from krnl_name file.
  */
-cl_kernel xcl_import_binary(xcl_world world, const char *krnl_file, const char *krnl_name);
+cl_program xcl_import_binary(xcl_world world, const char *xclbin_file);
 
 /* xcl_import_source
  *
@@ -92,9 +93,23 @@ cl_kernel xcl_import_binary(xcl_world world, const char *krnl_file, const char *
  *   krnl_name - name of kernel.
  *
  * Returns:
- *   An opencl kernel object that was created from krnl_name file.
+ *   An opencl program object that was created from krnl_name file.
  */
-cl_kernel xcl_import_source(xcl_world world, const char *krnl_file, const char *krnl_name);
+cl_program xcl_import_source(xcl_world world, const char *krnl_file);
+
+/* xcl_get_kernel
+ *
+ * Description:
+ *   Get kernel from program
+ *
+ * Input:
+ *   program - program that was built
+ *   krnl_name - name of kernel
+ *
+ * Returns:
+ *   An opencl kernel object that was created from the krnl_name
+ */
+cl_kernel xcl_get_kernel(cl_program program, const char *krnl_name);
 
 /* xcl_set_kernel_arg
  *

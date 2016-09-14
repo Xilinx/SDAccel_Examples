@@ -7,7 +7,7 @@ include ../../libs/opencl/opencl.mk
 # Nearest Neighbor Search Application
 nearest_SRCS=./src/linear_search.c $(xcl_SRCS)
 nearest_HDRS=./src/linear_search.h $(xcl_HDRS)
-nearest_CXXFLAGS=-I./src/ -I$(XILINX_SDACCEL)/include/ $(opencl_CXXFLAGS)
+nearest_CXXFLAGS=-I./src/ -I$(XILINX_SDACCEL)/include/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS)
 nearest_X86_LDFLAGS=$(opencl_X86_LDFLAGS)
 nearest_POWER_LDFLAGS=$(opencl_POWER_LDFLAGS)
 

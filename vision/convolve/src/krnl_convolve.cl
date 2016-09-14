@@ -33,9 +33,10 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define IMAGE_WIDTH 1024
 #define IMAGE_HEIGHT 1024
 
+#define B (4)
 
-#define B (8)
 #define M(x) (((x)-1)/(B) + 1)
+#define REG_WIDTH (M(FILTER_WIDTH+B-1)*B)
 
 #if(B == 32)
 typedef uint16 bus_t;
@@ -76,67 +77,75 @@ bus_t short_to_bus(short in[B]) {
 
 void get_coef(
 	__global bus_t *coef,
-	short coef_buf[FILTER_WIDTH*FILTER_HEIGHT]
+	short coef_buf[FILTER_HEIGHT*FILTER_WIDTH]
 ) {
-	//printf("get_coef {\n");
-
+#ifdef __xilinx__
 	__attribute__((xcl_pipeline_loop))
+#endif
 	for(int i = 0; i < M(FILTER_WIDTH*FILTER_HEIGHT); i++) {
-		short tmp[B] __attribute__((xcl_array_partition(complete,1)));
+		short tmp[B];
 		bus_to_short(coef[i], tmp);
 
 		for(int j = 0; j < B; j++) {
-			coef_buf[i*B + j] = tmp[j];
+			int k = i*B + j;
+			if (k < FILTER_HEIGHT*FILTER_WIDTH) {
+				coef_buf[k] = tmp[j];
+			}
 		}
 	}
-
-	//printf("get_coef }\n");
 }
 
 void filter(
-	short coef_buf[FILTER_WIDTH*FILTER_HEIGHT],
+	short coef_buf[FILTER_HEIGHT*FILTER_WIDTH],
 	global bus_t* input, global bus_t* output
 ) {
-	//printf("filter {\n");
 
-	/* Registers to read values from */
-	#define REG_WIDTH (M(FILTER_WIDTH+B-1)*B)
-
+	/* Pad registers to align line_buf read/write */
 	short line_reg[FILTER_HEIGHT][REG_WIDTH]
+#ifdef __xilinx__
 		__attribute__((xcl_array_partition(complete,1)))
-		__attribute__((xcl_array_partition(complete,2)));
-
+		__attribute__((xcl_array_partition(complete,2)))
+#endif
+		;
 	/* Line buffers to store values */
 	short line_buf[FILTER_HEIGHT-1][M(IMAGE_WIDTH-REG_WIDTH)*B]
+#ifdef __xilinx__
 		__attribute__((xcl_array_partition(complete, 1)))
-/* The following could be used with incrementing pointers in a BRAM to reduce FF usage and hit 4k/8k image sizes */
-		__attribute__((xcl_array_partition(cyclic, B, 2)));
-//		__attribute__((xcl_array_partition(complete, 2)));
+		__attribute__((xcl_array_partition(cyclic, B, 2)))
+#endif 
+		;
 
+#ifdef __xilinx__
 	__attribute__((xcl_pipeline_loop))
+#endif
 	for(size_t i = 0; i < M(IMAGE_WIDTH*IMAGE_HEIGHT); i++) {
-		short input_buf[B] __attribute__((xcl_array_partition(complete, 1)));
+		short input_buf[B];
 
 		/* Read pixels from the input image */
 		bus_to_short(input[i], input_buf);
 
 		/* Rotate Buffers */
 		for(size_t y = 0; y < FILTER_HEIGHT-1; y++) {
+			/* Move the line reg B pixels at a time */
 			for(size_t x = 0; x < REG_WIDTH - B; x++) {
 				line_reg[y][x] = line_reg[y][x+B];
 			}
+			/* Add values from line_buf to end of regs */
 			for(size_t j = 0; j < B; j++) {
-				line_reg[y][REG_WIDTH - B + j] = line_buf[y][j + B*(i % (M(IMAGE_WIDTH-REG_WIDTH)))];
+				line_reg[y][(REG_WIDTH - B) + j] = line_buf[y][j + B*(i % (M(IMAGE_WIDTH-REG_WIDTH)))];
 			}
+			/* Write values from the start of the next line to the line_buf */
 			for(size_t j = 0; j < B; j++) {
 				line_buf[y][j + B*(i % (M(IMAGE_WIDTH-REG_WIDTH)))] = line_reg[y+1][j];
 			}
 		}
+		/* On last line rotate regs */
 		for(size_t x = 0; x < ((M(FILTER_WIDTH+B)-1)*B); x++) {
 			line_reg[FILTER_HEIGHT-1][x] = line_reg[FILTER_HEIGHT-1][x+B];
 		}
+		/* Add the new input data to the end */
 		for(size_t j = 0; j < B; j++) {
-			line_reg[FILTER_HEIGHT-1][REG_WIDTH - B + j] = input_buf[j];
+			line_reg[FILTER_HEIGHT-1][(REG_WIDTH - B) + j] = input_buf[j];
 		}
 
 		short filter_sums[B];
@@ -149,7 +158,7 @@ void filter(
 					const size_t offset = REG_WIDTH - FILTER_WIDTH - B + 1;
 					short val = line_reg[y][offset + x + j];
 
-					sum += (int) coef_buf[y * FILTER_WIDTH + x] *
+					sum += (int) coef_buf[y*FILTER_WIDTH + x] *
 					       (int) val;
 				}
 			}
@@ -165,12 +174,7 @@ void filter(
 		}
 
 		output[i] = short_to_bus(filter_sums);
-
-		//printf("i = %d x = %d-%d y = %d\r", i, xpos, xpos + 31, ypos);
 	}
-	//printf("\n");
-
-	//printf("filter }\n");
 }
 
 __attribute__((reqd_work_group_size(1,1,1)))
@@ -179,14 +183,13 @@ __kernel void krnl_convolve(
    __global bus_t *img_input,
    __global bus_t *img_output
 ) {
-	//printf("krnl_convolve {\n");
-
-	short coef_buf[FILTER_WIDTH*FILTER_HEIGHT]
-		__attribute__((xcl_array_partition(complete, 1)));
+	short coef_buf[FILTER_HEIGHT*FILTER_WIDTH]
+#ifdef __xilinx__
+		__attribute__((xcl_array_partition(complete, 1)))
+#endif
+		;
 
 	get_coef(coef, coef_buf);
 
 	filter(coef_buf, img_input, img_output);
-
-	//printf("krnl_convolve }\n");
 }

@@ -43,47 +43,27 @@ ALL TIMES.
 
 *******************************************************************************/
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <cstring>
-#include <iostream>
-#include <iomanip>
-#include <math.h>
 
 //OpenCL includes
 #include <xcl.h>
 #include <vdotprod.h>
 
-int main(int argc, char* argv[])
-{
-
-    if(argc != 2)
-    {
-        std::cout << "Usage: " << argv[0] <<" <xclbin>" << std::endl;
-        return -1;
+int main(int argc, char* argv[]) {
+    if(argc != 1) {
+        printf("Usage: %s\n", argv[0]);
+        return EXIT_FAILURE;
     }
 
-    const char* xclbinFilename = argv[1];
+    xcl_world world    = xcl_world_single();
+    cl_program program = xcl_import_binary(world, "krnl_vdotprod");
+    cl_kernel krnl     = xcl_get_kernel(program, "krnl_vdotprod");
 
-// OPENCL HOST CODE AREA START
-    xcl_world world;
-    cl_kernel krnl;
-
-    if(strstr(argv[1], ".xclbin") != NULL) {
-        world = xcl_world_single(CL_DEVICE_TYPE_ACCELERATOR);
-        krnl  = xcl_import_binary(world, xclbinFilename, "krnl_vdotprod");
-    } else {
-        world = xcl_world_single(CL_DEVICE_TYPE_CPU);
-        krnl  = xcl_import_source(world, xclbinFilename, "krnl_vdotprod");
-    }
-
-	int nhalf = NPOINTS >> 1;
+    int nhalf = NPOINTS >> 1;
     size_t input_size_bytes = sizeof(int) * NPOINTS;
-	size_t output_size_bytes = sizeof(int) * nhalf;
+    size_t output_size_bytes = sizeof(int) * nhalf;
 
     cl_mem buffer_x = xcl_malloc(world, CL_MEM_READ_ONLY, input_size_bytes);
     cl_mem buffer_y = xcl_malloc(world, CL_MEM_READ_ONLY, input_size_bytes);
@@ -102,13 +82,13 @@ int main(int argc, char* argv[])
         source_z[i] = 2*i - NPOINTS;
     }
 
-	int j = 0;
+    int j = 0;
     for(int i=0; i < nhalf; i++) {
-		j = i + nhalf;
-		result_sim[i] = source_x[i] * source_x[j] + 
-						source_y[i] * source_y[j] + 
-						source_z[i] * source_z[j];
-	}
+        j = i + nhalf;
+        result_sim[i] = source_x[i] * source_x[j] + 
+                        source_y[i] * source_y[j] + 
+                        source_z[i] * source_z[j];
+    }
 
     /* Copy input vectors to memory */
     xcl_memcpy_to_device(world, buffer_x, source_x, input_size_bytes);
@@ -120,7 +100,7 @@ int main(int argc, char* argv[])
     free(source_y);
     free(source_z);
 
-    /* Set the kernel arguments */
+    /* Set the kernel arguments */
     clSetKernelArg(krnl, 0, sizeof(cl_mem), &buffer_x);
     clSetKernelArg(krnl, 1, sizeof(cl_mem), &buffer_y);
     clSetKernelArg(krnl, 2, sizeof(cl_mem), &buffer_z);
@@ -148,13 +128,12 @@ int main(int argc, char* argv[])
     int krnl_match = 0;
     for(int i = 0; i < nhalf; i++){
         if(result_sim[i] != result_krnl[i]){
-            std::cout <<"Error: Result mismatch" << std::endl;
-            std::cout <<"i = " << i << " CPU result = " << result_sim[i] << " Krnl Result = " << result_krnl[i] << std::endl;
+            printf("Error: Result mismatch");
+            printf("i = %d CPU result = %d Krnl Result = %d\n", i, result_sim[i], result_krnl[i]);
             krnl_match = 1;
             break;
-        }
-        else{
-            std::cout <<"Result Match: i = " << i << " CPU result = " << result_sim[i] << " Krnl Result = " << result_krnl[i] << std::endl;
+        } else{
+            printf("Result Match: i = %d CPU result = %d Krnl Result = %d\n", i, result_sim[i], result_krnl[i]);
         }
     }
 
@@ -162,10 +141,10 @@ int main(int argc, char* argv[])
     free(result_sim);
     free(result_krnl);
 
-    if(krnl_match == 1)
-        return 1;
-    else{
-        std::cout << "Success! kernel results match cpu results." << std::endl;
-        return 0;
+    if(krnl_match == 1) {
+        return EXIT_FAILURE;
+    } else{
+        printf("Success! kernel results match cpu results.");
+        return EXIT_SUCCESS;
     }
 }

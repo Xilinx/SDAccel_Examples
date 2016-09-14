@@ -48,14 +48,16 @@ krnl_vdotprod(
      __global int* x,
      __global int* y,
      __global int* z,
-	 __global int* d,
+     __global int* d,
      const int npoints) {
 
 
   int j = 0;
   for(int i = 0; i < npoints; i++){
-	j = i + npoints;
-    d[i] = x[i] * x[j] + y[i] * y[j] + z[i] * z[j];
+    j = i + npoints;
+    d[i] = x[i] * x[j]
+         + y[i] * y[j]
+         + z[i] * z[j];
   }
 
   return;
