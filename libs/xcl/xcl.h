@@ -155,6 +155,19 @@ void xcl_memcpy_to_device(xcl_world world, cl_mem dest, void* src,
 void xcl_memcpy_from_device(xcl_world world, void* dest, cl_mem src,
                             size_t size);
 
+/* xcl_get_event_duration
+ *
+ * Description:
+ *   Determine the duration of an event
+ *
+ * Inputs:
+ *   event - determine the duration of this event
+ *
+ * Returns:
+ *   time that the event took to run to completion.
+ */
+unsigned long xcl_get_event_duration(cl_event event);
+
 /* xcl_run_kernel3d
  *
  * Description:

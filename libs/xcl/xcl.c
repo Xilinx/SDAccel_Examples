@@ -387,6 +387,17 @@ void xcl_memcpy_from_device(xcl_world world, void* dest,
 	}
 }
 
+unsigned long xcl_get_event_duration(cl_event event) {
+	unsigned long start, stop;
+
+	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START,
+	                        sizeof(unsigned long), &start, NULL);
+	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END,
+	                        sizeof(unsigned long), &stop, NULL);
+
+	return stop - start;
+}
+
 unsigned long xcl_run_kernel3d(xcl_world world, cl_kernel krnl,
                                size_t x, size_t y, size_t z
 ) {
@@ -403,10 +414,5 @@ unsigned long xcl_run_kernel3d(xcl_world world, cl_kernel krnl,
 
 	clFinish(world.command_queue);
 
-	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START,
-	                        sizeof(unsigned long), &start, NULL);
-	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END,
-	                        sizeof(unsigned long), &stop, NULL);
-
-	return stop - start;
+	return xcl_get_event_duration(event);
 }
