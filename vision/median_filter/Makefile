@@ -9,8 +9,7 @@ include ../../libs/opencl/opencl.mk
 median_SRCS=./src/medianFilter.cpp $(bitmap_SRCS) $(oclHelper_SRCS)
 median_HDRS=$(bitmap_HDRS) $(oclHelper_HDRS)
 median_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(bitmap_CXXFLAGS) $(oclHelper_CXXFLAGS)
-median_X86_LDFLAGS=$(opencl_X86_LDFLAGS)
-median_POWER_LDFLAGS=$(opencl_POWER_LDFLAGS)
+median_LDFLAGS=$(opencl_LDFLAGS)
 
 # Median Filter Kernel
 krnl_median_SRCS=./src/krnl_medianFilter.cl

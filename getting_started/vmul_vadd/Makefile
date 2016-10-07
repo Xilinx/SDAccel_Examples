@@ -9,8 +9,7 @@ vmulvadd_SRCS=./src/main.c $(xcl_SRCS)
 vmulvadd_HDRS=$(xcl_HDRS)
 vmulvadd_EXE=vmulvadd
 vmulvadd_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS)
-vmulvadd_X86_LDFLAGS=$(opencl_X86_LDFLAGS)
-vmulvadd_POWER_LDFLAGS=$(opencl_POWER_LDFLAGS)
+vmulvadd_LDFLAGS=$(opencl_LDFLAGS)
 
 # vmul Kernel
 krnl_vmul_SRCS=./src/krnl_vmul.cl

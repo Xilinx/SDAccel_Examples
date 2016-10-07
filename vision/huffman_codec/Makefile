@@ -13,8 +13,7 @@ huffman_SRCS=./src/bit_io.cpp ./src/huffmancodec_naive.cpp ./src/huffmancodec_op
 huffman_HDRS=./src/bit_io.h ./src/huffmancodec_naive.h ./src/huffmancodec_optimized_cpuonly.h ./src/huffmancodec_optimized.h \
 	$(logger_HDRS) $(simplebmp_HDRS) $(xcl_cpp_HDRS) $(cmdparser_HDRS)
 huffman_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(cmdparser_CXXFLAGS) $(xcl_cpp_CXXFLAGS) $(simplebmp_CXXFLAGS) $(logger_CXXFLAGS)
-huffman_X86_LDFLAGS=$(opencl_X86_LDFLAGS)
-huffman_POWER_LDFLAGS=$(opencl_POWER_LDFLAGS)
+huffman_LDFLAGS=$(opencl_LDFLAGS)
 
 # Huffman Codec Kernel
 krnl_huffman_SRCS=./src/krnl_huffman_singleptr.cl

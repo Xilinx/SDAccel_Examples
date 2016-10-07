@@ -9,9 +9,7 @@ include ../../libs/opencl/opencl.mk
 convolve_SRCS=src/convolve.cpp $(xcl_SRCS)
 convolve_HDRS= $(xcl_HDRS)
 convolve_CXXFLAGS=$(xcl_CXXFLAGS) $(opencl_CXXFLAGS) $(opencv_CXXFLAGS)
-convolve_LDFLAGS=$(opencv_LDFLAGS)
-convolve_X86_LDFLAGS=$(opencl_X86_LDFLAGS)
-convolve_POWER_LDFLAGS=$(opencl_POWER_LDFLAGS)
+convolve_LDFLAGS=$(opencl_LDFLAGS) $(opencv_LDFLAGS)
 
 # convolve Kernel
 krnl_convolve_SRCS=src/krnl_convolve.cl

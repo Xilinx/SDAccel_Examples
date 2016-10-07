@@ -10,8 +10,7 @@ include ../../libs/opencl/opencl.mk
 sha1_SRCS=./src/sha1_app.cpp ./src/sha1.c ./src/main.cpp $(logger_SRCS) $(cmdparser_SRCS) $(xcl_cpp_SRCS)
 sha1_HDRS=./src/sha1_app.h ./src/oswendian.h ./src/sha1.h $(logger_HDRS) $(cmdparser_HDRS) $(xcl_cpp_HDRS)
 sha1_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(logger_CXXFLAGS) $(cmdparser_CXXFLAGS) $(xcl_cpp_CXXFLAGS)
-sha1_X86_LDFLAGS=$(opencl_X86_LDFLAGS)
-sha1_POWER_LDFLAGS=$(opencl_POWER_LDFLAGS)
+sha1_LDFLAGS=$(opencl_LDFLAGS)
 
 # SHA1 Kernel
 krnl_sha1_SRCS=./src/krnl_sha1.cl

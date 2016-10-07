@@ -8,8 +8,7 @@ include ../../libs/opencl/opencl.mk
 vadd_SRCS=./src/vadd.cpp $(xcl_SRCS)
 vadd_HDRS=$(xcl_HDRS)
 vadd_CXXFLAGS=-I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS)
-vadd_X86_LDFLAGS=$(opencl_X86_LDFLAGS)
-vadd_POWER_LDFLAGS=$(opencl_POWER_LDFLAGS)
+vadd_LDFLAGS=$(opencl_LDFLAGS)
 
 # vadd Kernel
 krnl_vadd_SRCS=./src/krnl_vadd.cl

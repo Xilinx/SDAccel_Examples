@@ -8,8 +8,7 @@ include ../../libs/opencl/opencl.mk
 sum_scan_SRCS=./src/sum_scan.cpp $(xcl_SRCS)
 sum_scan_HDRS=$(xcl_HDRS)
 sum_scan_CXXFLAGS=-I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS)
-sum_scan_X86_LDFLAGS=$(opencl_X86_LDFLAGS)
-sum_scan_POWER_LDFLAGS=$(opencl_POWER_LDFLAGS)
+sum_scan_LDFLAGS=$(opencl_LDFLAGS)
 
 # sum_scan Kernel
 krnl_sum_scan_SRCS=./src/krnl_sum_scan.cl

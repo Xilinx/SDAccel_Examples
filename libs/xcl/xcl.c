@@ -233,7 +233,7 @@ cl_program xcl_import_binary(xcl_world world,
 
 	for(size_t i = 0; i < device_len; i++) {
 		char tmp = world.device_name[i];
-		if(tmp == ':') {
+		if(tmp == ':' || tmp == '.') {
 			tmp = '_';
 		}
 		device_name[i] = tmp;

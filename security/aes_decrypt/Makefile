@@ -12,8 +12,7 @@ include ../../libs/opencl/opencl.mk
 aes_SRCS=./src/aes_ecb.cpp ./src/aes_app.cpp ./src/main.cpp $(xcl_cpp_SRCS) $(cmdparser_SRCS) $(logger_SRCS) $(simplebmp_SRCS)
 aes_HDRS=./src/aes_app.h $(xcl_cpp_HDRS) $(cmdparser_HDRS) $(logger_HDRS) $(simplebmp_HDRS)
 aes_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl_cpp_CXXFLAGS) $(cmdparser_CXXFLAGS) $(logger_CXXFLAGS) $(simplebmp_CXXFLAGS)
-aes_X86_LDFLAGS=$(opencl_X86_LDFLAGS)
-aes_POWER_LDFLAGS=$(opencl_POWER_LDFLAGS)
+aes_LDFLAGS=$(opencl_LDFLAGS)
 
 # AES Kernel
 krnl_aes_SRCS=./src/krnl_aes.cl
