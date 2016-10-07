@@ -1,0 +1,10 @@
+^security/sha1/src/sha1.c$
+^security/sha1/src/sha1.h$
+^security/sha1/src/oswendian.h$
+^acceleration/bfgminer/src/ocl.c$
+^libs/lodepng/lodepng.h$
+^libs/lodepng/lodepng.cpp$
+^acceleration/smithwaterman/src/intel/ssw.h$
+^acceleration/smithwaterman/src/intel/ssw.c$
+^acceleration/smithwaterman/src/intel/kseq.h$
+^acceleration/smithwaterman/src/intel/sc_demo.c$
