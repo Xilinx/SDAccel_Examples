@@ -1,4 +1,4 @@
-Vector Add - Vector Multiplication Example 
+kernel_global Example 
 ======================
 
 This README file contains the following sections:
@@ -14,7 +14,7 @@ This README file contains the following sections:
 
 
 ## 1. OVERVIEW
-This example shows how data stored in global memory can be shared between kernels in different binary containers.
+Bandwidth test of global to local memory
 
 ## 2. SOFTWARE AND SYSTEM REQUIREMENTS
 Board | Software Version
@@ -40,7 +40,7 @@ emconfigutil --xdevice 'xilinx:adm-pcie-ku3:2ddr:2.1' --nd 1
 ```
 Run the application as
 ```
-./vaddvmul_X86.exe
+./kernel_global_X86.exe ./xclbin/krnl_kernel_global.<emulation flow>.xilinx_adm-pcie-ku3_2ddr_2.1.xclbin
 ```
 The choices for emulation flow are
 		- sw_emu = software emulation
@@ -58,7 +58,7 @@ rm -rf xbinst
 ```
 Run the nimbix-run.py script provided in the utility/nimbix directory at the top level of this repository
 ```
-../../utility/nimbix/nimbix-run.py ./vaddvmul_X86.exe
+../../utility/nimbix/nimbix-run.py ./kernel_global_X86.exe ./xclbin/krnl_kernel_global.hw.xilinx_adm-pcie-ku3_2ddr_2.1.xclbin
 ```
 
 	Only the Alpha Data ADM-PCIE-KU3 card is supported by this method.
@@ -87,8 +87,7 @@ This example is written by developers at
 ## 8. REVISION HISTORY
 Date | README Version | Description
 -----|----------------|------------
-FEB2016|1.0|Initial Xilinx Release
-JUL2016|2.0|Conversion to Makefile based compilation
+AUG2016|1.0|Initial Xilinx Release
 [3-Clause BSD License]: LICENSE.md
 [SDAccel Forums]: https://forums.xilinx.com/t5/SDAccel/bd-p/SDx
 [SDAccel User Guides]: http://www.xilinx.com/support/documentation-navigation/development-tools/software-development/sdaccel.html?resultsTablePreSelect=documenttype:SeeAll#documentation

@@ -44,7 +44,7 @@ emconfigutil --xdevice 'xilinx:adm-pcie-ku3:2ddr:2.1' --nd 1
 ```
 Run the application as
 ```
-./nearest_X86.exe ./xclbin/krnl_nearest.<emulation flow>.xilinx_adm-pcie-ku3_2ddr_2.1.xclbin data/queries.txt data/queries.txt
+./nearest_X86.exe data/queries.txt data/queries.txt
 ```
 The choices for emulation flow are
 		- sw_emu = software emulation
@@ -62,7 +62,7 @@ rm -rf xbinst
 ```
 Run the nimbix-run.py script provided in the utility/nimbix directory at the top level of this repository
 ```
-../../utility/nimbix/nimbix-run.py ./nearest_X86.exe ./xclbin/krnl_nearest.hw.xilinx_adm-pcie-ku3_2ddr_2.1.xclbin
+../../utility/nimbix/nimbix-run.py ./nearest_X86.exe data/queries.txt data/queries.txt
 ```
 
 	Only the Alpha Data ADM-PCIE-KU3 card is supported by this method.

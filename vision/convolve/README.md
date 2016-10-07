@@ -45,7 +45,7 @@ emconfigutil --xdevice 'xilinx:adm-pcie-ku3:2ddr:2.1' --nd 1
 ```
 Run the application as
 ```
-./convolve_X86.exe <emulation flow> 'xilinx:adm-pcie-ku3:2ddr:2.1' data/input_buffer_raw.txt data/filter_buffer_raw.txt data/output_buffer_raw.txt
+./convolve_X86.exe data/input_buffer_raw.txt data/filter_buffer_raw.txt data/output_buffer_raw.txt
 ```
 The choices for emulation flow are
 		- sw_emu = software emulation
@@ -63,7 +63,7 @@ rm -rf xbinst
 ```
 Run the nimbix-run.py script provided in the utility/nimbix directory at the top level of this repository
 ```
-../../utility/nimbix/nimbix-run.py ./convolve_X86.exe hw 'xilinx:adm-pcie-ku3:2ddr:2.1' data/input_buffer_raw.txt data/filter_buffer_raw.txt data/output_buffer_raw.txt
+../../utility/nimbix/nimbix-run.py ./convolve_X86.exe data/input_buffer_raw.txt data/filter_buffer_raw.txt data/output_buffer_raw.txt
 ```
 
 	Only the Alpha Data ADM-PCIE-KU3 card is supported by this method.

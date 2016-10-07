@@ -1,4 +1,4 @@
-Vector Add - Vector Multiplication Example 
+host_global Example 
 ======================
 
 This README file contains the following sections:
@@ -14,7 +14,7 @@ This README file contains the following sections:
 
 
 ## 1. OVERVIEW
-This example shows how data stored in global memory can be shared between kernels in different binary containers.
+Host to global memory bandwidth test
 
 ## 2. SOFTWARE AND SYSTEM REQUIREMENTS
 Board | Software Version
@@ -40,7 +40,7 @@ emconfigutil --xdevice 'xilinx:adm-pcie-ku3:2ddr:2.1' --nd 1
 ```
 Run the application as
 ```
-./vaddvmul_X86.exe
+./host_global_X86.exe ./xclbin/krnl_host_global.<emulation flow>.xilinx_adm-pcie-ku3_2ddr_2.1.xclbin
 ```
 The choices for emulation flow are
 		- sw_emu = software emulation
@@ -58,7 +58,7 @@ rm -rf xbinst
 ```
 Run the nimbix-run.py script provided in the utility/nimbix directory at the top level of this repository
 ```
-../../utility/nimbix/nimbix-run.py ./vaddvmul_X86.exe
+../../utility/nimbix/nimbix-run.py ./sha1_X86.exe -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:2.1' -k ./xclbin/krnl_sha1.hw.xilinx_adm-pcie-ku3_2ddr_2.1.xclbin
 ```
 
 	Only the Alpha Data ADM-PCIE-KU3 card is supported by this method.

@@ -1,4 +1,4 @@
-Vector Addition Example 
+Parallel Prefix Sum Example 
 ======================
 
 This README file contains the following sections:
@@ -14,7 +14,7 @@ This README file contains the following sections:
 
 
 ## 1. OVERVIEW
-Simple example of vector addition.
+Example of parallel prefix sum
 
 ## 2. SOFTWARE AND SYSTEM REQUIREMENTS
 Board | Software Version
@@ -40,7 +40,7 @@ emconfigutil --xdevice 'xilinx:adm-pcie-ku3:2ddr:2.1' --nd 1
 ```
 Run the application as
 ```
-./vadd_X86.exe
+./sum_scan_X86.exe
 ```
 The choices for emulation flow are
 		- sw_emu = software emulation
@@ -58,7 +58,7 @@ rm -rf xbinst
 ```
 Run the nimbix-run.py script provided in the utility/nimbix directory at the top level of this repository
 ```
-../../utility/nimbix/nimbix-run.py ./vadd_X86.exe
+../../utility/nimbix/nimbix-run.py ./sum_scan_X86.exe
 ```
 
 	Only the Alpha Data ADM-PCIE-KU3 card is supported by this method.
@@ -87,8 +87,7 @@ This example is written by developers at
 ## 8. REVISION HISTORY
 Date | README Version | Description
 -----|----------------|------------
-FEB2016|1.0|Initial Xilinx Release
-JUL2016|2.0|Conversion to Makefile based compilation
+SEP2016|1.0|Initial Release
 [3-Clause BSD License]: LICENSE.md
 [SDAccel Forums]: https://forums.xilinx.com/t5/SDAccel/bd-p/SDx
 [SDAccel User Guides]: http://www.xilinx.com/support/documentation-navigation/development-tools/software-development/sdaccel.html?resultsTablePreSelect=documenttype:SeeAll#documentation

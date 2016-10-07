@@ -44,7 +44,7 @@ emconfigutil --xdevice 'xilinx:adm-pcie-ku3:2ddr:2.1' --nd 1
 ```
 Run the application as
 ```
-./equalizer_X86.exe ./xclbin/krnl_equalizer.<emulation type>.xilinx_adm-pcie-ku3_2ddr_2.1.xclbin data/race_2k.bmp
+./equalizer_X86.exe data/race_2k.bmp
 ```
 The choices for emulation flow are
 		- sw_emu = software emulation
@@ -62,7 +62,7 @@ rm -rf xbinst
 ```
 Run the nimbix-run.py script provided in the utility/nimbix directory at the top level of this repository
 ```
-../../utility/nimbix/nimbix-run.py ./equalizer_X86.exe ./xclbin/krnl_equalizer.<emulation type>.xilinx_adm-pcie-ku3_2ddr_2.1.xclbin data/race_2k.bmp
+../../utility/nimbix/nimbix-run.py ./equalizer_X86.exe data/race_2k.bmp
 ```
 
 	Only the Alpha Data ADM-PCIE-KU3 card is supported by this method.

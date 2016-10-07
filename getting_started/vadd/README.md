@@ -40,7 +40,7 @@ emconfigutil --xdevice 'xilinx:adm-pcie-ku3:2ddr:2.1' --nd 1
 ```
 Run the application as
 ```
-./vadd_X86.exe ./xclbin/krnl_vadd.<emulation flow>.xilinx_adm-pcie-ku3_2ddr_2.1.xclbin
+./vadd_X86.exe
 ```
 The choices for emulation flow are
 		- sw_emu = software emulation
@@ -58,7 +58,7 @@ rm -rf xbinst
 ```
 Run the nimbix-run.py script provided in the utility/nimbix directory at the top level of this repository
 ```
-../../utility/nimbix/nimbix-run.py ./vadd_X86.exe ./xclbin/krnl_vadd.hw.xilinx_adm-pcie-ku3_2ddr_2.1.xclbin
+../../utility/nimbix/nimbix-run.py ./vadd_X86.exe
 ```
 
 	Only the Alpha Data ADM-PCIE-KU3 card is supported by this method.
