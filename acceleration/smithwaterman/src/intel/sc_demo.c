@@ -51,10 +51,10 @@ void genSeq(kseq_t *read, kseq_t *ref) {
   
 
   read->name.s = strdup("READ");
-  read->seq.s = malloc(readlen*sizeof(char)+1);
+  read->seq.s = (char*) malloc(readlen*sizeof(char)+1);
   read->seq.m = readlen;
   ref->name.s = strdup("REF");
-  ref->seq.s = malloc(reflen*sizeof(char)+1);
+  ref->seq.s = (char*) malloc(reflen*sizeof(char)+1);
   ref->seq.m = reflen;
   
   char bases[5] = "ACTG";

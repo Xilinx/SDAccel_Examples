@@ -1,58 +1,101 @@
-Smithwaterman Example
-===============================
+Smithwaterman Genetic Sequencing Demo Example 
+======================
 
-This is an optimized implementation of the smithwaterman algorithm
-targeting execution on an SDAccel supported FPGA acceleration card.
+This README file contains the following sections:
+
+1. OVERVIEW
+2. SOFTWARE TOOLS AND SYSTEM REQUIREMENTS
+3. DESIGN FILE HIERARCHY
+4. INSTALLATION AND OPERATING INSTRUCTIONS
+5. SUPPORT
+6. LICENSE
+7. ACKNOWLEDGEMENTS
+8. REVISION HISTORY
+
+
+## 1. OVERVIEW
+This is an optimized implementation of the smithwaterman algorithm targeting exection on an SDAccel support FPGA acceleration card.
 
 The main algorithm characteristics of this application are
-
 1. Compute MaxScore
 2. Systolic array implementation
-3. Target performance = 
-4. Achieved performance = 
 
-Achieved performance was measured on an Alpha Data ADM-PCI-7v3 card.
 
-Changelog
-----------
-1/29/2016 - Initial Release
+## 2. SOFTWARE AND SYSTEM REQUIREMENTS
+Board | Software Version
+------|---------
+Alpha Data ADM-PCIE-7V3|SDAccel 2016.2
+Alpha Data ADM-PCIE-KU3|SDAccel 2016.2
 
-Compiling the Application
----------------------------
-This application is compiled using the SDAccel script mode.
-To compile the kernel:
 
+## 3. DESIGN FILE HIERARCHY
+Application code is located in the src directory. Accelerator binary files will be compiled to the xclbin directory. The xclbin directory is required by the Makefile and its contents will be filled during compilation.
+
+## 4. INSTALLATION AND OPERATING INSTRUCTIONS
+### Compilation for x86 based servers
+1. make all
+
+	Launches compilation both emulation and board execution modes of the application for all supported boards.To limit or change the boards for compilation, edit the utility/boards.mk file located at the top level of this repository.
+
+2. Executing emulation flows
+Set the following environment variable to create a emconfig.json file
 ```
-sdaccel smithwaterman_hw_systolic.tcl
+export XCL_EMULATION_MODE=true
+emconfigutil --xdevice 'xilinx:adm-pcie-ku3:2ddr:3.1' --nd 1
+```
+Run the application as
+```
+./smithwaterman -p xilinx -d xilinx:adm-pcie-ku3:2ddr:3.1 -k xclbin/krnl_smithwaterman.<emu_mode>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin
+```
+The choices for emulation flow are
+		- sw_emu = software emulation
+		- hw_emu = hardware emulation
+*NOTE:* The software emulation flow is a functional correctness check only. It does not estimate the performance of the application in hardware.
+The hardware emulation flow is a cycle accurate simulation of the hardware generated for the application. As such, it is expected for this simulation to take a long time.
+It is recommended that for this example the user skips running hardware emulation or modifies the example to work on a reduced data set.
+3. Running the application on a board hosted by Nimbix from a remote system
+
+	Install the Xilinx Runtime for board in Nimbix using the xbinst utility in SDAccel
+```
+xbinst -x 'xilinx:adm-pcie-ku3:2ddr:3.1' -d .
+mv xbinst/pkg/pcie/runtime . 
+rm -rf xbinst
+```
+Run the nimbix-run.py script provided in the utility/nimbix directory at the top level of this repository
+```
+../../utility/nimbix/nimbix-run.py ./smithwaterman -p xilinx -d xilinx:adm-pcie-ku3:2ddr:3.1 -k xclbin/krnl_smithwaterman.<emu_mode>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin
 ```
 
-To compile the host:
-```
-./build_host.sh
-```
+	Only the Alpha Data ADM-PCIE-KU3 card is supported by this method.
+4. Running the application from within Nimbix
 
-The target board can be changed by editing *smithwaterman_hw_systolic.tcl*
+	Follow the instructions in the [Nimbix Getting Started Guide][]
 
-Executing the Application
----------------------------
-```
-smithwaterman_host.exe --platform Xilinx --device fpga0 --kernel opencl_sw_maxscore.xclbin
-```
+### Compilation for IBM POWER servers
+1. View the SuperVessel [Walkthrough Video][]
 
-Files in the Example
----------------------
+2. make all-POWER
+	Launches compilation both emulation and board execution modes of the application for all supported boards.
 
-Application host code
-- genseq.cpp
-- matcharray.cpp
-- matcharray.h
-- smithwaterman.cpp
-- smithwaterman.h
-- main.cpp
+## 5. SUPPORT
+For more information about SDAccel check the [SDAccel User Guides][]
 
-Kernel code
-- src/opencl_sw_maxscore_basic.cpp
-- src/opencl_sw_maxscore_systolic.cpp
+For questions and to get help on this project or your own projects, visit the [SDAccel Forums][].
 
-Compilation Script
-- smithwaterman_hw_systolic.tcl
+## 6. LICENSE
+The source for this project is licensed under the [3-Clause BSD License][]
+
+## 7. ACKNOWLEDGEMENTS
+This example is written by developers at
+- [Xilinx](http://www.xilinx.com)
+
+## 8. REVISION HISTORY
+Date | README Version | Description
+-----|----------------|------------
+FEB2016|1.0|Initial Xilinx Release
+OCT2016|2.0|Conversion to Makefile based compilation
+[3-Clause BSD License]: LICENSE.md
+[SDAccel Forums]: https://forums.xilinx.com/t5/SDAccel/bd-p/SDx
+[SDAccel User Guides]: http://www.xilinx.com/support/documentation-navigation/development-tools/software-development/sdaccel.html?resultsTablePreSelect=documenttype:SeeAll#documentation
+[Nimbix Getting Started Guide]: http://www.xilinx.com/member/sdaccel_ea_40hr/Getting_Started_with_SDAccel_on_Nimbix_cloud.pdf
+[Walkthrough Video]: http://bcove.me/6pp0o482

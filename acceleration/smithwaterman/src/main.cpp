@@ -42,9 +42,7 @@ using namespace sda::utils;
 
 #include "sw.h"
 
-extern "C" {
-int SSW_par(int, int, int, char**, char**, unsigned int*, unsigned int*, unsigned int*);
-}
+extern int SSW_par(int, int, int, char**, char**, unsigned int*, unsigned int*, unsigned int*);
 
 void intelImpl(int nBlocks, int blkSz, int nThreads, int writeMatchArray, MatchArray* pm)
 {
