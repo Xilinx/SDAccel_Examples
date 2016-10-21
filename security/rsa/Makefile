@@ -9,7 +9,7 @@ include ../../libs/opencl/opencl.mk
 # hello Host Application
 rsa_SRCS=./src/rsa_app.cpp ./src/common.cpp ./src/main.cpp $(cmdparser_SRCS) $(xcl_cpp_SRCS) $(logger_SRCS)
 rsa_HDRS=./src/rsa_app.h ./src/common.h $(cmdparser_HDRS) $(logger_HDRS) $(xcl_cpp_HDRS)
-rsa_CXXFLAGS=-DRSA_2048 -g -O3 -Wall -I./src/ $(opencl_CXXFLAGS) $(cmdparser_CXXFLAGS) $(logger_CXXFLAGS) $(xcl_cpp_CXXFLAGS)  -I$::env(PWD)/src -I$::env(XILINX_SDACCEL)/include -lssl -lcrypto -ldl
+rsa_CXXFLAGS=-DRSA_2048 -g -O3 -Wall -I./src/ $(opencl_CXXFLAGS) $(cmdparser_CXXFLAGS) $(logger_CXXFLAGS) $(xcl_cpp_CXXFLAGS) -lssl -lcrypto -ldl
 rsa_LDFLAGS=$(opencl_CXXFLAGS)
 
 # RSA Kernel
