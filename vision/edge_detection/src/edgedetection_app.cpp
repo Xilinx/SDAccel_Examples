@@ -26,6 +26,7 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
+
 #include <algorithm>
 #include <assert.h>
 #include "edgedetection_app.h"
@@ -96,7 +97,6 @@ EdgeDetectFilter::~EdgeDetectFilter() {
 	xcl_release_world(m_world);
 }
 
-
 bool EdgeDetectFilter::run(const string& strInput, string& strOutput) {
 	int error;
 	struct bmp_t inputbmp;
@@ -107,10 +107,10 @@ bool EdgeDetectFilter::run(const string& strInput, string& strOutput) {
 	}
 
 	int nchannels = (inputbmp.header.dibdepth >> 3);
-       std::cout << "nchannels is : " << nchannels << " width is " << inputbmp.width << "height is "<< inputbmp.height<< std::endl;
     //convert to grayscale image
-    size_t szGreyImage = inputbmp.width * inputbmp.height;
+        size_t szGreyImage = inputbmp.width * inputbmp.height;
 	size_t szColorImage = szGreyImage * nchannels;
+	std::cout << "nchannels is : " << nchannels << " width is " << inputbmp.width << "height is "<< inputbmp.height<< std::endl;
     vector<unsigned char> vGreyImage;
     vGreyImage.resize(szGreyImage);
 
@@ -135,29 +135,14 @@ bool EdgeDetectFilter::run(const string& strInput, string& strOutput) {
 
 	xcl_memcpy_to_device(m_world, buffer_in_grey, &vGreyImage[0], szGreyImage);
 
-	/*
-	//copy input to device
-    xcl_memcpy_to_device(m_world, buffer_in_rgba, pbuf, szColorImage);
-
-	//execute kernel: greyscale
-    clSetKernelArg(m_clKrnlGreyScale, 0, sizeof(cl_mem), &buffer_in_rgba);
-    clSetKernelArg(m_clKrnlGreyScale, 1, sizeof(int), &nchannels);
-    clSetKernelArg(m_clKrnlGreyScale, 2, sizeof(int), &inputbmp.width);
-    clSetKernelArg(m_clKrnlGreyScale, 3, sizeof(int), &inputbmp.height);
-    clSetKernelArg(m_clKrnlGreyScale, 4, sizeof(cl_mem), &buffer_inout_grey);
-
-    //Launch the kernel
-    unsigned long duration = xcl_run_kernel3d(m_world, m_clKrnlGreyScale, 1, 1, 1);
-	*/
-
 	//execute kernel: sobel
     nchannels = 1;
     
     clSetKernelArg(m_clKrnlSobel, 0, sizeof(cl_mem), &buffer_in_grey);
-    clSetKernelArg(m_clKrnlSobel, 1, sizeof(int), &nchannels);
-    clSetKernelArg(m_clKrnlSobel, 2, sizeof(int), &inputbmp.width);
-    clSetKernelArg(m_clKrnlSobel, 3, sizeof(int), &inputbmp.height);
-    clSetKernelArg(m_clKrnlSobel, 4, sizeof(cl_mem), &buffer_out_sobel);
+    //clSetKernelArg(m_clKrnlSobel, 1, sizeof(int), &nchannels);
+    //clSetKernelArg(m_clKrnlSobel, 2, sizeof(int), &inputbmp.width);
+    //clSetKernelArg(m_clKrnlSobel, 3, sizeof(int), &inputbmp.height);
+    clSetKernelArg(m_clKrnlSobel, 1, sizeof(cl_mem), &buffer_out_sobel);
 
     //Launch the kernel
     unsigned long duration = xcl_run_kernel3d(m_world, m_clKrnlSobel, 1, 1, 1);
