@@ -26,6 +26,7 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
+
 #ifdef __ECLIPSE__
 #define kernel
 #define global
@@ -36,11 +37,55 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 typedef unsigned char		u8;
 typedef unsigned short		u16;
 typedef unsigned int		u32;
-typedef			 char		i8;
-typedef			 short		i16;
-typedef			 int		i32;
 
-#define MAX_IMAGE_ROW_WIDTH 4096 
+
+//#define MAX_IMAGE_ROW_WIDTH 4096 
+//fixed image width height
+#define IMAGE_WIDTH 1024
+#define IMAGE_HEIGHT 1895
+//#define nchannels 1
+//#define szrow width * nchannels
+#define FILTER_WIDTH 3
+#define FILTER_HEIGHT 3
+#define B (16)
+#define M(x) (((x)-1)/(B) + 1)
+#define REG_WIDTH (M(FILTER_WIDTH+B-1)*B)
+
+#if(B == 32)
+typedef uint8 bus_t;
+#elif(B == 16)
+typedef uint4 bus_t;
+#elif(B == 8)
+typedef uint2 bus_t;
+#elif(B == 4)
+typedef uint bus_t;
+#endif
+
+typedef union {
+	bus_t b;
+	uchar s[B];
+} bus_to_char_t;
+
+void bus_to_char(bus_t in, uchar out[B]) {
+	bus_to_char_t val;
+
+	val.b = in;
+
+	for(int i = 0; i < B; i++) {
+		out[i] = val.s[i];
+	}
+}
+
+bus_t char_to_bus(uchar in[B]) {
+	bus_to_char_t val;
+
+	for(int i = 0; i < B; i++) {
+		val.s[i] = in[i];
+	}
+
+	return val.b;
+}
+
 
 /*!
  * Input is a greyscaled image with 8 bits per pixel format
@@ -49,16 +94,17 @@ typedef			 int		i32;
  */
 __kernel
 __attribute__ ((reqd_work_group_size(1,1,1)))
-void krnl_sobel(global unsigned char* in_pixels, int nchannels, int width, int height, global unsigned char* out_pixels)
+void krnl_sobel(global bus_t* in_pixels, global bus_t* out_pixels)
 {
-    local uchar rowbuf0[MAX_IMAGE_ROW_WIDTH];
-    local uchar rowbuf1[MAX_IMAGE_ROW_WIDTH];
-    local uchar rowbuf2[MAX_IMAGE_ROW_WIDTH];
-    local uchar resbuf[MAX_IMAGE_ROW_WIDTH];
-
-	local uchar* prow0;
-	local uchar* prow1;
-	local uchar* prow2;    
+	
+    /* Pad registers to align line_buf read/write */
+	short line_reg[FILTER_HEIGHT][REG_WIDTH]
+		__attribute__((xcl_array_partition(complete,1)))
+		__attribute__((xcl_array_partition(complete,2)));
+	/* Line buffers to store values */
+	short line_buf[FILTER_HEIGHT-1][M(IMAGE_WIDTH-REG_WIDTH)*B]
+		__attribute__((xcl_array_partition(complete, 1)))
+		__attribute__((xcl_array_partition(cyclic, B, 2)));
 
 
 	//original sobel weights
@@ -72,129 +118,133 @@ void krnl_sobel(global unsigned char* in_pixels, int nchannels, int width, int h
 			{1, 2, 1},
 			{ 0, 0, 0},
 			{ -1,  -2,  -1}
-	};
-	
+};
+
+
 
 	//internal frame format is:
 	//1- greyscale 8 bits per pixel
-	u16 sumx = 0;
-	u16 sumy = 0;
     //const float threshold = 50.0f;
-	float sum = 0;
-    float ming = FLT_MAX;
-    float maxg = FLT_MIN;
+    	
+    	float ming = FLT_MAX;
+	float maxg = FLT_MIN;
 
     //init resbuf
-    for(int i=0; i < MAX_IMAGE_ROW_WIDTH; i++)
-        resbuf[i] = 255;
-
-    int szrow = width * nchannels;
-
-    //init output
-	for(int y=0; y < height; y++) {
-        async_work_group_copy(&out_pixels[y * szrow], resbuf, szrow, 0);
-        barrier(CLK_LOCAL_MEM_FENCE);
-    }   
-
-
-	//read first two lines
-    async_work_group_copy(rowbuf0, in_pixels, szrow, 0);
-    async_work_group_copy(rowbuf1, in_pixels + szrow, szrow, 0);
-	prow0 = rowbuf0;
-	prow1 = rowbuf1;
+   /*for(int i=0; i < IMAGE_WIDTH; i++)
+	resbuf[i] = 255;
+ */
 
 	//loop over height and width and compute min and max gradients
-	for(int y=1; y < height - 1; y++) {
+	__attribute__((xcl_pipeline_loop))
+	for(int y=0; y < M(IMAGE_HEIGHT*IMAGE_WIDTH); y++) {
+                 uchar input_buf[B];
 
-        // load 1 line only
-        async_work_group_copy(rowbuf2, &in_pixels[ (y+1) * szrow ], szrow, 0);
+		/* Read pixels from the input image */
+		bus_to_char(in_pixels[y], input_buf);
 
-        //sync all reads
-        barrier(CLK_LOCAL_MEM_FENCE);
-		prow2 = rowbuf2;        
+		/* Rotate Buffers */
+		for(size_t i = 0; i < FILTER_HEIGHT-1; i++) {
+			/* Move the line reg B pixels at a time */
+			for(size_t x = 0; x < REG_WIDTH - B; x++) {
+				line_reg[i][x] = line_reg[i][x+B];
+			}
+			/* Add values from line_buf to end of regs */
+			for(size_t j = 0; j < B; j++) {
+				line_reg[i][(REG_WIDTH - B) + j] = line_buf[i][j + B*(y % (M(IMAGE_WIDTH-REG_WIDTH)))];
+			}
+			/* Write values from the start of the next line to the line_buf */
+			for(size_t j = 0; j < B; j++) {
+				line_buf[i][j + B*(y % (M(IMAGE_WIDTH-REG_WIDTH)))] = line_reg[i+1][j];
+			}
+		}
+		/* On last line rotate regs */
+		for(size_t x = 0; x < ((M(FILTER_WIDTH+B)-1)*B); x++) {
+			line_reg[FILTER_HEIGHT-1][x] = line_reg[FILTER_HEIGHT-1][x+B];
+		}
+		/* Add the new input data to the end */
+		for(size_t j = 0; j < B; j++) {
+			line_reg[FILTER_HEIGHT-1][(REG_WIDTH - B) + j] = input_buf[j];
+		}
 
-        __attribute__ ((xcl_pipeline_loop))
-		for(int x=1; x < width - 1; x++) {
-
-			//reset for this pixel
-			sumx = 0;
-			sumy = 0;
+   	for(size_t x=0;x<B;x++){
+			u16 sumx = 0;
+                        u16 sumy = 0;
 
 			//approximate the gradients
-			for(int i=-1; i<=1; i++) {
-                sumx += GX[i+1][0] * prow0[x + i];                
-                sumx += GX[i+1][1] * prow1[x + i];
-                sumx += GX[i+1][2] * prow2[x + i];
+		for(size_t k = 0; k < FILTER_HEIGHT; k++) {
+				for(size_t l = 0; l < FILTER_WIDTH; l++) {
+					const size_t offset = REG_WIDTH - FILTER_WIDTH - B + 1;
+					short val = line_reg[k][offset + l + x];
 
-                sumy += GY[i+1][0] * prow0[x + i];                
-                sumy += GY[i+1][1] * prow1[x + i];
-                sumy += GY[i+1][2] * prow2[x + i];
-            }
+					sumx  += (u16) GX[k*FILTER_WIDTH + l] * (u16) val;
+				        sumy  += (u16) GY[k*FILTER_WIDTH + l] * (u16) val;
+		} }
 
-            sum = sqrt((float)(sumx*sumx) + (float)(sumy*sumy));            
-            if(sum > maxg) 
+           float sum = native_sqrt((float)(sumx*sumx) + (float)(sumy*sumy)); 
+            
+            if(sum > maxg)
                 maxg = sum;
             if(sum < ming)
                 ming = sum;
-		}
-
-
-		//swap buffers
-		prow0 = prow1;
-		prow1 = prow2;
+   	}
 	}
 
-    //printf("INFO: MIN VAL = %.2f MAX VAL = %.2f \n", ming, maxg);
+        __attribute__((xcl_pipeline_loop))
+	for(int y=0; y < M(IMAGE_WIDTH*IMAGE_HEIGHT); y++) {
+	 uchar input_buf[B];
 
-	//read first two lines
-    async_work_group_copy(rowbuf0, in_pixels, szrow, 0);
-    async_work_group_copy(rowbuf1, in_pixels + szrow, szrow, 0);
-	prow0 = rowbuf0;
-	prow1 = rowbuf1;
+		/* Read pixels from the input image */
+		bus_to_char(in_pixels[y], input_buf);
 
-	for(int y=1; y < height - 1; y++) {
-
-        // load 1 line only
-        async_work_group_copy(rowbuf2, &in_pixels[ (y+1) * szrow ], szrow, 0);
-
-        //sync all reads
-        barrier(CLK_LOCAL_MEM_FENCE);
-		prow2 = rowbuf2;        
-
-        __attribute__ ((xcl_pipeline_loop))
-		for(int x=1; x < width - 1; x++) {
-
-			//reset for this pixel
-			sumx = 0;
-			sumy = 0;
-
-			//approximate the gradients
-			for(int i=-1; i<=1; i++) {
-                sumx += GX[i+1][0] * prow0[x + i];                
-                sumx += GX[i+1][1] * prow1[x + i];
-                sumx += GX[i+1][2] * prow2[x + i];
-
-                sumy += GY[i+1][0] * prow0[x + i];                
-                sumy += GY[i+1][1] * prow1[x + i];
-                sumy += GY[i+1][2] * prow2[x + i];
-            }
-
-
-            sum = sqrt((float)(sumx*sumx) + (float)(sumy*sumy));
-            
-			//store
-			u8 intensity = (u8)(255.0f * (sum -  ming) / (maxg - ming));
-            resbuf[x] = 255 - intensity;
+		/* Rotate Buffers */
+		for(size_t i = 0; i < FILTER_HEIGHT-1; i++) {
+			/* Move the line reg B pixels at a time */
+			for(size_t x = 0; x < REG_WIDTH - B; x++) {
+				line_reg[i][x] = line_reg[i][x+B];
+			}
+			/* Add values from line_buf to end of regs */
+			for(size_t j = 0; j < B; j++) {
+				line_reg[i][(REG_WIDTH - B) + j] = line_buf[i][j + B*(y % (M(IMAGE_WIDTH-REG_WIDTH)))];
+			}
+			/* Write values from the start of the next line to the line_buf */
+			for(size_t j = 0; j < B; j++) {
+				line_buf[i][j + B*(y % (M(IMAGE_WIDTH-REG_WIDTH)))] = line_reg[i+1][j];
+			}
 		}
+		/* On last line rotate regs */
+		for(size_t x = 0; x < ((M(FILTER_WIDTH+B)-1)*B); x++) {
+			line_reg[FILTER_HEIGHT-1][x] = line_reg[FILTER_HEIGHT-1][x+B];
+		}
+		/* Add the new input data to the end */
+		for(size_t j = 0; j < B; j++) {
+			line_reg[FILTER_HEIGHT-1][(REG_WIDTH - B) + j] = input_buf[j];
+			}
+			
+       uchar resbuf[B];
 
-        async_work_group_copy(&out_pixels[y * szrow], resbuf, szrow, 0);
-        barrier(CLK_LOCAL_MEM_FENCE);
+       for(size_t x=0;x<B;x++){
+			//reset for this pixel
+			u16 sumx = 0;
+			u16 sumy = 0;
+			for(size_t k = 0; k < FILTER_HEIGHT; k++) {
+				for(size_t l = 0; l < FILTER_WIDTH; l++) {
+					const size_t offset = REG_WIDTH - FILTER_WIDTH - B + 1;
+					short val = line_reg[k][offset + l + x];
 
-		//swap buffers
-		prow0 = prow1;
-		prow1 = prow2;
+					sumx += (u16) GX[k*FILTER_WIDTH + l] * (u16) val;
+					sumy += (u16) GY[k*FILTER_WIDTH + l] * (u16) val;
+					 
+		}
+				
+			}
+
+           float sum = native_sqrt((float)(sumx*sumx) + (float)(sumy*sumy));
+			//store
+	  u8 intensity = (u8)(255.0f * (sum -  ming) / (maxg - ming));
+          resbuf[x] = 255 - intensity;
+       }
+
+    		out_pixels[y] = char_to_bus(resbuf);
 	}
 
 }
-
-
