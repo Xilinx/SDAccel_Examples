@@ -28,6 +28,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 
 #ifndef __COMMON_H__
+#ifndef __COMMON_H__
 #define __COMMON_H__
 
 #include <stdio.h>
@@ -43,15 +44,15 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string.h>
 #include <unistd.h>
 
-#ifdef RSA_1024
+#ifdef RSA_2048
 #define WORD_TYPE uint
-#define NUM_WORDS		32
-#define NUM_WORDS_MODULUS	16
+#define NUM_WORDS		64
+#define NUM_WORDS_MODULUS	32
 #define MESSAGE_WORDS NUM_WORDS
 #define CIPHER_WORDS NUM_WORDS
-#define EXPONENT_BITS		512
+#define EXPONENT_BITS		1024
 
-#endif // RSA_1024
+#endif 
 
 
 
@@ -107,4 +108,3 @@ uint mod_add(uint x, uint y, uint m);
 uint mod_subtract(uint x, uint y, uint m);
 
 #endif // __COMMON_H__
-
