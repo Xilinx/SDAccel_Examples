@@ -19,6 +19,7 @@ smithwaterman_LDFLAGS=$(opencl_LDFLAGS) -fopenmp -lz
 
 # Smithwaterman Kernel
 krnl_smithwaterman_SRCS=./src/opencl_sw_maxscore_systolic.cpp
+krnl_smithwaterman_HDRS=./src/sw.h
 krnl_smithwaterman_CLFLAGS=--kernel opencl_sw_maxscore
 
 EXES=smithwaterman
