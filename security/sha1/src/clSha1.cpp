@@ -1,31 +1,3 @@
-/**********
-Copyright (c) 2016, Xilinx, Inc.
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice,
-this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice,
-this list of conditions and the following disclaimer in the documentation
-and/or other materials provided with the distribution.
-
-3. Neither the name of the copyright holder nor the names of its contributors
-may be used to endorse or promote products derived from this software
-without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-**********/
 #include <cstdlib>
 #include <iostream>
 #include <iomanip>
@@ -33,11 +5,9 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fstream>
 #include <streambuf>
 
-#include "sha1_app.h"
+#include "clSha1.h"
 
-using namespace std;
-
-sha1Runner::sha1Runner(cl_context context, cl_command_queue command_queue, cl_kernel kernel) {
+clSha1Runner::clSha1Runner(cl_context context, cl_command_queue command_queue, cl_kernel kernel) {
   mContext = context;
   mCommandQueue = command_queue;
   mKernel = kernel;
@@ -54,12 +24,32 @@ sha1Runner::sha1Runner(cl_context context, cl_command_queue command_queue, cl_ke
     std::cout << "ERROR: Could not create buffer" << std::endl;
     abort();
   }
+
+  for(size_t i = 0; i < 4; i++) {
+    mEventStats[i].cnt = 0;
+    mEventStats[i].max = 0;
+  }
 }
 
-sha1Runner::~sha1Runner() {
+clSha1Runner::~clSha1Runner() {
+
+  int err;
+
+  err = clReleaseMemObject(mDevGBuf);
+  if(err != CL_SUCCESS) {
+    std::cout << "ERROR: Could not release Mem object mDevGbuf!" << std::endl;
+    abort();
+  }
+
+  err = clReleaseMemObject(mDevGState);
+  if(err != CL_SUCCESS) {
+    std::cout << "ERROR: Could not release Mem object mDevGState!" << std::endl;
+    abort();
+  }
+
 }
 
-cl_event sha1Runner::run(const unsigned int *buf, unsigned int *mds) {
+cl_event clSha1Runner::run(const unsigned int *buf, unsigned int *mds) {
 
   size_t w[] = {1};
   size_t g[] = {1};
@@ -70,7 +60,7 @@ cl_event sha1Runner::run(const unsigned int *buf, unsigned int *mds) {
                              CHANNELS*BLOCKS*64, buf,
                              0, NULL, &mEvents[0]);
   if(err != CL_SUCCESS) {
-    std::cout << "Error: failed to Enqueue Write buffer! " <<  err << std::endl;
+    std::cout << "Error: failed to Enqueue Write buffer mDevGBuf! " <<  err << std::endl;
     abort();
   }
 
@@ -78,7 +68,7 @@ cl_event sha1Runner::run(const unsigned int *buf, unsigned int *mds) {
                             CHANNELS*64, mds,
                             0, NULL, &mEvents[1]);
   if(err != CL_SUCCESS) {
-    std::cout << "Error: failed to Enqueue Write buffer! " <<  err << std::endl;
+    std::cout << "Error: failed to Enqueue Write buffer mDevGState! " <<  err << std::endl;
     abort();
   }
 
@@ -94,7 +84,6 @@ cl_event sha1Runner::run(const unsigned int *buf, unsigned int *mds) {
     abort();
   }
 
-  cout << "calling: clEnqueueNDRangeKernel" << endl;
   err = clEnqueueNDRangeKernel(mCommandQueue, mKernel,
                                1, NULL, g, w, 2, &mEvents[0], &mEvents[2]);
   if(err != CL_SUCCESS) {
@@ -113,7 +102,80 @@ cl_event sha1Runner::run(const unsigned int *buf, unsigned int *mds) {
   return mEvents[3];
 }
 
-sha1::sha1(std::string Vendor, std::string Device, const char* filename) {
+void clSha1Runner::initStats(size_t size) {
+	for(size_t i = 0; i < 4; i++) {
+		mEventStats[i].ent = (unsigned long*) malloc(sizeof(unsigned long) * size);
+		if (mEventStats[i].ent == NULL) {
+			std::cout << "ERROR: out of memory" << std::endl;
+			abort();
+		}
+
+		mEventStats[i].cnt = 0;
+		mEventStats[i].max = size;
+	}
+}
+
+void clSha1Runner::updateStats() {
+  for(size_t i = 0 ; i < 4; i++) {
+    size_t cnt = mEventStats[i].cnt;
+    size_t max = mEventStats[i].max;
+    if (cnt < max) {
+      unsigned long start, stop;
+      clGetEventProfilingInfo(mEvents[i], CL_PROFILING_COMMAND_START,
+                              sizeof(unsigned long), &start, NULL);
+      clGetEventProfilingInfo(mEvents[i], CL_PROFILING_COMMAND_END,
+                              sizeof(unsigned long), &stop, NULL);
+
+      if (stop > start) {
+        mEventStats[i].ent[cnt] = stop - start;
+      } else {
+        std::cout << "overflow" << std::endl;
+        mEventStats[i].ent[cnt] = 0xFFFFFFFF - start  +  stop + 1;
+      }
+
+      //std::cout << start << " " << stop << " ";
+
+      //mEventStats[i].ent[cnt] = 0xFFFFFFFF;
+
+      mEventStats[i].cnt = cnt + 1;
+
+      //double dur = mEventStats[i].ent[cnt] * 1.0;
+      //dur /= 1000.0;  // us
+      //dur /= 1000.0;  // ms
+
+      //std::cout << dur << " ms ";
+    }
+  }
+  //std::cout << std::endl;
+}
+
+void clSha1Runner::getStats(unsigned long min[4], unsigned long max[4], unsigned long avg[4], size_t cnt[4]) {
+  for(size_t i = 0; i < 4; i++) {
+    unsigned long long tot;
+
+    min[i] = max[i] = tot = mEventStats[i].ent[0];
+
+    for(size_t j = 1; j < mEventStats[i].cnt; j++) {
+      unsigned long val = mEventStats[i].ent[j];
+      if (val > max[i]) {
+        max[i] = val;
+      }
+      if (val < min[i]) {
+        min[i] = val;
+      }
+      tot += val;
+    }
+    if (mEventStats[i].cnt != 0) {
+      avg[i] = tot / mEventStats[i].cnt;
+      cnt[i] = mEventStats[i].cnt;
+    } else {
+      avg[i] = 0;
+      cnt[i] = 0;
+    }
+  }
+}
+
+clSha1::clSha1(std::string Vendor, std::string Device, const char* filename) {
   getVendorPlatform(Vendor);
   getDeviceIdByName(Device);
   createContext();
@@ -122,14 +184,14 @@ sha1::sha1(std::string Vendor, std::string Device, const char* filename) {
   createKernelByName("dev_sha1_update");
 }
 
-sha1::~sha1() {
+clSha1::~clSha1() {
   clReleaseKernel(mKernel);
   releaseCommandQueue();
   clReleaseProgram(mProgram);
   clReleaseContext(mContext);
 }
 
-void sha1::getVendorPlatform(std::string Vendor) {
+void clSha1::getVendorPlatform(std::string Vendor) {
   int err;
   cl_uint num_platforms;
 
@@ -174,10 +236,7 @@ void sha1::getVendorPlatform(std::string Vendor) {
       abort();
     }
 
-    std::string cur_vendor = std::string(vendor);
-    if (cur_vendor.find(Vendor) != std::string::npos )
-    {
-      cout << "platform vendor set to: " << cur_vendor << endl;
+    if(Vendor == std::string(vendor)) {
       free(vendor);
       platform_id = platform_ids[i];
       break;
@@ -191,7 +250,7 @@ void sha1::getVendorPlatform(std::string Vendor) {
   mPlatformId = platform_id;
 }
 
-void sha1::getDeviceIdByName(std::string Device) {
+void clSha1::getDeviceIdByName(std::string Device) {
   int err;
 
   cl_uint num_device_ids;
@@ -215,7 +274,6 @@ void sha1::getDeviceIdByName(std::string Device) {
     abort();
   }
 
-  cout << "Found: " << num_device_ids << " devices" << endl;
   for(unsigned i = 0; i < num_device_ids; i++) {
     size_t device_size;
     err = clGetDeviceInfo(device_ids[i], CL_DEVICE_NAME, 0, NULL, &device_size);
@@ -236,10 +294,9 @@ void sha1::getDeviceIdByName(std::string Device) {
       abort();
     }
 
-    std::string cur_device = std::string(device);
     std::cout << "Dev:   " << Device << std::endl;
     std::cout << "Match: " << std::string(device) << std::endl;
-    if (cur_device.find(Device) != std::string::npos ) {
+    if (Device == std::string(device)) {
       mDeviceId = device_ids[i];
     }
     free(device);
@@ -248,7 +305,7 @@ void sha1::getDeviceIdByName(std::string Device) {
   free(device_ids);
 }
 
-void sha1::createContext() {
+void clSha1::createContext() {
   int err;
 
   mContext = clCreateContext(0, 1, &mDeviceId,
@@ -259,7 +316,7 @@ void sha1::createContext() {
   }
 }
 
-void sha1::createProgram(const char* filename) {
+void clSha1::createProgram(const char* filename) {
 
   std::ifstream fs(filename, std::ifstream::binary);
 
@@ -285,7 +342,6 @@ void sha1::createProgram(const char* filename) {
   int err;
   std::string filename_string(filename);
   if(filename_string.find(".xclbin") != std::string::npos) {
-    cout << "calling: clCreateProgramWithBinary" << endl;
     mProgram = clCreateProgramWithBinary(mContext, 1, &mDeviceId,
                                         &bin_size, &bin_ptr,
                                         NULL, &err);
@@ -294,7 +350,6 @@ void sha1::createProgram(const char* filename) {
       abort();
     }
   } else {
-    cout << "calling: clCreateProgramWithSource" << endl;
     mProgram = clCreateProgramWithSource(mContext, 1,
                                         (const char**) &bin_ptr,
                                         NULL, &err);
@@ -333,7 +388,7 @@ void sha1::createProgram(const char* filename) {
   }
 }
 
-void sha1::createKernelByName(std::string kernel_name) {
+void clSha1::createKernelByName(std::string kernel_name) {
   int err;
 
   mKernel = clCreateKernel(mProgram, kernel_name.c_str(), &err);
@@ -343,7 +398,7 @@ void sha1::createKernelByName(std::string kernel_name) {
   }
 }
 
-void sha1::createCommandQueue() {
+void clSha1::createCommandQueue() {
   int err;
 
   mCommandQueue = clCreateCommandQueue(mContext, mDeviceId,
@@ -355,12 +410,12 @@ void sha1::createCommandQueue() {
   }
 }
 
-void sha1::releaseCommandQueue() {
+void clSha1::releaseCommandQueue() {
   clReleaseCommandQueue(mCommandQueue);
 }
 
-sha1Runner sha1::createRunner() {
-  sha1Runner runner(mContext, mCommandQueue, mKernel);
+clSha1Runner *clSha1::createRunner() {
+  clSha1Runner *runner = new clSha1Runner(mContext, mCommandQueue, mKernel);
 
   return runner;
 }

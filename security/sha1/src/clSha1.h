@@ -1,31 +1,3 @@
-/**********
-Copyright (c) 2016, Xilinx, Inc.
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice,
-this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice,
-this list of conditions and the following disclaimer in the documentation
-and/or other materials provided with the distribution.
-
-3. Neither the name of the copyright holder nor the names of its contributors
-may be used to endorse or promote products derived from this software
-without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-**********/
 #pragma once
 
 #define VC690_ADMPCIE7V3_1DDR_GEN2 1
@@ -33,9 +5,10 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define XCL_DEVICE M505_LX325T
 
-#define BLOCKS 16384
-//#define BLOCKS 8
-#define PIPELINE_DEPTH 165 
+//#define BLOCKS 65536
+#define BLOCKS 8192
+//#define BLOCKS 512
+#define PIPELINE_DEPTH 192
 
 //#define DEBUG
 
@@ -154,15 +127,26 @@ void int_to_char4(int in, global char *out) {
 #include <string>
 #include <CL/opencl.h>
 
+typedef struct {
+	unsigned long *ent;
+	size_t cnt;
+	size_t max;
+} clSha1Stats;
+
+
 typedef cl_uint16 buf_t;
 typedef cl_uint16 state_t;
 
-class sha1Runner {
+class clSha1Runner {
   public:
-    sha1Runner(cl_context context, cl_command_queue command_queue, cl_kernel kernel);
-    ~sha1Runner();
+    clSha1Runner(cl_context context, cl_command_queue command_queue, cl_kernel kernel);
+    ~clSha1Runner();
 
-     cl_event run(const unsigned int *bufs, unsigned int *mds);
+    cl_event run(const unsigned int *bufs, unsigned int *mds);
+    
+    void initStats(size_t size);
+    void updateStats();
+    void getStats(unsigned long min[4], unsigned long max[4], unsigned long avg[4], size_t cnt[4]);
 
   private:
     cl_context mContext;
@@ -171,16 +155,21 @@ class sha1Runner {
     cl_mem mDevGBuf;
     cl_mem mDevGState;
     cl_event mEvents[4];
+    clSha1Stats mEventStats[4];
 };
 
-class sha1 {
+class clSha1 {
 public:
-  sha1(std::string Vendor, std::string Device, const char* filename);
-  ~sha1();
+  clSha1(std::string Vendor, std::string Device, const char* filename);
+  ~clSha1();
 
-  sha1Runner createRunner();
+  clSha1Runner *createRunner();
 
 private:
+  cl_context mContext;
+  cl_kernel mKernel;
+  cl_command_queue mCommandQueue;
+
   void getVendorPlatform(std::string Vendor);
   void getDeviceIdByName(std::string Device);
   void createContext();
@@ -192,10 +181,8 @@ private:
   cl_platform_id mPlatformId;
   cl_device_id mDeviceId;
 
-  cl_context mContext;
   cl_program mProgram;
-  cl_kernel mKernel;
-  cl_command_queue mCommandQueue;
+
 };
 
 #endif

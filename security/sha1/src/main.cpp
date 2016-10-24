@@ -39,14 +39,9 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cstring>
 
 #include "sha1.h"
+#include "clSha1.h"
 #include <cmdlineparser.h>
 #include <logger.h>
-#include "sha1_app.h"
-
-
-using namespace std;
-using namespace sda;
-using namespace sda::utils;
 
 //#define SHA1_PUB 1
 typedef unsigned char u8;
@@ -59,8 +54,7 @@ volatile sig_atomic_t g_done = 0;
 	#include <jsonxx.h>
 #endif
 
-void term(int signum)
-{
+void term(int signum) {
     g_done = 1;
 }
 
@@ -71,9 +65,9 @@ void init_mds(unsigned int *mds) {
 		mds[i * 16 + 2] = 0x98BADCFE;
 		mds[i * 16 + 3] = 0x10325476;
 		mds[i * 16 + 4] = 0xC3D2E1F0;
-		//for(unsigned j = 0; j < 16-5; j++) {
-		//  mds[i*16 + 5 + j] = 0x0;
-		//}
+		for(unsigned j = 5; j < 16; j++) {
+		  mds[i*16 + j] = 0x0;
+		}
 	}
 }
 
@@ -116,25 +110,25 @@ void init_buf_0(unsigned int *buf) {
 
 void init_buf_count(unsigned int *buf, unsigned int start) {
 
-	unsigned long int ml = 512 * (BLOCKS - 1) + 64;
+	uint64_t ml = 512 * (BLOCKS - 1) + 64;
 
-	unsigned long int ml0 = (ml & 0x00000000000000FF) << 56;
-	unsigned long int ml1 = (ml & 0x000000000000FF00) << 40;
-	unsigned long int ml2 = (ml & 0x0000000000FF0000) << 24;
-	unsigned long int ml3 = (ml & 0x00000000FF000000) << 8;
-	unsigned long int ml4 = (ml & 0x000000FF00000000) >> 8;
-	unsigned long int ml5 = (ml & 0x0000FF0000000000) >> 24;
-	unsigned long int ml6 = (ml & 0x00FF000000000000) >> 40;
-	unsigned long int ml7 = (ml & 0xFF00000000000000) >> 56;
+	uint64_t ml0 = (ml & 0x00000000000000FF) << 56;
+	uint64_t ml1 = (ml & 0x000000000000FF00) << 40;
+	uint64_t ml2 = (ml & 0x0000000000FF0000) << 24;
+	uint64_t ml3 = (ml & 0x00000000FF000000) << 8;
+	uint64_t ml4 = (ml & 0x000000FF00000000) >> 8;
+	uint64_t ml5 = (ml & 0x0000FF0000000000) >> 24;
+	uint64_t ml6 = (ml & 0x00FF000000000000) >> 40;
+	uint64_t ml7 = (ml & 0xFF00000000000000) >> 56;
 
-	unsigned long int mlbe = ml0 | ml1 | ml2 | ml3 | ml4 | ml5 | ml6 | ml7;
+	uint64_t mlbe = ml0 | ml1 | ml2 | ml3 | ml4 | ml5 | ml6 | ml7;
 
-	unsigned int mlbe0 = (mlbe & 0xFFFFFFFF00000000) >> 32;
-	unsigned int mlbe1 = (mlbe & 0x00000000FFFFFFFF) >> 0;
+	uint32_t mlbe0 = (mlbe & 0xFFFFFFFF00000000) >> 32;
+	uint32_t mlbe1 = (mlbe & 0x00000000FFFFFFFF) >> 0;
 
-	memset(buf, 0, CHANNELS * (BLOCKS - 1) * 64);
+	std::memset(buf, 0, CHANNELS * (BLOCKS - 1) * 64);
 
-	for (unsigned i = 0; i < CHANNELS; i++) {
+	for (size_t i = 0; i < CHANNELS; i++) {
 		buf[CHANNELS * (BLOCKS - 1) * 16 + i * 16 + 0] = i;
 		buf[CHANNELS * (BLOCKS - 1) * 16 + i * 16 + 1] = start;
 		buf[CHANNELS * (BLOCKS - 1) * 16 + i * 16 + 2] = 0x80;
@@ -159,7 +153,7 @@ void verify_sha1_0(unsigned int *mds) {
 	std::cout << "VERIFYING" << std::endl;
 
 	for (int i = 0; i < CHANNELS; i++) {
-		memset(ibuf, 0, 8);
+		std::memset(ibuf, 0, 8);
 
 		unsigned char obuf[20];
 		SHA1(ibuf, 8, obuf);
@@ -202,9 +196,9 @@ void verify_sha1(unsigned int start, unsigned int *mds) {
 	std::cout << "VERIFYING" << std::endl;
 
 	for (int i = 0; i < CHANNELS; i++) {
-		memset(ibuf, 0, (BLOCKS - 1) * 64);
-		memcpy(&ibuf[(BLOCKS - 1) * 64 + 0], &i, 4);
-		memcpy(&ibuf[(BLOCKS - 1) * 64 + 4], &start, 4);
+		std::memset(ibuf, 0, (BLOCKS - 1) * 64);
+		std::memcpy(&ibuf[(BLOCKS - 1) * 64 + 0], &i, 4);
+		std::memcpy(&ibuf[(BLOCKS - 1) * 64 + 4], &start, 4);
 
 		unsigned char obuf[20];
 		SHA1(ibuf, (BLOCKS - 1) * 64 + 8, obuf);
@@ -244,7 +238,7 @@ void verify_sha1(unsigned int start, unsigned int *mds) {
 
 /* sha1_single - run SHA1 once
  */
-void sha1_single(sha1 &host) {
+void sha1_single(clSha1 &host) {
 	unsigned int *buf = (unsigned int*) malloc(CHANNELS * BLOCKS * 64);
 	unsigned int *mds = (unsigned int*) malloc(CHANNELS * 64);
 
@@ -257,14 +251,16 @@ void sha1_single(sha1 &host) {
 	init_buf_count(buf, 0);
 	//init_buf_0(buf);
 
-	sha1Runner runner = host.createRunner();
+	clSha1Runner *runner = host.createRunner();
 
-	cl_event event = runner.run(buf, mds);
+	cl_event event = runner->run(buf, mds);
 
 	clWaitForEvents(1, &event);
 
 	//verify_sha1_0(mds);
 	verify_sha1(0, mds);
+
+	delete runner;
 
 	free(mds);
 	free(buf);
@@ -281,10 +277,9 @@ void CL_CALLBACK single_callback(cl_event event, cl_int status,
 
 /* sha1_parallel - run SHA1 for timelimit seconds check performance
  */
-double sha1_parallel(sha1 &host, double timelimit, const string& zmq_port) {
-	int size = 64;
-	unsigned int **buf = (unsigned int**) malloc(sizeof(unsigned int*) * 20);
-	unsigned int **mds = (unsigned int**) malloc(sizeof(unsigned int*) * 20);
+void sha1_parallel(clSha1 &host, double timelimit, size_t runners, const string& zmq_port) {
+	uint32_t **buf = (uint32_t**) malloc(sizeof(uint32_t*) * runners*2);
+	uint32_t **mds = (uint32_t**) malloc(sizeof(uint32_t*) * runners*2);
 
 #ifdef SHA1_PUB
 	std::cout << "Setup zeromq publisher" << std::endl;
@@ -299,9 +294,9 @@ double sha1_parallel(sha1 &host, double timelimit, const string& zmq_port) {
 		abort();
 	}
 
-	for (int i = 0; i < 20; i++) {
-		buf[i] = (unsigned int*) malloc(CHANNELS * BLOCKS * 64);
-		mds[i] = (unsigned int*) malloc(CHANNELS * 64);
+	for (size_t i = 0; i < runners*2; i++) {
+		buf[i] = (uint32_t*) malloc(CHANNELS * BLOCKS * 64);
+		mds[i] = (uint32_t*) malloc(CHANNELS * 64);
 
 		init_mds(mds[i]);
 		init_buf_count(buf[i], i * CHANNELS);
@@ -312,13 +307,16 @@ double sha1_parallel(sha1 &host, double timelimit, const string& zmq_port) {
 		}
 	}
 
-	long long unsigned blocks = 0;
-	long long unsigned blocks_complete = 0;
+	uint64_t completions = 0;
+	uint64_t completed = 0;
+
+	cl_event events[runners*2];
+	std::vector<clSha1Runner*> clRunners(runners*2);
+	for(size_t i = 0; i < runners*2; i++) {
+		clRunners[i] = host.createRunner();
+	}
 
 	std::clock_t timeout = std::clock() + (double) CLOCKS_PER_SEC * timelimit;
-
-	cl_event events[20];
-	std::vector<sha1Runner> runners(20, host.createRunner());
 
 	size_t i;
 	for (i = 0;; i++) {
@@ -330,38 +328,30 @@ double sha1_parallel(sha1 &host, double timelimit, const string& zmq_port) {
 		}
 		usleep(10);
 
-		if (i % 10 == 0 && i >= 20) {
-			size_t j = ((i - 20) / 10) % 2;
-			clWaitForEvents(10, &events[j * 10]);
-
-			//no verify for now
-			/*
-			 for(int k = 0; k < 10; k++) {
-			 verify_sha1((i-20+k) * CHANNELS, mds[j*10 + k]);
-			 }
-			 */
-
-			//output to zmq for web viz
-			u8 zmq_output[CHANNELS * 10];
-			for (int k = 0; k < CHANNELS * 10; k++) {
-				zmq_output[k] = (unsigned char) (mds[j * 10 + (k / CHANNELS)][(k
-						% CHANNELS) * 16] & 0x1F);
-			}
+		if (i % runners == 0 && i >= runners*2) {
+			size_t j = ((i - runners*2) / runners) % 2;
+			clWaitForEvents(runners, &events[j * runners]);
 
 #ifdef SHA1_PUB
+			// output to zmq for web viz
+			u8 zmq_output[CHANNELS * runners];
+			for (int k = 0; k < CHANNELS * runners; k++) {
+				zmq_output[k] = (unsigned char) (mds[j * runners + (k / CHANNELS)][(k % CHANNELS) * 16] & 0x1F);
+			}
+
 			jsonxx::Array a;
-			for (int k = 0; k < CHANNELS * 10; k++)
+			for (int k = 0; k < CHANNELS * runners; k++)
 				a << zmq_output[k];
 
 			std::string str = a.json();
-			std::cout << "output: " << str << std::endl;
+			//std::cout << "output: " << str << std::endl;
 			publisher.send((const void*) str.c_str(), str.length());
 #endif
 
 			/* Re-init with new data */
-			for (int k = 0; k < 10; k++) {
-				init_mds(mds[j * 10 + k]);
-				init_buf_count(buf[j * 10 + k], (i + k) * CHANNELS);
+			for (int k = 0; k < runners; k++) {
+				init_mds(mds[j * runners + k]);
+				init_buf_count(buf[j * runners + k], (i + k) * CHANNELS);
 			}
 		}
 
@@ -369,70 +359,65 @@ double sha1_parallel(sha1 &host, double timelimit, const string& zmq_port) {
 		 if (std::clock() > timeout && timelimit > 0.0) {
 			 //Stop counting blocks immediately
 			 LogInfo("Timeout reached! Stopping...");
-			 blocks_complete = blocks;
+			 completed = completions;
 			 g_done = 1;
 			 break;
 		 }
 
-		blocks_complete = blocks;
+		events[i % (runners*2)] = clRunners[i % (runners*2)]->run(buf[i % (runners*2)], mds[i % (runners*2)]);
 
-		events[i % 20] = runners[i % 20].run(buf[i % 20], mds[i % 20]);
-
-		int err = clSetEventCallback(events[i % 20], CL_COMPLETE,
-				single_callback, &blocks);
+		int err = clSetEventCallback(events[i % (runners*2)], CL_COMPLETE,
+				single_callback, &completions);
 		if (err != CL_SUCCESS) {
 			std::cout << "ERROR: Could not create callback" << std::endl;
 			abort();
 		}
 	}
 
-	if (i >= 10) {
-		size_t j = (i / 10 - 2) % 2;
+	if (i >= runners) {
+		size_t j = (i / runners - 2) % 2;
 		if (j == 0) {
-			clWaitForEvents(10, &events[10]);
-			clWaitForEvents(i % 10, &events[0]);
+			clWaitForEvents(runners, &events[runners]);
+			clWaitForEvents(i % runners, &events[0]);
 		} else {
-			clWaitForEvents(10, &events[0]);
-			clWaitForEvents(i % 10, &events[10]);
+			clWaitForEvents(runners, &events[0]);
+			clWaitForEvents(i % runners, &events[runners]);
 		}
 	} else {
 		clWaitForEvents(i, &events[0]);
 	}
 
-	double dblocks = blocks_complete * 1.0;
-	double dsize = size * 1.0;
+	double dcompleted = completed * 1.0;
+	double dsize = 64.0;
 
-	double rate = dblocks * dsize / timelimit * (8.0 / 1024.0 / 1024.0);
-	std::cout << "INFO: Block Size: " << size * 8 << " bits" << std::endl;
-	std::cout << "INFO: Blocks Processed: " << blocks << std::endl;
-
+	double rate = dcompleted * dsize / timelimit * (8.0 / 1024.0 / 1024.0);
+	std::cout << "INFO: Block Size: " << 64 * 8 << " bits" << std::endl;
+	std::cout << "INFO: Blocks Processed: " << completed << std::endl;
 	std::cout << "INFO: Rate = " << rate << " MBit/s" << std::endl;
 
 	free(mds);
 	free(buf);
-
-	return rate;
 }
 
 /* Run SHA1 in a single and parallel mode */
 int main(int argc, char** argv) {
 	//parse commandline
 	LogInfo("Xilinx SHA1 Example Application");
+
+	// Create sig handler to quit gracefully
 	struct sigaction action;
-	memset(&action, 0, sizeof(struct sigaction));
+	std::memset(&action, 0, sizeof(struct sigaction));
 	action.sa_handler = term;
 	sigaction(SIGTERM, &action, NULL);
 
-
-	string strKernelFullPath = sda::GetApplicationPath() + "/";
-
 	//parse commandline
-	CmdLineParser parser;
+	sda::utils::CmdLineParser parser;
 	parser.addSwitch("--platform-name", "-p", "OpenCl platform vendor name", "Xilinx");
 	parser.addSwitch("--device-name", "-d", "OpenCl device name", "fpga0");
 	parser.addSwitch("--kernel-file", "-k", "OpenCl kernel file to use");
 	parser.addSwitch("--select-device", "-s", "Select from multiple matched devices [0-based index]", "0");
 	parser.addSwitch("--time-limit", "-t", "Time limit in seconds, -1 means run forever", "20");
+	parser.addSwitch("--runners", "-r", "Runners to execute concurrently", "2");
 	parser.addSwitch("--zmq-pub-port", "-z", "ZeroMQ publisher port for web visualization", "5010");
 	parser.setDefaultKey("--kernel-file");
 
@@ -444,19 +429,21 @@ int main(int argc, char** argv) {
 	string str_device = parser.value("device-name");
 	string str_kernel = parser.value("kernel-file");
 	string str_zmq_port = parser.value("zmq-pub-port");
+	size_t runners = parser.value_to_double("runners");
+
+	size_t memused = runners*2*CHANNELS*BLOCKS*65;
 
 	LogInfo("Platform: %s, Device: %s", str_platform.c_str(), str_device.c_str());
 	LogInfo("Kernel FP: %s", str_kernel.c_str());
+	LogInfo("Runners: %lld (%f MB)", runners, (float) memused  / 1024.0 / 1024.0);
 	LogInfo("ZMQ PORT: %s", str_zmq_port.c_str());
 	LogInfo("Running for [%f] seconds...", timelimit);
 
-	{
-		sha1 fpga(str_platform, str_device, str_kernel.c_str());
-		sha1_single(fpga);
-		std::cout << "INFO: FPGA Start" << std::endl;
-		sha1_parallel(fpga, timelimit, str_zmq_port);
-		std::cout << "INFO: FPGA Done" << std::endl;
-	}
+	clSha1 fpga(str_platform, str_device, str_kernel.c_str());
+	sha1_single(fpga);
+	std::cout << "INFO: FPGA Start" << std::endl;
+	sha1_parallel(fpga, timelimit, runners, str_zmq_port);
+	std::cout << "INFO: FPGA Done" << std::endl;
 
 	std::cout << "INFO: DONE" << std::endl;
 
