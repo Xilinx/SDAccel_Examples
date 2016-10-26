@@ -108,9 +108,9 @@ void init_buf_0(unsigned int *buf) {
 	}
 }
 
-void init_buf_count(unsigned int *buf, unsigned int start) {
+void init_buf_count(uint32_t *buf, uint32_t start) {
 
-	uint64_t ml = 512 * (BLOCKS - 1) + 64;
+	uint64_t ml = 512 * (BLOCKS - 1) + 32;
 
 	uint64_t ml0 = (ml & 0x00000000000000FF) << 56;
 	uint64_t ml1 = (ml & 0x000000000000FF00) << 40;
@@ -129,79 +129,39 @@ void init_buf_count(unsigned int *buf, unsigned int start) {
 	std::memset(buf, 0, CHANNELS * (BLOCKS - 1L) * 64L);
 
 	for (size_t i = 0; i < CHANNELS; i++) {
-		buf[CHANNELS * (BLOCKS - 1) * 16 + i * 16 + 0] = i;
-		buf[CHANNELS * (BLOCKS - 1) * 16 + i * 16 + 1] = start;
-		buf[CHANNELS * (BLOCKS - 1) * 16 + i * 16 + 2] = 0x80;
-		buf[CHANNELS * (BLOCKS - 1) * 16 + i * 16 + 3] = 0;
-		buf[CHANNELS * (BLOCKS - 1) * 16 + i * 16 + 4] = 0;
-		buf[CHANNELS * (BLOCKS - 1) * 16 + i * 16 + 5] = 0;
-		buf[CHANNELS * (BLOCKS - 1) * 16 + i * 16 + 6] = 0;
-		buf[CHANNELS * (BLOCKS - 1) * 16 + i * 16 + 7] = 0;
-		buf[CHANNELS * (BLOCKS - 1) * 16 + i * 16 + 8] = 0;
-		buf[CHANNELS * (BLOCKS - 1) * 16 + i * 16 + 9] = 0;
-		buf[CHANNELS * (BLOCKS - 1) * 16 + i * 16 + 10] = 0;
-		buf[CHANNELS * (BLOCKS - 1) * 16 + i * 16 + 11] = 0;
-		buf[CHANNELS * (BLOCKS - 1) * 16 + i * 16 + 12] = 0;
-		buf[CHANNELS * (BLOCKS - 1) * 16 + i * 16 + 13] = 0;
-		buf[CHANNELS * (BLOCKS - 1) * 16 + i * 16 + 14] = mlbe1;
-		buf[CHANNELS * (BLOCKS - 1) * 16 + i * 16 + 15] = mlbe0;
+		buf[CHANNELS * (BLOCKS - 1) * 16L + i * 16L + 0]  = i + start;
+		buf[CHANNELS * (BLOCKS - 1) * 16L + i * 16L + 1]  = 0x80;
+		buf[CHANNELS * (BLOCKS - 1) * 16L + i * 16L + 2]  = 0;
+		buf[CHANNELS * (BLOCKS - 1) * 16L + i * 16L + 3]  = 0;
+		buf[CHANNELS * (BLOCKS - 1) * 16L + i * 16L + 4]  = 0;
+		buf[CHANNELS * (BLOCKS - 1) * 16L + i * 16L + 5]  = 0;
+		buf[CHANNELS * (BLOCKS - 1) * 16L + i * 16L + 6]  = 0;
+		buf[CHANNELS * (BLOCKS - 1) * 16L + i * 16L + 7]  = 0;
+		buf[CHANNELS * (BLOCKS - 1) * 16L + i * 16L + 8]  = 0;
+		buf[CHANNELS * (BLOCKS - 1) * 16L + i * 16L + 9]  = 0;
+		buf[CHANNELS * (BLOCKS - 1) * 16L + i * 16L + 10] = 0;
+		buf[CHANNELS * (BLOCKS - 1) * 16L + i * 16L + 11] = 0;
+		buf[CHANNELS * (BLOCKS - 1) * 16L + i * 16L + 12] = 0;
+		buf[CHANNELS * (BLOCKS - 1) * 16L + i * 16L + 13] = 0;
+		buf[CHANNELS * (BLOCKS - 1) * 16L + i * 16L + 14] = mlbe1;
+		buf[CHANNELS * (BLOCKS - 1) * 16L + i * 16L + 15] = mlbe0;
 	}
 }
 
-void verify_sha1_0(unsigned int *mds) {
-	unsigned char ibuf[8];
+void verify_sha1(uint32_t start, uint32_t *mds) {
+	unsigned char ibuf[(BLOCKS - 1) * 64 + 4];
 	std::cout << "VERIFYING" << std::endl;
 
 	for (int i = 0; i < CHANNELS; i++) {
-		std::memset(ibuf, 0, 8);
-
-		unsigned char obuf[20];
-		SHA1(ibuf, 8, obuf);
-
-		for (int j = 0; j < 5; j++) {
-			unsigned int ref_mds = (unsigned) obuf[j * 4 + 0] << 24
-					| (unsigned) obuf[j * 4 + 1] << 16
-					| (unsigned) obuf[j * 4 + 2] << 8
-					| (unsigned) obuf[j * 4 + 3] << 0;
-
-			if (ref_mds != mds[i * 16 + j]) {
-				std::cout << "ERROR: Mismatch!: " << std::hex << std::setw(8)
-						<< std::setfill('0') << (uint) ref_mds << " != "
-						<< (uint) mds[i * 16 + j] << std::endl;
-
-				std::cout << "mds = ";
-				for (unsigned k = 0; k < 5; k++) {
-					std::cout << std::hex << std::setw(8) << std::setfill('0')
-							<< (uint) mds[i * 16 + k];
-				}
-				std::cout << std::dec << std::endl;
-
-				std::cout << "ref = ";
-				for (unsigned k = 0; k < 20; k++) {
-					std::cout << std::hex << std::setw(2) << std::setfill('0')
-							<< (uint) obuf[k];
-				}
-				std::cout << std::dec << std::endl;
-
-				/* Stop */
-				j = 5;
-			}
-		}
-
-	}
-}
-
-void verify_sha1(unsigned int start, unsigned int *mds) {
-	unsigned char ibuf[(BLOCKS - 1) * 64 + 8];
-	std::cout << "VERIFYING" << std::endl;
-
-	for (int i = 0; i < CHANNELS; i++) {
+		uint32_t val = i + start;
 		std::memset(ibuf, 0, (BLOCKS - 1) * 64);
-		std::memcpy(&ibuf[(BLOCKS - 1) * 64 + 0], &i, 4);
-		std::memcpy(&ibuf[(BLOCKS - 1) * 64 + 4], &start, 4);
+		ibuf[(BLOCKS - 1) * 64 + 0] = (val & 0x000000FF) >> 0;
+		ibuf[(BLOCKS - 1) * 64 + 1] = (val & 0x0000FF00) >> 8;
+		ibuf[(BLOCKS - 1) * 64 + 2] = (val & 0x00FF0000) >> 16;
+		ibuf[(BLOCKS - 1) * 64 + 3] = (val & 0xFF000000) >> 24;
 
 		unsigned char obuf[20];
-		SHA1(ibuf, (BLOCKS - 1) * 64 + 8, obuf);
+		SHA1(ibuf, (BLOCKS - 1) * 64 + 4, obuf);
 
 		for (int j = 0; j < 5; j++) {
 			unsigned int ref_mds = (unsigned) obuf[j * 4 + 0] << 24
@@ -210,7 +170,7 @@ void verify_sha1(unsigned int start, unsigned int *mds) {
 					| (unsigned) obuf[j * 4 + 3] << 0;
 
 			if (ref_mds != mds[i * 16 + j]) {
-				std::cout << "ERROR: Mismatch!: " << std::hex << std::setw(8)
+				std::cout << "ERROR: Mismatch on Chan " << i << "!: " << std::hex << std::setw(8)
 						<< std::setfill('0') << (uint) ref_mds << " != "
 						<< (uint) mds[i * 16 + j] << std::endl;
 
@@ -277,7 +237,7 @@ void sha1_parallel(clSha1 &host, double timelimit, size_t runners, const string&
 	string zmq_url = "tcp://*:" + zmq_port;
 	publisher.bind(zmq_url);
 #endif
-
+	uint32_t *start = new uint32_t[runners];
 	uint32_t **buf = new uint32_t*[runners];
 	uint32_t **mds = new uint32_t*[runners];
 
@@ -302,9 +262,9 @@ void sha1_parallel(clSha1 &host, double timelimit, size_t runners, const string&
 	to.tv_sec += (long) timelimit;
 
 	for(size_t i = 0; i < runners; i++) {
+		start[i] = (i) * CHANNELS;
 		init_mds(mds[i]);
-		init_buf_count(buf[i], i * CHANNELS);
-
+		init_buf_count(buf[i], start[i]);
 		clRunners[i]->run(buf[i], mds[i]);
 	}
 
@@ -313,12 +273,12 @@ void sha1_parallel(clSha1 &host, double timelimit, size_t runners, const string&
 	while(!done) {
 		for(size_t j = 0; j < runners; j++) {
 			if (clRunners[j]->isDone()) {
-				std::cout << "INFO: Runner " << j << " complete" << std::endl;
+				std::cout << "INFO: Runner " << j << " complete (" << start[j] << ")" << std::endl;
 #ifdef SHA1_PUB
 				// output to zmq for web viz
 				u8 zmq_output[CHANNELS];
 				for (int k = 0; k < CHANNELS; k++) {
-					zmq_output[k] = (unsigned char) (mds[j][k*64L] & 0x1F);
+					zmq_output[k] = (unsigned char) (mds[j][k*16 + 4] & 0x1F);
 				}
 
 				jsonxx::Array a;
@@ -331,9 +291,11 @@ void sha1_parallel(clSha1 &host, double timelimit, size_t runners, const string&
 #endif
 
 				complete++;
-				init_mds(mds[j]);
-				init_buf_count(buf[j], (complete+runners) * CHANNELS);
+				//verify_sha1(start[j], mds[j]);
 
+				start[j] = (complete + runners - 1) * CHANNELS;
+				init_mds(mds[j]);
+				init_buf_count(buf[j], start[j]);
 				clRunners[j]->run(buf[j], mds[j]);
 			}
 		}

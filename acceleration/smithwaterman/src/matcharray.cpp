@@ -38,7 +38,7 @@ using namespace sda;
 using namespace std;
 
 #ifdef PUB_ZMQ
-	#include "3rdparty/jsonxx/jsonxx.h"
+	#include <jsonxx.h>
 	using namespace jsonxx;
 #endif
 
