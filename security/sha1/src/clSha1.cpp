@@ -12,8 +12,10 @@ clSha1Runner::clSha1Runner(cl_context context, cl_command_queue command_queue, c
   mCommandQueue = command_queue;
   mKernel = kernel;
 
+  mDone = true;
+
   int err;
-  mDevGBuf = clCreateBuffer(mContext, CL_MEM_READ_ONLY, 64*CHANNELS*BLOCKS, NULL, &err);
+  mDevGBuf = clCreateBuffer(mContext, CL_MEM_READ_ONLY, CHANNELS*BLOCKS*64L, NULL, &err);
   if (err != CL_SUCCESS) {
     std::cout << "ERROR: Could not create buffer" << std::endl;
     abort();
@@ -49,7 +51,15 @@ clSha1Runner::~clSha1Runner() {
 
 }
 
-cl_event clSha1Runner::run(const unsigned int *buf, unsigned int *mds) {
+void CL_CALLBACK clSha1Runner_callback(cl_event event, cl_int status, void *user_data) {
+	bool *mDone = (bool*) user_data;
+
+	*mDone = true;
+}
+
+cl_event clSha1Runner::run(const uint32_t *buf, uint32_t *mds) {
+
+  mDone = false;
 
   size_t w[] = {1};
   size_t g[] = {1};
@@ -57,7 +67,7 @@ cl_event clSha1Runner::run(const unsigned int *buf, unsigned int *mds) {
   int err;
 
   err = clEnqueueWriteBuffer(mCommandQueue, mDevGBuf, CL_FALSE, 0,
-                             CHANNELS*BLOCKS*64, buf,
+                             CHANNELS*BLOCKS*64L, buf,
                              0, NULL, &mEvents[0]);
   if(err != CL_SUCCESS) {
     std::cout << "Error: failed to Enqueue Write buffer mDevGBuf! " <<  err << std::endl;
@@ -99,20 +109,30 @@ cl_event clSha1Runner::run(const unsigned int *buf, unsigned int *mds) {
     abort();
   }
 
+  err = clSetEventCallback(mEvents[3], CL_COMPLETE, clSha1Runner_callback, &mDone);
+  if(err != CL_SUCCESS) {
+    std::cout << "ERROR: Could not create callback" << std::endl;
+    abort();
+  }
+
   return mEvents[3];
 }
 
-void clSha1Runner::initStats(size_t size) {
-	for(size_t i = 0; i < 4; i++) {
-		mEventStats[i].ent = (unsigned long*) malloc(sizeof(unsigned long) * size);
-		if (mEventStats[i].ent == NULL) {
-			std::cout << "ERROR: out of memory" << std::endl;
-			abort();
-		}
+bool clSha1Runner::isDone() {
+  return mDone;
+}
 
-		mEventStats[i].cnt = 0;
-		mEventStats[i].max = size;
-	}
+void clSha1Runner::initStats(size_t size) {
+  for(size_t i = 0; i < 4; i++) {
+    mEventStats[i].ent = (unsigned long*) malloc(sizeof(unsigned long) * size);
+    if (mEventStats[i].ent == NULL) {
+      std::cout << "ERROR: out of memory" << std::endl;
+      abort();
+    }
+
+    mEventStats[i].cnt = 0;
+    mEventStats[i].max = size;
+  }
 }
 
 void clSha1Runner::updateStats() {

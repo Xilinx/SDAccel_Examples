@@ -5,10 +5,11 @@
 
 #define XCL_DEVICE M505_LX325T
 
+#define BLOCKS (1<<14)
 //#define BLOCKS 65536
-#define BLOCKS 8192
+//#define BLOCKS 8192
 //#define BLOCKS 512
-#define PIPELINE_DEPTH 192
+#define PIPELINE_DEPTH 256
 
 //#define DEBUG
 
@@ -142,11 +143,12 @@ class clSha1Runner {
     clSha1Runner(cl_context context, cl_command_queue command_queue, cl_kernel kernel);
     ~clSha1Runner();
 
-    cl_event run(const unsigned int *bufs, unsigned int *mds);
+    cl_event run(const uint32_t *bufs, uint32_t *mds);
     
     void initStats(size_t size);
     void updateStats();
     void getStats(unsigned long min[4], unsigned long max[4], unsigned long avg[4], size_t cnt[4]);
+    bool isDone();
 
   private:
     cl_context mContext;
@@ -156,6 +158,7 @@ class clSha1Runner {
     cl_mem mDevGState;
     cl_event mEvents[4];
     clSha1Stats mEventStats[4];
+    bool mDone;
 };
 
 class clSha1 {

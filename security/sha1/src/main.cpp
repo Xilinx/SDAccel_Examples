@@ -126,7 +126,7 @@ void init_buf_count(unsigned int *buf, unsigned int start) {
 	uint32_t mlbe0 = (mlbe & 0xFFFFFFFF00000000) >> 32;
 	uint32_t mlbe1 = (mlbe & 0x00000000FFFFFFFF) >> 0;
 
-	std::memset(buf, 0, CHANNELS * (BLOCKS - 1) * 64);
+	std::memset(buf, 0, CHANNELS * (BLOCKS - 1L) * 64L);
 
 	for (size_t i = 0; i < CHANNELS; i++) {
 		buf[CHANNELS * (BLOCKS - 1) * 16 + i * 16 + 0] = i;
@@ -239,8 +239,8 @@ void verify_sha1(unsigned int start, unsigned int *mds) {
 /* sha1_single - run SHA1 once
  */
 void sha1_single(clSha1 &host) {
-	unsigned int *buf = (unsigned int*) malloc(CHANNELS * BLOCKS * 64);
-	unsigned int *mds = (unsigned int*) malloc(CHANNELS * 64);
+	unsigned int *buf = (unsigned int*) malloc(CHANNELS * BLOCKS * 64L);
+	unsigned int *mds = (unsigned int*) malloc(CHANNELS * 64L);
 
 	if (!buf || !mds) {
 		std::cout << "ERROR: Out of Memory!" << std::endl;
@@ -266,20 +266,9 @@ void sha1_single(clSha1 &host) {
 	free(buf);
 }
 
-/* Call back used for keeping the update kernel constantly active */
-void CL_CALLBACK single_callback(cl_event event, cl_int status,
-		void *user_data) {
-	long long unsigned *blocks = (long long unsigned *) user_data;
-
-	//clReleaseEvent(event);
-	__sync_fetch_and_add(blocks, CHANNELS * BLOCKS); /* Atomic add */
-}
-
 /* sha1_parallel - run SHA1 for timelimit seconds check performance
  */
 void sha1_parallel(clSha1 &host, double timelimit, size_t runners, const string& zmq_port) {
-	uint32_t **buf = (uint32_t**) malloc(sizeof(uint32_t*) * runners*2);
-	uint32_t **mds = (uint32_t**) malloc(sizeof(uint32_t*) * runners*2);
 
 #ifdef SHA1_PUB
 	std::cout << "Setup zeromq publisher" << std::endl;
@@ -289,114 +278,101 @@ void sha1_parallel(clSha1 &host, double timelimit, size_t runners, const string&
 	publisher.bind(zmq_url);
 #endif
 
+	uint32_t **buf = new uint32_t*[runners];
+	uint32_t **mds = new uint32_t*[runners];
+
 	if (!buf || !mds) {
 		std::cout << "ERROR: Out of Memory!" << std::endl;
 		abort();
 	}
 
-	for (size_t i = 0; i < runners*2; i++) {
-		buf[i] = (uint32_t*) malloc(CHANNELS * BLOCKS * 64);
-		mds[i] = (uint32_t*) malloc(CHANNELS * 64);
+	std::vector<clSha1Runner*> clRunners(runners);
+	for (size_t i = 0; i < runners; i++) {
+		buf[i] = new uint32_t[CHANNELS * BLOCKS * 64L];
+		mds[i] = new uint32_t[CHANNELS * 64L];
 
-		init_mds(mds[i]);
-		init_buf_count(buf[i], i * CHANNELS);
-
-		if (!buf[i] || !mds[i]) {
-			std::cout << "ERROR: Out of Memory!" << std::endl;
-			abort();
-		}
-	}
-
-	uint64_t completions = 0;
-	uint64_t completed = 0;
-
-	cl_event events[runners*2];
-	std::vector<clSha1Runner*> clRunners(runners*2);
-	for(size_t i = 0; i < runners*2; i++) {
 		clRunners[i] = host.createRunner();
 	}
 
-	std::clock_t timeout = std::clock() + (double) CLOCKS_PER_SEC * timelimit;
+	bool done = false;
 
-	size_t i;
-	for (i = 0;; i++) {
+	std::cout << "INFO: Starting Timer" << std::endl;
+	struct timespec to;
+	clock_gettime(CLOCK_MONOTONIC, &to);
+	to.tv_sec += (long) timelimit;
 
-		//break gracefully
-		if(g_done) {
-			LogInfo("Caught SIGTERM...");
-			break;
-		}
-		usleep(10);
+	for(size_t i = 0; i < runners; i++) {
+		init_mds(mds[i]);
+		init_buf_count(buf[i], i * CHANNELS);
 
-		if (i % runners == 0 && i >= runners*2) {
-			size_t j = ((i - runners*2) / runners) % 2;
-			clWaitForEvents(runners, &events[j * runners]);
+		clRunners[i]->run(buf[i], mds[i]);
+	}
 
+	size_t complete = 0;
+
+	while(!done) {
+		for(size_t j = 0; j < runners; j++) {
+			if (clRunners[j]->isDone()) {
+				std::cout << "INFO: Runner " << j << " complete" << std::endl;
 #ifdef SHA1_PUB
-			// output to zmq for web viz
-			u8 zmq_output[CHANNELS * runners];
-			for (int k = 0; k < CHANNELS * runners; k++) {
-				zmq_output[k] = (unsigned char) (mds[j * runners + (k / CHANNELS)][(k % CHANNELS) * 16] & 0x1F);
-			}
+				// output to zmq for web viz
+				u8 zmq_output[CHANNELS];
+				for (int k = 0; k < CHANNELS; k++) {
+					zmq_output[k] = (unsigned char) (mds[j][k*64L] & 0x1F);
+				}
 
-			jsonxx::Array a;
-			for (int k = 0; k < CHANNELS * runners; k++)
-				a << zmq_output[k];
+				jsonxx::Array a;
+				for (int k = 0; k < CHANNELS; k++)
+					a << zmq_output[k];
 
-			std::string str = a.json();
-			//std::cout << "output: " << str << std::endl;
-			publisher.send((const void*) str.c_str(), str.length());
+				std::string str = a.json();
+				//std::cout << "output: " << str << std::endl;
+				publisher.send((const void*) str.c_str(), str.length());
 #endif
 
-			/* Re-init with new data */
-			for (int k = 0; k < runners; k++) {
-				init_mds(mds[j * runners + k]);
-				init_buf_count(buf[j * runners + k], (i + k) * CHANNELS);
+				complete++;
+				init_mds(mds[j]);
+				init_buf_count(buf[j], (complete+runners) * CHANNELS);
+
+				clRunners[j]->run(buf[j], mds[j]);
 			}
 		}
 
+		usleep(10);
+
 		 /* After timeout stop */
-		 if (std::clock() > timeout && timelimit > 0.0) {
-			 //Stop counting blocks immediately
-			 LogInfo("Timeout reached! Stopping...");
-			 completed = completions;
-			 g_done = 1;
-			 break;
-		 }
+		struct timespec cur;
+		clock_gettime(CLOCK_MONOTONIC, &cur);
 
-		events[i % (runners*2)] = clRunners[i % (runners*2)]->run(buf[i % (runners*2)], mds[i % (runners*2)]);
+		if (cur.tv_sec >= to.tv_sec && timelimit > 0.0) {
+			 std::cout << "INFO: Test complete ran for " << timelimit << " seconds! Stopping..." << std::endl;
+			 done = true;
+		}
 
-		int err = clSetEventCallback(events[i % (runners*2)], CL_COMPLETE,
-				single_callback, &completions);
-		if (err != CL_SUCCESS) {
-			std::cout << "ERROR: Could not create callback" << std::endl;
-			abort();
+		if (g_done) {
+			std::cout << "INFO: Signal detected! Stopping..." << std::endl;
+			done = true;
 		}
 	}
 
-	if (i >= runners) {
-		size_t j = (i / runners - 2) % 2;
-		if (j == 0) {
-			clWaitForEvents(runners, &events[runners]);
-			clWaitForEvents(i % runners, &events[0]);
-		} else {
-			clWaitForEvents(runners, &events[0]);
-			clWaitForEvents(i % runners, &events[runners]);
-		}
-	} else {
-		clWaitForEvents(i, &events[0]);
+	double jsize = 64.0 * BLOCKS / 1024.0 / 1024.0;
+	double jcompleted = CHANNELS * complete * 1.0;
+	double rate = jcompleted * jsize / timelimit;
+
+	std::cout << "INFO: Job Size: " << jsize << " MB" << std::endl;
+	std::cout << "INFO: Jobs Processed: " << jcompleted << std::endl;
+	std::cout << "INFO: Rate = " << rate << " MB/s" << std::endl;
+
+	for(size_t i = 0; i < runners; i++) {
+		while(!clRunners[i]->isDone());
+
+		delete clRunners[i];
+		delete mds[i];
+		delete buf[i];
 	}
 
-	double dcompleted = completed * 1.0;
-	double dsize = 64.0;
-
-	double rate = dcompleted * dsize / timelimit * (8.0 / 1024.0 / 1024.0);
-	std::cout << "INFO: Block Size: " << 64 * 8 << " bits" << std::endl;
-	std::cout << "INFO: Blocks Processed: " << completed << std::endl;
-	std::cout << "INFO: Rate = " << rate << " MBit/s" << std::endl;
-
-	free(mds);
-	free(buf);
+	delete mds;
+	delete buf;
 }
 
 /* Run SHA1 in a single and parallel mode */
@@ -431,7 +407,7 @@ int main(int argc, char** argv) {
 	string str_zmq_port = parser.value("zmq-pub-port");
 	size_t runners = parser.value_to_double("runners");
 
-	size_t memused = runners*2*CHANNELS*BLOCKS*65;
+	size_t memused = runners*(CHANNELS*BLOCKS*64L + CHANNELS*64L);
 
 	LogInfo("Platform: %s, Device: %s", str_platform.c_str(), str_device.c_str());
 	LogInfo("Kernel FP: %s", str_kernel.c_str());
@@ -439,10 +415,10 @@ int main(int argc, char** argv) {
 	LogInfo("ZMQ PORT: %s", str_zmq_port.c_str());
 	LogInfo("Running for [%f] seconds...", timelimit);
 
-	clSha1 fpga(str_platform, str_device, str_kernel.c_str());
-	sha1_single(fpga);
+	clSha1 host(str_platform, str_device, str_kernel.c_str());
+	//sha1_single(host);
 	std::cout << "INFO: FPGA Start" << std::endl;
-	sha1_parallel(fpga, timelimit, runners, str_zmq_port);
+	sha1_parallel(host, timelimit, runners, str_zmq_port);
 	std::cout << "INFO: FPGA Done" << std::endl;
 
 	std::cout << "INFO: DONE" << std::endl;
