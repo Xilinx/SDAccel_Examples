@@ -78,9 +78,9 @@ int main(int argc, char* argv[]) {
 	LogInfo("Xilinx Canonical Huffman Codec Application");
 
 	{
-		LogInfo("Unit test naive impl");
+	/*	LogInfo("Unit test naive impl");
 		HuffmanNaiveImpl naive;
-		assert(unit_test_codec(&naive));
+		assert(unit_test_codec(&naive));*/
 
 
 		LogInfo("Unit test optimized cpu-only");
@@ -91,7 +91,7 @@ int main(int argc, char* argv[]) {
 
 
 
-	string strKernelFullPath = sda::GetApplicationPath() + "/";
+/*	string strKernelFullPath = sda::GetApplicationPath() + "/";
 
 	//parse commandline
 	CmdLineParser parser;
@@ -140,7 +140,7 @@ int main(int argc, char* argv[]) {
 	if(!res) {
 		LogError("An error occurred when running benchmark on device 0");
 		return -1;
-	}
+	}*/
 
 
 	LogInfo("finished");
