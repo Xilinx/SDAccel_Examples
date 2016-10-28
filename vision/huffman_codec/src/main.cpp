@@ -86,7 +86,7 @@ int main(int argc, char* argv[]) {
 
 		LogInfo("Unit test optimized cpu-only");
 		HuffmanOptimizedCPUOnly cpuonly;
-		assert(unit_test_codec(&cpuonly));*/
+		assert(unit_test_codec(&cpuonly));
 	}
 
 
