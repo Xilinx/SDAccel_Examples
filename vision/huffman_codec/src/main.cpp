@@ -56,8 +56,7 @@ static bool unit_test_codec(ICodec* pHuffmanCodec) {
 		string out_str;
 
 		int res = pHuffmanCodec->enc_str(msgs[i], encoded_data);
-		ctPassed++;
-		/*res &= pHuffmanCodec->dec_str(encoded_data, out_str);
+		res &= pHuffmanCodec->dec_str(encoded_data, out_str);
 
 		if(msgs[i] == out_str) {
 			LogInfo("Test [%u of %u] PASS", i+1, total);
@@ -66,7 +65,7 @@ static bool unit_test_codec(ICodec* pHuffmanCodec) {
 		else
 		{
 			LogError("Test [%u of %u] Failed! (input: %s, output: %s)", msgs[i].c_str(), out_str.c_str());
-		}*/
+		}
 	}
 
 	LogInfo("End unit tests for kernels on the CPU");
@@ -79,12 +78,13 @@ int main(int argc, char* argv[]) {
 	LogInfo("Xilinx Canonical Huffman Codec Application");
 
 	{
-		LogInfo("Unit test naive impl");
+	//we don't need this 
+	/*	LogInfo("Unit test naive impl");
 		HuffmanNaiveImpl naive;
-		assert(unit_test_codec(&naive));
+		assert(unit_test_codec(&naive));*/
 
 
-	/*	LogInfo("Unit test optimized cpu-only");
+		LogInfo("Unit test optimized cpu-only");
 		HuffmanOptimizedCPUOnly cpuonly;
 		assert(unit_test_codec(&cpuonly));*/
 	}
@@ -92,7 +92,7 @@ int main(int argc, char* argv[]) {
 
 
 
-/*	string strKernelFullPath = sda::GetApplicationPath() + "/";
+	string strKernelFullPath = sda::GetApplicationPath() + "/";
 
 	//parse commandline
 	CmdLineParser parser;
@@ -141,7 +141,7 @@ int main(int argc, char* argv[]) {
 	if(!res) {
 		LogError("An error occurred when running benchmark on device 0");
 		return -1;
-	}*/
+	}
 
 
 	LogInfo("finished");
