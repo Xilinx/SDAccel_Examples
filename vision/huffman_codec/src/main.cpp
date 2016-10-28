@@ -56,6 +56,7 @@ static bool unit_test_codec(ICodec* pHuffmanCodec) {
 		string out_str;
 
 		int res = pHuffmanCodec->enc_str(msgs[i], encoded_data);
+		ctPassed++;
 		/*res &= pHuffmanCodec->dec_str(encoded_data, out_str);
 
 		if(msgs[i] == out_str) {
