@@ -129,7 +129,7 @@ int main( int argc, char* argv[] )
 		return err;
 	}
 	// Create the compute kernel in the program we wish to run
-	kernel = clCreateKernel(program, "misterious_kernel", &err);
+	kernel = clCreateKernel(program, "vadd", &err);
 	print_opencl_error(stderr, err);
 	// Create the input and output arrays in device memory for our calculation
 	d_a = clCreateBuffer(context, CL_MEM_READ_ONLY, bytes, NULL, NULL);
