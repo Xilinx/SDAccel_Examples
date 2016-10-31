@@ -239,7 +239,7 @@ def submit_testcase(username, apikey, testid, exe, args):
 	_args = ' '.join(args)
 
 	job_desc = {
-		"app": "xilinx_runtime",
+		"app": "spenserg-sdx",
 		"checkedout": False,
 		"machine": {
 			"nodes": "1",
@@ -248,10 +248,12 @@ def submit_testcase(username, apikey, testid, exe, args):
 		"application": {
 			"geometry": "800x600",
 			"staging": False,
-			"command": "run",
+			"command": "batch",
 			"parameters": {
 				"executable": _exe,
-				"args": _args
+				"args": _args,
+				"-dp": False,
+				"-tt": False
 			}
 		},
 		"vault": {
