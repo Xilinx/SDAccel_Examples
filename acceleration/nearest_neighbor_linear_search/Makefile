@@ -12,7 +12,7 @@ nearest_LDFLAGS=$(opencl_LDFLAGS)
 
 # Nearest Neighbor Kernel
 krnl_nearest_SRCS=./src/krnl_linear_search.cpp
-krnl_nearest_XFLAGS=--kernel krnl_linear_search
+krnl_nearest_CLFLAGS=--kernel krnl_linear_search
 
 EXES=nearest
 XCLBINS=krnl_nearest
