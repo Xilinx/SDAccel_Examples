@@ -14,10 +14,10 @@ XCLBIN_DIR=xclbin
 #   $(1)_LDFLAGS - extra linkder flags
 define mk_exe
 
-$(1): $($(1)_SRCS) $($(1)_HDRS)
+$(1)_$(ARCH).exe: $($(1)_SRCS) $($(1)_HDRS)
 	$(CXX) $(CXXFLAGS) $($(1)_CXXFLAGS) -o $$@ $($(1)_SRCS) $($(1)_LDFLAGS) $(LDFLAGS)
 
-EXE_GOALS+= $(1)
+EXE_GOALS+= $(1)_$(ARCH).exe
 
 endef
 
