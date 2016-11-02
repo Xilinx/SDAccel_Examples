@@ -1,10 +1,15 @@
+include ../../utility/boards.mk
+include ../../libs/oclHelper/oclHelper.mk
+include ../../libs/bitmap/bitmap.mk
+include ../../libs/opencl/opencl.mk
+
 DSA				   			:= xilinx:adm-pcie-7v3:1ddr:2.0
 
 XILINX_CXX					:= $(XILINX_OPENCL)/lnx64/tools/gcc/bin/g++
 XILINX_CC					:= $(XILINX_OPENCL)/lnx64/tools/gcc/bin/gcc
 XOCC						:= $(XILINX_OPENCL)/bin/xocc
 
-XILINX_CXXFLAGS			:= -g -Wall -std=c++0x -lrt -D XILINX
+XILINX_CXXFLAGS			:= -g -Wall -std=c++0x -lrt -D XILINX -I./src/ $(opencl_CXXFLAGS) $(bitmap_CXXFLAGS) $(oclHelper_CXXFLAGS)
 
 
 GTK_LIBS						= -pthread -lgtk-x11-2.0 -lgdk-x11-2.0 -latk-1.0 -lgio-2.0 -lpangoft2-1.0 -lpangocairo-1.0 -lgdk_pixbuf-2.0 -lcairo -lpango-1.0 -lfreetype -lfontconfig -lgobject-2.0			\
