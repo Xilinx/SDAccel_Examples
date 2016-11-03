@@ -82,7 +82,7 @@ int main(int argc, char** argv)
     char cl_platform_vendor[1001];
     char cl_platform_name[1001];
     char cl_device_name[1001];
-    char target_device_name[1001] = "xilinx:adm-pcie-7v3:1ddr:2.1";
+    char target_device_name[1001] = "xilinx:adm-pcie-ku3:1ddr:3.1";//"xilinx:adm-pcie-7v3:1ddr:2.1";
 
     cl_mem buffer0, buffer1;
     void *map_buffer0, *map_buffer1;
