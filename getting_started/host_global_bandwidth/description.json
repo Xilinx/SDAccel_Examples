@@ -2,10 +2,10 @@
     "example" : "host_global",
     "overview" : "Host to global memory bandwidth test",
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
-    "version": ["SDAccel 2016.1"],
-    "dsa": "xilinx:adm-pcie-ku3:2ddr:2.1",
-    "em_cmd" : "./host_global_X86.exe ./xclbin/krnl_host_global.<emulation flow>.xilinx_adm-pcie-ku3_2ddr_2.1.xclbin",
-    "hw_cmd" : "../../utility/nimbix/nimbix-run.py ./sha1_X86.exe -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:2.1' -k ./xclbin/krnl_sha1.hw.xilinx_adm-pcie-ku3_2ddr_2.1.xclbin",
+    "version": ["SDAccel 2016.2"],
+    "dsa": "xilinx:adm-pcie-ku3:2ddr:3.1",
+    "em_cmd" : "./host_global ./xclbin/krnl_host_global.<emulation flow>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin",
+    "hw_cmd" : "../../utility/nimbix/nimbix-run.py ./host_global ./xclbin/krnl_host_global.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin",
     "contributors" : [
         {
             "group": "Xilinx",

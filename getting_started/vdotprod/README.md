@@ -19,8 +19,8 @@ Simple example of vector dot-product.
 ## 2. SOFTWARE AND SYSTEM REQUIREMENTS
 Board | Software Version
 ------|---------
-Alpha Data ADM-PCIE-7V3|SDAccel 2016.1
-Alpha Data ADM-PCIE-KU3|SDAccel 2016.1
+Alpha Data ADM-PCIE-7V3|SDAccel 2016.2
+Alpha Data ADM-PCIE-KU3|SDAccel 2016.2
 
 
 ## 3. DESIGN FILE HIERARCHY
@@ -36,11 +36,11 @@ Application code is located in the src directory. Accelerator binary files will 
 Set the following environment variable to create a emconfig.json file
 ```
 export XCL_EMULATION_MODE=true
-emconfigutil --xdevice 'xilinx:adm-pcie-ku3:2ddr:2.1' --nd 1
+emconfigutil --xdevice 'xilinx:adm-pcie-ku3:2ddr:3.1' --nd 1
 ```
 Run the application as
 ```
-./vdotprod.exe
+./vdotprod
 ```
 The choices for emulation flow are
 		- sw_emu = software emulation
@@ -52,13 +52,13 @@ It is recommended that for this example the user skips running hardware emulatio
 
 	Install the Xilinx Runtime for board in Nimbix using the xbinst utility in SDAccel
 ```
-xbinst -x 'xilinx:adm-pcie-ku3:2ddr:2.1' -d .
+xbinst -x 'xilinx:adm-pcie-ku3:2ddr:3.1' -d .
 mv xbinst/pkg/pcie/runtime . 
 rm -rf xbinst
 ```
 Run the nimbix-run.py script provided in the utility/nimbix directory at the top level of this repository
 ```
-../../utility/nimbix/nimbix-run.py ./vdotprod.exe
+../../utility/nimbix/nimbix-run.py ./vdotprod
 ```
 
 	Only the Alpha Data ADM-PCIE-KU3 card is supported by this method.

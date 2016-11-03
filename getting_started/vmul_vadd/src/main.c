@@ -64,16 +64,16 @@ int main(int argc, char** argv)
 
    xcl_world world = xcl_world_single();
 
+   printf("INFO: loading vmul kernel\n");
+   cl_program program_vmul = xcl_import_binary(world, "krnl_vmul");
+   cl_kernel  krnl_vmul = xcl_get_kernel(program_vmul, "krnl_vmul");
+
    cl_mem d_a = xcl_malloc(world, CL_MEM_READ_ONLY, sizeof(int) * LENGTH);
    cl_mem d_b = xcl_malloc(world, CL_MEM_READ_ONLY, sizeof(int) * LENGTH);
    cl_mem d_mul_c = xcl_malloc(world, CL_MEM_WRITE_ONLY, sizeof(int) * LENGTH);
 
    xcl_memcpy_to_device(world, d_a, h_a, sizeof(int) * LENGTH);
    xcl_memcpy_to_device(world, d_b, h_b, sizeof(int) * LENGTH);
-
-   printf("INFO: loading vmul kernel\n");
-   cl_program program_vmul = xcl_import_binary(world, "krnl_vmul");
-   cl_kernel  krnl_vmul = xcl_get_kernel(program_vmul, "krnl_vmul");
 
    err = 0;
    err  = clSetKernelArg(krnl_vmul, 0, sizeof(cl_mem), &d_a);

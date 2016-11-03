@@ -55,8 +55,12 @@ $(foreach xclbin,$(XCLBINS),$(foreach target,$(TARGETS),$(foreach device,$(DEVIC
 $(info $(XCLBIN_GOALS))
 
 .PHONY: all-real
-all-real: $(EXE_GOALS) $(XCLBIN_GOALS)
+all-real: $(EXE_GOALS) $(XCLBIN_GOALS) README.md
 
 .PHONY: clean
 clean:
 	rm -rf $(EXE_GOALS) $(XCLBIN_GOALS) sdaccel* *.ll _xocc_*
+
+README.md: description.json
+	../../utility/readme_gen/readme_gen.py description.json
+

@@ -2,10 +2,10 @@
     "example" : "Vector Addition",
     "overview" : "Simple example of vector addition.",
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
-    "version": ["SDAccel 2016.1"],
-    "dsa": "xilinx:adm-pcie-ku3:2ddr:2.1",
-    "em_cmd" : "./vadd_X86.exe",
-    "hw_cmd" : "../../utility/nimbix/nimbix-run.py ./vadd_X86.exe",
+    "version": ["SDAccel 2016.2"],
+    "dsa": "xilinx:adm-pcie-ku3:2ddr:3.1",
+    "em_cmd" : "./vadd",
+    "hw_cmd" : "../../utility/nimbix/nimbix-run.py ./vadd",
     "contributors" : [
         {
             "group": "Xilinx",

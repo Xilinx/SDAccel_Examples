@@ -45,7 +45,7 @@ emconfigutil --xdevice 'xilinx:adm-pcie-ku3:2ddr:3.1' --nd 1
 ```
 Run the application as
 ```
-./smithwaterman -p xilinx -d xilinx:adm-pcie-ku3:2ddr:3.1 -k xclbin/krnl_smithwaterman.<emu_mode>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin
+./smithwaterman -p Xilinx -d xilinx:adm-pcie-ku3:2ddr:3.1 -k xclbin/krnl_smithwaterman.<emu_mode>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin
 ```
 The choices for emulation flow are
 		- sw_emu = software emulation
@@ -63,7 +63,7 @@ rm -rf xbinst
 ```
 Run the nimbix-run.py script provided in the utility/nimbix directory at the top level of this repository
 ```
-../../utility/nimbix/nimbix-run.py ./smithwaterman -p xilinx -d xilinx:adm-pcie-ku3:2ddr:3.1 -k xclbin/krnl_smithwaterman.<emu_mode>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin
+../../utility/nimbix/nimbix-run.py ./smithwaterman -p xilinx -d xilinx:adm-pcie-ku3:2ddr:3.1 -k xclbin/krnl_smithwaterman.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin
 ```
 
 	Only the Alpha Data ADM-PCIE-KU3 card is supported by this method.
