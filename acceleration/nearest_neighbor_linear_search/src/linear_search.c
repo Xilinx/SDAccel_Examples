@@ -37,6 +37,10 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "linear_search.h"
 
+#ifdef __cplusplus
+using namespace std;
+#endif
+
 #define KRNL_NAME "krnl_linear_search"
 
 void linear_search_read_datafile(char* filename, float* data, size_t size) {
