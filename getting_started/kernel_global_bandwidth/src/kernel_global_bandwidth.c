@@ -31,6 +31,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdint.h>
 #include <string.h>
 #include <CL/opencl.h>
+#define KU3_2DDR
 #ifdef KU3_2DDR
 #include <CL/cl_ext.h>
 #endif
