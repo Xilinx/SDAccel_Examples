@@ -204,7 +204,7 @@ int main(int argc, char** argv)
 
     //change the line below to match the target device
 #ifdef KU3_2DDR
-    const char *target_device_name = "xilinx:adm-pcie-ku3:2ddr:3.0";
+    const char *target_device_name = "xilinx:adm-pcie-ku3:2ddr:3.1";
 #else
     const char *target_device_name = "xilinx:adm-pcie-7v3:1ddr:3.0";
 #endif
