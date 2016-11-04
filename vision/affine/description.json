@@ -4,6 +4,7 @@
     "board" : ["Alpha Data ADM-PCIE-7V3"],
     "version": ["SDAccel 2016.1"],
     "dsa": "xilinx:adm-pcie-7v3:1ddr:2.1",
+    "xcl": false,
     "em_cmd": "make xilinx_em",
     "hw_cmd": "make xilinx_hw",
     "perf_fields":["Task","Xilinx Execution Time (in ns)", "GTX 780 Execution Time (in ns)"],

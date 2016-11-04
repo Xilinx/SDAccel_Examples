@@ -68,7 +68,16 @@ def compilation(target,data):
     target.write("2. Executing emulation flows\n")
     target.write("Set the following environment variable to create a emconfig.json file\n")
     target.write("```\n")
-    target.write("export XCL_EMULATION_MODE=true\n")
+    target.write("export LD_LIBRARY_PATH=$XILINX_SDACCEL/runtime/lib/x86_64/:$LD_LIBRARY_PATH\n")
+    target.write("export XCL_EMULATION_MODE=")
+    try:
+      if not data['xcl']:
+        target.write('true')
+      else:
+        target.write('<sw_emu|hw_emu>')
+    except:
+      target.write('<sw_emu|hw_emu>')
+    target.write('\n')
     target.write("emconfigutil --xdevice '")
     target.write(data["dsa"])
     target.write("' --nd 1\n")

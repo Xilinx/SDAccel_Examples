@@ -4,6 +4,7 @@
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
     "version": ["SDAccel 2016.2"],
     "dsa": "xilinx:adm-pcie-ku3:2ddr:3.1",
+    "xcl": false,
     "em_cmd" : "./huffman -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:3.1' --kernel ./xclbin/krnl_huffman.<emulation type>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin data/rect_1024.bmp",
     "hw_cmd" : "../../utility/nimbix/nimbix-run.py ./huffman -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:2.1' --kernel ./xclbin/krnl_huffman.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin data/rect_1024.bmp",
     "contributors" : [

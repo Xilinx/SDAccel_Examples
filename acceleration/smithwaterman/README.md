@@ -40,6 +40,7 @@ Application code is located in the src directory. Accelerator binary files will 
 2. Executing emulation flows
 Set the following environment variable to create a emconfig.json file
 ```
+export LD_LIBRARY_PATH=$XILINX_SDACCEL/runtime/lib/x86_64/:$LD_LIBRARY_PATH
 export XCL_EMULATION_MODE=true
 emconfigutil --xdevice 'xilinx:adm-pcie-ku3:2ddr:3.1' --nd 1
 ```
