@@ -3,6 +3,15 @@ SDAccel Example Repository
 
 Welcome to the SDAccel example repository. This repository contains the latest examples to get you started with application optimization targeting Xilinx PCIe FPGA acceleration boards. All examples are ready to be compiled and executed on boards hosted in the Nimbix and IBM SuperVessel clouds. The repository is organized as follows:
 
+
+If you are a total beginner at SDAccel, me (Guilherme Lucas) and my friend Bruno Takeshi, from Unicamp OpenPower Lab, 
+made a tutorial using the vadd example from this repository. This tutorial has text and video. Use whatever you like most. To acces, visit the
+following link:
+
+```
+http://openpower.ic.unicamp.br/blog/SDAccel.html
+```
+
 1. GETTINGS STARTED
 2. ACCELERATION
 3. SECURITY
