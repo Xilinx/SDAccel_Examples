@@ -36,12 +36,12 @@ Application code is located in the src directory. Accelerator binary files will 
 Set the following environment variable to create a emconfig.json file
 ```
 export LD_LIBRARY_PATH=$XILINX_SDACCEL/runtime/lib/x86_64/:$LD_LIBRARY_PATH
-export XCL_EMULATION_MODE=true
+export XCL_EMULATION_MODE=<sw_emu|hw_emu>
 emconfigutil --xdevice 'xilinx:adm-pcie-ku3:2ddr:3.1' --nd 1
 ```
 Run the application as
 ```
-./edge -p Xilinx -d xilinx:adm-pcie-ku3:2ddr:3.1 -k ./xclbin/krnl_edge.<emulation type>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin -b data/input/lola.bmp
+./edge data/input/eiffel.bmp
 ```
 The choices for emulation flow are
 		- sw_emu = software emulation
@@ -59,7 +59,7 @@ rm -rf xbinst
 ```
 Run the nimbix-run.py script provided in the utility/nimbix directory at the top level of this repository
 ```
-../../utility/nimbix/nimbix-run.py ./edge -p Xilinx -d xilinx:adm-pcie-ku3:2ddr:3.1 -k ./xclbin/krnl_edge.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin -b data/input/lola.bmp
+../../utility/nimbix/nimbix-run.py ./edge data/input/eiffel.bmp
 ```
 
 	Only the Alpha Data ADM-PCIE-KU3 card is supported by this method.
