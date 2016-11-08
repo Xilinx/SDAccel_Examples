@@ -228,11 +228,7 @@ int main(int argc, char** argv)
    printf("   INFO: Using platform %d\n", target_platform);
 
    // Connect to a compute device
-#ifdef XILINX
    err = clGetDeviceIDs(platform_id[target_platform], CL_DEVICE_TYPE_ACCELERATOR, 1, &device_id, NULL);
-#else
-   err = clGetDeviceIDs(platform_id[target_platform], CL_DEVICE_TYPE_GPU, 1, &device_id, NULL);
-#endif
    if (err != CL_SUCCESS)
    {
       printf("   Error: Failed to create a device group!\n");
