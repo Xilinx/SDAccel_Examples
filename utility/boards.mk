@@ -1,6 +1,6 @@
 
 # Default C++ Compiler Flags and xocc compiler flags
-CXXFLAGS:=-O0 -g
+CXXFLAGS:=-Wall -O0 -g
 CLFLAGS:=-g --xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generateExtraRunData=true" -s
 
 # Use the Xilinx OpenCL compiler
