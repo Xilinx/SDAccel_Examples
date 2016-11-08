@@ -62,7 +62,7 @@ using namespace std;
 
 
 #ifndef USE_OPENCL
-#include "affine_kernel.cl"
+#include "krnl_affine.cl"
 #endif
 
 
