@@ -154,7 +154,7 @@ int main(int argc, char** argv)
 #endif
 
 #ifndef XILINX
-   const char       *filename = "affine_kernel.cl";
+   const char       *filename = "krnl_affine.cl";
 #endif
 
 #endif // ifdef USE_OPENCL
