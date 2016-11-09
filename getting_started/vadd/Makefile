@@ -1,8 +1,8 @@
 # Vadd Application
-
-include ../../utility/boards.mk
-include ../../libs/xcl/xcl.mk
-include ../../libs/opencl/opencl.mk
+COMMON_REPO:=../../
+include ${COMMON_REPO}/utility/boards.mk
+include ${COMMON_REPO}/libs/xcl/xcl.mk
+include ${COMMON_REPO}/libs/opencl/opencl.mk
 
 # vadd Host Application
 vadd_SRCS=./src/vadd.cpp $(xcl_SRCS)
