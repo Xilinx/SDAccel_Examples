@@ -128,8 +128,8 @@ checkErrorStatus(err, "Unable to create kernel!") ;
 			     imageToDevice,
 			     CL_TRUE,
 			     0,
-			     image.numPixels() * sizeof(int),
-			     image.bitmap(),
+			     sizeof input_image, 
+			     (void *)(&input_image),
 			     0,
 			     NULL,
 			     NULL) ;
@@ -174,8 +174,8 @@ checkErrorStatus(err, "Unable to create kernel!") ;
 			    imageFromDevice,
 			    CL_TRUE,
 			    0,
-			    image.numPixels() * sizeof(int),
-			    outImage,
+			    sizeof output_image, 
+			    (void *)(&output_image),
 			    0,
 			    NULL,
 			    &seq_complete) ;
