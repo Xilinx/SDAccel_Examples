@@ -72,7 +72,7 @@ if (argc != 2)
   std::cout << "Reading input image...\n";
 
  // Load the input image
-   input_file = fopen("CT-MONO2-16-brain.raw", "rb");
+   input_file = fopen("data/CT-MONO2-16-brain.raw", "rb");
    if (!input_file)
    {
       printf("Error: Unable to open input image file!\n");
