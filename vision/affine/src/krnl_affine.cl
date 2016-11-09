@@ -34,27 +34,11 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define Y_SIZE 512
 
 
-#ifdef C_COMPILE
-void affine_kernel(float *x_rot,   float *y_rot, 
-                   float *x_expan, float *y_expan, 
-                   int   *x_move,  int   *y_move,
-                   unsigned short *image1,
-                   unsigned short *image2
-                  )
-#else
+
 __kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
-/*
-void affine_kernel(__global float *x_rot,   __global float *y_rot, 
-                   __global float *x_expan, __global float *y_expan, 
-                   __global int   *x_move,  __global int   *y_move,
-                   __global unsigned short *image1,
-                   __global unsigned short *image2
-                  )
-*/
 void affine_kernel(__global unsigned short *image1,
                    __global unsigned short *image2
                   )
-#endif
 {
 /*
    float    lx_rot   = *x_rot;
@@ -116,13 +100,9 @@ void affine_kernel(__global unsigned short *image1,
    // Output image generation by inverse affine transformation and bilinear transformation
    for (y = 0; y < Y_SIZE; y++)
    {
-#ifdef XILINX
-      printf("XILINX defined\n");
+
 
 		__attribute__((xcl_pipeline_loop))
-#else
-      #pragma unroll
-#endif
       for (x = 0; x < X_SIZE; x++)
       {
          x_new    = i_beta[0] + i_affine[0][0]*(x-X_SIZE/2.0f) + i_affine[0][1]*(y-Y_SIZE/2.0f) + X_SIZE/2.0f;
