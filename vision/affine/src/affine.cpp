@@ -193,7 +193,7 @@ checkErrorStatus(err, "Unable to create kernel!") ;
 
    printf("   Writing RAW Image\n");
    size_t items_written = fwrite(output_image, sizeof output_image, 1, output_file);
-   printf("   Bytes written = %d\n\n", (int)(items_read * sizeof output_image));
+   printf("   Bytes written = %d\n\n", (int)(items_written * sizeof output_image));
 
   release(software) ;
   release(hardware) ;
