@@ -10,7 +10,7 @@ include ../../libs/opencl/opencl.mk
 
 affine_SRCS=./src/affine.cpp $(bitmap_SRCS) $(oclHelper_SRCS)
 affine_HDRS=$(bitmap_HDRS) $(oclHelper_HDRS)
-affine_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(bitmap_CXXFLAGS) $(oclHelper_CXXFLAGS) -DUSE_OPENCL -DXILINX
+affine_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(bitmap_CXXFLAGS) $(oclHelper_CXXFLAGS)
 affine_LDFLAGS=$(opencl_LDFLAGS) -Wall -std=c++0x -lrt 
 
 # Median Filter Kernel
