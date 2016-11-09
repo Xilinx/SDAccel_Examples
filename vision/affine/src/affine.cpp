@@ -76,7 +76,7 @@ if (argc != 2)
       printf("Error: Unable to open input image file!\n");
       return 1;
    }
-
+   
    printf("\n");
    printf("   Reading RAW Image\n");
    size_t items_read = fread(input_image, sizeof input_image, 1, input_file);
