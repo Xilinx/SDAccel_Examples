@@ -34,9 +34,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 #include <cstring>
 #include <iostream>
-
 #include <CL/cl.h>
-
 #include "bitmap.h"
 #include "oclHelper.h"
 
@@ -50,10 +48,6 @@ void checkErrorStatus(cl_int error, const char* message)
     exit(0) ;
   }
 }
-
-#define TOTAL_ITERATIONS  100
-#define TIME_BINS         200
- 
 
 int main(int argc, char** argv)
 {
