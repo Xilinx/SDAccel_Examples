@@ -38,6 +38,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "bitmap.h"
 #include "oclHelper.h"
 
+#define X_SIZE  512
+#define Y_SIZE 512
 
 void checkErrorStatus(cl_int error, const char* message)
 {
