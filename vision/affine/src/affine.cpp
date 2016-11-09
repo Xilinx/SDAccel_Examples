@@ -184,9 +184,16 @@ checkErrorStatus(err, "Unable to create kernel!") ;
 
   clWaitForEvents(1, &seq_complete) ;
 
-  // Write the final image to disk
-  image.writeBitmapFile(outImage) ;
-  free(outImage) ;
+  output_file = fopen("transformed_image.raw", "wb");
+  if (!output_file)
+   {
+      printf("Error: Unable to open output image file!\n");
+      return 1;
+   }
+
+   printf("   Writing RAW Image\n");
+   size_t items_written = fwrite(output_image, sizeof output_image, 1, output_file);
+   printf("   Bytes written = %d\n\n", (int)(items_read * sizeof output_image));
 
   release(software) ;
   release(hardware) ;
