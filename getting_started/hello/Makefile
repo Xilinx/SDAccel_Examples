@@ -1,8 +1,8 @@
 # Hello Application
-
-include ../../utility/boards.mk
-include ../../libs/xcl/xcl.mk
-include ../../libs/opencl/opencl.mk
+COMMON_REPO:=../../
+include $(COMMON_REPO)/utility/boards.mk
+include $(COMMON_REPO)/libs/xcl/xcl.mk
+include $(COMMON_REPO)/libs/opencl/opencl.mk
 
 # hello Host Application
 hello_SRCS=./src/hello.cpp $(xcl_SRCS)
@@ -16,5 +16,5 @@ krnl_hello_SRCS=./src/krnl_hello.cl
 EXES=hello
 XCLBINS=krnl_hello
 
-include ../../utility/rules.mk
+include $(COMMON_REPO)/utility/rules.mk
 

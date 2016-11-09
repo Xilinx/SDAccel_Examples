@@ -111,6 +111,21 @@ cl_program xcl_import_source(xcl_world world, const char *krnl_file);
  */
 cl_kernel xcl_get_kernel(cl_program program, const char *krnl_name);
 
+/* xcl_create_kernel
+ * 
+ * Description:
+ *  Create kernel in program and return kernel object
+ *
+ * Inputs:
+ *   world - program in which kernel is created
+ *   krnl_name - name of kernel.
+ *
+ * Returns:
+ *   An opencl kernel object that was created from krnl_name file.
+ */
+cl_kernel xcl_create_kernel(cl_program program, const char *krnl_name);
+
+
 /* xcl_set_kernel_arg
  *
  * Description:
@@ -187,3 +202,22 @@ unsigned long xcl_get_event_duration(cl_event event);
  */
 unsigned long xcl_run_kernel3d(xcl_world world, cl_kernel krnl,
                                size_t x, size_t y, size_t z);
+
+/* xcl_run_kernel3d_nb
+ *
+ * Description:
+ *   Run a kernel with a 3 dimensional thread array and return immediately. In this configuration,
+ *   there will be x*y*z threads created with a rank in each dimension.
+ *
+ * Inputs:
+ *   world - xcl_world to use for running the kernel.
+ *   krnl  - application to run on the device.
+ *   x     - number of threads in the x direction.
+ *   y     - number of threads in the y direction.
+ *   z     - number of threads in the z direction.
+ *
+ * Returns: No Return
+ *    
+ */
+void xcl_run_kernel3d_nb(xcl_world world, cl_kernel krnl, cl_event *evt = NULL,
+                               size_t x=1, size_t y=1, size_t z=1);

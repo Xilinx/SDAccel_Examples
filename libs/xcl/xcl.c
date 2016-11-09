@@ -342,6 +342,19 @@ cl_kernel xcl_get_kernel(cl_program program,
 	return kernel;
 }
 
+cl_kernel xcl_create_kernel(cl_program program, const char *krnl_name)
+{
+    int err;
+    cl_kernel kernel = clCreateKernel(program, krnl_name, &err);
+	if (!kernel || err != CL_SUCCESS) {
+		printf("Error: Failed to create kernel for %s: %d\n", krnl_name, err);
+		printf("Test failed\n");
+		exit(EXIT_FAILURE);
+	}
+
+	return kernel;
+}
+
 void xcl_set_kernel_arg(cl_kernel krnl,
                         cl_uint num,
                         size_t size,
@@ -415,4 +428,19 @@ unsigned long xcl_run_kernel3d(xcl_world world, cl_kernel krnl,
 	clFinish(world.command_queue);
 
 	return xcl_get_event_duration(event);
+}
+
+void xcl_run_kernel3d_nb(xcl_world world, cl_kernel krnl,cl_event *event,
+                               size_t x, size_t y, size_t z) { 
+	size_t size[3] = {x, y, z};
+
+	int err = clEnqueueNDRangeKernel(world.command_queue, krnl, 3,
+	                                 NULL, size, size, 0, NULL, event);
+	if( err != CL_SUCCESS) {
+		printf("Error: failed to execute kernel! %d\n", err);
+		printf("Test failed\n");
+		exit(EXIT_FAILURE);
+	}
+
+	return;
 }

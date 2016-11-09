@@ -3,6 +3,19 @@
 # Defines the prefix for each kernel.
 XCLBIN_DIR=xclbin
 
+ECHO:= @echo
+help:
+	${ECHO} "Makefile Usage:"
+	${ECHO} "	make all TARGETS=<sw_emu/hw_emu/hw>"
+	${ECHO}	"		Command to generate the design for specified Target."
+	${ECHO} ""
+	${ECHO} "	make check TARGETS=<sw_emu/hw_emu>"
+	${ECHO}	"		Command to run emulation for specified Target."
+	${ECHO} ""
+	${ECHO} "	make clean"
+	${ECHO}	"		Command to remove the generated files."
+	${ECHO} ""
+
 # mk_exe - build an exe from host code
 #   CXX - compiler to use
 #   CXXFLAGS - base compiler flags to use
@@ -62,5 +75,15 @@ clean:
 	rm -rf $(EXE_GOALS) $(XCLBIN_GOALS) sdaccel* *.ll _xocc_*
 
 README.md: description.json
-	../../utility/readme_gen/readme_gen.py description.json
+	$(COMMON_REPO)/utility/readme_gen/readme_gen.py description.json
 
+############ CREATE emulation config file ###########
+EM_CONFIG_FILE := emconfig.json
+${EM_CONFIG_FILE} :
+	$(EMCONFIGUTIL) --xdevice ${DEVICES} --nd 1 --od ./
+em_config : ${EM_CONFIG_FILE}
+
+############# Design Emulation ##################
+check:all em_config
+	export XCL_EMULATION_MODE="${TARGETS}";\
+   	./${EXES} ${RUN_TIME_ARGS}

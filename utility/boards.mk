@@ -5,6 +5,7 @@ CLFLAGS:=-g --xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.gener
 
 # Use the Xilinx OpenCL compiler
 CLC:=$(XILINX_SDACCEL)/bin/xocc
+EMCONFIGUTIL := $(XILINX_SDACCEL)/bin/emconfigutil
 
 # By default build for X86, this could also be set to POWER to build for power
 ARCH:=X86
@@ -14,7 +15,12 @@ DEVICES:= xilinx:adm-pcie-7v3:1ddr-ppc64le:2.1
 CXX:=$(XILINX_SDACCEL)/gnu/ppc64le/4.9.3/lnx64/bin/powerpc64le-linux-gnu-g++
 else
 DEVICES:= xilinx:adm-pcie-ku3:2ddr:3.1
-CXX:=$(XILINX_SDACCEL)/lnx64/tools/gcc/bin/g++
+CXX:=$(XILINX_SDACCEL)/Vivado_HLS/lnx64/tools/gcc/bin/g++
+endif
+
+#Added COMMON_REPO check to support existing Designs
+ifndef COMMON_REPO
+COMMON_REPO:=../../
 endif
 
 # By default build for hardware can be set to
