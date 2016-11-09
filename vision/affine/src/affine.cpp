@@ -52,48 +52,46 @@ void checkErrorStatus(cl_int error, const char* message)
 int main(int argc, char** argv)
 {
 
-if (argc != 3)
+if (argc != 2)
   {
-    printf("Usage: %s <bitmap> <xclbin>\n", argv[0]) ;
+    printf("Usage: %s <xclbin>\n", argv[0]) ;
     return -1 ;
 }
    
+   FILE *input_file;
+   unsigned short    input_image[Y_SIZE][X_SIZE];
+
+   FILE             *output_file;
+
+   unsigned short    output_image[Y_SIZE][X_SIZE];
+
  // Read the bit map file into memory and allocate memory for the
   //  final image
   std::cout << "Reading input image...\n";
-  const char* bitmapFilename = argv[1] ;
-  int width = 512 ; // Default size
-  int height = 512 ; // Default size
 
-  BitmapInterface image(bitmapFilename) ;
-  
-  bool result = image.readBitmapFile() ;
-  if (!result)
-  {
-    return -1 ;
-  }
+ // Load the input image
+   input_file = fopen("CT-MONO2-16-brain.raw", "rb");
+   if (!input_file)
+   {
+      printf("Error: Unable to open input image file!\n");
+      return 1;
+   }
 
-  width = image.getWidth() ;
-  height = image.getHeight() ;
-
-  int* outImage = (int*)(malloc(image.numPixels() * sizeof(int))) ;
-
-  if (outImage == NULL)
-  {
-    fprintf(stderr, "Unable to allocate host memory!\n") ;
-    return 0 ;
-  }
+   printf("\n");
+   printf("   Reading RAW Image\n");
+   size_t items_read = fread(input_image, sizeof input_image, 1, input_file);
+   printf("   Bytes read = %d\n\n", (int)(items_read * sizeof input_image));
 
   // Set up OpenCL hardware and software constructs
   std::cout << "Setting up OpenCL hardware and software...\n";
   cl_int err = 0 ;
-  const char* xclbinFilename = argv[2] ;
+  const char* xclbinFilename = argv[1] ;
 
   oclHardware hardware = getOclHardware(CL_DEVICE_TYPE_ACCELERATOR) ;
   oclSoftware software ;
 
   memset(&software, 0, sizeof(oclSoftware)) ;
-  strcpy(software.mKernelName, "applyWatermark") ;
+  strcpy(software.mKernelName, "affine_kernel") ;
   strcpy(software.mFileName, xclbinFilename) ;
   strcpy(software.mCompileOptions, "-g -Wall") ;
 
@@ -109,16 +107,16 @@ checkErrorStatus(err, "Unable to create kernel!") ;
   cl_mem imageFromDevice ;
 
   imageToDevice = clCreateBuffer(hardware.mContext,
-				 CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
-				 image.numPixels() * sizeof(int),
-				 image.bitmap(),
+				 CL_MEM_READ_ONLY, 
+				 sizeof(input_image), 
+				 NULL,
 				 &err) ;
   checkErrorStatus(err, "Unable to create read buffer") ;
 
   imageFromDevice = clCreateBuffer(hardware.mContext,
-				   CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
-				   image.numPixels() * sizeof(int),
-				   outImage,
+				   CL_MEM_WRITE_ONLY, 
+				   sizeof(output_image), 
+				   NULL,
 				   &err) ;
   checkErrorStatus(err, "Unable to create write buffer") ;
 
