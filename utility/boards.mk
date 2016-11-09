@@ -18,6 +18,11 @@ DEVICES:= xilinx:adm-pcie-ku3:2ddr:3.1
 CXX:=$(XILINX_SDACCEL)/Vivado_HLS/lnx64/tools/gcc/bin/g++
 endif
 
+#Added COMMON_REPO check to support existing Designs
+ifndef COMMON_REPO
+COMMON_REPO:=../../
+endif
+
 # By default build for hardware can be set to
 #   hw_emu for hardware emulation
 #   sw_emu for software emulation
