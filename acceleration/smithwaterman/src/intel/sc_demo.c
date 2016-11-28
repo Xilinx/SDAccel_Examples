@@ -201,8 +201,6 @@ void deleteSSWData(int niter, int numsample, kseq_t **read, kseq_t **ref){
 
 float SSW(int numsample, int tid, kseq_t *read, kseq_t *ref, unsigned int *maxr, unsigned int *maxc, unsigned int *maxv){
   
-  clock_t start, end;
-  float cpu_time;
   kseq_t *read_seq, *ref_seq;
   int32_t l, m, k, match = 2, mismatch = 2, gap_open = 3, gap_extension = 1, path = 0, n = 5, s1 = 67108864, s2 = 128, filter = 0;
   int8_t* mata = (int8_t*)calloc(25, sizeof(int8_t));
@@ -236,7 +234,6 @@ float SSW(int numsample, int tid, kseq_t *read, kseq_t *ref, unsigned int *maxr,
   for (m = 0; LIKELY(m < 5); ++m) mata[k++] = 0;
   
   // alignment
-  start = clock();
   int ii;
   for(ii =0; ii < total; ++ii){
 // clear screen newline
@@ -281,14 +278,6 @@ float SSW(int numsample, int tid, kseq_t *read, kseq_t *ref, unsigned int *maxr,
       init_destroy(p);
     }
   }
-  end = clock();
-  cpu_time = ((float) (end - start)) / CLOCKS_PER_SEC;
-  float cups = (float)numsample*256*128/cpu_time;
-  //fprintf(stdout, "Total Samples Processed %d in Thread %d\n", numsample, tid);
-  //fprintf(stdout, "Net GCups: %.3f\n", cups/1e9);
-  //fprintf(stdout, "Average Compute GCups: %.3f\n", total_cups/(numsample));
-  //fprintf(stdout, "CPU time: %f seconds\n", cpu_time);  
-
   
   if (num_rc) {
     free(num_rc);

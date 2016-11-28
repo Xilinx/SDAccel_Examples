@@ -80,7 +80,7 @@ static int getToken(FILE* fp, char* tok)
 {
     int pos = 0;
     char ch;
-    while (ch = (char)(fgetc(fp))) {
+    while ((ch = (char)(fgetc(fp)))) {
         if (ch == EOF) {
             return 0;
         }
@@ -93,14 +93,13 @@ static int getToken(FILE* fp, char* tok)
         }
         tok[pos++] = ch;
     }
+    return -1;
 }
 
 static int readReadRefFile(char* fname, unsigned int** pairs, unsigned int** maxv, int N)
 {
     FILE* fp = fopen(fname, "r");
     char* string = new char[1024];
-    int v;
-    char ch;
     int rdSz = 0;
     int refSz = 0;
     int sampleNum = 0;
@@ -216,10 +215,6 @@ SmithWatermanApp::~SmithWatermanApp()
 
 bool SmithWatermanApp::unit_test_kernel_cpu()
 {
-    string msgs[] = { "AABBCCCC",
-        "Xilinx SDAccel Benchmarking",
-        "Hello Pourya Shirazian",
-        "The quick brown fox jumps over the lazy dog." };
 
     LogInfo("Start unit tests for kernels on the CPU");
 
@@ -342,10 +337,6 @@ bool SmithWatermanApp::invoke_kernel_blocking(
         return false;
     }
 
-    size_t global[1];
-    size_t local[1];
-    global[0] = 1;
-    local[0] = 1;
     int numIter = m_numBlocks;
 
     cout << "Processing " << m_numSamples << " Samples \n";

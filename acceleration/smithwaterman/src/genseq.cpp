@@ -74,7 +74,6 @@ void genSeq(int readSize, int refSize, int readLoc, short* readSeq, short* refSe
     int i;
     for (i = 0; i < refSize; ++i) {
         int bpid = rand() % 4;
-        int bp = bases[bpid];
         refSeq[i] = bpid;
         if (i >= readLoc && readCount < readSize) {
             switch (command()) {
@@ -268,7 +267,7 @@ unsigned int* generatePackedNReadRefPair(int N, int readSize, int refSize, unsig
     unsigned int* refSeqP = new unsigned int[refSize / UINTNUMBP];
     short** matRef = buildMat(readSize, refSize);
     *maxVal = new unsigned int[N * 3];
-    int i, j;
+    int i;
     for (i = 0; i < N; ++i) {
         short maxv, maxr, maxc;
         maxv = 0;
@@ -305,16 +304,15 @@ unsigned int* generatePackedNReadRefPair(int N, int readSize, int refSize, unsig
 void writeReadRefFile(char* fname, unsigned int* pairs, unsigned int* maxVals, int N)
 {
     FILE* fp = fopen(fname, "w");
-    int i, j;
     fprintf(fp, "rdsz,%d\n", MAXROW);
     fprintf(fp, "refsz,%d\n", MAXCOL);
     fprintf(fp, "samples,%d\n", N);
-    for (i = 0; i < N; ++i) {
-        fprintf(fp, "S%d,", i);
-        for (j = 0; j < PACKEDSZ; ++j) {
+    for (size_t i = 0; i < (size_t) N; ++i) {
+        fprintf(fp, "S%lu,", i);
+        for (size_t j = 0; j < PACKEDSZ; ++j) {
             fprintf(fp, "%u,", pairs[i * PACKEDSZ + j]);
         }
-        for (j = 0; j < 3; ++j) {
+        for (size_t j = 0; j < 3; ++j) {
             if (j == 2) {
                 fprintf(fp, "%u\n", maxVals[i * 3 + j]);
             }
@@ -330,7 +328,7 @@ int getToken(FILE* fp, char* tok)
 {
     int pos = 0;
     char ch;
-    while (ch = (char)(fgetc(fp))) {
+    while ((ch = (char)(fgetc(fp)))) {
         if (ch == EOF) {
             return 0;
         }
@@ -343,14 +341,13 @@ int getToken(FILE* fp, char* tok)
         }
         tok[pos++] = ch;
     }
+    return -1;
 }
 
 int readReadRefFile(char* fname, unsigned int** pairs, unsigned int** maxv, int N)
 {
     FILE* fp = fopen(fname, "r");
     char* string = new char[1024];
-    int v;
-    char ch;
     int rdSz = 0;
     int refSz = 0;
     int sampleNum = 0;
@@ -400,7 +397,6 @@ void printPackedNReadRefPair(unsigned int* pairs, int N, int readSize, int refSi
     short* refSeq = new short[refSize];
     unsigned int* readSeqP = new unsigned int[readSize / UINTNUMBP];
     unsigned int* refSeqP = new unsigned int[refSize / UINTNUMBP];
-    unsigned int* intSeq = new unsigned int[readSize / UINTNUMBP];
 
     int i;
     for (i = 0; i < N; ++i) {
@@ -429,10 +425,8 @@ void testuintConv()
     short q[TESTSZ];
     short out[TESTSZ];
     unsigned int dI[TESTSZ / 16];
-    unsigned int QI[TESTSZ / 16];
     int cnt, i;
     for (cnt = 0; cnt < 100; ++cnt) {
-        int readCnt = 0;
         makeSeq(TESTSZ / 2, TESTSZ, d, q);
         printSeq(TESTSZ, q);
         uint2TouintArray(TESTSZ, q, dI);
