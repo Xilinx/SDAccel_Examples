@@ -66,7 +66,6 @@ bool BitmapInterface::readBitmapFile()
 {
   // First, open the bitmap file
   int fd ;
-  int numRead ;
   unsigned int fileSize ;
 
   fd = open(filename, O_RDONLY) ;
@@ -77,7 +76,7 @@ bool BitmapInterface::readBitmapFile()
   }
 
   core = new char[14] ;
-  numRead = read(fd, core, 14) ;
+  read(fd, core, 14) ;
   magicNumber = (*(unsigned short*)(&(core[0]))) ;
   fileSize = (*(unsigned int*)(&(core[2]))) ;
   offsetOfImage = (*(unsigned int*)(&(core[10]))) ;
@@ -85,7 +84,7 @@ bool BitmapInterface::readBitmapFile()
   // Just read in the DIB, but don't process it
   sizeOfDIB = offsetOfImage - 14 ;
   dib = new char[sizeOfDIB] ;
-  numRead = read(fd, dib, sizeOfDIB) ;
+  read(fd, dib, sizeOfDIB) ;
 
   width = (*(int*)(&(dib[4]))) ;
   height = (*(int*)(&(dib[8]))) ;
