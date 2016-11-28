@@ -57,8 +57,8 @@ std::string getXclbinFileName(std::string name, std::string xmode, std::string x
 short getAbsMax(cv::Mat mat, size_t rows, size_t cols) {
 	short max = 0;
 	
-	for(int r = 0; r < rows; r++) {
-		for(int c = 0; c < cols; c++) {
+	for(size_t r = 0; r < rows; r++) {
+		for(size_t c = 0; c < cols; c++) {
 			short tmp = std::abs(mat.at<short>(r,c));
 			if(tmp > max) {
 				max = tmp;
@@ -80,8 +80,8 @@ cv::Mat readTxtFile(std::string fileName, size_t rows, size_t cols) {
         abort();
     }
 
-    for(int r = 0; r < rows; r++) {
-        for(int c = 0; c < cols; c++) {
+    for(size_t r = 0; r < rows; r++) {
+        for(size_t c = 0; c < cols; c++) {
             txtFile >> mat.at<short>(r,c);
         }
     }
@@ -100,8 +100,8 @@ cv::Mat readFloatTxtFile(std::string fileName, size_t rows, size_t cols) {
         abort();
     }
 
-    for(int r = 0; r < rows; r++) {
-        for(int c = 0; c < cols; c++) {
+    for(size_t r = 0; r < rows; r++) {
+        for(size_t c = 0; c < cols; c++) {
             txtFile >> mat.at<float>(r,c);
         }
     }
