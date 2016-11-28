@@ -122,7 +122,7 @@ xcl_world xcl_world_single() {
 		exit(EXIT_FAILURE);
 	}
 
-	int i;
+	size_t i;
 	for(i = 0; i < num_platforms; i++) {
 		size_t platform_name_size;
 		err = clGetPlatformInfo(platform_ids[i], CL_PLATFORM_NAME, 
@@ -248,8 +248,8 @@ cl_program xcl_import_binary(xcl_world world,
 		exit(EXIT_FAILURE);
 	}
 
-	err = sprintf(xclbin_file_name, "xclbin/%s.%s.%s.xclbin", xclbin_name, world.mode, device_name);
-	if(err != xclbin_file_name_len-1) {
+	size_t letters = sprintf(xclbin_file_name, "xclbin/%s.%s.%s.xclbin", xclbin_name, world.mode, device_name);
+	if(letters != xclbin_file_name_len-1) {
 		printf("Error: failed to create xclbin file name\n");
 		exit(EXIT_FAILURE);
 	}
@@ -403,7 +403,7 @@ void xcl_memcpy_from_device(xcl_world world, void* dest,
 unsigned long xcl_get_event_duration(cl_event event) {
 	unsigned long start, stop;
 
-	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START,
+	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_QUEUED,
 	                        sizeof(unsigned long), &start, NULL);
 	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END,
 	                        sizeof(unsigned long), &stop, NULL);
@@ -416,7 +416,6 @@ unsigned long xcl_run_kernel3d(xcl_world world, cl_kernel krnl,
 ) {
 	size_t size[3] = {x, y, z};
 	cl_event event;
-	unsigned long start, stop;
 
 	int err = clEnqueueNDRangeKernel(world.command_queue, krnl, 3,
 	                                 NULL, size, size, 0, NULL, &event);
