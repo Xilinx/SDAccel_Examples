@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    unsigned length = 1000000000;
+    unsigned length = 1000000;
 
     if(argc == 2) {
         length = atoi(argv[1]);
@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
     float *out = (float *) malloc(vector_size_bytes);
 
     float sum = 0;
-    
+
     /* Create the test data and run the vector addition locally */
     for(unsigned i=0; i < length; i++) {
         in[i] = (i%2 == 0) ? -1.0f : 1.0f;
