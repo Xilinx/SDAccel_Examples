@@ -7,5 +7,6 @@ _xocc_*/
 *.exe
 emconfig.json
 xmltmp
-dltmp
+dltmp*
 runtime/
+*.log
