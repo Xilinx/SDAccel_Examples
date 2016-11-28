@@ -1,0 +1,24 @@
+{
+    "example": "Datflow Example Using HLS Stream",
+    "overview": "This is simple example of vector addition to demonstrate Dataflow functionality of HLS. HLS Dataflow allows user to schedule multiple task together to achieve higher throughput.",
+    "key_concepts": [ "Dataflow" , "Task Level Parallism"],
+    "keywords": [ "dataflow" , "hls::stream<>"],
+    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
+    "version": ["SDx 2016.3"],
+    "dsa": "xilinx:adm-pcie-ku3:2ddr:3.2",
+    "em_cmd": "./host ./xclbin/adder.<emulation target>.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
+    "hw_cmd": "../../../utility/nimbix/nimbix-run.py ./host ./xclbin/adder.hw.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ],
+    "revision" : [
+        {
+            "date" : "DEC2016",
+            "version": "1.0",
+            "description": "Initial Xilinx Release"
+        }
+    ]
+}

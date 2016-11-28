@@ -1,0 +1,24 @@
+{
+    "example": "Datflow Example Using HLS Stream",
+    "overview": "This is simple example of Multiple Stages Vector Addition to demonstrate Array of Stream usage in HLS C Kernel Code.",
+    "key_concepts": [ "Dataflow" , "Array of Stream"],
+    "keywords": [ "dataflow" , "hls::stream<>", "array of stream"],
+    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
+    "version": ["SDx 2016.3"],
+    "dsa": "xilinx:adm-pcie-ku3:2ddr:3.2",
+    "em_cmd": "./host ./xclbin/N_stage_Adders.<emulation target>.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
+    "hw_cmd": "../../../utility/nimbix/nimbix-run.py ./host ./xclbin/N_stage_Adders.hw.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ],
+    "revision" : [
+        {
+            "date" : "DEC2016",
+            "version": "1.0",
+            "description": "Initial Xilinx Release"
+        }
+    ]
+}

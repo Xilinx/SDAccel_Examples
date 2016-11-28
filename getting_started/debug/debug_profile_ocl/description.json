@@ -1,0 +1,24 @@
+{
+    "example": "Example based on vectod addition that demonstrates printing of work item data (integer products in this case)",
+    "overview": "This is simple example of vector addition and printing profile data (wall clock time taken between start and stop)",
+    "key_concepts": [ "Use of Profile API"],
+    "keywords": [ "profile"],
+    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
+    "version": ["SDx 2016.3"],
+    "dsa": "xilinx:adm-pcie-ku3:2ddr:3.2",
+    "em_cmd": "./host ./xclbin/vadd.<emulation target>.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
+    "hw_cmd": "../../../utility/nimbix/nimbix-run.py ./host ./xclbin/vadd.hw.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ],
+    "revision" : [
+        {
+            "date" : "DEC2016",
+            "version": "1.0",
+            "description": "Initial Xilinx Release"
+        }
+    ]
+}
