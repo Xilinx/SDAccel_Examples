@@ -63,11 +63,10 @@ int main(int argc, char* argv[]) {
     free(source_a);
 
     /* Set the kernel arguments */
-    int vector_length = LENGTH;
     clSetKernelArg(krnl, 0, sizeof(cl_mem), &buffer_a);
 
     /* Launch the kernel */
-    unsigned long duration = xcl_run_kernel3d(world, krnl, 1, 1, 1);
+    xcl_run_kernel3d(world, krnl, 1, 1, 1);
 
     clReleaseMemObject(buffer_a);
     clReleaseKernel(krnl);
