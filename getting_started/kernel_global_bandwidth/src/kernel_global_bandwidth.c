@@ -31,256 +31,83 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdint.h>
 #include <string.h>
 #include <CL/opencl.h>
-#define KU3_2DDR
-#ifdef KU3_2DDR
 #include <CL/cl_ext.h>
-#endif
 
-/////////////////////////////////////////////////////////////////////////////////
-//load_file_to_memory
-//Allocated memory for and load file from disk memory
-//Return value 
-// 0   Success
-//-1   Failure to open file
-//-2   Failure to allocate memory
-int load_file_to_memory(const char *filename, char **result,size_t *inputsize)
-{ 
-    int size = 0;
-    FILE *f = fopen(filename, "rb");
-    if (f == NULL) { 
-        *result = NULL;
-        return -1; // -1 means file opening fail 
-    } 
-    fseek(f, 0, SEEK_END);
-    size = ftell(f);
-    fseek(f, 0, SEEK_SET);
-    *result = (char *)malloc(size+1);
-    if (size != fread(*result, sizeof(char), size, f)) 
-        { 
-            free(*result);
-            return -2; // -2 means file reading fail 
-        } 
-    fclose(f);
-    (*result)[size] = 0;
-    if(inputsize!=NULL) (*inputsize)=size;
-    return 0;
+uint8_t get_ddr_banks(xcl_world world) {
+    char* ddr_loc = strstr(world.device_name, "ddr");
+
+    /* if the ddr identifier is at the front of the string or NULL is returned
+      * then reading the previous char is dangerous so just assume 1 bank */
+    if(ddr_loc == NULL || ddr_loc == world.device_name) {
+        return 1;
+    }
+
+    /* The letter before contains the number of banks */
+    ddr_loc--;
+
+    /* Subtract from '0' to find the number of banks in uint8_t */
+    return (uint8_t) *ddr_loc - (uint8_t) '0';
 }
 
+int main(int argc, char** argv) {
 
-/////////////////////////////////////////////////////////////////////////////////
-//opencl_setup
-//Create context for Xilinx platform, Accelerator device
-//Create single command queue for accelerator device
-//Create program object with clCreateProgramWithBinary using given xclbin file name
-//Return value
-// 0    Success
-//-1    Error
-//-2    Failed to load XCLBIN file from disk
-//-3    Failed to clCreateProgramWithBinary
-int opencl_setup(const char *xclbinfilename, cl_platform_id *platform_id, 
-                 cl_device_id *devices, cl_device_id *device_id, cl_context  *context, 
-                 cl_command_queue *command_queue, cl_program *program, 
-                 char *cl_platform_name, const char *target_device_name) {
-
-    char cl_platform_vendor[1001];
-    char cl_device_name[1001];
-    cl_int err;
-    cl_uint num_devices;
-    unsigned int device_found = 0;
-
-    // Get first platform
-    err = clGetPlatformIDs(1,platform_id,NULL);
-    if (err != CL_SUCCESS) {
-        printf("ERROR: Failed to find an OpenCL platform!\n");
-        printf("ERROR: Test failed\n");
-        return -1;
-    }
-    err = clGetPlatformInfo(*platform_id,CL_PLATFORM_VENDOR,1000,(void *)cl_platform_vendor,NULL);
-    if (err != CL_SUCCESS) {
-        printf("ERROR: clGetPlatformInfo(CL_PLATFORM_VENDOR) failed!\n");
-        printf("ERROR: Test failed\n");
-        return -1;
-    }
-    printf("CL_PLATFORM_VENDOR %s\n",cl_platform_vendor);
-    err = clGetPlatformInfo(*platform_id,CL_PLATFORM_NAME,1000,(void *)cl_platform_name,NULL);
-    if (err != CL_SUCCESS) {
-            printf("ERROR: clGetPlatformInfo(CL_PLATFORM_NAME) failed!\n");
-            printf("ERROR: Test failed\n");
-            return -1;
-    }
-    printf("CL_PLATFORM_NAME %s\n",cl_platform_name);
-
-    // Get Accelerator compute device
-    int accelerator = 1;
-    err = clGetDeviceIDs(*platform_id, CL_DEVICE_TYPE_ACCELERATOR, 16, devices, &num_devices);
-    if (err != CL_SUCCESS) {
-        printf("ERROR: Failed to create a device group!\n");
-        printf("ERROR: Test failed\n");
-        return -1;
-    }
-
-    //iterate all devices to select the target device. 
-    for (int i=0; i<num_devices; i++) {
-        err = clGetDeviceInfo(devices[i], CL_DEVICE_NAME, 1024, cl_device_name, 0);
-        if (err != CL_SUCCESS) {
-            printf("Error: Failed to get device name for device %d!\n", i);
-            printf("Test failed\n");
-            return EXIT_FAILURE;
-        }
-        //printf("CL_DEVICE_NAME %s\n", cl_device_name);
-        if(strcmp(cl_device_name, target_device_name) == 0) {
-            *device_id = devices[i];
-            device_found = 1;
-            printf("Selected %s as the target device\n", cl_device_name);
-        }
-    }
-    
-    if (!device_found) {
-        printf("Target device %s not found. Exit.\n", target_device_name);
+    if(argc != 1) {
+        printf("Usage: %s\n", argv[0]);
         return EXIT_FAILURE;
     }
 
-    // Create a compute context containing accelerator device
-    (*context)= clCreateContext(0, 1, device_id, NULL, NULL, &err);
-    if (!(*context))
-        {
-            printf("ERROR: Failed to create a compute context!\n");
-            printf("ERROR: Test failed\n");
-            return -1;
-        }
-
-    // Create a command queue for accelerator device
-    (*command_queue) = clCreateCommandQueue(*context, *device_id, CL_QUEUE_PROFILING_ENABLE, &err);
-    if (!(*command_queue))
-        {
-            printf("ERROR: Failed to create a command commands!\n");
-            printf("ERROR: code %i\n",err);
-            printf("ERROR: Test failed\n");
-            return -1;
-        }
-
-    // Load XCLBIN file binary from disk
-    int status;
-    unsigned char *kernelbinary;
-    printf("loading %s\n", xclbinfilename);
-    size_t xclbinlength;
-    err = load_file_to_memory(xclbinfilename, (char **) &kernelbinary,&xclbinlength);
-    if (err != 0) {
-        printf("ERROR: failed to load kernel from xclbin: %s\n", xclbinfilename);
-        printf("ERROR: Test failed\n");
-        return -2;
-    }
-
-    // Create the program from XCLBIN file, configuring accelerator device
-    (*program) = clCreateProgramWithBinary(*context, 1, device_id, &xclbinlength, (const unsigned char **) &kernelbinary, &status, &err);
-    if ((!(*program)) || (err!=CL_SUCCESS)) {
-        printf("ERROR: Failed to create compute program from binary %d!\n", err);
-        printf("ERROR: Test failed\n");
-        return -3;
-    }
-
-    // Build the program executable (no-op)
-    err = clBuildProgram(*program, 0, NULL, NULL, NULL, NULL);
-    if (err != CL_SUCCESS) {
-            size_t len;
-            char buffer[2048];
-            printf("ERROR: Failed to build program executable!\n");
-            clGetProgramBuildInfo(*program, *device_id, CL_PROGRAM_BUILD_LOG, sizeof(buffer), buffer, &len);
-            printf("%s\n", buffer);
-            printf("ERROR: Test failed\n");
-            return -1;
-    }
-
-    return 0;
-}
-
-
-
-/////////////////////////////////////////////////////////////////////////////////
-//main
-
-int main(int argc, char** argv)
-{
-
-    //change the line below to match the target device
-#ifdef KU3_2DDR
-    const char *target_device_name = "xilinx:adm-pcie-ku3:2ddr:3.1";
-#else
-    const char *target_device_name = "xilinx:adm-pcie-7v3:1ddr:3.0";
-#endif
-
-    // binary container name is bin_bandwidth unless path is provided on command line
-    const char *binary_container_name = argc > 1 ? argv[1] : "bin_bandwidth.xclbin";
+    xcl_world world = xcl_world_single();
+    cl_program program = xcl_import_binary(world, "krnl_global");
+    cl_kernel krnl = xcl_get_kernel(program, "bandwidth");
 
     int err;
 
     size_t globalbuffersize = 1024*1024*1024;    //1GB
 
-    //opencl setup
-    cl_platform_id platform_id;
-    cl_device_id device_id;
-    cl_device_id devices[16];  // compute device id 
-    cl_context context;
-    cl_command_queue command_queue;
-    cl_program program;
-    char cl_platform_name[1001];
-
     //variables for profiling
     uint64_t nsduration;
     uint64_t tenseconds = ((uint64_t) 10) * ((uint64_t) 1000000000);
 
-    err = opencl_setup(binary_container_name, &platform_id, devices, &device_id, 
-                       &context, &command_queue, &program, cl_platform_name, 
-                       target_device_name);
-    if(err==-1){
-        printf("Error : general failure setting up opencl context\n");
-        return -1;
-    }
-    if(err==-2) {
-        printf("Error : failed to bandwidth.xclbin from disk\n");
-        return -1;
-    }
-    if(err==-3) {
-        printf("Error : failed to clCreateProgramWithBinary with contents of xclbin\n");
-    }
-
-    //access the ACCELERATOR kernel
-    cl_int clstatus;
-    cl_kernel kernel = clCreateKernel(program, "bandwidth", &clstatus);
-    if (!kernel || clstatus != CL_SUCCESS) {
-        printf("Error: Failed to create compute kernel!\n");
-        printf("Error: Test failed\n");
-        return -1;
-    }
-
     //input buffer
-    unsigned char *input_host = ((unsigned char *)malloc(globalbuffersize));
+    unsigned char *input_host = ((unsigned char *) malloc(globalbuffersize));
     if(input_host==NULL) {
         printf("Error: Failed to allocate host side copy of OpenCL source buffer of size %i\n",globalbuffersize);
         return -1;
     }
-    unsigned int i;
-    for(i=0; i<globalbuffersize; i++) 
-        input_host[i]=i%256;
-    cl_mem input_buffer;
-#ifdef KU3_2DDR
-    cl_mem_ext_ptr_t input_buffer_ext;
-    input_buffer_ext.flags = XCL_MEM_DDR_BANK0;
-    input_buffer_ext.obj = NULL;
-    input_buffer_ext.param = 0;
 
-    input_buffer = clCreateBuffer(context, 
-                                  CL_MEM_READ_WRITE | CL_MEM_EXT_PTR_XILINX, 
-                                  globalbuffersize, 
-                                  &input_buffer_ext, 
-                                  &err);
-#else
-    input_buffer = clCreateBuffer(context, 
-                                  CL_MEM_READ_WRITE, 
-                                  globalbuffersize, 
-                                  NULL, 
-                                  &err);
-#endif
+    for(size_t i=0; i<globalbuffersize; i++) {
+        input_host[i] = i % 256;
+    }
+
+    cl_mem *input_buffers;
+    cl_mem *output_buffers;
+
+    if (get_ddr_banks(world) == 1) {
+        input_buffers = malloc(sizeof(cl_mem));
+        if (input_buffers == NULL) {
+            printf("ERROR: out of memory\n");
+            exit(EXIT_FAILURE);
+        }
+
+        input_buffers[0] = clCreateBuffer(context,
+                                          CL_MEM_READ_WRITE,
+                                          globalbuffersize,
+                                          NULL,
+                                          &err);
+
+    } else {
+        cl_mem_ext_ptr_t input_buffer_ext;
+        input_buffer_ext.flags = XCL_MEM_DDR_BANK0;
+        input_buffer_ext.obj = NULL;
+        input_buffer_ext.param = 0;
+
+        input_buffer = clCreateBuffer(context,
+                                      CL_MEM_READ_WRITE | CL_MEM_EXT_PTR_XILINX,
+                                      globalbuffersize,
+                                      &input_buffer_ext,
+                                      &err);
+    }
+
     if(err != CL_SUCCESS) {
         printf("Error: Failed to allocate OpenCL source buffer of size %i\n", globalbuffersize);
         return -1;
@@ -288,6 +115,7 @@ int main(int argc, char** argv)
 
     //output buffer
     cl_mem output_buffer;
+
 #ifdef KU3_2DDR
     cl_mem_ext_ptr_t output_buffer_ext;
     output_buffer_ext.flags = XCL_MEM_DDR_BANK1;

@@ -26,20 +26,16 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
+
 kernel 
 __attribute__ ((reqd_work_group_size(1,1,1)))
 void bandwidth(__global uint16  * __restrict output,
                __global uint16  * __restrict input, 
                ulong num_blocks)
 {
-
-    ulong blockindex;
-    uint16 temp;  
-    //
-    blockindex = 0;
     __attribute__((xcl_pipeline_loop))
-    for (blockindex=0; blockindex<num_blocks; blockindex++) {
-        temp = input[blockindex];
+    for (ulong blockindex=0; blockindex<num_blocks; blockindex++) {
+        uint16 temp = input[blockindex];
         output[blockindex] = temp;
     }
 }
