@@ -50,8 +50,8 @@ short getAbsMax(cv::Mat mat) {
 	size_t rows = mat.rows;
 	size_t cols = mat.cols;
 
-	for(int r = 0; r < rows; r++) {
-		for(int c = 0; c < cols; c++) {
+	for(size_t r = 0; r < rows; r++) {
+		for(size_t c = 0; c < cols; c++) {
 			uchar tmp = std::abs(mat.at<uchar>(r,c));
 			if(tmp > max) {
 				max = tmp;
