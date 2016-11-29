@@ -13,7 +13,7 @@ rsa_CXXFLAGS=-DRSA_2048 -g -O3 -Wall -I./src/ $(opencl_CXXFLAGS) $(cmdparser_CXX
 rsa_LDFLAGS=$(opencl_LDFLAGS)
 
 # RSA Kernel
-krnl_rsa_SRCS=./src/krnl_rsa.cpp
+krnl_rsa_SRCS=./src/krnl_rsa.cpp -k rsa
 
 EXES=rsa
 XCLBINS=krnl_rsa
