@@ -296,52 +296,6 @@ if(cmp_ge_n(t, n)){
 
   }
 
-void compute(u32 *Cqg,u32 *r2qg,u32 *qg,u32 *dmq1g, u32 *m2){
-        u32  d;
-  	u32 workspace[34]  ;
-  	u32 expo[32];
-  	u32 n[32] ;
-  	u32 t[32];
-  	u32 a[32];
-	u32 dtemp[32];
-	int i,j;
-
-
-  	memcpy(t,Cqg,128);
-  	memcpy(a, r2qg, 128);
-  	memcpy(n, qg, 128);
-  	memcpy(expo, dmq1g, 128);
-
-	d = inv2adic(n[0]); //C0797221
-
-  	mulredc(t, t, a, n, d, workspace); // t = tr %n=, montgomery multiplicaiton, t ordinary to montgomery form
-
-
- 	redc(a, a, n, d, workspace); // a = r%n
-
-  for(i=32; i >0 ; --i)
-  {
-   	 
-
-    	for(j=0; j<32; j++)
-   	 {
-		u32 ex = expo[i-1];
-        	mulredc(a, a, a, n, d, workspace);// a=a*a*d%n
-		if(ex&(0x80000000>>j))
-      		{
-			mulredc(a, a, t, n, d, workspace); // a=a*t
-
-		}
-    	 }
-    }
- 	 redc(a,a,n,d, workspace); //a=a%n, montgomery back to ordinary
-
- 	for(i=0;i<32;i++)
-		m2[i]=a[i]; //store Cq^dq % q
-
- }
-
-
 //Cp, Cq is ciphertext, z stores decrypted message, p, q, dmp,dmq,iqmp, r2q,r2q is the constant used in montgomery multilication
 
 extern "C" { 
@@ -370,18 +324,20 @@ void rsa(u32 *z, u32 *Cpg, u32 *Cqg,  u32 *pg,  u32 *qg,  u32 *dmp1g, u32 *dmq1g
 #pragma HLS INTERFACE s_axilite port=r2qg bundle=control
 
 #pragma HLS INTERFACE s_axilite port=return bundle=control
-	u32  d1;
+	u32  d;
 	u32 dtemp[32]  ;
-  	u32 workspace1[34]  ;
+  	u32 workspace[34]  ;
+  	u32 expo[32];
   	u32 q[32];
   	u32 product[64];
   	u32 r2p[32];
   	u32 m1[32];
   	u32 m2[64] ;
-  	u32 n1[32] ;
+  	u32 n[32] ;
+  	u32 t[32];
   	u32 iqmp[32];
+  	u32 a[32];
 	int i,j;
-
 //#pragma HLS PIPELINE
 	for(i=0;i<64;i++)
 	{
@@ -391,25 +347,92 @@ void rsa(u32 *z, u32 *Cpg, u32 *Cqg,  u32 *pg,  u32 *qg,  u32 *dmp1g, u32 *dmq1g
 	
   	memcpy(q,qg,128);
   	memcpy(iqmp,iqmpg,128);
-        memcpy(r2p,r2pg,128);
-        compute(Cqg,r2qg,qg,dmq1g,m2);
-        compute(Cpg,r2pg,pg,dmp1g,m1);
+  	memcpy(r2p,r2pg,128);
+  	memcpy(t,Cqg,128);
+  	memcpy(a, r2qg, 128);
+  	memcpy(n, qg, 128);
+  	memcpy(expo, dmq1g, 128);
 
-	memcpy(n1, pg , 128 );
-        d1 = inv2adic(pg[0]);
+	d = inv2adic(n[0]); //C0797221
 
+  	mulredc(t, t, a, n, d, workspace); // t = tr %n=, montgomery multiplicaiton, t ordinary to montgomery form
+
+
+ 	redc(a, a, n, d, workspace); // a = r%n
+
+  for(i=32; i >0 ; --i)
+  {
+   	 
+
+    	for(j=0; j<32; j++)
+   	 {
+		u32 ex = expo[i-1];
+        	mulredc(a, a, a, n, d, workspace);// a=a*a*d%n
+                 
+		if(ex&(0x80000000>>j))
+      		{
+			//memcpy(a,dtemp,128);
+			mulredc(a, a, t, n, d, workspace); // a=a*t
+
+		}
+    	 }
+    }
+ 	 redc(a,a,n,d, workspace); //a=a%n, montgomery back to ordinary
+
+ 	for(i=0;i<32;i++)
+		m2[i]=a[i]; //store Cq^dq % q
+
+		memcpy(t, Cpg , 128);
+		memcpy(a, r2pg , 128 );
+		memcpy(n, pg , 128 );
+		memcpy(expo, dmp1g , 128 );
+
+
+	d = inv2adic(n[0]);
+
+  	mulredc(t, t, a, n, d, workspace); // t = tr %n=, montgomery multiplicaiton, t ordinary to montgomery form
+
+
+ 	redc(a, a, n, d, workspace); // a = r%n
+
+//left-to-right binary exponentiation
+
+  for(i=32; i >0 ; --i)
+  {
+   	 
+
+    	for(j=0; j<32; j++)
+   	 {
+		u32 ex = expo[i-1];
+        	mulredc(a, a, a, n, d, workspace);// a=a*a*d%n
+                
+		if(ex&(0x80000000>>j))
+      		{
+			 
+				mulredc(a, a, t, n, d, workspace); // a=a*t
+
+		}
+    	 }
+
+    }
+
+  redc(a,a,n,d, workspace); //a=a%n, montgomery back to ordinary
+
+//#pragma HLS PIPELINE
+ for(i=0;i<32;i++)
+		m1[i]=a[i]; //store Cp^dp % p
 
 	u32 borrow=sub_n(m1,m1,m2);
 	if(borrow)
 	{
-		add_32(m1,m1,n1);
+		add_32(m1,m1,n);
 
 	}
 
-	mulredc(m1,m1,r2pg,n1,d1,workspace1);
-	mulredc(dtemp,iqmp,r2pg,n1,d1,workspace1);
-	mulredc(m1,m1,dtemp,n1,d1,workspace1);
-	redc(m1,m1,n1,d1,workspace1); //h=(m1-m2)iqmp %p
+	mulredc(m1,m1,r2p,n,d,workspace);
+	mulredc(dtemp,iqmp,r2p,n,d,workspace);
+	mulredc(m1,m1,dtemp,n,d,workspace);
+	redc(m1,m1,n,d,workspace); //h=(m1-m2)iqmp %p
 	mul_n(product,m1,q); //h*q
 	add_64(product,product,m2);	//m=m2+hq
   	memcpy(z, product, 256);
