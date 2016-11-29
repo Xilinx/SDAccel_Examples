@@ -30,7 +30,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-#include <CL/opencl.h>
+
+#include <xcl.h>
 #include <CL/cl_ext.h>
 
 uint8_t get_ddr_banks(xcl_world world) {
@@ -57,7 +58,7 @@ int main(int argc, char** argv) {
     }
 
     xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "krnl_global");
+    cl_program program = xcl_import_binary(world, "krnl_kernel_global");
     cl_kernel krnl = xcl_get_kernel(program, "bandwidth");
 
     int err;
@@ -66,12 +67,11 @@ int main(int argc, char** argv) {
 
     //variables for profiling
     uint64_t nsduration;
-    uint64_t tenseconds = ((uint64_t) 10) * ((uint64_t) 1000000000);
 
     //input buffer
     unsigned char *input_host = ((unsigned char *) malloc(globalbuffersize));
     if(input_host==NULL) {
-        printf("Error: Failed to allocate host side copy of OpenCL source buffer of size %i\n",globalbuffersize);
+        printf("Error: Failed to allocate host side copy of OpenCL source buffer of size %ld\n",globalbuffersize);
         return -1;
     }
 
@@ -79,21 +79,15 @@ int main(int argc, char** argv) {
         input_host[i] = i % 256;
     }
 
-    cl_mem *input_buffers;
-    cl_mem *output_buffers;
+    // input buffer
+    cl_mem input_buffer;
 
     if (get_ddr_banks(world) == 1) {
-        input_buffers = malloc(sizeof(cl_mem));
-        if (input_buffers == NULL) {
-            printf("ERROR: out of memory\n");
-            exit(EXIT_FAILURE);
-        }
-
-        input_buffers[0] = clCreateBuffer(context,
-                                          CL_MEM_READ_WRITE,
-                                          globalbuffersize,
-                                          NULL,
-                                          &err);
+        input_buffer = clCreateBuffer(world.context,
+                                      CL_MEM_READ_WRITE,
+                                      globalbuffersize,
+                                      NULL,
+                                      &err);
 
     } else {
         cl_mem_ext_ptr_t input_buffer_ext;
@@ -101,7 +95,7 @@ int main(int argc, char** argv) {
         input_buffer_ext.obj = NULL;
         input_buffer_ext.param = 0;
 
-        input_buffer = clCreateBuffer(context,
+        input_buffer = clCreateBuffer(world.context,
                                       CL_MEM_READ_WRITE | CL_MEM_EXT_PTR_XILINX,
                                       globalbuffersize,
                                       &input_buffer_ext,
@@ -109,37 +103,37 @@ int main(int argc, char** argv) {
     }
 
     if(err != CL_SUCCESS) {
-        printf("Error: Failed to allocate OpenCL source buffer of size %i\n", globalbuffersize);
+        printf("Error: Failed to allocate OpenCL source buffer of size %ld\n", globalbuffersize);
         return -1;
     }
 
     //output buffer
     cl_mem output_buffer;
 
-#ifdef KU3_2DDR
-    cl_mem_ext_ptr_t output_buffer_ext;
-    output_buffer_ext.flags = XCL_MEM_DDR_BANK1;
-    output_buffer_ext.obj = NULL;
-    output_buffer_ext.param = 0;
+    if (get_ddr_banks(world) == 1) {
+        output_buffer = clCreateBuffer(world.context,
+                                       CL_MEM_READ_WRITE,
+                                       globalbuffersize,
+                                       NULL,
+                                       &err);
+    } else {
+        cl_mem_ext_ptr_t output_buffer_ext;
+        output_buffer_ext.flags = XCL_MEM_DDR_BANK1;
+        output_buffer_ext.obj = NULL;
+        output_buffer_ext.param = 0;
 
-    output_buffer = clCreateBuffer(context, 
-                                   CL_MEM_READ_WRITE | CL_MEM_EXT_PTR_XILINX, 
-                                   globalbuffersize, 
-                                   &output_buffer_ext, 
-                                   &err);
-#else
-    output_buffer = clCreateBuffer(context, 
-                                   CL_MEM_READ_WRITE, 
-                                   globalbuffersize, 
-                                   NULL, 
-                                   &err);
-#endif
+        output_buffer = clCreateBuffer(world.context,
+                                       CL_MEM_READ_WRITE | CL_MEM_EXT_PTR_XILINX,
+                                       globalbuffersize,
+                                       &output_buffer_ext,
+                                       &err);
+    }
+
     if (err != CL_SUCCESS) {
-        printf("Error: Failed to allocate worst case OpenCL output buffer of size %i\n",globalbuffersize);
+        printf("Error: Failed to allocate worst case OpenCL output buffer of size %ld\n", globalbuffersize);
         return -1;
     }
 
-    //
     cl_ulong num_blocks = globalbuffersize/64;
     double dbytes = globalbuffersize;
     double dmbytes = dbytes / (((double)1024) * ((double)1024));
@@ -148,7 +142,7 @@ int main(int argc, char** argv) {
     //Write input buffer
     //Map input buffer for PCIe write
     unsigned char *map_input_buffer;
-    map_input_buffer = (unsigned char *) clEnqueueMapBuffer(command_queue, 
+    map_input_buffer = (unsigned char *) clEnqueueMapBuffer(world.command_queue,
                                                             input_buffer, 
                                                             CL_FALSE, 
                                                             CL_MAP_WRITE_INVALIDATE_REGION,
@@ -163,17 +157,18 @@ int main(int argc, char** argv) {
         printf("Error: Test failed\n");
         return -1;
     }
-    clFinish(command_queue);
+    clFinish(world.command_queue);
 
     //prepare data to be written to the device
-    for(i=0; i<globalbuffersize; i++) 
+    for(size_t i=0; i<globalbuffersize; i++) {
         map_input_buffer[i] = input_host[i];
+    }
 
     cl_event event1;
-    err = clEnqueueUnmapMemObject(command_queue, 
-                                  input_buffer, 
-                                  map_input_buffer, 
-                                  0, 
+    err = clEnqueueUnmapMemObject(world.command_queue,
+                                  input_buffer,
+                                  map_input_buffer,
+                                  0,
                                   NULL,
                                   &event1);
     if (err != CL_SUCCESS) {
@@ -184,9 +179,9 @@ int main(int argc, char** argv) {
 
     //execute kernel
     err = 0;
-    err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &output_buffer);
-    err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &input_buffer);
-    err |= clSetKernelArg(kernel, 2, sizeof(cl_ulong), &num_blocks);
+    err = clSetKernelArg(krnl, 0, sizeof(cl_mem), &output_buffer);
+    err |= clSetKernelArg(krnl, 1, sizeof(cl_mem), &input_buffer);
+    err |= clSetKernelArg(krnl, 2, sizeof(cl_ulong), &num_blocks);
 
     if (err != CL_SUCCESS) {
         printf("ERROR: Failed to set kernel arguments! %d\n", err);
@@ -200,26 +195,26 @@ int main(int argc, char** argv) {
     local[0]=1;
 
     cl_event ndrangeevent;
-    err = clEnqueueNDRangeKernel(command_queue, kernel, 1, NULL, global, local, 0, NULL, &ndrangeevent);
+    err = clEnqueueNDRangeKernel(world.command_queue, krnl, 1, NULL, global, local, 0, NULL, &ndrangeevent);
     if (err != CL_SUCCESS) {
-        printf("ERROR: Failed to execute kernel %d\n", err);
+        printf("ERROR: Failed to execute krnl %d\n", err);
         printf("ERROR: Test failed\n");
         return EXIT_FAILURE;
     }
     
-    clFinish(command_queue);
+    clFinish(world.command_queue);
 
     //copy results back from OpenCL buffer
     unsigned char *map_output_buffer;
-    map_output_buffer = (unsigned char *)clEnqueueMapBuffer(command_queue, 
-                                                            output_buffer, 
-                                                            CL_FALSE, 
-                                                            CL_MAP_READ, 
-                                                            0, 
-                                                            globalbuffersize, 
-                                                            0, 
-                                                            NULL, 
-                                                            &event1, 
+    map_output_buffer = (unsigned char *)clEnqueueMapBuffer(world.command_queue,
+                                                            output_buffer,
+                                                            CL_FALSE,
+                                                            CL_MAP_READ,
+                                                            0,
+                                                            globalbuffersize,
+                                                            0,
+                                                            NULL,
+                                                            &event1,
                                                             &err);
 
     if (err != CL_SUCCESS) {
@@ -227,12 +222,12 @@ int main(int argc, char** argv) {
         printf("ERROR: Test failed\n");
         return EXIT_FAILURE;
     }
-    clFinish(command_queue);
+    clFinish(world.command_queue);
 
     //check
-    for (i=0; i<globalbuffersize; i++) {
+    for (size_t i=0; i<globalbuffersize; i++) {
         if (map_output_buffer[i] != input_host[i]) {
-            printf("ERROR : kernel failed to copy entry %i input %i output %i\n",i,input_host[i], map_output_buffer[i]);
+            printf("ERROR : kernel failed to copy entry %ld input %i output %i\n",i,input_host[i], map_output_buffer[i]);
             return EXIT_FAILURE;
         }
     }
@@ -246,8 +241,6 @@ int main(int argc, char** argv) {
     double dnsduration = ((double)nsduration);
     double dsduration = dnsduration / ((double) 1000000000);
 
-
-
     double bpersec = (dbytes/dsduration);
     double mbpersec = bpersec / ((double) 1024*1024 );
 
@@ -256,10 +249,6 @@ int main(int argc, char** argv) {
     printf("Concurrent Read and Write Throughput = %f (MB/sec) \n", mbpersec);
 
 
-    //add clena up code
-    //
-
     return EXIT_SUCCESS;
-
 }
 
