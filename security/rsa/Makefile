@@ -14,6 +14,7 @@ rsa_LDFLAGS=$(opencl_LDFLAGS)
 
 # RSA Kernel
 krnl_rsa_SRCS=./src/krnl_rsa.cpp
+krnl_rsa_CLFLAGS=--kernel rsa
 
 EXES=rsa
 XCLBINS=krnl_rsa
