@@ -39,7 +39,7 @@ typedef unsigned char u8;
 
 int main(int argc, char* argv[]) {
     xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary_file(world, "krnl_hello");
+    cl_program program = xcl_import_binary(world, "krnl_hello");
     cl_kernel krnl = xcl_get_kernel(program, "krnl_hello");
 
     size_t vector_size_bytes = sizeof(char) * LENGTH;
