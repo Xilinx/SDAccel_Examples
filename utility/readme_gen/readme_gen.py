@@ -37,6 +37,21 @@ def overview(target,data):
             target.write("|")
             target.write(result["metric"])
             target.write("\n")
+    if 'key_concepts' in data:
+        target.write("### KEY CONCEPTS\n")
+        target.write("\n")
+        for result in data["key_concepts"]:
+            target.write("- ")
+            target.write(result)
+            target.write("\n")
+        target.write("\n")
+    if 'keywords' in data:
+        target.write("### KEYWORDS\n")
+        for result in data["keywords"]:
+            target.write("- ")
+            target.write(result)
+            target.write("\n")
+        target.write("\n")
     return
 
 def requirements(target,data):
