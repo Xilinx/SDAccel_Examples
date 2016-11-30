@@ -215,6 +215,46 @@ void xcl_release_world(xcl_world world) {
 	free(world.device_name);
 	free(world.mode);
 }
+cl_program xcl_import_binary_file(xcl_world world,
+                            const char *xclbin_file_name
+) {
+	int err;
+
+	if(access(xclbin_file_name, R_OK) != 0) {
+		printf("ERROR: %s kernel not available please build\n", xclbin_file_name);
+		exit(EXIT_FAILURE);
+	}
+
+	char *krnl_bin;
+	const size_t krnl_size = load_file_to_memory(xclbin_file_name, &krnl_bin);
+
+	cl_program program = clCreateProgramWithBinary(world.context, 1,
+	                                    &world.device_id, &krnl_size,
+	                                    (const unsigned char**) &krnl_bin,
+	                                    NULL, &err);
+	if ((!program) || (err!=CL_SUCCESS)) {
+		printf("Error: Failed to create compute program from binary %d!\n",
+		       err);
+		printf("Test failed\n");
+		exit(EXIT_FAILURE);
+	}
+
+	err = clBuildProgram(program, 0, NULL, NULL, NULL, NULL);
+	if (err != CL_SUCCESS) {
+		size_t len;
+		char buffer[2048];
+
+		clGetProgramBuildInfo(program, world.device_id, CL_PROGRAM_BUILD_LOG,
+		                      sizeof(buffer), buffer, &len);
+		printf("%s\n", buffer);
+		printf("Error: Failed to build program executable!\n");
+		exit(EXIT_FAILURE);
+	}
+
+	free(krnl_bin);
+
+	return program;
+}
 
 cl_program xcl_import_binary(xcl_world world,
                             const char *xclbin_name
@@ -256,40 +296,7 @@ cl_program xcl_import_binary(xcl_world world,
 
 	free(device_name);
 
-	if(access(xclbin_file_name, R_OK) != 0) {
-		printf("ERROR: %s kernel not available please build\n", xclbin_file_name);
-		exit(EXIT_FAILURE);
-	}
-
-	char *krnl_bin;
-	const size_t krnl_size = load_file_to_memory(xclbin_file_name, &krnl_bin);
-
-	cl_program program = clCreateProgramWithBinary(world.context, 1,
-	                                    &world.device_id, &krnl_size,
-	                                    (const unsigned char**) &krnl_bin,
-	                                    NULL, &err);
-	if ((!program) || (err!=CL_SUCCESS)) {
-		printf("Error: Failed to create compute program from binary %d!\n",
-		       err);
-		printf("Test failed\n");
-		exit(EXIT_FAILURE);
-	}
-
-	err = clBuildProgram(program, 0, NULL, NULL, NULL, NULL);
-	if (err != CL_SUCCESS) {
-		size_t len;
-		char buffer[2048];
-
-		clGetProgramBuildInfo(program, world.device_id, CL_PROGRAM_BUILD_LOG,
-		                      sizeof(buffer), buffer, &len);
-		printf("%s\n", buffer);
-		printf("Error: Failed to build program executable!\n");
-		exit(EXIT_FAILURE);
-	}
-
-	free(krnl_bin);
-
-	return program;
+	return xcl_import_binary_file(world, xclbin_file_name);
 }
 
 cl_program xcl_import_source(xcl_world world,
@@ -336,19 +343,6 @@ cl_kernel xcl_get_kernel(cl_program program,
 	cl_kernel kernel = clCreateKernel(program, krnl_name, &err);
 	if (!kernel || err != CL_SUCCESS) {
 		printf("Error: Failed to create kernel for %s: %d\n", krnl_name, err);
-		exit(EXIT_FAILURE);
-	}
-
-	return kernel;
-}
-
-cl_kernel xcl_create_kernel(cl_program program, const char *krnl_name)
-{
-    int err;
-    cl_kernel kernel = clCreateKernel(program, krnl_name, &err);
-	if (!kernel || err != CL_SUCCESS) {
-		printf("Error: Failed to create kernel for %s: %d\n", krnl_name, err);
-		printf("Test failed\n");
 		exit(EXIT_FAILURE);
 	}
 

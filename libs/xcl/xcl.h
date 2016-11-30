@@ -82,6 +82,22 @@ void xcl_release_world(xcl_world world);
  */
 cl_program xcl_import_binary(xcl_world world, const char *xclbin_file);
 
+/* xcl_import_binary_file
+ *
+ * Description:
+ *   Import precompiled program (as commonly created by the Xilinx OpenCL
+ *   flow).
+ *
+ * Inputs:
+ *   world - xcl_world to import into.
+ *   xclbin_file - file name of xclbin to import.
+ *
+ * Returns:
+ *   An opencl program object that was created from krnl_name file.
+ */
+cl_program xcl_import_binary_file(xcl_world world, const char *xclbin_file_name);
+
+
 /* xcl_import_source
  *
  * Description:
@@ -110,20 +126,6 @@ cl_program xcl_import_source(xcl_world world, const char *krnl_file);
  *   An opencl kernel object that was created from the krnl_name
  */
 cl_kernel xcl_get_kernel(cl_program program, const char *krnl_name);
-
-/* xcl_create_kernel
- * 
- * Description:
- *  Create kernel in program and return kernel object
- *
- * Inputs:
- *   world - program in which kernel is created
- *   krnl_name - name of kernel.
- *
- * Returns:
- *   An opencl kernel object that was created from krnl_name file.
- */
-cl_kernel xcl_create_kernel(cl_program program, const char *krnl_name);
 
 
 /* xcl_set_kernel_arg
