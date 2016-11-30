@@ -1,0 +1,24 @@
+{
+    "example": "Device Query",
+    "overview": "This example prints the OpenCL properties of the platform and its devices. It also displays the limits and capabilities of the hardware.",
+    "key_concepts": [ "OpenCL API" , "Querying device properties"],
+    "keywords": [ "Write Buffers" , "Read Buffers", "Map Buffer", "Async Memcpy"],
+    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
+    "version": ["SDx 2016.3"],
+    "dsa": "xilinx:adm-pcie-ku3:2ddr:3.2",
+    "em_cmd": "./host",
+    "hw_cmd": "../../../utility/nimbix/nimbix-run.py ./host",
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ],
+    "revision" : [
+        {
+            "date" : "DEC2016",
+            "version": "1.0",
+            "description": "Initial Xilinx Release"
+        }
+    ]
+}
