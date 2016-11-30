@@ -1,0 +1,26 @@
+{
+    "example": "Global Memory Two Banks Example",
+    "overview": "This example of 2ddr to demonstrate on how to use 2ddr DSA. How to create buffers in each DDR.",
+    "key_concepts": [ "Multiple Banks"],
+    "keywords": [ "max_memory_ports", "param:compiler.enablemap_connect", "misc:map_connect",
+            "cl_mem_ext_ptr_t", "XCL_MEM_DDR_BANK0", "XCL_MEM_DDR_BANK1", "XCL_MEM_DDR_BANKx",
+            "CL_MEM_EXT_PTR_XILINX", "HLS Interface m_axi bundle"],
+    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
+    "version": ["SDAccel 2016.2"],
+    "dsa": "xilinx:adm-pcie-ku3:2ddr:3.1",
+    "em_cmd": "./host",
+    "hw_cmd": "../../../utility/nimbix/nimbix-run.py ./host",
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ],
+    "revision" : [
+        {
+            "date" : "DEC2016",
+            "version": "1.0",
+            "description": "Initial Xilinx Release"
+        }
+    ]
+}
