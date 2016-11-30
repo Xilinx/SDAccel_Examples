@@ -81,12 +81,12 @@ int main(int argc, char* argv[]) {
 	//we don't need this 
 	/*	LogInfo("Unit test naive impl");
 		HuffmanNaiveImpl naive;
-		assert(unit_test_codec(&naive));
+		assert(unit_test_codec(&naive));*/
 
 
 		LogInfo("Unit test optimized cpu-only");
 		HuffmanOptimizedCPUOnly cpuonly;
-		assert(unit_test_codec(&cpuonly));*/
+		assert(unit_test_codec(&cpuonly));
 	}
 
 
