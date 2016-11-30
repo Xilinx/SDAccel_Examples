@@ -130,18 +130,18 @@ int main(int argc, char* argv[]) {
 
 	LogInfo("Chosen kernel file is %s", strKernelFullPath.c_str());
 	LogInfo("Chosen Platform = %s, Device Name: %s, Device Index: [%d]", strPlatformName.c_str(), strDeviceName.c_str(), idxSelectedDevice);
-	HuffmanOptimized huffman(strPlatformName, strDeviceName, idxSelectedDevice, strKernelFullPath, strBitmapFP);
+	//HuffmanOptimized huffman(strPlatformName, strDeviceName, idxSelectedDevice, strKernelFullPath, strBitmapFP);
 
-	LogInfo("Perform some unit tests before the actual image decode, encode");
-	unit_test_codec(&huffman);
+	//LogInfo("Perform some unit tests before the actual image decode, encode");
+	//unit_test_codec(&huffman);
 
 	//Execute benchmark application
-	LogInfo("Run HUFFMAN on FPGA with an image dataset. nruns = [%d]", nruns);
+	/*LogInfo("Run HUFFMAN on FPGA with an image dataset. nruns = [%d]", nruns);
 	bool res = huffman.run(0, nruns);
 	if(!res) {
 		LogError("An error occurred when running benchmark on device 0");
 		return -1;
-	}
+	}*/
 
 
 	LogInfo("finished");
