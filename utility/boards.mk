@@ -3,6 +3,10 @@
 CXXFLAGS:=-Wall -O0 -g
 CLFLAGS:=-g --xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generateExtraRunData=true" -s
 
+ifdef XILINX_SDX
+XILINX_SDACCEL=${XILINX_SDX}
+endif
+
 # Use the Xilinx OpenCL compiler
 CLC:=$(XILINX_SDACCEL)/bin/xocc
 EMCONFIGUTIL := $(XILINX_SDACCEL)/bin/emconfigutil
@@ -18,10 +22,8 @@ DEVICES:= xilinx:adm-pcie-ku3:2ddr:3.1
 CXX:=$(XILINX_SDACCEL)/Vivado_HLS/lnx64/tools/gcc/bin/g++
 endif
 
-#Added COMMON_REPO check to support existing Designs
-ifndef COMMON_REPO
-COMMON_REPO:=../../
-endif
+#if COMMON_REPO is not defined use the default value support existing Designs
+COMMON_REPO ?= ../../
 
 # By default build for hardware can be set to
 #   hw_emu for hardware emulation

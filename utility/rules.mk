@@ -4,17 +4,16 @@
 XCLBIN_DIR=xclbin
 
 ECHO:= @echo
-help:
-	${ECHO} "Makefile Usage:"
-	${ECHO} "	make all TARGETS=<sw_emu/hw_emu/hw>"
-	${ECHO}	"		Command to generate the design for specified Target."
-	${ECHO} ""
-	${ECHO} "	make check TARGETS=<sw_emu/hw_emu>"
-	${ECHO}	"		Command to run emulation for specified Target."
-	${ECHO} ""
-	${ECHO} "	make clean"
-	${ECHO}	"		Command to remove the generated files."
-	${ECHO} ""
+
+.PHONY: help
+help::
+	$(ECHO) "Makefile Usage:"
+	$(ECHO) "	make all TARGETS=<sw_emu/hw_emu/hw>"
+	$(ECHO) "		Command to generate the design for specified Target."
+	$(ECHO) ""
+	$(ECHO) "	make clean"
+	$(ECHO) "		Command to remove the generated files."
+	$(ECHO) ""
 
 # mk_exe - build an exe from host code
 #   CXX - compiler to use
@@ -52,6 +51,7 @@ sanitize_dsa = $(strip $(subst $(PERIOD),$(UNDERSCORE),$(subst $(COLON),$(UNDERS
 define mk_xclbin
 
 $(XCLBIN_DIR)/$(1).$(2).$(call sanitize_dsa,$(3)).xclbin: $($(1)_SRCS) $($(1)_HDRS)
+	mkdir -p ${XCLBIN_DIR}
 	$(CLC) $(CLFLAGS) $($(1)_CLFLAGS) -o $$@ -t $(2) --xdevice $(3) $($(1)_SRCS)
 
 XCLBIN_GOALS+= $(XCLBIN_DIR)/$(1).$(2).$(call sanitize_dsa,$(3)).xclbin
@@ -72,18 +72,8 @@ all-real: $(EXE_GOALS) $(XCLBIN_GOALS) README.md
 
 .PHONY: clean
 clean:
-	rm -rf $(EXE_GOALS) $(XCLBIN_GOALS) sdaccel* *.ll _xocc_*
+	rm -rf $(EXE_GOALS) $(XCLBIN_GOALS) sdaccel* TempConfig
+	rm -rf src/*.ll _xocc_* .Xil emconfig.json $(EXTRA_CLEAN) dltmp* xmltmp* *.log
 
 README.md: description.json
 	$(COMMON_REPO)/utility/readme_gen/readme_gen.py description.json
-
-############ CREATE emulation config file ###########
-EM_CONFIG_FILE := emconfig.json
-${EM_CONFIG_FILE} :
-	$(EMCONFIGUTIL) --xdevice ${DEVICES} --nd 1 --od ./
-em_config : ${EM_CONFIG_FILE}
-
-############# Design Emulation ##################
-check:all em_config
-	export XCL_EMULATION_MODE="${TARGETS}";\
-   	./${EXES} ${RUN_TIME_ARGS}
