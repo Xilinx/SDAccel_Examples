@@ -1,0 +1,24 @@
+{
+    "example": "Hello World",
+    "overview": "This example is a simple OpenCL application. It will highlight the basic flow of an OpenCL application.",
+    "key_concepts": [ "OpenCL API"],
+    "keywords": [ "Write Buffers" , "Read Buffers", "Kernels" ],
+    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
+    "version": ["SDx 2016.3"],
+    "dsa": "xilinx:adm-pcie-ku3:2ddr:3.2",
+    "em_cmd": "./host",
+    "hw_cmd": "../../../utility/nimbix/nimbix-run.py ./host",
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ],
+    "revision" : [
+        {
+            "date" : "DEC2016",
+            "version": "1.0",
+            "description": "Initial Xilinx Release"
+        }
+    ]
+}
