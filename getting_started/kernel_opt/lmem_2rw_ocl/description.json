@@ -1,0 +1,24 @@
+{
+    "example": "Two Parallel Read/Write in Local Memory",
+    "overview": "This is simple example of vector addition to demonstrate how to utilized both ports of Local Memory.", 
+    "key_concepts": [ "Kernel Optimization", "2port BRAM Utilization", "two read/write Local Memory"],
+    "keywords": ["opencl_unroll_hint(2)"],
+    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
+    "version": ["SDAccel 2016.2"],
+    "dsa": "xilinx:adm-pcie-ku3:2ddr:3.1",
+    "em_cmd": "./host",
+    "hw_cmd": "../../../utility/nimbix/nimbix-run.py ./host",
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ],
+    "revision" : [
+        {
+            "date" : "DEC2016",
+            "version": "1.0",
+            "description": "Initial Xilinx Release"
+        }
+    ]
+}
