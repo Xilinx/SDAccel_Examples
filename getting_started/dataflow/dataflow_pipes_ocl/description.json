@@ -1,11 +1,13 @@
 {
     "example": "Blocking Pipes Example",
     "overview": "This is simple example of vector addition to demonstrate OpenCL Pipe Memory usage. OpenCL PIPE memory functionality allows user to achieve kernel-to-kernel data transfer without using global memory.",
+    "key_concepts": [ "Dataflow" , "kernel to kernel pipes"],
+    "keywords": [ "pipe" , "xcl_reqd_pipe_depth", "read_pipe_block()", "write_pipe_block()"],
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
-    "version": ["SDAccel 2016.2"],
-    "dsa": "xilinx:adm-pcie-ku3:2ddr:3.1",
-    "em_cmd": "./host.exe",
-    "hw_cmd": "../../utility/nimbix/nimbix-run.py ./host.exe",
+    "version": ["SDx 2016.3"],
+    "dsa": "xilinx:adm-pcie-ku3:2ddr:3.2",
+    "em_cmd": "./host ./xclbin/adder.<emulation target>.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
+    "hw_cmd": "../../../utility/nimbix/nimbix-run.py ./host ./xclbin/adder.hw.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
     "contributors" : [
         {
             "group": "Xilinx",
@@ -14,7 +16,7 @@
     ],
     "revision" : [
         {
-            "date" : "NOV2016",
+            "date" : "DEC2016",
             "version": "1.0",
             "description": "Initial Xilinx Release"
         }
