@@ -29,8 +29,8 @@ This is simple example of vector addition to demonstrate Loops Dataflow function
 ## 2. SOFTWARE AND SYSTEM REQUIREMENTS
 Board | Software Version
 ------|---------
-Alpha Data ADM-PCIE-7V3|SDx 2016.3
-Alpha Data ADM-PCIE-KU3|SDx 2016.3
+Alpha Data ADM-PCIE-7V3|SDAccel 2016.2
+Alpha Data ADM-PCIE-KU3|SDAccel 2016.2
 
 
 ## 3. DESIGN FILE HIERARCHY
@@ -47,11 +47,11 @@ Set the following environment variable to create a emconfig.json file
 ```
 export LD_LIBRARY_PATH=$XILINX_SDACCEL/runtime/lib/x86_64/:$LD_LIBRARY_PATH
 export XCL_EMULATION_MODE=<sw_emu|hw_emu>
-emconfigutil --xdevice 'xilinx:adm-pcie-ku3:2ddr:3.2' --nd 1
+emconfigutil --xdevice 'xilinx:adm-pcie-ku3:2ddr:3.1' --nd 1
 ```
 Run the application as
 ```
-./host ./xclbin/adder.<emulation target>.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin
+./host
 ```
 The choices for emulation flow are
 		- sw_emu = software emulation
@@ -63,13 +63,13 @@ It is recommended that for this example the user skips running hardware emulatio
 
 	Install the Xilinx Runtime for board in Nimbix using the xbinst utility in SDAccel
 ```
-xbinst -x 'xilinx:adm-pcie-ku3:2ddr:3.2' -d .
+xbinst -x 'xilinx:adm-pcie-ku3:2ddr:3.1' -d .
 mv xbinst/pkg/pcie/runtime . 
 rm -rf xbinst
 ```
 Run the nimbix-run.py script provided in the utility/nimbix directory at the top level of this repository
 ```
-../../../utility/nimbix/nimbix-run.py ./host ./xclbin/adder.hw.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin
+../../../utility/nimbix/nimbix-run.py ./host
 ```
 
 	Only the Alpha Data ADM-PCIE-KU3 card is supported by this method.

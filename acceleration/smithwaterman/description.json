@@ -2,8 +2,6 @@
     "example" : "Smithwaterman Genetic Sequencing Demo",
     "overview" : "This is an optimized implementation of the smithwaterman algorithm targeting exection on an SDAccel support FPGA acceleration card.\n\nThe main algorithm characteristics of this application are\n1. Compute MaxScore\n2. Systolic array implementation\n",
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
-    "version": ["SDAccel 2016.2"],
-    "dsa": "xilinx:adm-pcie-ku3:2ddr:3.1",
     "xcl": false,
     "em_cmd" : "./smithwaterman -p Xilinx -d xilinx:adm-pcie-ku3:2ddr:3.1 -k xclbin/krnl_smithwaterman.<emu_mode>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin",
     "hw_cmd" : "../../utility/nimbix/nimbix-run.py ./smithwaterman -p xilinx -d xilinx:adm-pcie-ku3:2ddr:3.1 -k xclbin/krnl_smithwaterman.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin",

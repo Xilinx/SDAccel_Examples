@@ -2,6 +2,9 @@
 from sys import argv
 import json
 
+DSA = 'xilinx:adm-pcie-ku3:2ddr:3.1'
+VERSION = 'SDAccel 2016.2'
+
 def header(target,data):
     target.write(data["example"])
     target.write(" Example \n")
@@ -61,7 +64,7 @@ def requirements(target,data):
     for board in data["board"]:
         target.write(board)
         target.write("|")
-        for version in data["version"]:
+        for version in VERSION:
             target.write(version)
         target.write("\n")
     target.write("\n\n")
@@ -94,7 +97,7 @@ def compilation(target,data):
       target.write('<sw_emu|hw_emu>')
     target.write('\n')
     target.write("emconfigutil --xdevice '")
-    target.write(data["dsa"])
+    target.write(DSA)
     target.write("' --nd 1\n")
     target.write("```\n")
     target.write("Run the application as\n")
@@ -111,7 +114,7 @@ def compilation(target,data):
     target.write("\n\tInstall the Xilinx Runtime for board in Nimbix using the xbinst utility in SDAccel\n")
     target.write("```\n")
     target.write("xbinst -x '")
-    target.write(data["dsa"])
+    target.write(DSA)
     target.write("' -d .\n")
     target.write("mv xbinst/pkg/pcie/runtime . \n")
     target.write("rm -rf xbinst\n")

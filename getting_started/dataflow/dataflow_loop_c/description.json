@@ -4,10 +4,8 @@
     "key_concepts": [ "Dataflow" , "Task Level Parallism", "Loop Dataflow"],
     "keywords": [ "dataflow" , "hls::stream<>"],
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
-    "version": ["SDx 2016.3"],
-    "dsa": "xilinx:adm-pcie-ku3:2ddr:3.2",
-    "em_cmd": "./host ./xclbin/adder.<emulation target>.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
-    "hw_cmd": "../../../utility/nimbix/nimbix-run.py ./host ./xclbin/adder.hw.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
+    "em_cmd": "./host",
+    "hw_cmd": "../../../utility/nimbix/nimbix-run.py ./host",
     "contributors" : [
         {
             "group": "Xilinx",

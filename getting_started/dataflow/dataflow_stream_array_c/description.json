@@ -4,10 +4,8 @@
     "key_concepts": [ "Dataflow" , "Array of Stream"],
     "keywords": [ "dataflow" , "hls::stream<>", "array of stream"],
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
-    "version": ["SDx 2016.3"],
-    "dsa": "xilinx:adm-pcie-ku3:2ddr:3.2",
-    "em_cmd": "./host ./xclbin/N_stage_Adders.<emulation target>.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
-    "hw_cmd": "../../../utility/nimbix/nimbix-run.py ./host ./xclbin/N_stage_Adders.hw.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
+    "em_cmd": "./host",
+    "hw_cmd": "../../../utility/nimbix/nimbix-run.py ./host",
     "contributors" : [
         {
             "group": "Xilinx",

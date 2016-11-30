@@ -2,8 +2,6 @@
     "example" : "Tiny Encryption",
     "overview" : "implementation of the tiny encryption algorithm.",
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
-    "version": ["SDAccel 2016.2"],
-    "dsa": "xilinx:adm-pcie-ku3:2ddr:3.1",
     "xcl": false,
     "em_cmd" : "./tiny ./xclbin/krnl_vadd.<emulation flow>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin",
     "hw_cmd" : "../../utility/nimbix/nimbix-run.py ./tiny ./xclbin/krnl_vadd.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin",

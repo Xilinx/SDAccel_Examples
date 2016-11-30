@@ -2,10 +2,8 @@
     "example" : "Vector Dot-Product",
     "overview" : "Simple example of vector dot-product.",
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
-    "version": ["SDx 2016.3"],
-    "dsa": "xilinx:adm-pcie-ku3:2ddr:3.2",
-    "em_cmd" : "./vdotprod ./xclbin/krnl_vdotprod.<emulation target>.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
-    "hw_cmd" : "../../../utility/nimbix/nimbix-run.py ./vdotprod ./xclbin/krnl_vdotprod.hw.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
+    "em_cmd" : "./vdotprod",
+    "hw_cmd" : "../../../utility/nimbix/nimbix-run.py ./vdotprod",
     "contributors" : [
         {
             "group": "Xilinx",

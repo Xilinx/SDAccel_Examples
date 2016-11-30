@@ -60,7 +60,6 @@ rm -rf xbinst
 Run the nimbix-run.py script provided in the utility/nimbix directory at the top level of this repository
 ```
 ../../../utility/nimbix/nimbix-run.py ./kernel_global
-
 ```
 
 	Only the Alpha Data ADM-PCIE-KU3 card is supported by this method.
