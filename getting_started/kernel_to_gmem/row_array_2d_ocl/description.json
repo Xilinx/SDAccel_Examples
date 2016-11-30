@@ -1,0 +1,24 @@
+{
+    "example": "Row of 2D Array Example Using AXI4-master interface",
+    "overview": "This is a simple example of accessing each row of data from 2d array",
+    "key_concepts": [ "Row of 2D data array access"],
+    "keywords": ["row", "pipe"],
+    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
+    "version": ["SDAccel 2016.2"],
+    "dsa": "xilinx:adm-pcie-ku3:2ddr:3.1",
+    "em_cmd": "./host",
+    "hw_cmd": "../../../utility/nimbix/nimbix-run.py ./host",
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ],
+    "revision" : [
+        {
+            "date" : "DEC2016",
+            "version": "1.0",
+            "description": "Initial Xilinx Release"
+        }
+    ]
+}
