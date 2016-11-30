@@ -42,11 +42,6 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <xcl.h>
 
 int main(int argc, char** argv) {
-    if (argc != 1) {
-        printf("%s\n", argv[0]);
-        return EXIT_FAILURE;
-    }
-
 
     xcl_world world = xcl_world_single();
     clReleaseCommandQueue(world.command_queue);

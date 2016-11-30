@@ -35,14 +35,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vdotprod.h>
 
 int main(int argc, char* argv[]) {
-    if(argc != 2) {
-        printf("Usage: %s <xclbin> \n", argv[0]);
-        return EXIT_FAILURE;
-    }
-    const char* xclbinFileName = argv[1];
-
     xcl_world world    = xcl_world_single();
-    cl_program program = xcl_import_binary_file(world, xclbinFileName);
+    cl_program program = xcl_import_binary(world, "krnl_vdotprod");
     cl_kernel krnl     = xcl_get_kernel(program, "krnl_vdotprod");
 
     int nhalf = NPOINTS >> 1;

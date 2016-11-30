@@ -44,13 +44,6 @@ int main(int argc, char** argv)
    size_t global[1];                   // global domain size for our calculation
    size_t local[1];                    // local domain size for our calculation
 
-   if (argc != 3) {
-      printf("Usage: %s <vmul_xclbin> <add_xclbin>\n", argv[0]);
-      return EXIT_FAILURE;
-   }
-   const char* vmul_xclbinFileName  = argv[1];
-   const char* vadd_xclbinFileName  = argv[2];
-
    int h_a[LENGTH];                    // host memory for a vector
    int h_b[LENGTH];                    // host memory for b vector
    int h_c[LENGTH];                    // host memort for c vector
@@ -67,7 +60,7 @@ int main(int argc, char** argv)
    xcl_world world = xcl_world_single();
 
    printf("INFO: loading vmul kernel\n");
-   cl_program program_vmul = xcl_import_binary_file(world,vmul_xclbinFileName);
+   cl_program program_vmul = xcl_import_binary(world, "krnl_vmul");
    cl_kernel  krnl_vmul = xcl_get_kernel(program_vmul, "krnl_vmul");
 
    cl_mem d_a = xcl_malloc(world, CL_MEM_READ_ONLY, sizeof(int) * LENGTH);
@@ -110,7 +103,7 @@ int main(int argc, char** argv)
    }
 
    printf("INFO: loading vadd_krnl\n");
-   cl_program program_vadd = xcl_import_binary_file(world, vadd_xclbinFileName);
+   cl_program program_vadd = xcl_import_binary(world, "krnl_vadd");
    cl_kernel krnl_vadd = xcl_get_kernel(program_vadd, "krnl_vadd");
 
    cl_mem d_add_c = xcl_malloc(world, CL_MEM_WRITE_ONLY, sizeof(int) * LENGTH);

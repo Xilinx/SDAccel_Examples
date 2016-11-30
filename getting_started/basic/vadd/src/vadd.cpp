@@ -36,14 +36,9 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vadd.h>
 
 int main(int argc, char* argv[]) {
-    if(argc != 2) {
-        printf("Usage: %s <xclbin>\n", argv[0]);
-        return EXIT_FAILURE;
-    }
-    const char* xclbinFilename =argv[1];
 
     xcl_world world    = xcl_world_single();
-    cl_program program = xcl_import_binary_file(world, xclbinFilename);
+    cl_program program = xcl_import_binary(world, "krnl_vadd");
     cl_kernel krnl     = xcl_get_kernel(program, "krnl_vadd");
 
     size_t vector_size_bytes = sizeof(int) * LENGTH;
