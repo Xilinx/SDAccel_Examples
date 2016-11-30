@@ -130,7 +130,7 @@ int main(int argc, char* argv[]) {
 
 	LogInfo("Chosen kernel file is %s", strKernelFullPath.c_str());
 	LogInfo("Chosen Platform = %s, Device Name: %s, Device Index: [%d]", strPlatformName.c_str(), strDeviceName.c_str(), idxSelectedDevice);
-	HuffmanOptimized huffman(strPlatformName, strDeviceName, idxSelectedDevice, strKernelFullPath, strBitmapFP);
+	//HuffmanOptimized huffman(strPlatformName, strDeviceName, idxSelectedDevice, strKernelFullPath, strBitmapFP);
 
 	//LogInfo("Perform some unit tests before the actual image decode, encode");
 	//unit_test_codec(&huffman);
