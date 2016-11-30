@@ -64,7 +64,7 @@ HuffmanOptimized::HuffmanOptimized(string& vendor_name,
 			   string& strBitmapFP)
 {
 	//store path to input bitmap
-	m_strBitmapFP = strBitmapFP;
+	//m_strBitmapFP = strBitmapFP;
 
 
 	//list available platforms
