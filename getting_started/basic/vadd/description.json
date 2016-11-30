@@ -1,0 +1,28 @@
+{
+    "example" : "Vector Addition",
+    "overview" : "Simple example of vector addition.",
+    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
+    "version": ["SDx 2016.3"],
+    "dsa": "xilinx:adm-pcie-ku3:2ddr:3.2",
+    "em_cmd" : "./vadd ./xclbin/krnl_vadd.<emulation target>.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
+    "hw_cmd" : "../../../utility/nimbix/nimbix-run.py ./vadd ./xclbin/krnl_vadd.hw.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ],
+    "revision" : [
+        {
+            "date" : "FEB2016",
+            "version": "1.0",
+            "description": "Initial Xilinx Release"
+        },
+        {
+            "date" : "JUL2016",
+            "version": "2.0",
+            "description": "Conversion to Makefile based compilation"
+        }
+    ]
+
+}
