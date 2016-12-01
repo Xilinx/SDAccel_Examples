@@ -16,5 +16,10 @@ krnl_kernel_global_SRCS=./src/kernel.cl
 EXES=kernel_global
 XCLBINS=krnl_kernel_global
 
+# check
+check_EXE=kernel_global
+check_XCLBINS=krnl_kernel_global
+
+CHECKS=check
+
 include ${COMMON_REPO}/utility/rules.mk
-include ${COMMON_REPO}/utility/emu_check.mk

@@ -39,17 +39,9 @@
 
 int main(int argc, char* argv[])
 {
-
-   if(argc != 2)
-    {
-        std::cout << "Usage: " << argv[0] << " <xclbin>" << std::endl;
-        return EXIT_FAILURE;
-    }
-    const char* xclbinFilename = argv[1];
-
 // OPENCL HOST CODE AREA START
     xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary_file(world, xclbinFilename);
+    cl_program program = xcl_import_binary(world, "vadd");
     cl_kernel krnl = xcl_get_kernel(program, "krnl_vadd");
 
     size_t vector_size_bytes = sizeof(int) * LENGTH;

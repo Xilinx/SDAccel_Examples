@@ -17,5 +17,12 @@ krnl_nearest_CLFLAGS=--kernel krnl_linear_search
 EXES=nearest
 XCLBINS=krnl_nearest
 
+# check
+check_EXE=nearest
+check_XCLBINS=krnl_nearest
+check_ARGS=data/queries.txt data/queries.txt
+
+CHECKS=check
+
 include ../../utility/rules.mk
 

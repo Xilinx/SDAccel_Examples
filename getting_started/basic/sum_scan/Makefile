@@ -16,6 +16,11 @@ krnl_sum_scan_SRCS=./src/krnl_sum_scan.cl
 EXES=sum_scan
 XCLBINS=krnl_sum_scan
 
+# check
+check_EXE=sum_scan
+check_XCLBINS=krnl_sum_scan
+
+CHECKS=check
+
 include ${COMMON_REPO}/utility/rules.mk
-include ${COMMON_REPO}/utility/emu_check.mk
 

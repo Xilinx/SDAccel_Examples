@@ -17,5 +17,11 @@ krnl_equalizer_SRCS=./src/krnl_equalizer.cl
 EXES=equalizer
 XCLBINS=krnl_equalizer
 
+# check
+check_EXE=equalizer
+check_XCLBINS=krnl_equalizer
+
+CHECKS=check
+
 include ../../utility/rules.mk
 

@@ -73,8 +73,8 @@ int main(int argc, char** argv)
     cl_program program = xcl_import_binary(world,"adder");
     cl_kernel krnl_adder_stage   = xcl_get_kernel(program, "adder");
     //Creating additional Kernels
-    cl_kernel krnl_input_stage   = xcl_create_kernel(program, "input_stage");
-    cl_kernel krnl_output_stage  = xcl_create_kernel(program, "output_stage");
+    cl_kernel krnl_input_stage   = xcl_get_kernel(program, "input_stage");
+    cl_kernel krnl_output_stage  = xcl_get_kernel(program, "output_stage");
     
     
     // By-default xcl_world_single create command queues with sequential command.

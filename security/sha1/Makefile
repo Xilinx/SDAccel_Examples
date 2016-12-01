@@ -20,5 +20,11 @@ krnl_sha1_CLFLAGS=--nk dev_sha1_update:2
 EXES=sha1
 XCLBINS=krnl_sha1
 
+# check
+check_EXE=sha1
+check_XCLBINS=krnl_sha1
+
+CHECKS=check
+
 include ../../utility/rules.mk
 

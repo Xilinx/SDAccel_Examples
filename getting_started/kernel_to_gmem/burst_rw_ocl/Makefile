@@ -17,5 +17,11 @@ vadd_CLFLAGS=-k vadd
 EXES=host
 XCLBINS=vadd
 
+# check
+check_EXE=host
+check_XCLBINS=vadd
+
+CHECKS=check
+
 include ${COMMON_REPO}/utility/rules.mk
-include ${COMMON_REPO}/utility/emu_check.mk
+

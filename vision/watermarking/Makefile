@@ -17,4 +17,11 @@ krnl_watermark_SRCS=./src/krnl_watermarking.cl
 EXES=watermark
 XCLBINS=krnl_watermark
 
+# check
+check_EXE=watermark
+check_XCLBINS=krnl_watermark
+
+CHECKS=check
+
 include ../../utility/rules.mk
+

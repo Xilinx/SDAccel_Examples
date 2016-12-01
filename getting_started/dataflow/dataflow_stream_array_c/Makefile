@@ -1,5 +1,5 @@
 COMMON_REPO := ../../../
-#Common Includes
+
 include ${COMMON_REPO}/utility/boards.mk
 include ${COMMON_REPO}/libs/xcl/xcl.mk
 include ${COMMON_REPO}/libs/opencl/opencl.mk
@@ -17,5 +17,11 @@ N_stage_Adders_CLFLAGS= -k N_stage_Adders
 EXES=host
 XCLBINS=N_stage_Adders
 
+# check
+check_EXE=host
+check_XCLBINS=N_stage_Adders
+
+CHECKS=check
+
 include ${COMMON_REPO}/utility/rules.mk
-include ${COMMON_REPO}/utility/emu_check.mk
+

@@ -19,5 +19,11 @@ krnl_rsa_CLFLAGS=--kernel rsa
 EXES=rsa
 XCLBINS=krnl_rsa
 
+# check
+check_EXE=rsa
+check_XCLBINS=krnl_rsa
+
+CHECKS=check
+
 include ../../utility/rules.mk
 

@@ -18,5 +18,11 @@ krnl_convolve_CLFLAGS=--nk krnl_convolve:3
 EXES=convolve
 XCLBINS=krnl_convolve
 
+# check
+check_EXE=convolve
+check_XCLBINS=krnl_convolve
+
+CHECKS=check
+
 include ../../utility/rules.mk
 

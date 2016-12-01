@@ -17,5 +17,11 @@ mmult_CLFLAGS=-k mmult
 EXES=host
 XCLBINS=mmult
 
+# check
+check_EXE=host
+check_XCLBINS=mmult
+
+CHECKS=check
+
 include ${COMMON_REPO}/utility/rules.mk
-include ${COMMON_REPO}/utility/emu_check.mk
+

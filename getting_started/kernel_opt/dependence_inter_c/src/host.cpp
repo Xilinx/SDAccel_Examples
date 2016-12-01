@@ -53,13 +53,6 @@ void mean_value(int in[], int out[], int n)
 
 int main(int argc, char** argv)
 {
-    if (argc != 2)
-    {
-        std::cout << "Usage: " << argv[0] << " <xclbin>" << std::endl;
-        return EXIT_FAILURE;
-    }
-    const char* xclbinFilename = argv[1];
-
     //Allocate Memory in Host Memory
     size_t vector_size_bytes = sizeof(int) * DATA_SIZE;
 
@@ -78,7 +71,7 @@ int main(int argc, char** argv)
 //OPENCL HOST CODE AREA START
     //Create Program and Kernel
     xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary_file(world, xclbinFilename);
+    cl_program program = xcl_import_binary(world, "mean_value");
     cl_kernel krnl_mean_value = xcl_get_kernel(program, "mean_value");
 
     //Allocate Buffer in Global Memory

@@ -17,5 +17,11 @@ krnl_tiny_SRCS=./src/krnl_tinyEncryption.cl
 EXES=tiny
 XCLBINS=krnl_tiny
 
+# check
+check_EXE=tiny
+check_XCLBINS=krnl_tiny
+
+CHECKS=check
+
 include ../../utility/rules.mk
 

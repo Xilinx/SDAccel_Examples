@@ -22,10 +22,12 @@ EXES=host
 XCLBINS=apply_watermark
 EXTRA_CLEAN=./output.bmp 
 
+# check
+check_EXE=host
+check_XCLBINS=apply_watermark
+check_ARGS=./data/input.bmp ./data/golden.bmp
+
+CHECKS=check
+
 include ${COMMON_REPO}/utility/rules.mk
-include ${COMMON_REPO}/utility/emu_check.mk
-
-#Runtime arguments
-RUN_TIME_ARGS +=./data/input.bmp ./data/golden.bmp
-
 

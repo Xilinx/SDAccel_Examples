@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
 //OPENCL HOST CODE AREA START
    //Create Program and Kernels
     xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary_file(world, "rgb_to_hsv");
+    cl_program program = xcl_import_binary(world, "rgb_to_hsv");
     cl_kernel krnl_rgb2hsv = xcl_get_kernel(program, "rgb_to_hsv");
     
     //Allocate Buffer in Global Memory

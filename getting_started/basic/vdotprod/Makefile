@@ -1,4 +1,5 @@
 # vdotprod Application
+
 COMMON_REPO:=../../../
 include ${COMMON_REPO}/utility/boards.mk
 include ${COMMON_REPO}/libs/xcl/xcl.mk
@@ -17,5 +18,11 @@ krnl_vdotprod_SRCS=./src/krnl_vdotprod.cl
 EXES=vdotprod
 XCLBINS=krnl_vdotprod
 
+# check
+check_EXE=vdotprod
+check_XCLBINS=krnl_vdotprod
+
+CHECKS=check
+
 include ${COMMON_REPO}/utility/rules.mk
-include ${COMMON_REPO}/utility/emu_check.mk
+

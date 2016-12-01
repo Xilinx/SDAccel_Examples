@@ -1,7 +1,5 @@
-#Repo containing utility and libs repository to use
 COMMON_REPO := ../../../
 
-# Custom Data Type Application
 include ${COMMON_REPO}/utility/boards.mk
 include ${COMMON_REPO}/libs/xcl/xcl.mk
 include ${COMMON_REPO}/libs/opencl/opencl.mk
@@ -21,9 +19,12 @@ EXES=host
 XCLBINS=rgb_to_hsv
 EXTRA_CLEAN=./output.bmp 
 
+# check
+check_EXE=host
+check_XCLBINS=rgb_to_hsv
+check_ARGS=./data/input.bmp
+
+CHECKS=check
 
 include ${COMMON_REPO}/utility/rules.mk
-include ${COMMON_REPO}/utility/emu_check.mk
-
-RUN_TIME_ARGS += ./data/input.bmp
 

@@ -21,9 +21,12 @@ EXES=host
 XCLBINS=rgb_to_hsv
 EXTRA_CLEAN=./output.bmp 
 
-include ${COMMON_REPO}/utility/rules.mk
-include ${COMMON_REPO}/utility/emu_check.mk
-#Runtime arguments
-RUN_TIME_ARGS += ./data/input.bmp
+# check
+check_EXE=host
+check_XCLBINS=rgb_to_hsv
+check_ARGS=./data/input.bmp
 
+CHECKS=check
+
+include ${COMMON_REPO}/utility/rules.mk
 

@@ -1,4 +1,5 @@
-# Vaddvmul Application
+# vaddvmul Application
+
 COMMON_REPO:=../../../
 include ${COMMON_REPO}/utility/boards.mk
 include ${COMMON_REPO}/libs/opencl/opencl.mk
@@ -20,5 +21,11 @@ krnl_vadd_SRCS=./src/krnl_vadd.cl
 EXES=vmulvadd
 XCLBINS=krnl_vmul krnl_vadd
 
+# check
+check_EXE=vmulvadd
+check_XCLBINS=krnl_vmul krnl_vadd
+
+CHECKS=check
+
 include ${COMMON_REPO}/utility/rules.mk
-include ${COMMON_REPO}/utility/emu_check.mk
+

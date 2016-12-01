@@ -18,5 +18,11 @@ krnl_edge_HDRS=./src/edge.h
 EXES=edge
 XCLBINS=krnl_edge
 
+# check
+check_EXE=edge
+check_XCLBINS=krnl_edge
+
+CHECKS=check
+
 include ../../utility/rules.mk
 

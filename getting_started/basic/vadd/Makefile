@@ -1,4 +1,5 @@
-# Vadd Application
+# vadd Application
+
 COMMON_REPO:=../../../
 include ${COMMON_REPO}/utility/boards.mk
 include ${COMMON_REPO}/libs/xcl/xcl.mk
@@ -16,5 +17,11 @@ krnl_vadd_SRCS=./src/krnl_vadd.cl
 EXES=vadd
 XCLBINS=krnl_vadd
 
+# check
+check_EXE=vadd
+check_XCLBINS=krnl_vadd
+
+CHECKS=check
+
 include ${COMMON_REPO}/utility/rules.mk
-include ${COMMON_REPO}/utility/emu_check.mk
+

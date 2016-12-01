@@ -17,14 +17,16 @@ host_LDFLAGS=${opencl_LDFLAGS}
 apply_watermark_SRCS=./src/apply_watermark.cpp
 apply_watermark_CLFLAGS=-k apply_watermark -s -g -I./src  --xp param:compiler.enablemap_connect=1 --max_memory_ports apply_watermark --xp misc:map_connect=add.kernel.apply_watermark_1.M_AXI_GMEM0.core.OCL_REGION_0.M00_AXI --xp misc:map_connect=add.kernel.apply_watermark_1.M_AXI_GMEM1.core.OCL_REGION_0.M01_AXI
 
-
 EXES=host
 XCLBINS=apply_watermark
 EXTRA_CLEAN=./output.bmp 
 
-include ${COMMON_REPO}/utility/rules.mk
-include ${COMMON_REPO}/utility/emu_check.mk
+# check
+check_EXE=host
+check_XCLBINS=apply_watermark
+check_ARGS=./data/input.bmp ./data/golden.bmp
 
-#Runtime arguments
-RUN_TIME_ARGS += ./data/input.bmp ./data/golden.bmp
+CHECKS=check
+
+include ${COMMON_REPO}/utility/rules.mk
 

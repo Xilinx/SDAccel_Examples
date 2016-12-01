@@ -1,5 +1,5 @@
 COMMON_REPO := ../../../
-#Common Includes
+
 include ${COMMON_REPO}/utility/boards.mk
 include ${COMMON_REPO}/libs/xcl/xcl.mk
 include ${COMMON_REPO}/libs/opencl/opencl.mk
@@ -18,5 +18,11 @@ row_array_2d_CLFLAGS=-k row_array_2d
 EXES=host
 XCLBINS=row_array_2d
 
+# check
+check_EXE=host
+check_XCLBINS=row_array_2d
+
+CHECKS=check
+
 include ${COMMON_REPO}/utility/rules.mk
-include ${COMMON_REPO}/utility/emu_check.mk
+

@@ -21,5 +21,11 @@ krnl_huffman_SRCS=./src/krnl_huffman_singleptr.cl
 EXES=huffman
 XCLBINS=krnl_huffman
 
+# check
+check_EXE=huffman
+check_XCLBINS=krnl_huffman
+
+CHECKS=check
+
 include ../../utility/rules.mk
 

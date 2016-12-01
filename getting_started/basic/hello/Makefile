@@ -16,6 +16,11 @@ krnl_hello_SRCS=./src/krnl_hello.cl
 EXES=hello
 XCLBINS=krnl_hello
 
+# check
+check_EXE=hello
+check_XCLBINS=krnl_hello
+
+CHECKS=check
+
 include $(COMMON_REPO)/utility/rules.mk
-include ${COMMON_REPO}/utility/emu_check.mk
 

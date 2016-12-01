@@ -43,6 +43,7 @@ sanitize_dsa = $(strip $(subst $(PERIOD),$(UNDERSCORE),$(subst $(COLON),$(UNDERS
 # mk_xclbin - create an xclbin from a set of krnl sources
 #  CLC - kernel compiler to use
 #  CLFLAGS - flags to pass to the compiler
+#  $(1) - base name for this xclbin
 #  $(1)_SRCS - set of source files
 #  $(1)_HDRS - set of header files
 #  $(1)_CLFLAGS - set clflags per xclbin
@@ -58,17 +59,14 @@ XCLBIN_GOALS+= $(XCLBIN_DIR)/$(1).$(2).$(call sanitize_dsa,$(3)).xclbin
 
 endef
 
-.PHONY: all
-all: all-real
-
 $(foreach exe,$(EXES),$(eval $(call mk_exe,$(exe))))
 
 $(foreach xclbin,$(XCLBINS),$(foreach target,$(TARGETS),$(foreach device,$(DEVICES),$(eval $(call mk_xclbin,$(xclbin),$(target),$(device))))))
 
 $(info $(XCLBIN_GOALS))
 
-.PHONY: all-real
-all-real: $(EXE_GOALS) $(XCLBIN_GOALS) README.md
+.PHONY: all
+all: $(EXE_GOALS) $(XCLBIN_GOALS) README.md
 
 .PHONY: clean
 clean:
@@ -77,3 +75,6 @@ clean:
 
 README.md: description.json
 	$(COMMON_REPO)/utility/readme_gen/readme_gen.py description.json
+
+include $(COMMON_REPO)/utility/check.mk
+

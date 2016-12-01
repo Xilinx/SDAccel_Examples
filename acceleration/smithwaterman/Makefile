@@ -25,5 +25,11 @@ krnl_smithwaterman_CLFLAGS=--kernel opencl_sw_maxscore
 EXES=smithwaterman
 XCLBINS=krnl_smithwaterman
 
+# check
+check_EXE=smithwaterman
+check_XCLBINS=krnl_smithwaterman
+
+CHECKS=check
+
 include ../../utility/rules.mk
 

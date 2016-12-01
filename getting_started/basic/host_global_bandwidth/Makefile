@@ -16,6 +16,11 @@ krnl_host_global_SRCS=./src/kernel.cl
 EXES=host_global
 XCLBINS=krnl_host_global
 
+# check
+check_EXE=host_global
+check_XCLBINS=krnl_host_global
+
+CHECKS=check
+
 include ${COMMON_REPO}/utility/rules.mk
-include ${COMMON_REPO}/utility/emu_check.mk
 

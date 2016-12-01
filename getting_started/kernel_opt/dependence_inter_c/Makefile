@@ -1,7 +1,5 @@
-#Repo containing utility and libs repository to use
 COMMON_REPO := ../../../
 
-#Includes
 include ${COMMON_REPO}/utility/boards.mk
 include ${COMMON_REPO}/libs/xcl/xcl.mk
 include ${COMMON_REPO}/libs/opencl/opencl.mk
@@ -19,5 +17,11 @@ mean_value_CLFLAGS=-k mean_value
 EXES=host
 XCLBINS=mean_value
 
+# check
+check_EXE=host
+check_XCLBINS=mean_value
+
+CHECKS=check
+
 include ${COMMON_REPO}/utility/rules.mk
-include ${COMMON_REPO}/utility/emu_check.mk
+

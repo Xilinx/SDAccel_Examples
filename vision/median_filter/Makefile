@@ -17,5 +17,11 @@ krnl_median_SRCS=./src/krnl_medianFilter.cl
 EXES=median
 XCLBINS=krnl_median
 
+# check
+check_EXE=median
+check_XCLBINS=krnl_median
+
+CHECKS=check
+
 include ../../utility/rules.mk
 

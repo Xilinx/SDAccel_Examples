@@ -44,13 +44,6 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 int main(int argc, char** argv)
 {
-    if (argc != 2)
-    {
-        std::cout << "Usage: " << argv[0] << " <xclbin>" << std::endl;
-        return EXIT_FAILURE;
-    }
-
-    const char* xclbinFilename = argv[1];
     int size = DATA_SIZE;
     int incr = INCR_VALUE;
 
@@ -76,7 +69,7 @@ int main(int argc, char** argv)
 //OPENCL HOST CODE AREA START
     //Create Program and Kernel
     xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary_file(world, xclbinFilename);
+    cl_program program = xcl_import_binary(world, "N_stage_Adders");
     cl_kernel krnl_adders = xcl_get_kernel(program, "N_stage_Adders");
 
     //Allocate Buffer in Global Memory

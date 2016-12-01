@@ -20,5 +20,11 @@ krnl_aes_SRCS=./src/krnl_aes.cl
 EXES=aes
 XCLBINS=krnl_aes
 
+# check
+check_EXE=aes
+check_XCLBINS=krnl_aes
+
+CHECKS=check
+
 include ../../utility/rules.mk
 

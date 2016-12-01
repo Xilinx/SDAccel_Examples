@@ -215,6 +215,7 @@ void xcl_release_world(xcl_world world) {
 	free(world.device_name);
 	free(world.mode);
 }
+
 cl_program xcl_import_binary_file(xcl_world world,
                             const char *xclbin_file_name
 ) {
@@ -259,8 +260,6 @@ cl_program xcl_import_binary_file(xcl_world world,
 cl_program xcl_import_binary(xcl_world world,
                             const char *xclbin_name
 ) {
-	int err;
-
 	size_t xclbin_len = strlen(xclbin_name);
 	size_t mode_len = strlen(world.mode);
 
