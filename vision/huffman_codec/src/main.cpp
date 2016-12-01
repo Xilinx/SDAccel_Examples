@@ -127,7 +127,8 @@ int main(int argc, char* argv[]) {
 
 	int nruns = parser.value_to_int("number-of-runs");
 	int idxSelectedDevice = parser.value_to_int("select-device");
-
+  
+  	LogInfo("Chosen bitmap file is %s",strBitmapFP.c_str());
 	LogInfo("Chosen kernel file is %s", strKernelFullPath.c_str());
 	LogInfo("Chosen Platform = %s, Device Name: %s, Device Index: [%d]", strPlatformName.c_str(), strDeviceName.c_str(), idxSelectedDevice);
 	HuffmanOptimized huffman(strPlatformName, strDeviceName, idxSelectedDevice, strKernelFullPath, strBitmapFP);
