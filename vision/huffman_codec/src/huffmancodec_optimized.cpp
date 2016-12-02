@@ -68,7 +68,7 @@ HuffmanOptimized::HuffmanOptimized(const string& vendor_name,
 
 
 	//list available platforms
-	xcl_list_platforms();
+	//xcl_list_platforms();
 
 	//list available devices
 /*	if(xcl_list_devices(vendor_name.c_str()) > 0) {
