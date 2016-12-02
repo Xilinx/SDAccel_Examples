@@ -19,7 +19,7 @@ This is an implementation of a RSA Decryption algorithm targeting execution on a
 ### PERFORMANCE
 Board|Cipher Text Length|Throughput
 ----|-----|-----
-Alpha Data ADM-PCIE-7V3|1,024 bits|272,340 bytes / second
+Alpha Data ADM-PCIE-KU3|2,048 bits|272,340 bytes / second
 ## 2. SOFTWARE AND SYSTEM REQUIREMENTS
 Board | Software Version
 ------|---------
@@ -45,7 +45,7 @@ emconfigutil --xdevice 'xilinx:adm-pcie-ku3:2ddr:3.1' --nd 1
 ```
 Run the application as
 ```
-./rsa -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:3.1' -k ./xclbin/krnl_rsa.<emulation flow>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin --in data/0_0_1024_key.cip --out data/0_out.msg --key data/0_1024_key.pem
+./rsa -p Xilinx -d xilinx:adm-pcie-ku3:2ddr-3.1 -k ./xclbin/krnl_rsa.sw_emu.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin --in data/0_0_2048_key.cip --out data/0_out.msg --key data/0_2048_key.pem
 ```
 The choices for emulation flow are
 		- sw_emu = software emulation
@@ -63,7 +63,8 @@ rm -rf xbinst
 ```
 Run the nimbix-run.py script provided in the utility/nimbix directory at the top level of this repository
 ```
-../../utility/nimbix/nimbix-run.py ./rsa -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:3.1' -k ./xclbin/krnl_rsa.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin --in data/0_0_1024_key.cip --out data/0_out.msg --key data/0_1024_key.pem
+../../utility/nimbix/nimbix-run.py ./rsa -p Xilinx -d xilinx:adm-pcie-ku3:2ddr:3.1 -k ./xclbin/krnl_rsa.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin -i ./data/0_0_2048_key.cip -o data/0_out.msg -y ./data/0_2048_key.pem
+
 ```
 
 	Only the Alpha Data ADM-PCIE-KU3 card is supported by this method.
