@@ -30,7 +30,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assert.h>
 #include "cmdlineparser.h"
 #include "logger.h"
-//#include "huffmancodec_naive.h"
+#include "huffmancodec_naive.h"
 #include "huffmancodec_optimized_cpuonly.h"
 #include "huffmancodec_optimized.h"
 
