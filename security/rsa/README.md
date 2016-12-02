@@ -45,7 +45,7 @@ emconfigutil --xdevice 'xilinx:adm-pcie-ku3:2ddr:3.1' --nd 1
 ```
 Run the application as
 ```
-./rsa -p Xilinx -d xilinx:adm-pcie-ku3:2ddr-3.1 -k ./xclbin/krnl_rsa.sw_emu.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin --in data/0_0_2048_key.cip --out data/0_out.msg --key data/0_2048_key.pem
+./rsa -p Xilinx -d xilinx:adm-pcie-ku3:2ddr:3.1 -k ./xclbin/krnl_rsa.sw_emu.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin --in data/0_0_2048_key.cip --out data/0_out.msg --key data/0_2048_key.pem
 ```
 The choices for emulation flow are
 		- sw_emu = software emulation
