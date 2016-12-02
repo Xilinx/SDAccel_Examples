@@ -54,7 +54,7 @@ using namespace sda::cl;
 
 HuffmanOptimized::HuffmanOptimized() {
 	// TODO Auto-generated constructor stub
-
+       xcl_list_platforms();
 }
 
 HuffmanOptimized::HuffmanOptimized(string& vendor_name,
