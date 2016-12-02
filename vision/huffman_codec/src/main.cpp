@@ -30,7 +30,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assert.h>
 #include "cmdlineparser.h"
 #include "logger.h"
-#include "huffmancodec_naive.h"
+//#include "huffmancodec_naive.h"
 #include "huffmancodec_optimized_cpuonly.h"
 #include "huffmancodec_optimized.h"
 
@@ -84,9 +84,9 @@ int main(int argc, char* argv[]) {
 		assert(unit_test_codec(&naive));*/
 
 
-		LogInfo("Unit test optimized cpu-only");
+	/*	LogInfo("Unit test optimized cpu-only");
 		HuffmanOptimizedCPUOnly cpuonly;
-		assert(unit_test_codec(&cpuonly));
+		assert(unit_test_codec(&cpuonly));*/
 	}
 
 
