@@ -54,21 +54,21 @@ using namespace sda::cl;
 
 HuffmanOptimized::HuffmanOptimized() {
 	// TODO Auto-generated constructor stub
-       xcl_list_platforms();
+     
 }
 
-HuffmanOptimized::HuffmanOptimized(string& vendor_name,
-			   string& device_name,
+HuffmanOptimized::HuffmanOptimized(const string& vendor_name,
+			   const string& device_name,
 			   int selected_device,
-			   string& strKernelFP,
-			   string& strBitmapFP)
+			   const string& strKernelFP,
+			   const string& strBitmapFP)
 {
 	//store path to input bitmap
 	//m_strBitmapFP = strBitmapFP;
 
 
 	//list available platforms
-	//xcl_list_platforms();
+	xcl_list_platforms();
 
 	//list available devices
 /*	if(xcl_list_devices(vendor_name.c_str()) > 0) {
