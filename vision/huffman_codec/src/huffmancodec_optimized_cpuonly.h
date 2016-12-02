@@ -29,7 +29,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef HUFFMANCODEC_OPENCL_CPU_H_
 #define HUFFMANCODEC_OPENCL_CPU_H_
 
-//#include "huffmancodec_naive.h"
+#include "huffmancodec_naive.h"
 
 #ifdef __ECLIPSE__
 	#define kernel
