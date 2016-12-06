@@ -76,9 +76,9 @@ protected:
 private:
 	string m_strBitmapFP;
 
-//	xcl_world m_world;
-//	cl_kernel m_clKernelHuffmanEncoder;
-//	cl_kernel m_clKernelHuffmanDecoder;
+	xcl_world m_world;
+	cl_kernel m_clKernelHuffmanEncoder;
+	cl_kernel m_clKernelHuffmanDecoder;
 };
 
 }
