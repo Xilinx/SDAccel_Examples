@@ -56,7 +56,7 @@ public:
 	virtual ~HuffmanOptimized();
 
 	enum EvBreakDown {evtHostWrite = 0, evtKernelExec = 1, evtHostRead = 2, evtCount = 3};
-
+/*
 	//overide interface funcs
 	int enc(const vector<u8>& in_data, vector<u8>& out_data);
 	int dec(const vector<u8>& in_data, vector<u8>& out_data);
@@ -80,7 +80,7 @@ private:
 	cl_kernel m_clKernelHuffmanEncoder;
 	cl_kernel m_clKernelHuffmanDecoder;
 };
-
+*/
 }
 //}
 
