@@ -87,7 +87,7 @@ HuffmanOptimized::HuffmanOptimized(const string vendor_name,
 HuffmanOptimized::~HuffmanOptimized() {
 	// TODO Auto-generated destructor stub
 	cleanup();
-	 LogInfo("inside optimizedddddd")
+	 LogInfo("inside optimizedddddd");
 }
 
 void HuffmanOptimized::cleanup() {
