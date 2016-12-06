@@ -86,10 +86,10 @@ HuffmanOptimized::HuffmanOptimized(const string vendor_name,
 
 HuffmanOptimized::~HuffmanOptimized() {
 	// TODO Auto-generated destructor stub
-	cleanup();
+//	cleanup();
 	 LogInfo("inside optimizedddddd");
 }
-
+/*
 void HuffmanOptimized::cleanup() {
 
 	clReleaseKernel(m_clKernelHuffmanDecoder);
@@ -136,7 +136,7 @@ bool HuffmanOptimized::releaseMemObject(cl_mem &obj)
       returnStatus |= false;
     }
     else
-      obj = NULL; /* memory was released, re-initialize pointer to NULL */
+      obj = NULL; 
   }
 
   return returnStatus;
@@ -196,15 +196,8 @@ bool HuffmanOptimized::invoke_kernel(cl_kernel krnl,
 	clFinish(m_world.command_queue);
 
 	//execute kernel
-	/*!
-	 * void encode(__global uchar* in_data, uint size_in_data,
-	 * 			   __global uchar* out_data, __global uint* size_out_data,
-	 * 			   uchar fetch_size_only)
-	 *
-	 * void decode(__global uchar* in_data, uint size_in_data,
-	 * 			   __global uchar* out_data, __global uint* size_out_data,
-	 * 			   uchar fetch_size_only)
-	 */
+
+
 	err = 0;
 	err = clSetKernelArg(krnl, 0, sizeof(cl_mem), &mem_input);
 	if (err != CL_SUCCESS) {
@@ -513,4 +506,4 @@ bool HuffmanOptimized::run(int idevice, int nruns) {
 
 	return true;
 }
-
+*/
