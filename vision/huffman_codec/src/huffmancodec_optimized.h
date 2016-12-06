@@ -40,7 +40,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 
 namespace sda {
-namespace cl {
+//namespace cl {
 
 /*!
  *
@@ -82,6 +82,6 @@ private:
 };
 
 }
-}
+//}
 
 #endif /* AESAPP_H_ */
