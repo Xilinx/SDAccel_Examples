@@ -54,7 +54,7 @@ using namespace sda::cl;
 
 HuffmanOptimized::HuffmanOptimized() :ICodec(){
 	// TODO Auto-generated constructor stub
-     
+     LogInfo("inside optimized");
 }
 
 HuffmanOptimized::HuffmanOptimized(const string vendor_name,
