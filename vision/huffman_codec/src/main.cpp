@@ -73,7 +73,7 @@ static bool unit_test_codec(ICodec* pHuffmanCodec) {
 	return(ctPassed == total);
 }
 
-
+HuffmanOptimized huffm;
 int main(int argc, char* argv[]) {
 	LogInfo("Xilinx Canonical Huffman Codec Application");
 
