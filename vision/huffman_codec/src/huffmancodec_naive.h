@@ -34,7 +34,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <iostream>
 #include "bit_io.h"
-
+#include "logger.h"
 
 using namespace std;
 
@@ -44,7 +44,7 @@ class ICodec {
 public:
 	virtual int enc(const vector<u8>& in_data, vector<u8>& out_data) = 0;
 	virtual int dec(const vector<u8>& in_data, vector<u8>& out_data) = 0;
-        ICodec() {std::cout<<"test\n";}
+        ICodec() {LogInfo("test");}
 	int enc_str(const string& in_str, vector<u8>& out_data);
 	int dec_str(const vector<u8>& in_data, string& out_str);
 
