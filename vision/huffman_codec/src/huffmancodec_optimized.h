@@ -48,11 +48,11 @@ namespace cl {
 class HuffmanOptimized : public ICodec {
 public:
 	HuffmanOptimized();
-	HuffmanOptimized(const string& vendor_name,
-		   const string& device_name,
+	HuffmanOptimized(const string vendor_name,
+		   const string device_name,
 		   int selected_device,
-		   const string& strKernelFP,
-		   const string& strBitmapFP);
+		   const string strKernelFP,
+		   const string strBitmapFP);
 	virtual ~HuffmanOptimized();
 
 	enum EvBreakDown {evtHostWrite = 0, evtKernelExec = 1, evtHostRead = 2, evtCount = 3};
