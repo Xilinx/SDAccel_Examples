@@ -52,7 +52,7 @@ using namespace sda::cl;
 //load_file_to_memory
 
 
-HuffmanOptimized::HuffmanOptimized() {
+HuffmanOptimized::HuffmanOptimized() :ICodec(){
 	// TODO Auto-generated constructor stub
      
 }
