@@ -44,7 +44,7 @@ class ICodec {
 public:
 	virtual int enc(const vector<u8>& in_data, vector<u8>& out_data) = 0;
 	virtual int dec(const vector<u8>& in_data, vector<u8>& out_data) = 0;
-
+        ICodec() {std::cout<<"test\n";}
 	int enc_str(const string& in_str, vector<u8>& out_data);
 	int dec_str(const vector<u8>& in_data, string& out_str);
 
