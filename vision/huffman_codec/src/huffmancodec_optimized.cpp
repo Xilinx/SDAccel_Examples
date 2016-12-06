@@ -62,6 +62,7 @@ HuffmanOptimized::HuffmanOptimized(const string vendor_name,
 			   int selected_device,
 			   const string strKernelFP,
 			   const string strBitmapFP)
+			   :ICodec()
 {
 	//store path to input bitmap
 	//m_strBitmapFP = strBitmapFP;
