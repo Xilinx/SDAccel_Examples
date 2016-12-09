@@ -329,8 +329,6 @@ cl_program xcl_import_binary(xcl_world world,
 
 	free(device_name);
 
-	printf("xclbin: %s\n", xclbin_file_name);
-
 	return xcl_import_binary_file(world, xclbin_file_name);
 }
 
