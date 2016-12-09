@@ -78,14 +78,6 @@ int main(int argc, char* argv[]) {
 	parser.setDefaultKey("--kernel-file");
 	parser.parse(argc, argv);
 
-	if(parser.isValid("kernel-file"))
-		strKernelFullPath += parser.value("kernel-file");
-	else {
-		LogError("Please pass in a valid kernel file path relative to the exe file path.");
-		parser.printHelp();
-		return -1;
-	}
-
 	//read settings
 	string strInputFP = parser.value("in");
 	string strOutputFP = parser.value("out");
@@ -96,8 +88,6 @@ int main(int argc, char* argv[]) {
 	int nruns = parser.value_to_int("number-of-runs");
 	int idxSelectedDevice = parser.value_to_int("select-device");
 
-	LogInfo("Chosen kernel file is %s", strKernelFullPath.c_str());
-	LogInfo("Chosen Platform = %s, Device Name: %s, Device Index: [%d]", strPlatformName.c_str(), strDeviceName.c_str(), idxSelectedDevice);
 	RSAApp rsa(strPlatformName, strDeviceName, idxSelectedDevice, strKernelFullPath, strInputFP, strOutputFP, strKeyFP);
 
 	//Execute benchmark application

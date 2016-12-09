@@ -21,13 +21,13 @@ $(1)_$(2)_$(call sanitize_dsa,$(3))_check: $($(1)_DEPS) $($(1)_EXE) $(foreach xc
 ifneq ($(2),hw)
 	$(EMCONFIGUTIL) --xdevice $(3) --nd 1
 endif
-ifdef ($(1)_$(2)_$(call sanitize_dsa,$(3))_ARGS)
+ifdef $(1)_$(2)_$(call sanitize_dsa,$(3))_ARGS
 	$(call loader,$(2)) ./$($(1)_EXE) $($(1)_$(2)_$(3)_ARGS)
 else
-ifdef ($(1)_$(call sanitize_dsa,$(3))_ARGS)
+ifdef $(1)_$(call sanitize_dsa,$(3))_ARGS
 	$(call loader,$(2)) ./$($(1)_EXE) $($(1)_$(3)_ARGS)
 else
-ifdef ($(1)_$(2)_ARGS)
+ifdef $(1)_$(2)_ARGS
 	$(call loader,$(2)) ./$($(1)_EXE) $($(1)_$(2)_ARGS)
 else
 	$(call loader,$(2)) ./$($(1)_EXE) $($(1)_ARGS)

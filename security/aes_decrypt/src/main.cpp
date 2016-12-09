@@ -56,14 +56,6 @@ int main(int argc, char* argv[]) {
 	parser.setDefaultKey("--kernel-file");
 	parser.parse(argc, argv);
 
-
-	if(parser.isValid("kernel-file"))
-		strKernelFullPath += parser.value("kernel-file");
-	else {
-		LogError("Please pass in a valid kernel file path relative to the exe file path.");
-		return -1;
-	}
-
 	//bitmap file exist?
 	if(!is_file(parser.value("bitmap"))) {
 		LogError("Input bitmap file: %s does not exist!", parser.value("bitmap").c_str());
@@ -76,8 +68,6 @@ int main(int argc, char* argv[]) {
 	int nruns = parser.value_to_int("number-of-runs");
 	int idxSelectedDevice = parser.value_to_int("select-device");
 
-	LogInfo("Chosen kernel file is %s", strKernelFullPath.c_str());
-	LogInfo("Chosen Platform = %s, Device Name: %s, Device Index: [%d]", strPlatformName.c_str(), strDeviceName.c_str(), idxSelectedDevice);
 	AesApp aesapp(strPlatformName, strDeviceName, idxSelectedDevice, strKernelFullPath, strBitmapFP);
 
 	//Execute benchmark application
@@ -86,7 +76,6 @@ int main(int argc, char* argv[]) {
 		LogError("An error occurred when running benchmark on device 0");
 		return -1;
 	}
-
 
 	LogInfo("finished");
 

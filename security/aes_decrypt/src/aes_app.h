@@ -62,6 +62,7 @@ private:
 
 	cl_kernel m_clKernelAesDecrypt;
 	xcl_world m_world;
+	cl_program m_program;
 };	
 
 }

@@ -77,20 +77,9 @@ static bool unit_test_codec(ICodec* pHuffmanCodec) {
 int main(int argc, char* argv[]) {
 	LogInfo("Xilinx Canonical Huffman Codec Application");
 
-	{
-	//we don't need this 
-	/*	LogInfo("Unit test naive impl");
-		HuffmanNaiveImpl naive;
-		assert(unit_test_codec(&naive));*/
-
-
-	/*	LogInfo("Unit test optimized cpu-only");
-		HuffmanOptimizedCPUOnly cpuonly;
-		assert(unit_test_codec(&cpuonly));*/
-	}
-
-
-
+	LogInfo("Unit test optimized cpu-only");
+	HuffmanOptimizedCPUOnly cpuonly;
+	assert(unit_test_codec(&cpuonly));
 
 	string strKernelFullPath = sda::GetApplicationPath() + "/";
 
@@ -104,14 +93,6 @@ int main(int argc, char* argv[]) {
 	parser.addSwitch("--number-of-runs", "-n", "Number of times the kernel runs on the device to compute the average.", "1");
 	parser.setDefaultKey("--kernel-file");
 	parser.parse(argc, argv);
-
-	if(parser.isValid("kernel-file"))
-		strKernelFullPath += parser.value("kernel-file");
-	else {
-		LogError("Please pass in a valid kernel file path relative to the exe file path.");
-		parser.printHelp();
-		return -1;
-	}
 
 	//bitmap file exist?
 	if(!is_file(parser.value("bitmap"))) {
@@ -128,26 +109,22 @@ int main(int argc, char* argv[]) {
 	int nruns = parser.value_to_int("number-of-runs");
 	int idxSelectedDevice = parser.value_to_int("select-device");
   
-  	LogInfo("Chosen bitmap file is %s",strBitmapFP.c_str());
-	LogInfo("Chosen kernel file is %s", strKernelFullPath.c_str());
-	LogInfo("Chosen Platform = %s, Device Name: %s, Device Index: [%d]", strPlatformName.c_str(), strDeviceName.c_str(), idxSelectedDevice);
+	LogInfo("Chosen bitmap file is %s",strBitmapFP.c_str());
 	HuffmanOptimized huffman(strPlatformName, strDeviceName, idxSelectedDevice, strKernelFullPath, strBitmapFP);
 
-	//LogInfo("Perform some unit tests before the actual image decode, encode");
-	//unit_test_codec(&huffman);
+	LogInfo("Perform some unit tests before the actual image decode, encode");
+	unit_test_codec(&huffman);
 
 	//Execute benchmark application
-	/*LogInfo("Run HUFFMAN on FPGA with an image dataset. nruns = [%d]", nruns);
+	LogInfo("Run huffman on FPGA with an image dataset. nruns = [%d]", nruns);
 	bool res = huffman.run(0, nruns);
 	if(!res) {
 		LogError("An error occurred when running benchmark on device 0");
 		return -1;
-	}*/
-
+	}
 
 	LogInfo("finished");
 
 	return 0;
 }
-
 

@@ -78,23 +78,44 @@ static int load_file_to_memory(const char *filename, char **result) {
 	return size;
 }
 
+char* xcl_create_and_set(const char* str) {
+	size_t len = strlen(str);
+	char *ret = (char*) malloc(sizeof(char)*len);
+	if (ret == NULL) {
+		printf("ERROR: Out of Memory\n");
+		exit(EXIT_FAILURE);
+	}
+	strcpy(ret, str);
+
+	return ret;
+}
+
 xcl_world xcl_world_single() {
 	int err;
 	xcl_world world;
 	cl_uint num_platforms;
 
 	char *xcl_mode = getenv("XCL_EMULATION_MODE");
+	char *xcl_target = getenv("XCL_TARGET");
 
-	int mode_len;
 	if(xcl_mode == NULL) {
-		mode_len = strlen("hw");
-		world.mode = (char*) malloc(sizeof(char)*mode_len);
-		strcpy(world.mode, "hw");
+		world.mode = xcl_create_and_set("hw");
 	} else {
-		mode_len = strlen(xcl_mode);
-		world.mode = (char*) malloc(sizeof(char)*mode_len);
-	
-		strcpy(world.mode, xcl_mode);
+		/* if xcl_mode is set then check if it's equal to true*/
+		if(strcmp(xcl_mode,"true") == 0) {
+			/* if it's true, then check if xcl_target is set */
+			if(xcl_target == NULL) {
+				/* default if emulation but not specified is software emulation */
+				world.mode = xcl_create_and_set("sw_emu");
+			} else {
+				/* otherwise, it's what ever is specified in XCL_TARGET */
+				world.mode = xcl_create_and_set(xcl_target);
+			}
+		} else {
+			/* if it's not equal to true then it should be whatever
+			 * XCL_EMULATION_MODE is set to */
+			world.mode = xcl_create_and_set(xcl_mode);
+		}
 
 		err = setenv("XCL_EMULATION_MODE", "true", 1);
 		if(err != 0) {
@@ -222,7 +243,7 @@ cl_program xcl_import_binary_file(xcl_world world,
 	int err;
 
 	if(access(xclbin_file_name, R_OK) != 0) {
-		printf("ERROR: %s kernel not available please build\n", xclbin_file_name);
+		printf("ERROR: %s xclbin not available please build\n", xclbin_file_name);
 		exit(EXIT_FAILURE);
 	}
 
@@ -260,6 +281,19 @@ cl_program xcl_import_binary_file(xcl_world world,
 cl_program xcl_import_binary(xcl_world world,
                             const char *xclbin_name
 ) {
+	char *xcl_bindir = getenv("XCL_BINDIR");
+
+	size_t bindir_len;
+	if(xcl_bindir == NULL) {
+		bindir_len = strlen("xclbin");
+		world.bindir = (char*) malloc(sizeof(char)*bindir_len);
+		strcpy(world.bindir, "xclbin");
+	} else {
+		bindir_len = strlen(xcl_bindir);
+		world.bindir = (char*) malloc(sizeof(char)*bindir_len);
+		strcpy(world.bindir, xcl_bindir);
+	}
+
 	size_t xclbin_len = strlen(xclbin_name);
 	size_t mode_len = strlen(world.mode);
 
@@ -280,20 +314,22 @@ cl_program xcl_import_binary(xcl_world world,
 
 	device_name[device_len] = '\0';
 
-	size_t xclbin_file_name_len = xclbin_len + mode_len + device_len + 17;
-	char *xclbin_file_name = (char*) malloc(sizeof(char)*(xclbin_len+mode_len+device_len+18));
+	size_t xclbin_file_name_len = bindir_len + xclbin_len + mode_len + device_len + 11;
+	char *xclbin_file_name = (char*) malloc(sizeof(char)*(xclbin_file_name_len+1));
 	if(xclbin_file_name == NULL) {
 		printf("Error: Out of Memory!\n");
 		exit(EXIT_FAILURE);
 	}
 
-	size_t letters = sprintf(xclbin_file_name, "xclbin/%s.%s.%s.xclbin", xclbin_name, world.mode, device_name);
+	size_t letters = sprintf(xclbin_file_name, "%s/%s.%s.%s.xclbin", world.bindir, xclbin_name, world.mode, device_name);
 	if(letters != xclbin_file_name_len-1) {
 		printf("Error: failed to create xclbin file name\n");
 		exit(EXIT_FAILURE);
 	}
 
 	free(device_name);
+
+	printf("xclbin: %s\n", xclbin_file_name);
 
 	return xcl_import_binary_file(world, xclbin_file_name);
 }
@@ -377,7 +413,7 @@ void xcl_memcpy_to_device(xcl_world world, cl_mem dest, void* src,
 	int err = clEnqueueWriteBuffer(world.command_queue, dest, CL_TRUE, 0, size,
 	                               src, 0, NULL, NULL);
 	if (err != CL_SUCCESS) {
-		printf("Error: Failed to write to source array a!\n");
+		printf("Error: Failed to write to source array! %d\n", err);
 		exit(EXIT_FAILURE);
 	}
 }

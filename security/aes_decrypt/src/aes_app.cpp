@@ -79,17 +79,9 @@ AesApp::AesApp(const string& vendor_name,
 			   const string& strKernelFP,
 			   const string& strBitmapFP) {
 
-	//list available platforms
-	xcl_list_platforms();
-
-	//list available devices
-	if(xcl_list_devices(vendor_name.c_str()) > 0) {
-
-		//get device by name
-		assert(xcl_world_vendor_devtype(vendor_name.c_str(), CL_DEVICE_TYPE_ACCELERATOR, m_world));
-	}
-
-	m_clKernelAesDecrypt = xcl_import_binary(m_world, strKernelFP.c_str(), "krnl_aes_decrypt");
+	m_world = xcl_world_single();
+	m_program = xcl_import_binary(m_world, "krnl_aes");
+	m_clKernelAesDecrypt = xcl_get_kernel(m_program, "krnl_aes_decrypt");
 
 	//store path to bitmap
 	m_strBitmapFP = strBitmapFP;

@@ -192,18 +192,11 @@ SmithWatermanApp::SmithWatermanApp(const string& vendor_name,
     m_pMatchInfo = pm;
     m_writeMatchArray = writeMatchArray;
 
-	//list available platforms
-	xcl_list_platforms();
+    m_world = xcl_world_single();
 
-	//list available devices
-	if(xcl_list_devices(vendor_name.c_str()) > 0) {
-
-		//get device by name
-		assert(xcl_world_vendor_devtype(vendor_name.c_str(), CL_DEVICE_TYPE_ACCELERATOR, m_world));
-	}
-
-	//kernels
-    m_clKernelSmithWaterman = xcl_import_binary(m_world, strKernelFP.c_str(), "opencl_sw_maxscore");
+    m_program = xcl_import_binary(m_world, "krnl_smithwaterman");
+   //kernels
+    m_clKernelSmithWaterman = xcl_get_kernel(m_program, "opencl_sw_maxscore");
 
 }
 

@@ -98,6 +98,7 @@ private:
         string m_strOutputFP;
         string m_strKeyFP;
 	xcl_world m_world;
+	cl_program m_program;
 	cl_kernel m_clKernelRSA;
 };
 

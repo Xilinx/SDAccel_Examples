@@ -35,6 +35,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 typedef struct {
 	char *mode;
+	char *bindir;
 	char *device_name;
 	cl_context context;
 	cl_platform_id platform_id;
@@ -126,6 +127,20 @@ cl_program xcl_import_source(xcl_world world, const char *krnl_file);
  *   An opencl kernel object that was created from the krnl_name
  */
 cl_kernel xcl_get_kernel(cl_program program, const char *krnl_name);
+
+/* xcl_create_kernel
+ * 
+ * Description:
+ *  Create kernel in program and return kernel object
+ *
+ * Inputs:
+ *   world - program in which kernel is created
+ *   krnl_name - name of kernel.
+ *
+ * Returns:
+ *   An opencl kernel object that was created from krnl_name file.
+ */
+cl_kernel xcl_create_kernel(cl_program program, const char *krnl_name);
 
 
 /* xcl_set_kernel_arg

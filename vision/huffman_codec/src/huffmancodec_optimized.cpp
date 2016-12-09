@@ -54,32 +54,27 @@ using namespace sda::cl;
 
 HuffmanOptimized::HuffmanOptimized() {
 	// TODO Auto-generated constructor stub
-     
+
 }
 
-HuffmanOptimized::HuffmanOptimized(const string& vendor_name,
-			   const string& device_name,
+HuffmanOptimized::HuffmanOptimized(string& vendor_name,
+			   string& device_name,
 			   int selected_device,
-			   const string& strKernelFP,
-			   const string& strBitmapFP)
+			   string& strKernelFP,
+			   string& strBitmapFP)
 {
 	//store path to input bitmap
-	m_strBitmapFP = strBitmapFP;
+	//m_strBitmapFP = strBitmapFP;
 
 
-	//list available platforms
-	xcl_list_platforms();
+	m_world = xcl_world_single();
 
-	//list available devices
-	if(xcl_list_devices(vendor_name.c_str()) > 0) {
 
-		//get device by name
-		assert(xcl_world_vendor_devtype(vendor_name.c_str(), CL_DEVICE_TYPE_ACCELERATOR, m_world));
-	}
+	m_program = xcl_import_binary(m_world, "krnl_huffman");
 
 	//kernels
-    m_clKernelHuffmanEncoder  = xcl_import_binary(m_world, strKernelFP.c_str(), "encode");
-    m_clKernelHuffmanDecoder  = xcl_import_binary(m_world, strKernelFP.c_str(), "decode");
+	m_clKernelHuffmanEncoder  = xcl_get_kernel(m_program, "encode");
+	m_clKernelHuffmanDecoder  = xcl_get_kernel(m_program, "decode");
 
 }
 

@@ -74,26 +74,22 @@ RSAApp::RSAApp() {
 }
 
 RSAApp::RSAApp(const string& vendor_name,
-		    const string& device_name,
-		    int selected_device,
-		    const string& strKernelFP,
-	            const string& strInputFP,
-                    const string& strOutputFP,
-                    const string& strKeyFP)
+               const string& device_name,
+               int selected_device,
+               const string& strKernelFP,
+               const string& strInputFP,
+               const string& strOutputFP,
+               const string& strKeyFP)
 {
 	//store path to input bitmap
-     m_strInputFP = strInputFP;
-     m_strOutputFP = strOutputFP;
-     m_strKeyFP = strKeyFP;
-     xcl_list_platforms();
-     if(xcl_list_devices(vendor_name.c_str()) > 0) {
-               //get device by name
-               assert(xcl_world_vendor_devtype(vendor_name.c_str(),CL_DEVICE_TYPE_ACCELERATOR,m_world));
- 	}
+	m_strInputFP = strInputFP;
+	m_strOutputFP = strOutputFP;
+	m_strKeyFP = strKeyFP;
 
 	//kernels
-    m_clKernelRSA  = xcl_import_binary(m_world, strKernelFP.c_str(), "rsa");
-
+	m_world = xcl_world_single();
+	m_program = xcl_import_binary(m_world, "krnl_rsa");
+	m_clKernelRSA  = xcl_get_kernel(m_program, "rsa");
 }
 
 RSAApp::~RSAApp() {

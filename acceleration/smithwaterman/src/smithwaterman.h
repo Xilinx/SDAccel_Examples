@@ -83,7 +83,6 @@ namespace cl {
         bool releaseMemObject(cl_mem& obj);
 
     private:
-		
         string m_strSampleFP;
         bool m_useDoubleBuffered;
         int m_numSamples;
@@ -91,8 +90,9 @@ namespace cl {
         int m_blockSz;
         bool m_verifyMode; //true == verify, false is not verify
         bool m_writeMatchArray; //true == writeMatchArray
+        cl_program m_program;
         cl_kernel m_clKernelSmithWaterman;
-		xcl_world m_world;
+        xcl_world m_world;
 
         MatchArray* m_pMatchInfo;
     };

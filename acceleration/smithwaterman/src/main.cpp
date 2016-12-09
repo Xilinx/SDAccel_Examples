@@ -141,16 +141,12 @@ int main(int argc, char* argv[])
     //SWAN Execution 
     if (strPlatformName == string("intel")) {
         for (int r = 0; r < nRuns; r++) {
-	    //SWAN-CPU Intel Intrinsic flow	
+            //SWAN-CPU Intel Intrinsic flow	
             intelImpl(nBlocks, blkSz, nThreads, writeMatchArray, pMatchInfo.get());
         }
-    }
-    else {
-        if (parser.isValid("kernel-file"))
+    } else {
+        if (parser.isValid("kernel-file")) {
             strKernelFullPath += parser.value("kernel-file");
-        else {
-            LogError("Please pass in a valid kernel file path relative to the exe file path.");
-            return -1;
         }
         if (verifyMode) {
             if (!is_file(parser.value("sample-file"))) {
@@ -158,8 +154,7 @@ int main(int argc, char* argv[])
                 return -1;
             }
         }
-        LogInfo("Chosen kernel file is %s", strKernelFullPath.c_str());
-        LogInfo("Chosen Platform = %s, Device Name: %s, Device Index: [%d]", strPlatformName.c_str(), strDeviceName.c_str(), idxSelectedDevice);
+
         SmithWatermanApp smithwaterman(strPlatformName, strDeviceName, idxSelectedDevice,
             strKernelFullPath, strSampleFP, nBlocks, blkSz,
             doubleBuffered == 0 ? false : true,
@@ -167,7 +162,7 @@ int main(int argc, char* argv[])
             writeMatchArray == 0 ? false : true,
             pMatchInfo.get());
 
-        //SWAN-HLS Xilinx SDAccel flow
+        // SWAN-HLS Xilinx SDAccel flow
         bool res = smithwaterman.run(0, nRuns);
         if (!res) {
             LogError("An error occurred when running benchmark on device 0");
