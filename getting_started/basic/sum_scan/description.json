@@ -1,7 +1,7 @@
 {
     "example" : "Parallel Prefix Sum",
     "overview" : "Example of parallel prefix sum",
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
+    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
     "em_cmd" : "./sum_scan",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py ./sum_scan",
     "contributors" : [
@@ -15,6 +15,11 @@
             "date" : "SEP2016",
             "version": "1.0",
             "description": "Initial Release"
+        },
+        {
+            "date": "DEC2016",
+            "version": "2.0",
+            "description": "Update for SDAccel 2016.3"
         }
     ]
 

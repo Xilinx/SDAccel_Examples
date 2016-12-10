@@ -1,7 +1,7 @@
 {
     "example" : "host_global",
     "overview" : "Host to global memory bandwidth test",
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
+    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
     "em_cmd" : "./host_global",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py ./host_global",
     "contributors" : [
@@ -20,6 +20,11 @@
             "date" : "JUL2016",
             "version": "2.0",
             "description": "Conversion to Makefile based compilation"
+        },
+        {
+            "date" :"DEC2016",
+            "version": "3.0",
+            "description": "Update for SDAccel 2016.3"
         }
     ]
 }

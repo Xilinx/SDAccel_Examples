@@ -1,7 +1,7 @@
 {
     "example" : "Vector Addition",
     "overview" : "Simple example of vector addition.",
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
+    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
     "em_cmd" : "./vadd",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py ./vadd",
     "contributors" : [
@@ -20,6 +20,11 @@
             "date" : "JUL2016",
             "version": "2.0",
             "description": "Conversion to Makefile based compilation"
+        },
+        {
+            "date":"DEC2016",
+            "version":"3.0",
+            "description": "Update for SDAccel 2016.3"
         }
     ]
 
