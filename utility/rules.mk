@@ -66,7 +66,10 @@ $(foreach xclbin,$(XCLBINS),$(foreach target,$(TARGETS),$(foreach device,$(DEVIC
 $(info $(XCLBIN_GOALS))
 
 .PHONY: all
-all: $(EXE_GOALS) $(XCLBIN_GOALS) README.md
+all: $(EXE_GOALS) $(XCLBIN_GOALS)
+
+.PHONY: docs
+docs: README.md
 
 .PHONY: clean
 clean:
@@ -77,4 +80,3 @@ README.md: description.json
 	$(COMMON_REPO)/utility/readme_gen/readme_gen.py description.json
 
 include $(COMMON_REPO)/utility/check.mk
-
