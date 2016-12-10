@@ -3,7 +3,7 @@
     "overview": "This Example to demostrate OpenCL xcl_dependence attribute. Using xcl_dependence user can provide additional dependency details to compiler which allow compiler to perform unrolling/pipelining to get better performance.",
     "key_concepts": [ "Dependence"],
     "keywords": ["xcl_dependence", "inter dependency"],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
+    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py ./host",
     "contributors" : [
