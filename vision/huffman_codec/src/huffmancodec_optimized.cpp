@@ -273,9 +273,20 @@ bool HuffmanOptimized::invoke_kernel(cl_kernel krnl,
 	releaseMemObject(mem_output);
 
 	vec_output.resize(sz_output);
+	std::fill(vec_output.begin(), vec_output.end(), 0);
+
 	mem_output = clCreateBuffer(m_world.context, CL_MEM_READ_WRITE, sz_output, NULL, &err);
 	if (err != CL_SUCCESS) {
 		LogError("Failed to allocate worst case OpenCL output buffer of size %lu", sz_output);
+		return false;
+	}
+
+	LogInfo("Write output data to device buffer");
+	//copy input dataset to OpenCL buffer
+	err = clEnqueueWriteBuffer(m_world.command_queue, mem_output, CL_TRUE, 0,
+							   sz_output, vec_output.data(), 0, NULL, NULL);
+	if (err != CL_SUCCESS) {
+		LogError("Failed to clear output dataset in OpenCL buffer");
 		return false;
 	}
 

@@ -39,8 +39,58 @@ using namespace sda;
 using namespace sda::cl;
 using namespace sda::utils;
 
+static void print_huffman_encoded_data(vector<u8> data) {
 
-static bool unit_test_codec(ICodec* pHuffmanCodec) {
+	u32 msg_len = (data[0]) |
+	              (data[1] << 4) |
+	              (data[2] << 8) |
+	              (data[3] << 16);
+
+	size_t s = data[4];
+
+	std::cout << std::dec << "MSG_LEN: " << msg_len << std::endl;
+	std::cout << std::dec << "S: " << s << std::endl;
+
+	size_t bitcode_bits = 0;
+
+
+	for(size_t i = 0; i < s; i++) {
+		char sym = data[5+2*i];
+		size_t len = data[5+2*i+1];
+		bitcode_bits += len;
+
+		std::cout << "\t" << sym << ": " << len << std::endl;
+	}
+
+	size_t bitcode_bytes = (bitcode_bits + 7) / 8;
+
+	std::cout << "BITCODE: ";
+	for(size_t i = 0; i < bitcode_bytes; i++) {
+		std::cout << std::hex << std::setfill('0') << std::setw(2) << (unsigned) data[5+2*s+i];
+	}
+	std::cout << std::endl;
+
+	size_t o = 5+2*s+bitcode_bytes;
+	u32 payload_size = (data[o+0]) |
+	                   (data[o+1] << 4) |
+	                   (data[o+2] << 8) |
+	                   (data[o+3] << 16);
+	size_t payload_rem = data[o+4];
+
+	std::cout << std::dec << "Payload Size: " << payload_size-1 << " bytes + " << payload_rem << " bits" << std::endl;
+
+	std::cout << "PAYLOAD: ";
+	for(size_t i = 0; i < payload_size-1; i++) {
+		std::cout << std::hex << std::setfill('0') << std::setw(2) << (unsigned) data[o+4+i];
+	}
+	u8 mask = 0xFF >> (8 - payload_rem);
+	u8 last = data[o+4+payload_size-1] & mask;
+
+	std::cout << std::hex << (unsigned) last << " (" << (unsigned) mask << ")" << std::endl;
+
+}
+
+static bool unit_test_codec(ICodec* pHuffmanCodec, ICodec* pHuffmanCodecGold) {
 	if(pHuffmanCodec == NULL)
 		return false;
 
@@ -52,19 +102,26 @@ static bool unit_test_codec(ICodec* pHuffmanCodec) {
 	u32 total = sizeof(msgs) / sizeof(msgs[0]);
 	u32 ctPassed = 0;
 	for(u32 i = 0; i < total; i++) {
+		vector<u8> gold_data;
 		vector<u8> encoded_data;
 		string out_str;
+		string gold_str;
 
+		int gold = pHuffmanCodecGold->enc_str(msgs[i], gold_data);
 		int res = pHuffmanCodec->enc_str(msgs[i], encoded_data);
-		res &= pHuffmanCodec->dec_str(encoded_data, out_str);
+		res &= pHuffmanCodecGold->dec_str(encoded_data, out_str);
+
+		std::cout << "Encoded Data" << std::endl;
+		print_huffman_encoded_data(encoded_data);
+
+		std::cout << "Golden Data" << std::endl;
+		print_huffman_encoded_data(gold_data);
 
 		if(msgs[i] == out_str) {
-			LogInfo("Test [%u of %u] PASS", i+1, total);
+			LogInfo("Test [%u of %u] PASS (%s)", i+1, total, out_str.c_str());
 			ctPassed++;
-		}
-		else
-		{
-			LogError("Test [%u of %u] Failed! (input: %s, output: %s)", msgs[i].c_str(), out_str.c_str());
+		} else {
+			LogError("Test [%u of %u] Failed! (input: %s, output: %s)", i+1, total, msgs[i].c_str(), out_str.c_str());
 		}
 	}
 
@@ -79,7 +136,6 @@ int main(int argc, char* argv[]) {
 
 	LogInfo("Unit test optimized cpu-only");
 	HuffmanOptimizedCPUOnly cpuonly;
-	assert(unit_test_codec(&cpuonly));
 
 	string strKernelFullPath = sda::GetApplicationPath() + "/";
 
@@ -113,7 +169,7 @@ int main(int argc, char* argv[]) {
 	HuffmanOptimized huffman(strPlatformName, strDeviceName, idxSelectedDevice, strKernelFullPath, strBitmapFP);
 
 	LogInfo("Perform some unit tests before the actual image decode, encode");
-	unit_test_codec(&huffman);
+	unit_test_codec(&huffman,&cpuonly);
 
 	//Execute benchmark application
 	LogInfo("Run huffman on FPGA with an image dataset. nruns = [%d]", nruns);

@@ -658,7 +658,7 @@ void decode(__global uchar* in_data, uint size_in_data, __global uchar* out_data
 	read_ht_node(&ht[current * ENTRY_STRIDE], &node);
 
 	while(total_bits_read < total_payload_bits) {
-		u8 bit = 0;
+		u32 bit = 0;
 		int nbytes = bit_reader(ptr, &total_bits_read, 1, &bit);
 		ptr += nbytes;
 
