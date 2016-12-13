@@ -30,7 +30,7 @@ where examples is the name of the directory where the repository will be stored 
 Board | Device Name | Software Version
 ------|-------------|---------
 Alpha Data ADM-PCIE-7V3|xilinx:adm-pcie-7v3:1ddr:3.2|SDAccel 2016.3
-Alpha Data ADM-PCIE-KU3|xilinx:adm-pcie-ku3:2ddr:3.2|SDAccel 2016.3
+Alpha Data ADM-PCIE-KU3|xilinx:adm-pcie-ku3:2ddr-xpr:3.2|SDAccel 2016.3
 
 
 Board targeted by default = ***Alpha Data ADM-PCIE-KU3***
@@ -95,7 +95,7 @@ To manually configure the environment to run the application, set the following
 ```
 export LD_LIBRARY_PATH=$XILINX_SDX/runtime/lib/x86_64/:$LD_LIBRARY_PATH
 export XCL_EMULATION_MODE=<sw_emu|hw_emu>
-emconfigutil --xdevice 'xilinx:adm-pcie-ku3:2ddr:3.2' --nd 1
+emconfigutil --xdevice 'xilinx:adm-pcie-ku3:2ddr-xpr:3.2' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
@@ -158,6 +158,9 @@ For more information about SDAccel check the [SDAccel User Guides][]
 
 For questions and to get help on this project or your own projects, visit the [SDAccel Forums][].
 
+To execute this example using the SDAccel GUI, follow the setup instructions in [SDAccel GUI README][]
+
+
 ## 8. LICENSE AND CONTRIBUTING TO THE REPOSITORY
 The source for this project is licensed under the [3-Clause BSD License][]
 
@@ -181,3 +184,4 @@ DEC2016|3.0|Update for SDAccel 2016.3
 [Walkthrough Video]: http://bcove.me/6pp0o482
 [Nimbix Application Submission README]:../../../utility/nimbix/README.md
 [Repository Contribution README]:../../../CONTRIBUTING.md
+[SDaccel GUI README]:../../../GUIREADME.md
