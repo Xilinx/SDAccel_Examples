@@ -18,15 +18,9 @@ This README file contains the following sections:
 ## 1. OVERVIEW
 This is simple example of vector addition to demonstrate Loops Dataflow functionality of HLS. HLS Dataflow allows user to schedule multiple sequential loops concurrently to achieve higher throughput.
 
-### KEY CONCEPTS
+***KEY CONCEPTS:*** Dataflow, Task Level Parallism, Loop Dataflow
 
-- Dataflow
-- Task Level Parallism
-- Loop Dataflow
-
-### KEYWORDS
-- dataflow
-- hls::stream<>
+***KEYWORDS:*** dataflow, hls::stream<>
 
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
@@ -40,7 +34,7 @@ where examples is the name of the directory where the repository will be stored 
 Board | Device Name | Software Version
 ------|-------------|---------
 Alpha Data ADM-PCIE-7V3|xilinx:adm-pcie-7v3:1ddr:3.2|SDAccel 2016.3
-Alpha Data ADM-PCIE-KU3|xilinx:adm-pcie-ku3:2ddr:3.2|SDAccel 2016.3
+Alpha Data ADM-PCIE-KU3|xilinx:adm-pcie-ku3:2ddr-xpr:3.2|SDAccel 2016.3
 Xilinx KU115|xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2|SDAccel 2016.3
 
 
@@ -105,7 +99,7 @@ To manually configure the environment to run the application, set the following
 ```
 export LD_LIBRARY_PATH=$XILINX_SDX/runtime/lib/x86_64/:$LD_LIBRARY_PATH
 export XCL_EMULATION_MODE=<sw_emu|hw_emu>
-emconfigutil --xdevice 'xilinx:adm-pcie-ku3:2ddr:3.2' --nd 1
+emconfigutil --xdevice 'xilinx:adm-pcie-ku3:2ddr-xpr:3.2' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
@@ -168,6 +162,9 @@ For more information about SDAccel check the [SDAccel User Guides][]
 
 For questions and to get help on this project or your own projects, visit the [SDAccel Forums][].
 
+To execute this example using the SDAccel GUI, follow the setup instructions in [SDAccel GUI README][]
+
+
 ## 8. LICENSE AND CONTRIBUTING TO THE REPOSITORY
 The source for this project is licensed under the [3-Clause BSD License][]
 
@@ -189,3 +186,4 @@ DEC2016|1.0|Initial Xilinx Release
 [Walkthrough Video]: http://bcove.me/6pp0o482
 [Nimbix Application Submission README]:../../../utility/nimbix/README.md
 [Repository Contribution README]:../../../CONTRIBUTING.md
+[SDaccel GUI README]:../../../GUIREADME.md
