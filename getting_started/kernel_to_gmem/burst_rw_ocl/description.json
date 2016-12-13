@@ -3,7 +3,7 @@
     "overview": "This is simple example of using AXI4-master interface for burst read and write",
     "key_concepts": [ "burst access"],
     "keywords": ["burst"],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
+    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py ./host",
     "contributors" : [

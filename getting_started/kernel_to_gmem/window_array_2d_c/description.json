@@ -4,7 +4,7 @@
     "limitation": "Currently we ONLY support array size smaller than 512*512 due to some issue in the tool",
     "key_concepts": [ "window of 2D data array access"],
     "keywords": ["burst", "window"],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
+    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py ./host",
     "contributors" : [
