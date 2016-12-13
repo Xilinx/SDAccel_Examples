@@ -4,9 +4,9 @@ import json
 import os
 import subprocess
 
-DSA = 'xilinx:adm-pcie-ku3:2ddr:3.2'
+DSA = 'xilinx:adm-pcie-ku3:2ddr-xpr:3.2'
 VERSION = 'SDAccel 2016.3'
-DEVICES = {'Alpha Data ADM-PCIE-7V3':'xilinx:adm-pcie-7v3:1ddr:3.2', 'Alpha Data ADM-PCIE-KU3':'xilinx:adm-pcie-ku3:2ddr:3.2', 'Xilinx KU115':'xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2'}
+DEVICES = {'Alpha Data ADM-PCIE-7V3':'xilinx:adm-pcie-7v3:1ddr:3.2', 'Alpha Data ADM-PCIE-KU3':'xilinx:adm-pcie-ku3:2ddr-xpr:3.2', 'Xilinx KU115':'xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2'}
 
 def header(target,data):
     target.write(data["example"])
@@ -59,20 +59,23 @@ def overview(target,data):
             target.write(result["metric"])
             target.write("\n")
     if 'key_concepts' in data:
-        target.write("### KEY CONCEPTS\n")
-        target.write("\n")
+        target.write("***KEY CONCEPTS:*** ")
+        elem_count = len(data["key_concepts"])
         for result in data["key_concepts"]:
-            target.write("- ")
+            elem_count -= 1
             target.write(result)
-            target.write("\n")
-        target.write("\n")
+            if elem_count != 0:
+                target.write(", ")
+        target.write("\n\n")
     if 'keywords' in data:
-        target.write("### KEYWORDS\n")
+        target.write("***KEYWORDS:*** ")
+        word_count = len(data["keywords"])
         for result in data["keywords"]:
-            target.write("- ")
+            word_count -= 1
             target.write(result)
-            target.write("\n")
-        target.write("\n")
+            if word_count != 0:
+                target.write(", ")
+        target.write("\n\n")
     return
 
 def requirements(target,data):
@@ -220,7 +223,8 @@ def power(target):
 def support(target):
     target.write("\r\n## 7. SUPPORT\n")
     target.write("For more information about SDAccel check the [SDAccel User Guides][]\n\n")
-    target.write("For questions and to get help on this project or your own projects, visit the [SDAccel Forums][].\n")
+    target.write("For questions and to get help on this project or your own projects, visit the [SDAccel Forums][].\n\n")
+    target.write("To execute this example using the SDAccel GUI, follow the setup instructions in [SDAccel GUI README][]\n\n")
     return
 
 def license(target):
@@ -289,6 +293,7 @@ def footer(target):
     licPath = s + 'LICENSE.txt'
     contribPath = s + 'CONTRIBUTING.md'
     nimbixPath = s + 'utility/nimbix/README.md'
+    guiPath = s + 'GUIREADME.md'
     target.write("[3-Clause BSD License]:")
     target.write(licPath)
     target.write("\n")
@@ -301,6 +306,9 @@ def footer(target):
     target.write("\n")
     target.write("[Repository Contribution README]:")
     target.write(contribPath)
+    target.write("\n")
+    target.write("[SDaccel GUI README]:")
+    target.write(guiPath)
     target.write("\n")
     return
 
