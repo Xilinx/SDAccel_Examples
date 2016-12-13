@@ -1,7 +1,7 @@
 {
     "example" : "AES Decryption",
     "overview" : "Implementation of an AES-128 ECB Encrypt in software, followed by decryption written in OpenCL and targeting execution on an SDAccel supported FPGA acceleration card.",
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
+    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3", "Xilinx KU115"],
     "em_cmd" : "./aes -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:3.1' -k ./xclbin/krnl_aes.<emulation flow>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin -b  data/input.bmp",
     "xcl": false,
     "hw_cmd" : "../../utility/nimbix/nimbix-run.py ./aes -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:3.1' -k ./xclbin/krnl_aes.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin -b data/input.bmp",
@@ -21,6 +21,11 @@
             "date" : "JUL2016",
             "version": "2.0",
             "description": "Conversion to Makefile based compilation"
+        },
+        {
+            "date": "DEC2016",
+            "version": "3.0",
+            "description": "Update for SDAccel 2016.3"
         }
     ]
 
