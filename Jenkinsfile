@@ -83,6 +83,9 @@ module add opencv/vivado_hls
 module add proxy
 
 cd ${dir}
+
+rsync -rL \$XILINX_SDX/Vivado_HLS/lnx64/tools/opencv/ lib/
+
 make TARGETS=${target} DEVICES=${devices} check
 
 """
@@ -122,6 +125,7 @@ node('rhel6 && xsjrdevl') {
 	}
 
 	stage('Build') {
+
 		workdir = pwd()
 
 		def swEmuSteps = [:]
@@ -132,6 +136,16 @@ node('rhel6 && xsjrdevl') {
 		}
 
 		parallel swEmuSteps
+
+		def hwSteps = [:]
+
+		for(int i = 0; i < examples.size(); i++) {
+			name = "${examples[i]}-hw"
+			hwSteps[name] = buildExample('hw', examples[i], devices, workdir)
+		}
+
+		parallel hwSteps
+
 	}
 
 	step([$class: 'GitHubCommitStatusSetter'])
