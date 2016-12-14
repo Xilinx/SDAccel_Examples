@@ -65,7 +65,7 @@ int main(int argc, char** argv)
 
    cl_mem d_a = xcl_malloc(world, CL_MEM_READ_ONLY, sizeof(int) * LENGTH);
    cl_mem d_b = xcl_malloc(world, CL_MEM_READ_ONLY, sizeof(int) * LENGTH);
-   cl_mem d_mul_c = xcl_malloc(world, CL_MEM_WRITE_ONLY, sizeof(int) * LENGTH);
+   cl_mem d_mul_c = xcl_malloc(world, CL_MEM_READ_WRITE, sizeof(int) * LENGTH);
 
    xcl_memcpy_to_device(world, d_a, h_a, sizeof(int) * LENGTH);
    xcl_memcpy_to_device(world, d_b, h_b, sizeof(int) * LENGTH);
@@ -107,6 +107,8 @@ int main(int argc, char** argv)
    cl_kernel krnl_vadd = xcl_get_kernel(program_vadd, "krnl_vadd");
 
    cl_mem d_add_c = xcl_malloc(world, CL_MEM_WRITE_ONLY, sizeof(int) * LENGTH);
+
+   xcl_memcpy_to_device(world, d_mul_c, h_c, sizeof(int) * LENGTH);
 
    // Set the arguments to our compute kernel
    //
