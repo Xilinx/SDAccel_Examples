@@ -22,9 +22,9 @@ XCLBINS=krnl_sha1
 # check
 check_EXE=sha1
 check_XCLBINS=krnl_sha1
-check_sw_emu_ARGS=-t 20 -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:3.2' -k ./xclbin/krnl_sha1.sw_emu.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin
-check_hw_emu_ARGS=-t 20 -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:3.2' -k ./xclbin/krnl_sha1.hw_emu.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin
-check_hw_ARGS=-t 20 -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:3.2' -k ./xclbin/krnl_sha1.hw.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin
+check_sw_emu_ARGS=-t 20 -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr-xpr:3.2' -k ./xclbin/krnl_sha1.sw_emu.xilinx_adm-pcie-ku3_2ddr-xpr_3_2.xclbin
+check_hw_emu_ARGS=-t 20 -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr-xpr:3.2' -k ./xclbin/krnl_sha1.hw_emu.xilinx_adm-pcie-ku3_2ddr-xpr_3_2.xclbin
+check_hw_ARGS=-t 20 -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr-xpr:3.2' -k ./xclbin/krnl_sha1.hw.xilinx_adm-pcie-ku3_2ddr-xpr_3_2.xclbin
 
 CHECKS=check
 

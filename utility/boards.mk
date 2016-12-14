@@ -18,7 +18,7 @@ ifeq ($(ARCH),POWER)
 DEVICES:= xilinx:adm-pcie-7v3:1ddr-ppc64le:2.1
 CXX:=$(XILINX_SDACCEL)/gnu/ppc64le/4.9.3/lnx64/bin/powerpc64le-linux-gnu-g++
 else
-DEVICES:= xilinx:adm-pcie-ku3:2ddr:3.2
+DEVICES:= xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2
 CXX:=$(XILINX_SDACCEL)/Vivado_HLS/lnx64/tools/gcc/bin/g++
 endif
 

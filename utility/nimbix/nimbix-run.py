@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import sys
+import optparse
 
 import os
 import pwd
@@ -234,16 +235,16 @@ bye
 
 	return lftp(cmds)
 
-def submit_testcase(username, apikey, testid, exe, args):
+def submit_testcase(username, apikey, testid, exe, args, type, nae, tt, dp):
 	_exe = "automated_test/%s/%s" % (testid, exe)
 	_args = ' '.join(args)
 
 	job_desc = {
-		"app": "spenserg-sdx",
+		"app": nae,
 		"checkedout": False,
 		"machine": {
 			"nodes": "1",
-			"type": "nx1"
+			"type": type
 		},
 		"application": {
 			"geometry": "800x600",
@@ -252,8 +253,8 @@ def submit_testcase(username, apikey, testid, exe, args):
 			"parameters": {
 				"executable": _exe,
 				"args": _args,
-				"-dp": False,
-				"-tt": False
+				"-dp": dp,
+				"-tt": tt
 			}
 		},
 		"vault": {
@@ -269,22 +270,47 @@ def submit_testcase(username, apikey, testid, exe, args):
 
 	return job
 
+description = "Application for Running Jobs on Nimbix"
+parser = optparse.OptionParser(description=description)
+parser.add_option("--nae", help="Set Nimbix Application Environment to use (Advanced)", type=str, default="spenserg-sdx")
+parser.add_option("--type", help="Set Nimbix Node Type to use (nx1, nx2, nx3)", type=str, default="nx1")
+parser.add_option("--tt", help="Enable timeline trace", action="store_true", default=False)
+parser.add_option("--dp", help="Enable device profiling", action="store_true", default=False)
+parser.add_option("--queue_timeout", help="How long to wait for job to run while in queue (minutes)", type=int, default=60)
+parser.add_option("--exe_timeout", help="How long to wait for job to run on the board (minutes)", type=int, default=5)
+parser.add_option("-v", "--verbose", help="Print out additional information", action="store_true", default=False)
+
+try:
+	opts, remainder = parser.parse_args()
+except:
+	print "ERROR: Could not parse command line options"
+	raise
+
+nae = opts.nae
+type = opts.type
+tt = opts.tt
+dp = opts.dp
+
+exe_timeout = opts.exe_timeout
+queue_timeout = opts.queue_timeout
+
+exe = remainder[0]
+args = remainder[1:]
+
+if opts.verbose:
+	print "NAE = " + nae
+	print "TYPE = " + type
+	print "-tt = " + str(tt)
+	print "-dp = " + str(dp)
+	print "exe = " + exe
+	print "args = " + ' '.join(args)
+
 cdir = os.getcwd()
 rundate = datetime.datetime.now();
 
 user = pwd.getpwuid(os.getuid())[0]
 rand = os.urandom(4).encode('hex')
 testid = user + "-" + rundate.strftime("%d%m%y_%S") + "-" + rand
-
-if len(sys.argv) != 1:
-	exe = sys.argv[1]
-else:
-	exe = os.environ['EXE']
-
-if len(sys.argv) != 1:
-	args = sys.argv[2:len(sys.argv)]
-else:
-	args = os.environ['ARGS']
 
 try:
 	nimbix_user = os.environ['NIMBIX_USER']
@@ -320,18 +346,18 @@ print "Testcase: " + exe + " " + ' '.join(args)
 # instantaneous
 time.sleep(10)
 
-
 job = submit_testcase(nimbix_user, nimbix_apikey,
-                      testid, exe, args)
+                      testid, exe, args,
+                      type, nae, tt, dp)
 
 print "Job: " + str(job['name']) + " #" + str(job['number'])
 
 
 # Wait at maximum 1 hour for test to move to running state
-queue_timeout = datetime.datetime.now() + datetime.timedelta(minutes=60)
+queue_end_time = datetime.datetime.now() + datetime.timedelta(minutes=queue_timeout)
 
 rc = 127
-timeout = None
+exe_end_time = None
 api_fails = 0
 
 while True:
@@ -353,11 +379,11 @@ while True:
 
 	#  First time state = RUNNING set timeout
 	if state == 'RUNNING':
-		if not timeout:
-			timeout = datetime.datetime.now() + datetime.timedelta(minutes=timeout)
+		if not exe_end_time:
+			exe_end_time = datetime.datetime.now() + datetime.timedelta(minutes=exe_timeout)
 
 		# Test Timeout
-		if datetime.datetime.now() > timeout:
+		if datetime.datetime.now() > exe_end_time:
 			terminate(nimbix_user, nimbix_apikey,
 			          job_number=job['number'])
 			rc = 140
@@ -370,7 +396,7 @@ while True:
 	current_time = datetime.datetime.now()
 
 	# Infrastructure Failure if queue timeout exceeded
-	if current_time > queue_timeout:
+	if current_time > queue_end_time:
 		terminate(nimbix_user, nimbix_apikey,
 		                  job_number=job['number'])
 		raise RuntimeError("ERROR: Queue timeout exceeded")

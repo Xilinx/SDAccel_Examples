@@ -1,7 +1,17 @@
 # check.mk - defines rules for testing
 
+NIMBIX_DSA_xilinx_adm-pcie-ku3_2ddr-xpr_3_2 = nx1
+NIMBIX_DSA_xilinx_adm-pcie-7v3_1ddr_3_0 = nx2
+NIMBIX_DSA_xilinx_xil-accel-rd-ku115_4ddr-xpr_3_2 = nx3
+
+dsa2type = $(NIMBIX_DSA_$(call sanitize_dsa,$(1)))
+
 # TODO: the filter on xcl_SRCS is not required in 2016.3+
-loader = $(if $(filter $(1),hw),$(COMMON_REPO)/utility/nimbix/nimbix-run.py,$(if $(filter %.c,$(xcl_SRCS)),XCL_EMULATION_MODE=$(1),XCL_EMULATION_MODE=true))
+hw_RUNNER = $(COMMON_REPO)/utility/nimbix/nimbix-run.py --type $(call dsa2type,$(1))
+sw_emu_RUNNER = XCL_EMULATION_MODE=sw_emu
+hw_emu_RUNNER = XCL_EMULATION_MODE=hw_emu
+
+loader = $(call $(1)_RUNNER,$(2))
 
 # mk_check - run a check against the application
 #  $(1) - base name for the check
@@ -22,15 +32,15 @@ ifneq ($(2),hw)
 	$(EMCONFIGUTIL) --xdevice $(3) --nd $(NUM_DEVICES)
 endif
 ifdef $(1)_$(2)_$(call sanitize_dsa,$(3))_ARGS
-	$(call loader,$(2)) ./$($(1)_EXE) $($(1)_$(2)_$(3)_ARGS)
+	$(call loader,$(2),$(3)) ./$($(1)_EXE) $($(1)_$(2)_$(3)_ARGS)
 else
 ifdef $(1)_$(call sanitize_dsa,$(3))_ARGS
-	$(call loader,$(2)) ./$($(1)_EXE) $($(1)_$(3)_ARGS)
+	$(call loader,$(2),$(3)) ./$($(1)_EXE) $($(1)_$(3)_ARGS)
 else
 ifdef $(1)_$(2)_ARGS
-	$(call loader,$(2)) ./$($(1)_EXE) $($(1)_$(2)_ARGS)
+	$(call loader,$(2),$(3)) ./$($(1)_EXE) $($(1)_$(2)_ARGS)
 else
-	$(call loader,$(2)) ./$($(1)_EXE) $($(1)_ARGS)
+	$(call loader,$(2),$(3)) ./$($(1)_EXE) $($(1)_ARGS)
 endif
 endif
 endif
