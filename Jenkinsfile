@@ -14,7 +14,7 @@ properties properties: [
 	]
 ]
 
-devices = 'xilinx:adm-pcie-ku3:2ddr:3.1'
+devices = 'xilinx:adm-pcie-ku3:2ddr:3.2'
 
 def examples = [
 	"acceleration/smithwaterman",
@@ -75,9 +75,9 @@ cd ${workdir}
 . /tools/local/bin/modinit.sh
 module use.own /proj/picasso/modulefiles
 
-module add vivado/2016.2_daily
-module add vivado_hls/2016.2_daily
-module add sdaccel/2016.2_daily
+module add vivado/2016.3_daily
+module add vivado_hls/2016.3_daily
+module add sdaccel/2016.3_daily
 module add opencv/vivado_hls
 
 module add proxy
