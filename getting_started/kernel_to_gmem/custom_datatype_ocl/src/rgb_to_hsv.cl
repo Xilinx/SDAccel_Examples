@@ -33,7 +33,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /*******************************************************************************
 Description: 
-    This example demostrate How a Custom data type can used in Kernel code.  
+    This example demonstrate How a Custom data type can used in Kernel code.  
     Here RGBcolor and HSVcolor two structure is declared and used as global 
     memory access type
 *******************************************************************************/

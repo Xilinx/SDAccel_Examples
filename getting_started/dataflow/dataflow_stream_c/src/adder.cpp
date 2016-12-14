@@ -35,7 +35,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Description: 
     HLS Dataflow Example using HLS Stream datatype 
     This is example of vector addition to demonstrate HLS Dataflow Pragma 
-    functionality to perform task level parallism using HLS Stream datatype. HLS 
+    functionality to perform task level parallelism using HLS Stream datatype. HLS 
     dataflow pragma instruct compiler to run sub-task parallel. Sub-task can 
     transfer the data using hls stream. In this Example, a vector addition 
     implementation is divided into three sub-task APIs as below:
@@ -53,7 +53,7 @@ Description:
         This API reads the result vector from 'outStream' using blocking read
         command and write the result into Global Memory Location.
 
-    Data Flow Stream based Adder will be implmented as below:
+    Data Flow Stream based Adder will be implemented as below:
                     _____________
                     |             |<----- Input Vector from Global Memory
                     |  read_input |       __
@@ -131,14 +131,14 @@ void adder(unsigned int *in, unsigned int *out, int inc, int size)
     hls::stream<unsigned int> outStream;
 #pragma HLS STREAM variable=inStream  depth=32
 #pragma HLS STREAM variable=outStream depth=32
-//  HLS STREAM variable=<name> depta=<size> pragma is used to define the Stream 
+//  HLS STREAM variable=<name> depth=<size> pragma is used to define the Stream 
 //  depth. For this example, Depth 32 is defined. Which means that Stream can hold 
 //  maximum 32 outstanding elements at a given time. If Stream is full, any further
 //  blocking write command from producer will go into wait state until consumer 
 //  reads some elements from stream. Similarly if Stream is empty (no element in Stream)
 //  any blocking read command from consumer will go into wait state until producer
 //  writes elements to Stream. This blocking read and write allow consumer and 
-//  producer to syncronize each other.
+//  producer to synchronize each other.
 
 #pragma HLS dataflow
     //dataflow pragma instruct compiler to run following three APIs in parallel

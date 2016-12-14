@@ -71,7 +71,7 @@ int main(int argc, char** argv)
     //Create Program and Kernels. 
     xcl_world world = xcl_world_single();
     cl_program program = xcl_import_binary(world,"adder");
-    cl_kernel krnl_adder_stage   = xcl_get_kernel(program, "adder");
+    cl_kernel krnl_adder_stage   = xcl_get_kernel(program, "adder_stage");
     //Creating additional Kernels
     cl_kernel krnl_input_stage   = xcl_get_kernel(program, "input_stage");
     cl_kernel krnl_output_stage  = xcl_get_kernel(program, "output_stage");
@@ -116,7 +116,7 @@ int main(int argc, char** argv)
     xcl_run_kernel3d_nb(world,krnl_adder_stage );
     xcl_run_kernel3d_nb(world,krnl_output_stage);
 
-    //wait for all kernels to finish thier operations
+    //wait for all kernels to finish their operations
     clFinish(world.command_queue);
 
     //Copy Result from Device Global Memory to Host Local Memory

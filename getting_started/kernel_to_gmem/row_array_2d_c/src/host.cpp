@@ -41,7 +41,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "xcl.h"
 #include "host.h"
 
-//Utilily to print array
+//Utility to print array
 void print_array(DTYPE *mat, const char *name, int size, int dim) {
     int i;
     printf("%s\n", name);

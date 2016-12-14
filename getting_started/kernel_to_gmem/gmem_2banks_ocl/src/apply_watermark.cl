@@ -32,7 +32,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 /*******************************************************************************
 Description: 
-    This example demostrate to utilized both DDR and full bandwidth using 
+    This example demonstrate to utilized both DDR and full bandwidth using 
     watermark Application. In Watermark application, kernel has to apply a fixed
     watermark (Here is it Xilinx First Character 'X') into a given Image and 
     write the output image.

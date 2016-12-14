@@ -37,7 +37,7 @@ Description:
     Support printf only for OpenCL C Kernel. It is not supported C/C++ HLS kernel.
 
     Note: It is recommended to use printf only for kernel code debugging purposes. 
-    Avoid printf usage inside kernel when targetting for real application. User may 
+    Avoid printf usage inside kernel when targeting for real application. User may 
     not get the optimized kernel implementation with printf as tool will try to 
     implement printf functionality while compiling kernel and as a result, it 
     could ignore some critical performance specific attributes like unrolling/

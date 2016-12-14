@@ -85,7 +85,7 @@ void vadd(
         memcpy(v2_buffer,&in2[i],chunk_size * sizeof (unsigned int));
 
         //FPGA implementation, local array is mostly implemented as BRAM Memory block. 
-        // BRAM Memory Block contains two memory ports which allow two simulataneous access 
+        // BRAM Memory Block contains two memory ports which allow two parallel access 
         // to memory. To utilized both ports of BRAM block, vector addition loop is 
         // unroll with factor of 2. It is equivalent to following code:
         //  for (int j = 0 ; j < chunk_size ; j+= 2){
