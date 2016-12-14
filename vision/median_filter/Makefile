@@ -20,6 +20,7 @@ XCLBINS=krnl_median
 # check
 check_EXE=median
 check_XCLBINS=krnl_median
+check_sw_emu_ARGS=data/inputImage.bmp xclbin/krnl_median.sw_emu.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin
 
 CHECKS=check
 

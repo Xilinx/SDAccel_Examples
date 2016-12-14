@@ -21,6 +21,7 @@ XCLBINS=krnl_convolve
 # check
 check_EXE=convolve
 check_XCLBINS=krnl_convolve
+check_ARGS=data/input_buffer_raw.txt data/filter_buffer_raw.txt data/output_buffer_raw.txt
 
 CHECKS=check
 

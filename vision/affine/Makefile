@@ -22,6 +22,7 @@ XCLBINS=krnl_affine
 # check
 check_EXE=affine
 check_XCLBINS=krnl_affine
+check_sw_emu_ARGS=xclbin/krnl_affine.sw_emu.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin
 
 CHECKS=check
 

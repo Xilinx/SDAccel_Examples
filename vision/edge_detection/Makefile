@@ -21,6 +21,7 @@ XCLBINS=krnl_edge
 # check
 check_EXE=edge
 check_XCLBINS=krnl_edge
+check_ARGS=data/input/eiffel.bmp
 
 CHECKS=check
 

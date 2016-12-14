@@ -20,7 +20,7 @@ XCLBINS=krnl_equalizer
 # check
 check_EXE=equalizer
 check_XCLBINS=krnl_equalizer
-
+check_ARGS=data/race_2k.bmp
 CHECKS=check
 
 include ../../utility/rules.mk

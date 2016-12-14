@@ -20,6 +20,7 @@ XCLBINS=krnl_tiny
 # check
 check_EXE=tiny
 check_XCLBINS=krnl_tiny
+check_sw_emu_ARGS=data/image1.bmp data/image2.bmp xclbin/krnl_tiny.sw_emu.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin
 
 CHECKS=check
 
