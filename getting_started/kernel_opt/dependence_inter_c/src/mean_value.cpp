@@ -33,7 +33,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /*******************************************************************************
 Description: 
-    This Example to demostrate HLS Dependence Pragma. Using HLS DEPENDECE pragma 
+    This Example to demonstrate HLS Dependence Pragma. Using HLS DEPENDECE pragma 
     user can provide additional dependency details to compiler which allow 
     compiler to implement unrolling/pipelining with optimized way.
 *******************************************************************************/
@@ -73,7 +73,7 @@ void mean_value(int *in, int *out, int size)
 execution: for (int i = 1 ; i < size -1 ; i++) {
     #pragma HLS DEPENDENCE variable=local_buffer inter false
     //HLS Dependence pragma provide extra dependency information to compiler.
-    //For exmaple here local_buffer has false inter dependency. Which means 
+    //For example here local_buffer has false inter dependency. Which means 
     //each iteration of loop is independent for local_buffer access. 
     //It allow compiler to ignore dependency of local_buffer and generate 
     //a pipeline with lower II count. If user do not provide this pragma, compiler 

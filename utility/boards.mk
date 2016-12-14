@@ -30,4 +30,4 @@ COMMON_REPO ?= ../../
 #   sw_emu for software emulation
 #   or a collection of all or none of these
 TARGETS:=hw
-
+NUM_DEVICES:=1

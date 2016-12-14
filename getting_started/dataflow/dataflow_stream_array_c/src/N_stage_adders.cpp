@@ -50,7 +50,7 @@ Description:
         This API reads the result vector from outStream using blocking read
         command and write the result into Global Memory Location.
         
-    Four Stage Adder will be implmented as below:
+    Four Stage Adder will be implemented as below:
 
                      _____________
                     |             |<----- Input Vector from Global Memory

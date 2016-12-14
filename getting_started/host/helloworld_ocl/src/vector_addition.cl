@@ -32,8 +32,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // parameters with the global keyword represents cl_mem objects on the FPGA
 // DDR memory.
 //
-// NOTE: This kernel is not optimized. Please see the kernel_opt directory for
-// techniques to improve this kernel
+// NOTE: This kernel is not optimized. It is written to demonstrate basic 
+// OpenCL functionality in FPGA.
 kernel __attribute__((reqd_work_group_size(1, 1, 1)))
 void vector_add(global int* c,
                 global const int* a,

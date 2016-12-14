@@ -54,7 +54,7 @@ Description:
         This Kernel reads the result vector from Pipe Memory P1 using blocking 
         read command and write the result into Global Memory Location.
 
-    PIPE Memory based Adder will be implmented as below:
+    PIPE Memory based Adder will be implemented as below:
                      _____________
                     |             |<----- Input Vector from Global Memory
                     |  read_input |       __
@@ -81,7 +81,7 @@ pipe int p1 __attribute__((xcl_reqd_pipe_depth(32)));
 //  memory. Similarly if PIPE memory is empty (no element in memory), any 
 //  blocking read command on this memory will go into wait state until some 
 //  other kernel writes elements to PIPE Memory.
-//  This blocking read and write functionality allow designer to syncronize the 
+//  This blocking read and write functionality allow designer to synchronize the 
 //  data across multiple kernels
 
 
@@ -100,7 +100,7 @@ void input_stage(__global int *input, int size)
 // Adder Stage Kernel: Read Input data from Pipe P0 and write the result 
 // into Pipe P1
 kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
-void adder(int inc, int size)
+void adder_stage(int inc, int size)
 {
     __attribute__((xcl_pipeline_loop))
     execute: for(int i = 0 ; i < size ;  i++)

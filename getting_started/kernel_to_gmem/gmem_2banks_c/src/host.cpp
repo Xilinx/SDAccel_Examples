@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
 {
     if (argc != 3)
     {
-        std::cout << "Usage: " << argv[0] << "<input bitmap> <golden bitmap>" << std::endl;
+        std::cout << "Usage: " << argv[0] << " <input bitmap> <golden bitmap>" << std::endl;
         return EXIT_FAILURE ;
     }
     const char* bitmapFilename = argv[1];

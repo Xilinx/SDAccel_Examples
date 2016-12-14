@@ -28,6 +28,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #include "CL/cl.h"
+#include "xcl.h"
 
 #include <array>
 #include <cstdio>
@@ -55,11 +56,21 @@ using std::vector;
         }                                                            \
     } while (0);
 
-#define ENUM_CASE(ENUM)                         \
-  case ENUM:                                    \
-  printf(#ENUM "\n");                           \
-  break
+#define ENUM_CASE(ENUM)     \
+    case ENUM:              \
+        printf(#ENUM "\n"); \
+        break
 
+#define BITFIELD_SETUP(type)                  \
+    auto value = convert<type>(field.data()); \
+    printf("[ ")
+
+#define BITFIELD_PRINT(FIELD) \
+    if (value & FIELD) {      \
+        printf(#FIELD " ");   \
+    }
+
+#define BITFIELD_END() printf("]\n")
 
 pair<int, const char*> platform_info[] = {
     {CL_PLATFORM_PROFILE, "profile"},
@@ -297,8 +308,48 @@ void print_device_info(cl_device_id device) {
                         printf("UNKNOWN\n");
                 }
                 break;
+            case CL_DEVICE_QUEUE_PROPERTIES: {
+                BITFIELD_SETUP(cl_command_queue_properties);
+                BITFIELD_PRINT(CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+                BITFIELD_PRINT(CL_QUEUE_PROFILING_ENABLE);
+                BITFIELD_END();
+            } break;
+            case CL_DEVICE_DOUBLE_FP_CONFIG:
+            case CL_DEVICE_HALF_FP_CONFIG:
+            case CL_DEVICE_SINGLE_FP_CONFIG: {
+                BITFIELD_SETUP(cl_device_fp_config);
+                BITFIELD_PRINT(CL_FP_DENORM);
+                BITFIELD_PRINT(CL_FP_INF_NAN);
+                BITFIELD_PRINT(CL_FP_ROUND_TO_ZERO);
+                BITFIELD_PRINT(CL_FP_ROUND_TO_INF);
+                BITFIELD_PRINT(CL_FP_FMA);
+                BITFIELD_PRINT(CL_FP_SOFT_FLOAT);
+                BITFIELD_END();
+            } break;
+            case CL_DEVICE_EXECUTION_CAPABILITIES: {
+                BITFIELD_SETUP(cl_device_exec_capabilities);
+                BITFIELD_PRINT(CL_EXEC_KERNEL);
+                BITFIELD_PRINT(CL_EXEC_NATIVE_KERNEL);
+                BITFIELD_END();
+            } break;
+            case CL_DEVICE_PARTITION_AFFINITY_DOMAIN: {
+                BITFIELD_SETUP(cl_device_affinity_domain);
+                BITFIELD_PRINT(CL_DEVICE_AFFINITY_DOMAIN_NUMA);
+                BITFIELD_PRINT(CL_DEVICE_AFFINITY_DOMAIN_L4_CACHE);
+                BITFIELD_PRINT(CL_DEVICE_AFFINITY_DOMAIN_L3_CACHE);
+                BITFIELD_PRINT(CL_DEVICE_AFFINITY_DOMAIN_L2_CACHE);
+                BITFIELD_PRINT(CL_DEVICE_AFFINITY_DOMAIN_L1_CACHE);
+                BITFIELD_PRINT(CL_DEVICE_AFFINITY_DOMAIN_NEXT_PARTITIONABLE);
+                BITFIELD_END();
+            }
+            break;
+            case CL_DEVICE_PLATFORM: {
+                auto platform = convert<cl_platform_id>(field.data());
+                clGetPlatformInfo(platform, CL_PLATFORM_NAME, field.size(),
+                                  (void*)field.data(), nullptr);
+                printf("%s\n", field.c_str());
+            } break;
             default:
-                // TODO(umar): Add support for additional types
                 printf("N/A \n");
                 continue;
         }
@@ -312,11 +363,14 @@ int main(int argc, char** argv) {
     cl_int err = CL_SUCCESS;
     cl_device_id device = 0;
 
+    // sets environment variables
+    xcl_world world = xcl_world_single();
+
     // The following call retrieves the total number of platforms available
     cl_uint platform_count;
-    OCL_CHECK(clGetPlatformIDs(0, NULL, &platform_count));
+    OCL_CHECK(clGetPlatformIDs(0, nullptr, &platform_count));
     vector<cl_platform_id> platforms(platform_count);
-    OCL_CHECK(clGetPlatformIDs(platform_count, platforms.data(), NULL));
+    OCL_CHECK(clGetPlatformIDs(platform_count, platforms.data(), nullptr));
     for (int p = 0; p < platform_count; ++p) {
         print_platform_info(platforms[p]);
         cl_uint device_count = 0;
@@ -324,7 +378,7 @@ int main(int argc, char** argv) {
                                  &device_count));
         vector<cl_device_id> devices(device_count);
         OCL_CHECK(clGetDeviceIDs(platforms[p], CL_DEVICE_TYPE_ALL, device_count,
-                                 devices.data(), NULL));
+                                 devices.data(), nullptr));
         for (int d = 0; d < device_count; ++d) {
             clGetDeviceInfo(devices[d], CL_DEVICE_NAME, field.size(),
                             (void*)field.data(), nullptr);

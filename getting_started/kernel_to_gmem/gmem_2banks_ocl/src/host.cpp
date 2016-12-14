@@ -142,7 +142,7 @@ int main(int argc, char* argv[])
         for (int i = 0 ; i < image.numPixels(); i++){
             if (outImage[i] != goldImgPtr[i]){
                 match = 1;
-                printf ("Pixel %d Mixmatch Output %x and Expected %x \n", i, outImage[i], goldImgPtr[i]);
+                printf ("Pixel %d Mismatch Output %x and Expected %x \n", i, outImage[i], goldImgPtr[i]);
                 break;
             }
         }

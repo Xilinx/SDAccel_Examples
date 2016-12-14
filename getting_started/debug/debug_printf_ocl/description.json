@@ -1,5 +1,5 @@
 {
-    "example": "Example based on vectod addition that demonstrates printing of work item data (integer products in this case)",
+    "example": "Example based on vectored addition that demonstrates printing of work item data (integer products in this case)",
     "overview": "This is simple example of vector addition and printing of data that is computational result (addition)",
     "key_concepts": [ "Use of print statements for debugging"],
     "keywords": [ "printf"],

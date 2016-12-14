@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
     // Launch the kernel and get profile data (stop-start)
 
     // Note that xcl_run_kernel3d will call Profiling API clGetEventProfilingInfo 
-    // to get start and stop time and returns diffence i.e. stop - start
+    // to get start and stop time and returns difference i.e. stop - start
     unsigned long duration_nanosec = xcl_run_kernel3d(world, krnl, 1, 1, 1);
     std::cout << " **** Duration returned by profile API is " << (duration_nanosec * (1.0e-6) ) << " ms **** " << std::endl;
 

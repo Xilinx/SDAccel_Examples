@@ -49,6 +49,7 @@ memory datawidth
 
 int main(int argc, char** argv)
 {
+
     //Allocate Memory in Host Memory
     size_t vector_size_bytes = sizeof(int) * DATA_SIZE;
 

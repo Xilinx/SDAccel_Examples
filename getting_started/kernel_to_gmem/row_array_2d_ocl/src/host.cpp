@@ -41,7 +41,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "xcl.h"
 #include "host.h"
 
-//Utilily to print array
+//Utility to print array
 void print_array(int *mat, const char *name, int size, int dim) {
     int i;
     printf("%s\n", name);
@@ -54,7 +54,6 @@ void print_array(int *mat, const char *name, int size, int dim) {
 
 int main(int argc, char** argv)
 {
-
     //Allocate Memory in Host Memory
     size_t vector_size_bytes = sizeof(int) * BLOCK_SIZE;
     int* a = (int*)malloc(vector_size_bytes);// original data set given to device

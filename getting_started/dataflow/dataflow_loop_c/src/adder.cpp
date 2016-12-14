@@ -35,7 +35,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Description: 
     HLS Loop Dataflow Example using HLS Stream datatype. 
     This is example of vector addition to demonstrate HLS Dataflow Pragma 
-    functionality to perform multiple loops parallism using HLS Stream datatype. 
+    functionality to perform multiple loops parallelism using HLS Stream datatype. 
     HLS dataflow pragma instruct compiler to run loops concurrently. Loops can 
     transfer the data using hls stream. In this Example a vector addition 
     implementation is divided into three loops as below:
@@ -54,7 +54,7 @@ Description:
         command and write the result into Global Memory Location.
 
 
-     Loop Dataflow based Adder will be implmented as below:
+     Loop Dataflow based Adder will be implemented as below:
                      _____________
                     |             |<----- Input Vector from Global Memory
                     |   loop1:    |
@@ -107,7 +107,7 @@ void adder(unsigned int *in, unsigned int *out, int inc, int size)
 //  reads some elements from stream. Similarly if Stream is empty (no element in Stream)
 //  any blocking read command from consumer will go into wait state until producer
 //  writes elements to Stream. This blocking read and write allow consumer and 
-//  producer to syncronize each other.
+//  producer to synchronize each other.
 
     //dataflow pragma instruct compiler to run following three 'For' Loops concurrently
 #pragma HLS dataflow

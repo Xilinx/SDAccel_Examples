@@ -2,7 +2,7 @@
     "example": "Window of 2D Array Example Using AXI4-master interface",
     "overview": "This is a simple example of accessing each window of data from 2d array",
     "key_concepts": [ "window/tile of 2D data array access"],
-    "keywords": ["pipe", "window"],
+    "keywords": ["pipe", "xcl_pipeline_loop", "xcl_reqd_pipe_depth"],
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py ./host",
