@@ -34,6 +34,11 @@
             "date" : "AUG2016",
             "version": "2.0",
             "description": "Added performance metrics"
+        },
+        {
+            "date": "DEC2016",
+            "version": "3.0",
+            "description": "Update for SDAccel 2016.3"
         }
     ]
 

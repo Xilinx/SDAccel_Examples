@@ -48,6 +48,11 @@
             "date": "MAR2016",
             "version": "1.0",
             "description": "Initial Xilinx release"
+        },
+        {
+            "date": "DEC2016",
+            "version":"2.0",
+            "description": "Update for SDAccel 2016.3"
         }
     ]
 }
