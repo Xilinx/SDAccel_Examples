@@ -1,18 +1,10 @@
 #!/usr/bin/env groovy
 
-properties properties: [
-	[
-		$class: 'BuildDiscarderProperty', 
-		strategy: [
-			$class: 'LogRotator',
-			daysToKeepStr: '30', 
-			numToKeepStr: '5'
-		]
-	], [
-		$class: 'GithubProjectProperty', 
-		projectUrlStr: 'http://gitenterprise.xilinx.com/SDx-Hub/apps/'
-	]
-]
+properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '',
+artifactNumToKeepStr: '', daysToKeepStr: '30', numToKeepStr: '5')), [$class:
+'GithubProjectProperty', displayName: '', projectUrlStr:
+'https://gitenterprise.xilinx.com/SDx-Hub/apps/'], pipelineTriggers([[$class:
+'GitHubPushTrigger']])])
 
 devices  = 'xilinx:adm-pcie-7v3:1ddr:3.0'
 devices += ' xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2'
@@ -69,11 +61,13 @@ def buildExample(target, dir, devices, workdir) {
 	return { ->
 		stage("${dir}-${target}") {
 			node('rhel6 && xsjrdevl') {
-				sh """#!/bin/bash -e
+				/* Retry up to 3 times to get this to work */
+				retry(3) {
+					sh """#!/bin/bash -e
 
 cd ${workdir}
 
-. /tools/local/bin/modinit.sh
+. /tools/local/bin/modinit.sh > /dev/null 2>&1
 module use.own /proj/picasso/modulefiles
 
 module add vivado/2016.3_daily
@@ -85,11 +79,18 @@ module add proxy
 
 cd ${dir}
 
+echo
+echo "-----------------------------------------------"
+echo "PWD: \$(pwd)"
+echo "-----------------------------------------------"
+echo
+
 rsync -rL \$XILINX_SDX/Vivado_HLS/lnx64/tools/opencv/ lib/
 
 make TARGETS=${target} DEVICES=\"${devices}\" check
 
 """
+				}
 			}
 		}
 	}

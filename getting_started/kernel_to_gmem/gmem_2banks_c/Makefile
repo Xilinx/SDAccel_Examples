@@ -25,6 +25,7 @@ EXTRA_CLEAN=./output.bmp
 check_EXE=host
 check_XCLBINS=apply_watermark
 check_ARGS=./data/input.bmp ./data/golden.bmp
+check_DEVICES=xilinx:adm-pcie-ku3:2ddr-xpr:3.2
 
 CHECKS=check
 

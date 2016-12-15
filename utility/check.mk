@@ -26,6 +26,12 @@ loader = $(call $(1)_RUNNER,$(2))
 #                        devices
 define mk_check
 
+ifndef $(1)_DEVICES
+$(1)_DEVICES = $(DEVICES)
+endif
+
+ifneq ($(filter $(3),$($(1)_DEVICES)),)
+
 .PHONY: $(1)_$(2)_$(call sanitize_dsa,$(3))_check
 $(1)_$(2)_$(call sanitize_dsa,$(3))_check: $($(1)_DEPS) $($(1)_EXE) $(foreach xclbin,$($(1)_XCLBINS),$(XCLBIN_DIR)/$(xclbin).$(2).$(call sanitize_dsa,$(3)).xclbin)
 ifneq ($(2),hw)
@@ -46,6 +52,8 @@ endif
 endif
 
 CHECK_GOALS += $(1)_$(2)_$(call sanitize_dsa,$(3))_check
+
+endif
 
 endef
 
