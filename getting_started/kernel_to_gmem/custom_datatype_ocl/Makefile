@@ -9,7 +9,7 @@ include $(COMMON_REPO)/libs/bitmap/bitmap.mk
 
 # Host Application
 host_SRCS=./src/host.cpp $(bitmap_SRCS) $(xcl_SRCS)
-host_HDRS=$(xcl_HDRS)
+host_HDRS=$(xcl_HDRS)  $(bitmap_HDRS)
 host_CXXFLAGS= -D USE_IN_HOST -I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS) $(bitmap_CXXFLAGS)  
 host_LDFLAGS=$(opencl_LDFLAGS)
 
