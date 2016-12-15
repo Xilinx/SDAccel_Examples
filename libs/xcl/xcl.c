@@ -31,11 +31,13 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <limits.h>
+#include <sys/stat.h>
 
 #include <string.h>
 #include <math.h>
 
-#include <xcl.h>
+#include "xcl.h"
 
 static void* smalloc(size_t size) {
 	void* ptr;
@@ -281,55 +283,60 @@ cl_program xcl_import_binary_file(xcl_world world,
 cl_program xcl_import_binary(xcl_world world,
                             const char *xclbin_name
 ) {
-	char *xcl_bindir = getenv("XCL_BINDIR");
+    char *xcl_bindir = getenv("XCL_BINDIR");
 
-	size_t bindir_len;
-	if(xcl_bindir == NULL) {
-		bindir_len = strlen("xclbin");
-		world.bindir = (char*) malloc(sizeof(char)*bindir_len);
-		strcpy(world.bindir, "xclbin");
-	} else {
-		bindir_len = strlen(xcl_bindir);
-		world.bindir = (char*) malloc(sizeof(char)*bindir_len);
-		strcpy(world.bindir, xcl_bindir);
-	}
+    // typical locations of directory containing xclbin files
+    const char *dirs[] = {
+        "xclbin",   // command line build
+        "..",       // gui build + run
+        ".",        // gui build, run in build directory
+        xcl_bindir, // $XCL_BINDIR-specified
+        NULL
+    };
 
-	size_t xclbin_len = strlen(xclbin_name);
-	size_t mode_len = strlen(world.mode);
+    char *device_name = strdup(world.device_name);
+    if (device_name == NULL) {
+        printf("Error: Out of Memory\n");
+        exit(EXIT_FAILURE);
+    }
 
-	size_t device_len = strlen(world.device_name);
-	char *device_name = (char*) malloc(sizeof(char)*device_len+1);
-	if(device_name == NULL) {
-		printf("Error: Out of Memory\n");
-		exit(EXIT_FAILURE);
-	}
+    // fix up device name to avoid colons and dots.
+    // xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2 -> xilinx_xil-accel-rd-ku115_4ddr-xpr_3_2
+    for (char *c = device_name; *c != 0; c++) {
+        if (*c == ':' || *c == '.') {
+            *c = '_';
+        }
+    }
 
-	for(size_t i = 0; i < device_len; i++) {
-		char tmp = world.device_name[i];
-		if(tmp == ':' || tmp == '.') {
-			tmp = '_';
-		}
-		device_name[i] = tmp;
-	}
+    const char *file_patterns[] = {
+        "%1$s/%2$s.xclbin",               // <kernel>.xclbin
+        "%1$s/binary_container_1.xclbin", // default for gui projects
+        "%1$s/%2$s.%3$s.%4$s.xclbin",     // <kernel>.<target>.<device>.xclbin
+        NULL
+    };
+    char xclbin_file_name[PATH_MAX];
+    memset(xclbin_file_name, 0, PATH_MAX);
+    for (const char **dir = dirs; *dir != NULL; dir++) {
+        struct stat sb;
+        if (stat(*dir, &sb) == 0 && S_ISDIR(sb.st_mode)) {
+            for (const char **pattern = file_patterns; *pattern != NULL; pattern++) {
+                snprintf(xclbin_file_name, PATH_MAX, *pattern, *dir, xclbin_name, world.mode, device_name);
+                if (stat(xclbin_file_name, &sb) == 0 && S_ISREG(sb.st_mode)) {
+                    world.bindir = strdup(*dir);
+                    if (world.bindir == NULL) {
+                        printf("Error: Out of Memory\n");
+                        exit(EXIT_FAILURE);
+                    }
+                    goto found_xclbin;
+                }
+            }
+        }
+    }
 
-	device_name[device_len] = '\0';
+found_xclbin:
+    free(device_name);
 
-	size_t xclbin_file_name_len = bindir_len + xclbin_len + mode_len + device_len + 11;
-	char *xclbin_file_name = (char*) malloc(sizeof(char)*(xclbin_file_name_len+1));
-	if(xclbin_file_name == NULL) {
-		printf("Error: Out of Memory!\n");
-		exit(EXIT_FAILURE);
-	}
-
-	size_t letters = sprintf(xclbin_file_name, "%s/%s.%s.%s.xclbin", world.bindir, xclbin_name, world.mode, device_name);
-	if(letters != xclbin_file_name_len-1) {
-		printf("Error: failed to create xclbin file name\n");
-		exit(EXIT_FAILURE);
-	}
-
-	free(device_name);
-
-	return xcl_import_binary_file(world, xclbin_file_name);
+    return xcl_import_binary_file(world, xclbin_file_name);
 }
 
 cl_program xcl_import_source(xcl_world world,

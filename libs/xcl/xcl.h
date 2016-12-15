@@ -30,7 +30,6 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-#include <xcl.h>
 #include <CL/opencl.h>
 
 typedef struct {
