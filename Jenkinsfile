@@ -62,8 +62,7 @@ def buildExample(target, dir, devices, workdir) {
 		stage("${dir}-${target}") {
 			node('rhel6 && xsjrdevl') {
 				/* Retry up to 3 times to get this to work */
-				retry(3) {
-					sh """#!/bin/bash -e
+				sh """#!/bin/bash -e
 
 cd ${workdir}
 
@@ -87,9 +86,37 @@ echo
 
 rsync -rL \$XILINX_SDX/Vivado_HLS/lnx64/tools/opencv/ lib/
 
+make TARGETS=${target} DEVICES=\"${devices}\" all
+
+"""
+				}
+				retry(3) {
+					sh """#!/bin/bash -e
+
+cd ${workdir}
+
+. /tools/local/bin/modinit.sh > /dev/null 2>&1
+module use.own /proj/picasso/modulefiles
+
+module add vivado/2016.3_daily
+module add vivado_hls/2016.3_daily
+module add sdaccel/2016.3_daily
+module add opencv/vivado_hls
+
+module add proxy
+
+cd ${dir}
+
+echo
+echo "-----------------------------------------------"
+echo "PWD: \$(pwd)"
+echo "-----------------------------------------------"
+echo
+
 make TARGETS=${target} DEVICES=\"${devices}\" check
 
 """
+					}
 				}
 			}
 		}
