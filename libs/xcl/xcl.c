@@ -128,7 +128,7 @@ xcl_world xcl_world_single() {
 
 	err = clGetPlatformIDs(0, NULL, &num_platforms);
 	if (err != CL_SUCCESS) {
-		printf("Error: no platforms available or OpenCL install broken");
+		printf("Error: no platforms available or OpenCL install broken\n");
 		exit(EXIT_FAILURE);
 	}
 
