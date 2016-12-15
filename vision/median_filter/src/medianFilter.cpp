@@ -46,7 +46,7 @@ void checkErrorStatus(cl_int error, const char* message)
   {
     printf("%s\n", message) ;
     printf("%s\n", oclErrorCode(error)) ;
-    exit(0) ;
+    exit(1) ;
   }
 }
 

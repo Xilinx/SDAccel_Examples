@@ -22,9 +22,13 @@ XCLBINS=krnl_sha1
 # check
 check_EXE=sha1
 check_XCLBINS=krnl_sha1
-check_sw_emu_ARGS=-t 20 -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr-xpr:3.2' -k ./xclbin/krnl_sha1.sw_emu.xilinx_adm-pcie-ku3_2ddr-xpr_3_2.xclbin
-check_hw_emu_ARGS=-t 20 -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr-xpr:3.2' -k ./xclbin/krnl_sha1.hw_emu.xilinx_adm-pcie-ku3_2ddr-xpr_3_2.xclbin
-check_hw_ARGS=-t 20 -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr-xpr:3.2' -k ./xclbin/krnl_sha1.hw.xilinx_adm-pcie-ku3_2ddr-xpr_3_2.xclbin
+
+# Pattern to allow cmdline to determine xclbin name
+define mk_args
+check_$(1)_$(call sanitize_dsa,$(2))_ARGS = -t 20 -p Xilinx -d $(2) -k ./xclbin/krnl_sha1.$(1).$(call sanitize_dsa,$(2)).xclbin
+endef
+
+$(foreach target,$(TARGETS),$(foreach device,$(DEVICES),$(eval $(call mk_args,$(target),$(device)))))
 
 CHECKS=check
 

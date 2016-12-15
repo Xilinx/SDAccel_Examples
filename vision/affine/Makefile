@@ -22,7 +22,14 @@ XCLBINS=krnl_affine
 # check
 check_EXE=affine
 check_XCLBINS=krnl_affine
-check_sw_emu_ARGS=xclbin/krnl_affine.sw_emu.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin
+
+# Pattern to allow cmdline to determine xclbin name
+define mk_args
+check_$(1)_$(call sanitize_dsa,$(2))_ARGS = ./xclbin/krnl_sha1.$(1).$(call sanitize_dsa,$(2)).xclbin
+endef
+
+$(foreach target,$(TARGETS),$(foreach device,$(DEVICES),$(eval $(call mk_args,$(target),$(device)))))
+
 
 CHECKS=check
 

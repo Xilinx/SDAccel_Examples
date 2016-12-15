@@ -31,3 +31,12 @@ COMMON_REPO ?= ../../
 #   or a collection of all or none of these
 TARGETS:=hw
 NUM_DEVICES:=1
+
+# sanitize_dsa - create a filesystem friendly name from dsa name
+#   $(1) - name of dsa
+COLON=:
+PERIOD=.
+UNDERSCORE=_
+sanitize_dsa = $(strip $(subst $(PERIOD),$(UNDERSCORE),$(subst $(COLON),$(UNDERSCORE),$(1))))
+
+

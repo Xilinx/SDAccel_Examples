@@ -33,13 +33,6 @@ EXE_GOALS+= $(1)
 
 endef
 
-# sanitize_dsa - create a filesystem friendly name from dsa name
-#   $(1) - name of dsa
-COLON=:
-PERIOD=.
-UNDERSCORE=_
-sanitize_dsa = $(strip $(subst $(PERIOD),$(UNDERSCORE),$(subst $(COLON),$(UNDERSCORE),$(1))))
-
 # mk_xclbin - create an xclbin from a set of krnl sources
 #  CLC - kernel compiler to use
 #  CLFLAGS - flags to pass to the compiler
