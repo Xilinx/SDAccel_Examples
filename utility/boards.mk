@@ -7,6 +7,10 @@ ifdef XILINX_SDX
 XILINX_SDACCEL=${XILINX_SDX}
 endif
 
+ifndef XILINX_SDACCEL
+$(error XILINX_SDX or XILINX_SDACCEL is not set. Please source the SDx settings64.{csh,sh} script before attempting to run examples)
+endif
+
 # Use the Xilinx OpenCL compiler
 CLC:=$(XILINX_SDACCEL)/bin/xocc
 EMCONFIGUTIL := $(XILINX_SDACCEL)/bin/emconfigutil
