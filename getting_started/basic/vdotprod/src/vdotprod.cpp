@@ -31,8 +31,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 
 //OpenCL includes
-#include <xcl.h>
-#include <vdotprod.h>
+#include "xcl.h"
+#include "vdotprod.h"
 
 int main(int argc, char* argv[]) {
     xcl_world world    = xcl_world_single();

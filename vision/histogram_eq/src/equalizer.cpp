@@ -43,8 +43,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <opencv2/highgui/highgui.hpp>
 
 //OpenCL includes
-#include <xcl.h>
-#include <equalizer.h>
+#include "xcl.h"
+#include "equalizer.h"
 
 int main(int argc, char* argv[])
 {

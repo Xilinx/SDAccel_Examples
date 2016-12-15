@@ -40,9 +40,9 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <opencv2/highgui/highgui.hpp>
 
 // XCL Helper Library
-#include <xcl.h>
+#include "xcl.h"
 
-#include <edge.h>
+#include "edge.h"
 
 short getAbsMax(cv::Mat mat) {
 	short max = 0;

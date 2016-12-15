@@ -31,7 +31,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <xcl.h>
+#include "xcl.h"
 
 int main(int argc, char* argv[]) {
     if(argc != 1 && argc != 2) {

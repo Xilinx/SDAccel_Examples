@@ -29,8 +29,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <iostream>
 #include "aes_app.h"
-#include <cmdlineparser.h>
-#include <logger.h>
+#include "cmdlineparser.h"
+#include "logger.h"
 
 using namespace std;
 using namespace sda;

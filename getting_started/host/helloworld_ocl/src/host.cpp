@@ -28,7 +28,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #include <CL/cl.h>
-#include <xcl.h>
+#include "xcl.h"
 
 #include <cstdio>
 #include <vector>

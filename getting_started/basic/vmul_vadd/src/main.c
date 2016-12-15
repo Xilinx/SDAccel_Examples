@@ -30,7 +30,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdlib.h>
 #include <unistd.h>
 
-#include <xcl.h>
+#include "xcl.h"
 
 #define LENGTH 16
 

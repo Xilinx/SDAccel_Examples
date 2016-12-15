@@ -40,8 +40,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "sha1.h"
 #include "clSha1.h"
-#include <cmdlineparser.h>
-#include <logger.h>
+#include "cmdlineparser.h"
+#include "logger.h"
 
 //#define SHA1_PUB 1
 typedef unsigned char u8;

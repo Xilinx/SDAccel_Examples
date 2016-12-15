@@ -30,11 +30,11 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string.h>
 #include <stdio.h>
 
-#include <logger.h>
+#include "logger.h"
 #include "aes_app.h"
 #include "aes_ecb.h"
 
-#include <simplebmp.h>
+#include "simplebmp.h"
 
 #if defined(__linux__) || defined(linux)
 	#include "sys/time.h"

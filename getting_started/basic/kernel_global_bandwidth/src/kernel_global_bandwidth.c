@@ -31,7 +31,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdint.h>
 #include <string.h>
 
-#include <xcl.h>
+#include "xcl.h"
 #include <CL/cl_ext.h>
 
 uint8_t get_ddr_banks(xcl_world world) {

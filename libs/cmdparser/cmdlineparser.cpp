@@ -30,8 +30,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fstream>
 #include <iostream>
 #include <stdlib.h>
-#include <cmdlineparser.h>
-#include <logger.h>
+#include "cmdlineparser.h"
+#include "logger.h"
 
 namespace sda {
 namespace utils {

@@ -32,8 +32,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 
 //OpenCL includes
-#include <xcl.h>
-#include <vadd.h>
+#include "xcl.h"
+#include "vadd.h"
 
 int main(int argc, char* argv[]) {
 

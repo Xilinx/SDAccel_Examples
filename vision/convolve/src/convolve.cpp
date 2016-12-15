@@ -40,7 +40,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <opencv2/highgui/highgui.hpp>
 
 // XCL Helper Library
-#include <xcl.h>
+#include "xcl.h"
 
 std::string getXclbinFileName(std::string name, std::string xmode, std::string xdevice) {
     std::string xclbinFileName;
