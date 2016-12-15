@@ -102,11 +102,33 @@ int main(int argc, char** argv)
       }
    }
 
+   //XPR Platform (Xilinx Extended Partial Reconfiguration Platform) supports larger Kernel
+   // binaries compare to non-XPR Platform. However this platform has one limitation with
+   // respect non-XPR, it does not persist the Global Memory(DDR) content when user switches
+   // between multiple binaries. So for such case, user should be responsible to 
+   // migrate the required buffer from device to host and later use migrate buffer back to
+   // device after second binary is imported
+   
+   // Migrating Buffer from Device to Host
+   err = clEnqueueMigrateMemObjects(world.command_queue, 1, &d_mul_c,CL_MIGRATE_MEM_OBJECT_HOST,
+                                   0, NULL, NULL);
+
+   if (err){
+      printf("Error: Failed to execute clEnqueueMigrateMemObjects()! %d\n", err);
+      return EXIT_FAILURE;
+   }
+
    printf("INFO: loading vadd_krnl\n");
    cl_program program_vadd = xcl_import_binary(world, "krnl_vadd");
    cl_kernel krnl_vadd = xcl_get_kernel(program_vadd, "krnl_vadd");
 
    cl_mem d_add_c = xcl_malloc(world, CL_MEM_WRITE_ONLY, sizeof(int) * LENGTH);
+
+
+   //Migrating the buffer from Host to Device
+   err = clEnqueueMigrateMemObjects(world.command_queue, 1, &d_mul_c,
+                                   0 /* flags, 0 means from host to device */,
+                                   0, NULL, NULL);
 
    // Set the arguments to our compute kernel
    //
