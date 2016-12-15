@@ -1,6 +1,6 @@
 # check.mk - defines rules for testing
 
-NIMBIX_DSA_xilinx_adm-pcie-ku3_2ddr-xpr_3_2 = nx1
+NIMBIX_DSA_xilinx_adm-pcie-ku3_2ddr-xpr_3_2 = nx1test
 NIMBIX_DSA_xilinx_adm-pcie-7v3_1ddr_3_0 = nx2
 NIMBIX_DSA_xilinx_xil-accel-rd-ku115_4ddr-xpr_3_2 = nx3
 
@@ -17,6 +17,7 @@ loader = $(call $(1)_RUNNER,$(2))
 #  $(1) - base name for the check
 #  $(1)_EXE - executable to run
 #  $(1)_ARGS - arguments to use by default for the check
+#  $(1)_DEVICES - whitelist of devices to run the check
 #  $(2) - compilation target (i.e. hw, hw_emu, sw_emu)
 #  $(1)_$(2)_ARGS - specialization of arguments for specific targets
 #  $(3) - device name (i.e. xilinx:adm-pcie-ku3:1ddr:3.0)
@@ -26,11 +27,7 @@ loader = $(call $(1)_RUNNER,$(2))
 #                        devices
 define mk_check
 
-ifndef $(1)_DEVICES
-$(1)_DEVICES = $(DEVICES)
-endif
-
-ifneq ($(filter $(3),$($(1)_DEVICES)),)
+ifneq ($(filter $(3),$(if $($(1)_DEVICES), $($(1)_DEVICES), $(DEVICES))),)
 
 .PHONY: $(1)_$(2)_$(call sanitize_dsa,$(3))_check
 $(1)_$(2)_$(call sanitize_dsa,$(3))_check: $($(1)_DEPS) $($(1)_EXE) $(foreach xclbin,$($(1)_XCLBINS),$(XCLBIN_DIR)/$(xclbin).$(2).$(call sanitize_dsa,$(3)).xclbin)
