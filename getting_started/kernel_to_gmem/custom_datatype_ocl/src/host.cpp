@@ -37,6 +37,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //OpenCL utility layer include
 #include "xcl.h"
 #include "bitmap.h"
+#define USE_IN_HOST
 #include "rgb_to_hsv.h"
 
 //Utility Function Declaration

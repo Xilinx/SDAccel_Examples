@@ -10,7 +10,7 @@ include $(COMMON_REPO)/libs/bitmap/bitmap.mk
 # Host files and setting
 host_SRCS=./src/host.cpp $(xcl_SRCS) $(bitmap_SRCS)
 host_HDRS=$(xcl_HDRS) $(bitmap_HDRS) 
-host_CXXFLAGS= -I./src/ -g -std=c++0x -D USE_IN_HOST -I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS) $(bitmap_CXXFLAGS) 
+host_CXXFLAGS= -I./src/ -g -std=c++0x -I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS) $(bitmap_CXXFLAGS) 
 host_LDFLAGS=$(opencl_LDFLAGS)
 
 # Kernel
