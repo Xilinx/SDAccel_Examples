@@ -2,16 +2,16 @@
 COMMON_REPO := ../../../
 
 # Make file Includes
-include ${COMMON_REPO}/utility/boards.mk
-include ${COMMON_REPO}/libs/xcl/xcl.mk
-include ${COMMON_REPO}/libs/opencl/opencl.mk
-include ${COMMON_REPO}/libs/bitmap/bitmap.mk
+include $(COMMON_REPO)/utility/boards.mk
+include $(COMMON_REPO)/libs/xcl/xcl.mk
+include $(COMMON_REPO)/libs/opencl/opencl.mk
+include $(COMMON_REPO)/libs/bitmap/bitmap.mk
 
 # Host files and setting
-host_SRCS=./src/host.cpp ${xcl_SRCS} ${bitmap_SRCS}
-host_HDRS=${xcl_HDRS} ${bitmap_HDRS} 
-host_CXXFLAGS= -I./src/ -g -std=c++0x -D USE_IN_HOST -I./src/ ${xcl_CXXFLAGS} ${opencl_CXXFLAGS} ${bitmap_CXXFLAGS} 
-host_LDFLAGS=${opencl_LDFLAGS}
+host_SRCS=./src/host.cpp $(xcl_SRCS) $(bitmap_SRCS)
+host_HDRS=$(xcl_HDRS) $(bitmap_HDRS) 
+host_CXXFLAGS= -I./src/ -g -std=c++0x -D USE_IN_HOST -I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS) $(bitmap_CXXFLAGS) 
+host_LDFLAGS=$(opencl_LDFLAGS)
 
 # Kernel
 apply_watermark_SRCS=./src/apply_watermark.cpp
@@ -28,5 +28,5 @@ check_ARGS=./data/input.bmp ./data/golden.bmp
 
 CHECKS=check
 
-include ${COMMON_REPO}/utility/rules.mk
+include $(COMMON_REPO)/utility/rules.mk
 

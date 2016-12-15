@@ -1,8 +1,8 @@
 # sum_scan Application
 COMMON_REPO:=../../../
-include ${COMMON_REPO}/utility/boards.mk
-include ${COMMON_REPO}/libs/xcl/xcl.mk
-include ${COMMON_REPO}/libs/opencl/opencl.mk
+include $(COMMON_REPO)/utility/boards.mk
+include $(COMMON_REPO)/libs/xcl/xcl.mk
+include $(COMMON_REPO)/libs/opencl/opencl.mk
 
 # sum_scan Host Application
 sum_scan_SRCS=./src/sum_scan.cpp $(xcl_SRCS)
@@ -22,5 +22,5 @@ check_XCLBINS=krnl_sum_scan
 
 CHECKS=check
 
-include ${COMMON_REPO}/utility/rules.mk
+include $(COMMON_REPO)/utility/rules.mk
 

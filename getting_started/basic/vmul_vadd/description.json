@@ -1,6 +1,8 @@
 {
     "example" : "Vector Add - Vector Multiplication",
-    "overview" : "This example shows how data stored in global memory can be shared between kernels in different binary containers.",
+    "overview" : "This example shows how data stored in global memory can be shared between kernels in different binary containers. This functionality is available only for non-XPR Devices.",
+    "key_concepts": [ "Multiple Kernel Binaries" , "Buffer sharing across Multiple binaries", "Multiple Kernels in different Binaries"],
+    "keywords": [ "NA"],
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
     "em_cmd" : "./vaddvmul",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py ./vaddvmul",

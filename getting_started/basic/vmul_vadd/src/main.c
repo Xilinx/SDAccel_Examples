@@ -108,8 +108,6 @@ int main(int argc, char** argv)
 
    cl_mem d_add_c = xcl_malloc(world, CL_MEM_WRITE_ONLY, sizeof(int) * LENGTH);
 
-   xcl_memcpy_to_device(world, d_mul_c, h_c, sizeof(int) * LENGTH);
-
    // Set the arguments to our compute kernel
    //
    err = 0;
