@@ -27,7 +27,7 @@ loader = $(call $(1)_RUNNER,$(2))
 #                        devices
 define mk_check
 
-ifneq ($(filter $(3),$(if $($(1)_DEVICES), $($(1)_DEVICES), $(DEVICES))),)
+ifneq ($(filter $(3),$(call device_whitelist,$(1))),)
 
 .PHONY: $(1)_$(2)_$(call sanitize_dsa,$(3))_check
 $(1)_$(2)_$(call sanitize_dsa,$(3))_check: $($(1)_DEPS) $($(1)_EXE) $(foreach xclbin,$($(1)_XCLBINS),$(XCLBIN_DIR)/$(xclbin).$(2).$(call sanitize_dsa,$(3)).xclbin)

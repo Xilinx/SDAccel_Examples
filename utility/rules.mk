@@ -15,6 +15,8 @@ help::
 	$(ECHO) "		Command to remove the generated files."
 	$(ECHO) ""
 
+device_whitelist = $(if $($(1)_DEVICES), $($(1)_DEVICES), $(DEVICES))
+
 # mk_exe - build an exe from host code
 #   CXX - compiler to use
 #   CXXFLAGS - base compiler flags to use
@@ -44,11 +46,15 @@ endef
 #  $(3) - device name (i.e. xilinx:adm-pcie-ku3:1ddr:3.0)
 define mk_xclbin
 
+ifneq ($(filter $(3),$(call device_whitelist,$(1))),)
+
 $(XCLBIN_DIR)/$(1).$(2).$(call sanitize_dsa,$(3)).xclbin: $($(1)_SRCS) $($(1)_HDRS)
 	mkdir -p ${XCLBIN_DIR}
 	$(CLC) $(CLFLAGS) $($(1)_CLFLAGS) -o $$@ -t $(2) --xdevice $(3) $($(1)_SRCS)
 
 XCLBIN_GOALS+= $(XCLBIN_DIR)/$(1).$(2).$(call sanitize_dsa,$(3)).xclbin
+
+endif
 
 endef
 
