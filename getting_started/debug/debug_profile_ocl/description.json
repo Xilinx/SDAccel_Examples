@@ -1,6 +1,6 @@
 {
-    "example": "Example based on vectored addition that demonstrates printing of work item data (integer products in this case)",
-    "overview": "This is simple example of vector addition and printing profile data (wall clock time taken between start and stop)",
+    "example": " Printing Profile Data",
+    "overview": "This is simple example of vector addition and printing profile data (wall clock time taken between start and stop).",
     "key_concepts": [ "Use of Profile API"],
     "keywords": [ "xcl_get_event_duration()"],
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],

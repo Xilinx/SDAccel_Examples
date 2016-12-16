@@ -1,5 +1,5 @@
 {
-    "example": "Loops Datflow Example Using HLS Stream",
+    "example": "Loops Dataflow Using HLS Stream",
     "overview": "This is simple example of vector addition to demonstrate Loops Dataflow functionality of HLS. HLS Dataflow allows user to schedule multiple sequential loops concurrently to achieve higher throughput.",
     "key_concepts": [ "Loop Dataflow"],
     "keywords": [ "dataflow" , "hls::stream<>"],

@@ -1,5 +1,5 @@
 {
-    "example": "Burst read/write Example Using AXI4-master interface",
+    "example": "Burst Read/Write",
     "overview": "This is simple example of using AXI4-master interface for burst read and write",
     "key_concepts": [ "burst access"],
     "keywords": ["NA"],

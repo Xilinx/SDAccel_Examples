@@ -1,5 +1,5 @@
 {
-    "example": "Window of 2D Array Example Using AXI4-master interface",
+    "example": "Read/Write Window of 2D Array",
     "overview": "This is a simple example of accessing each window of data from 2d array",
     "limitation": "Currently we ONLY support array size smaller than 512*512 due to some issue in the tool",
     "key_concepts": [ "window of 2D data array access"],

@@ -1,5 +1,5 @@
 {
-    "example": "Datflow Example Using HLS Stream",
+    "example": "Dataflow Using HLS Stream",
     "overview": "This is simple example of Multiple Stages Vector Addition to demonstrate Array of Stream usage in HLS C Kernel Code.",
     "key_concepts": [ "Array of Stream"],
     "keywords": [ "dataflow" , "hls::stream<>"],
