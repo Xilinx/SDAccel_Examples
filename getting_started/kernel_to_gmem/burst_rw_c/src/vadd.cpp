@@ -44,7 +44,7 @@ Description:
 #define BURSTBUFFERSIZE 2048
 
 extern "C" {
-    void vadd(int *a, int size, int inc_value){
+void vadd(int *a, int size, int inc_value){
     // Map pointer a to AXI4-master interface for global memory access
     #pragma HLS INTERFACE m_axi port=a  offset=slave bundle=gmem
     // We also need to map a and return to a bundled axilite slave interface
@@ -53,18 +53,27 @@ extern "C" {
     #pragma HLS INTERFACE s_axilite port=inc_value bundle=control
     #pragma HLS INTERFACE s_axilite port=return bundle=control
       
-        int i;
-        int burstbuffer[BURSTBUFFERSIZE];
+    int burstbuffer[BURSTBUFFERSIZE];
+
+    //Per iteration of this loop perform BURSTBUFFERSIZE vector addition
+    for(int i=0; i < size;  i+=BURSTBUFFERSIZE)
+    {
+        int chunk_size = BURSTBUFFERSIZE;
+        //boundary checks
+        if ((i + BURSTBUFFERSIZE) > size) 
+            chunk_size = size - i;
         
         //memcpy creates a burst access to memory
         //multiple calls of memcpy cannot be pipelined and will be scheduled sequentially
         //memcpy requires a local buffer to store the results of the memory transaction
-        memcpy(burstbuffer,(const int*)a,size*sizeof(int));
+        memcpy(burstbuffer,&a[i],chunk_size * sizeof (int));
         
         //calculate and write results to global memory, the sequential write in a for loop can be inferred to a memory burst access automatically
-        calc_write: for(i=0; i < size; i++){
-            burstbuffer[i] = burstbuffer[i] + inc_value;
-            a[i] = burstbuffer[i];
+        calc_write: for(int j=0; j < chunk_size; j++){
+        #pragma HLS PIPELINE
+            burstbuffer[j] = burstbuffer[j] + inc_value;
+            a[i+j] = burstbuffer[j];
         }
     }
+}
 }
