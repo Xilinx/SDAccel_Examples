@@ -8,7 +8,7 @@ include $(COMMON_REPO)/libs/opencl/opencl.mk
 # Host Application
 errors_SRCS=./src/host.cpp $(oclHelper_SRCS) $(xcl_SRCS)
 errors_HDRS=$(xcl_HDRS)
-errors_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS) $(oclHelper_CXXFLAGS) -std=c++0x -Wno-parentheses -Wno-unused-but-set-variable
+errors_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS) $(oclHelper_CXXFLAGS) -std=c++0x
 errors_LDFLAGS=$(opencl_LDFLAGS)
 
 # Kernel
