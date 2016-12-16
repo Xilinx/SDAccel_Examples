@@ -80,3 +80,25 @@ README.md: description.json
 	$(COMMON_REPO)/utility/readme_gen/readme_gen.py description.json
 
 include $(COMMON_REPO)/utility/check.mk
+
+# copy_library_sources - copy library source files to the local source directory
+#   $(1) - name of exe
+#   $(1)_SRCS - the source files 
+#   $(1)_HDRS - the header files
+
+define copy_library_sources
+
+local-files: $(1)_local_files
+
+# note: this attempts to copy files from the src/ directory to themselves.
+# it also does not update the makefile to use the all-local sources, so the
+# gui and command line could get out of sync.
+$(1)_local_files: $($(1)_SRCS) $($(1)_HDRS)
+	@echo "Copying library sources to project:"
+	-@mkdir -p src
+	-@tar c $($(1)_SRCS) $($(1)_HDRS) -P --exclude="src/*" --xform="s/^.*\///" | tar xv -C src
+	@echo "Library sources were copied to the src/ directory."
+
+endef
+
+$(foreach exe,$(EXES),$(eval $(call copy_library_sources,$(exe))))
