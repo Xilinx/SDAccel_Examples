@@ -90,9 +90,9 @@ define copy_library_sources
 
 local-files: $(1)_local_files
 
-# note: this attempts to copy files from the src/ directory to themselves.
-# it also does not update the makefile to use the all-local sources, so the
-# gui and command line could get out of sync.
+# note:
+# this does not update the makefile to reference the src/ copy of the
+# library files, so gui and command line projects can get out of sync.
 $(1)_local_files: $($(1)_SRCS) $($(1)_HDRS)
 	@echo "Copying library sources to project:"
 	-@mkdir -p src
