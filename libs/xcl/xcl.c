@@ -287,12 +287,16 @@ cl_program xcl_import_binary(xcl_world world,
 
     // typical locations of directory containing xclbin files
     const char *dirs[] = {
+        xcl_bindir, // $XCL_BINDIR-specified
         "xclbin",   // command line build
         "..",       // gui build + run
         ".",        // gui build, run in build directory
-        xcl_bindir, // $XCL_BINDIR-specified
         NULL
     };
+    const char **search_dirs = dirs;
+    if (xcl_bindir == NULL) {
+    	search_dirs++;
+    }
 
     char *device_name = strdup(world.device_name);
     if (device_name == NULL) {
@@ -309,31 +313,40 @@ cl_program xcl_import_binary(xcl_world world,
     }
 
     const char *file_patterns[] = {
-        "%1$s/%2$s.xclbin",               // <kernel>.xclbin
-        "%1$s/binary_container_1.xclbin", // default for gui projects
         "%1$s/%2$s.%3$s.%4$s.xclbin",     // <kernel>.<target>.<device>.xclbin
+        "%1$s/binary_container_1.xclbin", // default for gui projects
+        "%1$s/%2$s.xclbin",               // <kernel>.xclbin
         NULL
     };
     char xclbin_file_name[PATH_MAX];
     memset(xclbin_file_name, 0, PATH_MAX);
-    for (const char **dir = dirs; *dir != NULL; dir++) {
+    for (const char **dir = search_dirs; *dir != NULL; dir++) {
         struct stat sb;
         if (stat(*dir, &sb) == 0 && S_ISDIR(sb.st_mode)) {
             for (const char **pattern = file_patterns; *pattern != NULL; pattern++) {
-                snprintf(xclbin_file_name, PATH_MAX, *pattern, *dir, xclbin_name, world.mode, device_name);
-                if (stat(xclbin_file_name, &sb) == 0 && S_ISREG(sb.st_mode)) {
+                char file_name[PATH_MAX];
+                memset(file_name, 0, PATH_MAX);
+                snprintf(file_name, PATH_MAX, *pattern, *dir, xclbin_name, world.mode, device_name);
+                if (stat(file_name, &sb) == 0 && S_ISREG(sb.st_mode)) {
                     world.bindir = strdup(*dir);
                     if (world.bindir == NULL) {
                         printf("Error: Out of Memory\n");
                         exit(EXIT_FAILURE);
                     }
-                    goto found_xclbin;
+                    if (*xclbin_file_name) {
+                    	printf("Error: multiple xclbin files discovered:\n %s\n %s\n", file_name, xclbin_file_name);
+                    	exit(EXIT_FAILURE);
+                    }
+                    strncpy(xclbin_file_name, file_name, PATH_MAX);
                 }
             }
         }
     }
+	// if no xclbin found, preferred path for error message from xcl_import_binary_file()
+    if (*xclbin_file_name == '\0') {
+        snprintf(xclbin_file_name, PATH_MAX, file_patterns[0], *search_dirs, xclbin_name, world.mode, device_name);
+    }
 
-found_xclbin:
     free(device_name);
 
     return xcl_import_binary_file(world, xclbin_file_name);
