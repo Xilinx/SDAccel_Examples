@@ -38,11 +38,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 int main(int argc, char** argv)
 {
-   int err;                            // error code returned from api calls
    int check_status = 0;
-
-   size_t global[1];                   // global domain size for our calculation
-   size_t local[1];                    // local domain size for our calculation
 
    int h_a[LENGTH];                    // host memory for a vector
    int h_b[LENGTH];                    // host memory for b vector
@@ -70,28 +66,12 @@ int main(int argc, char** argv)
    xcl_memcpy_to_device(world, d_a, h_a, sizeof(int) * LENGTH);
    xcl_memcpy_to_device(world, d_b, h_b, sizeof(int) * LENGTH);
 
-   err = 0;
-   err  = clSetKernelArg(krnl_vmul, 0, sizeof(cl_mem), &d_a);
-   err |= clSetKernelArg(krnl_vmul, 1, sizeof(cl_mem), &d_b);
-   err |= clSetKernelArg(krnl_vmul, 2, sizeof(cl_mem), &d_mul_c);
-   if (err != CL_SUCCESS) {
-      printf("Error: Failed to set kernel arguments! %d\n", err);
-      return EXIT_FAILURE;
-   }
+   xcl_set_kernel_arg(krnl_vmul, 0, sizeof(cl_mem), &d_a);
+   xcl_set_kernel_arg(krnl_vmul, 1, sizeof(cl_mem), &d_b);
+   xcl_set_kernel_arg(krnl_vmul, 2, sizeof(cl_mem), &d_mul_c);
 
-   // Execute the kernel over the entire range of our 1d input data set
-   // using the maximum number of work group items for this device
-   //
-   global[0] = NUM_WORKGROUPS * WORKGROUP_SIZE;
-   local[0] = WORKGROUP_SIZE;
-   err = clEnqueueNDRangeKernel(world.command_queue, krnl_vmul, 1, NULL,
-                                (size_t*)&global, (size_t*)&local, 0, NULL, NULL);
-
-   if (err) {
-      printf("Error: Failed to execute kernel! %d\n", err);
-      return EXIT_FAILURE;
-   }
-
+   // This function will execute the kernel on the FPGA
+   xcl_run_kernel3d(world,krnl_vmul,1,1,1);
    xcl_memcpy_from_device(world, h_c, d_mul_c, sizeof(int) * LENGTH);
 
    // Check Results
@@ -102,7 +82,7 @@ int main(int argc, char** argv)
       }
    }
 
-   //XPR Platform (Xilinx Expanded Partial Reconfiguration Platform) supports larger Kernel
+   //XPR Platform (Xilinx Extended Partial Reconfiguration Platform) supports larger Kernel
    // binaries compare to non-XPR Platform. However this platform has one limitation with
    // respect non-XPR, it does not persist the Global Memory(DDR) content when user switches
    // between multiple binaries. So for such case, user should be responsible to 
@@ -110,11 +90,10 @@ int main(int argc, char** argv)
    // device after second binary is imported
    
    // Migrating Buffer from Device to Host
-   err = clEnqueueMigrateMemObjects(world.command_queue, 1, &d_mul_c,CL_MIGRATE_MEM_OBJECT_HOST,
+   int err = clEnqueueMigrateMemObjects(world.command_queue, 1, &d_mul_c,CL_MIGRATE_MEM_OBJECT_HOST,
                                    0, NULL, NULL);
-
-   if (err){
-      printf("Error: Failed to execute clEnqueueMigrateMemObjects()! %d\n", err);
+   if (err) {
+      printf("Error: Failed to run clEnqueueMigrateMemObjects()! %d\n", err);
       return EXIT_FAILURE;
    }
 
@@ -129,31 +108,18 @@ int main(int argc, char** argv)
    err = clEnqueueMigrateMemObjects(world.command_queue, 1, &d_mul_c,
                                    0 /* flags, 0 means from host to device */,
                                    0, NULL, NULL);
-
-   // Set the arguments to our compute kernel
-   //
-   err = 0;
-   //use the results from vmul as a and b inputs for vadd
-   err  = clSetKernelArg(krnl_vadd, 0, sizeof(cl_mem), &d_mul_c);
-   err |= clSetKernelArg(krnl_vadd, 1, sizeof(cl_mem), &d_mul_c);
-   err |= clSetKernelArg(krnl_vadd, 2, sizeof(cl_mem), &d_add_c);
-   if (err != CL_SUCCESS) {
-      printf("Error: Failed to set kernel arguments! %d\n", err);
-      return EXIT_FAILURE;
-   }
-
-   // Execute the kernel over the entire range of our 1d input data set
-   // using the maximum number of work group items for this device
-   //
-   global[0] = NUM_WORKGROUPS * WORKGROUP_SIZE;
-   local[0] = WORKGROUP_SIZE;
-   err = clEnqueueNDRangeKernel(world.command_queue, krnl_vadd, 1, NULL,
-                                 (size_t*)&global, (size_t*)&local, 0, NULL, NULL);
    if (err) {
-      printf("Error: Failed to execute kernel! %d\n", err);
+      printf("Error: Failed to run clEnqueueMigrateMemObjects()! %d\n", err);
       return EXIT_FAILURE;
    }
 
+   //use the results from vmul as a and b inputs for vadd
+   xcl_set_kernel_arg(krnl_vadd, 0, sizeof(cl_mem), &d_mul_c);
+   xcl_set_kernel_arg(krnl_vadd, 1, sizeof(cl_mem), &d_mul_c);
+   xcl_set_kernel_arg(krnl_vadd, 2, sizeof(cl_mem), &d_add_c);
+
+   // This function will execute the kernel on the FPGA
+   xcl_run_kernel3d(world,krnl_vadd,1,1,1);
    xcl_memcpy_from_device(world, h_c, d_add_c, sizeof(int) * LENGTH);
 
    // Check Results
@@ -178,9 +144,9 @@ int main(int argc, char** argv)
    xcl_release_world(world);
 
    if (check_status) {
-      printf("INFO: Test failed\n");
+      printf("TEST FAILED\n");
       return EXIT_FAILURE;
    } else {
-      printf("INFO: Test passed\n");
+      printf("TEST PASSED\n");
    }
 }
