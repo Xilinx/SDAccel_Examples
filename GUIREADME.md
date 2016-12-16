@@ -14,19 +14,19 @@ The steps described in this document use the hello example application as a refe
 
 - In the *Templates* page, select **Empty Application**
 
-![empty application select](./img/empty_app.png =472x200)
+![empty application select](./img/empty_app.png)
 
 - In the new project, right-click on the **src** folder, and select **Import...** to start the file import Wizard
 
 - In the *Import* wizard, select **General > File Systems** and click **Next**
 
-![file system select](./img/filesystem.png =472x400)
+![file system select](./img/filesystem.png)
 
 - Browse to the *src* directory for the *hello example design*
 
 - Select all of the source files and click **Finish**
 
-![source file select](./img/src_select.png =472x400)
+![source file select](./img/src_select.png)
 
 - The *Project Explorer* should look like
 
@@ -44,7 +44,7 @@ The steps described in this document use the hello example application as a refe
 
 - Select the *xcl.c* and *xcl.h* files and click **Finish**
 
-![library files](./img/lib_files.png =472x400)
+![library files](./img/lib_files.png)
 
 - Select the project in the **Project Explorer**
 
@@ -52,7 +52,7 @@ The steps described in this document use the hello example application as a refe
 
 - Select **C/C++ Build > Settings**
 
-![settings](./img/settings.png =472x400)
+![settings](./img/settings.png)
 
 - In the **Configuration** menu, select *[All Configurations]*
 
@@ -60,13 +60,13 @@ The steps described in this document use the hello example application as a refe
 
 - In the **Include paths (-I)**, click **Add**
 
-![Include Path](./img/add_path.png =472x200)
+![Include Path](./img/add_path.png)
 
 - In the **Project Settings** window, click **Add HW Function...***
 
 - Select *krnl_hello* and click **OK**. This will add the accelerator function for the *hello example* to the project
 
-![hardware function](./img/hardware_function.png =472x400)
+![hardware function](./img/hardware_function.png)
 
 ### Configuring the Build Environment
 
@@ -74,7 +74,7 @@ Once the project has been setup, the build configuration has to be updated to co
 
 - Open the **Run Configuration** panel
 
-![Run Configuration](./img/build_config.png =472x400)
+![Run Configuration](./img/build_config.png)
 
 - Click the **Environment** tab
 
