@@ -17,6 +17,7 @@ huffman_LDFLAGS=$(opencl_LDFLAGS)
 
 # Huffman Codec Kernel
 krnl_huffman_SRCS=./src/krnl_huffman_singleptr.cl
+krnl_huffman_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 
 EXES=huffman
 XCLBINS=krnl_huffman
@@ -25,6 +26,8 @@ XCLBINS=krnl_huffman
 check_EXE=huffman
 check_XCLBINS=krnl_huffman
 check_ARGS=-b data/rect_1024.bmp
+check_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
+
 CHECKS=check
 
 include ../../utility/rules.mk

@@ -15,6 +15,7 @@ sha1_LDFLAGS=$(opencl_LDFLAGS) -lrt
 krnl_sha1_SRCS=./src/krnl_clSha1.cl
 krnl_sha1_HDRS=./src/clSha1.h
 krnl_sha1_CLFLAGS=--nk dev_sha1_update:2
+krnl_sha1_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 
 EXES=sha1
 XCLBINS=krnl_sha1
@@ -22,6 +23,7 @@ XCLBINS=krnl_sha1
 # check
 check_EXE=sha1
 check_XCLBINS=krnl_sha1
+check_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 
 # Pattern to allow cmdline to determine xclbin name
 define mk_args

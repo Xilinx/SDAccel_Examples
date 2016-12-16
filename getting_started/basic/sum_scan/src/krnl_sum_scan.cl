@@ -99,12 +99,12 @@ bus_t sum_scan(float *sum, bus_t g_in[HIST_LENGTH+1], uint i) {
 	}
 	
 	/* Sum Scan for incoming block */
-	for(uint d = 0; d < 4; d++) {
+	for(uint d = 0; d < LOG2_B; d++) {
 		uint o0 = B*HIST_LENGTH;
 		uint o1 = 1<<d;
 		uint o2 = 1<<(d+1);
 
-		for(uint k = 1; k <= (1<<(4-1-d)); k++) {
+		for(uint k = 1; k <= (1<<(LOG2_B-1-d)); k++) {
 			for(uint j =  0; j < (1<<d); j++) {
 				in[o0+k*o2-j-1] = in[o0+k*o2-j-1] + in[o0+k*o2-o1-1];
 			}

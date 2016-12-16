@@ -15,6 +15,7 @@ rsa_LDFLAGS=$(opencl_LDFLAGS)
 # RSA Kernel
 krnl_rsa_SRCS=./src/krnl_rsa.cpp
 krnl_rsa_CLFLAGS=--kernel rsa
+krnl_rsa_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 
 EXES=rsa
 XCLBINS=krnl_rsa
@@ -23,6 +24,7 @@ XCLBINS=krnl_rsa
 check_EXE=rsa
 check_XCLBINS=krnl_rsa
 check_ARGS=--in data/0_0_2048_key.cip --out data/0_out.msg --key data/0_2048_key.pem
+check_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 
 CHECKS=check
 

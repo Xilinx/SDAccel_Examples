@@ -21,6 +21,7 @@ smithwaterman_LDFLAGS=$(opencl_LDFLAGS) -fopenmp -lz
 krnl_smithwaterman_SRCS=./src/opencl_sw_maxscore_systolic.cpp
 krnl_smithwaterman_HDRS=./src/sw.h
 krnl_smithwaterman_CLFLAGS=--kernel opencl_sw_maxscore
+krnl_smithwaterman_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 
 EXES=smithwaterman
 XCLBINS=krnl_smithwaterman
@@ -28,6 +29,7 @@ XCLBINS=krnl_smithwaterman
 # check
 check_EXE=smithwaterman
 check_XCLBINS=krnl_smithwaterman
+check_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 
 CHECKS=check
 
