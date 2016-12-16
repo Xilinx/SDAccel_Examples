@@ -74,8 +74,6 @@ module add vivado_hls/2016.3_daily
 module add sdaccel/2016.3_daily
 module add opencv/vivado_hls
 
-module add proxy
-
 cd ${dir}
 
 echo
@@ -89,9 +87,9 @@ rsync -rL \$XILINX_SDX/Vivado_HLS/lnx64/tools/opencv/ lib/
 make TARGETS=${target} DEVICES=\"${devices}\" all
 
 """
-				}
-				retry(3) {
-					sh """#!/bin/bash -e
+			}
+			retry(3) {
+				sh """#!/bin/bash -e
 
 cd ${workdir}
 
@@ -116,8 +114,6 @@ echo
 make TARGETS=${target} DEVICES=\"${devices}\" check
 
 """
-					}
-				}
 			}
 		}
 	}
