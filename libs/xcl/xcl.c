@@ -320,6 +320,7 @@ cl_program xcl_import_binary(xcl_world world,
     };
     char xclbin_file_name[PATH_MAX];
     memset(xclbin_file_name, 0, PATH_MAX);
+    ino_t ino = 0; // used to avoid errors if an xclbin found via multiple/repeated paths
     for (const char **dir = search_dirs; *dir != NULL; dir++) {
         struct stat sb;
         if (stat(*dir, &sb) == 0 && S_ISDIR(sb.st_mode)) {
@@ -333,10 +334,11 @@ cl_program xcl_import_binary(xcl_world world,
                         printf("Error: Out of Memory\n");
                         exit(EXIT_FAILURE);
                     }
-                    if (*xclbin_file_name) {
+                    if (*xclbin_file_name && sb.st_ino != ino) {
                     	printf("Error: multiple xclbin files discovered:\n %s\n %s\n", file_name, xclbin_file_name);
                     	exit(EXIT_FAILURE);
                     }
+                    ino = sb.st_ino;
                     strncpy(xclbin_file_name, file_name, PATH_MAX);
                 }
             }
