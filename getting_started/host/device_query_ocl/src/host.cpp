@@ -155,7 +155,7 @@ pair<int, const char*> device_info[] = {
     {CL_DEVICE_PRINTF_BUFFER_SIZE, "printf buffer size"}};
 
 template <typename T, size_t N>
-size_t sizeof_array(T (&)[N]) {
+int sizeof_array(T (&)[N]) {
     return N;
 }
 
@@ -251,7 +251,7 @@ void print_device_info(cl_device_id device) {
                 clGetDeviceInfo(device, CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS,
                                 sizeof(size_t), &max_dim, nullptr);
                 printf("[  ");
-                for (int i = 0; i < max_dim; i++) {
+                for (int i = 0; i < (int)max_dim; i++) {
                     printf("\b%zu  ",
                            convert<size_t>(&field[i * sizeof(size_t)]));
                 }
@@ -360,18 +360,15 @@ void print_device_info(cl_device_id device) {
 // This example prints devices available on this machine and their
 // corresponding capabilities.
 int main(int argc, char** argv) {
-    cl_int err = CL_SUCCESS;
-    cl_device_id device = 0;
-
     // sets environment variables
-    xcl_world world = xcl_world_single();
+    xcl_world __attribute__((unused))world = xcl_world_single();
 
     // The following call retrieves the total number of platforms available
     cl_uint platform_count;
     OCL_CHECK(clGetPlatformIDs(0, nullptr, &platform_count));
     vector<cl_platform_id> platforms(platform_count);
     OCL_CHECK(clGetPlatformIDs(platform_count, platforms.data(), nullptr));
-    for (int p = 0; p < platform_count; ++p) {
+    for (int p = 0; p < (int)platform_count; ++p) {
         print_platform_info(platforms[p]);
         cl_uint device_count = 0;
         OCL_CHECK(clGetDeviceIDs(platforms[p], CL_DEVICE_TYPE_ALL, 0, nullptr,
@@ -379,7 +376,7 @@ int main(int argc, char** argv) {
         vector<cl_device_id> devices(device_count);
         OCL_CHECK(clGetDeviceIDs(platforms[p], CL_DEVICE_TYPE_ALL, device_count,
                                  devices.data(), nullptr));
-        for (int d = 0; d < device_count; ++d) {
+        for (int d = 0; d < (int)device_count; ++d) {
             clGetDeviceInfo(devices[d], CL_DEVICE_NAME, field.size(),
                             (void*)field.data(), nullptr);
             printf("Device %d: %s\n", d, field.c_str());
