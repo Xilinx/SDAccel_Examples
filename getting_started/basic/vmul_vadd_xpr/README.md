@@ -1,4 +1,4 @@
-Printf Usage in Kernel code
+Vector Add - Vector Multiplication for XPR Devices
 ======================
 
 This README file contains the following sections:
@@ -16,11 +16,11 @@ This README file contains the following sections:
 
 
 ## 1. OVERVIEW
-This is simple example of vector addition and printing of data that is computational result (addition). It is based on vectored addition that demonstrates printing of work item data (integer product in this case)
+This example shows how data stored in global memory should be migrated from device to host and later from host to device to share between kernels in different binary containers. This buffer migration is only needed for XPR(Extended Partial Reconfiguration) Specific Devices. As XPR devices do not persist data when user reload another binary container.
 
-***KEY CONCEPTS:*** Use of print statements for debugging
+***KEY CONCEPTS:*** Handling Buffer sharing across multiple binaries for XPR Platform, Multiple Kernel Binaries, Buffer sharing across Multiple binaries
 
-***KEYWORDS:*** printf
+***KEYWORDS:*** clEnqueueMigrateMemObjects(), CL_MIGRATE_MEM_OBJECT_HOST
 
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
@@ -54,9 +54,9 @@ Application code is located in the src directory. Accelerator binary files will 
 ├── Makefile
 ├── README.md
 ├── src
-│   ├── host.cpp
-│   ├── host.h
-│   └── vadd.cl
+│   ├── krnl_vadd.cl
+│   ├── krnl_vmul.cl
+│   └── main.c
 └── xclbin
 
 2 directories, 6 files
@@ -104,7 +104,7 @@ emconfigutil --xdevice 'xilinx:adm-pcie-ku3:2ddr-xpr:3.2' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./host
+./vaddvmul
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card
@@ -139,7 +139,7 @@ make check
 
 * Use the following command to launch the application from the users terminal (on a system outside of the Nimbix environment)
 ```
-../../../utility/nimbix/nimbix-run.py ./host
+../../../utility/nimbix/nimbix-run.py ./vaddvmul
 ```
 
 ***Copy the application files from the Developer to Runtime instances on Nimbix***
@@ -147,7 +147,7 @@ make check
 * Launch the application using the Nimbix web interface as described in [Nimbix Getting Started Guide][]
 * Make sure that the application launch options in the Nimbix web interface reflect the applications command line syntax
 ```
-./host
+./vaddvmul
 ```
 
 ## 6. COMPILATION AND EXECUTION FOR IBM POWER SERVERS
@@ -178,7 +178,9 @@ This example is written by developers at
 ## 10. REVISION HISTORY
 Date | README Version | Description
 -----|----------------|------------
-DEC2016|1.0|Initial Xilinx Release
+FEB2016|1.0|Initial Xilinx Release
+JUL2016|2.0|Conversion to Makefile based compilation
+DEC2016|3.0|Update for SDAccel 2016.3
 
 [3-Clause BSD License]:../../../LICENSE.txt
 [SDAccel Forums]: https://forums.xilinx.com/t5/SDAccel/bd-p/SDx

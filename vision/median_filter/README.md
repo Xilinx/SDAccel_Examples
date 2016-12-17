@@ -1,4 +1,4 @@
-Median Filter Example 
+Median Filter
 ======================
 
 This README file contains the following sections:
@@ -31,10 +31,10 @@ where examples is the name of the directory where the repository will be stored 
 
 *NOTE: If the destination of the repository is the user home directory in the Nimbix SDAccel developer instance, the command will need to be executed for every session. Contents of the user home directory in the Nimbix SDAccel developer instance are not preserved between user sessions. Only files placed in the /data directory are kept between SDAccel development sessions.*
 ## 3. SOFTWARE AND SYSTEM REQUIREMENTS
-Board | Device Name | Software Version
-------|-------------|---------
-Alpha Data ADM-PCIE-7V3|xilinx:adm-pcie-7v3:1ddr:3.2|SDAccel 2016.3
-Alpha Data ADM-PCIE-KU3|xilinx:adm-pcie-ku3:2ddr-xpr:3.2|SDAccel 2016.3
+Board | Device Name | Software Version | NIMBIX Machine Type
+------|-------------|------------------|--------------------
+Alpha Data ADM-PCIE-7V3|xilinx:adm-pcie-7v3:1ddr:3.0|SDAccel 2016.3|nx2
+Alpha Data ADM-PCIE-KU3|xilinx:adm-pcie-ku3:2ddr-xpr:3.2|SDAccel 2016.3|nx1
 
 
 Board targeted by default = ***Alpha Data ADM-PCIE-KU3***

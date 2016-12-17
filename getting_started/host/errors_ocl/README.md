@@ -1,4 +1,4 @@
-Printf Usage in Kernel code
+Error Handling
 ======================
 
 This README file contains the following sections:
@@ -16,11 +16,11 @@ This README file contains the following sections:
 
 
 ## 1. OVERVIEW
-This is simple example of vector addition and printing of data that is computational result (addition). It is based on vectored addition that demonstrates printing of work item data (integer product in this case)
+This example discuss the different reasons for errors in OpenCL and how to handle them at runtime.
 
-***KEY CONCEPTS:*** Use of print statements for debugging
+***KEY CONCEPTS:*** OpenCL API, Error handling
 
-***KEYWORDS:*** printf
+***KEYWORDS:*** CL_SUCCESS, CL_DEVICE_NOT_FOUND, CL_DEVICE_NOT_AVAILABLE
 
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
@@ -53,13 +53,11 @@ Application code is located in the src directory. Accelerator binary files will 
 ├── description.json
 ├── Makefile
 ├── README.md
-├── src
-│   ├── host.cpp
-│   ├── host.h
-│   └── vadd.cl
-└── xclbin
+└── src
+    ├── host.cpp
+    └── vector_addition.cl
 
-2 directories, 6 files
+1 directory, 5 files
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS
@@ -104,7 +102,7 @@ emconfigutil --xdevice 'xilinx:adm-pcie-ku3:2ddr-xpr:3.2' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./host
+./errors ./xclbin/vector_addition.<emulation target>.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card
@@ -139,7 +137,7 @@ make check
 
 * Use the following command to launch the application from the users terminal (on a system outside of the Nimbix environment)
 ```
-../../../utility/nimbix/nimbix-run.py ./host
+../../../utility/nimbix/nimbix-run.py ./errors ./xclbin/vector_addition.hw.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin
 ```
 
 ***Copy the application files from the Developer to Runtime instances on Nimbix***
@@ -147,7 +145,7 @@ make check
 * Launch the application using the Nimbix web interface as described in [Nimbix Getting Started Guide][]
 * Make sure that the application launch options in the Nimbix web interface reflect the applications command line syntax
 ```
-./host
+./errors ./xclbin/vector_addition.<emulation target>.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin
 ```
 
 ## 6. COMPILATION AND EXECUTION FOR IBM POWER SERVERS

@@ -1,4 +1,4 @@
-Printf Usage in Kernel code
+Multiple FPGA Devices Execution Concurrently
 ======================
 
 This README file contains the following sections:
@@ -16,11 +16,11 @@ This README file contains the following sections:
 
 
 ## 1. OVERVIEW
-This is simple example of vector addition and printing of data that is computational result (addition). It is based on vectored addition that demonstrates printing of work item data (integer product in this case)
+This example show how to take advantage of multiple FPGAs on a system. It will show how to initialized an OpenCL context, allocate memory on the two devices and execute a kernel on each FPGA.
 
-***KEY CONCEPTS:*** Use of print statements for debugging
+***KEY CONCEPTS:*** OpenCL API, Multi-FPGA Execution, Event Handling
 
-***KEYWORDS:*** printf
+***KEYWORDS:*** cl_device_id, clGetDeviceIDs()
 
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
@@ -55,11 +55,10 @@ Application code is located in the src directory. Accelerator binary files will 
 ├── README.md
 ├── src
 │   ├── host.cpp
-│   ├── host.h
-│   └── vadd.cl
+│   └── vector_addition.cl
 └── xclbin
 
-2 directories, 6 files
+2 directories, 5 files
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS
@@ -104,7 +103,7 @@ emconfigutil --xdevice 'xilinx:adm-pcie-ku3:2ddr-xpr:3.2' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./host
+./multiple_devices xclbin/vector_addition.<emulation target>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card
@@ -139,7 +138,7 @@ make check
 
 * Use the following command to launch the application from the users terminal (on a system outside of the Nimbix environment)
 ```
-../../../utility/nimbix/nimbix-run.py ./host
+../../../utility/nimbix/nimbix-run.py ./multiple_devices xclbin/vector_addition.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin
 ```
 
 ***Copy the application files from the Developer to Runtime instances on Nimbix***
@@ -147,7 +146,7 @@ make check
 * Launch the application using the Nimbix web interface as described in [Nimbix Getting Started Guide][]
 * Make sure that the application launch options in the Nimbix web interface reflect the applications command line syntax
 ```
-./host
+./multiple_devices xclbin/vector_addition.<emulation target>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin
 ```
 
 ## 6. COMPILATION AND EXECUTION FOR IBM POWER SERVERS

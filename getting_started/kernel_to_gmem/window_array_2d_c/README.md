@@ -1,4 +1,4 @@
-Window of 2D Array Example Using AXI4-master interface Example 
+Read/Write Window of 2D Array
 ======================
 
 This README file contains the following sections:
@@ -20,7 +20,7 @@ This is a simple example of accessing each window of data from 2d array
 
 ***KEY CONCEPTS:*** window of 2D data array access
 
-***KEYWORDS:*** burst, window
+***KEYWORDS:*** #pragma HLS DATAFLOW, #pragma HLS PIPELINE, #pragma HLS stream
 
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
@@ -31,11 +31,11 @@ where examples is the name of the directory where the repository will be stored 
 
 *NOTE: If the destination of the repository is the user home directory in the Nimbix SDAccel developer instance, the command will need to be executed for every session. Contents of the user home directory in the Nimbix SDAccel developer instance are not preserved between user sessions. Only files placed in the /data directory are kept between SDAccel development sessions.*
 ## 3. SOFTWARE AND SYSTEM REQUIREMENTS
-Board | Device Name | Software Version
-------|-------------|---------
-Alpha Data ADM-PCIE-7V3|xilinx:adm-pcie-7v3:1ddr:3.2|SDAccel 2016.3
-Alpha Data ADM-PCIE-KU3|xilinx:adm-pcie-ku3:2ddr-xpr:3.2|SDAccel 2016.3
-Xilinx KU115|xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2|SDAccel 2016.3
+Board | Device Name | Software Version | NIMBIX Machine Type
+------|-------------|------------------|--------------------
+Alpha Data ADM-PCIE-7V3|xilinx:adm-pcie-7v3:1ddr:3.0|SDAccel 2016.3|nx2
+Alpha Data ADM-PCIE-KU3|xilinx:adm-pcie-ku3:2ddr-xpr:3.2|SDAccel 2016.3|nx1
+Xilinx KU115|xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2|SDAccel 2016.3|nx3
 
 
 Board targeted by default = ***Alpha Data ADM-PCIE-KU3***

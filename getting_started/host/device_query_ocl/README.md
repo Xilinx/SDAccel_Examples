@@ -1,4 +1,4 @@
-Device Query Example 
+Device Query
 ======================
 
 This README file contains the following sections:
@@ -20,7 +20,7 @@ This example prints the OpenCL properties of the platform and its devices. It al
 
 ***KEY CONCEPTS:*** OpenCL API, Querying device properties
 
-***KEYWORDS:*** Write Buffers, Read Buffers, Map Buffer, Async Memcpy
+***KEYWORDS:*** clGetPlatformIDs(), clGetPlatformInfo(), clGetDeviceIDs(), clGetDeviceInfo()
 
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
@@ -31,11 +31,11 @@ where examples is the name of the directory where the repository will be stored 
 
 *NOTE: If the destination of the repository is the user home directory in the Nimbix SDAccel developer instance, the command will need to be executed for every session. Contents of the user home directory in the Nimbix SDAccel developer instance are not preserved between user sessions. Only files placed in the /data directory are kept between SDAccel development sessions.*
 ## 3. SOFTWARE AND SYSTEM REQUIREMENTS
-Board | Device Name | Software Version
-------|-------------|---------
-Alpha Data ADM-PCIE-7V3|xilinx:adm-pcie-7v3:1ddr:3.2|SDAccel 2016.3
-Alpha Data ADM-PCIE-KU3|xilinx:adm-pcie-ku3:2ddr-xpr:3.2|SDAccel 2016.3
-Xilinx KU115|xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2|SDAccel 2016.3
+Board | Device Name | Software Version | NIMBIX Machine Type
+------|-------------|------------------|--------------------
+Alpha Data ADM-PCIE-7V3|xilinx:adm-pcie-7v3:1ddr:3.0|SDAccel 2016.3|nx2
+Alpha Data ADM-PCIE-KU3|xilinx:adm-pcie-ku3:2ddr-xpr:3.2|SDAccel 2016.3|nx1
+Xilinx KU115|xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2|SDAccel 2016.3|nx3
 
 
 Board targeted by default = ***Alpha Data ADM-PCIE-KU3***
@@ -101,7 +101,7 @@ emconfigutil --xdevice 'xilinx:adm-pcie-ku3:2ddr-xpr:3.2' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./host
+./device_query
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card
@@ -136,7 +136,7 @@ make check
 
 * Use the following command to launch the application from the users terminal (on a system outside of the Nimbix environment)
 ```
-../../../utility/nimbix/nimbix-run.py ./host
+../../../utility/nimbix/nimbix-run.py ./device_query
 ```
 
 ***Copy the application files from the Developer to Runtime instances on Nimbix***
@@ -144,7 +144,7 @@ make check
 * Launch the application using the Nimbix web interface as described in [Nimbix Getting Started Guide][]
 * Make sure that the application launch options in the Nimbix web interface reflect the applications command line syntax
 ```
-./host
+./device_query
 ```
 
 ## 6. COMPILATION AND EXECUTION FOR IBM POWER SERVERS
