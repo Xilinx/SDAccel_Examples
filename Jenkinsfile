@@ -6,7 +6,8 @@ artifactNumToKeepStr: '', daysToKeepStr: '30', numToKeepStr: '5')), [$class:
 'https://gitenterprise.xilinx.com/SDx-Hub/apps/'], pipelineTriggers([[$class:
 'GitHubPushTrigger']])])
 
-devices  = 'xilinx:adm-pcie-7v3:1ddr:3.0'
+devices = ''
+//devices += ' xilinx:adm-pcie-7v3:1ddr:3.0'
 devices += ' xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2'
 devices += ' xilinx:adm-pcie-ku3:2ddr-xpr:3.2'
 
