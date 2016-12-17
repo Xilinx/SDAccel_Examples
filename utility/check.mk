@@ -1,6 +1,6 @@
 # check.mk - defines rules for testing
 
-NIMBIX_DSA_xilinx_adm-pcie-ku3_2ddr-xpr_3_2 = nx1test
+NIMBIX_DSA_xilinx_adm-pcie-ku3_2ddr-xpr_3_2 = nx1
 NIMBIX_DSA_xilinx_adm-pcie-7v3_1ddr_3_0 = nx2
 NIMBIX_DSA_xilinx_xil-accel-rd-ku115_4ddr-xpr_3_2 = nx3
 
