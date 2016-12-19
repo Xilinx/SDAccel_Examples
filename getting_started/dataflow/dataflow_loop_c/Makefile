@@ -13,6 +13,7 @@ host_LDFLAGS=$(opencl_LDFLAGS)
 # Kernel
 adder_SRCS=./src/adder.cpp
 adder_CLFLAGS= -k adder
+adder_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.2 xilinx:adm-pcie-ku3:2ddr-xpr:3.2
 
 EXES=host
 XCLBINS=adder
@@ -20,6 +21,7 @@ XCLBINS=adder
 # check
 check_EXE=host
 check_XCLBINS=adder
+check_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.2 xilinx:adm-pcie-ku3:2ddr-xpr:3.2
 
 CHECKS=check
 
