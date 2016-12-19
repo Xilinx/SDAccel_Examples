@@ -14,9 +14,11 @@ vmulvadd_LDFLAGS=$(opencl_LDFLAGS)
 
 # vmul Kernel
 krnl_vmul_SRCS=./src/krnl_vmul.cl
+krnl_vmul_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 
 # vadd Kernel
 krnl_vadd_SRCS=./src/krnl_vadd.cl
+krnl_vadd_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 
 EXES=vmulvadd
 XCLBINS=krnl_vmul krnl_vadd
@@ -24,6 +26,7 @@ XCLBINS=krnl_vmul krnl_vadd
 # check
 check_EXE=vmulvadd
 check_XCLBINS=krnl_vmul krnl_vadd
+check_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 
 CHECKS=check
 
