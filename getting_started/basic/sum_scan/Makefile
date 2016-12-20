@@ -12,13 +12,14 @@ sum_scan_LDFLAGS=$(opencl_LDFLAGS)
 
 # sum_scan Kernel
 krnl_sum_scan_SRCS=./src/krnl_sum_scan.cl
-
+krnl_sum_scan_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 EXES=sum_scan
 XCLBINS=krnl_sum_scan
 
 # check
 check_EXE=sum_scan
 check_XCLBINS=krnl_sum_scan
+check_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 
 CHECKS=check
 
