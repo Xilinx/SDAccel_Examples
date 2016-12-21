@@ -25,7 +25,7 @@ check_TARGETS=sw_emu hw_emu
 
 # Pattern to allow cmdline to determine xclbin name
 define mk_args
-check_$(1)_$(call sanitize_dsa,$(2))_ARGS = ./xclbin/krnl_vector_addition.$(1).$(call sanitize_dsa,$(2)).xclbin
+check_$(1)_$(call sanitize_dsa,$(2))_ARGS = ./xclbin/vector_addition.$(1).$(call sanitize_dsa,$(2)).xclbin
 endef
 
 $(foreach target,$(TARGETS),$(foreach device,$(DEVICES),$(eval $(call mk_args,$(target),$(device)))))
