@@ -11,54 +11,6 @@ devices = ''
 devices += ' xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2'
 devices += ' xilinx:adm-pcie-ku3:2ddr-xpr:3.2'
 
-def examples = [
-	"acceleration/smithwaterman",
-	"acceleration/nearest_neighbor_linear_search",
-	"vision/huffman_codec",
-	"vision/convolve",
-	"vision/median_filter",
-	"vision/histogram_eq",
-	"vision/edge_detection",
-	"vision/affine",
-	"vision/watermarking",
-	"getting_started/kernel_opt/lmem_2rw_c",
-	"getting_started/kernel_opt/lmem_2rw_ocl",
-	"getting_started/kernel_opt/dependence_inter_c",
-	"getting_started/kernel_to_gmem/burst_rw_c",
-	"getting_started/kernel_to_gmem/custom_datatype_c",
-	"getting_started/kernel_to_gmem/full_array_2d_c",
-	"getting_started/kernel_to_gmem/gmem_2banks_ocl",
-	"getting_started/kernel_to_gmem/window_array_2d_c",
-	"getting_started/kernel_to_gmem/wide_mem_rw_c",
-	"getting_started/kernel_to_gmem/full_array_2d_ocl",
-	"getting_started/kernel_to_gmem/custom_datatype_ocl",
-	"getting_started/kernel_to_gmem/row_array_2d_c",
-	"getting_started/kernel_to_gmem/window_array_2d_ocl",
-	"getting_started/kernel_to_gmem/burst_rw_ocl",
-	"getting_started/kernel_to_gmem/gmem_2banks_c",
-	"getting_started/kernel_to_gmem/row_array_2d_ocl",
-	"getting_started/kernel_to_gmem/wide_mem_rw_ocl",
-	"getting_started/basic/sum_scan",
-	"getting_started/basic/vmul_vadd",
-	"getting_started/basic/vadd",
-	"getting_started/basic/vdotprod",
-	"getting_started/basic/hello",
-	"getting_started/basic/host_global_bandwidth",
-	"getting_started/basic/kernel_global_bandwidth",
-	"getting_started/host/device_query_ocl",
-	"getting_started/host/helloworld_ocl",
-	"getting_started/dataflow/dataflow_stream_array_c",
-	"getting_started/dataflow/dataflow_stream_c",
-	"getting_started/dataflow/dataflow_pipes_ocl",
-	"getting_started/dataflow/dataflow_loop_c",
-	"getting_started/debug/debug_printf_ocl",
-	"getting_started/debug/debug_profile_ocl",
-	"security/sha1",
-	"security/rsa",
-	"security/aes_decrypt",
-	"security/tiny_encryption",
-]
-
 def buildExample(target, dir, devices, workdir) {
 	return { ->
 		stage("${dir}-${target}") {
@@ -122,7 +74,15 @@ make TARGETS=${target} DEVICES=\"${devices}\" check
 }
 
 timestamps {
-node('rhel6 && xsjrdevl') {
+// Always build on the same host so that the workspace is reused
+node('rhel6 && xsjrdevl && xsjrdevl110') {
+	Calendar now = Calendar.getInstance();
+
+	if (now.get(Calendar.DAY_OF_WEEK) == Calendar.TUESDAY) {
+		stage('clean') {
+			sh 'echo "FIXME: Clean not implemented"'
+		}
+	}
 
 	stage("Checkout") {
 		checkout scm
@@ -142,16 +102,10 @@ node('rhel6 && xsjrdevl') {
 		step([$class: 'GitHubSetCommitStatusBuilder'])
 	}
 
-	Calendar now = Calendar.getInstance();
-
-	if (now.get(Calendar.DAY_OF_WEEK) == Calendar.TUESDAY || 
-	    ! fileExists('configure.mk') || ! fileExists('xilinx.lic') ) {
-		stage('clean') {
-			sh 'echo "FIXME: Clean not implemented"'
-		}
-	}
-
 	stage('Build') {
+		sh 'find . -name description.json | sed -e \'s/\\.\\///\' -e \'s/\\/description.json//\' > examples.dat'
+		examplesFile = readFile 'examples.dat'
+		examples = examplesFile.split('\\n')
 
 		workdir = pwd()
 
