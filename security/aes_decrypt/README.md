@@ -141,7 +141,7 @@ make check
 
 * Use the following command to launch the application from the users terminal (on a system outside of the Nimbix environment)
 ```
-../../utility/nimbix/nimbix-run.py ./aes -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:3.1' -k ./xclbin/krnl_aes.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin -b data/input.bmp
+../../utility/nimbix/nimbix-run.py -- ./aes -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:3.1' -k ./xclbin/krnl_aes.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin -b data/input.bmp
 ```
 
 ***Copy the application files from the Developer to Runtime instances on Nimbix***

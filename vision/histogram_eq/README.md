@@ -140,7 +140,7 @@ make check
 
 * Use the following command to launch the application from the users terminal (on a system outside of the Nimbix environment)
 ```
-../../utility/nimbix/nimbix-run.py ./equalizer data/race_2k.bmp
+../../utility/nimbix/nimbix-run.py -- ./equalizer data/race_2k.bmp
 ```
 
 ***Copy the application files from the Developer to Runtime instances on Nimbix***

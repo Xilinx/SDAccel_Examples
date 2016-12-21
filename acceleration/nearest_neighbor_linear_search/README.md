@@ -139,7 +139,7 @@ make check
 
 * Use the following command to launch the application from the users terminal (on a system outside of the Nimbix environment)
 ```
-../../utility/nimbix/nimbix-run.py ./nearest data/queries.txt data/queries.txt
+../../utility/nimbix/nimbix-run.py -- ./nearest data/queries.txt data/queries.txt
 ```
 
 ***Copy the application files from the Developer to Runtime instances on Nimbix***

@@ -148,7 +148,7 @@ make check
 
 * Use the following command to launch the application from the users terminal (on a system outside of the Nimbix environment)
 ```
-../../utility/nimbix/nimbix-run.py ./rsa -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:3.1' -k ./xclbin/krnl_rsa.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin --in data/0_0_1024_key.cip --out data/0_out.msg --key data/0_1024_key.pem
+../../utility/nimbix/nimbix-run.py -- ./rsa -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:3.1' -k ./xclbin/krnl_rsa.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin --in data/0_0_1024_key.cip --out data/0_out.msg --key data/0_1024_key.pem
 ```
 
 ***Copy the application files from the Developer to Runtime instances on Nimbix***

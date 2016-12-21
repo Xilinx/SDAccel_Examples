@@ -133,7 +133,7 @@ make check
 
 * Use the following command to launch the application from the users terminal (on a system outside of the Nimbix environment)
 ```
-../../../utility/nimbix/nimbix-run.py ./kernel_global
+../../../utility/nimbix/nimbix-run.py -- ./kernel_global
 ```
 
 ***Copy the application files from the Developer to Runtime instances on Nimbix***

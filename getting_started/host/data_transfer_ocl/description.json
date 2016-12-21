@@ -5,7 +5,7 @@
     "keywords": [ "clEnqueueWriteBuffer()" , "clEnqueueReadBuffer()", "clEnqueueMapBuffer()", "clEnqueueUnmapMemObject()"],
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
     "em_cmd": "./data_transfer",
-    "hw_cmd": "../../../utility/nimbix/nimbix-run.py ./data_transfer",
+    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./data_transfer",
     "contributors" : [
         {
             "group": "Xilinx",

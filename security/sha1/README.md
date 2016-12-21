@@ -139,7 +139,7 @@ make check
 
 * Use the following command to launch the application from the users terminal (on a system outside of the Nimbix environment)
 ```
-../../utility/nimbix/nimbix-run.py ./sha1 -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:3.1' -k ./xclbin/krnl_sha1.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin
+../../utility/nimbix/nimbix-run.py -- ./sha1 -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:3.1' -k ./xclbin/krnl_sha1.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin
 ```
 
 ***Copy the application files from the Developer to Runtime instances on Nimbix***

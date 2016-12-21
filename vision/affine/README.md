@@ -107,7 +107,7 @@ emconfigutil --xdevice 'xilinx:adm-pcie-ku3:2ddr-xpr:3.2' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-make xilinx_em
+./affine ./xclbin/krnl_affine.<emulation mode>.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card
@@ -142,7 +142,7 @@ make check
 
 * Use the following command to launch the application from the users terminal (on a system outside of the Nimbix environment)
 ```
-make xilinx_hw
+../../utility/nimbix/nimbix-run.py -- ./affine ./xclbin/krnl_affine.hw.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin
 ```
 
 ***Copy the application files from the Developer to Runtime instances on Nimbix***
@@ -150,7 +150,7 @@ make xilinx_hw
 * Launch the application using the Nimbix web interface as described in [Nimbix Getting Started Guide][]
 * Make sure that the application launch options in the Nimbix web interface reflect the applications command line syntax
 ```
-make xilinx_em
+./affine ./xclbin/krnl_affine.<emulation mode>.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin
 ```
 
 ## 6. COMPILATION AND EXECUTION FOR IBM POWER SERVERS

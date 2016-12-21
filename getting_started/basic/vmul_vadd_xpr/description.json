@@ -5,7 +5,7 @@
     "keywords": [ "clEnqueueMigrateMemObjects()", "CL_MIGRATE_MEM_OBJECT_HOST"],
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3",  "Xilinx KU115"],
     "em_cmd" : "./vaddvmul",
-    "hw_cmd" : "../../../utility/nimbix/nimbix-run.py ./vaddvmul",
+    "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./vaddvmul",
     "contributors" : [
         {
             "group": "Xilinx",

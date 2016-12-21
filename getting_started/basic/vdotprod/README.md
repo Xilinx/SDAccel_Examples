@@ -135,7 +135,7 @@ make check
 
 * Use the following command to launch the application from the users terminal (on a system outside of the Nimbix environment)
 ```
-../../../utility/nimbix/nimbix-run.py ./vdotprod
+../../../utility/nimbix/nimbix-run.py -- ./vdotprod
 ```
 
 ***Copy the application files from the Developer to Runtime instances on Nimbix***

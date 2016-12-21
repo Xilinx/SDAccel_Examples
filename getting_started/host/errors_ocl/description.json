@@ -5,7 +5,7 @@
     "keywords": [ "CL_SUCCESS", "CL_DEVICE_NOT_FOUND", "CL_DEVICE_NOT_AVAILABLE"],
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
     "em_cmd": "./errors ./xclbin/vector_addition.<emulation target>.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
-    "hw_cmd": "../../../utility/nimbix/nimbix-run.py ./errors ./xclbin/vector_addition.hw.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
+    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./errors ./xclbin/vector_addition.hw.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
     "contributors" : [
         {
             "group": "Xilinx",

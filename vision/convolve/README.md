@@ -143,7 +143,7 @@ make check
 
 * Use the following command to launch the application from the users terminal (on a system outside of the Nimbix environment)
 ```
-../../utility/nimbix/nimbix-run.py ./convolve data/input_buffer_raw.txt data/filter_buffer_raw.txt data/output_buffer_raw.txt
+../../utility/nimbix/nimbix-run.py -- ./convolve data/input_buffer_raw.txt data/filter_buffer_raw.txt data/output_buffer_raw.txt
 ```
 
 ***Copy the application files from the Developer to Runtime instances on Nimbix***

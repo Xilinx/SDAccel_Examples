@@ -58,9 +58,10 @@ Application code is located in the src directory. Accelerator binary files will 
 ├── src
 │   ├── krnl_watermarking.cl
 │   └── watermarking.cpp
+├── TempConfig
 └── xclbin
 
-3 directories, 7 files
+4 directories, 7 files
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS
@@ -140,7 +141,7 @@ make check
 
 * Use the following command to launch the application from the users terminal (on a system outside of the Nimbix environment)
 ```
-../../utility/nimbix/nimbix-run.py ./watermark data/inputImage.bmp ./xclbin/krnl_watermark.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin
+../../utility/nimbix/nimbix-run.py -- ./watermark data/inputImage.bmp ./xclbin/krnl_watermark.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin
 ```
 
 ***Copy the application files from the Developer to Runtime instances on Nimbix***

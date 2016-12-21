@@ -12,7 +12,7 @@
     "board" : ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
     "xcl": false,
     "em_cmd": "./equalizer data/race_2k.bmp",
-    "hw_cmd": "../../utility/nimbix/nimbix-run.py ./equalizer data/race_2k.bmp",
+    "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./equalizer data/race_2k.bmp",
     "contributors" : [
         {
             "group": "Xilinx",
