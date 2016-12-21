@@ -31,64 +31,64 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define WATERMARK_HEIGHT 10
 #define WATERMARK_WIDTH 10
 #define MAX_WIDTH  512
-#define height 64
-#define width 64
 
-int saturatedAdd(int x, int y)
+uint saturatedAdd(uint x, uint y)
 {
   // Separate into the different channels
-  int redX = x & 0xff ;
-  int redY = y & 0xff ;
-  int redOutput ;
+  uchar redX = x & 0xff;
+  uchar redY = y & 0xff;
+  uchar redOutput;
 
-  int greenX = (x & 0xff00) >> 8 ;
-  int greenY = (y & 0xff00) >> 8 ;
-  int greenOutput ;
+  uchar greenX = (x & 0xff00) >> 8;
+  uchar greenY = (y & 0xff00) >> 8;
+  uchar greenOutput;
 
-  int blueX = (x & 0xff0000) >> 16 ;
-  int blueY = (y & 0xff0000) >> 16 ;
-  int blueOutput ;
+  uchar blueX = (x & 0xff0000) >> 16;
+  uchar blueY = (y & 0xff0000) >> 16;
+  uchar blueOutput;
 
-  int combinedOutput = 0 ;
-
+  
   if (redX + redY > 255)
   {
-    redOutput = 255 ;
+    redOutput = 255;
   }
-  else 
+  else
   {
-    redOutput = redX + redY ;
+    redOutput = redX + redY;
   }
 
   if (greenX + greenY > 255)
   {
-    greenOutput = 255 ;
+    greenOutput = 255;
   }
-  else 
+  else
   {
-    greenOutput = greenX + greenY ;
+    greenOutput = greenX + greenY;
   }
 
   if (blueX + blueY > 255)
   {
-    blueOutput = 255 ;
+    blueOutput = 255;
   }
   else 
   {
-    blueOutput = blueX + blueY ;
+    blueOutput = blueX + blueY;
   }
 
-  combinedOutput |= redOutput ;
-  combinedOutput |= (greenOutput << 8) ;
-  combinedOutput |= (blueOutput << 16) ;
-  return combinedOutput ;
+  uint combinedOutput = 0;
+
+  combinedOutput |= redOutput;
+  combinedOutput |= (greenOutput << 8);
+  combinedOutput |= (blueOutput << 16);
+
+  return combinedOutput;
 
 }
 
 __kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
-void applyWatermark(__global const uint* input, __global uint* output) {
+void applyWatermark(__global const uint* input, __global uint* output, const uint gwidth, const uint gheight) {
 
-  const int watermark[WATERMARK_HEIGHT][WATERMARK_WIDTH] = 
+  const uint watermark[WATERMARK_HEIGHT][WATERMARK_WIDTH] =
   {
     { 0, 0,        0, 0, 0, 0, 0, 0, 0,        0 },
     { 0, 0x0f0f0f, 0, 0, 0, 0, 0, 0, 0x0f0f0f, 0 },
@@ -100,63 +100,23 @@ void applyWatermark(__global const uint* input, __global uint* output) {
     { 0, 0, 0x0f0f0f, 0, 0, 0, 0, 0x0f0f0f, 0, 0 },
     { 0, 0x0f0f0f, 0, 0, 0, 0, 0, 0, 0x0f0f0f, 0 },
     { 0, 0,        0, 0, 0, 0, 0, 0, 0,        0 }
-  } ;
+  };
 
- local uint linebuf[MAX_WIDTH];
- 
- local uint lineres[MAX_WIDTH];
- uint temp;
+  const uint width = gwidth;
+  const uint height = gheight;
 
-  // Process the whole image
+  uint row = 0, col = 0;
+  uint wrow = 0, wcol = 0;
+
   __attribute__((xcl_pipeline_loop))
-  for (int y = 0 ; y < height-WATERMARK_HEIGHT ; y += WATERMARK_HEIGHT)
+  for (size_t p = 0; p < height*width; p++)
   {
-     
-    __attribute__((opencl_unroll_hint))
-   
-    for (int i = 0 ; i < WATERMARK_HEIGHT ; ++i)
-    {
-      temp = width*(y+i) ; //compute when need
-      async_work_group_copy(linebuf, input+temp, width, 0);
+    output[p] = 
+      saturatedAdd(input[p], watermark[wrow][wcol]);
 
-
-      for(int x = 0 ; x < width-WATERMARK_WIDTH ; x += WATERMARK_WIDTH)
-      {
-
-        for (int j = 0 ; j < WATERMARK_WIDTH ; ++j)
-        {
-          
-          lineres[x + j] = 
-            saturatedAdd(linebuf[x + j], watermark[i][j]) ;
-        }
-       
-      }
-     
-      async_work_group_copy(output + temp, lineres, width, 0);
-      
-     }
-
-      // Finish off the last columns
-     //__attribute__((xcl_pipeline_loop))
-     for (int i = 0 ; i < WATERMARK_HEIGHT ; ++i)
-     {
-       temp = width*(y+i) ;   
-       async_work_group_copy(lineres+width-WATERMARK_WIDTH, input+temp+width-WATERMARK_WIDTH, WATERMARK_WIDTH, 0);
-       
-       async_work_group_copy(output+temp+width-WATERMARK_WIDTH,lineres+width-WATERMARK_WIDTH, WATERMARK_WIDTH, 0);
-       
-     }
-   
+    col = (col == width) ? 0 : col+1;
+    wcol = (wcol < WATERMARK_WIDTH) ? wcol+1 : 0;
+    row = (col == width) ? row+1 : row;
+    wrow = (col != width) ? wrow : (wrow < WATERMARK_WIDTH) ? wrow+1 : 0;
   }
-  // Finish off the last rows
-
-  //__attribute__((xcl_pipeline_loop))
- 
-  for (int y = height - WATERMARK_HEIGHT ; y < height ; ++y)
-  {
-     async_work_group_copy(linebuf, input+y*width, width, 0);
-     
-     async_work_group_copy(output + y*width, linebuf, width, 0);
-     
-   }
 }
