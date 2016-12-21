@@ -15,6 +15,7 @@ help::
 	$(ECHO) "		Command to remove the generated files."
 	$(ECHO) ""
 
+target_whitelist = $(if $($(1)_TARGETS), $($(1)_TARGETS), $(TARGETS))
 device_whitelist = $(if $($(1)_DEVICES), $($(1)_DEVICES), $(DEVICES))
 
 # mk_exe - build an exe from host code

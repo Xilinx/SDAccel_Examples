@@ -11,7 +11,6 @@ device_query_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS) $(oclHelper_CX
 device_query_LDFLAGS=$(opencl_LDFLAGS)
 
 EXES=device_query
-NUM_DEVICES:=2
 
 # check
 check_EXE=device_query

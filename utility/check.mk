@@ -1,12 +1,11 @@
 # check.mk - defines rules for testing
 
-NIMBIX_DSA_xilinx_adm-pcie-ku3_2ddr-xpr_3_2 = nx1
-NIMBIX_DSA_xilinx_adm-pcie-7v3_1ddr_3_0 = nx2
-NIMBIX_DSA_xilinx_xil-accel-rd-ku115_4ddr-xpr_3_2 = nx3
+NIMBIX_DSA_xilinx_adm-pcie-ku3_2ddr-xpr_3_2_1 = nx1
+NIMBIX_DSA_xilinx_adm-pcie-7v3_1ddr_3_0_1 = nx2
+NIMBIX_DSA_xilinx_xil-accel-rd-ku115_4ddr-xpr_3_2_1 = nx3
 
-dsa2type = $(NIMBIX_DSA_$(call sanitize_dsa,$(1)))
+dsa2type = $(NIMBIX_DSA_$(call sanitize_dsa,$(1))_$(if $(NUM_DEVICES),$(NUM_DEVICES),1))
 
-# TODO: the filter on xcl_SRCS is not required in 2016.3+
 hw_RUNNER = $(COMMON_REPO)/utility/nimbix/nimbix-run.py --type $(call dsa2type,$(1))
 sw_emu_RUNNER = XCL_EMULATION_MODE=sw_emu
 hw_emu_RUNNER = XCL_EMULATION_MODE=hw_emu
@@ -27,6 +26,7 @@ loader = $(call $(1)_RUNNER,$(2))
 #                        devices
 define mk_check
 
+ifneq ($(filter $(2),$(call target_whitelist,$(1))),)
 ifneq ($(filter $(3),$(call device_whitelist,$(1))),)
 
 .PHONY: $(1)_$(2)_$(call sanitize_dsa,$(3))_check
@@ -50,6 +50,7 @@ endif
 
 CHECK_GOALS += $(1)_$(2)_$(call sanitize_dsa,$(3))_check
 
+endif
 endif
 
 endef
