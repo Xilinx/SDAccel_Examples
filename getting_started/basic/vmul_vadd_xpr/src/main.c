@@ -82,7 +82,7 @@ int main(int argc, char** argv)
       }
    }
 
-   //XPR Platform (Xilinx Extended Partial Reconfiguration Platform) supports larger Kernel
+   //XPR Platform (Xilinx Expanded Partial Reconfiguration Platform) supports larger Kernel
    // binaries compare to non-XPR Platform. However this platform has one limitation with
    // respect non-XPR, it does not persist the Global Memory(DDR) content when user switches
    // between multiple binaries. So for such case, user should be responsible to 
