@@ -238,7 +238,6 @@ void sw_HsvToRgb(int *in, int *out, int image_size)
 
 int compareImages(int * _in, int * _out, int image_size)
 {
-    bool ret=0;
     for (int i = 0, cnt = 0 ; i < image_size ; i++)
     {
         int in  = _in[i];
