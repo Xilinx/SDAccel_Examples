@@ -73,7 +73,7 @@ docs: README.md
 
 .PHONY: clean
 clean:
-	rm -rf $(EXE_GOALS) $(XCLBIN_GOALS) sdaccel* TempConfig
+	rm -rf $(EXE_GOALS) $(XCLBIN_GOALS) sdaccel_* TempConfig
 	rm -rf src/*.ll _xocc_* .Xil emconfig.json $(EXTRA_CLEAN) dltmp* xmltmp* *.log
 
 README.md: description.json
