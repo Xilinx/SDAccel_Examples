@@ -68,7 +68,7 @@ def gen_category(dir ,outfile, subdircount):
   return links
 
 def genReadMe(dir):
-  desc = open(os.path.join(dir,"description.json"),'r')
+  desc = open(os.path.join(dir,"summary.json"),'r')
   data = json.load(desc)
   outfile = open(os.path.join(dir, "README.md"), "w")
   outfile.write(data["overview"] + "\n")
@@ -84,9 +84,9 @@ def genReadMe(dir):
   links = ""
   
   for subDir in subDirs:
-    desc_file = os.path.join(subDir,"description.json")
+    desc_file = os.path.join(subDir,"summary.json")
     if os.path.exists(desc_file):
-        subDirDesc = open(os.path.join(subDir,"description.json"),'r')
+        subDirDesc = open(os.path.join(subDir,"summary.json"),'r')
         subDirData = json.load(subDirDesc)
         outfile.write(str(counter));
         outfile.write(" | [" +subDir +"][]      |" + subDirData["description"] + "\n")
@@ -106,7 +106,7 @@ Example        | Description           | Key Concepts / Keywords
   outfile.close();
 
 def genReadMe2(dir):
-  desc = open(os.path.join(dir,"description.json"),'r')
+  desc = open(os.path.join(dir,"summary.json"),'r')
   data = json.load(desc)
   outfile = open(os.path.join(dir, "README.md"), "w")
   outfile.write(data["overview"] + "\n")

@@ -1,6 +1,6 @@
-Basic Examples
+Miscellaneous Examples
 ==================================
-OpenCL Basic Examples
+OpenCL miscellaneous Examples
 
  __Examples Table__ 
 
