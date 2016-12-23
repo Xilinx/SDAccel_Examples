@@ -1,7 +1,15 @@
+# By Default report is set to none, so report will be generated
+# 'estimate' for estimate report generation
+# 'system' for system report generation
+REPORT:=none
 
 # Default C++ Compiler Flags and xocc compiler flags
 CXXFLAGS:=-Wall -O0 -g
 CLFLAGS:=-g --xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generateExtraRunData=true" -s
+
+ifneq ($(REPORT),none)
+CLFLAGS += --report $(REPORT)
+endif 
 
 ifdef XILINX_SDX
 XILINX_SDACCEL=${XILINX_SDX}
