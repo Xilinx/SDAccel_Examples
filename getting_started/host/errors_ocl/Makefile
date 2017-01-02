@@ -2,13 +2,11 @@ COMMON_REPO := ../../..
 
 #Common Includes
 include $(COMMON_REPO)/utility/boards.mk
-include $(COMMON_REPO)/libs/xcl/xcl.mk
 include $(COMMON_REPO)/libs/opencl/opencl.mk
 
 # Host Application
-errors_SRCS=./src/host.cpp $(oclHelper_SRCS) $(xcl_SRCS)
-errors_HDRS=$(xcl_HDRS)
-errors_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS) $(oclHelper_CXXFLAGS) -std=c++0x
+errors_SRCS=./src/host.cpp $(oclHelper_SRCS) 
+errors_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(oclHelper_CXXFLAGS) -std=c++0x
 errors_LDFLAGS=$(opencl_LDFLAGS)
 
 # Kernel
