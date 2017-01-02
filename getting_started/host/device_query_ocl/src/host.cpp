@@ -27,8 +27,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
-#include "CL/cl.h"
-#include "xcl.h"
+#include <CL/opencl.h>
 
 #include <array>
 #include <cstdio>
@@ -360,8 +359,6 @@ void print_device_info(cl_device_id device) {
 // This example prints devices available on this machine and their
 // corresponding capabilities.
 int main(int argc, char** argv) {
-    // sets environment variables
-    xcl_world __attribute__((unused))world = xcl_world_single();
 
     // The following call retrieves the total number of platforms available
     cl_uint platform_count;
