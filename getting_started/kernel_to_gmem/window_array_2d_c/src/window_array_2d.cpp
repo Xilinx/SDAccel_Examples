@@ -45,19 +45,19 @@ C Kernel Example using AXI4-master interface to access window of data from 2D ar
 
 // Read data function : Read tile/window of Data from Global Memory
 void read_data(DTYPE *inx, my_data_fifo &inFifo) {
-    DTYPE tile[TILE_HEIGHT][WORD_GROUP_SIZE];
+    DTYPE tile[TILE_HEIGHT][TILE_WIDTH];
     rd_loop_i: for(int i = 0; i < TILE_PER_COLUMN; ++i) {
-        rd_loop_j: for (int j = 0; j < WORD_GROUP_PER_ROW; ++j) {
+        rd_loop_j: for (int j = 0; j < TILE_PER_ROW; ++j) {
 #pragma HLS DATAFLOW
             rd_buf_loop_m: for (int m = 0; m < TILE_HEIGHT; ++m) {
-                rd_buf_loop_n: for (int n = 0; n < WORD_GROUP_SIZE; ++n) {
+                rd_buf_loop_n: for (int n = 0; n < TILE_WIDTH; ++n) {
 #pragma HLS PIPELINE
-                    // should burst WORD_GROUP_SIZE in WORD beat
-                    tile[m][n] = inx[TILE_HEIGHT*WORD_GROUP_PER_ROW*WORD_GROUP_SIZE*i+WORD_GROUP_PER_ROW*WORD_GROUP_SIZE*m+WORD_GROUP_SIZE*j+n];
+                    // should burst TILE_WIDTH in WORD beat
+                    tile[m][n] = inx[TILE_HEIGHT*TILE_PER_ROW*TILE_WIDTH*i+TILE_PER_ROW*TILE_WIDTH*m+TILE_WIDTH*j+n];
                 }
             }
             rd_loop_m: for (int m = 0; m < TILE_HEIGHT; ++m) {
-                rd_loop_n: for (int n = 0; n < WORD_GROUP_SIZE; ++n) {
+                rd_loop_n: for (int n = 0; n < TILE_WIDTH; ++n) {
 #pragma HLS PIPELINE
                     inFifo << tile[m][n];
                 }
@@ -68,21 +68,21 @@ void read_data(DTYPE *inx, my_data_fifo &inFifo) {
 
 // Write data function : Write tile/window of Results to Global Memory
 void write_data(DTYPE *outx, my_data_fifo &outFifo) {
-    DTYPE tile[TILE_HEIGHT][WORD_GROUP_SIZE];
+    DTYPE tile[TILE_HEIGHT][TILE_WIDTH];
     wr_loop_i: for(int i = 0; i < TILE_PER_COLUMN; ++i) {
-        wr_loop_j: for (int j = 0; j < WORD_GROUP_PER_ROW; ++j) {
+        wr_loop_j: for (int j = 0; j < TILE_PER_ROW; ++j) {
 #pragma HLS DATAFLOW
             wr_buf_loop_m: for (int m = 0; m < TILE_HEIGHT; ++m) {
-                wr_buf_loop_n: for (int n = 0; n < WORD_GROUP_SIZE; ++n) {
+                wr_buf_loop_n: for (int n = 0; n < TILE_WIDTH; ++n) {
 #pragma HLS PIPELINE
-                    // should burst WORD_GROUP_SIZE in WORD beat
+                    // should burst TILE_WIDTH in WORD beat
                     outFifo >> tile[m][n];
                 }
             }
             wr_loop_m: for (int m = 0; m < TILE_HEIGHT; ++m) {
-                wr_loop_n: for (int n = 0; n < WORD_GROUP_SIZE; ++n) {
+                wr_loop_n: for (int n = 0; n < TILE_WIDTH; ++n) {
 #pragma HLS PIPELINE
-                    outx[TILE_HEIGHT*WORD_GROUP_PER_ROW*WORD_GROUP_SIZE*i+WORD_GROUP_PER_ROW*WORD_GROUP_SIZE*m+WORD_GROUP_SIZE*j+n] = tile[m][n];
+                    outx[TILE_HEIGHT*TILE_PER_ROW*TILE_WIDTH*i+TILE_PER_ROW*TILE_WIDTH*m+TILE_WIDTH*j+n] = tile[m][n];
                 }
             }
         }
@@ -91,9 +91,9 @@ void write_data(DTYPE *outx, my_data_fifo &outFifo) {
 
 // Compute function, currently as simple as possible because this example is focused on efficient memory access pattern.
 void compute(my_data_fifo &inFifo, my_data_fifo &outFifo, DTYPE alpha) {
-    compute_loop_i: for(int i = 0; i < NUM_ROWS; ++i) {
-        compute_loop_jj: for (int jj = 0; jj < WORD_GROUP_PER_ROW; ++jj) {
-            compute_loop_m: for (int m = 0; m < WORD_GROUP_SIZE; ++m) {
+    compute_loop_i: for(int i = 0; i < TILE_PER_COLUMN*TILE_HEIGHT; ++i) {
+        compute_loop_j: for (int j = 0; j < TILE_PER_ROW; ++j) {
+            compute_loop_m: for (int m = 0; m < TILE_WIDTH; ++m) {
 #pragma HLS PIPELINE
                 DTYPE inTmp;
                 inFifo >> inTmp;

@@ -47,19 +47,19 @@ pipe int outFifo __attribute__((xcl_reqd_pipe_depth(16)));
 // Read data Kernel : Read tile/window of Data from Global Memory
 kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
 void read_data(__global int *inx) {
-    int tile[TILE_HEIGHT][WORD_GROUP_SIZE];
+    int tile[TILE_HEIGHT][TILE_WIDTH];
     rd_loop_i: for(int i = 0; i < TILE_PER_COLUMN; ++i) {
-        rd_loop_j: for (int j = 0; j < WORD_GROUP_PER_ROW; ++j) {
+        rd_loop_j: for (int j = 0; j < TILE_PER_ROW; ++j) {
             rd_buf_loop_m: for (int m = 0; m < TILE_HEIGHT; ++m) {
                 __attribute__((xcl_pipeline_loop))
-                rd_buf_loop_n: for (int n = 0; n < WORD_GROUP_SIZE; ++n) {
-                    // should burst WORD_GROUP_SIZE in WORD beat
-                    tile[m][n] = inx[TILE_HEIGHT*WORD_GROUP_PER_ROW*WORD_GROUP_SIZE*i+WORD_GROUP_PER_ROW*WORD_GROUP_SIZE*m+WORD_GROUP_SIZE*j+n];
+                rd_buf_loop_n: for (int n = 0; n < TILE_WIDTH; ++n) {
+                    // should burst TILE_WIDTH in WORD beat
+                    tile[m][n] = inx[TILE_HEIGHT*TILE_PER_ROW*TILE_WIDTH*i+TILE_PER_ROW*TILE_WIDTH*m+TILE_WIDTH*j+n];
                 }
             }
             rd_loop_m: for (int m = 0; m < TILE_HEIGHT; ++m) {
                 __attribute__((xcl_pipeline_loop))
-                rd_loop_n: for (int n = 0; n < WORD_GROUP_SIZE; ++n) {
+                rd_loop_n: for (int n = 0; n < TILE_WIDTH; ++n) {
                     write_pipe_block(inFifo, &tile[m][n]);
                 }
             }
@@ -70,20 +70,20 @@ void read_data(__global int *inx) {
 // Write data Kernel : Write tile/window of Results to Global Memory
 kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
 void write_data(__global int *outx) {
-    int tile[TILE_HEIGHT][WORD_GROUP_SIZE];
+    int tile[TILE_HEIGHT][TILE_WIDTH];
     wr_loop_i: for(int i = 0; i < TILE_PER_COLUMN; ++i) {
-        wr_loop_j: for (int j = 0; j < WORD_GROUP_PER_ROW; ++j) {
+        wr_loop_j: for (int j = 0; j < TILE_PER_ROW; ++j) {
             wr_buf_loop_m: for (int m = 0; m < TILE_HEIGHT; ++m) {
                 __attribute__((xcl_pipeline_loop))
-                wr_buf_loop_n: for (int n = 0; n < WORD_GROUP_SIZE; ++n) {
-                    // should burst WORD_GROUP_SIZE in WORD beat
+                wr_buf_loop_n: for (int n = 0; n < TILE_WIDTH; ++n) {
+                    // should burst TILE_WIDTH in WORD beat
                     read_pipe_block(outFifo, &tile[m][n]);
                 }
             }
             wr_loop_m: for (int m = 0; m < TILE_HEIGHT; ++m) {
                 __attribute__((xcl_pipeline_loop))
-                wr_loop_n: for (int n = 0; n < WORD_GROUP_SIZE; ++n) {
-                    outx[TILE_HEIGHT*WORD_GROUP_PER_ROW*WORD_GROUP_SIZE*i+WORD_GROUP_PER_ROW*WORD_GROUP_SIZE*m+WORD_GROUP_SIZE*j+n] = tile[m][n];
+                wr_loop_n: for (int n = 0; n < TILE_WIDTH; ++n) {
+                    outx[TILE_HEIGHT*TILE_PER_ROW*TILE_WIDTH*i+TILE_PER_ROW*TILE_WIDTH*m+TILE_WIDTH*j+n] = tile[m][n];
                 }
             }
         }
@@ -93,10 +93,10 @@ void write_data(__global int *outx) {
 // Compute kernel, currently as simple as possible because this example is focused on efficient memory access pattern.
 kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
 void compute(int alpha) {
-    for(int i = 0; i < NUM_ROWS; ++i) {
-        __attribute__((xcl_pipeline_loop))
-        for (int jj = 0; jj < WORD_GROUP_PER_ROW; ++jj) {
-            for (int m = 0; m < WORD_GROUP_SIZE; ++m) {
+    for(int i = 0; i < TILE_PER_COLUMN*TILE_HEIGHT; ++i) {
+        for (int jj = 0; jj < TILE_PER_ROW; ++jj) {
+            __attribute__((xcl_pipeline_loop))
+            for (int m = 0; m < TILE_WIDTH; ++m) {
                 int inTmp;
                 read_pipe_block(inFifo, &inTmp);
                 int outTmp = inTmp * alpha;
