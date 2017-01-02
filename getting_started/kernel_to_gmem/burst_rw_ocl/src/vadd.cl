@@ -55,6 +55,7 @@ void vadd(__global int *a, int size, int inc_value){
 
 #ifndef USE_ASYNC_API  //Burst Read using For loop (Xilinx recommended)
         //read data from global memory into local buffer, the sequential read in a for loop can be inferred to a memory burst access automatically
+        __attribute__((xcl_pipeline_loop))
         read_buf: for (int j = 0; j < chunk_size; j++) {
             burstbuffer[j] = a[i+j];
         }
