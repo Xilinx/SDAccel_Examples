@@ -12,7 +12,7 @@ kernel_global_LDFLAGS=$(opencl_LDFLAGS)
 
 # kernel_global Kernel
 krnl_kernel_global_SRCS=./src/kernel.cl
-krnl_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.2
+krnl_kernel_global_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.2
 
 EXES=kernel_global
 XCLBINS=krnl_kernel_global
