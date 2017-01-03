@@ -45,3 +45,37 @@ The steps described in this document use the hello example application as a refe
 ![hardware function](./img/hardware_function.png)
 
 - Build and run the application
+
+### Configure a project with multiple kernels
+
+Some example projects, such as *getting_started/basic/vmul_vadd*, need to be set up with more than one binary container.
+
+As an example, the *vmul_vadd* project defines two kernels: *krnl_vadd* and *krnl_vmul*, which are expected to be found in *krnl_vadd.xclbin* and *krnl_vmul.xclbin*.
+
+To set up the project to create these, follow these steps:
+- In the **Project Settings** window, click **Add Binary Container**. This will create a new binary container.
+
+- Click **Add HW Function...**
+
+- Select *krnl_vmul* and click **OK**. This will add the accelerator function to the selected binary container.
+
+- Change the name of the binary container to *krnl_vmul*. To change the name, click on the *binary_container_1* name in the **HW Functions** table, and type the new name.
+
+- Repeat these steps to add the *krnl_vadd* accelerator function to a binary container named *krnl_vadd*.
+
+### Configure command line arguments
+
+Some applications use custom command line arguments, or do not need the .xlcbin file specified on the command line.
+
+To change the command line arguments:
+- In the **Run** menu, click **Run Configurations...**.
+
+- Check that the run configuration for the current project is selected. *OpenCL > example-Default* should be selected in the tree.
+
+- Select the **Arguments** tab.
+
+- If the .xclbin filenames are not needed on the command line, uncheck **Automatically add binary container(s) to arguments**.
+
+- Type any custom command line arguments in the text box.
+
+- Click **Close** to save changes, or **Run** to save changes and then run the application.
