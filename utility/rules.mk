@@ -73,8 +73,8 @@ docs: README.md
 
 .PHONY: clean
 clean:
-	rm -rf $(EXE_GOALS) $(XCLBIN_GOALS) sdaccel* TempConfig
-	rm -rf src/*.ll _xocc_* .Xil emconfig.json $(EXTRA_CLEAN) dltmp* xmltmp* *.log
+	rm -rf $(EXE_GOALS) $(XCLBIN_GOALS) sdaccel_* TempConfig system_estimate.xtxt *.rpt
+	rm -rf src/*.ll _xocc_* .Xil emconfig.json $(EXTRA_CLEAN) dltmp* xmltmp* *.log *.jou *.wcfg *.wdb
 
 README.md: description.json
 	$(COMMON_REPO)/utility/readme_gen/readme_gen.py description.json

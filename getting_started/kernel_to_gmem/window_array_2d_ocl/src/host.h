@@ -32,16 +32,14 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 //Parameters Description:
-//         NUM_ROWS:            matrix height
-//         WORD_GROUP_PER_ROW:  number of groups/partitions of matrix row
-//         WORD_GROUP_SIZE:     number of words in each group/partition
-//         TILE_PER_COLUMN:     number of tiles/windows of matrix column
+//         TILE_PER_ROW:        number of tiles/windows in each matrix row
+//         TILE_WIDTH:          number of words in each tile/window
+//         TILE_PER_COLUMN:     number of tiles/windows in each matrix column
 //         TILE_HEIGHT:         number of rows in matrix tile/window
-//         BLOCK_SIZE:          number of words in an array
+//         BLOCK_SIZE:          number of words in an matrix
 
-#define NUM_ROWS   64
-#define WORD_GROUP_PER_ROW 4
-#define WORD_GROUP_SIZE 16
+#define TILE_PER_ROW 4
+#define TILE_WIDTH 16
 #define TILE_PER_COLUMN 8
 #define TILE_HEIGHT 8
-#define BLOCK_SIZE (WORD_GROUP_SIZE*WORD_GROUP_PER_ROW*NUM_ROWS)
+#define BLOCK_SIZE (TILE_WIDTH*TILE_PER_ROW*TILE_PER_COLUMN*TILE_HEIGHT)

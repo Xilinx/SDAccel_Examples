@@ -33,11 +33,10 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #include <iostream>
-
+#define USE_IN_HOST
 //OpenCL utility layer include
 #include "xcl.h"
 #include "bitmap.h"
-#define USE_IN_HOST
 #include "rgb_to_hsv.h"
 
 //Utility Function Declaration
@@ -239,7 +238,6 @@ void sw_HsvToRgb(int *in, int *out, int image_size)
 
 int compareImages(int * _in, int * _out, int image_size)
 {
-    bool ret=0;
     for (int i = 0, cnt = 0 ; i < image_size ; i++)
     {
         int in  = _in[i];

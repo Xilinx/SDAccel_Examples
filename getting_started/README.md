@@ -1,0 +1,99 @@
+Getting Started Examples
+==================================
+This page contains examples for users who are new to Xilinx SDx OpenCL Flows. The focus of the examples is towards code optimization for Xilinx devices. The table lists various categories of examples in suggested order which users can follow.
+
+ __Prerequisites__
+ - User is familiar with basics of OpenCL flow.
+ - User has gone through SDx tutorial and is familiar with basics of tool functionality and terminology.
+
+S.No.   | Category  | Description 
+--------|-----------|-----------------------------------------
+1 | [host][]      |OpenCL host code for optimized interfacing with Xilinx Devices
+2 | [kernel_to_gmem][]      |Kernel to Global Memory Access Optimization.
+3 | [kernel_opt][]      |Kernel Optimization for performance
+4 | [debug][]      |Debugging and Profiling of Kernel.
+5 | [basic][]      |OpenCL miscellaneous Examples
+
+ __Examples Table__ 
+
+Example        | Description           | Key Concepts / Keywords 
+---------------|-----------------------|-------------------------
+[host/concurrent_kernel_execution_ocl/][]|"This example will demonstrate how to use multiple and out of order command queues to simultaneously execute multiple kernels on an FPGA."|__Key__ __Concepts__<br> - Concurrent execution<br> - Out of Order Command Queues<br> - Multiple Command Queues<br>__Keywords__<br> - CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE<br> - clSetEventCallback()
+[host/data_transfer_ocl/][]|"This example illustrates several ways to use the OpenCL API to transfer data to and from the FPGA"|__Key__ __Concepts__<br> - OpenCL API<br> - Data Transfer<br> - Write Buffers<br> - Read Buffers<br> - Map Buffers<br> - Async Memcpy<br>__Keywords__<br> - clEnqueueWriteBuffer()<br> - clEnqueueReadBuffer()<br> - clEnqueueMapBuffer()<br> - clEnqueueUnmapMemObject()
+[host/device_query_ocl/][]|"This example prints the OpenCL properties of the platform and its devices. It also displays the limits and capabilities of the hardware."|__Key__ __Concepts__<br> - OpenCL API<br> - Querying device properties<br>__Keywords__<br> - clGetPlatformIDs()<br> - clGetPlatformInfo()<br> - clGetDeviceIDs()<br> - clGetDeviceInfo()
+[host/errors_ocl/][]|"This example discuss the different reasons for errors in OpenCL and how to handle them at runtime."|__Key__ __Concepts__<br> - OpenCL API<br> - Error handling<br>__Keywords__<br> - CL_SUCCESS<br> - CL_DEVICE_NOT_FOUND<br> - CL_DEVICE_NOT_AVAILABLE
+[host/helloworld_ocl/][]|"This example is a simple OpenCL application. It will highlight the basic flow of an OpenCL application."|__Key__ __Concepts__<br> - OpenCL API<br>__Keywords__<br> - NA
+[host/multiple_devices_ocl/][]|"This example show how to take advantage of multiple FPGAs on a system. It will show how to initialized an OpenCL context, allocate memory on the two devices and execute a kernel on each FPGA."|__Key__ __Concepts__<br> - OpenCL API<br> - Multi-FPGA Execution<br> - Event Handling<br>__Keywords__<br> - cl_device_id<br> - clGetDeviceIDs()
+[host/overlap_ocl/][]|"This examples demonstrates techniques that allow you to overlap Host(CPU) and FPGA computation in an application. We will cover asynchronous operations and event object."|__Key__ __Concepts__<br> - OpenCL API<br> - Synchronize Host and FPGA<br> - Asynchronous Processing<br> - Events<br> - Asynchronous memcpy<br>__Keywords__<br> - cl_event<br> - clCreateCommandQueue<br> - CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE
+[kernel_to_gmem/burst_rw_c/][]|"This is simple example of using AXI4-master interface for burst read and write"|__Key__ __Concepts__<br> - burst access<br>__Keywords__<br> - memcpy
+[kernel_to_gmem/burst_rw_ocl/][]|"This is simple example of using AXI4-master interface for burst read and write"|__Key__ __Concepts__<br> - burst access<br>__Keywords__<br> - NA
+[kernel_to_gmem/custom_datatype_c/][]|"This is simple example of RGB to HSV conversion to demonstrate Custom DATA Type usages in C Based Kernel. Xilinx HLS Compiler Supports Custom Data Type to use for operation as well as Memory Interface between Kernel and Global Memory."|__Key__ __Concepts__<br> - Dataflow<br> - Custom Datatype<br>__Keywords__<br> - struct<br> - datapack
+[kernel_to_gmem/custom_datatype_ocl/][]|"This is simple example of RGB to HSV conversion to demonstrate Custom DATA Type usages in OpenCL Based Kernel. Xilinx HLS Compiler Supports Custom Data Type to use for operation as well as Memory Interface between Kernel and Global Memory."|__Key__ __Concepts__<br> - dataflow<br> - Custom Datatype<br>__Keywords__<br> - struct
+[kernel_to_gmem/full_array_2d_c/][]|"This is a simple example of accessing full data from 2d array"|__Key__ __Concepts__<br> - 2D data full array Access<br>__Keywords__<br> - NA
+[kernel_to_gmem/full_array_2d_ocl/][]|"This is a simple example of accessing full data from 2d array"|__Key__ __Concepts__<br> - 2D data full array Access<br>__Keywords__<br> - NA
+[kernel_to_gmem/gmem_2banks_c/][]|"This example of 2ddr to demonstrate on how to use 2ddr DSA. How to create buffers in each DDR."|__Key__ __Concepts__<br> - Multiple Banks<br>__Keywords__<br> - max_memory_ports<br> - misc:map_connect<br> - cl_mem_ext_ptr_t<br> - XCL_MEM_DDR_BANK0<br> - XCL_MEM_DDR_BANK1<br> - XCL_MEM_DDR_BANKx<br> - CL_MEM_EXT_PTR_XILINX<br> - HLS Interface m_axi bundle
+[kernel_to_gmem/gmem_2banks_ocl/][]|"This example of 2ddr to demonstrate on how to use 2ddr DSA. How to create buffers in each DDR."|__Key__ __Concepts__<br> - Multiple Banks<br>__Keywords__<br> - max_memory_ports<br> - misc:map_connect<br> - cl_mem_ext_ptr_t<br> - XCL_MEM_DDR_BANK0<br> - XCL_MEM_DDR_BANK1<br> - XCL_MEM_DDR_BANKx<br> - CL_MEM_EXT_PTR_XILINX
+[kernel_to_gmem/row_array_2d_c/][]|"This is a simple example of accessing each row of data from 2d array"|__Key__ __Concepts__<br> - Row of 2D data array access<br>__Keywords__<br> - hls::stream
+[kernel_to_gmem/row_array_2d_ocl/][]|"This is a simple example of accessing each row of data from 2d array"|__Key__ __Concepts__<br> - Row of 2D data array access<br>__Keywords__<br> - xcl_dataflow<br> - xcl_pipeline_loop
+[kernel_to_gmem/wide_mem_rw_c/][]|"This is simple example of vector addition to demonstrate Wide Memory Access using ap_uint<512> data type. Based on input argument type, xocc compiler will figure our the memory datawidth between Global Memory and Kernel. For this example, ap_uint<512> datatype is used, so Memory datawidth will be 16 x (integer bit size) = 16 x 32 = 512 bit."|__Key__ __Concepts__<br> - Kernel to DDR<br> - wide memory access<br> - burst read and write<br>__Keywords__<br> - ap_uint<><br> - ap_int.h
+[kernel_to_gmem/wide_mem_rw_ocl/][]|"This is simple example of vector addition to demonstrate Wide Memory Access using uint16 data type. Based on input argument type, xocc compiler will figure our the memory datawidth between Global Memory and Kernel. For this example, uint16 datatype is used, so Memory datawidth will be 16 x (integer bit size) = 16 x 32 = 512 bit."|__Key__ __Concepts__<br> - Kernel to DDR<br> - wide memory access<br> - burst read and write<br>__Keywords__<br> - uint16<br> - xcl_pipeline_loop
+[kernel_to_gmem/window_array_2d_c/][]|"This is a simple example of accessing each window of data from 2d array"|__Key__ __Concepts__<br> - window of 2D data array access<br>__Keywords__<br> - #pragma HLS DATAFLOW<br> - #pragma HLS PIPELINE<br> - #pragma HLS stream
+[kernel_to_gmem/window_array_2d_ocl/][]|"This is a simple example of accessing each window of data from 2d array"|__Key__ __Concepts__<br> - window/tile of 2D data array access<br>__Keywords__<br> - pipe<br> - xcl_pipeline_loop<br> - xcl_reqd_pipe_depth
+[kernel_opt/dependence_inter_c/][]|"This Example to demostrate OpenCL xcl_dependence attribute. Using xcl_dependence user can provide additional dependency details to compiler which allow compiler to perform unrolling/pipelining to get better performance."|__Key__ __Concepts__<br> - Inter Dependence<br>__Keywords__<br> - DEPENDENCE<br> - inter
+[kernel_opt/lmem_2rw_c/][]|"This is simple example of vector addition to demonstrate how to utilized both ports of Local Memory memory."|__Key__ __Concepts__<br> - Kernel Optimization<br> - 2port BRAM Utilization<br> - two read/write Local Memory<br>__Keywords__<br> - #pragma HLS UNROLL FACTOR=2
+[kernel_opt/lmem_2rw_ocl/][]|"This is simple example of vector addition to demonstrate how to utilized both ports of Local Memory."|__Key__ __Concepts__<br> - Kernel Optimization<br> - 2port BRAM Utilization<br> - two read/write Local Memory<br>__Keywords__<br> - opencl_unroll_hint(2)
+[kernel_opt/loop_reorder_c/][]|"This is a simple example of matrix multiplication (Row x Col) to demonstrate how to achieve better pipeline II factor by loop reordering."|__Key__ __Concepts__<br> - Kernel Optimization<br> - Loop reorder to improve II<br>__Keywords__<br> - #pragma HLS PIPELINE<br> - #pragma HLS ARRAY_PARTITION
+[kernel_opt/loop_reorder_ocl/][]|"This is a simple example of matrix multiplication (Row x Col) to demonstrate how to achieve better pipeline II factor by loop reordering."|__Key__ __Concepts__<br> - Kernel Optimization<br> - Loop reorder to improve II<br>__Keywords__<br> - xcl_pipeline_loop<br> - xcl_array_partition(complete, 2)
+[debug/debug_printf_ocl/][]|"This is simple example of vector addition and printing of data that is computational result (addition). It is based on vectored addition that demonstrates printing of work item data (integer product in this case)"|__Key__ __Concepts__<br> - Use of print statements for debugging<br>__Keywords__<br> - printf
+[debug/debug_profile_ocl/][]|"This is simple example of vector addition and printing profile data (wall clock time taken between start and stop)."|__Key__ __Concepts__<br> - Use of Profile API<br>__Keywords__<br> - xcl_get_event_duration()
+[basic/hello/][]|"The hello world example is a simple design which tests the correct installation of the FPGA acceleration boards. The example uses the printf function call inside of the kernel code to report on the values provided from the host to the kernel."|
+[basic/host_global_bandwidth/][]|"Host to global memory bandwidth test"|
+[basic/kernel_global_bandwidth/][]|"Bandwidth test of global to local memory"|
+[basic/sum_scan/][]|"Example of parallel prefix sum"|
+[basic/vadd/][]|"Simple example of vector addition."|
+[basic/vdotprod/][]|"Simple example of vector dot-product."|
+[basic/vmul_vadd/][]|"This example shows how data stored in global memory can be shared between kernels in different binary containers. This functionality is available only for non-XPR Devices."|__Key__ __Concepts__<br> - Multiple Kernel Binaries<br> - Buffer sharing across Multiple binaries<br> - Multiple Kernels in different Binaries<br>__Keywords__<br> - NA
+[basic/vmul_vadd_xpr/][]|"This example shows how data stored in global memory should be migrated from device to host and later from host to device to share between kernels in different binary containers. This buffer migration is only needed for XPR(Extended Partial Reconfiguration) Specific Devices. As XPR devices do not persist data when user reload another binary container."|__Key__ __Concepts__<br> - Handling Buffer sharing across multiple binaries for XPR Platform<br> - Multiple Kernel Binaries<br> - Buffer sharing across Multiple binaries<br>__Keywords__<br> - clEnqueueMigrateMemObjects()<br> - CL_MIGRATE_MEM_OBJECT_HOST
+
+[host]:host
+[host/concurrent_kernel_execution_ocl/]:host/concurrent_kernel_execution_ocl/
+[host/data_transfer_ocl/]:host/data_transfer_ocl/
+[host/device_query_ocl/]:host/device_query_ocl/
+[host/errors_ocl/]:host/errors_ocl/
+[host/helloworld_ocl/]:host/helloworld_ocl/
+[host/multiple_devices_ocl/]:host/multiple_devices_ocl/
+[host/overlap_ocl/]:host/overlap_ocl/
+[kernel_to_gmem]:kernel_to_gmem
+[kernel_to_gmem/burst_rw_c/]:kernel_to_gmem/burst_rw_c/
+[kernel_to_gmem/burst_rw_ocl/]:kernel_to_gmem/burst_rw_ocl/
+[kernel_to_gmem/custom_datatype_c/]:kernel_to_gmem/custom_datatype_c/
+[kernel_to_gmem/custom_datatype_ocl/]:kernel_to_gmem/custom_datatype_ocl/
+[kernel_to_gmem/full_array_2d_c/]:kernel_to_gmem/full_array_2d_c/
+[kernel_to_gmem/full_array_2d_ocl/]:kernel_to_gmem/full_array_2d_ocl/
+[kernel_to_gmem/gmem_2banks_c/]:kernel_to_gmem/gmem_2banks_c/
+[kernel_to_gmem/gmem_2banks_ocl/]:kernel_to_gmem/gmem_2banks_ocl/
+[kernel_to_gmem/row_array_2d_c/]:kernel_to_gmem/row_array_2d_c/
+[kernel_to_gmem/row_array_2d_ocl/]:kernel_to_gmem/row_array_2d_ocl/
+[kernel_to_gmem/wide_mem_rw_c/]:kernel_to_gmem/wide_mem_rw_c/
+[kernel_to_gmem/wide_mem_rw_ocl/]:kernel_to_gmem/wide_mem_rw_ocl/
+[kernel_to_gmem/window_array_2d_c/]:kernel_to_gmem/window_array_2d_c/
+[kernel_to_gmem/window_array_2d_ocl/]:kernel_to_gmem/window_array_2d_ocl/
+[kernel_opt]:kernel_opt
+[kernel_opt/dependence_inter_c/]:kernel_opt/dependence_inter_c/
+[kernel_opt/lmem_2rw_c/]:kernel_opt/lmem_2rw_c/
+[kernel_opt/lmem_2rw_ocl/]:kernel_opt/lmem_2rw_ocl/
+[kernel_opt/loop_reorder_c/]:kernel_opt/loop_reorder_c/
+[kernel_opt/loop_reorder_ocl/]:kernel_opt/loop_reorder_ocl/
+[datflow]:datflow
+[debug]:debug
+[debug/debug_printf_ocl/]:debug/debug_printf_ocl/
+[debug/debug_profile_ocl/]:debug/debug_profile_ocl/
+[basic]:basic
+[basic/hello/]:basic/hello/
+[basic/host_global_bandwidth/]:basic/host_global_bandwidth/
+[basic/kernel_global_bandwidth/]:basic/kernel_global_bandwidth/
+[basic/sum_scan/]:basic/sum_scan/
+[basic/vadd/]:basic/vadd/
+[basic/vdotprod/]:basic/vdotprod/
+[basic/vmul_vadd/]:basic/vmul_vadd/
+[basic/vmul_vadd_xpr/]:basic/vmul_vadd_xpr/

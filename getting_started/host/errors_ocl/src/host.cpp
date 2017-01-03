@@ -28,7 +28,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #include <CL/cl.h>
-#include "xcl.h"
 
 #include <cstdio>
 #include <fstream>
@@ -143,9 +142,6 @@ int main(int argc, char **argv) {
     }
     static const int elements = 128;
     char *binary_file_path = argv[1];
-
-    xcl_world __attribute__((unused)) world = xcl_world_single();
-
 
     // Error handling in OpenCL is performed using the cl_int specifier. OpenCL
     // functions either return or accept pointers to cl_int types to indicate if
