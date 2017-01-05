@@ -99,7 +99,7 @@ node('rhel6 && xsjrdevl && xsjrdevl110') {
 		]
 	*/
 
-		step([$class: 'GitHubSetCommitStatusBuilder'])
+		step([$class: 'GitHubCommitStatusSetter'])
 	}
 
 	stage('Build') {
