@@ -40,7 +40,7 @@ Description:
 
 __kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
 void mmult(__global int *a, __global int *b, __global int *c, int size){
-    int bufa[N][N], bufb[N][N], bufc[N][N];
+    local int bufa[N][N], bufb[N][N], bufc[N][N];
     int matrix_size = size * size;
   
     // Read data from global memory and write into local buffer for a, loop pipeline will be automatically inferred
