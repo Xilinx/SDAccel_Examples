@@ -112,9 +112,9 @@ int main(int argc, char** argv)
     xcl_set_kernel_arg(krnl_output_stage,1,sizeof(int),&size);
 
     //Launch the Kernel
-    xcl_run_kernel3d_nb(world,krnl_input_stage );
-    xcl_run_kernel3d_nb(world,krnl_adder_stage );
     xcl_run_kernel3d_nb(world,krnl_output_stage);
+    xcl_run_kernel3d_nb(world,krnl_adder_stage );
+    xcl_run_kernel3d_nb(world,krnl_input_stage );
 
     //wait for all kernels to finish their operations
     clFinish(world.command_queue);

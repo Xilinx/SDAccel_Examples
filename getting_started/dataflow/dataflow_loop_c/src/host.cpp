@@ -38,7 +38,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //OpenCL utility layer include
 #include "xcl.h"
 
-#define DATA_SIZE 256
+#define DATA_SIZE 4096
 #define INCR_VALUE 10
 
 int main(int argc, char** argv)
@@ -99,7 +99,6 @@ int main(int argc, char** argv)
     
     // Compare the results of the Device to the simulation
     int match = 0;
-    std::cout << "Result = " << std::endl;
     for (int i = 0 ; i < DATA_SIZE ; i++){
         if (source_hw_results[i] != source_sw_results[i]){
             std::cout << "Error: Result mismatch" << std::endl;
@@ -107,9 +106,6 @@ int main(int argc, char** argv)
                 << " Device result = " << source_hw_results[i] << std::endl;
             match = 1;
             break;
-        }else{
-            std::cout << source_hw_results[i] << " " ;
-            if ( ( (i+1) % 16) == 0) std::cout << std::endl;
         }
     }
 

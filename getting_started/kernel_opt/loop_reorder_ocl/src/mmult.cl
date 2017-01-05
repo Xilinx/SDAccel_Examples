@@ -75,10 +75,10 @@ void mmult(
         )
 {    // Local memory to store input and output matrices
     // Local memory is implemented as BRAM memory blocks
-    int A[MAX_SIZE][MAX_SIZE];
-    int B[MAX_SIZE][MAX_SIZE] __attribute__((xcl_array_partition(complete, 2)));
-    int C[MAX_SIZE][MAX_SIZE] __attribute__((xcl_array_partition(complete, 2)));
-    int temp_sum[MAX_SIZE] __attribute__((xcl_array_partition(complete, 1)));
+    local int A[MAX_SIZE][MAX_SIZE];
+    local int B[MAX_SIZE][MAX_SIZE] __attribute__((xcl_array_partition(complete, 2)));
+    local int C[MAX_SIZE][MAX_SIZE] __attribute__((xcl_array_partition(complete, 2)));
+    local int temp_sum[MAX_SIZE] __attribute__((xcl_array_partition(complete, 1)));
 
     // Burst reads on input matrices from global memory
     // Burst read for matrix A

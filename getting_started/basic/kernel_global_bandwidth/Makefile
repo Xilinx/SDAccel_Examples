@@ -24,4 +24,6 @@ check_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.2
 
 CHECKS=check
 
+#Changing Default device for this example
+DEVICES:=xilinx:adm-pcie-ku3:2ddr-xpr:3.2
 include $(COMMON_REPO)/utility/rules.mk

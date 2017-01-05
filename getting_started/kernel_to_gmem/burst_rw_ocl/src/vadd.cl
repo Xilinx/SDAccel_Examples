@@ -44,7 +44,7 @@ Description:
 
 __kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
 void vadd(__global int *a, int size, int inc_value){
-    int burstbuffer[BURSTBUFFERSIZE];
+    local int burstbuffer[BURSTBUFFERSIZE]; 
     //Per iteration of this loop perform BURSTBUFFERSIZE vector addition
     for(int i = 0; i < size;  i += BURSTBUFFERSIZE)
     {
@@ -60,7 +60,6 @@ void vadd(__global int *a, int size, int inc_value){
             burstbuffer[j] = a[i+j];
         }
 #else //Burst Read using async_work_group_copy() API (Not recommended)
-       __local int burstbuffer[BURSTBUFFERSIZE]; //For async_work_group_copy() API, local array should be declared with "__local"
        async_work_group_copy(burstbuffer, &a[i], chunk_size, 0);
        //This code is kept here for intentionally to describe about async_work_group_copy() comparison with respect to for loop
        //based implementation. async_work_group_copy() API is another way of implementing burst read from global memory, 

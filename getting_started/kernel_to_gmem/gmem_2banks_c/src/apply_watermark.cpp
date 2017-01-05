@@ -109,6 +109,7 @@ void apply_watermark(TYPE *input, TYPE *output, int width, int height) {
     // Process the whole image 
     image_traverse: for (int idx = 0, x = 0 , y = 0  ; idx < size ; ++idx, x+= DATA_SIZE)
     {
+      #pragma HLS LOOP_TRIPCOUNT min=49152 max=49152
       #pragma HLS pipeline
       // Read the next 16 Pixels
       TYPE tmp = input[idx];

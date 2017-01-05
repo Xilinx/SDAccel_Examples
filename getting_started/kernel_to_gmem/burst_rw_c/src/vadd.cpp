@@ -57,6 +57,7 @@ void vadd(int *a, int size, int inc_value){
 
     //Per iteration of this loop perform BURSTBUFFERSIZE vector addition
     for(int i=0; i < size;  i+=BURSTBUFFERSIZE)
+    #pragma HLS LOOP_TRIPCOUNT min=1 max=64
     {
         int chunk_size = BURSTBUFFERSIZE;
         //boundary checks
@@ -70,6 +71,7 @@ void vadd(int *a, int size, int inc_value){
         
         //calculate and write results to global memory, the sequential write in a for loop can be inferred to a memory burst access automatically
         calc_write: for(int j=0; j < chunk_size; j++){
+        #pragma HLS LOOP_TRIPCOUNT min=256 max=2048
         #pragma HLS PIPELINE
             burstbuffer[j] = burstbuffer[j] + inc_value;
             a[i+j] = burstbuffer[j];

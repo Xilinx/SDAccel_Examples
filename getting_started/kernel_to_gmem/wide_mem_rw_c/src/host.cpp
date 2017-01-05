@@ -45,7 +45,7 @@ memory datawidth
 //DATA_SIZE should be multiple of 16 as Kernel Code is using int16 vector datatype
 //to read the operands from Global Memory. So every read/write to global memory 
 //will read 16 integers value.
-#define DATA_SIZE 4096
+#define DATA_SIZE 16384
 
 int main(int argc, char** argv)
 {

@@ -114,6 +114,7 @@ void adder(unsigned int *in, unsigned int *out, int inc, int size)
     //Loop1: Read Data from Global Memory and write into Stream inStream
     mem_rd: for (int i = 0 ; i < size ; i++){
     #pragma HLS pipeline
+    #pragma HLS LOOP_TRIPCOUNT min=4096 max=4096
         //Blocking write command to inStream 
         inStream << in[i];
     }
@@ -121,6 +122,7 @@ void adder(unsigned int *in, unsigned int *out, int inc, int size)
     //Loop2: Read Input data from inStream and write the result into outStream
     execute: for (int j = 0 ; j < size ; j++){
     #pragma HLS pipeline
+    #pragma HLS LOOP_TRIPCOUNT min=4096 max=4096
         //Blocking read command from inStream and Blocking write command 
         //to outStream 
         outStream << (inStream.read() + inc);
@@ -129,6 +131,7 @@ void adder(unsigned int *in, unsigned int *out, int inc, int size)
     //Loop3: Read result from outStream and write the result to Global Memory
     mem_wr: for (int k = 0 ; k < size ; k++) {
     #pragma HLS pipeline
+    #pragma HLS LOOP_TRIPCOUNT min=4096 max=4096
         //Blocking read command from OutStream 
         out[k] = outStream.read();
     }
