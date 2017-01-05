@@ -57,8 +57,8 @@ void vadd(
         int size                   // Size in integer
         )
 {
-    local uint16 v1_local[LOCAL_MEM_SIZE];    // Local memory to store vector1
-    local uint16 result_local[LOCAL_MEM_SIZE];// Local Memory to store result
+    uint16 v1_local[LOCAL_MEM_SIZE];    // Local memory to store vector1
+    uint16 result_local[LOCAL_MEM_SIZE];// Local Memory to store result
 
     // Input vector size is in integer. It has to be changed into
     // Size of int16. 

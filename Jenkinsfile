@@ -65,6 +65,8 @@ echo "PWD: \$(pwd)"
 echo "-----------------------------------------------"
 echo
 
+export PYTHONUNBUFFERED=true
+
 make TARGETS=${target} DEVICES=\"${devices}\" check
 
 """
