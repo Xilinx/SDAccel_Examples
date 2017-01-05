@@ -57,7 +57,7 @@ endef
 
 $(foreach check,$(CHECKS),$(foreach target,$(TARGETS),$(foreach device,$(DEVICES),$(eval $(call mk_check,$(check),$(target),$(device))))))
 
-ifdef (CHECK_GOALS)
+ifdef CHECK_GOALS
 ECHO:= @echo
 
 #Extended help messages
