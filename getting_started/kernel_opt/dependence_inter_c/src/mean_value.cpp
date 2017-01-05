@@ -66,11 +66,13 @@ void mean_value(int *in, int *out, int size)
 
     //burst read of input data
     mem_rd: for (int i = 0 ; i < size ; i++){
+    #pragma HLS LOOP_TRIPCOUNT min=256 max=256
         local_buffer[i] = in[i];
     }
 
     //Calculating Mean Value
 execution: for (int i = 1 ; i < size -1 ; i++) {
+    #pragma HLS LOOP_TRIPCOUNT min=254 max=254
     #pragma HLS DEPENDENCE variable=local_buffer inter false
     //HLS Dependence pragma provide extra dependency information to compiler.
     //For example here local_buffer has false inter dependency. Which means 
@@ -89,6 +91,7 @@ execution: for (int i = 1 ; i < size -1 ; i++) {
 
     //burst Write of result
     mem_wr:for (int i = 0 ; i < size ; i++){
+    #pragma HLS LOOP_TRIPCOUNT min=254 max=254
         out[i] = local_buffer[i+MAX_SIZE];
     }
 }

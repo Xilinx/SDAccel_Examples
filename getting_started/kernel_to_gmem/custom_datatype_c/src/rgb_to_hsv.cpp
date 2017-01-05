@@ -70,6 +70,9 @@ void rgb_to_hsv(RGBcolor* in,  // Access global memory as RGBcolor struct-wise
         // Loop is marked for pipeline. Compiler will be able to get Loop II=1 
         // as a result, Kernel will be able to do burst read and burst write. 
         // Kernel will be performing RGB to HSV conversion per pixel per clock. 
+#pragma HLS LOOP_TRIPCOUNT min=16384 max=16384
+        // LOOP TRIPCOUNT is added so that report estimate can provide estimated
+        //  latency Information 
         
         unsigned char rgbMin, rgbMax, tempS;
 

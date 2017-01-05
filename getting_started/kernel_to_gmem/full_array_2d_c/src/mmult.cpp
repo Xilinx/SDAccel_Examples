@@ -59,6 +59,7 @@ extern "C" {
         // Read data from global memory and write into local buffer for a, loop pipeline will be automatically inferred
         int x = 0, y = 0;
         read_data_a: for (int i = 0 ; i < matrix_size ; i++){
+        #pragma HLS LOOP_TRIPCOUNT min=1 max=65536
             int tmpData_a = a[i];
             bufa[x][y] = tmpData_a;
             if (y == size-1){
@@ -71,6 +72,7 @@ extern "C" {
     
         // Read data from global memory and write into local buffer for b, loop pipeline will be automatically inferred
         read_data_b: for (int i = 0, x=0, y=0; i < matrix_size ; i++){
+        #pragma HLS LOOP_TRIPCOUNT min=1 max=65536
             int tmpData_b = b[i];
             bufb[x][y] = tmpData_b;
             if (y == size-1){
@@ -83,10 +85,13 @@ extern "C" {
     
         // Calculate matrix multiplication using local data buffer based on input size, and write results into local buffer for c
         matrix_mult: for (int row = 0; row < size; row++) {
+        #pragma HLS LOOP_TRIPCOUNT min=1 max=256
             for (int col = 0; col < size; col++) {
+            #pragma HLS LOOP_TRIPCOUNT min=1 max=256
                 int result = 0;
                 for (int k = 0; k < size; k++) {
-    #pragma HLS pipeline
+                #pragma HLS LOOP_TRIPCOUNT min=1 max=256
+                #pragma HLS pipeline
                     result += bufa[row][k] * bufb[k][col];
                 }
                 bufc[row][col] = result;
@@ -95,6 +100,7 @@ extern "C" {
         // Write results from local buffer to global memory for c, loop pipeline will be automatically inferred
         int m = 0, n = 0;
         write_data: for (int i = 0 ; i < matrix_size ; i++){
+        #pragma HLS LOOP_TRIPCOUNT min=1 max=65536
             int tmpData_c = bufc[m][n];
             c[i] = tmpData_c;
             if (n == size-1){

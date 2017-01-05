@@ -75,14 +75,21 @@ void vadd(
     //Per iteration of this loop perform BUFFER_SIZE vector addition
     for(int i = 0; i < size;  i += BUFFER_SIZE)
     {
+    #pragma HLS LOOP_TRIPCOUNT min=4 max=4
         int chunk_size = BUFFER_SIZE;
         //boundary checks
         if ((i + BUFFER_SIZE) > size) 
             chunk_size = size - i;
 
         // burst read of v1 and v2 vector from global memory
-        memcpy(v1_buffer,&in1[i],chunk_size * sizeof (unsigned int));
-        memcpy(v2_buffer,&in2[i],chunk_size * sizeof (unsigned int));
+        for (int j = 0 ; j < chunk_size ; j++){
+        #pragma HLS LOOP_TRIPCOUNT min=1024 max=1024
+            v1_buffer[j] = in1[i + j];
+        }
+        for (int j = 0 ; j < chunk_size ; j++){
+        #pragma HLS LOOP_TRIPCOUNT min=1024 max=1024
+            v2_buffer[j] = in2[i + j];
+        }
 
         //FPGA implementation, local array is mostly implemented as BRAM Memory block. 
         // BRAM Memory Block contains two memory ports which allow two parallel access 
@@ -97,12 +104,16 @@ void vadd(
         vadd: for (int j = 0 ; j < chunk_size; j ++){
         #pragma HLS PIPELINE
         #pragma HLS UNROLL FACTOR=2
+        #pragma HLS LOOP_TRIPCOUNT min=1024 max=1024
             //perform vector addition
             vout_buffer[j] = v1_buffer[j] + v2_buffer[j]; 
         }
 
         //burst write the result
-        memcpy(&out[i],vout_buffer, chunk_size * sizeof (unsigned int));
+        for (int j = 0 ; j < chunk_size ; j++){
+        #pragma HLS LOOP_TRIPCOUNT min=1024 max=1024
+            out[i + j] = vout_buffer[j];
+        }
     }
 }
 }
