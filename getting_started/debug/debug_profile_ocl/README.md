@@ -1,4 +1,4 @@
- Printing Profile Data
+ Printing Profile Data and Dumping Waveform file
 ======================
 
 This README file contains the following sections:
@@ -16,9 +16,9 @@ This README file contains the following sections:
 
 
 ## 1. OVERVIEW
-This is simple example of vector addition and printing profile data (wall clock time taken between start and stop).
+This is simple example of vector addition and printing profile data (wall clock time taken between start and stop). It also dump a waveform file which can be reloaded to vivado to see the waveform. Run command 'vivado -source ./scripts/open_waveform.tcl -tclargs <device_name>-<kernel_name>.<target>.<device_name>.wdb' to launch waveform viewer. User can also update batch to gui in sdaccel.ini file to see the live waveform while running application.
 
-***KEY CONCEPTS:*** Use of Profile API
+***KEY CONCEPTS:*** Use of Profile API, Waveform Dumping and loading
 
 ***KEYWORDS:*** xcl_get_event_duration()
 
@@ -53,13 +53,16 @@ Application code is located in the src directory. Accelerator binary files will 
 ├── description.json
 ├── Makefile
 ├── README.md
+├── scripts
+│   └── open_waveform.tcl
+├── sdaccel.ini
 ├── src
 │   ├── host.cpp
 │   ├── host.h
 │   └── vadd.cl
 └── xclbin
 
-2 directories, 6 files
+3 directories, 8 files
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS

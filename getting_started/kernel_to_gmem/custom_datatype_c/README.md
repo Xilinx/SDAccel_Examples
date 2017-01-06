@@ -20,7 +20,7 @@ This is simple example of RGB to HSV conversion to demonstrate Custom DATA Type 
 
 ***KEY CONCEPTS:*** Dataflow, Custom Datatype
 
-***KEYWORDS:*** struct, datapack
+***KEYWORDS:*** struct, #pragma HLS data_pack, #pragma HLS LOOP_TRIPCOUNT
 
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
