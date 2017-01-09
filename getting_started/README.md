@@ -44,6 +44,11 @@ Example        | Description           | Key Concepts / Keywords
 [kernel_opt/lmem_2rw_ocl/][]|"This is simple example of vector addition to demonstrate how to utilized both ports of Local Memory."|__Key__ __Concepts__<br> - Kernel Optimization<br> - 2port BRAM Utilization<br> - two read/write Local Memory<br>__Keywords__<br> - opencl_unroll_hint(2)
 [kernel_opt/loop_reorder_c/][]|"This is a simple example of matrix multiplication (Row x Col) to demonstrate how to achieve better pipeline II factor by loop reordering."|__Key__ __Concepts__<br> - Kernel Optimization<br> - Loop reorder to improve II<br>__Keywords__<br> - #pragma HLS PIPELINE<br> - #pragma HLS ARRAY_PARTITION
 [kernel_opt/loop_reorder_ocl/][]|"This is a simple example of matrix multiplication (Row x Col) to demonstrate how to achieve better pipeline II factor by loop reordering."|__Key__ __Concepts__<br> - Kernel Optimization<br> - Loop reorder to improve II<br>__Keywords__<br> - xcl_pipeline_loop<br> - xcl_array_partition(complete, 2)
+[kernel_opt/array_partition_ocl/][]|"This example shows how to use array partitioning to improve performance of a kernel"|__Key__ __Concepts__<br> - Kernel Optimization<br> - Array Partitioning<br>__Keywords__<br> - xcl_array_partition<br> - complete
+[kernel_opt/loop_fusion_ocl/][]|"This example will demonstrate how to fuse two loops into one to improve the performance of an OpenCL kernel."|__Key__ __Concepts__<br> - Kernel Optimization<br> - Loop Fusion<br> - Loop Pipelining<br>__Keywords__<br> - xcl_pipeline_loop
+[kernel_opt/shift_register_ocl/][]|"This example demonstrates how to shift values in registers in each clock cycle"|__Key__ __Concepts__<br> - Kernel Optimization<br> - Shift Register<br> - FIR<br>__Keywords__<br> - xcl_array_partition
+[kernel_opt/loop_perfect_c/][]|"This nearest neighbor example is to demonstrate how to achieve better performance using perfect loop."|
+[kernel_opt/loop_perfect_ocl/][]|"This nearest neighbor example is to demonstrate how to achieve better performance using loop perfect."|
 [debug/debug_printf_ocl/][]|"This is simple example of vector addition and printing of data that is computational result (addition). It is based on vectored addition that demonstrates printing of work item data (integer product in this case)"|__Key__ __Concepts__<br> - Use of print statements for debugging<br>__Keywords__<br> - printf
 [debug/debug_profile_ocl/][]|"This is simple example of vector addition and printing profile data (wall clock time taken between start and stop). It also dump a waveform file which can be reloaded to vivado to see the waveform. Run command 'vivado -source ./scripts/open_waveform.tcl -tclargs <device_name>-<kernel_name>.<target>.<device_name>.wdb' to launch waveform viewer. User can also update batch to gui in sdaccel.ini file to see the live waveform while running application."|__Key__ __Concepts__<br> - Use of Profile API<br> - Waveform Dumping and loading<br>__Keywords__<br> - xcl_get_event_duration()
 [basic/hello/][]|"The hello world example is a simple design which tests the correct installation of the FPGA acceleration boards. The example uses the printf function call inside of the kernel code to report on the values provided from the host to the kernel."|
@@ -84,6 +89,11 @@ Example        | Description           | Key Concepts / Keywords
 [kernel_opt/lmem_2rw_ocl/]:kernel_opt/lmem_2rw_ocl/
 [kernel_opt/loop_reorder_c/]:kernel_opt/loop_reorder_c/
 [kernel_opt/loop_reorder_ocl/]:kernel_opt/loop_reorder_ocl/
+[kernel_opt/array_partition_ocl/]:kernel_opt/array_partition_ocl/
+[kernel_opt/loop_fusion_ocl/]:kernel_opt/loop_fusion_ocl/
+[kernel_opt/shift_register_ocl/]:kernel_opt/shift_register_ocl/
+[kernel_opt/loop_perfect_c/]:kernel_opt/loop_perfect_c/
+[kernel_opt/loop_perfect_ocl/]:kernel_opt/loop_perfect_ocl/
 [datflow]:datflow
 [debug]:debug
 [debug/debug_printf_ocl/]:debug/debug_printf_ocl/
