@@ -1,0 +1,22 @@
+{
+    "example": "Loop Pipelining",
+    "overview": "This example demonstrates how loop pipelining can be used to improve the performance of a kernel.",
+    "key_concepts": [ "Kernel Optimization", "Loop Pipelining"],
+    "keywords": [ "xcl_pipeline_loop" ],
+    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
+    "em_cmd": "./loop_pipeline",
+    "hw_cmd": "../../utility/nimbix/nimbix-run.py ./loop_pipeline",
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ],
+    "revision" : [
+        {
+            "date" : "DEC2016",
+            "version": "1.0",
+            "description": "Initial Xilinx Release"
+        }
+    ]
+}
