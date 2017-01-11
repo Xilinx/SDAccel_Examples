@@ -113,7 +113,8 @@ void adder(unsigned int *in, unsigned int *out, int inc, int size)
 #pragma HLS dataflow
     //Loop1: Read Data from Global Memory and write into Stream inStream
     mem_rd: for (int i = 0 ; i < size ; i++){
-    #pragma HLS pipeline
+    //Xilinx HLS by default try to implement pipeline design for loop, 
+    //so explicit PIPELINE pragma is not needed
     #pragma HLS LOOP_TRIPCOUNT min=4096 max=4096
         //Blocking write command to inStream 
         inStream << in[i];
@@ -121,7 +122,8 @@ void adder(unsigned int *in, unsigned int *out, int inc, int size)
 
     //Loop2: Read Input data from inStream and write the result into outStream
     execute: for (int j = 0 ; j < size ; j++){
-    #pragma HLS pipeline
+    //Xilinx HLS by default try to implement pipeline design for loop, 
+    //so explicit PIPELINE pragma is not needed
     #pragma HLS LOOP_TRIPCOUNT min=4096 max=4096
         //Blocking read command from inStream and Blocking write command 
         //to outStream 
@@ -130,7 +132,8 @@ void adder(unsigned int *in, unsigned int *out, int inc, int size)
 
     //Loop3: Read result from outStream and write the result to Global Memory
     mem_wr: for (int k = 0 ; k < size ; k++) {
-    #pragma HLS pipeline
+    //Xilinx HLS by default try to implement pipeline design for loop, 
+    //so explicit PIPELINE pragma is not needed
     #pragma HLS LOOP_TRIPCOUNT min=4096 max=4096
         //Blocking read command from OutStream 
         out[k] = outStream.read();
