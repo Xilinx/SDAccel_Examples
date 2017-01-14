@@ -49,19 +49,18 @@ Application code is located in the src directory. Accelerator binary files will 
 
 ```
 .
-├── data
-│   ├── inputImage128x128.bmp
-│   └── inputImage.bmp
-├── description.json
-├── Makefile
-├── README.md
-├── src
-│   ├── krnl_watermarking.cl
-│   └── watermarking.cpp
-├── TempConfig
-└── xclbin
+|-- Makefile
+|-- README.md
+|-- data
+|   |-- inputImage.bmp
+|   `-- inputImage128x128.bmp
+|-- description.json
+|-- src
+|   |-- krnl_watermarking.cl
+|   `-- watermarking.cpp
+`-- xclbin
 
-4 directories, 7 files
+3 directories, 7 files
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS
@@ -102,7 +101,7 @@ To manually configure the environment to run the application, set the following
 ```
 export LD_LIBRARY_PATH=$XILINX_SDX/runtime/lib/x86_64/:$LD_LIBRARY_PATH
 export XCL_EMULATION_MODE=true
-emconfigutil --xdevice 'xilinx:adm-pcie-ku3:2ddr-xpr:3.2' --nd 1
+emconfigutil --xdevice 'xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```

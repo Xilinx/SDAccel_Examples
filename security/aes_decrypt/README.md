@@ -46,20 +46,20 @@ Application code is located in the src directory. Accelerator binary files will 
 
 ```
 .
-├── data
-│   └── input.bmp
-├── description.json
-├── LICENSE.md
-├── Makefile
-├── README.md
-├── src
-│   ├── aes_app.cpp
-│   ├── aes_app.h
-│   ├── aes_ecb.cpp
-│   ├── aes_ecb.h
-│   ├── krnl_aes.cl
-│   └── main.cpp
-└── xclbin
+|-- LICENSE.md
+|-- Makefile
+|-- README.md
+|-- data
+|   `-- input.bmp
+|-- description.json
+|-- src
+|   |-- aes_app.cpp
+|   |-- aes_app.h
+|   |-- aes_ecb.cpp
+|   |-- aes_ecb.h
+|   |-- krnl_aes.cl
+|   `-- main.cpp
+`-- xclbin
 
 3 directories, 11 files
 ```
@@ -102,7 +102,7 @@ To manually configure the environment to run the application, set the following
 ```
 export LD_LIBRARY_PATH=$XILINX_SDX/runtime/lib/x86_64/:$LD_LIBRARY_PATH
 export XCL_EMULATION_MODE=true
-emconfigutil --xdevice 'xilinx:adm-pcie-ku3:2ddr-xpr:3.2' --nd 1
+emconfigutil --xdevice 'xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```

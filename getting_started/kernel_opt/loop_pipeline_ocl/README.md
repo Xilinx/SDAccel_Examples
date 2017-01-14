@@ -50,16 +50,15 @@ Application code is located in the src directory. Accelerator binary files will 
 
 ```
 .
-├── description.json
-├── Makefile
-├── README.md
-├── src
-│   ├── host.cpp
-│   └── vector_addition.cl
-└── xclbin
-    └── vector_addition.hw_emu.xilinx_xil-accel-rd-ku115_4ddr-xpr_3_3.xclbin
+|-- Makefile
+|-- README.md
+|-- description.json
+|-- src
+|   |-- host.cpp
+|   `-- vector_addition.cl
+`-- xclbin
 
-2 directories, 6 files
+2 directories, 5 files
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS
@@ -100,7 +99,7 @@ To manually configure the environment to run the application, set the following
 ```
 export LD_LIBRARY_PATH=$XILINX_SDX/runtime/lib/x86_64/:$LD_LIBRARY_PATH
 export XCL_EMULATION_MODE=<sw_emu|hw_emu>
-emconfigutil --xdevice 'xilinx:adm-pcie-ku3:2ddr-xpr:3.2' --nd 1
+emconfigutil --xdevice 'xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
