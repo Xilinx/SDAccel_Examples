@@ -4,7 +4,7 @@ import json
 import os
 import subprocess
 
-DSA = 'xilinx:adm-pcie-ku3:2ddr-xpr:3.2'
+DSA = 'xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2'
 VERSION = 'SDAccel 2016.3'
 DEVICES = {
     'Alpha Data ADM-PCIE-7V3':['xilinx:adm-pcie-7v3:1ddr:3.0','nx2'],
