@@ -34,7 +34,7 @@ Alpha Data ADM-PCIE-KU3|xilinx:adm-pcie-ku3:2ddr-xpr:3.2|SDAccel 2016.3|nx1
 Xilinx KU115|xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2|SDAccel 2016.3|nx3
 
 
-Board targeted by default = ***Alpha Data ADM-PCIE-KU3***
+Board targeted by default = ***xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2***
 
 *NOTE:* The board/device used for compilation can be changed by adding the DEVICES variable to the make command as shown below
 ```
@@ -46,18 +46,18 @@ Application code is located in the src directory. Accelerator binary files will 
 
 ```
 .
-├── description.json
-├── Makefile
-├── README.md
-├── src
-│   ├── clSha1.cpp
-│   ├── clSha1.h
-│   ├── krnl_clSha1.cl
-│   ├── main.cpp
-│   ├── oswendian.h
-│   ├── sha1.c
-│   └── sha1.h
-└── xclbin
+|-- Makefile
+|-- README.md
+|-- description.json
+|-- src
+|   |-- clSha1.cpp
+|   |-- clSha1.h
+|   |-- krnl_clSha1.cl
+|   |-- main.cpp
+|   |-- oswendian.h
+|   |-- sha1.c
+|   `-- sha1.h
+`-- xclbin
 
 2 directories, 10 files
 ```
@@ -100,7 +100,7 @@ To manually configure the environment to run the application, set the following
 ```
 export LD_LIBRARY_PATH=$XILINX_SDX/runtime/lib/x86_64/:$LD_LIBRARY_PATH
 export XCL_EMULATION_MODE=true
-emconfigutil --xdevice 'xilinx:adm-pcie-ku3:2ddr-xpr:3.2' --nd 1
+emconfigutil --xdevice 'xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
