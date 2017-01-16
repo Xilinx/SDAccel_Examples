@@ -37,7 +37,7 @@ Board | Device Name | Software Version | NIMBIX Machine Type
 Alpha Data ADM-PCIE-7V3|xilinx:adm-pcie-7v3:1ddr:3.0|SDAccel 2016.3|nx2
 
 
-Board targeted by default = ***Alpha Data ADM-PCIE-KU3***
+Board targeted by default = ***xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2***
 
 *NOTE:* The board/device used for compilation can be changed by adding the DEVICES variable to the make command as shown below
 ```

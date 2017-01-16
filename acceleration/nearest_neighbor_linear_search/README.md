@@ -36,7 +36,7 @@ Board | Device Name | Software Version | NIMBIX Machine Type
 Alpha Data ADM-PCIE-7V3|xilinx:adm-pcie-7v3:1ddr:3.0|SDAccel 2016.3|nx2
 
 
-Board targeted by default = ***Alpha Data ADM-PCIE-KU3***
+Board targeted by default = ***xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2***
 
 *NOTE:* The board/device used for compilation can be changed by adding the DEVICES variable to the make command as shown below
 ```
@@ -57,9 +57,10 @@ Application code is located in the src directory. Accelerator binary files will 
 |   |-- krnl_linear_search.cpp
 |   |-- linear_search.c
 |   `-- linear_search.h
-`-- xclbin
+|-- xclbin
+`-- ^?q
 
-3 directories, 7 files
+3 directories, 8 files
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS
