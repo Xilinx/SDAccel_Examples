@@ -57,10 +57,9 @@ Application code is located in the src directory. Accelerator binary files will 
 |   |-- krnl_linear_search.cpp
 |   |-- linear_search.c
 |   `-- linear_search.h
-|-- xclbin
-`-- ^?q
+`-- xclbin
 
-3 directories, 8 files
+3 directories, 7 files
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS
