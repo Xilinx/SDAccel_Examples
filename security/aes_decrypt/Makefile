@@ -1,12 +1,13 @@
 # AES Decrypt Application
+COMMON_REPO =../../
 
 # Supported devices
-include ../../utility/boards.mk
-include ../../libs/xcl/xcl.mk
-include ../../libs/logger/logger.mk
-include ../../libs/cmdparser/cmdparser.mk
-include ../../libs/simplebmp/simplebmp.mk
-include ../../libs/opencl/opencl.mk
+include $(COMMON_REPO)/utility/boards.mk
+include $(COMMON_REPO)/libs/xcl/xcl.mk
+include $(COMMON_REPO)/libs/logger/logger.mk
+include $(COMMON_REPO)/libs/cmdparser/cmdparser.mk
+include $(COMMON_REPO)/libs/simplebmp/simplebmp.mk
+include $(COMMON_REPO)/libs/opencl/opencl.mk
 
 # hello Host Application
 aes_SRCS=./src/aes_ecb.cpp ./src/aes_app.cpp ./src/main.cpp $(xcl_SRCS) $(cmdparser_SRCS) $(logger_SRCS) $(simplebmp_SRCS)
@@ -29,5 +30,5 @@ check_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 
 CHECKS=check
 
-include ../../utility/rules.mk
+include $(COMMON_REPO)/utility/rules.mk
 

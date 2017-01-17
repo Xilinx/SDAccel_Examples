@@ -1,10 +1,11 @@
 # Smithwaterman Application
+COMMON_REPO =../../
 
-include ../../utility/boards.mk
-include ../../libs/xcl/xcl.mk
-include ../../libs/logger/logger.mk
-include ../../libs/cmdparser/cmdparser.mk
-include ../../libs/opencl/opencl.mk
+include $(COMMON_REPO)/utility/boards.mk
+include $(COMMON_REPO)/libs/xcl/xcl.mk
+include $(COMMON_REPO)/libs/logger/logger.mk
+include $(COMMON_REPO)/libs/cmdparser/cmdparser.mk
+include $(COMMON_REPO)/libs/opencl/opencl.mk
 
 # Smithwaterman Application
 smithwaterman_SRCS=./src/main.cpp ./src/genseq.cpp ./src/matcharray.cpp ./src/smithwaterman.cpp
@@ -33,5 +34,5 @@ check_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 
 CHECKS=check
 
-include ../../utility/rules.mk
+include $(COMMON_REPO)/utility/rules.mk
 
