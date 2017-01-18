@@ -1,9 +1,10 @@
 # Histogram Equalization Application
+COMMON_REPO =../../
 
-include ../../utility/boards.mk
-include ../../libs/xcl/xcl.mk
-include ../../libs/opencv/opencv.mk
-include ../../libs/opencl/opencl.mk
+include $(COMMON_REPO)/utility/boards.mk
+include $(COMMON_REPO)/libs/xcl/xcl.mk
+include $(COMMON_REPO)/libs/opencv/opencv.mk
+include $(COMMON_REPO)/libs/opencl/opencl.mk
 
 # Equalizer Host Application
 equalizer_SRCS=./src/equalizer.cpp $(xcl_SRCS)
@@ -23,5 +24,5 @@ check_XCLBINS=krnl_equalizer
 check_ARGS=data/race_2k.bmp
 CHECKS=check
 
-include ../../utility/rules.mk
+include $(COMMON_REPO)/utility/rules.mk
 

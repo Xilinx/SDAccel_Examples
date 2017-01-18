@@ -1,10 +1,11 @@
 
 # affine Application
+COMMON_REPO =../../
 
-include ../../utility/boards.mk
-include ../../libs/oclHelper/oclHelper.mk
-include ../../libs/bitmap/bitmap.mk
-include ../../libs/opencl/opencl.mk
+include $(COMMON_REPO)/utility/boards.mk
+include $(COMMON_REPO)/libs/oclHelper/oclHelper.mk
+include $(COMMON_REPO)/libs/bitmap/bitmap.mk
+include $(COMMON_REPO)/libs/opencl/opencl.mk
 
 # affine Host Application
 
@@ -33,5 +34,5 @@ $(foreach target,$(TARGETS),$(foreach device,$(DEVICES),$(eval $(call mk_args,$(
 
 CHECKS=check
 
-include ../../utility/rules.mk
+include $(COMMON_REPO)/utility/rules.mk
 
