@@ -1,10 +1,11 @@
 # RSA Application
+COMMON_REPO =../../
 
-include ../../utility/boards.mk
-include ../../libs/logger/logger.mk
-include ../../libs/cmdparser/cmdparser.mk
-include ../../libs/xcl/xcl.mk
-include ../../libs/opencl/opencl.mk
+include $(COMMON_REPO)/utility/boards.mk
+include $(COMMON_REPO)/libs/logger/logger.mk
+include $(COMMON_REPO)/libs/cmdparser/cmdparser.mk
+include $(COMMON_REPO)/libs/xcl/xcl.mk
+include $(COMMON_REPO)/libs/opencl/opencl.mk
 
 # hello Host Application
 rsa_SRCS=./src/rsa_app.cpp ./src/common.cpp ./src/main.cpp $(cmdparser_SRCS) $(xcl_SRCS) $(logger_SRCS)
@@ -28,5 +29,5 @@ check_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 
 CHECKS=check
 
-include ../../utility/rules.mk
+include $(COMMON_REPO)/utility/rules.mk
 

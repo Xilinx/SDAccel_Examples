@@ -1,8 +1,9 @@
 # Nearest Neighbor Search Application
+COMMON_REPO =../../
 
-include ../../utility/boards.mk
-include ../../libs/xcl/xcl.mk
-include ../../libs/opencl/opencl.mk
+include $(COMMON_REPO)/utility/boards.mk
+include $(COMMON_REPO)/libs/xcl/xcl.mk
+include $(COMMON_REPO)/libs/opencl/opencl.mk
 
 # Nearest Neighbor Search Application
 nearest_SRCS=./src/linear_search.c $(xcl_SRCS)
@@ -26,5 +27,5 @@ check_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 
 CHECKS=check
 
-include ../../utility/rules.mk
+include $(COMMON_REPO)/utility/rules.mk
 

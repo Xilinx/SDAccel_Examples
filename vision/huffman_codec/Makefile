@@ -1,11 +1,12 @@
 # Huffman Codec Application
+COMMON_REPO =../../
 
-include ../../utility/boards.mk
-include ../../libs/logger/logger.mk
-include ../../libs/simplebmp/simplebmp.mk
-include ../../libs/cmdparser/cmdparser.mk
-include ../../libs/xcl/xcl.mk
-include ../../libs/opencl/opencl.mk
+include $(COMMON_REPO)/utility/boards.mk
+include $(COMMON_REPO)/libs/logger/logger.mk
+include $(COMMON_REPO)/libs/simplebmp/simplebmp.mk
+include $(COMMON_REPO)/libs/cmdparser/cmdparser.mk
+include $(COMMON_REPO)/libs/xcl/xcl.mk
+include $(COMMON_REPO)/libs/opencl/opencl.mk
 
 # Huffman Codec Host Application
 huffman_SRCS=./src/bit_io.cpp ./src/huffmancodec_naive.cpp ./src/huffmancodec_optimized_cpuonly.cpp ./src/huffmancodec_optimized.cpp \
@@ -30,5 +31,5 @@ check_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 
 CHECKS=check
 
-include ../../utility/rules.mk
+include $(COMMON_REPO)/utility/rules.mk
 

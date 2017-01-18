@@ -1,9 +1,10 @@
 # Edge Detection Application
+COMMON_REPO =../../
 
-include ../../utility/boards.mk
-include ../../libs/xcl/xcl.mk
-include ../../libs/opencv/opencv.mk
-include ../../libs/opencl/opencl.mk
+include $(COMMON_REPO)/utility/boards.mk
+include $(COMMON_REPO)/libs/xcl/xcl.mk
+include $(COMMON_REPO)/libs/opencv/opencv.mk
+include $(COMMON_REPO)/libs/opencl/opencl.mk
 
 # Edge Detection Host Application
 edge_SRCS=./src/edge.cpp $(xcl_SRCS)
@@ -25,5 +26,5 @@ check_ARGS=data/input/eiffel.bmp
 
 CHECKS=check
 
-include ../../utility/rules.mk
+include $(COMMON_REPO)/utility/rules.mk
 

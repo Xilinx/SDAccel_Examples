@@ -1,9 +1,10 @@
 # SHA1 Application
+COMMON_REPO =../../
 
-include ../../utility/boards.mk
-include ../../libs/logger/logger.mk
-include ../../libs/cmdparser/cmdparser.mk
-include ../../libs/opencl/opencl.mk
+include $(COMMON_REPO)/utility/boards.mk
+include $(COMMON_REPO)/libs/logger/logger.mk
+include $(COMMON_REPO)/libs/cmdparser/cmdparser.mk
+include $(COMMON_REPO)/libs/opencl/opencl.mk
 
 # hello Host Application
 sha1_SRCS=./src/clSha1.cpp ./src/sha1.c ./src/main.cpp $(logger_SRCS) $(cmdparser_SRCS) $(xcl_SRCS)
@@ -34,5 +35,5 @@ $(foreach target,$(TARGETS),$(foreach device,$(DEVICES),$(eval $(call mk_args,$(
 
 CHECKS=check
 
-include ../../utility/rules.mk
+include $(COMMON_REPO)/utility/rules.mk
 
