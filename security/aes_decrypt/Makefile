@@ -16,7 +16,6 @@ aes_LDFLAGS=$(opencl_LDFLAGS)
 
 # AES Kernel
 krnl_aes_SRCS=./src/krnl_aes.cl
-krnl_aes_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 
 EXES=aes
 XCLBINS=krnl_aes
@@ -25,7 +24,6 @@ XCLBINS=krnl_aes
 check_EXE=aes
 check_XCLBINS=krnl_aes
 check_ARGS=-b data/input.bmp
-check_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 
 CHECKS=check
 
