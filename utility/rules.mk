@@ -12,7 +12,7 @@ help::
 	$(ECHO) "		Command to generate the design for specified Target."
 	$(ECHO) ""
 	$(ECHO) "	make clean"
-	$(ECHO) "		Command to remove the generated intermediate files."
+	$(ECHO) "		Command to remove the generated non-hardware files."
 	$(ECHO) ""
 	$(ECHO) "	make cleanall"
 	$(ECHO) "		Command to remove all the generated files."
@@ -78,8 +78,9 @@ docs: README.md
 cleanall: clean
 	rm -rf $(XCLBIN_DIR)
 clean:
-	rm -rf $(EXE_GOALS) sdaccel_* TempConfig system_estimate.xtxt *.rpt
+	rm -rf $(EXE_GOALS) $(XCLBIN_DIR)/{*sw_emu*,*hw_emu*} sdaccel_* TempConfig system_estimate.xtxt *.rpt
 	rm -rf src/*.ll _xocc_* .Xil emconfig.json $(EXTRA_CLEAN) dltmp* xmltmp* *.log *.jou *.wcfg *.wdb
+	rmdir --ignore-fail-on-non-empty $(XCLBIN_DIR)
 
 README.md: description.json
 	$(COMMON_REPO)/utility/readme_gen/readme_gen.py description.json
