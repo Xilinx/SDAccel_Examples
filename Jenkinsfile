@@ -38,7 +38,7 @@ echo
 
 rsync -rL \$XILINX_SDX/Vivado_HLS/lnx64/tools/opencv/ lib/
 
-make TARGETS=${target} DEVICES=\"${devices}\" all
+make -k TARGETS=${target} DEVICES=\"${devices}\" all
 
 """
 			}
@@ -67,7 +67,7 @@ echo
 
 export PYTHONUNBUFFERED=true
 
-make TARGETS=${target} DEVICES=\"${devices}\" check
+make -k TARGETS=${target} DEVICES=\"${devices}\" check
 
 """
 			}
