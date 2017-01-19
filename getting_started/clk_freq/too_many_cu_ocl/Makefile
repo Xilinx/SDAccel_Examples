@@ -28,9 +28,6 @@ endif
 
 vadd_CLFLAGS+=-k vadd
 
-# Generate system estimates
-#vadd_CLFLAGS+=--report estimate
-
 EXES=host
 XCLBINS=vadd
 

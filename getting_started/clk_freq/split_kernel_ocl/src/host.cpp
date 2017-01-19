@@ -54,6 +54,7 @@ Description:
 #include "bitmap.h"
 
 // Support functions 
+#define SW_FLOW 
 #include "defns.h"
 
 // Software solution of image sketch operation
