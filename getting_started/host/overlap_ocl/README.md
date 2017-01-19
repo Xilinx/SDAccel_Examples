@@ -16,11 +16,11 @@ This README file contains the following sections:
 
 
 ## 1. OVERVIEW
-This examples demonstrates techniques that allow you to overlap Host(CPU) and FPGA computation in an application. We will cover asynchronous operations and event object.
+This examples demonstrates techniques that allow user to overlap Host(CPU) and FPGA computation in an application. It will cover asynchronous operations and event object.
 
 ***KEY CONCEPTS:*** OpenCL API, Synchronize Host and FPGA, Asynchronous Processing, Events, Asynchronous memcpy
 
-***KEYWORDS:*** cl_event, clCreateCommandQueue, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE
+***KEYWORDS:*** cl_event, clCreateCommandQueue, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, clEnqueueMigrateMemObjects
 
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
@@ -50,13 +50,13 @@ Application code is located in the src directory. Accelerator binary files will 
 
 ```
 .
-|-- Makefile
-|-- README.md
-|-- description.json
-|-- src
-|   |-- host.cpp
-|   `-- vector_addition.cl
-`-- xclbin
+├── description.json
+├── Makefile
+├── README.md
+├── src
+│   ├── host.cpp
+│   └── vector_addition.cl
+└── xclbin
 
 2 directories, 5 files
 ```

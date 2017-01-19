@@ -149,6 +149,17 @@ void event_cb(cl_event event, cl_int cmd_status, void *data) {
   case CL_COMMAND_NDRANGE_KERNEL:
     command_str = "kernel";
     break;
+  case CL_COMMAND_MAP_BUFFER:
+    command_str = "kernel";
+    break;
+  case CL_COMMAND_COPY_BUFFER:
+    command_str = "kernel";
+    break;
+  case CL_COMMAND_MIGRATE_MEM_OBJECTS:
+        command_str = "buffer migrate";
+      break;
+  default:
+    command_str = "unknown";
   }
   switch (status) {
   case CL_QUEUED:
@@ -176,7 +187,6 @@ void set_callback(cl_event event, const char *queue_name) {
 }
 
 int main(int argc, char **argv) {
-
   cl_int err;
 
   xcl_world world = xcl_world_single();
@@ -196,17 +206,6 @@ int main(int argc, char **argv) {
       clCreateCommandQueue(world.context, world.device_id,
                            CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err);
 
-  // Allocate memory on the FPGA. We will execute kernels on one half of the
-  // memory while using the other half for staging of the next set of elements.
-  // This requires us to allocate two times the memory required for one
-  // iteration
-  cl_mem buffer_a =
-      xcl_malloc(world, CL_MEM_READ_ONLY, bytes_per_iteration * 2);
-  cl_mem buffer_b =
-      xcl_malloc(world, CL_MEM_READ_ONLY, bytes_per_iteration * 2);
-  cl_mem buffer_c =
-      xcl_malloc(world, CL_MEM_WRITE_ONLY, bytes_per_iteration * 2);
-
   // Allocate memory on the host and fill with random data.
   vector<int> A(ARRAY_SIZE);
   vector<int> B(ARRAY_SIZE);
@@ -219,90 +218,95 @@ int main(int argc, char **argv) {
   // This pair of events will be used to track when a kernel is finished with
   // the input buffers. Once the kernel is finished processing the data, a new
   // set of elements will be written into the buffer.
-  array<cl_event, 2> kernel_events = {0, 0};
-  for (int iteration_idx = 0; iteration_idx < num_iterations; iteration_idx++) {
-    // These offsets from the beginning of the buffer
-    size_t offset = (iteration_idx % 2) * elements_per_iteration;
-    size_t offset_bytes = offset * sizeof(int);
+  array<cl_event, 2> kernel_events;
+  array<cl_event, 2> read_events;
+  array<cl_event, 2> map_events;
+  cl_mem buffer_a[2], buffer_b[2], buffer_c[2];
+  size_t global = 1, local = 1;
+  for (size_t iteration_idx = 0; iteration_idx < num_iterations; iteration_idx++) {
+    int flag = iteration_idx % 2;
 
-    size_t wait_list_event_count = kernel_events[0] == 0 ? 0 : 1;
-    cl_event *event_ptr =
-        wait_list_event_count == 0 ? nullptr : &kernel_events[0];
+    if (iteration_idx >= 2) {
+        clWaitForEvents(1, &map_events[flag]);
+        OCL_CHECK(clReleaseMemObject(buffer_a[flag]));
+        OCL_CHECK(clReleaseMemObject(buffer_b[flag]));
+        OCL_CHECK(clReleaseMemObject(buffer_c[flag]));
+        OCL_CHECK(clReleaseEvent(read_events[flag]));
+        OCL_CHECK(clReleaseEvent(kernel_events[flag]));
+    }
 
+    buffer_a[flag] = clCreateBuffer(world.context,  
+            CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
+           bytes_per_iteration, &A[iteration_idx * elements_per_iteration], NULL);
+    buffer_b[flag] = clCreateBuffer(world.context,  
+            CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
+           bytes_per_iteration, &B[iteration_idx * elements_per_iteration], NULL);
+    buffer_c[flag] = clCreateBuffer(world.context,  
+            CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
+           bytes_per_iteration, &device_result[iteration_idx * elements_per_iteration], NULL);
     array<cl_event, 2> write_events;
-    printf("Enqueueing write buffer calls\n");
+    printf("Enqueueing Migrate Mem Object (Host to Device) calls\n");
     // These calls are asynchronous with respect to the main thread because we
     // are passing the CL_FALSE as the third parameter. Because we are passing
     // the events from the previous kernel call into the wait list, it will wait
-    // for the previous operations to complete before contining
-    OCL_CHECK(clEnqueueWriteBuffer(
-        world.command_queue, buffer_a,
-        CL_FALSE,                                   // - Non-blocking call
-        offset_bytes,                               // - offset from the
-                                                    //   beginning of the buffer
-        bytes_per_iteration,                        // - bytes to transfer
-        &A[iteration_idx * elements_per_iteration], // - ptr to host host array
-        wait_list_event_count, event_ptr, // - Wait for the previous kernel call
-                                          //   to finish before beginning
+    // for the previous operations to complete before continuing
+    OCL_CHECK(clEnqueueMigrateMemObjects(
+        world.command_queue, 1, &buffer_a[iteration_idx % 2],
+        0 /* flags, 0 means from host */,
+        0, NULL, 
         &write_events[0]));
     set_callback(write_events[0], "ooo_queue");
 
-    OCL_CHECK(clEnqueueWriteBuffer(
-        world.command_queue, buffer_b, CL_FALSE, offset_bytes,
-        bytes_per_iteration, &B[iteration_idx * elements_per_iteration],
-        wait_list_event_count, event_ptr, &write_events[1]));
+    OCL_CHECK(clEnqueueMigrateMemObjects(
+        world.command_queue, 1, &buffer_b[iteration_idx % 2],
+        0 /* flags, 0 means from host */,
+        0, NULL, 
+        &write_events[1]));
     set_callback(write_events[1], "ooo_queue");
 
-    // Release the previous event pointer. This will be overwritten with the
-    // next kernel's event
-    if (kernel_events[0])
-      OCL_CHECK(clReleaseEvent(kernel_events[0]));
-
-    xcl_set_kernel_arg(kernel, 0, sizeof(cl_mem), &buffer_c);
-    xcl_set_kernel_arg(kernel, 1, sizeof(cl_mem), &buffer_a);
-    xcl_set_kernel_arg(kernel, 2, sizeof(cl_mem), &buffer_b);
-    xcl_set_kernel_arg(kernel, 3, sizeof(int), &offset);
-    xcl_set_kernel_arg(kernel, 4, sizeof(int), &elements_per_iteration);
+    xcl_set_kernel_arg(kernel, 0, sizeof(cl_mem), &buffer_c[iteration_idx % 2]);
+    xcl_set_kernel_arg(kernel, 1, sizeof(cl_mem), &buffer_a[iteration_idx % 2]);
+    xcl_set_kernel_arg(kernel, 2, sizeof(cl_mem), &buffer_b[iteration_idx % 2]);
+    xcl_set_kernel_arg(kernel, 3, sizeof(int), &elements_per_iteration);
 
     printf("Enqueueing NDRange kernel.\n");
-    size_t global = 1;
-    size_t local = 1;
     // This event needs to wait for the write buffer operations to complete
     // before executing. We are sending the write_events into its wait list to
     // ensure that the order of operations is correct.
     OCL_CHECK(clEnqueueNDRangeKernel(world.command_queue, kernel, 1, nullptr,
-                                     &global, &local, 2, write_events.data(),
-                                     &kernel_events[0]));
-    set_callback(kernel_events[0], "ooo_queue");
+                                     &global, &local, 2 , write_events.data(),
+                                     &kernel_events[flag]));
+    set_callback(kernel_events[flag], "ooo_queue");
 
-    printf("Enqueueing Read Buffer call.\n");
+    printf("Enqueueing Migrate Mem Object (Device to Host) calls\n");
     // This operation only needs to wait for the kernel call. This call will
     // potentially overlap the next kernel call as well as the next read
     // operations
-    clEnqueueReadBuffer(world.command_queue, buffer_c, CL_FALSE, offset_bytes,
-                        bytes_per_iteration,
-                        &device_result[iteration_idx * elements_per_iteration],
-                        1, kernel_events.data(), nullptr);
+    OCL_CHECK( clEnqueueMigrateMemObjects(world.command_queue, 1, &buffer_c[iteration_idx % 2], 
+                CL_MIGRATE_MEM_OBJECT_HOST, 1, &kernel_events[flag], &read_events[flag]));
 
-    // OpenCL manages objects using reference counts. Whenever the event is
-    // passed into an enqueue command, the OpenCL runtime should increment the
-    // call of the reference count of the event. Since we don't need to keep
-    // track of the event past this point, we can safely release the event
-    // resources.
-    for (auto event : write_events)
-      OCL_CHECK(clReleaseEvent(event));
+    set_callback(read_events[flag], "ooo_queue");
+    clEnqueueMapBuffer(world.command_queue, buffer_c[flag], CL_FALSE, CL_MAP_READ, 0, 
+            bytes_per_iteration, 1, &read_events[flag], &map_events[flag], 0);
+    set_callback(map_events[flag], "ooo_queue");
 
-    // Swap the front and the back kernel events. This call makes it easy to
-    // keep track of the current working events.
-    std::swap(kernel_events[0], kernel_events[1]);
+    OCL_CHECK(clReleaseEvent(write_events[0]));
+    OCL_CHECK(clReleaseEvent(write_events[1]));
   }
-  for (auto event : kernel_events)
-    OCL_CHECK(clReleaseEvent(event));
-
   // Wait for all of the OpenCL operations to complete
   printf("Waiting...\n");
   clFlush(world.command_queue);
   clFinish(world.command_queue);
+
+  //Releasing mem objects and events
+  for(int i = 0 ; i < 2 ; i++){
+    OCL_CHECK(clWaitForEvents(1, &map_events[i]));
+    OCL_CHECK(clReleaseMemObject(buffer_a[i]));
+    OCL_CHECK(clReleaseMemObject(buffer_b[i]));
+    OCL_CHECK(clReleaseMemObject(buffer_c[i]));
+    OCL_CHECK(clReleaseEvent(read_events[i]));
+    OCL_CHECK(clReleaseEvent(kernel_events[i]));
+  }
 
   int match = 0;
   // verify the results
@@ -315,10 +319,6 @@ int main(int argc, char **argv) {
     }
   }
 
-  // Free memory buffers and other OpenCL objects allocated on the FPGA device
-  OCL_CHECK(clReleaseMemObject(buffer_a));
-  OCL_CHECK(clReleaseMemObject(buffer_b));
-  OCL_CHECK(clReleaseMemObject(buffer_c));
   OCL_CHECK(clReleaseKernel(kernel));
   OCL_CHECK(clReleaseProgram(program));
   xcl_release_world(world);

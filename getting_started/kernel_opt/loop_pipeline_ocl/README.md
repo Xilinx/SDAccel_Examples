@@ -35,7 +35,6 @@ Board | Device Name | Software Version | NIMBIX Machine Type
 ------|-------------|------------------|--------------------
 Alpha Data ADM-PCIE-7V3|xilinx:adm-pcie-7v3:1ddr:3.0|SDAccel 2016.3|nx2
 Alpha Data ADM-PCIE-KU3|xilinx:adm-pcie-ku3:2ddr-xpr:3.2|SDAccel 2016.3|nx1
-Xilinx KU115|xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2|SDAccel 2016.3|nx3
 
 
 Board targeted by default = ***xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2***
@@ -50,15 +49,14 @@ Application code is located in the src directory. Accelerator binary files will 
 
 ```
 .
-|-- Makefile
-|-- README.md
-|-- description.json
-|-- src
-|   |-- host.cpp
-|   `-- vector_addition.cl
-`-- xclbin
+├── description.json
+├── Makefile
+├── README.md
+└── src
+    ├── host.cpp
+    └── vector_addition.cl
 
-2 directories, 5 files
+1 directory, 5 files
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS
@@ -138,7 +136,7 @@ make check
 
 * Use the following command to launch the application from the users terminal (on a system outside of the Nimbix environment)
 ```
-../../utility/nimbix/nimbix-run.py ./loop_pipeline
+../../utility/nimbix/nimbix-run.py -- ./loop_pipeline
 ```
 
 ***Copy the application files from the Developer to Runtime instances on Nimbix***

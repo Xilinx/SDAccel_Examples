@@ -46,14 +46,14 @@ Application code is located in the src directory. Accelerator binary files will 
 
 ```
 .
-|-- Makefile
-|-- README.md
-|-- description.json
-|-- src
-|   |-- krnl_vdotprod.cl
-|   |-- vdotprod.cpp
-|   `-- vdotprod.h
-`-- xclbin
+├── description.json
+├── Makefile
+├── README.md
+├── src
+│   ├── krnl_vdotprod.cl
+│   ├── vdotprod.cpp
+│   └── vdotprod.h
+└── xclbin
 
 2 directories, 6 files
 ```

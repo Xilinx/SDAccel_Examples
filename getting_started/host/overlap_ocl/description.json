@@ -1,8 +1,8 @@
 {
     "example": "Overlap Host and OpenCL kernels",
-    "overview": "This examples demonstrates techniques that allow you to overlap Host(CPU) and FPGA computation in an application. We will cover asynchronous operations and event object.",
+    "overview": "This examples demonstrates techniques that allow user to overlap Host(CPU) and FPGA computation in an application. It will cover asynchronous operations and event object.",
     "key_concepts": [ "OpenCL API", "Synchronize Host and FPGA", "Asynchronous Processing", "Events", "Asynchronous memcpy"],
-    "keywords": [ "cl_event" , "clCreateCommandQueue", "CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE"],
+    "keywords": [ "cl_event" , "clCreateCommandQueue", "CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE", "clEnqueueMigrateMemObjects"],
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
     "em_cmd": "./overlap",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./overlap",

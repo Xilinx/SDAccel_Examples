@@ -10,6 +10,7 @@ host_SRCS=./src/host.cpp $(xcl_SRCS)
 host_HDRS=$(xcl_HDRS)
 host_CXXFLAGS=-I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS)
 host_LDFLAGS=$(opencl_LDFLAGS)
+host_CXXFLAGS+=-Wall
 
 # Switch between GOOD/BAD Examples
 KFLOW:=GOOD
@@ -27,9 +28,6 @@ endif
 
 vadd_CLFLAGS+=-k vadd
 
-# Generate system estimates
-#vadd_CLFLAGS+=--report estimate
-
 EXES=host
 XCLBINS=vadd
 
@@ -38,6 +36,5 @@ check_EXE=host
 check_XCLBINS=vadd
 
 CHECKS=check
-
 
 include $(COMMON_REPO)/utility/rules.mk

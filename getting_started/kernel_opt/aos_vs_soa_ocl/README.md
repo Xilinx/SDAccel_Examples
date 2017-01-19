@@ -50,15 +50,16 @@ Application code is located in the src directory. Accelerator binary files will 
 
 ```
 .
-|-- Makefile
-|-- README.md
-|-- description.json
-|-- src
-|   |-- dot.cl
-|   `-- host.cpp
-`-- xclbin
+├── description.json
+├── Makefile
+├── README.md
+├── src
+│   ├── dot.cl
+│   └── host.cpp
+└── xclbin
+    └── dot.hw_emu.xilinx_xil-accel-rd-ku115_4ddr-xpr_3_3.xclbin
 
-2 directories, 5 files
+2 directories, 6 files
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS
@@ -138,7 +139,7 @@ make check
 
 * Use the following command to launch the application from the users terminal (on a system outside of the Nimbix environment)
 ```
-../../utility/nimbix/nimbix-run.py ./aos_vs_soa
+../../utility/nimbix/nimbix-run.py -- ./aos_vs_soa
 ```
 
 ***Copy the application files from the Developer to Runtime instances on Nimbix***
