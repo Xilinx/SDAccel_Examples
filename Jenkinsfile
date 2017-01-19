@@ -38,7 +38,9 @@ echo
 
 rsync -rL \$XILINX_SDX/Vivado_HLS/lnx64/tools/opencv/ lib/
 
+bsub -I -q long -R "osdistro=rhel && osver==ws6" -n 8 -R "span[ptile=1]" -j "\$(basename ${dir})-${target})<<EOF
 make -k TARGETS=${target} DEVICES=\"${devices}\" all
+EOF
 
 """
 			}
