@@ -11,9 +11,10 @@ S.No.   | Category  | Description
 1 | [host][]      |OpenCL host code for optimized interfacing with Xilinx Devices
 2 | [kernel_to_gmem][]      |Kernel to Global Memory Access Optimization.
 3 | [kernel_opt][]      |Kernel Optimization for performance
-4 | [clk_freq][]      |Improving Kernel Clock Frequency through Optimized code.
-5 | [debug][]      |Debugging and Profiling of Kernel.
-6 | [basic][]      |OpenCL miscellaneous Examples
+4 | [dataflow][]      |Kernel Optimization through Macro Level Pipelining
+5 | [clk_freq][]      |Improving Kernel Clock Frequency through Optimized code.
+6 | [debug][]      |Debugging and Profiling of Kernel.
+7 | [basic][]      |OpenCL miscellaneous Examples
 
  __Examples Table__ 
 
@@ -54,6 +55,11 @@ Example        | Description           | Key Concepts / Keywords
 [kernel_opt/aos_vs_soa_ocl/][]|"This example demonstrates how data layout can impact the performance of certain kernels. The example we will demonstrate how using the Structure of Array data layout can impact certain data parallel problems."|__Key__ __Concepts__<br> - Kernel Optimization<br> - Data Layout<br>__Keywords__<br> - NA
 [kernel_opt/systolic_array_c/][]|"This is a simple example of matrix multiplication (Row x Col) to help developers learn systolic array based algorithm design. Note : Systolic array based algorithm design is well suited for FPGA."|
 [kernel_opt/systolic_array_ocl/][]|"This is a simple example of matrix multiplication (Row x Col) to help developers learn systolic array based algorithm design. Note: Systolic array based algorithm design is well suited for FPGA."|
+[dataflow/dataflow_loop_c/][]|"This is simple example of vector addition to demonstrate Loops Dataflow functionality of HLS. HLS Dataflow allows user to schedule multiple sequential loops concurrently to achieve higher throughput."|__Key__ __Concepts__<br> - Loop Dataflow<br>__Keywords__<br> - dataflow<br> - hls::stream<>
+[dataflow/dataflow_pipes_ocl/][]|"This is simple example of vector addition to demonstrate OpenCL Pipe Memory usage. OpenCL PIPE memory functionality allows user to achieve kernel-to-kernel data transfer without using global memory."|__Key__ __Concepts__<br> - Dataflow<br> - kernel to kernel pipes<br>__Keywords__<br> - pipe<br> - xcl_reqd_pipe_depth<br> - read_pipe_block()<br> - write_pipe_block()
+[dataflow/dataflow_stream_array_c/][]|"This is simple example of Multiple Stages Vector Addition to demonstrate Array of Stream usage in HLS C Kernel Code."|__Key__ __Concepts__<br> - Array of Stream<br>__Keywords__<br> - dataflow<br> - hls::stream<>
+[dataflow/dataflow_stream_c/][]|"This is simple example of vector addition to demonstrate Dataflow functionality of HLS. HLS Dataflow allows user to schedule multiple task together to achieve higher throughput."|__Key__ __Concepts__<br> - Task Level Parallelism<br>__Keywords__<br> - dataflow<br> - hls::stream<>
+[dataflow/dataflow_func_ocl/][]|"This is simple example of vector addition to demonstrate Dataflow functionality in OpenCL Kernel. OpenCL Dataflow allows user to run multiple functions together to achieve higher throughput."|__Key__ __Concepts__<br> - Function/Task Level Parallelism<br>__Keywords__<br> - xcl_dataflow<br> - xclDataflowFifoDepth
 [clk_freq/split_kernel_c/][]|"This is a multi-filter image processing application to showcase effectiveness of Dataflow/Streams usage. This examples is intended to help developers to break down the complex kernels into multiple sub-functions using HLS Dataflow/Streams. It presents a way to concurrently execute multiple functions with better area utilization compared to a complex single kernel implementation. The main objective of this example is to showcase a way to build a optimal FPGA design which achieves maximum frequency with optimal resource utilization and achieves better performance compared to single complex kernel implementations."|__Key__ __Concepts__<br> - Dataflow<br> - Stream<br>__Keywords__<br> - #pragma HLS DATAFLOW<br> - hls::stream<br> - #pragma HLS INLINE<br> - #pragma HLS ARRAY_PARTITION<br> - #pragma HLS PIPELINE
 [clk_freq/split_kernel_ocl/][]|"This is a multi-filter image processing application to showcase effectiveness of Dataflow/Streams usage. This examples is intended to help developers to break down the complex kernel into multiple sub-functions using OpenCL Dataflow. It presents a way to concurrently execute multiple functions with better area utilization compared to a complex single kernel implementation. The main objective of this example is to showcase a way to build a optimal FPGA design which achieves maximum frequency with optimal resource utilization and achieves better performance compared to single kernel implementations."|__Key__ __Concepts__<br> - Dataflow<br> - Stream<br>__Keywords__<br> - xcl_dataflow<br> - xcl_array_partition<br> - xcl_pipeline_loop
 [clk_freq/too_many_cu_c/][]|"This is simple example of vector addition to demonstrate effectiveness of using single compute unit with heavy work load to achieve better performance. Bad example uses multiple compute units to achieve good performance but it results in heavy usage of FPGA resources and area due to which design fails timing. Good example uses single compute unit to compute with heavier work load, it helps in less resource utilization and also helps in kernel scalability. To switch between Good/Bad cases use the flag provided in makefile."|__Key__ __Concepts__<br> - Clock Frequency<br> - Data Level Parallelism<br> - Multiple Compute Units<br>__Keywords__<br> - #pragma HLS PIPELINE<br> - #pragma HLS ARRAY_PARTITION
@@ -109,7 +115,12 @@ Example        | Description           | Key Concepts / Keywords
 [kernel_opt/aos_vs_soa_ocl/]:kernel_opt/aos_vs_soa_ocl/
 [kernel_opt/systolic_array_c/]:kernel_opt/systolic_array_c/
 [kernel_opt/systolic_array_ocl/]:kernel_opt/systolic_array_ocl/
-[datflow]:datflow
+[dataflow]:dataflow
+[dataflow/dataflow_loop_c/]:dataflow/dataflow_loop_c/
+[dataflow/dataflow_pipes_ocl/]:dataflow/dataflow_pipes_ocl/
+[dataflow/dataflow_stream_array_c/]:dataflow/dataflow_stream_array_c/
+[dataflow/dataflow_stream_c/]:dataflow/dataflow_stream_c/
+[dataflow/dataflow_func_ocl/]:dataflow/dataflow_func_ocl/
 [clk_freq]:clk_freq
 [clk_freq/split_kernel_c/]:clk_freq/split_kernel_c/
 [clk_freq/split_kernel_ocl/]:clk_freq/split_kernel_ocl/
