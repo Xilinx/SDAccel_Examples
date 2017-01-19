@@ -16,6 +16,8 @@ CXXFLAGS+=-std=c++0x
 
 # Kernel
 vector_addition_SRCS=./src/vector_addition.cl
+vector_addition_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.2
+
 
 EXES=loop_pipeline
 XCLBINS=vector_addition
@@ -23,7 +25,10 @@ XCLBINS=vector_addition
 # check
 check_EXE=$(EXES)
 check_XCLBINS=$(XCLBINS)
+check_DEVICES=$(vector_addition_DEVICES)
 
 CHECKS=check
 
+#Changing Default Device
+DEVICES:=xilinx:adm-pcie-ku3:2ddr-xpr:3.2
 include $(COMMON_REPO)/utility/rules.mk

@@ -16,6 +16,15 @@ def buildExample(target, dir, devices, workdir) {
 		stage("${dir}-${target}") {
 			node('rhel6 && xsjrdevl') {
 				/* Retry up to 3 times to get this to work */
+
+				if ( $target == "sw_emu" ) {
+					cores = 1
+					queue = "medium"
+				} else {
+					cores = 8
+					queue = "long"
+				}
+
 				sh """#!/bin/bash -e
 
 cd ${workdir}
@@ -27,6 +36,7 @@ module add vivado/2016.3_daily
 module add vivado_hls/2016.3_daily
 module add sdaccel/2016.3_daily
 module add opencv/vivado_hls
+module add lsf
 
 cd ${dir}
 
@@ -36,9 +46,10 @@ echo "PWD: \$(pwd)"
 echo "-----------------------------------------------"
 echo
 
+
 rsync -rL \$XILINX_SDX/Vivado_HLS/lnx64/tools/opencv/ lib/
 
-bsub -I -q long -R "osdistro=rhel && osver==ws6" -n 8 -R "span[ptile=1]" -j "\$(basename ${dir})-${target})<<EOF
+bsub -I -q ${queue} -R "osdistro=rhel && osver==ws6" -n ${cores} -R "span[ptile=${cores}]" -J "\$(basename ${dir})-${target}" <<EOF
 make -k TARGETS=${target} DEVICES=\"${devices}\" all
 EOF
 

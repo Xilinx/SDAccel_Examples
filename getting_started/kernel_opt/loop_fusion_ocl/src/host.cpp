@@ -125,9 +125,9 @@ int main(int argc, char **argv) {
   xcl_memcpy_to_device(world, buffer_points, data.data(), array_size_bytes);
   xcl_memcpy_to_device(world, buffer_in, input.data(), num_dims * sizeof(int));
 
-  printf("|--------------------------------+-----------------|\n"
-         "| Kernel                         |    Runtime (ns) |\n"
-         "|--------------------------------+-----------------|\n");
+  printf( "|--------------------------------+-------------------------|\n"
+          "| Kernel                         |    Wall-Clock Time (ns) |\n"
+          "|--------------------------------+-------------------------|\n");
 
   // set kernel parameters
   cl_kernel kernel = xcl_get_kernel(program, "nearest_neighbor");
@@ -138,7 +138,7 @@ int main(int argc, char **argv) {
   xcl_set_kernel_arg(kernel, 4, sizeof(cl_int), &num_dims);
 
   auto simple_time = xcl_run_kernel3d(world, kernel, 1, 1, 1);
-  printf("| %-30s | %15lu |\n", "Nearest Neighbor: simple", simple_time);
+  printf("| %-30s | %23lu |\n", "Nearest Neighbor: simple", simple_time);
 
   xcl_memcpy_from_device(world, out.data(), buffer_out, num_dims * sizeof(int));
   verify(gold, out);
@@ -152,11 +152,13 @@ int main(int argc, char **argv) {
   xcl_set_kernel_arg(kernel_loop, 4, sizeof(cl_int), &num_dims);
 
   auto loop_time = xcl_run_kernel3d(world, kernel_loop, 1, 1, 1);
-  printf("| %-30s | %15lu |\n", "Nearest Neighbor: loop fusion", loop_time);
+  printf("| %-30s | %23lu |\n", "Nearest Neighbor: loop fusion", loop_time);
 
   xcl_memcpy_from_device(world, out.data(), buffer_out, num_dims * sizeof(int));
   verify(gold, out);
-  printf("|--------------------------------+-----------------|\n");
+  printf("|--------------------------------+-------------------------|\n");
+  printf("Note: Wall Clock Time is meaningful for real hardware execution only, not for emulation.\n");
+  printf("Please refer to profile summary for kernel execution time for hardware emulation.\n");
 
   // free memory buffers allocated on the accelerator device
   OCL_CHECK(clReleaseMemObject(buffer_out));

@@ -50,13 +50,13 @@ Application code is located in the src directory. Accelerator binary files will 
 
 ```
 .
-|-- Makefile
-|-- README.md
-|-- description.json
-|-- src
-|   |-- N_stage_adders.cpp
-|   `-- host.cpp
-`-- xclbin
+├── description.json
+├── Makefile
+├── README.md
+├── src
+│   ├── host.cpp
+│   └── N_stage_adders.cpp
+└── xclbin
 
 2 directories, 5 files
 ```
