@@ -83,9 +83,9 @@ int main(int argc, char** argv)
     xcl_memcpy_to_device(world, buffer_a, source_a.data(), size_in_bytes);
     xcl_memcpy_to_device(world, buffer_b, source_b.data(), size_in_bytes);
 
-    printf( "|-------------------------+-----------------|\n"
-            "| Kernel                  |    Runtime (ns) |\n"
-            "|-------------------------+-----------------|\n");
+    printf( "|-------------------------+-------------------------|\n"
+            "| Kernel                  |    Wall-Clock Time (ns) |\n"
+            "|-------------------------+-------------------------|\n");
 
     cl_kernel kernel_vadd = xcl_get_kernel(program, "vadd");
 
@@ -95,7 +95,7 @@ int main(int argc, char** argv)
     xcl_set_kernel_arg(kernel_vadd, 3, sizeof(int), &DATA_SIZE);
 
     auto simple_time = xcl_run_kernel3d(world, kernel_vadd, 1, 1, 1);
-    printf("| %-22s  | %15lu |\n", "vadd: simple", simple_time);
+    printf("| %-22s  | %23lu |\n", "vadd: simple", simple_time);
 
     xcl_memcpy_from_device(world, source_results.data(), buffer_result,
                            size_in_bytes);
@@ -109,8 +109,10 @@ int main(int argc, char** argv)
     xcl_set_kernel_arg(kernel_pipelined, 3, sizeof(int), &DATA_SIZE);
 
     auto pipelined_time = xcl_run_kernel3d(world, kernel_pipelined, 1, 1, 1);
-    printf("| %-22s  | %15lu |\n", "vadd: pipelined", pipelined_time);
-    printf("|-------------------------+-----------------|\n");
+    printf("| %-22s  | %23lu |\n", "vadd: pipelined", pipelined_time);
+    printf("|-------------------------+-------------------------|\n");
+    printf("Note: Wall Clock Time is meaningful for real hardware execution only, not for emulation.\n");
+    printf("Please refer to profile summary for kernel execution time for hardware emulation.\n");
 
     xcl_memcpy_from_device(world, source_results.data(), buffer_result,
                            size_in_bytes);

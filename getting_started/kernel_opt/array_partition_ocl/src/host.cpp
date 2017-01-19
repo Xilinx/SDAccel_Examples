@@ -119,9 +119,9 @@ int main(int argc, char **argv) {
     xcl_memcpy_to_device(world, buffer_a, A.data(), array_size_bytes);
     xcl_memcpy_to_device(world, buffer_b, B.data(), array_size_bytes);
 
-    printf("|-------------------------|-----------------|\n"
-           "| Kernel                  |    Runtime (ns) |\n"
-           "|-------------------------|-----------------|\n");
+  printf( "|-------------------------+-------------------------|\n"
+          "| Kernel                  |    Wall-Clock Time (ns) |\n"
+          "|-------------------------+-------------------------|\n");
     cl_kernel matmul_kernel = xcl_get_kernel(program, "matmul");
     xcl_set_kernel_arg(matmul_kernel, 0, sizeof(cl_mem), &buffer_a);
     xcl_set_kernel_arg(matmul_kernel, 1, sizeof(cl_mem), &buffer_b);
@@ -131,7 +131,7 @@ int main(int argc, char **argv) {
     auto matmul_time = xcl_run_kernel3d(world, matmul_kernel, 1, 1, 1);
     xcl_memcpy_from_device(world, C.data(), buffer_c, array_size_bytes);
     verify(gold, C);
-    printf("| %-23s | %15lu |\n", "matmul: ", matmul_time);
+    printf("| %-23s | %23lu |\n", "matmul: ", matmul_time);
 
     cl_kernel matmul_partition_kernel =
         xcl_get_kernel(program, "matmul_partition");
@@ -144,9 +144,11 @@ int main(int argc, char **argv) {
         xcl_run_kernel3d(world, matmul_partition_kernel, 1, 1, 1);
     xcl_memcpy_from_device(world, C.data(), buffer_c, array_size_bytes);
     verify(gold, C);
-    printf("| %-23s | %15lu |\n", "matmul: partition", matmul_partition_time);
+    printf("| %-23s | %23lu |\n", "matmul: partition", matmul_partition_time);
 
-    printf("|-------------------------|-----------------|\n");
+    printf("|-------------------------+-------------------------|\n");
+    printf("Note: Wall Clock Time is meaningful for real hardware execution only, not for emulation.\n");
+    printf("Please refer to profile summary for kernel execution time for hardware emulation.\n");
     printf("TEST PASSED\n\n");
 
     return EXIT_SUCCESS;

@@ -136,9 +136,9 @@ int main(int argc, char **argv) {
                        soa_vertices.y.size() * sizeof(int));
   xcl_memcpy_to_device(world, buffer_z, soa_vertices.z.data(),
                        soa_vertices.z.size() * sizeof(int));
-  printf( "|-------------------------+-----------------|\n"
-          "| Kernel                  |    Runtime (ns) |\n"
-          "|-------------------------+-----------------|\n");
+  printf( "|-------------------------+-------------------------|\n"
+          "| Kernel                  |    Wall-Clock Time (ns) |\n"
+          "|-------------------------+-------------------------|\n");
 
   // Allocate memory for the array of struct data structure
   cl_mem buffer_pts =
@@ -154,7 +154,7 @@ int main(int argc, char **argv) {
   xcl_set_kernel_arg(kernel_aos, 1, sizeof(cl_mem), &buffer_pts);
   xcl_set_kernel_arg(kernel_aos, 2, sizeof(cl_int), &VERTEX_COUNT);
   auto aos_time = xcl_run_kernel3d(world, kernel_aos, 1, 1, 1);
-  printf("| %-22s  | %15lu |\n", "dot: Array of Structs", aos_time);
+  printf("| %-22s  | %23lu |\n", "dot: Array of Structs", aos_time);
 
   // Transfer the results back from the GPU
   xcl_memcpy_from_device(world, results.data(), buffer_result,
@@ -170,13 +170,15 @@ int main(int argc, char **argv) {
   xcl_set_kernel_arg(kernel_soa, 3, sizeof(cl_mem), &buffer_z);
   xcl_set_kernel_arg(kernel_soa, 4, sizeof(cl_int), &VERTEX_COUNT);
   auto soa_time = xcl_run_kernel3d(world, kernel_soa, 1, 1, 1);
-  printf("| %-22s  | %15lu |\n", "dot: Struct of Arrays", soa_time);
+  printf("| %-22s  | %23lu |\n", "dot: Struct of Arrays", soa_time);
 
   // Get the results from the FPGA
   xcl_memcpy_from_device(world, results.data(), buffer_result,
                          results.size() * sizeof(int));
   verify(gold, results);
-  printf("|-------------------------+-----------------|\n");
+  printf("|-------------------------+-------------------------|\n");
+  printf("Note: Wall Clock Time is meaningful for real hardware execution only, not for emulation.\n");
+  printf("Please refer to profile summary for kernel execution time for hardware emulation.\n");
   printf("TEST PASSED\n\n");
   return EXIT_SUCCESS;
 }
