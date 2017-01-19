@@ -1,4 +1,4 @@
-Vector Dot-Product
+Clock Frequency ~ Large Loop Count (Multiple Compute Units) 
 ======================
 
 This README file contains the following sections:
@@ -16,7 +16,11 @@ This README file contains the following sections:
 
 
 ## 1. OVERVIEW
-Simple example of vector dot-product.
+This is a CNN (Convolutional Neural Network) based example which mainly focuses on Convolution operation of a CNN network. The goal of this example is to demonstrate a method to overcome kernel design timing failure issue. It also presents the effectiveness of using multiple compute units to improve performance.
+
+***KEY CONCEPTS:*** Clock Frequency, Multiple Compute Units, Convolutional Neural Networks
+
+***KEYWORDS:*** #pragma HLS ARRAY_PARTITION, #pragma HLS PIPELINE
 
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
@@ -30,7 +34,6 @@ where examples is the name of the directory where the repository will be stored 
 Board | Device Name | Software Version | NIMBIX Machine Type
 ------|-------------|------------------|--------------------
 Alpha Data ADM-PCIE-7V3|xilinx:adm-pcie-7v3:1ddr:3.0|SDAccel 2016.3|nx2
-Alpha Data ADM-PCIE-KU3|xilinx:adm-pcie-ku3:2ddr-xpr:3.2|SDAccel 2016.3|nx1
 Xilinx KU115|xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2|SDAccel 2016.3|nx3
 
 
@@ -49,13 +52,13 @@ Application code is located in the src directory. Accelerator binary files will 
 ├── description.json
 ├── Makefile
 ├── README.md
-├── src
-│   ├── krnl_vdotprod.cl
-│   ├── vdotprod.cpp
-│   └── vdotprod.h
-└── xclbin
+└── src
+    ├── cnn_convolution_bad.cpp
+    ├── cnn_convolution.cpp
+    ├── defns.h
+    └── host.cpp
 
-2 directories, 6 files
+1 directory, 7 files
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS
@@ -100,7 +103,7 @@ emconfigutil --xdevice 'xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./vdotprod
+./host
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card
@@ -135,7 +138,7 @@ make check
 
 * Use the following command to launch the application from the users terminal (on a system outside of the Nimbix environment)
 ```
-../../../utility/nimbix/nimbix-run.py -- ./vdotprod
+../../../utility/nimbix/nimbix-run.py -- ./host
 ```
 
 ***Copy the application files from the Developer to Runtime instances on Nimbix***
@@ -143,7 +146,7 @@ make check
 * Launch the application using the Nimbix web interface as described in [Nimbix Getting Started Guide][]
 * Make sure that the application launch options in the Nimbix web interface reflect the applications command line syntax
 ```
-./vdotprod
+./host
 ```
 
 ## 6. COMPILATION AND EXECUTION FOR IBM POWER SERVERS
@@ -174,9 +177,7 @@ This example is written by developers at
 ## 10. REVISION HISTORY
 Date | README Version | Description
 -----|----------------|------------
-FEB2016|1.0|Initial Xilinx Release
-JUL2016|2.0|Conversion to Makefile based compilation
-DEC2016|3.0|Update for SDAccel 2016.3
+DEC2016|1.0|Initial Xilinx Release
 
 [3-Clause BSD License]:../../../LICENSE.txt
 [SDAccel Forums]: https://forums.xilinx.com/t5/SDAccel/bd-p/SDx

@@ -44,13 +44,13 @@ Application code is located in the src directory. Accelerator binary files will 
 
 ```
 .
-|-- Makefile
-|-- README.md
-|-- description.json
-|-- src
-|   |-- krnl_sum_scan.cl
-|   `-- sum_scan.cpp
-`-- xclbin
+├── description.json
+├── Makefile
+├── README.md
+├── src
+│   ├── krnl_sum_scan.cl
+│   └── sum_scan.cpp
+└── xclbin
 
 2 directories, 5 files
 ```

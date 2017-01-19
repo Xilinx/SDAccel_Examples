@@ -50,21 +50,21 @@ Application code is located in the src directory. Accelerator binary files will 
 
 ```
 .
-|-- Makefile
-|-- README.md
-|-- data
-|   |-- car_128x128.bmp
-|   `-- car_480x640.bmp
-|-- description.json
-|-- src
-|   |-- boost_helper.h
-|   |-- defns.h
-|   |-- host.cpp
-|   |-- median_helper.h
-|   |-- sketch.cl
-|   |-- sketch_bad.cl
-|   `-- sketch_helper.h
-`-- xclbin
+├── data
+│   ├── car_128x128.bmp
+│   └── car_480x640.bmp
+├── description.json
+├── Makefile
+├── README.md
+├── src
+│   ├── boost_helper.h
+│   ├── defns.h
+│   ├── host.cpp
+│   ├── median_helper.h
+│   ├── sketch_bad.cl
+│   ├── sketch.cl
+│   └── sketch_helper.h
+└── xclbin
 
 3 directories, 12 files
 ```
@@ -146,7 +146,7 @@ make check
 
 * Use the following command to launch the application from the users terminal (on a system outside of the Nimbix environment)
 ```
-../../../utility/nimbix/nimbix-run.py ./host xclbin
+../../../utility/nimbix/nimbix-run.py -- ./host xclbin
 ```
 
 ***Copy the application files from the Developer to Runtime instances on Nimbix***

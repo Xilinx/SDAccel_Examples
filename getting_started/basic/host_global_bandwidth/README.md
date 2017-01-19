@@ -46,13 +46,13 @@ Application code is located in the src directory. Accelerator binary files will 
 
 ```
 .
-|-- Makefile
-|-- README.md
-|-- description.json
-|-- src
-|   |-- host_global_bandwidth.c
-|   `-- kernel.cl
-`-- xclbin
+├── description.json
+├── Makefile
+├── README.md
+├── src
+│   ├── host_global_bandwidth.c
+│   └── kernel.cl
+└── xclbin
 
 2 directories, 5 files
 ```

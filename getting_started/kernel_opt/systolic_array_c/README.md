@@ -1,4 +1,4 @@
-Vector Dot-Product
+Systolic Array Implementation
 ======================
 
 This README file contains the following sections:
@@ -16,7 +16,7 @@ This README file contains the following sections:
 
 
 ## 1. OVERVIEW
-Simple example of vector dot-product.
+This is a simple example of matrix multiplication (Row x Col) to help developers learn systolic array based algorithm design. Note : Systolic array based algorithm design is well suited for FPGA.
 
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
@@ -50,10 +50,10 @@ Application code is located in the src directory. Accelerator binary files will 
 ├── Makefile
 ├── README.md
 ├── src
-│   ├── krnl_vdotprod.cl
-│   ├── vdotprod.cpp
-│   └── vdotprod.h
+│   ├── host.cpp
+│   └── mmult.cpp
 └── xclbin
+    └── mmult.hw_emu.xilinx_xil-accel-rd-ku115_4ddr-xpr_3_3.xclbin
 
 2 directories, 6 files
 ```
@@ -100,7 +100,7 @@ emconfigutil --xdevice 'xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./vdotprod
+./host
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card
@@ -135,7 +135,7 @@ make check
 
 * Use the following command to launch the application from the users terminal (on a system outside of the Nimbix environment)
 ```
-../../../utility/nimbix/nimbix-run.py -- ./vdotprod
+../../../utility/nimbix/nimbix-run.py -- ./host
 ```
 
 ***Copy the application files from the Developer to Runtime instances on Nimbix***
@@ -143,7 +143,7 @@ make check
 * Launch the application using the Nimbix web interface as described in [Nimbix Getting Started Guide][]
 * Make sure that the application launch options in the Nimbix web interface reflect the applications command line syntax
 ```
-./vdotprod
+./host
 ```
 
 ## 6. COMPILATION AND EXECUTION FOR IBM POWER SERVERS
@@ -174,9 +174,7 @@ This example is written by developers at
 ## 10. REVISION HISTORY
 Date | README Version | Description
 -----|----------------|------------
-FEB2016|1.0|Initial Xilinx Release
-JUL2016|2.0|Conversion to Makefile based compilation
-DEC2016|3.0|Update for SDAccel 2016.3
+DEC2016|1.0|Initial Xilinx Release
 
 [3-Clause BSD License]:../../../LICENSE.txt
 [SDAccel Forums]: https://forums.xilinx.com/t5/SDAccel/bd-p/SDx

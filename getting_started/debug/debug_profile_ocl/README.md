@@ -50,17 +50,17 @@ Application code is located in the src directory. Accelerator binary files will 
 
 ```
 .
-|-- Makefile
-|-- README.md
-|-- description.json
-|-- scripts
-|   `-- open_waveform.tcl
-|-- sdaccel.ini
-|-- src
-|   |-- host.cpp
-|   |-- host.h
-|   `-- vadd.cl
-`-- xclbin
+├── description.json
+├── Makefile
+├── README.md
+├── scripts
+│   └── open_waveform.tcl
+├── sdaccel.ini
+├── src
+│   ├── host.cpp
+│   ├── host.h
+│   └── vadd.cl
+└── xclbin
 
 3 directories, 8 files
 ```

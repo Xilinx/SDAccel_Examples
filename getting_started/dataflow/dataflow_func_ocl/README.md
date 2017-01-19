@@ -1,4 +1,4 @@
-Vector Dot-Product
+Dataflow Function OpenCL
 ======================
 
 This README file contains the following sections:
@@ -16,7 +16,11 @@ This README file contains the following sections:
 
 
 ## 1. OVERVIEW
-Simple example of vector dot-product.
+This is simple example of vector addition to demonstrate Dataflow functionality in OpenCL Kernel. OpenCL Dataflow allows user to run multiple functions together to achieve higher throughput.
+
+***KEY CONCEPTS:*** Function/Task Level Parallelism
+
+***KEYWORDS:*** xcl_dataflow, xclDataflowFifoDepth
 
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
@@ -49,13 +53,11 @@ Application code is located in the src directory. Accelerator binary files will 
 ├── description.json
 ├── Makefile
 ├── README.md
-├── src
-│   ├── krnl_vdotprod.cl
-│   ├── vdotprod.cpp
-│   └── vdotprod.h
-└── xclbin
+└── src
+    ├── adder.cl
+    └── host.cpp
 
-2 directories, 6 files
+1 directory, 5 files
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS
@@ -100,7 +102,7 @@ emconfigutil --xdevice 'xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./vdotprod
+./host
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card
@@ -135,7 +137,7 @@ make check
 
 * Use the following command to launch the application from the users terminal (on a system outside of the Nimbix environment)
 ```
-../../../utility/nimbix/nimbix-run.py -- ./vdotprod
+../../../utility/nimbix/nimbix-run.py -- ./host
 ```
 
 ***Copy the application files from the Developer to Runtime instances on Nimbix***
@@ -143,7 +145,7 @@ make check
 * Launch the application using the Nimbix web interface as described in [Nimbix Getting Started Guide][]
 * Make sure that the application launch options in the Nimbix web interface reflect the applications command line syntax
 ```
-./vdotprod
+./host
 ```
 
 ## 6. COMPILATION AND EXECUTION FOR IBM POWER SERVERS
@@ -174,9 +176,7 @@ This example is written by developers at
 ## 10. REVISION HISTORY
 Date | README Version | Description
 -----|----------------|------------
-FEB2016|1.0|Initial Xilinx Release
-JUL2016|2.0|Conversion to Makefile based compilation
-DEC2016|3.0|Update for SDAccel 2016.3
+JAN2017|1.0|Initial Xilinx Release
 
 [3-Clause BSD License]:../../../LICENSE.txt
 [SDAccel Forums]: https://forums.xilinx.com/t5/SDAccel/bd-p/SDx
