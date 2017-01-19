@@ -66,8 +66,6 @@ $(foreach exe,$(EXES),$(eval $(call mk_exe,$(exe))))
 
 $(foreach xclbin,$(XCLBINS),$(foreach target,$(TARGETS),$(foreach device,$(DEVICES),$(eval $(call mk_xclbin,$(xclbin),$(target),$(device))))))
 
-$(info $(XCLBIN_GOALS))
-
 .PHONY: all
 all: $(EXE_GOALS) $(XCLBIN_GOALS)
 
