@@ -17,7 +17,7 @@ def buildExample(target, dir, devices, workdir) {
 			node('rhel6 && xsjrdevl') {
 				/* Retry up to 3 times to get this to work */
 
-				if ( $target == "sw_emu" ) {
+				if ( target == "sw_emu" ) {
 					cores = 1
 					queue = "medium"
 				} else {
@@ -118,7 +118,7 @@ node('rhel6 && xsjrdevl && xsjrdevl110') {
 	}
 
 	stage('Build') {
-		sh 'find . -name description.json | sed -e \'s/\\.\\///\' -e \'s/\\/description.json//\' > examples.dat'
+		sh 'git ls-files | grep description.json | sed -e \'s/\\.\\///\' -e \'s/\\/description.json//\' > examples.dat'
 		examplesFile = readFile 'examples.dat'
 		examples = examplesFile.split('\\n')
 
