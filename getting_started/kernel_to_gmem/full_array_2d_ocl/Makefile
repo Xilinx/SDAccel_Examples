@@ -13,6 +13,7 @@ host_LDFLAGS=$(opencl_LDFLAGS)
 # Kernel
 mmult_SRCS=./src/mmult.cl
 mmult_CLFLAGS=-k mmult
+mmult_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.2
 
 EXES=host
 XCLBINS=mmult
@@ -20,8 +21,11 @@ XCLBINS=mmult
 # check
 check_EXE=host
 check_XCLBINS=mmult
+check_DEVICES=$(mmult_DEVICES)
 
 CHECKS=check
+
+DEVICES:=xilinx:adm-pcie-ku3:2ddr-xpr:3.2
 
 include $(COMMON_REPO)/utility/rules.mk
 
