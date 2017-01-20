@@ -37,11 +37,9 @@ kernel __attribute__((reqd_work_group_size(1, 1, 1)))
 void vadd(global int* c,
           global const int* a,
           global const int* b,
-          const int offset,
           const int elements
           ) {
-    int end = offset + elements;
-    vadd_loop: for (int x=offset; x<end; ++x) {
+    vadd_loop: for (int x=0; x < elements ; ++x) {
         c[x] = a[x] + b[x];
     }
 }

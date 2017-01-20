@@ -102,7 +102,7 @@ vector<int> test_fir(xcl_world world, cl_program program, string kernel_name,
 
     auto kernel_time = xcl_run_kernel3d(world, kernel, 1, 1, 1);
 
-    printf("| %-30s | %15lu |\n", kernel_name.c_str(), kernel_time);
+    printf("| %-30s | %23lu |\n", kernel_name.c_str(), kernel_time);
     xcl_memcpy_from_device(world, device_output.data(), buffer_output,
                            signal_size * sizeof(int));
 
@@ -135,9 +135,9 @@ int main(int argc, char **argv) {
     xcl_memcpy_to_device(world, buffer_coeff, coeff.data(),
                          coeff_size_in_bytes);
 
-    printf("|--------------------------------+-----------------|\n"
-           "| Kernel                         |    Runtime (ns) |\n"
-           "|--------------------------------+-----------------|\n");
+    printf( "|--------------------------------+-------------------------|\n"
+            "| Kernel                         |    Wall-Clock Time (ns) |\n"
+            "|--------------------------------+-------------------------|\n");
 
     auto device_output = test_fir(world, program, "fir_naive", buffer_output,
                                   buffer_signal, buffer_coeff, signal_size);
@@ -148,7 +148,9 @@ int main(int argc, char **argv) {
                  buffer_signal, buffer_coeff, signal_size);
     verify(gold, device_output);
 
-    printf("|--------------------------------+-----------------|\n\n");
+    printf("|--------------------------------+-------------------------|\n");
+    printf("Note: Wall Clock Time is meaningful for real hardware execution only, not for emulation.\n");
+    printf("Please refer to profile summary for kernel execution time for hardware emulation.\n\n");
 
     clReleaseMemObject(buffer_signal);
     clReleaseMemObject(buffer_coeff);

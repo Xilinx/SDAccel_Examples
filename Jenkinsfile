@@ -16,6 +16,15 @@ def buildExample(target, dir, devices, workdir) {
 		stage("${dir}-${target}") {
 			node('rhel6 && xsjrdevl') {
 				/* Retry up to 3 times to get this to work */
+
+				if ( target == "sw_emu" ) {
+					cores = 1
+					queue = "medium"
+				} else {
+					cores = 8
+					queue = "long"
+				}
+
 				sh """#!/bin/bash -e
 
 cd ${workdir}
@@ -27,6 +36,7 @@ module add vivado/2016.3_daily
 module add vivado_hls/2016.3_daily
 module add sdaccel/2016.3_daily
 module add opencv/vivado_hls
+module add lsf
 
 cd ${dir}
 
@@ -36,9 +46,12 @@ echo "PWD: \$(pwd)"
 echo "-----------------------------------------------"
 echo
 
+
 rsync -rL \$XILINX_SDX/Vivado_HLS/lnx64/tools/opencv/ lib/
 
-make TARGETS=${target} DEVICES=\"${devices}\" all
+bsub -I -q ${queue} -R "osdistro=rhel && osver==ws6" -n ${cores} -R "span[ptile=${cores}]" -J "\$(basename ${dir})-${target}" <<EOF
+make -k TARGETS=${target} DEVICES=\"${devices}\" all
+EOF
 
 """
 			}
@@ -67,7 +80,7 @@ echo
 
 export PYTHONUNBUFFERED=true
 
-make TARGETS=${target} DEVICES=\"${devices}\" check
+make -k TARGETS=${target} DEVICES=\"${devices}\" check
 
 """
 			}
@@ -105,7 +118,7 @@ node('rhel6 && xsjrdevl && xsjrdevl110') {
 	}
 
 	stage('Build') {
-		sh 'find . -name description.json | sed -e \'s/\\.\\///\' -e \'s/\\/description.json//\' > examples.dat'
+		sh 'git ls-files | grep description.json | sed -e \'s/\\.\\///\' -e \'s/\\/description.json//\' > examples.dat'
 		examplesFile = readFile 'examples.dat'
 		examples = examplesFile.split('\\n')
 

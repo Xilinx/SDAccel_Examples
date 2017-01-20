@@ -50,13 +50,13 @@ Application code is located in the src directory. Accelerator binary files will 
 
 ```
 .
-|-- Makefile
-|-- README.md
-|-- description.json
-|-- src
-|   |-- host.cpp
-|   `-- matmul.cl
-`-- xclbin
+├── description.json
+├── Makefile
+├── README.md
+├── src
+│   ├── host.cpp
+│   └── matmul.cl
+└── xclbin
 
 2 directories, 5 files
 ```
@@ -138,7 +138,7 @@ make check
 
 * Use the following command to launch the application from the users terminal (on a system outside of the Nimbix environment)
 ```
-../../utility/nimbix/nimbix-run.py ./array_partition
+../../utility/nimbix/nimbix-run.py -- ./array_partition
 ```
 
 ***Copy the application files from the Developer to Runtime instances on Nimbix***

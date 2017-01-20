@@ -5,7 +5,7 @@
     "keywords": [ "#pragma HLS DATAFLOW" , "hls::stream", "#pragma HLS INLINE", "#pragma HLS ARRAY_PARTITION", "#pragma HLS PIPELINE"],
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
     "em_cmd": "./host ./data/car_128x128.bmp",
-    "hw_cmd": "../../../utility/nimbix/nimbix-run.py ./host ./data/car_128x128.bmp",
+    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host ./data/car_128x128.bmp",
     "contributors" : [
         {
             "group": "Xilinx",

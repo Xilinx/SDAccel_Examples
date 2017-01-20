@@ -21,7 +21,6 @@ else
 endif
 
 sketch_CLFLAGS=-k process_image
-sketch_CLFLAGS+= -DHW_FLOW
 
 EXES=host
 XCLBINS=sketch

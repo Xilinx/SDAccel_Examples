@@ -18,6 +18,8 @@ Example        | Description           | Key Concepts / Keywords
 [loop_perfect_ocl/][]|"This nearest neighbor example is to demonstrate how to achieve better performance using loop perfect."|
 [loop_pipeline_ocl/][]|"This example demonstrates how loop pipelining can be used to improve the performance of a kernel."|__Key__ __Concepts__<br> - Kernel Optimization<br> - Loop Pipelining<br>__Keywords__<br> - xcl_pipeline_loop
 [aos_vs_soa_ocl/][]|"This example demonstrates how data layout can impact the performance of certain kernels. The example we will demonstrate how using the Structure of Array data layout can impact certain data parallel problems."|__Key__ __Concepts__<br> - Kernel Optimization<br> - Data Layout<br>__Keywords__<br> - NA
+[systolic_array_c/][]|"This is a simple example of matrix multiplication (Row x Col) to help developers learn systolic array based algorithm design. Note : Systolic array based algorithm design is well suited for FPGA."|
+[systolic_array_ocl/][]|"This is a simple example of matrix multiplication (Row x Col) to help developers learn systolic array based algorithm design. Note: Systolic array based algorithm design is well suited for FPGA."|
 
 [.]:.
 [dependence_inter_c/]:dependence_inter_c/
@@ -32,3 +34,5 @@ Example        | Description           | Key Concepts / Keywords
 [loop_perfect_ocl/]:loop_perfect_ocl/
 [loop_pipeline_ocl/]:loop_pipeline_ocl/
 [aos_vs_soa_ocl/]:aos_vs_soa_ocl/
+[systolic_array_c/]:systolic_array_c/
+[systolic_array_ocl/]:systolic_array_ocl/

@@ -12,7 +12,10 @@ help::
 	$(ECHO) "		Command to generate the design for specified Target."
 	$(ECHO) ""
 	$(ECHO) "	make clean"
-	$(ECHO) "		Command to remove the generated files."
+	$(ECHO) "		Command to remove the generated non-hardware files."
+	$(ECHO) ""
+	$(ECHO) "	make cleanall"
+	$(ECHO) "		Command to remove all the generated files."
 	$(ECHO) ""
 
 target_whitelist = $(if $($(1)_TARGETS), $($(1)_TARGETS), $(TARGETS))
@@ -66,18 +69,19 @@ $(foreach exe,$(EXES),$(eval $(call mk_exe,$(exe))))
 
 $(foreach xclbin,$(XCLBINS),$(foreach target,$(TARGETS),$(foreach device,$(DEVICES),$(eval $(call mk_xclbin,$(xclbin),$(target),$(device))))))
 
-$(info $(XCLBIN_GOALS))
-
 .PHONY: all
 all: $(EXE_GOALS) $(XCLBIN_GOALS)
 
 .PHONY: docs
 docs: README.md
 
-.PHONY: clean
+.PHONY: cleanall clean
+cleanall: clean
+	rm -rf $(XCLBIN_DIR)
 clean:
-	rm -rf $(EXE_GOALS) $(XCLBIN_GOALS) sdaccel_* TempConfig system_estimate.xtxt *.rpt
+	rm -rf $(EXE_GOALS) $(XCLBIN_DIR)/{*sw_emu*,*hw_emu*} sdaccel_* TempConfig system_estimate.xtxt *.rpt
 	rm -rf src/*.ll _xocc_* .Xil emconfig.json $(EXTRA_CLEAN) dltmp* xmltmp* *.log *.jou *.wcfg *.wdb
+	rmdir --ignore-fail-on-non-empty $(XCLBIN_DIR)
 
 README.md: description.json
 	$(COMMON_REPO)/utility/readme_gen/readme_gen.py description.json
@@ -86,7 +90,7 @@ include $(COMMON_REPO)/utility/check.mk
 
 # copy_library_sources - copy library source files to the local source directory
 #   $(1) - name of exe
-#   $(1)_SRCS - the source files 
+#   $(1)_SRCS - the source files
 #   $(1)_HDRS - the header files
 
 define copy_library_sources

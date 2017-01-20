@@ -5,7 +5,7 @@
     "keywords": [ "xcl_array_partition", "complete"],
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
     "em_cmd": "./array_partition",
-    "hw_cmd": "../../utility/nimbix/nimbix-run.py ./array_partition",
+    "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./array_partition",
     "contributors" : [
         {
             "group": "Xilinx",
