@@ -63,7 +63,7 @@ ECHO:= @echo
 #Extended help messages
 help::
 	$(ECHO) "	make check TARGETS=<sw_emu/hw_emu/hw>"
-	$(ECHO) "		Command to run emulation for specified Target. "
+	$(ECHO) "		Command to run application/kernel either in emulation(sw_emu/hw_emu) or on board(hw)."
 	$(ECHO) ""
 endif
 
