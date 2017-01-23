@@ -27,7 +27,7 @@ else
 endif
 
 cnn_CLFLAGS+=-k cnn
-cnn_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2
+cnn_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 
 EXES=host
 XCLBINS=cnn

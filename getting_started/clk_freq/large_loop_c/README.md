@@ -34,7 +34,6 @@ where examples is the name of the directory where the repository will be stored 
 Board | Device Name | Software Version | NIMBIX Machine Type
 ------|-------------|------------------|--------------------
 Alpha Data ADM-PCIE-7V3|xilinx:adm-pcie-7v3:1ddr:3.0|SDAccel 2016.3|nx2
-Xilinx KU115|xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2|SDAccel 2016.3|nx3
 
 
 Board targeted by default = ***xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2***
@@ -142,7 +141,7 @@ make check
 ```
 
 ***Copy the application files from the Developer to Runtime instances on Nimbix***
-* Copy the application *.exe file and xclbin directory to the /data directory
+* Copy the application executable file and xclbin directory to the /data directory
 * Launch the application using the Nimbix web interface as described in [Nimbix Getting Started Guide][]
 * Make sure that the application launch options in the Nimbix web interface reflect the applications command line syntax
 ```

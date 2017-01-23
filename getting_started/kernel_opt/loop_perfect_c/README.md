@@ -31,7 +31,6 @@ Board | Device Name | Software Version | NIMBIX Machine Type
 ------|-------------|------------------|--------------------
 Alpha Data ADM-PCIE-7V3|xilinx:adm-pcie-7v3:1ddr:3.0|SDAccel 2016.3|nx2
 Alpha Data ADM-PCIE-KU3|xilinx:adm-pcie-ku3:2ddr-xpr:3.2|SDAccel 2016.3|nx1
-Xilinx KU115|xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2|SDAccel 2016.3|nx3
 
 
 Board targeted by default = ***xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2***
@@ -47,15 +46,15 @@ Application code is located in the src directory. Accelerator binary files will 
 ```
 .
 ├── description.json
+├── host
 ├── Makefile
 ├── README.md
-├── src
-│   ├── host.cpp
-│   ├── nearest_bad.cpp
-│   └── nearest_good.cpp
-└── xclbin
+└── src
+    ├── host.cpp
+    ├── nearest_bad.cpp
+    └── nearest_good.cpp
 
-2 directories, 6 files
+1 directory, 7 files
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS
@@ -139,7 +138,7 @@ make check
 ```
 
 ***Copy the application files from the Developer to Runtime instances on Nimbix***
-* Copy the application *.exe file and xclbin directory to the /data directory
+* Copy the application executable file and xclbin directory to the /data directory
 * Launch the application using the Nimbix web interface as described in [Nimbix Getting Started Guide][]
 * Make sure that the application launch options in the Nimbix web interface reflect the applications command line syntax
 ```
