@@ -13,8 +13,8 @@ nearest_LDFLAGS=$(opencl_LDFLAGS)
 
 # Nearest Neighbor Kernel
 krnl_nearest_SRCS=./src/krnl_linear_search.cpp
-krnl_nearest_CLFLAGS=--kernel krnl_linear_search
-krnl_nearest_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
+krnl_nearest_CLFLAGS=--kernel krnl_linear_search --nk krnl_linear_search:3
+krnl_nearest_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.2
 
 EXES=nearest
 XCLBINS=krnl_nearest
@@ -23,7 +23,7 @@ XCLBINS=krnl_nearest
 check_EXE=nearest
 check_XCLBINS=krnl_nearest
 check_ARGS=data/queries.txt data/queries.txt
-check_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
+check_DEVICES=$(krnl_nearest_DEVICES)
 
 CHECKS=check
 
