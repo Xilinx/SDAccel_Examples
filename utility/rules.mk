@@ -30,6 +30,7 @@ device_whitelist = $(if $($(1)_DEVICES), $($(1)_DEVICES), $(DEVICES))
 #   $(1)_HDRS - the header files used by sources
 #   $(1)_CXXFLAGS - extra flags specific to this exe
 #   $(1)_LDFLAGS - extra linkder flags
+
 define mk_exe
 
 $(1): $($(1)_SRCS) $($(1)_HDRS)
@@ -48,13 +49,15 @@ endef
 #  $(1)_CLFLAGS - set clflags per xclbin
 #  $(2) - compilation target (i.e. hw, hw_emu, sw_emu)
 #  $(3) - device name (i.e. xilinx:adm-pcie-ku3:1ddr:3.0)
+#  $(3)_CLFLAGS - set clflags per device
+
 define mk_xclbin
 
 ifneq ($(filter $(3),$(call device_whitelist,$(1))),)
 
 $(XCLBIN_DIR)/$(1).$(2).$(call sanitize_dsa,$(3)).xclbin: $($(1)_SRCS) $($(1)_HDRS)
 	mkdir -p ${XCLBIN_DIR}
-	$(CLC) $(CLFLAGS) $($(1)_CLFLAGS) -o $$@ -t $(2) --xdevice $(3) $($(1)_SRCS)
+	$(CLC) $(CLFLAGS) $($(1)_CLFLAGS) $((3)_CLFLAGS) -o $$@ -t $(2) --xdevice $(3) $($(1)_SRCS)
 
 XCLBIN_GOALS+= $(XCLBIN_DIR)/$(1).$(2).$(call sanitize_dsa,$(3)).xclbin
 
