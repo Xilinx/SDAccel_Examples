@@ -102,7 +102,16 @@ def requirements(target,data):
     target.write("```\n")
     target.write("make DEVICES=<device name>\n")
     target.write("```\n")
-    target.write("where the *DEVICES* variable accepts either 1 device from the table above or a comma separated list of device names.\n")
+    target.write("where the *DEVICES* variable accepts either 1 device from the table above or a comma separated list of device names.\n\n")
+    try:
+      if data['opencv']:
+                target.write("***OpenCV for Example Applications***\n\n")
+                target.write("This application requires OpenCV runtime libraries. If the host does not have OpenCV installed use the Xilinx included libraries with the following command:\n\n")
+                target.write("```\n")
+                target.write("export LD_LIBRARY_PATH=$XILINX_SDX/Vivado_HLS/lnx64/tools/opencv/:$LD_LIBRARY_PATH\n")
+                target.write("```\n")
+    except:
+      pass
     return
 
 def hierarchy(target):
