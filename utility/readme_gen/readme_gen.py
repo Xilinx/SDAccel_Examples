@@ -332,7 +332,7 @@ script, desc_file = argv
 
 # load the description file
 print "SDAccel README File Genarator"
-print "Opening the description file %r" % desc_file
+print "Opening the description file '%s'" % desc_file
 desc = open(desc_file,'r')
 
 # load the json data from the file
@@ -340,7 +340,7 @@ print "Parsing the description file"
 data = json.load(desc)
 desc.close()
 
-print "Generating the README for %r" % data["example"]
+print "Generating the README for %s" % data["example"]
 target = open("README.md","w")
 header(target,data)
 overview(target,data)
