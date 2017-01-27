@@ -1,46 +1,47 @@
 {
     "example": "Affine",
     "overview": "Affine transformation is a linear mapping method that preserves points, straight lines, and planes. Sets of parallel lines remain parallel after an affine transformation. The affine transformation technique is typically used to correct for geometric distortions or deformations that occur with non-ideal camera angles. The demo performs a 30 degree X rotation and a 50% X and Y scaling on a 512 by 512, 16 bits per pixels grayscale, raw MRI image.",
-    "board" : ["Alpha Data ADM-PCIE-7V3"],
+    "board": ["Alpha Data ADM-PCIE-7V3"],
     "xcl": false,
+    "opencv": true,
     "em_cmd": "./affine ./xclbin/krnl_affine.<emulation mode>.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./affine ./xclbin/krnl_affine.hw.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
     "perf_fields":["Task","Xilinx Execution Time (in ns)", "GTX 780 Execution Time (in ns)"],
-    "performance" : [
+    "performance": [
         {
             "system": "Host to Device",
-            "constraint" : "1,009,087",
-            "metric" : "1,828,606"
+            "constraint": "1,009,087",
+            "metric": "1,828,606"
         },
         {
             "system": "Device to Host",
             "constraint": "774,714",
-            "metric" : "563,740"
+            "metric": "563,740"
         },
         {
-            "system" : "Device to Kernel",
+            "system": "Device to Kernel",
             "constraint": "46,460,532",
             "metric": "195,938,535"
         },
         {
-            "system" : "Total Execution",
+            "system": "Total Execution",
             "constraint": "48,244,355",
-            "metric" : "198,330,886"
+            "metric": "198,330,886"
         },
         {
-            "system" : "Frames per Second",
+            "system": "Frames per Second",
             "constraint": "21.5",
             "metric": "5.1"
         }
     ],
-    "contributors" : [
+    "contributors": [
         {
             "group": "Xilinx",
-            "url" : "http://www.xilinx.com"
+            "url": "http://www.xilinx.com"
         },
         {
-            "group" : "Wakahara Project",
-            "url" : "http://cis.k.hosei.ac.jp/~wakahara"
+            "group": "Wakahara Project",
+            "url": "http://cis.k.hosei.ac.jp/~wakahara"
         }
     ],
     "revision": [

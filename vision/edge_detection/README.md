@@ -40,27 +40,35 @@ Board targeted by default = ***xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2***
 make DEVICES=<device name>
 ```
 where the *DEVICES* variable accepts either 1 device from the table above or a comma separated list of device names.
+
+***OpenCV for Example Applications***
+
+This application requires OpenCV runtime libraries. If the host does not have OpenCV installed use the Xilinx included libraries with the following command:
+
+```
+export LD_LIBRARY_PATH=$XILINX_SDX/Vivado_HLS/lnx64/tools/opencv/:$LD_LIBRARY_PATH
+```
 ## 4. DESIGN FILE HIERARCHY
 Application code is located in the src directory. Accelerator binary files will be compiled to the xclbin directory. The xclbin directory is required by the Makefile and its contents will be filled during compilation. A listing of all the files in this example is shown below
 
 ```
 .
-|-- Makefile
-|-- README.md
-|-- data
-|   |-- input
-|   |   |-- CF000221.jpg
-|   |   |-- eiffel.bmp
-|   |   |-- lola.bmp
-|   |   `-- vase.bmp
-|   `-- output
-|       `-- lola.bmp
-|-- description.json
-|-- src
-|   |-- edge.cpp
-|   |-- edge.h
-|   `-- krnl_sobelfilter.cl
-`-- xclbin
+├── data
+│   ├── input
+│   │   ├── CF000221.jpg
+│   │   ├── eiffel.bmp
+│   │   ├── lola.bmp
+│   │   └── vase.bmp
+│   └── output
+│       └── lola.bmp
+├── description.json
+├── Makefile
+├── README.md
+├── src
+│   ├── edge.cpp
+│   ├── edge.h
+│   └── krnl_sobelfilter.cl
+└── xclbin
 
 5 directories, 11 files
 ```

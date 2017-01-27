@@ -1,32 +1,33 @@
 {
-    "example" : "Histogram Equalization",
-    "overview" : "This is an optimized implementation of a 12-bit histogram equalizer targeting execution on an SDAccel supported FPGA acceleration card.",
-    "perf_fields" : ["Board", "Image Size", "Frames per Second"],
+    "example": "Histogram Equalization",
+    "overview": "This is an optimized implementation of a 12-bit histogram equalizer targeting execution on an SDAccel supported FPGA acceleration card.",
+    "perf_fields": ["Board", "Image Size", "Frames per Second"],
     "performance": [
         {
-            "system" : "Alpha Data ADM-PCIE-7V3",
+            "system": "Alpha Data ADM-PCIE-7V3",
             "constraint": "2,048 x 1,080",
-            "metric" : "333"
+            "metric": "333"
         }
     ],
-    "board" : ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
+    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
     "xcl": false,
+    "opencv": true,
     "em_cmd": "./equalizer data/race_2k.bmp",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./equalizer data/race_2k.bmp",
-    "contributors" : [
+    "contributors": [
         {
             "group": "Xilinx",
-            "url" : "http://www.xilinx.com"
+            "url": "http://www.xilinx.com"
         }
     ],
-    "revision" : [
+    "revision": [
         {
-            "date" : "FEB2016",
+            "date": "FEB2016",
             "version": "1.0",
             "description": "Initial Xilinx Release"
         },
         {
-            "date" : "JUL2016",
+            "date": "JUL2016",
             "version": "2.0",
             "description": "Conversion to Makefile based compilation"
         },
