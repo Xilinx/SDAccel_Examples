@@ -1,32 +1,33 @@
 {
-    "example" : "Watermarking",
-    "overview" : "This is an optimized implementation of a watermarking application to add watermarking to images targeting execution on an SDAccel supported FPGA acceleration card.",
+    "example": "Watermarking",
+    "overview": "This is an optimized implementation of a watermarking application to add watermarking to images targeting execution on an SDAccel supported FPGA acceleration card.",
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
     "xcl": false,
-    "em_cmd" : "./watermark data/inputImage.bmp ./xclbin/krnl_watermark.<emulation type>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin",
-    "hw_cmd" : "../../utility/nimbix/nimbix-run.py -- ./watermark data/inputImage.bmp ./xclbin/krnl_watermark.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin",
-    "perf_fields" : ["Board", "Image Size", "Frames / Second"],
+    "opencv": true,
+    "em_cmd": "./watermark data/inputImage.bmp ./xclbin/krnl_watermark.<emulation type>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin",
+    "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./watermark data/inputImage.bmp ./xclbin/krnl_watermark.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin",
+    "perf_fields": ["Board", "Image Size", "Frames / Second"],
     "performance": [
         {
-            "system" : "Alpha Data ADM-PCIE-7V3",
-            "constraint" : "64 x 64",
-            "metric" : "6,134"
+            "system": "Alpha Data ADM-PCIE-7V3",
+            "constraint": "64 x 64",
+            "metric": "6,134"
         }
     ],
-    "contributors" : [
+    "contributors": [
         {
             "group": "Xilinx",
-            "url" : "http://www.xilinx.com"
+            "url": "http://www.xilinx.com"
         }
     ],
-    "revision" : [
+    "revision": [
         {
-            "date" : "FEB2016",
+            "date": "FEB2016",
             "version": "1.0",
             "description": "Initial Xilinx Release"
         },
         {
-            "date" : "JUL2016",
+            "date": "JUL2016",
             "version": "2.0",
             "description": "Conversion to Makefile based compilation"
         },

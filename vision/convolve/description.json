@@ -2,36 +2,37 @@
     "example": "Convolve",
     "overview": "The convolve example is a performant design which showcases convolutional image filtering. The example processes the image 8 pixels at a time.",
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
+    "opencv": true,
     "em_cmd": "./convolve data/input_buffer_raw.txt data/filter_buffer_raw.txt data/output_buffer_raw.txt",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./convolve data/input_buffer_raw.txt data/filter_buffer_raw.txt data/output_buffer_raw.txt",
-    "perf_fields" : ["Board", "Image Size", "Frames / Second"],
+    "perf_fields": ["Board", "Image Size", "Frames / Second"],
     "performance": [
         {
-            "system" : "Alpha Data ADM-PCIE-7V3",
-            "constraint" : "1,024 x 1,024",
-            "metric" : "1,000"
+            "system": "Alpha Data ADM-PCIE-7V3",
+            "constraint": "1,024 x 1,024",
+            "metric": "1,000"
         },
         {
-            "system" : "Alpha Data ADM-PCIE-KU3",
-            "constraint" : "1,024 x 1,024",
-            "metric" : "1,000"
+            "system": "Alpha Data ADM-PCIE-KU3",
+            "constraint": "1,024 x 1,024",
+            "metric": "1,000"
         }
 
     ],
-    "contributors" : [
+    "contributors": [
         {
             "group": "Xilinx",
-            "url" : "http://www.xilinx.com"
+            "url": "http://www.xilinx.com"
         }
     ],
-    "revision" : [
+    "revision": [
         {
-            "date" : "JUL2016",
+            "date": "JUL2016",
             "version": "1.0",
             "description": "Initial Xilinx Release"
         },
         {
-            "date" : "AUG2016",
+            "date": "AUG2016",
             "version": "2.0",
             "description": "Added performance metrics"
         },

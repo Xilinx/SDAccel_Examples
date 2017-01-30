@@ -1,23 +1,24 @@
 {
     "example": "Edge Detection",
     "overview": "Implementation of a Sobel Filter for edge detection.",
-    "board" : ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
-    "em_cmd" : "./edge data/input/eiffel.bmp",
-    "hw_cmd" : "../../utility/nimbix/nimbix-run.py -- ./edge data/input/eiffel.bmp",
-    "contributors" : [
+    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
+    "opencv": true,
+    "em_cmd": "./edge data/input/eiffel.bmp",
+    "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./edge data/input/eiffel.bmp",
+    "contributors": [
         {
             "group": "Xilinx",
-            "url" : "http://www.xilinx.com"
+            "url": "http://www.xilinx.com"
         }
     ],
-    "revision" : [
+    "revision": [
         {
-            "date" : "FEB2016",
+            "date": "FEB2016",
             "version": "1.0",
             "description": "Initial Xilinx Release"
         },
         {
-            "date" : "JUL2016",
+            "date": "JUL2016",
             "version": "2.0",
             "description": "Conversion to Makefile based compilation"
         },
