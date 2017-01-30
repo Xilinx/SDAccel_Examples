@@ -118,8 +118,20 @@ node('rhel6 && xsjrdevl && xsjrdevl110') {
 	}
 
 	stage('Pre-check') {
-		sh './utility/check_licenses.sh LICENSE.txt'
-		sh './utility/check_readmes.sh'
+		sh """
+. /tools/local/bin/modinit.sh > /dev/null 2>&1
+module use.own /proj/picasso/modulefiles
+
+module add vivado/2016.3_daily
+module add vivado_hls/2016.3_daily
+module add sdaccel/2016.3_daily
+module add opencv/vivado_hls
+
+module add proxy
+
+./utility/check_license.sh LICENSE.txt
+./utility/check_readme.sh
+"""
 	}
 
 	stage('Build') {
