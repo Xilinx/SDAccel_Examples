@@ -45,6 +45,7 @@ Board targeted by default = ***xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2***
 make DEVICES=<device name>
 ```
 where the *DEVICES* variable accepts either 1 device from the table above or a comma separated list of device names.
+
 ## 4. DESIGN FILE HIERARCHY
 Application code is located in the src directory. Accelerator binary files will be compiled to the xclbin directory. The xclbin directory is required by the Makefile and its contents will be filled during compilation. A listing of all the files in this example is shown below
 
