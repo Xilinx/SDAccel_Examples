@@ -117,6 +117,11 @@ node('rhel6 && xsjrdevl && xsjrdevl110') {
 		step([$class: 'GitHubCommitStatusSetter'])
 	}
 
+	stage('Pre-check') {
+		sh './utility/check_licenses.sh LICENSE.txt'
+		sh './utility/check_readmes.sh'
+	}
+
 	stage('Build') {
 		sh 'git ls-files | grep description.json | sed -e \'s/\\.\\///\' -e \'s/\\/description.json//\' > examples.dat'
 		examplesFile = readFile 'examples.dat'

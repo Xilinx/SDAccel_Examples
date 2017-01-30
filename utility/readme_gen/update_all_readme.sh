@@ -5,7 +5,7 @@
 echo test
 BASEDIR=$(pwd)
 
-dir_list=( $(find . -type f -name 'description.json' | sed -r 's|/[^/]+$||' | sort | uniq ))
+dir_list=( $(git ls-files | grep 'description.json' | sed -r 's|/[^/]+$||' | sort | uniq ))
 
 echo ${dir_list[@]}
 echo $BASEDIR

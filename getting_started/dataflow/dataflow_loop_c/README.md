@@ -48,63 +48,13 @@ where the *DEVICES* variable accepts either 1 device from the table above or a c
 Application code is located in the src directory. Accelerator binary files will be compiled to the xclbin directory. The xclbin directory is required by the Makefile and its contents will be filled during compilation. A listing of all the files in this example is shown below
 
 ```
-.
-├── description.json
-├── emconfig.json
-├── host
-├── Makefile
-├── README.md
-├── src
-│   ├── adder.cpp
-│   └── host.cpp
-├── xclbin
-│   └── adder.sw_emu.xilinx_xil-accel-rd-ku115_4ddr-xpr_3_2.xclbin
-└── _xocc_adder_adder.sw_emu.xilinx_xil-accel-rd-ku115_4ddr-xpr_3_2.dir
-    └── impl
-        ├── build
-        │   ├── adder.sw_emu.xilinx_xil-accel-rd-ku115_4ddr-xpr_3_2_xclbincat.log
-        │   └── cpu_em
-        │       └── adder.sw_emu.xilinx_xil-accel-rd-ku115_4ddr-xpr_3_2
-        │           └── csim
-        │               ├── adder
-        │               │   ├── adder_ar.log
-        │               │   ├── adder.csim_cu.a
-        │               │   ├── adder_kernel_gcc.log
-        │               │   └── obj
-        │               │       ├── adder.Cd
-        │               │       └── adder.o
-        │               ├── adder.sw_emu.xilinx_xil-accel-rd-ku115_4ddr-xpr_3_2_regiongen.log
-        │               ├── adder.sw_emu.xilinx_xil-accel-rd-ku115_4ddr-xpr_3_2.so
-        │               ├── adder.sw_emu.xilinx_xil-accel-rd-ku115_4ddr-xpr_3_2_top_gpp.log
-        │               ├── adder.sw_emu.xilinx_xil-accel-rd-ku115_4ddr-xpr_3_2.xclbin
-        │               ├── adder.sw_emu.xilinx_xil-accel-rd-ku115_4ddr-xpr_3_2_xcl_top_gpp.log
-        │               ├── adder.sw_emu.xilinx_xil-accel-rd-ku115_4ddr-xpr_3_2.xml
-        │               ├── obj
-        │               │   ├── xcl_top.CXXd
-        │               │   └── xcl_top.o
-        │               └── xcl_top.cpp
-        └── kernels
-            └── adder
-                ├── adder
-                │   ├── kernel.xml
-                │   ├── kernel.xml.orig
-                │   ├── solution_OCL_REGION_0
-                │   │   ├── solution_OCL_REGION_0.aps
-                │   │   ├── solution_OCL_REGION_0.directive
-                │   │   └── solution_OCL_REGION_0.log
-                │   └── vivado_hls.app
-                ├── adder.tcl
-                ├── htr.txt
-                ├── ISEWrap.js
-                ├── ISEWrap.sh
-                ├── rundef.js
-                ├── runme.bat
-                ├── runme.log
-                ├── runme.sh
-                ├── vivado_hls.log
-                └── vivado_hls.pb
-
-15 directories, 39 files
+.gitignore
+Makefile
+README.md
+description.json
+src/adder.cpp
+src/host.cpp
+xclbin/.gitignore
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS

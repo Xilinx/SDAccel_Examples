@@ -45,23 +45,19 @@ where the *DEVICES* variable accepts either 1 device from the table above or a c
 Application code is located in the src directory. Accelerator binary files will be compiled to the xclbin directory. The xclbin directory is required by the Makefile and its contents will be filled during compilation. A listing of all the files in this example is shown below
 
 ```
-.
-|-- LICENSE.md
-|-- Makefile
-|-- README.md
-|-- data
-|   `-- input.bmp
-|-- description.json
-|-- src
-|   |-- aes_app.cpp
-|   |-- aes_app.h
-|   |-- aes_ecb.cpp
-|   |-- aes_ecb.h
-|   |-- krnl_aes.cl
-|   `-- main.cpp
-`-- xclbin
-
-3 directories, 11 files
+.gitignore
+LICENSE.md
+Makefile
+README.md
+data/input.bmp
+description.json
+src/aes_app.cpp
+src/aes_app.h
+src/aes_ecb.cpp
+src/aes_ecb.h
+src/krnl_aes.cl
+src/main.cpp
+xclbin/.gitignore
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS

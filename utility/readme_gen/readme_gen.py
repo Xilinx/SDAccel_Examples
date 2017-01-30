@@ -112,7 +112,7 @@ def hierarchy(target):
     target.write("The xclbin directory is required by the Makefile and its contents will be filled during compilation. A listing of all the files ")
     target.write("in this example is shown below\n\n")
     target.write("```\n")
-    tree_cmd = ['tree']
+    tree_cmd = ['git', 'ls-files']
     proc = subprocess.Popen(tree_cmd,stdout=subprocess.PIPE)
     output = proc.communicate()[0]
     target.write(output)
@@ -266,30 +266,19 @@ def revision(target,data):
     return
 
 def dirTraversal(stop_file):
-    last_loc = os.getcwd()
-    current_loc = os.getcwd()
     stop_search = None
-    level_count = 0
-    while stop_search is None and current_loc:
-        pruned = False
-        for root, dirs, files in os.walk(current_loc):
-            if not pruned:
-                try:
-                    del dirs[dirs.index(os.path.basename(last_loc))]
-                    pruned = True
-                except ValueError:
-                    pass
-            if stop_file in files:
-                stop_search = os.path.join(root,stop_file)
-                break
-        last_loc = current_loc
-        current_loc = os.path.dirname(last_loc)
+    level_count = 1
+    s = os.path.join('..', stop_file)
+    while level_count < 20:
+        s = os.path.join('..', s)
+        if os.path.isfile(s):
+            break
         level_count += 1
     return level_count
 
 def relativeTree(levels):
     s = '../'
-    for i in range(0,levels-2):
+    for i in range(0,levels):
         s += '../'
     return s
 

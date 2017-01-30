@@ -49,20 +49,16 @@ where the *DEVICES* variable accepts either 1 device from the table above or a c
 Application code is located in the src directory. Accelerator binary files will be compiled to the xclbin directory. The xclbin directory is required by the Makefile and its contents will be filled during compilation. A listing of all the files in this example is shown below
 
 ```
-.
-├── description.json
-├── Makefile
-├── README.md
-├── scripts
-│   └── open_waveform.tcl
-├── sdaccel.ini
-├── src
-│   ├── host.cpp
-│   ├── host.h
-│   └── vadd.cl
-└── xclbin
-
-3 directories, 8 files
+.gitignore
+Makefile
+README.md
+description.json
+scripts/open_waveform.tcl
+sdaccel.ini
+src/host.cpp
+src/host.h
+src/vadd.cl
+xclbin/.gitignore
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS

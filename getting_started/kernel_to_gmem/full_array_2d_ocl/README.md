@@ -48,16 +48,13 @@ where the *DEVICES* variable accepts either 1 device from the table above or a c
 Application code is located in the src directory. Accelerator binary files will be compiled to the xclbin directory. The xclbin directory is required by the Makefile and its contents will be filled during compilation. A listing of all the files in this example is shown below
 
 ```
-.
-├── description.json
-├── Makefile
-├── README.md
-├── src
-│   ├── host.cpp
-│   └── mmult.cl
-└── xclbin
-
-2 directories, 5 files
+.gitignore
+Makefile
+README.md
+description.json
+src/host.cpp
+src/mmult.cl
+xclbin/.gitignore
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS
@@ -141,7 +138,7 @@ make check
 ```
 
 ***Copy the application files from the Developer to Runtime instances on Nimbix***
-* Copy the application executable file and xclbin directory to the /data directory
+* Copy the application *.exe file and xclbin directory to the /data directory
 * Launch the application using the Nimbix web interface as described in [Nimbix Getting Started Guide][]
 * Make sure that the application launch options in the Nimbix web interface reflect the applications command line syntax
 ```

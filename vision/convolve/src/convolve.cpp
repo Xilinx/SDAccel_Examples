@@ -42,18 +42,6 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // XCL Helper Library
 #include "xcl.h"
 
-std::string getXclbinFileName(std::string name, std::string xmode, std::string xdevice) {
-    std::string xclbinFileName;
-
-    for(size_t i = 0; i < xdevice.size(); i++) {
-        if(xdevice[i] == ':') {
-            xdevice[i] = '_';
-        }
-    }
-
-    return "xclbin/" + name + "." + xmode + "." + xdevice + ".xclbin";
-}
-
 short getAbsMax(cv::Mat mat, size_t rows, size_t cols) {
 	short max = 0;
 	

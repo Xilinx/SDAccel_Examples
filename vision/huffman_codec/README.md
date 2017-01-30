@@ -43,32 +43,28 @@ where the *DEVICES* variable accepts either 1 device from the table above or a c
 Application code is located in the src directory. Accelerator binary files will be compiled to the xclbin directory. The xclbin directory is required by the Makefile and its contents will be filled during compilation. A listing of all the files in this example is shown below
 
 ```
-.
-|-- Makefile
-|-- README.md
-|-- data
-|   |-- input.bmp
-|   |-- rect_1024.bmp
-|   |-- rect_32.bmp
-|   |-- rect_512.bmp
-|   |-- rect_64.bmp
-|   `-- sdaccel.bmp
-|-- description.json
-|-- src
-|   |-- bit_io.cpp
-|   |-- bit_io.h
-|   |-- huffmancodec_naive.cpp
-|   |-- huffmancodec_naive.h
-|   |-- huffmancodec_optimized.cpp
-|   |-- huffmancodec_optimized.h
-|   |-- huffmancodec_optimized_cpuonly.cpp
-|   |-- huffmancodec_optimized_cpuonly.h
-|   |-- krnl_huffman.cl
-|   |-- krnl_huffman_singleptr.cl
-|   `-- main.cpp
-`-- xclbin
-
-3 directories, 20 files
+.gitignore
+Makefile
+README.md
+data/input.bmp
+data/rect_1024.bmp
+data/rect_32.bmp
+data/rect_512.bmp
+data/rect_64.bmp
+data/sdaccel.bmp
+description.json
+src/bit_io.cpp
+src/bit_io.h
+src/huffmancodec_naive.cpp
+src/huffmancodec_naive.h
+src/huffmancodec_optimized.cpp
+src/huffmancodec_optimized.h
+src/huffmancodec_optimized_cpuonly.cpp
+src/huffmancodec_optimized_cpuonly.h
+src/krnl_huffman.cl
+src/krnl_huffman_singleptr.cl
+src/main.cpp
+xclbin/.gitignore
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS
