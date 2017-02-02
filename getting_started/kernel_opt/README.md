@@ -6,33 +6,33 @@ Kernel Optimization for performance
 
 Example        | Description           | Key Concepts / Keywords 
 ---------------|-----------------------|-------------------------
+[aos_vs_soa_ocl/][]|"This example demonstrates how data layout can impact the performance of certain kernels. The example we will demonstrate how using the Structure of Array data layout can impact certain data parallel problems."|__Key__ __Concepts__<br> - Kernel Optimization<br> - Data Layout<br>__Keywords__<br> - NA
+[array_partition_ocl/][]|"This example shows how to use array partitioning to improve performance of a kernel"|__Key__ __Concepts__<br> - Kernel Optimization<br> - Array Partitioning<br>__Keywords__<br> - xcl_array_partition<br> - complete
 [dependence_inter_c/][]|"This Example to demostrate OpenCL xcl_dependence attribute. Using xcl_dependence user can provide additional dependency details to compiler which allow compiler to perform unrolling/pipelining to get better performance."|__Key__ __Concepts__<br> - Inter Dependence<br>__Keywords__<br> - DEPENDENCE<br> - inter
 [lmem_2rw_c/][]|"This is simple example of vector addition to demonstrate how to utilized both ports of Local Memory memory."|__Key__ __Concepts__<br> - Kernel Optimization<br> - 2port BRAM Utilization<br> - two read/write Local Memory<br>__Keywords__<br> - #pragma HLS UNROLL FACTOR=2
 [lmem_2rw_ocl/][]|"This is simple example of vector addition to demonstrate how to utilized both ports of Local Memory."|__Key__ __Concepts__<br> - Kernel Optimization<br> - 2port BRAM Utilization<br> - two read/write Local Memory<br>__Keywords__<br> - opencl_unroll_hint(2)
-[loop_reorder_c/][]|"This is a simple example of matrix multiplication (Row x Col) to demonstrate how to achieve better pipeline II factor by loop reordering."|__Key__ __Concepts__<br> - Kernel Optimization<br> - Loop reorder to improve II<br>__Keywords__<br> - #pragma HLS PIPELINE<br> - #pragma HLS ARRAY_PARTITION
-[loop_reorder_ocl/][]|"This is a simple example of matrix multiplication (Row x Col) to demonstrate how to achieve better pipeline II factor by loop reordering."|__Key__ __Concepts__<br> - Kernel Optimization<br> - Loop reorder to improve II<br>__Keywords__<br> - xcl_pipeline_loop<br> - xcl_array_partition(complete, 2)
-[array_partition_ocl/][]|"This example shows how to use array partitioning to improve performance of a kernel"|__Key__ __Concepts__<br> - Kernel Optimization<br> - Array Partitioning<br>__Keywords__<br> - xcl_array_partition<br> - complete
 [loop_fusion_ocl/][]|"This example will demonstrate how to fuse two loops into one to improve the performance of an OpenCL kernel."|__Key__ __Concepts__<br> - Kernel Optimization<br> - Loop Fusion<br> - Loop Pipelining<br>__Keywords__<br> - xcl_pipeline_loop
-[shift_register_ocl/][]|"This example demonstrates how to shift values in registers in each clock cycle"|__Key__ __Concepts__<br> - Kernel Optimization<br> - Shift Register<br> - FIR<br>__Keywords__<br> - xcl_array_partition
 [loop_perfect_c/][]|"This nearest neighbor example is to demonstrate how to achieve better performance using perfect loop."|
 [loop_perfect_ocl/][]|"This nearest neighbor example is to demonstrate how to achieve better performance using loop perfect."|
 [loop_pipeline_ocl/][]|"This example demonstrates how loop pipelining can be used to improve the performance of a kernel."|__Key__ __Concepts__<br> - Kernel Optimization<br> - Loop Pipelining<br>__Keywords__<br> - xcl_pipeline_loop
-[aos_vs_soa_ocl/][]|"This example demonstrates how data layout can impact the performance of certain kernels. The example we will demonstrate how using the Structure of Array data layout can impact certain data parallel problems."|__Key__ __Concepts__<br> - Kernel Optimization<br> - Data Layout<br>__Keywords__<br> - NA
+[loop_reorder_c/][]|"This is a simple example of matrix multiplication (Row x Col) to demonstrate how to achieve better pipeline II factor by loop reordering."|__Key__ __Concepts__<br> - Kernel Optimization<br> - Loop reorder to improve II<br>__Keywords__<br> - #pragma HLS PIPELINE<br> - #pragma HLS ARRAY_PARTITION
+[loop_reorder_ocl/][]|"This is a simple example of matrix multiplication (Row x Col) to demonstrate how to achieve better pipeline II factor by loop reordering."|__Key__ __Concepts__<br> - Kernel Optimization<br> - Loop reorder to improve II<br>__Keywords__<br> - xcl_pipeline_loop<br> - xcl_array_partition(complete, 2)
+[shift_register_ocl/][]|"This example demonstrates how to shift values in registers in each clock cycle"|__Key__ __Concepts__<br> - Kernel Optimization<br> - Shift Register<br> - FIR<br>__Keywords__<br> - xcl_array_partition
 [systolic_array_c/][]|"This is a simple example of matrix multiplication (Row x Col) to help developers learn systolic array based algorithm design. Note : Systolic array based algorithm design is well suited for FPGA."|
 [systolic_array_ocl/][]|"This is a simple example of matrix multiplication (Row x Col) to help developers learn systolic array based algorithm design. Note: Systolic array based algorithm design is well suited for FPGA."|
 
 [.]:.
+[aos_vs_soa_ocl/]:aos_vs_soa_ocl/
+[array_partition_ocl/]:array_partition_ocl/
 [dependence_inter_c/]:dependence_inter_c/
 [lmem_2rw_c/]:lmem_2rw_c/
 [lmem_2rw_ocl/]:lmem_2rw_ocl/
-[loop_reorder_c/]:loop_reorder_c/
-[loop_reorder_ocl/]:loop_reorder_ocl/
-[array_partition_ocl/]:array_partition_ocl/
 [loop_fusion_ocl/]:loop_fusion_ocl/
-[shift_register_ocl/]:shift_register_ocl/
 [loop_perfect_c/]:loop_perfect_c/
 [loop_perfect_ocl/]:loop_perfect_ocl/
 [loop_pipeline_ocl/]:loop_pipeline_ocl/
-[aos_vs_soa_ocl/]:aos_vs_soa_ocl/
+[loop_reorder_c/]:loop_reorder_c/
+[loop_reorder_ocl/]:loop_reorder_ocl/
+[shift_register_ocl/]:shift_register_ocl/
 [systolic_array_c/]:systolic_array_c/
 [systolic_array_ocl/]:systolic_array_ocl/
