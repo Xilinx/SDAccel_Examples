@@ -63,7 +63,6 @@ data/inputImage.bmp
 description.json
 src/krnl_medianFilter.cl
 src/medianFilter.cpp
-xclbin/.gitignore
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS

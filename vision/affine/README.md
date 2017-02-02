@@ -66,7 +66,6 @@ data/CT-MONO2-16-brain.raw
 description.json
 src/affine.cpp
 src/krnl_affine.cl
-xclbin/.gitignore
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS

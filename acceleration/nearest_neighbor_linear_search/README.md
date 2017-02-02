@@ -56,7 +56,6 @@ description.json
 src/krnl_linear_search.cpp
 src/linear_search.c
 src/linear_search.h
-xclbin/.gitignore
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS

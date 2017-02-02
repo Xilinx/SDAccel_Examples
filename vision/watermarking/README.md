@@ -64,7 +64,6 @@ data/inputImage128x128.bmp
 description.json
 src/krnl_watermarking.cl
 src/watermarking.cpp
-xclbin/.gitignore
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS

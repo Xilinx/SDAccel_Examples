@@ -64,7 +64,6 @@ description.json
 src/equalizer.cpp
 src/equalizer.h
 src/krnl_equalizer.cl
-xclbin/.gitignore
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS

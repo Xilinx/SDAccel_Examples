@@ -65,7 +65,6 @@ src/krnl_rsa.cpp
 src/main.cpp
 src/rsa_app.cpp
 src/rsa_app.h
-xclbin/.gitignore
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS

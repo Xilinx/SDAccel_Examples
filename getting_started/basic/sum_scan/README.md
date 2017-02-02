@@ -50,7 +50,6 @@ README.md
 description.json
 src/krnl_sum_scan.cl
 src/sum_scan.cpp
-xclbin/.gitignore
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS

@@ -72,7 +72,6 @@ src/huffmancodec_optimized_cpuonly.h
 src/krnl_huffman.cl
 src/krnl_huffman_singleptr.cl
 src/main.cpp
-xclbin/.gitignore
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS

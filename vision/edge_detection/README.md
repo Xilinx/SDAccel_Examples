@@ -64,7 +64,6 @@ description.json
 src/edge.cpp
 src/edge.h
 src/krnl_sobelfilter.cl
-xclbin/.gitignore
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS

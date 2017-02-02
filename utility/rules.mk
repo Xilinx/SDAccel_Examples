@@ -72,6 +72,12 @@ $(foreach xclbin,$(XCLBINS),$(foreach target,$(TARGETS),$(foreach device,$(DEVIC
 .PHONY: all
 all: $(EXE_GOALS) $(XCLBIN_GOALS)
 
+.PHONY: exe
+exe: $(EXE_GOALS)
+
+.PHONY: xclbin
+xclbin: $(XCLBIN_GOALS)
+
 .PHONY: docs
 docs: README.md
 

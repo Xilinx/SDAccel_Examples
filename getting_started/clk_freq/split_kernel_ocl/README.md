@@ -62,7 +62,6 @@ src/median_helper.h
 src/sketch.cl
 src/sketch_bad.cl
 src/sketch_helper.h
-xclbin/.gitignore
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS

@@ -51,7 +51,6 @@ README.md
 description.json
 src/kernel.cl
 src/kernel_global_bandwidth.c
-xclbin/.gitignore
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS

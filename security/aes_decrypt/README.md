@@ -58,7 +58,6 @@ src/aes_ecb.cpp
 src/aes_ecb.h
 src/krnl_aes.cl
 src/main.cpp
-xclbin/.gitignore
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS

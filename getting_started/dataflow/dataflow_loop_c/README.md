@@ -55,7 +55,6 @@ README.md
 description.json
 src/adder.cpp
 src/host.cpp
-xclbin/.gitignore
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS

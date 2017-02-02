@@ -54,7 +54,6 @@ README.md
 description.json
 src/host.cpp
 src/vadd.cl
-xclbin/.gitignore
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS

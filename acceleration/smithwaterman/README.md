@@ -67,7 +67,6 @@ src/opencl_sw_maxscore_systolic.cpp
 src/smithwaterman.cpp
 src/smithwaterman.h
 src/sw.h
-xclbin/.gitignore
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS
