@@ -53,7 +53,6 @@ description.json
 src/krnl_vadd.cl
 src/vadd.cpp
 src/vadd.h
-xclbin/.gitignore
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS

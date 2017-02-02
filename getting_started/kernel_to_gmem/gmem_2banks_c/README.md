@@ -58,7 +58,6 @@ data/input.bmp
 description.json
 src/apply_watermark.cpp
 src/host.cpp
-xclbin/.gitignore
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS

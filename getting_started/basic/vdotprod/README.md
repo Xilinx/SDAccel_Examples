@@ -53,7 +53,6 @@ description.json
 src/krnl_vdotprod.cl
 src/vdotprod.cpp
 src/vdotprod.h
-xclbin/.gitignore
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS

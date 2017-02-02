@@ -67,7 +67,6 @@ data/output_buffer_raw.txt
 description.json
 src/convolve.cpp
 src/krnl_convolve.cl
-xclbin/.gitignore
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS

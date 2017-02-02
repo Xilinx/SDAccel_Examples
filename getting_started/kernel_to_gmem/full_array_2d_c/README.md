@@ -56,7 +56,6 @@ README.md
 description.json
 src/host.cpp
 src/mmult.cpp
-xclbin/.gitignore
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS

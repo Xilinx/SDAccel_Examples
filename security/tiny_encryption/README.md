@@ -54,7 +54,6 @@ data/image2.bmp
 description.json
 src/krnl_tinyEncryption.cl
 src/tinyEncryption.cpp
-xclbin/.gitignore
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS

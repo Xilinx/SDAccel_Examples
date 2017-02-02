@@ -57,7 +57,6 @@ src/main.cpp
 src/oswendian.h
 src/sha1.c
 src/sha1.h
-xclbin/.gitignore
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS

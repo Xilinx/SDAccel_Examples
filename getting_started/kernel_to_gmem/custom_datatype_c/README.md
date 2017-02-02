@@ -58,7 +58,6 @@ description.json
 src/host.cpp
 src/rgb_to_hsv.cpp
 src/rgb_to_hsv.h
-xclbin/.gitignore
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS

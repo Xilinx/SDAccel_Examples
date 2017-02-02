@@ -55,7 +55,6 @@ description.json
 src/krnl_vadd.cl
 src/krnl_vmul.cl
 src/main.c
-xclbin/.gitignore
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS

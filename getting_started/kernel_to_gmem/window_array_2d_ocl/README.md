@@ -57,7 +57,6 @@ description.json
 src/host.cpp
 src/host.h
 src/window_array_2d.cl
-xclbin/.gitignore
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS

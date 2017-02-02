@@ -53,7 +53,6 @@ description.json
 src/hello.cpp
 src/hello.h
 src/krnl_hello.cl
-xclbin/.gitignore
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS
