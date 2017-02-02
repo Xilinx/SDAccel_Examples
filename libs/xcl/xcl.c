@@ -452,7 +452,7 @@ void xcl_memcpy_from_device(xcl_world world, void* dest,
 unsigned long xcl_get_event_duration(cl_event event) {
 	unsigned long start, stop;
 
-	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_QUEUED,
+	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START,
 	                        sizeof(unsigned long), &start, NULL);
 	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END,
 	                        sizeof(unsigned long), &stop, NULL);

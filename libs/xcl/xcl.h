@@ -214,7 +214,7 @@ unsigned long xcl_get_event_duration(cl_event event);
  *
  * Returns:
  *   For purposes of benchmarking, the return of this program is the length of
- *   time that the kernel took to run to completion.
+ *   time in ns that the kernel took to run to completion.
  */
 unsigned long xcl_run_kernel3d(xcl_world world, cl_kernel krnl,
                                size_t x, size_t y, size_t z);
