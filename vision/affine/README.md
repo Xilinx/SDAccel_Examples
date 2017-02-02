@@ -59,7 +59,6 @@ export LD_LIBRARY_PATH=$XILINX_SDX/Vivado_HLS/lnx64/tools/opencv/:$LD_LIBRARY_PA
 Application code is located in the src directory. Accelerator binary files will be compiled to the xclbin directory. The xclbin directory is required by the Makefile and its contents will be filled during compilation. A listing of all the files in this example is shown below
 
 ```
-<<<<<<< HEAD
 .gitignore
 Makefile
 README.md
@@ -68,20 +67,6 @@ description.json
 src/affine.cpp
 src/krnl_affine.cl
 xclbin/.gitignore
-=======
-.
-├── data
-│   └── CT-MONO2-16-brain.raw
-├── description.json
-├── Makefile
-├── README.md
-├── src
-│   ├── affine.cpp
-│   └── krnl_affine.cl
-└── xclbin
-
-3 directories, 6 files
->>>>>>> 75470aae3602ae89d1e3238b7c93fea480448f82
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS
