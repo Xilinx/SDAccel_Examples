@@ -33,7 +33,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Purpose: Demonstrate Vector Add in OpenCL
 //
-
+#define BUFFER_SIZE 256
 __kernel void __attribute__ ((reqd_work_group_size(1, 1, 1)))
 
 krnl_vadd(
@@ -41,9 +41,27 @@ krnl_vadd(
      __global int* e,
      const int length)
 {
-    __attribute__((xcl_pipeline_loop))
-        loop1: for (int j=0; j<length; j++) {
-        e[j]=a[4*j]+a[4*j+1]+a[4*j+2]+a[4*j+3];
+    int arrayA[BUFFER_SIZE];
+    int arrayB[BUFFER_SIZE];
+    int arrayC[BUFFER_SIZE];
+    int arrayD[BUFFER_SIZE];
+    for (int i = 0 ; i  < length ; i += BUFFER_SIZE)
+    {
+        int size = BUFFER_SIZE;
+        if (i + size > length) size = length - i;
+
+        __attribute__((xcl_pipeline_loop))
+        readA: for (int j = 0; j < 4 * size; j++) {
+            int tmpValue =  a[i+j];
+            switch (j % 4) {
+                case 0:  arrayA[j/4] = tmpValue; break;
+                case 1:  arrayB[j/4] = tmpValue; break;
+                case 2:  arrayC[j/4] = tmpValue; break;
+                case 3:  arrayD[j/4] = tmpValue; break;
+            }
+        }
+        vadd_writeC: for (int j = 0; j < size; j++) 
+            e[j] = arrayA[j] + arrayB[j] + arrayC[j] + arrayD[j];
     }
     return;
 }

@@ -73,13 +73,17 @@ void fir_naive(__global int* restrict output,
                __global int* restrict signal,
                __global int* restrict coeff,
                int signal_length) {
+
+    int coeff_reg[N_COEFF];
+    read_coef: for (int i = 0 ; i < N_COEFF ; i++) coeff_reg[i] = coeff[i];
+
     outer_loop:
     for (int j = 0; j < signal_length; j++) {
         int acc = 0;
         shift_loop:
         __attribute__((xcl_pipeline_loop))
         for (int i = min(j,N_COEFF-1); i >= 0; i--) {
-            acc += signal[j-i] * coeff[i];
+            acc += signal[j-i] * coeff_reg[i];
         }
         output[j] = acc;
     }

@@ -30,16 +30,23 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  /*
   See host code for additional details about this example
 
-  NOTE: This code is NOT optimized.
   */
 
+#define BUFFER_SIZE 256
 kernel __attribute__((reqd_work_group_size(1, 1, 1)))
 void vadd(global int* c,
           global const int* a,
           global const int* b,
           const int elements
           ) {
-    vadd_loop: for (int x=0; x < elements ; ++x) {
-        c[x] = a[x] + b[x];
+    int arrayA[BUFFER_SIZE];
+    int arrayB[BUFFER_SIZE];
+    for (int i = 0 ; i < elements ; i += BUFFER_SIZE)
+    {
+        int size = BUFFER_SIZE;
+        if (i + size > elements) size = elements - i;
+        readA: for (int j = 0 ; j < size ; j++) arrayA[j] = a[i+j];
+        readB: for (int j = 0 ; j < size ; j++) arrayB[j] = b[i+j];
+        vadd_writeC: for (int j = 0 ; j < size ; j++) c[i+j] = arrayA[j] + arrayB[j];
     }
 }

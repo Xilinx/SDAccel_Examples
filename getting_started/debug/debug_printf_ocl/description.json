@@ -4,7 +4,7 @@
         "This is simple example of vector addition and printing of data that is computational result (addition). It is based on vectored addition that demonstrates printing of work item data (integer product in this case)"
     ],
     "key_concepts": [ "Use of print statements for debugging"],
-    "keywords": [ "printf"],
+    "keywords": [ "printf", "param:compiler.enableAutoPipelining=false"],
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",

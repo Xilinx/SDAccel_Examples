@@ -27,6 +27,7 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 
+#define BUFFER_SIZE 256
 kernel __attribute__((reqd_work_group_size(1, 1, 1)))
 void vadd(global int* c, global const int* a, global const int* b, const int len)
 {
@@ -35,14 +36,14 @@ void vadd(global int* c, global const int* a, global const int* b, const int len
     //
     // Array's c, a and b are supposed to be of same length
 
-    // using the xcl_pipeline_loop for any iteration
-    // will give a hint to the compiler to pipeline the
-    // instructions from successive iterations to improve
-    // instruction throughput
-    __attribute__((xcl_pipeline_loop))
-    vadd_loop: for (int x=0; x<len; ++x) {
-        // arrays on FPGA memory can be indexed the same way as C-style arrays
-        // c is our output array
-        c[x] = a[x] + b[x];
+    int arrayA[BUFFER_SIZE];
+    int arrayB[BUFFER_SIZE];
+    for (int i = 0 ; i < len ; i += BUFFER_SIZE)
+    {
+        int size = BUFFER_SIZE;
+        if (i + size > len) size = len - i;
+        readA: for (int j = 0 ; j < size ; j++) arrayA[j] = a[i+j];
+        readB: for (int j = 0 ; j < size ; j++) arrayB[j] = b[i+j];
+        vadd_writeC: for (int j = 0 ; j < size ; j++) c[i+j] = arrayA[j] + arrayB[j];
     }
 }

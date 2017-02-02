@@ -32,18 +32,21 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // parameters with the global keyword represents cl_mem objects on the FPGA
 // DDR memory.
 //
-// NOTE: This kernel is not optimized. It is written to demonstrate basic 
-// OpenCL functionality in FPGA.
+#define BUFFER_SIZE 256
 kernel __attribute__((reqd_work_group_size(1, 1, 1)))
 void vector_add(global int* c,
                 global const int* a,
                 global const int* b,
                        const int n_elements)
 {
-    // This C label can be used to reference this for loop in performance
-    // reports
-    vadd_loop:
-    for (int i=0; i<n_elements; ++i) {
-        c[i] = a[i] + b[i];
+    int arrayA[BUFFER_SIZE];
+    int arrayB[BUFFER_SIZE];
+    for (int i = 0 ; i < n_elements ; i += BUFFER_SIZE)
+    {
+        int size = BUFFER_SIZE;
+        if (i + size > n_elements) size = n_elements - i;
+        readA: for (int j = 0 ; j < size ; j++) arrayA[j] = a[i+j];
+        readB: for (int j = 0 ; j < size ; j++) arrayB[j] = b[i+j];
+        vadd_writeC: for (int j = 0 ; j < size ; j++) c[i+j] = arrayA[j] + arrayB[j];
     }
 }

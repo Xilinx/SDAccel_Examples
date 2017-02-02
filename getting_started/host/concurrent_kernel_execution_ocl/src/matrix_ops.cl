@@ -34,33 +34,37 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   applications.
 */
 
+#define MAX_DIM 64
+
 kernel __attribute__((reqd_work_group_size(1, 1, 1)))
 void mscale(global int *inout, const int scale, const int dim0, const int dim1) {
-    for (int j = 0; j < dim1; ++j) {
-        for (int i = 0; i < dim0; ++i) {
-            inout[i + j * dim0] = inout[i + j * dim0] * scale;
-        }
-    }
+    mscale: for (int i = 0; i < dim0 * dim1; ++i) inout[i] = inout[i] * scale;
 }
 
 kernel __attribute__((reqd_work_group_size(1, 1, 1)))
 void madd(global int *c, global const int *a, global const int *b,
           const int dim0, const int dim1) {
-    for (int j = 0; j < dim1; ++j) {
-        for (int i = 0; i < dim0; ++i) {
-            c[i + j * dim0] = a[i + j * dim0] + b[i + j * dim0];
-        }
-    }
+    int matA[MAX_DIM * MAX_DIM];
+    int matB[MAX_DIM * MAX_DIM];
+
+    madd_readA:  for (int i = 0; i < dim0 * dim1; ++i) matA[i] = a[i];
+    madd_readB:  for (int i = 0; i < dim0 * dim1; ++i) matB[i] = b[i];
+    madd_writeC: for (int i = 0; i < dim0 * dim1; ++i) c[i] =  matA[i] + matB[i];
 }
 
 kernel __attribute__((reqd_work_group_size(1, 1, 1)))
 void mmult(global int *c, global const int *a, global const int *b,
            const int dim0, const int dim1) {
+    int matA[MAX_DIM * MAX_DIM];
+    int matB[MAX_DIM * MAX_DIM];
+    madd_readA:  for (int i = 0; i < dim0 * dim1; ++i) matA[i] = a[i];
+    madd_readB:  for (int i = 0; i < dim0 * dim1; ++i) matB[i] = b[i];
+
     for (int j = 0; j < dim1; ++j) {
         for (int i = 0; i < dim0; ++i) {
             int temp = 0;
             for (int k = 0; k < dim1; ++k)
-                temp += a[k + i * dim0] * b[j + k * dim0];
+                temp += matA[k + i * dim0] * matB[j + k * dim0];
 
             c[i + j * dim0] = temp;
         }

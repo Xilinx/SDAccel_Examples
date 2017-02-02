@@ -26,13 +26,16 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
+#define LENGTH 16
 __kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
 void krnl_vmul(
    __global int* a,
    __global int* b,
    __global int* c
 ) {
-   for (int i = 0; i < 16; i++){
-       c[i] = a[i] * b[i];
-   }
+   int arrayA[LENGTH];
+   int arrayB[LENGTH];
+   readA: for (int i = 0; i < LENGTH; i++) arrayA[i] = a[i];
+   readB: for (int i = 0; i < LENGTH; i++) arrayB[i] = b[i];
+   vmul_writeC: for (int i = 0; i < LENGTH; i++) c[i] = arrayA[i] * arrayB[i];
 }
