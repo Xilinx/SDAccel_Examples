@@ -72,15 +72,22 @@ $(foreach xclbin,$(XCLBINS),$(foreach target,$(TARGETS),$(foreach device,$(DEVIC
 .PHONY: all
 all: $(EXE_GOALS) $(XCLBIN_GOALS)
 
+.PHONY: exe
+exe: $(EXE_GOALS)
+
+.PHONY: xclbin
+xclbin: $(XCLBIN_GOALS)
+
 .PHONY: docs
 docs: README.md
 
 .PHONY: cleanall clean
 cleanall: clean
-	rm -rf $(XCLBIN_DIR)/*hw*
+	rm -rf $(XCLBIN_DIR)
 clean:
 	rm -rf $(EXE_GOALS) $(XCLBIN_DIR)/{*sw_emu*,*hw_emu*} sdaccel_* TempConfig system_estimate.xtxt *.rpt
 	rm -rf src/*.ll _xocc_* .Xil emconfig.json $(EXTRA_CLEAN) dltmp* xmltmp* *.log *.jou *.wcfg *.wdb
+	rmdir --ignore-fail-on-non-empty $(XCLBIN_DIR)
 
 README.md: description.json
 	$(COMMON_REPO)/utility/readme_gen/readme_gen.py description.json
