@@ -108,12 +108,12 @@ void kmeans(
     int total_cluster_size = nclusters * N_Features;
     int clusterIdx = 0;
     int fIdx = 0;
-    for(int i = 0 ; i < total_cluster_size ; i++)
+    cluster_read_l1:for(int i = 0 ; i < total_cluster_size ; i++)
     {
         VDATA_TYPE vValue;
         vValue = clusters[i];
         __attribute__((xcl_pipeline_loop))
-        for(int vid = 0 ; (vid < VECTOR_SIZE ) && (fIdx < nfeatures) ; vid ++, fIdx ++)
+        cluster_read_l2:for(int vid = 0 ; (vid < VECTOR_SIZE ) && (fIdx < nfeatures) ; vid ++, fIdx ++)
         {
             cluster_features[clusterIdx] = vValue[vid];
             clusterIdx ++ ;
@@ -136,7 +136,7 @@ void kmeans(
 #endif
 
     // For loop to perform K-means for N points together. For each point, find a cluster which has minimum distance from point. 
-    for(unsigned int start_point_id = kernel_point_start ; start_point_id < kernel_point_end ; start_point_id += PARALLEL_POINTS)
+    kmeans_itr:for(unsigned int start_point_id = kernel_point_start ; start_point_id < kernel_point_end ; start_point_id += PARALLEL_POINTS)
     {
         int total_points = PARALLEL_POINTS;
         if (start_point_id + total_points > kernel_point_end)
@@ -148,7 +148,7 @@ void kmeans(
         int pIdx = 0;
         //Reading Features of point into local memory
         __attribute__((xcl_pipeline_loop))
-        for (int i = 0 ; i < total_points * nfeatures; i++, fIdx++)
+        read_features:for (int i = 0 ; i < total_points * nfeatures; i++, fIdx++)
         {
             VDATA_TYPE vValue = feature[start_point_id * nfeatures + i];
             if (fIdx == nfeatures)
@@ -163,7 +163,7 @@ void kmeans(
         VMULT_TYPE vMinDist[PARALLEL_POINTS];
         VMULT_TYPE vAcc[PARALLEL_POINTS];
         __attribute__((opencl_unroll_hint))
-        for (int i = 0 ; i < PARALLEL_POINTS ; i++)
+        init_loop:for (int i = 0 ; i < PARALLEL_POINTS ; i++)
         {
             vIndex[i]   = 0;
             vAcc[i]     = 0;
@@ -175,11 +175,11 @@ void kmeans(
         fIdx = 0;
         int total_loop_count = ( (nfeatures -1) / PARALLEL_FEATURES + 1 )  * nclusters;
         __attribute__((xcl_pipeline_loop))
-        for (int i = 0; i < total_loop_count ; i ++) 
+        kmeans_ops:for (int i = 0; i < total_loop_count ; i ++) 
         {
             VDATA_TYPE vPoint[PARALLEL_FEATURES][PARALLEL_POINTS]__attribute__((xcl_array_partition(complete,0)));
             DATA_TYPE cf[PARALLEL_FEATURES];
-            for ( int fl = 0 ; fl < PARALLEL_FEATURES ; fl ++)
+            point_init:for ( int fl = 0 ; fl < PARALLEL_FEATURES ; fl ++)
             {
                 if (fIdx + fl < nfeatures ) cf[fl]= cluster_features[ cfIdx ++];
                 __attribute__((opencl_unroll_hint))
@@ -188,10 +188,10 @@ void kmeans(
             }
 
             __attribute__((opencl_unroll_hint))
-            for (int j = 0 ; j < PARALLEL_POINTS ; j++)
+            square_and_add:for (int j = 0 ; j < PARALLEL_POINTS ; j++)
             {
                VMULT_TYPE dist[PARALLEL_FEATURES];
-               for (int fl = 0 ; fl < PARALLEL_FEATURES ; fl ++)
+               diff_square:for (int fl = 0 ; fl < PARALLEL_FEATURES ; fl ++)
                {
                    VMULT_TYPE vDiff;
                    VDATA_TYPE vValue = vPoint[fl][j];
@@ -204,7 +204,7 @@ void kmeans(
                    dist[fl]  = vDiff * vDiff;
                }
                __attribute__((opencl_unroll_hint))
-               for (int fl = 0 ; fl < PARALLEL_FEATURES ; fl ++ )
+               calc_dist:for (int fl = 0 ; fl < PARALLEL_FEATURES ; fl ++ )
                    vAcc[j] += dist[fl];
             }
             if ( (fIdx + PARALLEL_FEATURES) < nfeatures) 
@@ -214,7 +214,7 @@ void kmeans(
             {
                 fIdx = 0;
                 __attribute__((opencl_unroll_hint))
-                for (int l = 0 ; l < PARALLEL_POINTS; l ++)
+                upate_min:for (int l = 0 ; l < PARALLEL_POINTS; l ++)
                 {
                     VMULT_TYPE t_vDist   = vAcc[l];
                     VMULT_TYPE t_vMinDist = vMinDist[l];
@@ -240,7 +240,7 @@ void kmeans(
 
         //Writing membership 
         __attribute__((xcl_pipeline_loop))
-        for ( int i = 0 ; i < total_points; i++)
+        membership_write:for ( int i = 0 ; i < total_points; i++)
         {
             membership[start_point_id + i] = vIndex[i];
         }

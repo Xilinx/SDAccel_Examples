@@ -56,7 +56,6 @@ cl_platform_id   g_platform_id[10];
 xcl_world       g_world;
 cl_program       g_prog;
 INT_DATA_TYPE   *g_membership_OCL;
-const char *g_xclbin;
 cl_kernel g_kernel_kmeans;
 cl_mem d_feature;
 cl_mem d_cluster;
@@ -121,6 +120,10 @@ static DATA_TYPE* re_align_clusters(float** clusters, int n_clusters, int N_Feat
 {
     int next_cfeature = 0; 
     DATA_TYPE* temp_clusters = (DATA_TYPE* )malloc(n_clusters * N_Features * sizeof(DATA_TYPE));
+    if (temp_clusters== NULL){
+        fprintf(stderr, "Error: Failed to allocate memory for temp_clusters\n");
+        exit(1);
+    }
     for ( int cid = 0 ; cid < n_clusters; cid ++){
         for (int fid = 0 ; fid < N_Features; fid++){
             if (fid < n_features){
@@ -145,6 +148,10 @@ static DATA_TYPE* re_align_features(float** feature, int N_Features, int NPoints
 {
     int next_feature=0;
     DATA_TYPE* temp_feature = (DATA_TYPE*)malloc( NPoints * n_features * sizeof (DATA_TYPE));
+    if (temp_feature== NULL){
+        fprintf(stderr, "Error: Failed to allocate memory for temp_feature\n");
+        exit(1);
+    }
     for (int pid = 0 ; pid < NPoints; pid += size){
         for (int fid = 0 ; fid < n_features; fid++){
             for (int tpid = 0 ; tpid < size; tpid++){
@@ -186,11 +193,11 @@ static int	fpga_kmeans_compute(
 
     int N_Features = ( (n_features -1)/g_vector_size + 1) * g_vector_size;
     DATA_TYPE* temp_clusters = re_align_clusters(clusters,n_clusters, N_Features,n_features);
-    OCL_CHECK(clEnqueueWriteBuffer(g_cmd_queue, d_cluster, 1, 0, n_clusters * N_Features * sizeof(DATA_TYPE),
-       temp_clusters, 0, 0, &wait_event));
+    OCL_CHECK(clEnqueueWriteBuffer(g_cmd_queue, d_cluster, CL_TRUE, 0, n_clusters * N_Features * sizeof(DATA_TYPE),
+       temp_clusters, 0, NULL, &wait_event));
     clWaitForEvents(1,&wait_event);
     free(temp_clusters);
-    g_t_mem_wr += getExecutionTime(wait_event);
+    g_t_mem_wr += xcl_get_event_duration(wait_event);
 
 
     int narg = 0;
@@ -206,7 +213,7 @@ static int	fpga_kmeans_compute(
     OCL_CHECK(clEnqueueNDRangeKernel(g_cmd_queue, g_kernel_kmeans, 3, NULL, global_work, local_work, 0, NULL,   &wait_event));
 
     clWaitForEvents(1,&wait_event);
-    g_t_exec += getExecutionTime(wait_event);
+    g_t_exec += xcl_get_event_duration(wait_event);
     g_iteration++;
 	clFinish(g_cmd_queue);
 	OCL_CHECK(clEnqueueReadBuffer(g_cmd_queue, d_membership, CL_TRUE, 0, n_points * sizeof(INT_DATA_TYPE), g_membership_OCL, 0, NULL, &wait_event));
@@ -219,7 +226,7 @@ static int	fpga_kmeans_compute(
     }
     //exit(1);
 #endif
-    g_t_mem_rd += getExecutionTime(wait_event);
+    g_t_mem_rd += xcl_get_event_duration(wait_event);
 	
 	delta = 0;
 	for (i = 0; i < n_points; i++)
@@ -269,12 +276,24 @@ float** fpga_kmeans_clustering(
 
     /* allocate space for and initialize returning variable clusters[] */
     clusters    = (float**) malloc(nclusters *             sizeof(float*));
+    if (clusters== NULL){
+        fprintf(stderr, "Error: Failed to allocate memory for clusters\n");
+        exit(1);
+    }
     clusters[0] = (float*)  malloc(nclusters * nfeatures * sizeof(float));
+    if (clusters[0]== NULL){
+        fprintf(stderr, "Error: Failed to allocate memory for clusters[0]\n");
+        exit(1);
+    }
     for (i=1; i<nclusters; i++)
         clusters[i] = clusters[i-1] + nfeatures;
 
 	/* initialize the random clusters */
 	initial = (int *) malloc (npoints * sizeof(int));
+    if (initial == NULL){
+        fprintf(stderr, "Error: Failed to allocate memory for initial\n");
+        exit(1);
+    }
 	for (i = 0; i < npoints; i++)
 	{
 		initial[i] = i;
@@ -303,9 +322,21 @@ float** fpga_kmeans_clustering(
 
     /* allocate space for and initialize new_centers_len and new_centers */
     new_centers_len = (int*) calloc(nclusters, sizeof(int));
+    if (new_centers_len == NULL){
+        fprintf(stderr, "Error: Failed to allocate memory for new_centers_len\n");
+        exit(1);
+    }
 
     new_centers    = (float**) malloc(nclusters *            sizeof(float*));
+    if (new_centers == NULL){
+        fprintf(stderr, "Error: Failed to allocate memory for new_centers\n");
+        exit(1);
+    }
     new_centers[0] = (float*)  calloc(nclusters * nfeatures, sizeof(float));
+    if (new_centers[0] == NULL){
+        fprintf(stderr, "Error: Failed to allocate memory for new_centers[0]\n");
+        exit(1);
+    }
     for (i=1; i<nclusters; i++)
         new_centers[i] = new_centers[i-1] + nfeatures;
 
@@ -357,7 +388,7 @@ int fpga_kmeans_shutdown()
 int fpga_kmeans_init()
 {
     g_world = xcl_world_single();
-    g_prog = xcl_import_binary_file(g_world,g_xclbin );
+    g_prog = xcl_import_binary(g_world, "kmeans");
     g_kernel_kmeans = xcl_get_kernel(g_prog, "kmeans");
     g_context = g_world.context;
     g_cmd_queue = g_world.command_queue;
@@ -376,11 +407,15 @@ int fpga_kmeans_allocate(int n_points, int n_features, int n_clusters, float **f
     d_feature   = xcl_malloc(g_world, CL_MEM_READ_WRITE, NPoints * n_features * sizeof(DATA_TYPE));
     d_cluster   = xcl_malloc(g_world, CL_MEM_READ_WRITE, n_clusters * N_Features * sizeof(DATA_TYPE));
     d_membership= xcl_malloc(g_world, CL_MEM_READ_WRITE, NPoints * sizeof(INT_DATA_TYPE));
-    OCL_CHECK(clEnqueueWriteBuffer(g_cmd_queue, d_feature, 1, 0, NPoints * n_features * sizeof(DATA_TYPE), temp_feature, 0, 0, &wait_event));
+    OCL_CHECK(clEnqueueWriteBuffer(g_cmd_queue, d_feature, CL_TRUE, 0, NPoints * n_features * sizeof(DATA_TYPE), temp_feature, 0, NULL, &wait_event));
     clWaitForEvents(1,&wait_event);
     free(temp_feature);
-    g_t_mem_wr += getExecutionTime(wait_event);
+    g_t_mem_wr += xcl_get_event_duration(wait_event);
 	g_membership_OCL = ( INT_DATA_TYPE *) malloc(n_points * sizeof(int));
+    if (g_membership_OCL == NULL){
+        fprintf(stderr, "Error: Failed to allocate memory for g_membership_OCL\n");
+        exit(1);
+    }
     return true;
 }
 
@@ -399,20 +434,18 @@ int fpga_kmeans_print_report()
     printf("\tKernel Execution Summary:\n");
     printf("*********************************************\n");
     printf("\tGlobal Size           : %d\n",g_global_size);
-    printf("\tMemory Write Time(ms) : %f\n",g_t_mem_wr);
-    printf("\tMemory Read Time(ms)  : %f\n",g_t_mem_rd);
-    
-    printf("\tExecution Time(ms)    : %f\n",g_t_exec);
-    printf("\tOverall Time(ms)      : %f\n",g_t_exec + g_t_mem_wr + g_t_mem_rd);
+    //Deviding time by 1E6 to change ns(nano sec) to ms (mili sec)
+    printf("\tMemory Write Time(ms) : %f\n",g_t_mem_wr/1E6);
+    printf("\tMemory Read Time(ms)  : %f\n",g_t_mem_rd/1E6);
+    printf("\tExecution Time(ms)    : %f\n",g_t_exec/1E6);
+    printf("\tOverall Time(ms)      : %f\n",(g_t_exec + g_t_mem_wr + g_t_mem_rd)/1E6);
     printf("\tIteration             : %d\n",g_iteration);
     printf("*********************************************\n");
     return 0;
 }
 
-int fpga_kmeans_setup( const char* filename, int global_size)
+int fpga_kmeans_setup( int global_size)
 {
-    g_xclbin        = filename;
-    printf("%s filename=%s\n",__func__, g_xclbin);
     g_global_size   = global_size;
     return 0;
 }

@@ -44,7 +44,7 @@ float** fpga_kmeans_clustering(
                           int    *membership /* out: [npoints] */
         );
 
-int fpga_kmeans_setup( const char* filename, int global_size = 1);
+int fpga_kmeans_setup(int global_size = 1);
 int fpga_kmeans_init();
 int fpga_kmeans_shutdown();
 int fpga_kmeans_allocate( int n_points, int n_features, int n_clusters, float **feature);

@@ -42,19 +42,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string.h>
 #include <time.h>
 #include <CL/cl.h>
-enum enum_device_type {
-   DEVICE_TYPE_FPGA,
-   DEVICE_TYPE_GPU,
-   DEVICE_TYPE_CPU,
-   DEVICE_TYPE_APU
-};
 /* rmse.c */
 float   euclid_dist_2        (float*, float*, int);
 int     find_nearest_point   (float* , int, float**, int);
 float	rms_err(float**, int, int, float**, int);
 int     cluster(int, int, float**, int, int, float, int*, float***, float*, int, int, const char* goldenFile = NULL);
-int setup(int argc, char** argv);
-
 float** kmeans_clustering_cmodel(float **feature, int nfeatures, int npoints, int nclusters, float threshold, 
         int* iteration, int *membership); 
 //return elapsed time in ms from t0 to t1
@@ -62,89 +54,5 @@ inline double time_elapsed(struct timespec t0, struct timespec t1){
   double result = ((double)t1.tv_sec - (double)t0.tv_sec) * 1.0E9 + ((double)t1.tv_nsec - (double)t0.tv_nsec);
   result = result / 1.0E6;
   return (result);
-}
-inline void verify_success(cl_int status) {
-    if(status != CL_SUCCESS) {
-        printf("OpenCL api call failed with error code %d.\nPlease refer to http://www.khronos.org/registry/cl/api/1.2/cl.h for error code definitions.\n", status);
-        exit(EXIT_FAILURE);
-    }
-}
-
-char* get_file_name();
-inline float getExecutionTime(cl_event event) {
-     cl_ulong time_start = 0;
-     cl_ulong time_end = 0;
-     float total_time = 0.0f;
-
-     clGetEventProfilingInfo(event,
-                             CL_PROFILING_COMMAND_START,
-                             sizeof(time_start),
-                             &time_start,
-                             NULL);
-     clGetEventProfilingInfo(event,
-                             CL_PROFILING_COMMAND_END,
-                             sizeof(time_end),
-                             &time_end,
-                             NULL);
-
-     total_time = (time_end - time_start) / 1E6; // Nanoseconds to Milliseconds
-     return total_time;
-}
-inline int get_platform_num(enum_device_type type)
-{
-    bool fpga=false;
-    cl_device_type device_type;
-    switch(type){
-        case DEVICE_TYPE_FPGA:
-            device_type = CL_DEVICE_TYPE_ACCELERATOR;
-            fpga=true;
-            break;
-        case DEVICE_TYPE_APU:
-            device_type = CL_DEVICE_TYPE_ACCELERATOR;
-            break;
-        case DEVICE_TYPE_GPU:
-            device_type = CL_DEVICE_TYPE_GPU;
-            break;
-        case DEVICE_TYPE_CPU:
-            device_type = CL_DEVICE_TYPE_CPU;
-            break;
-        default:
-            exit(-1);
-    };
-
-    cl_int status;
-    // Discover and initialise platform
-    cl_uint numPlatforms = 1;
-    char cl_platform_name[1001];
-    cl_platform_id *platforms = NULL;
-    // Retrieve number of platforms
-    status = clGetPlatformIDs(0, NULL, &numPlatforms);
-    verify_success(status);
-
-     // Allocate space for platforms and acquire their IDs
-    platforms = (cl_platform_id*) malloc(sizeof(*platforms) * numPlatforms);
-    status = clGetPlatformIDs(numPlatforms, platforms, NULL);
-    verify_success(status);
-    /*********************************************************/
-    int platform_num = -1;
-    unsigned int i;
-    for(i=0; i < numPlatforms; i++ ) {
-        static cl_uint pNumDevices = 0;
-        status = clGetDeviceIDs(platforms[i], device_type, 0, NULL, &pNumDevices);
-        if (pNumDevices){
-            if (fpga){
-                clGetPlatformInfo(platforms[i],CL_PLATFORM_NAME,1000,(void *)cl_platform_name,NULL);
-                platform_num = i;
-                break;
-            }else{
-                platform_num = i;
-                break;
-            }
-        }
-    }
-
-    /*********************************************************/
-    free(platforms);
-    return platform_num;
 }
 #endif

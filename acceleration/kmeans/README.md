@@ -24,9 +24,8 @@ This is OpenCL Based K-Means clustering Implementation for Xilinx FPGA Devices. 
 
  __Usage__
 
- ./kmeans -k xclbin_file -i input_file [-m max_nclusters ] [-n min_nclusters] [-g global_size] [-c golden_file] [options]
+ ./kmeans -i input_file [-m max_nclusters ] [-n min_nclusters] [-g global_size] [-c golden_file] [options]
 
-	 -k xclbin_file   : Xilinx FPGA Kernel binary file 
 	 -i filename      : file containing data to be clustered
 	 -m max_nclusters : maximum number of clusters allowed [default=5]
 	 -n min_nclusters : minimum number of clusters allowed [default=5]
@@ -63,6 +62,20 @@ where the *DEVICES* variable accepts either 1 device from the table above or a c
 Application code is located in the src directory. Accelerator binary files will be compiled to the xclbin directory. The xclbin directory is required by the Makefile and its contents will be filled during compilation. A listing of all the files in this example is shown below
 
 ```
+Makefile
+README.md
+data/100
+data/100.gold_c5
+description.json
+src/cluster.c
+src/fpga_kmeans.cpp
+src/fpga_kmeans.h
+src/host.cpp
+src/kmeans.cl
+src/kmeans.h
+src/kmeans_clustering_cmodel.c
+src/read_input.cpp
+src/rmse.c
 ```
 
 ## 5. COMPILATION AND EXECUTION FOR X86 SERVERS
@@ -107,7 +120,7 @@ emconfigutil --xdevice 'xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./kmeans -k ./xclbin/krnl_kmeans.<sw_emu|hw_emu>.<Device>.xclbin -i ./data/100 -c .data/100.gold_c5 -m 5 -n 5 -g 2
+./kmeans -i ./data/100 -c .data/100.gold_c5 -m 5 -n 5 -g 2
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card
@@ -142,7 +155,7 @@ make check
 
 * Use the following command to launch the application from the users terminal (on a system outside of the Nimbix environment)
 ```
-../../../utility/nimbix/nimbix-run.py -- ./kmeans -k ./xclbin/krnl_kmeans.hw.<Device>.xclbin -i ./data/100 -c ./data/100.gold_c100 -m 100 -n 100 -g 2
+../../../utility/nimbix/nimbix-run.py -- ./kmeans -i ./data/100 -c ./data/100.gold_c100 -m 100 -n 100 -g 2
 ```
 
 ***Copy the application files from the Developer to Runtime instances on Nimbix***
@@ -150,7 +163,7 @@ make check
 * Launch the application using the Nimbix web interface as described in [Nimbix Getting Started Guide][]
 * Make sure that the application launch options in the Nimbix web interface reflect the applications command line syntax
 ```
-./kmeans -k ./xclbin/krnl_kmeans.<sw_emu|hw_emu>.<Device>.xclbin -i ./data/100 -c .data/100.gold_c5 -m 5 -n 5 -g 2
+./kmeans -i ./data/100 -c .data/100.gold_c5 -m 5 -n 5 -g 2
 ```
 
 ## 6. COMPILATION AND EXECUTION FOR IBM POWER SERVERS

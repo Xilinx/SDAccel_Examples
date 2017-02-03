@@ -34,32 +34,26 @@ else
 	PARALLEL_FEATURES = 8 
 endif
 
-kmeans_SRCS=src/cluster.c src/rmse.c src/fpga_kmeans.cpp src/host.cpp src/kmeans_clustering_cmodel.c  src/read_input.cpp
-kmeans_SRCS+= $(logger_SRCS) $(cmdparser_SRCS) $(xcl_SRCS) $(oclHelper_SRCS)
-kmeans_HDRS = $(logger_SRCS) $(cmdparser_HDRS) $(xcl_HDRS) $(oclHelper_HDRS)
-kmeans_EXE=kmeans
-kmeans_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) -D RECORD_OVERALL_TIME -D USE_DATA_TYPE=$(DATATYPE_ID) 
-kmeans_CXXFLAGS+= $(logger_CXXFLAGS) $(cmdparser_CXXFLAGS) $(xcl_CXXFLAGS) $(oclHelper_CXXFLAGS) 
-kmeans_LDFLAGS=$(opencl_LDFLAGS) -lxilinxopencl -lpthread -lrt
+host_kmeans_SRCS=src/cluster.c src/rmse.c src/fpga_kmeans.cpp src/host.cpp src/kmeans_clustering_cmodel.c 
+host_kmeans_SRCS+= $(logger_SRCS) $(cmdparser_SRCS) $(xcl_SRCS) $(oclHelper_SRCS)
+host_kmeans_HDRS = $(logger_SRCS) $(cmdparser_HDRS) $(xcl_HDRS) $(oclHelper_HDRS)
+host_kmeans_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) -D RECORD_OVERALL_TIME -D USE_DATA_TYPE=$(DATATYPE_ID) -DVERIFY_USING_CMODEL 
+host_kmeans_CXXFLAGS+= $(logger_CXXFLAGS) $(cmdparser_CXXFLAGS) $(xcl_CXXFLAGS) $(oclHelper_CXXFLAGS) 
+host_kmeans_LDFLAGS=$(opencl_LDFLAGS) -lxilinxopencl -lpthread -lrt
 
 #Kmeans Kernel
-krnl_kmeans_SRCS=./src/kmeans.cl
-krnl_kmeans_CLFLAGS= --nk kmeans:$(COMPUTE_UNITS) -D PARALLEL_POINTS=$(PARALLEL_POINTS) -D PARALLEL_FEATURES=$(PARALLEL_FEATURES) -D USE_DATA_TYPE=$(DATATYPE_ID)
+kmeans_SRCS=./src/kmeans.cl
+kmeans_CLFLAGS= --nk kmeans:$(COMPUTE_UNITS) -D PARALLEL_POINTS=$(PARALLEL_POINTS) -D PARALLEL_FEATURES=$(PARALLEL_FEATURES) -D USE_DATA_TYPE=$(DATATYPE_ID)
 
-EXES=kmeans
-XCLBINS=krnl_kmeans
+EXES=host_kmeans
+XCLBINS=kmeans
 EXTRA_CLEAN=membership.out
 
 # check
 check_EXE=$(EXES)
 check_XCLBINS=$(XCLBINS)
+check_ARGS= -i $(TEST_FILE) -m $(NCLUSTERS) -n $(NCLUSTERS) -c $(GOLD_FILE) -g $(COMPUTE_UNITS) 
 
-
-# Pattern to allow cmdline to determine xclbin name
-define mk_args
-check_$(1)_$(call sanitize_dsa,$(2))_ARGS = -k ./xclbin/$(XCLBINS).$(1).$(call sanitize_dsa,$(2)).xclbin -i $(TEST_FILE) -m $(NCLUSTERS) -n $(NCLUSTERS) -c $(GOLD_FILE) -g $(COMPUTE_UNITS) 
-endef
-$(foreach target,$(TARGETS),$(foreach device,$(DEVICES),$(eval $(call mk_args,$(target),$(device)))))
 CHECKS=check
 
 include $(COMMON_REPO)/utility/rules.mk
