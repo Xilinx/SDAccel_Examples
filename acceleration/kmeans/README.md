@@ -74,7 +74,6 @@ src/host.cpp
 src/kmeans.cl
 src/kmeans.h
 src/kmeans_clustering_cmodel.c
-src/read_input.cpp
 src/rmse.c
 ```
 
@@ -120,7 +119,7 @@ emconfigutil --xdevice 'xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./kmeans -i ./data/100 -c .data/100.gold_c5 -m 5 -n 5 -g 2
+./host_kmeans -i ./data/100 -c .data/100.gold_c5 -m 5 -n 5 -g 2
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card
@@ -155,7 +154,7 @@ make check
 
 * Use the following command to launch the application from the users terminal (on a system outside of the Nimbix environment)
 ```
-../../../utility/nimbix/nimbix-run.py -- ./kmeans -i ./data/100 -c ./data/100.gold_c100 -m 100 -n 100 -g 2
+../../../utility/nimbix/nimbix-run.py -- ./host_kmeans -i ./data/100 -c ./data/100.gold_c100 -m 100 -n 100 -g 2
 ```
 
 ***Copy the application files from the Developer to Runtime instances on Nimbix***
@@ -163,7 +162,7 @@ make check
 * Launch the application using the Nimbix web interface as described in [Nimbix Getting Started Guide][]
 * Make sure that the application launch options in the Nimbix web interface reflect the applications command line syntax
 ```
-./kmeans -i ./data/100 -c .data/100.gold_c5 -m 5 -n 5 -g 2
+./host_kmeans -i ./data/100 -c .data/100.gold_c5 -m 5 -n 5 -g 2
 ```
 
 ## 6. COMPILATION AND EXECUTION FOR IBM POWER SERVERS
