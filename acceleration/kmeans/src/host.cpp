@@ -73,37 +73,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace sda::utils;
 
-/*---< usage() >------------------------------------------------------------*/
-void usage(char *argv0) {
-    const char *help =
-        "\nUsage: %s [switches] -i filename\n\n"
-        "    -i filename      :file containing data to be clustered\n"
-        "    -c goldenfilename:file containing expected membership of points\n"
-        "    -m max_nclusters :maximum number of clusters allowed           [default=5]\n"
-        "    -n min_nclusters :minimum number of clusters allowed           [default=5]\n"
-        "    -t threshold     :threshold value                              [default=0.001]\n"
-        "    -l nloops        :iteration for each number of clusters        [default=1]\n"
-        "    -b               :input file is in binary format\n"
-        "    -r               :calculate RMSE                               [default=off]\n"
-        "    -o               :output cluster center coordinates            [default=off]\n"
-        " Options for FPGA device Only:\n"
-        "    -w Mem Datawidth :FPGA Device Memory Datawidth of interface    [default=32] Allowed value 32/64/128/256/512\n"
-        "    -g Global Size h :Specify Global Size    [default=1] \n"
-        "    -p               :Use PIPE Memory for FPGA device       \n"
-        ;
-    fprintf(stderr, help, argv0);
-    exit(-1);
-}
-
 /*---< main() >-------------------------------------------------------------*/
 int main(int argc, char **argv) {
     float  *buf;
     char    line[1024];
     int     isBinaryFile = 0;
     int     global_size = 1;
-    float   threshold = 0.001;      /* default value */
-    int     max_nclusters=5;        /* default value */
-    int     min_nclusters=5;        /* default value */
+    float   threshold = 0.001;      
+    int     max_nclusters=5;        
+    int     min_nclusters=5;        
     int     best_nclusters = 0;
     int     nfeatures = 0;
     int     npoints = 0;
@@ -117,20 +95,23 @@ int main(int argc, char **argv) {
     float   rmse;
     
     int     isOutput = 0;
-    //parse commandline
+
+    //Command Line Parser
     CmdLineParser parser;
-    parser.addSwitch("--input-file",    "-i", "input test data flie", "./data/100");
-    parser.addSwitch("--golden-file",   "-c", "Golden File to compare result",                          "./data/100.gold_c5");
-    parser.addSwitch("--max_nclusters", "-m", "maximum number of clusters allowed           [default=5]",       "5");
-    parser.addSwitch("--min_nclusters", "-n", "minimum number of clusters allowed           [default=5]",       "5");
-    parser.addSwitch("--threshold",     "-t", "thresold value                               [default=0.001]",   "0.001");
-    parser.addSwitch("--output",        "-o", "output cluster center coordinates            [default=off]",     "0");
-    parser.addSwitch("--global_size",   "-g", "Specify Global Size                          [default=1]",       "1");
+
+                   //"<Full Arg>",  "<Short Arg>", "<Description>",                "<Default>");
+    parser.addSwitch("--input_file",    "-i",    "input test data flie",               "");
+    parser.addSwitch("--compare_file",  "-c",    "Compare File to compare result",      "");
+    parser.addSwitch("--max_nclusters", "-m",    "maximum number of clusters allowed", "5");
+    parser.addSwitch("--min_nclusters", "-n",    "minimum number of clusters allowed", "5");
+    parser.addSwitch("--threshold",     "-t",    "thresold value",                     "0.001");
+    parser.addSwitch("--output",        "-o",    "output cluster center coordinates",  "0");
+    parser.addSwitch("--global_size",   "-g",    "Specify Global Size",                "1");
     parser.parse(argc, argv);
 
     //read settings
-    std::string filename        = parser.value("input-file");   
-    std::string goldenfile      = parser.value("golden-file");
+    std::string filename        = parser.value("input_file");   
+    std::string goldenfile      = parser.value("compare_file");
     
     max_nclusters   = parser.value_to_int("max_nclusters");
     min_nclusters   = parser.value_to_int("min_nclusters");
@@ -138,7 +119,10 @@ int main(int argc, char **argv) {
     isOutput        = parser.value_to_int("output");       
     global_size     = parser.value_to_int("global_size");
 
-    if (filename.empty() ) usage(argv[0]);
+    if (filename.empty() ){
+        parser.printHelp();
+        exit(EXIT_FAILURE);
+    }
     fpga_kmeans_setup(global_size);
 
     /* ============== I/O begin ==============*/
@@ -147,7 +131,7 @@ int main(int argc, char **argv) {
         int infile;
         if ((infile = open(filename.c_str(), O_RDONLY, "0600")) == -1) {
             fprintf(stderr, "Error: no such file (%s)\n", filename.c_str());
-            exit(1);
+            exit(EXIT_FAILURE);
         }
         read(infile, &npoints,   sizeof(int));
         read(infile, &nfeatures, sizeof(int));        
@@ -167,7 +151,7 @@ int main(int argc, char **argv) {
         FILE *infile;
         if ((infile = fopen(filename.c_str(), "r")) == NULL) {
             fprintf(stderr, "Error: no such file (%s)\n", filename.c_str());
-            exit(1);
+            exit(EXIT_FAILURE);
         }
         while (fgets(line, 1024, infile) != NULL)
         if (strtok(line, " \t\n") != 0)
@@ -212,7 +196,7 @@ int main(int argc, char **argv) {
     if (npoints < min_nclusters)
     {
         printf("Error: min_nclusters(%d) > npoints(%d) -- cannot proceed\n", min_nclusters, npoints);
-        exit(0);
+        exit(EXIT_FAILURE);
     }
     
     srand(7);/* seed for future random number generator */
