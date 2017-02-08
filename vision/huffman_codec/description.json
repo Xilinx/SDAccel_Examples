@@ -1,6 +1,8 @@
 {
     "example": "Huffman Encoding/Decoding",
-    "overview": "This is an implementation of a huffman encoding/decoding algorithm targeting execution on an SDAccel supported FPGA acceleration card.",
+    "overview": [
+        "This is an implementation of a huffman encoding/decoding algorithm targeting execution on an SDAccel supported FPGA acceleration card."
+    ],
     "board": ["Alpha Data ADM-PCIE-7V3"],
     "xcl": false,
     "opencv": true,

@@ -1,6 +1,8 @@
 {
     "example": "Loop Iteration Dependency",
-    "overview": "This Example to demostrate OpenCL xcl_dependence attribute. Using xcl_dependence user can provide additional dependency details to compiler which allow compiler to perform unrolling/pipelining to get better performance.",
+    "overview": [
+      "This Example to demostrate OpenCL xcl_dependence attribute. Using xcl_dependence user can provide additional dependency details to compiler which allow compiler to perform unrolling/pipelining to get better performance."
+    ],
     "key_concepts": [ "Inter Dependence"],
     "keywords": ["DEPENDENCE", "inter"],
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],

@@ -1,6 +1,8 @@
 {
     "example": "Device Query",
-    "overview": "This example prints the OpenCL properties of the platform and its devices. It also displays the limits and capabilities of the hardware.",
+    "overview": [
+        "This example prints the OpenCL properties of the platform and its devices. It also displays the limits and capabilities of the hardware."
+    ],
     "key_concepts": [ "OpenCL API" , "Querying device properties"],
     "keywords": [ "clGetPlatformIDs()" , "clGetPlatformInfo()", "clGetDeviceIDs()", "clGetDeviceInfo()"],
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],

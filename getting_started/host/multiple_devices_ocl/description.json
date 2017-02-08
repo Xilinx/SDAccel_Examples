@@ -1,6 +1,8 @@
 {
     "example": "Multiple FPGA Devices Execution Concurrently",
-    "overview": "This example show how to take advantage of multiple FPGAs on a system. It will show how to initialized an OpenCL context, allocate memory on the two devices and execute a kernel on each FPGA.",
+    "overview": [
+        "This example show how to take advantage of multiple FPGAs on a system. It will show how to initialized an OpenCL context, allocate memory on the two devices and execute a kernel on each FPGA."
+    ],
     "key_concepts": [ "OpenCL API" , "Multi-FPGA Execution", "Event Handling"],
     "keywords": [ "cl_device_id", "clGetDeviceIDs()"],
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],

@@ -1,6 +1,8 @@
 {
     "example": "Loop Fusion",
-    "overview": "This example will demonstrate how to fuse two loops into one to improve the performance of an OpenCL kernel.",
+    "overview": [
+        "This example will demonstrate how to fuse two loops into one to improve the performance of an OpenCL kernel."
+    ],
     "key_concepts": [ "Kernel Optimization", "Loop Fusion", "Loop Pipelining" ],
     "keywords": [ "xcl_pipeline_loop"],
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],

@@ -1,6 +1,8 @@
 {
     "example": "Blocking Pipes",
-    "overview": "This is simple example of vector addition to demonstrate OpenCL Pipe Memory usage. OpenCL PIPE memory functionality allows user to achieve kernel-to-kernel data transfer without using global memory.",
+    "overview": [
+        "This is simple example of vector addition to demonstrate OpenCL Pipe Memory usage. OpenCL PIPE memory functionality allows user to achieve kernel-to-kernel data transfer without using global memory."
+    ],
     "key_concepts": [ "Dataflow" , "kernel to kernel pipes"],
     "keywords": [ "pipe" , "xcl_reqd_pipe_depth", "read_pipe_block()", "write_pipe_block()"],
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],

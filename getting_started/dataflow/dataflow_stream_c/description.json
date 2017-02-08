@@ -1,6 +1,8 @@
 {
     "example": "Dataflow Using HLS Stream",
-    "overview": "This is simple example of vector addition to demonstrate Dataflow functionality of HLS. HLS Dataflow allows user to schedule multiple task together to achieve higher throughput.",
+    "overview": [
+        "This is simple example of vector addition to demonstrate Dataflow functionality of HLS. HLS Dataflow allows user to schedule multiple task together to achieve higher throughput."
+    ],
     "key_concepts": [ "Task Level Parallelism"],
     "keywords": [ "dataflow" , "hls::stream<>"],
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],

@@ -44,7 +44,7 @@ def download(target):
 
 def overview(target,data):
     target.write("## 1. OVERVIEW\n")
-    target.write(data["overview"])
+    target.write(('\n').join(data["overview"]))
     target.write("\n\n")
     if 'perf_fields' in data:
         target.write("### PERFORMANCE\n")

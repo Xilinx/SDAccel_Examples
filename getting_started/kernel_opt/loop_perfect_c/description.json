@@ -1,6 +1,8 @@
 {
     "example": "Improve performance using loop perfect or semi-perfect",
-    "overview": "This nearest neighbor example is to demonstrate how to achieve better performance using perfect loop.", 
+    "overview": [
+        "This nearest neighbor example is to demonstrate how to achieve better performance using perfect loop."
+    ],
     "Key Concepts": [ "Loop perfect"],
     "Keywords": ["#pragma HLS PIPELINE", "#pragma HLS ARRAY_PARTITION"],
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],

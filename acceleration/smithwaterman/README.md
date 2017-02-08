@@ -19,9 +19,9 @@ This README file contains the following sections:
 This is an optimized implementation of the smithwaterman algorithm targeting exection on an SDAccel support FPGA acceleration card.
 
 The main algorithm characteristics of this application are
+
 1. Compute MaxScore
 2. Systolic array implementation
-
 
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:

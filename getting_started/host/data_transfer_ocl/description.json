@@ -1,6 +1,8 @@
 {
     "example": "Data Transfer",
-    "overview": "This example illustrates several ways to use the OpenCL API to transfer data to and from the FPGA",
+    "overview": [
+        "This example illustrates several ways to use the OpenCL API to transfer data to and from the FPGA"
+    ],
     "key_concepts": [ "OpenCL API" , "Data Transfer", "Write Buffers", "Read Buffers", "Map Buffers", "Async Memcpy"],
     "keywords": [ "clEnqueueWriteBuffer()" , "clEnqueueReadBuffer()", "clEnqueueMapBuffer()", "clEnqueueUnmapMemObject()"],
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],

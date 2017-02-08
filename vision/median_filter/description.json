@@ -1,6 +1,8 @@
 {
     "example": "Median Filter",
-    "overview": "This is an optimized implementation of a median filter being used to remove noise in images targeting execution on an SDAccel supported FPGA acceleration card.",
+    "overview": [
+        "This is an optimized implementation of a median filter being used to remove noise in images targeting execution on an SDAccel supported FPGA acceleration card."
+    ],
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
     "xcl": false,
     "opencv": true,

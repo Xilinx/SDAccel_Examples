@@ -1,6 +1,8 @@
 {
     "example": "Loops Dataflow Using HLS Stream",
-    "overview": "This is simple example of vector addition to demonstrate Loops Dataflow functionality of HLS. HLS Dataflow allows user to schedule multiple sequential loops concurrently to achieve higher throughput.",
+    "overview": [
+        "This is simple example of vector addition to demonstrate Loops Dataflow functionality of HLS. HLS Dataflow allows user to schedule multiple sequential loops concurrently to achieve higher throughput."
+    ],
     "key_concepts": [ "Loop Dataflow"],
     "keywords": [ "dataflow" , "hls::stream<>"],
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],

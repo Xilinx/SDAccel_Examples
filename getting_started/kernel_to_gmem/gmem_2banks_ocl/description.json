@@ -1,6 +1,8 @@
 {
     "example": "Global Memory Two Banks",
-    "overview": "This example of 2ddr to demonstrate on how to use 2ddr DSA. How to create buffers in each DDR.",
+    "overview": [
+        "This example of 2ddr to demonstrate on how to use 2ddr DSA. How to create buffers in each DDR."
+    ],
     "key_concepts": [ "Multiple Banks"],
     "keywords": [ "max_memory_ports", "misc:map_connect",
             "cl_mem_ext_ptr_t", "XCL_MEM_DDR_BANK0", "XCL_MEM_DDR_BANK1", "XCL_MEM_DDR_BANKx",

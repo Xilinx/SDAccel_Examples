@@ -1,6 +1,8 @@
 {
     "example" : "Tiny Encryption",
-    "overview" : "implementation of the tiny encryption algorithm.",
+    "overview" : [
+        "implementation of the tiny encryption algorithm."
+    ],
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
     "xcl": false,
     "em_cmd" : "./tiny ./xclbin/krnl_vadd.<emulation flow>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin",

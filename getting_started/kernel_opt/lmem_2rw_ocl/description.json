@@ -1,6 +1,8 @@
 {
     "example": "Two Parallel Read/Write on Local Memory",
-    "overview": "This is simple example of vector addition to demonstrate how to utilized both ports of Local Memory.", 
+    "overview": [
+        "This is simple example of vector addition to demonstrate how to utilized both ports of Local Memory."
+    ],
     "key_concepts": [ "Kernel Optimization", "2port BRAM Utilization", "two read/write Local Memory"],
     "keywords": ["opencl_unroll_hint(2)"],
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],

@@ -1,6 +1,13 @@
 {
     "example" : "Smithwaterman Genetic Sequencing Demo",
-    "overview" : "This is an optimized implementation of the smithwaterman algorithm targeting exection on an SDAccel support FPGA acceleration card.\n\nThe main algorithm characteristics of this application are\n1. Compute MaxScore\n2. Systolic array implementation\n",
+    "overview" : [
+        "This is an optimized implementation of the smithwaterman algorithm targeting exection on an SDAccel support FPGA acceleration card.",
+        "",
+        "The main algorithm characteristics of this application are",
+        "",
+        "1. Compute MaxScore",
+        "2. Systolic array implementation"
+    ],
     "board": ["Alpha Data ADM-PCIE-7V3", "Xilinx KU115"],
     "xcl": false,
     "em_cmd" : "./smithwaterman -p Xilinx -d xilinx:adm-pcie-ku3:2ddr:3.1 -k xclbin/krnl_smithwaterman.<emu_mode>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin",
@@ -18,7 +25,7 @@
             "description": "Initial Xilinx Release"
         },
         {
-            "date" : "OCT2016",
+            "date": "OCT2016",
             "version": "2.0",
             "description": "Conversion to Makefile based compilation"
         },

@@ -1,6 +1,8 @@
 {
     "example": "Read/Write Window of 2D Array",
-    "overview": "This is a simple example of accessing each window of data from 2d array",
+    "overview": [
+        "This is a simple example of accessing each window of data from 2d array"
+    ],
     "key_concepts": [ "window/tile of 2D data array access"],
     "keywords": ["pipe", "xcl_pipeline_loop", "xcl_reqd_pipe_depth"],
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
