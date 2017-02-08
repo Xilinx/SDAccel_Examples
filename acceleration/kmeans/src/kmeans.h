@@ -45,7 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* rmse.c */
 float   euclid_dist_2        (float*, float*, int);
 int     find_nearest_point   (float* , int, float**, int);
-float	rms_err(float**, int, int, float**, int);
+float   rms_err(float**, int, int, float**, int);
 int     cluster(int, int, float**, int, int, float, int*, float***, float*, int, int, const char* goldenFile = NULL);
 float** kmeans_clustering_cmodel(float **feature, int nfeatures, int npoints, int nclusters, float threshold, 
         int* iteration, int *membership); 

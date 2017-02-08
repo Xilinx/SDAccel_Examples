@@ -91,31 +91,31 @@ int find_nearest_point(float  *pt,          /* [nfeatures] */
 }
 
 /*----< rms_err(): calculates RMSE of clustering >-------------------------------------*/
-float rms_err	(float **feature,         /* [npoints][nfeatures] */
+float rms_err   (float **feature,         /* [npoints][nfeatures] */
                  int     nfeatures,
                  int     npoints,
                  float **cluster_centres, /* [nclusters][nfeatures] */
                  int     nclusters)
 {
     int    i;
-	int	   nearest_cluster_index;	/* cluster center id with min distance to pt */
-    float  sum_euclid = 0.0;		/* sum of Euclidean distance squares */
-    float  ret;						/* return value */
+    int    nearest_cluster_index;   /* cluster center id with min distance to pt */
+    float  sum_euclid = 0.0;        /* sum of Euclidean distance squares */
+    float  ret;                     /* return value */
     
-    /* calculate and sum the sqaure of euclidean distance*/	
+    /* calculate and sum the sqaure of euclidean distance*/
     for (i=0; i<npoints; i++) {
         nearest_cluster_index = find_nearest_point(feature[i], 
-													nfeatures, 
-													cluster_centres, 
-													nclusters);
+                                                    nfeatures, 
+                                                    cluster_centres, 
+                                                    nclusters);
 
-		sum_euclid += euclid_dist_2(feature[i],
-									cluster_centres[nearest_cluster_index],
-									nfeatures);
-		
-    }	
-	/* divide by n, then take sqrt */
-	ret = sqrt(sum_euclid / npoints);
+        sum_euclid += euclid_dist_2(feature[i],
+                                    cluster_centres[nearest_cluster_index],
+                                    nfeatures);
+        
+    }
+    /* divide by n, then take sqrt */
+    ret = sqrt(sum_euclid / npoints);
 
     return(ret);
 }

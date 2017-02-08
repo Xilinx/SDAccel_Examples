@@ -101,22 +101,22 @@ int main(int argc, char **argv) {
     char    line[1024];
     int     isBinaryFile = 0;
     int     global_size = 1;
-	float	threshold = 0.001;		/* default value */
-	int		max_nclusters=5;		/* default value */
-	int		min_nclusters=5;		/* default value */
-	int		best_nclusters = 0;
-	int		nfeatures = 0;
-	int		npoints = 0;
-	         
-	float **features;
-	float **cluster_centres=NULL;
-	int		i, j, index;
-	int		nloops = 1;				/* default value */
-			
-	int		isRMSE = 0;		
-	float	rmse;
-	
-	int		isOutput = 0;
+    float   threshold = 0.001;      /* default value */
+    int     max_nclusters=5;        /* default value */
+    int     min_nclusters=5;        /* default value */
+    int     best_nclusters = 0;
+    int     nfeatures = 0;
+    int     npoints = 0;
+             
+    float **features;
+    float **cluster_centres=NULL;
+    int     i, j, index;
+    int     nloops = 1;/* default value */
+            
+    int     isRMSE = 0;
+    float   rmse;
+    
+    int     isOutput = 0;
     //parse commandline
     CmdLineParser parser;
     parser.addSwitch("--input-file",    "-i", "input test data flie", "./data/100");
@@ -140,10 +140,10 @@ int main(int argc, char **argv) {
 
     if (filename.empty() ) usage(argv[0]);
     fpga_kmeans_setup(global_size);
-		
-	/* ============== I/O begin ==============*/
+
+    /* ============== I/O begin ==============*/
     /* get nfeatures and npoints */
-    if (isBinaryFile) {		//Binary file input
+    if (isBinaryFile) {//Binary file input
         int infile;
         if ((infile = open(filename.c_str(), O_RDONLY, "0600")) == -1) {
             fprintf(stderr, "Error: no such file (%s)\n", filename.c_str());
@@ -168,10 +168,10 @@ int main(int argc, char **argv) {
         if ((infile = fopen(filename.c_str(), "r")) == NULL) {
             fprintf(stderr, "Error: no such file (%s)\n", filename.c_str());
             exit(1);
-		}		
+        }
         while (fgets(line, 1024, infile) != NULL)
-			if (strtok(line, " \t\n") != 0)
-                npoints++;			
+        if (strtok(line, " \t\n") != 0)
+                npoints++;
         rewind(infile);
         while (fgets(line, 1024, infile) != NULL) {
             if (strtok(line, " \t\n") != 0) {
@@ -198,94 +198,94 @@ int main(int argc, char **argv) {
         }
         fclose(infile);
     }
-	
-	printf("\nI/O completed\n");
-	printf("\nfileName=%s\n",filename.c_str());
-	printf("\nNumber of objects: %d\n", npoints);
-	printf("Number of features: %d\n", nfeatures);	
-	printf("Number of min cluster: %d\n", min_nclusters);	
-	printf("Number of max cluster: %d\n", max_nclusters);	
-	printf("threshold: %f\n", threshold);	
-	/* ============== I/O end ==============*/
-
-	// error check for clusters
-	if (npoints < min_nclusters)
-	{
-		printf("Error: min_nclusters(%d) > npoints(%d) -- cannot proceed\n", min_nclusters, npoints);
-		exit(0);
-	}
-
-	srand(7);												/* seed for future random number generator */	
-	memcpy(features[0], buf, npoints*nfeatures*sizeof(float)); /* now features holds 2-dimensional array of features */
-	free(buf);
-
-	/* ======================= core of the clustering ===================*/
-
-
-    //FPGA Based cluster
-	cluster_centres = NULL;
-    index = cluster(npoints,				/* number of data points */
-					nfeatures,				/* number of features for each point */
-					features,				/* array: [npoints][nfeatures] */
-					min_nclusters,			/* range of min to max number of clusters */
-					max_nclusters,
-					threshold,				/* loop termination factor */
-				   &best_nclusters,			/* return: number between min and max */
-				   &cluster_centres,	/* return: [best_nclusters][nfeatures] */  
-				   &rmse,					/* Root Mean Squared Error */
-					isRMSE,					/* calculate RMSE */
-					nloops, 				/* number of iteration for each number of clusters */
-                    goldenfile.c_str());
-
     
-	//cluster_timing = omp_get_wtime() - cluster_timing;
+    printf("\nI/O completed\n");
+    printf("\nfileName=%s\n",filename.c_str());
+    printf("\nNumber of objects: %d\n", npoints);
+    printf("Number of features: %d\n", nfeatures);
+    printf("Number of min cluster: %d\n", min_nclusters);
+    printf("Number of max cluster: %d\n", max_nclusters);
+    printf("threshold: %f\n", threshold);
+    /* ============== I/O end ==============*/
 
-	printf("Number of min cluster: %d\n", min_nclusters);	
-	printf("Number of max cluster: %d\n", max_nclusters);	
-	printf("threshold: %f\n", threshold);	
-	printf("Number of best cluster: %d\n", best_nclusters);	
+    // error check for clusters
+    if (npoints < min_nclusters)
+    {
+        printf("Error: min_nclusters(%d) > npoints(%d) -- cannot proceed\n", min_nclusters, npoints);
+        exit(0);
+    }
+    
+    srand(7);/* seed for future random number generator */
+    memcpy(features[0], buf, npoints*nfeatures*sizeof(float)); /* now features holds 2-dimensional array of features */
+    free(buf);
+    
+    /* ======================= core of the clustering ===================*/
+    
+    
+    //FPGA Based cluster
+    cluster_centres = NULL;
+    index = cluster(npoints,            /* number of data points */
+                    nfeatures,          /* number of features for each point */
+                    features,           /* array: [npoints][nfeatures] */
+                    min_nclusters,      /* range of min to max number of clusters */
+                    max_nclusters,
+                    threshold,          /* loop termination factor */
+                    &best_nclusters,    /* return: number between min and max */
+                    &cluster_centres,   /* return: [best_nclusters][nfeatures] */  
+                    &rmse,              /* Root Mean Squared Error */
+                    isRMSE,             /* calculate RMSE */
+                    nloops,             /* number of iteration for each number of clusters */
+                    goldenfile.c_str());
+    
+    
+    //cluster_timing = omp_get_wtime() - cluster_timing;
+    
+    printf("Number of min cluster: %d\n", min_nclusters);
+    printf("Number of max cluster: %d\n", max_nclusters);
+    printf("threshold: %f\n", threshold);
+    printf("Number of best cluster: %d\n", best_nclusters);
+    
+    /* =============== Command Line Output =============== */
+    
+    /* cluster center coordinates
+       :displayed only for when k=1*/
+    if((min_nclusters == max_nclusters) && (isOutput == 1)) {
+        printf("\n================= Centroid Coordinates =================\n");
+        for(i = 0; i < max_nclusters; i++){
+            printf("\n\n%d:", i);
+            for(j = 0; j < nfeatures; j++){
+                printf(" %.2f", cluster_centres[i][j]);
+            }
+            printf("\n\n");
+        }
+    }
 
-	/* =============== Command Line Output =============== */
 
-	/* cluster center coordinates
-	   :displayed only for when k=1*/
-	if((min_nclusters == max_nclusters) && (isOutput == 1)) {
-		printf("\n================= Centroid Coordinates =================\n");
-		for(i = 0; i < max_nclusters; i++){
-			printf("\n\n%d:", i);
-			for(j = 0; j < nfeatures; j++){
-				printf(" %.2f", cluster_centres[i][j]);
-			}
-			printf("\n\n");
-		}
-	}
-	
-
-	printf("Number of Iteration: %d\n", nloops);
-	
-	if(min_nclusters != max_nclusters){
-		if(nloops != 1){									//range of k, multiple iteration
-			printf("Best number of clusters is %d\n", best_nclusters);				
-		}
-		else{												//range of k, single iteration
-			printf("Best number of clusters is %d\n", best_nclusters);				
-		}
-	}
-	else{
-		if(nloops != 1){									// single k, multiple iteration
-			if(isRMSE)										// if calculated RMSE
-				printf("Number of trials to approach the best RMSE of %.3f is %d\n", rmse, index + 1);
-		}
-		else{												// single k, single iteration				
-			if(isRMSE)										// if calculated RMSE
-				printf("Root Mean Squared Error: %.3f\n", rmse);
-		}
-	}
-	
-
-	/* free up memory */
-	free(features[0]);
-	free(features);    
+    printf("Number of Iteration: %d\n", nloops);
+    
+    if(min_nclusters != max_nclusters){
+        if(nloops != 1){//range of k, multiple iteration
+            printf("Best number of clusters is %d\n", best_nclusters);
+        }
+        else{//range of k, single iteration
+            printf("Best number of clusters is %d\n", best_nclusters);
+        }
+    }
+    else{
+        if(nloops != 1){// single k, multiple iteration
+            if(isRMSE)// if calculated RMSE
+               printf("Number of trials to approach the best RMSE of %.3f is %d\n", rmse, index + 1);
+        }
+        else{// single k, single iteration
+            if(isRMSE)// if calculated RMSE
+                printf("Root Mean Squared Error: %.3f\n", rmse);
+        }
+    }
+    
+    
+    /* free up memory */
+    free(features[0]);
+    free(features);    
     return(0);
 }
 

@@ -137,11 +137,11 @@ float** kmeans_clustering_cmodel(float **feature,    /* in: [npoints][nfeatures]
         //n = (int)rand() % npoints;
         for (j=0; j<nfeatures; j++)
             clusters[i][j] = feature[n][j];
-		n++;
+        n++;
     }
 
     for (i=0; i<npoints; i++)
-		membership[i] = -1;
+        membership[i] = -1;
 
     /* need to initialize new_centers_len and new_centers[0] to all 0 */
     new_centers_len = (int*) calloc(nclusters, sizeof(int));
@@ -153,34 +153,34 @@ float** kmeans_clustering_cmodel(float **feature,    /* in: [npoints][nfeatures]
  
   
     do {
-		
+
         delta = 0.0;
 
         for (i=0; i<npoints; i++) {
-	        /* find the index of nestest cluster centers */
-	        index = find_nearest_point(feature[i], nfeatures, clusters, nclusters);
-	        /* if membership changes, increase delta by 1 */
-	        if (membership[i] != index) delta += 1.0;
-
-	        /* assign the membership to object i */
-	        membership[i] = index;
-
-	        /* update new cluster centers : sum of objects located within */
-	        new_centers_len[index]++;
-	        for (j=0; j<nfeatures; j++)          
-				new_centers[index][j] += feature[i][j];
+            /* find the index of nestest cluster centers */
+            index = find_nearest_point(feature[i], nfeatures, clusters, nclusters);
+            /* if membership changes, increase delta by 1 */
+            if (membership[i] != index) delta += 1.0;
+    
+            /* assign the membership to object i */
+            membership[i] = index;
+    
+            /* update new cluster centers : sum of objects located within */
+            new_centers_len[index]++;
+            for (j=0; j<nfeatures; j++)          
+                new_centers[index][j] += feature[i][j];
         }
       
 
-	/* replace old cluster centers with new_centers */
+        /* replace old cluster centers with new_centers */
         for (i=0; i<nclusters; i++) {
             for (j=0; j<nfeatures; j++) {
                 if (new_centers_len[i] > 0)
-					clusters[i][j] = new_centers[i][j] / new_centers_len[i];
-				new_centers[i][j] = 0.0;   /* set back to 0 */
-			}
-			new_centers_len[i] = 0;   /* set back to 0 */
-		}
+                    clusters[i][j] = new_centers[i][j] / new_centers_len[i];
+                new_centers[i][j] = 0.0;   /* set back to 0 */
+            }
+            new_centers_len[i] = 0;   /* set back to 0 */
+        }
             
         //delta /= npoints;
     (*iteration)++;
