@@ -13,3 +13,4 @@
 ^acceleration/kmeans/src/kmeans.h$
 ^acceleration/kmeans/src/read_input.cpp$
 ^acceleration/kmeans/src/rmse.c$
+^acceleration/kmeans/src/host.cpp$
