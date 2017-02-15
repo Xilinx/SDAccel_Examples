@@ -7,7 +7,7 @@ artifactNumToKeepStr: '', daysToKeepStr: '30', numToKeepStr: '5')), [$class:
 'GitHubPushTrigger']])])
 
 devices = ''
-//devices += ' xilinx:adm-pcie-7v3:1ddr:3.0'
+devices += ' xilinx:adm-pcie-7v3:1ddr:3.0'
 devices += ' xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2'
 devices += ' xilinx:adm-pcie-ku3:2ddr-xpr:3.2'
 
@@ -91,6 +91,7 @@ make -k TARGETS=${target} DEVICES=\"${devices}\" check
 timestamps {
 // Always build on the same host so that the workspace is reused
 node('rhel6 && xsjrdevl && xsjrdevl110') {
+try {
 	Calendar now = Calendar.getInstance();
 
 	if (now.get(Calendar.DAY_OF_WEEK) == Calendar.TUESDAY) {
@@ -101,19 +102,6 @@ node('rhel6 && xsjrdevl && xsjrdevl110') {
 
 	stage("Checkout") {
 		checkout scm
-
-		// The following can be used when testing changes in the script console
-		/* 
-		checkout poll: false, scm: [
-			$class: 'GitSCM', 
-		*/ //	branches: [[name: '*/master']], 
-		/*	userRemoteConfigs: [[
-				credentialsId: '99feb95b-e9a4-4532-b6a0-ecce75d3dfad', 
-				url: 'git@gitenterprise.xilinx.com:SDx-Hub/apps.git'
-			]]
-		]
-	*/
-
 		step([$class: 'GitHubCommitStatusSetter'])
 	}
 
@@ -160,8 +148,16 @@ module add proxy
 		parallel hwSteps
 
 	}
-
+} catch (e) {
+	currentBuild.result = "FAILED"
+	throw e
+} finally {
 	step([$class: 'GitHubCommitStatusSetter'])
 	step([$class: 'Mailer', notifyEveryUnstableBuild: true, recipients: 'spenserg@xilinx.com', sendToIndividuals: false])
-}
+	// Cleanup .Xil Files after run
+	sh 'find . -name .Xil | xargs rm -rf'
+} // try
+} // node
 } // timestamps
+
+
