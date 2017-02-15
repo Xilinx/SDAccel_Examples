@@ -16,13 +16,18 @@ This README file contains the following sections:
 
 
 ## 1. OVERVIEW
-This is OpenCL Based K-Means clustering Implementation for Xilinx FPGA Devices. K-means clustering is a method of vector quantization, that is popular for cluster analysis in data mining. K-means clustering aims to partition n observations into k clusters in which each observation belongs to the cluster with the nearest mean, serving as a prototype of the cluster.
+This is OpenCL Based K-Means clustering Implementation for Xilinx FPGA 
+Devices. K-means clustering is a method of vector quantization, that 
+is popular for cluster analysis in data mining. K-means clustering 
+aims to partition n observations into k clusters in which each 
+observation belongs to the cluster with the nearest mean, serving as
+a prototype of the cluster.
 
- __Note__: This application is ported from Rodinia
+Note__: This application is ported from Rodinia
 
 (https://www.cs.virginia.edu/~skadron/wiki/rodinia/)
 
- __Usage__
+__Usage__
 
  ./kmeans -i input_file [-m max_nclusters ] [-n min_nclusters] [-g global_size] [-c golden_file] [options]
 
@@ -30,7 +35,7 @@ This is OpenCL Based K-Means clustering Implementation for Xilinx FPGA Devices. 
 	 -m max_nclusters : maximum number of clusters allowed [default=5]
 	 -n min_nclusters : minimum number of clusters allowed [default=5]
 	 -g global_size   : Specify global size [default=1]
-	 -c golden_file   : Golden File for result comparison 
+	 -c golden_file   : Golden File for result comparison
 	 -b               : input file is in binary format
 	 -o               : output cluster center coordinates [default=off]
 
