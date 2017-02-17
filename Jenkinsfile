@@ -11,9 +11,11 @@ devices += ' xilinx:adm-pcie-7v3:1ddr:3.0'
 devices += ' xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2'
 devices += ' xilinx:adm-pcie-ku3:2ddr-xpr:3.2'
 
+version = '2016.3'
+
 def buildExample(target, dir, devices, workdir) {
 	return { ->
-		stage("${dir}-${target}") {
+//		stage("${dir}-${target}") {
 			node('rhel6 && xsjrdevl') {
 				/* Retry up to 3 times to get this to work */
 
@@ -32,9 +34,9 @@ cd ${workdir}
 . /tools/local/bin/modinit.sh > /dev/null 2>&1
 module use.own /proj/picasso/modulefiles
 
-module add vivado/2016.3_daily
-module add vivado_hls/2016.3_daily
-module add sdaccel/2016.3_daily
+module add vivado/${version}_daily
+module add vivado_hls/${version}_daily
+module add sdaccel/${version}_daily
 module add opencv/vivado_hls
 module add lsf
 
@@ -45,7 +47,6 @@ echo "-----------------------------------------------"
 echo "PWD: \$(pwd)"
 echo "-----------------------------------------------"
 echo
-
 
 rsync -rL \$XILINX_SDX/Vivado_HLS/lnx64/tools/opencv/ lib/
 
@@ -63,9 +64,9 @@ cd ${workdir}
 . /tools/local/bin/modinit.sh > /dev/null 2>&1
 module use.own /proj/picasso/modulefiles
 
-module add vivado/2016.3_daily
-module add vivado_hls/2016.3_daily
-module add sdaccel/2016.3_daily
+module add vivado/${version}_daily
+module add vivado_hls/${version}_daily
+module add sdaccel/${version}_daily
 module add opencv/vivado_hls
 
 module add proxy
@@ -84,7 +85,7 @@ make -k TARGETS=${target} DEVICES=\"${devices}\" check
 
 """
 			}
-		}
+//		}
 	}
 }
 
@@ -100,19 +101,19 @@ try {
 		}
 	}
 
-	stage("Checkout") {
+	stage("checkout") {
 		checkout scm
 		step([$class: 'GitHubCommitStatusSetter'])
 	}
 
-	stage('Pre-check') {
+	stage('pre-check') {
 		sh """
 . /tools/local/bin/modinit.sh > /dev/null 2>&1
 module use.own /proj/picasso/modulefiles
 
-module add vivado/2016.3_daily
-module add vivado_hls/2016.3_daily
-module add sdaccel/2016.3_daily
+module add vivado/${version}_daily
+module add vivado_hls/${version}_daily
+module add sdaccel/${version}_daily
 module add opencv/vivado_hls
 
 module add proxy
@@ -122,13 +123,16 @@ module add proxy
 """
 	}
 
-	stage('Build') {
+	stage('configure') {
 		sh 'git ls-files | grep description.json | sed -e \'s/\\.\\///\' -e \'s/\\/description.json//\' > examples.dat'
 		examplesFile = readFile 'examples.dat'
 		examples = examplesFile.split('\\n')
 
-		workdir = pwd()
+	}
 
+	workdir = pwd()
+
+	stage('sw_emu') {
 		def swEmuSteps = [:]
 
 		for(int i = 0; i < examples.size(); i++) {
@@ -137,7 +141,9 @@ module add proxy
 		}
 
 		parallel swEmuSteps
+	}
 
+	stage('hw') {
 		def hwSteps = [:]
 
 		for(int i = 0; i < examples.size(); i++) {
@@ -146,8 +152,8 @@ module add proxy
 		}
 
 		parallel hwSteps
-
 	}
+
 } catch (e) {
 	currentBuild.result = "FAILED"
 	throw e
