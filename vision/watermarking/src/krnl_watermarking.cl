@@ -77,9 +77,9 @@ uint saturatedAdd(uint x, uint y)
 
   uint combinedOutput = 0;
 
-  combinedOutput |= redOutput;
-  combinedOutput |= (greenOutput << 8);
-  combinedOutput |= (blueOutput << 16);
+  combinedOutput |= (uint) redOutput;
+  combinedOutput |= ((uint) greenOutput << 8);
+  combinedOutput |= ((uint) blueOutput << 16);
 
   return combinedOutput;
 
@@ -112,11 +112,11 @@ void applyWatermark(__global const uint* input, __global uint* output, const uin
   for (size_t p = 0; p < height*width; p++)
   {
     output[p] = 
-      saturatedAdd(input[p], watermark[wrow][wcol]);
+      saturatedAdd(input[p], watermark[wcol][wrow]);
 
-    col = (col == width) ? 0 : col+1;
-    wcol = (wcol < WATERMARK_WIDTH) ? wcol+1 : 0;
-    row = (col == width) ? row+1 : row;
-    wrow = (col != width) ? wrow : (wrow < WATERMARK_WIDTH) ? wrow+1 : 0;
+    col = (col == width-1) ? 0 : col+1;
+    wcol = (wcol == WATERMARK_WIDTH-1 || col == width-1) ? 0 : wcol+1;
+    row = (col == width-1) ? row+1 : row;
+    wrow = (col == width-1) ? ((wrow == WATERMARK_HEIGHT-1) ? 0 : wrow+1) : wrow;
   }
 }
