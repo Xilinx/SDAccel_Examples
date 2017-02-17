@@ -14,7 +14,7 @@ nearest_LDFLAGS=$(opencl_LDFLAGS)
 # Nearest Neighbor Kernel
 krnl_nearest_SRCS=./src/krnl_linear_search.cpp
 krnl_nearest_CLFLAGS=--kernel krnl_linear_search --nk krnl_linear_search:3
-krnl_nearest_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.2
+krnl_nearest_DEVICES=xilinx:adm-pcie-ku3:2ddr-xpr:3.2
 
 EXES=nearest
 XCLBINS=krnl_nearest
