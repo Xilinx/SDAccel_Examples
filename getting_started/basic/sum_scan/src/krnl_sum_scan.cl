@@ -26,7 +26,7 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
-#define LOG2_B (3)
+#define LOG2_B (4)
 #define B (1<<(LOG2_B))
 #define M(x) (((x)-1)/(B) + 1)
 
@@ -82,12 +82,14 @@ bus_t sum_scan(float *sum, bus_t g_in[HIST_LENGTH+1], uint i) {
 
 		bus_to_array(tmp, &in[B*j]);
 	}
-/*
+
+#if DEBUG
 	for(uint j = 0; j < (HIST_LENGTH+1)*B; j++) {
 		printf("%7.3f ", in[B+j]);
 	}
 	printf("\n");
-*/
+#endif
+
 	/* Tree based sumation of history */
 	for(uint d = 0; d < LOG2_HIST_LENGTH; d++) {
 		uint o1 = 1<<d;
@@ -116,14 +118,14 @@ bus_t sum_scan(float *sum, bus_t g_in[HIST_LENGTH+1], uint i) {
 	for(uint j = 0; j < B; j++) {
 		in[B*HIST_LENGTH+j] += *sum;
 	}
-/*
+#ifdef DEBUG
 	for(uint j = 0; j < B; j++) {
 		printf("%7.3f ", in[B*HIST_LENGTH+j]);
 	}
 
 	printf("[%7.3f] (%d)", *sum, i % (HIST_LENGTH+1));
 	printf("\n");
-*/
+#endif
 	return array_to_bus(&in[B*HIST_LENGTH]);
 }
 

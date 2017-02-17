@@ -30,22 +30,55 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
+#include <fenv.h>
 
 #include "xcl.h"
 
+float get_rand() {
+    float ret = ((float) rand() / (float)(RAND_MAX)) * 1.0f - 0.5f;
+
+    union {
+        float f;
+        unsigned u;
+    } x = {ret};
+
+    /* Check if the number is subnormal if so change it to zero */
+    if ((x.u & 0x7f800000) == 0) {
+        x.f = 0.0;
+    }
+
+    return x.f;
+}
+
 int main(int argc, char* argv[]) {
-    if(argc != 1 && argc != 2) {
-        printf("Usage: %s [length]\n", argv[0]);
+    if(argc != 1 && argc != 2 && argc !=3 && argc !=4) {
+        printf("Usage: %s [length] [max relative error] [rand seed]\n", argv[0]);
         return EXIT_FAILURE;
     }
 
-    unsigned length = 1000000;
+    unsigned length = 1000;
+    unsigned seed = 0;
+    float max_relative_error =  0.05;
 
-    if(argc == 2) {
+    if(argc > 1) {
         length = atoi(argv[1]);
     }
 
+    if (argc > 2) {
+        max_relative_error = atof(argv[2]);
+    }
+
+    if(argc > 3) {
+        seed = atoi(argv[3]);
+    }
+
     printf("length = %d\n", length);
+    printf("seed = %d\n", seed);
+    printf("max_relative_error = %f\n", max_relative_error);
+
+    srand(seed);
+    fesetround(FE_TOWARDZERO);
 
     xcl_world world    = xcl_world_single();
     cl_program program = xcl_import_binary(world, "krnl_sum_scan");
@@ -62,7 +95,7 @@ int main(int argc, char* argv[]) {
 
     /* Create the test data and run the vector addition locally */
     for(unsigned i=0; i < length; i++) {
-        in[i] = (i%2 == 0) ? -1.0f : 1.0f;
+        in[i] = get_rand();
         out[i] = (sum += in[i]);
     }
 
@@ -70,9 +103,9 @@ int main(int argc, char* argv[]) {
     xcl_memcpy_to_device(world, dev_in, in, vector_size_bytes);
 
     /* Set the kernel arguments */
-    clSetKernelArg(krnl, 0, sizeof(cl_mem), &dev_in);
-    clSetKernelArg(krnl, 1, sizeof(cl_mem), &dev_out);
-    clSetKernelArg(krnl, 2, sizeof(unsigned), &length);
+    xcl_set_kernel_arg(krnl, 0, sizeof(cl_mem), &dev_in);
+    xcl_set_kernel_arg(krnl, 1, sizeof(cl_mem), &dev_out);
+    xcl_set_kernel_arg(krnl, 2, sizeof(unsigned), &length);
 
     /* Launch the kernel */
     unsigned long duration = xcl_run_kernel3d(world, krnl, 1, 1, 1);
@@ -91,9 +124,13 @@ int main(int argc, char* argv[]) {
     /* Compare the results of the kernel to the simulation */
     size_t krnl_match = 0;
     for(unsigned i = 0; i < length; i++){
-        if(out[i] != out_fpga[i]){
-            printf("Error: Result mismatch\n");
-            printf("i = %d CPU result = %f Krnl Result = %f\n", i, out[i], out_fpga[i]);
+#if DEBUG
+        printf("i = %d CPU result = %f(%a) Krnl Result = %f(%a) : in = %f(%a)\n", i, out[i], out[i], out_fpga[i],out_fpga[i], in[i], in[i]);
+#endif
+        float relative_error = fabs(out[i] - out_fpga[i]) / fabs(out[i]);
+        if(relative_error  > max_relative_error){
+            printf("Error: Result mismatch (relative_error = %f)\n", relative_error);
+            printf("i = %d CPU result = %f(%a) Krnl Result = %f(%a)\n", i, out[i], out[i], out_fpga[i],out_fpga[i]);
             krnl_match = 1;
             break;
         }
@@ -108,7 +145,7 @@ int main(int argc, char* argv[]) {
         printf("Fail! kernel results do not match cpu results\n");
         return EXIT_FAILURE;
     } else{
-        printf("Success! Kernel took %lld ns to execute\n", duration);
+        printf("Success! Kernel took %ld ns to execute\n", duration);
         return EXIT_SUCCESS;
     }
 }
