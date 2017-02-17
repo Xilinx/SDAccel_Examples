@@ -22,6 +22,9 @@ XCLBINS=krnl_equalizer
 check_EXE=equalizer
 check_XCLBINS=krnl_equalizer
 check_ARGS=data/race_2k.bmp
+
+EXTRA_CLEAN=out.bmp
+
 CHECKS=check
 
 include $(COMMON_REPO)/utility/rules.mk
