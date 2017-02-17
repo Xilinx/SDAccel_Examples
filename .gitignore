@@ -10,3 +10,5 @@ xmltmp
 dltmp*
 runtime/
 *.log
+xclbin/
+lib/
