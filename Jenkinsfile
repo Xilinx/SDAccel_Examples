@@ -16,7 +16,7 @@ version = '2016.3'
 def buildExample(target, dir, devices, workdir) {
 	return { ->
 //		stage("${dir}-${target}") {
-			node('rhel6 && xsjrdevl') {
+//			node('rhel6 && xsjrdevl') {
 				/* Retry up to 3 times to get this to work */
 
 				if ( target == "sw_emu" ) {
@@ -86,7 +86,7 @@ make -k TARGETS=${target} DEVICES=\"${devices}\" check
 """
 			}
 //		}
-	}
+//	}
 }
 
 timestamps {
