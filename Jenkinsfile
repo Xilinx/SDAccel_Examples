@@ -15,19 +15,15 @@ version = '2016.3'
 
 def buildExample(target, dir, devices, workdir) {
 	return { ->
-//		stage("${dir}-${target}") {
-//			node('rhel6 && xsjrdevl') {
-				/* Retry up to 3 times to get this to work */
+		if ( target == "sw_emu" ) {
+			cores = 1
+			queue = "medium"
+		} else {
+			cores = 8
+			queue = "long"
+		}
 
-				if ( target == "sw_emu" ) {
-					cores = 1
-					queue = "medium"
-				} else {
-					cores = 8
-					queue = "long"
-				}
-
-				sh """#!/bin/bash -e
+		sh """#!/bin/bash -e
 
 cd ${workdir}
 
@@ -55,9 +51,8 @@ make -k TARGETS=${target} DEVICES=\"${devices}\" all
 EOF
 
 """
-			}
-			retry(3) {
-				sh """#!/bin/bash -e
+		retry(3) {
+			sh """#!/bin/bash -e
 
 cd ${workdir}
 
@@ -84,9 +79,8 @@ export PYTHONUNBUFFERED=true
 make -k TARGETS=${target} DEVICES=\"${devices}\" check
 
 """
-			}
-//		}
-//	}
+		}
+	}
 }
 
 timestamps {
