@@ -152,10 +152,14 @@ module add proxy
 	currentBuild.result = "FAILED"
 	throw e
 } finally {
-	step([$class: 'GitHubCommitStatusSetter'])
-	step([$class: 'Mailer', notifyEveryUnstableBuild: true, recipients: 'spenserg@xilinx.com', sendToIndividuals: false])
-	// Cleanup .Xil Files after run
-	sh 'find . -name .Xil | xargs rm -rf'
+	stage('post-check') {
+		step([$class: 'GitHubCommitStatusSetter'])
+		step([$class: 'Mailer', notifyEveryUnstableBuild: true, recipients: 'spenserg@xilinx.com', sendToIndividuals: false])
+	}
+	stage('cleanup') {
+		// Cleanup .Xil Files after run
+		sh 'find . -name .Xil | xargs rm -rf'
+	}
 } // try
 } // node
 } // timestamps
