@@ -5,7 +5,6 @@
     ],
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
     "xcl": false,
-    "opencv": true,
     "em_cmd": "./watermark data/inputImage.bmp ./xclbin/krnl_watermark.<emulation type>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./watermark data/inputImage.bmp ./xclbin/krnl_watermark.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin",
     "perf_fields": ["Board", "Image Size", "Frames / Second"],
