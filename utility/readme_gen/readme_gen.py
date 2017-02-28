@@ -190,7 +190,7 @@ def execution(target):
     target.write("## 6. Execution in Cloud Environments\n")
     target.write("FPGA acceleration boards have been deployed to the cloud. For information on how to execute the example within a specific cloud, take a look at the following guides.\n");
     target.write("* [AWS F1 Application Execution on Xilinx Virtex UltraScale Devices] (Coming Soon)\n")
-    target.write("* [Nimbix Application Execution Xilinx Kintex UltraScale Devices]\n")
+    target.write("* [Nimbix Application Execution on Xilinx Kintex UltraScale Devices]\n")
     target.write("* [IBM SuperVessel Research Cloud on Xilinx Virtex Devices]\n")
     target.write("\n")
 
