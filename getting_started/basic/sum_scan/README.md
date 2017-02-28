@@ -7,8 +7,8 @@ This README file contains the following sections:
 2. HOW TO DOWLOAD THE REPOSITORY
 3. SOFTWARE TOOLS AND SYSTEM REQUIREMENTS
 4. DESIGN FILE HIERARCHY
-5. COMPILATION AND EXECUTION ON X86 SERVERS
-6. COMPILATION AND EXECUTION ON IBM POWER SERVERS
+5. COMPILATION AND EXECUTION
+6. EXECUTION IN CLOUD ENVIRONMENTS
 7. SUPPORT
 8. LICENSE AND CONTRIBUTING TO THE REPOSITORY
 9. ACKNOWLEDGEMENTS
@@ -25,11 +25,10 @@ git clone https://github.com/Xilinx/SDAccel_Examples examples
 ```
 where examples is the name of the directory where the repository will be stored on the local system.This command needs to be executed only once to retrieve the latest version of all SDAccel examples. The only required software is a local installation of git.
 
-*NOTE: If the destination of the repository is the user home directory in the Nimbix SDAccel developer instance, the command will need to be executed for every session. Contents of the user home directory in the Nimbix SDAccel developer instance are not preserved between user sessions. Only files placed in the /data directory are kept between SDAccel development sessions.*
 ## 3. SOFTWARE AND SYSTEM REQUIREMENTS
-Board | Device Name | Software Version | NIMBIX Machine Type
-------|-------------|------------------|--------------------
-Alpha Data ADM-PCIE-7V3|xilinx:adm-pcie-7v3:1ddr:3.0|SDAccel 2016.3|nx2
+Board | Device Name | Software Version
+------|-------------|-----------------
+Alpha Data ADM-PCIE-7V3|xilinx:adm-pcie-7v3:1ddr:3.0|SDAccel 2016.3
 
 
 Board targeted by default = ***xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2***
@@ -52,7 +51,7 @@ src/krnl_sum_scan.cl
 src/sum_scan.cpp
 ```
 
-## 5. COMPILATION AND EXECUTION FOR X86 SERVERS
+## 5. COMPILATION AND EXECUTION
 ### Compiling for Application Emulation
 As part of the capabilities available to an application developer, SDAccel includes environments to test the correctness of an application at both a software functional level and a hardware emulated level.
 These modes, which are named sw_emu and hw_emu, allow the developer to profile and evaluate the performance of a design before compiling for board execution.
@@ -90,7 +89,7 @@ To manually configure the environment to run the application, set the following
 ```
 export LD_LIBRARY_PATH=$XILINX_SDX/runtime/lib/x86_64/:$LD_LIBRARY_PATH
 export XCL_EMULATION_MODE=<sw_emu|hw_emu>
-emconfigutil --xdevice 'xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2' --nd 1
+emconfigutil --xdevice 'xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2 --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
@@ -103,50 +102,15 @@ The command to compile the application for execution on the FPGA acceleration bo
 make all
 ```
 The default target for the makefile is to compile for hardware. Therefore, setting the TARGETS option is not required.
-*NOTE:* Compilation for application execution in hardware generates custom logic to implement the functionality of the kernels in an application.It is typical for hardware compile times to range from 30 minutes to a couple of hours.
-### Executing the Application in the FPGA Accelerator Card
-The developer instance hosting the SDAccel tools on Nimbix is not directly connected to an FPGA accelerator card.
-FPGA Accelerator cards are available as part of the SDAccel Runtime application. There are several ways of executing an application on the available cards:
+*NOTE:* Compilation for application execution in hardware generates custom logic to implement the functionality of the kernels in an application.
+It is typical for hardware compile times to range from 30 minutes to a couple of hours.
 
-***Submit the application from the developer to runtime instances (recommended flow)***
-* Create a credentials file for the runtime machine based on your Nimbix username and API key. For more information on how to obtain the API key, refer to [Nimbix Application Submission README][]. The credentials file ( ~/.nimbix_creds.json ) should look like
-```
-{
-	"username": "<username>",
-	"api-key": "<apikey>"
-}
-```
+## 6. Execution in Cloud Environments
+FPGA acceleration boards have been deployed to the cloud. For information on how to execute the example within a specific cloud, take a look at the following guides.
+* [AWS F1 Application Execution on Xilinx Virtex UltraScale Devices] (Coming Soon)
+* [Nimbix Application Execution Xilinx Kintex UltraScale Devices]
+* [IBM SuperVessel Research Cloud on Xilinx Virtex Devices]
 
-where the values for username and apikey have been set to the values from your Nimbix account.
-
-*NOTE:* The home directory of a SDAccel developer instance is not persistent across sessions. Only files stored in the /data directory are kept between sessions.It is recommended that a copy of the nimbix_creds.json file be stored in the /data directory and copied to the appropriate location in the home directory at the start of each development session.
-* Launch the application
-```
-make check
-```
-***Launch the application from a remote system outside of the Nimbix environment***
-* Follow the instructions in [Nimbix Application Submission README][]
-
-* Use the following command to launch the application from the users terminal (on a system outside of the Nimbix environment)
-```
-../../../utility/nimbix/nimbix-run.py -- ./sum_scan
-```
-
-***Copy the application files from the Developer to Runtime instances on Nimbix***
-* Copy the application *.exe file and xclbin directory to the /data directory
-* Launch the application using the Nimbix web interface as described in [Nimbix Getting Started Guide][]
-* Make sure that the application launch options in the Nimbix web interface reflect the applications command line syntax
-```
-./sum_scan
-```
-
-## 6. COMPILATION AND EXECUTION FOR IBM POWER SERVERS
-View the SuperVessel [Walkthrough Video][] to become familiar with the environment.
-
-Compile the application with the following command
-```
-make ARCH=POWER all
-```
 
 ## 7. SUPPORT
 For more information about SDAccel check the [SDAccel User Guides][]
@@ -171,11 +135,14 @@ Date | README Version | Description
 SEP2016|1.0|Initial Release
 DEC2016|2.0|Update for SDAccel 2016.3
 
-[3-Clause BSD License]:../../../LICENSE.txt
+[3-Clause BSD License]: ../../../LICENSE.txt
 [SDAccel Forums]: https://forums.xilinx.com/t5/SDAccel/bd-p/SDx
 [SDAccel User Guides]: http://www.xilinx.com/support/documentation-navigation/development-tools/software-development/sdaccel.html?resultsTablePreSelect=documenttype:SeeAll#documentation
 [Nimbix Getting Started Guide]: http://www.xilinx.com/support/documentation/sw_manuals/xilinx2016_2/ug1240-sdaccel-nimbix-getting-started.pdf
 [Walkthrough Video]: http://bcove.me/6pp0o482
-[Nimbix Application Submission README]:../../../utility/nimbix/README.md
-[Repository Contribution README]:../../../CONTRIBUTING.md
-[SDaccel GUI README]:../../../GUIREADME.md
+[Nimbix Application Submission README]: ../../../utility/nimbix/README.md
+[Repository Contribution README]: ../../../CONTRIBUTING.md
+[SDaccel GUI README]: ../../../GUIREADME.md
+[AWS F1 Application Execution on Xilinx Virtex UltraScale Devices]: ../../../README.md
+[Nimbix Application Execution on Xilinx Kintex UltraScale Devices]: ../../../utility/nimbix/README.md
+[IBM SuperVessel Research Cloud on Xilinx Virtex Devices]: http://bcove.me/6pp0o482

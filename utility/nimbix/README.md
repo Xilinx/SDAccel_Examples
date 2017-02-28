@@ -88,7 +88,7 @@ $ export all_proxy=proxy:8080
 ## 5. OTHER INFORMATION
 
 For more information check here:
-[SDAccel User Guides][]
+[SDAccel User Guides]
 
 ## 6. SUPPORT
 For questions and to get help on this project or your own projects, visit the [SDAccel Forums][].
@@ -101,11 +101,11 @@ The utility is written by developers at [Xilinx](http://www.xilinx.com/)
 
 ## 10. REVISION HISTORY
 
-Date		|	Readme Version	|	Revision Description
-----------------|-----------------------|-------------------------
-JAN2016		|	1.0		|	Initial Xilinx release
-MAR2016     |   2.0     |   Bug fix: Create /data/automated_test if it does not exist
-MAY2016     |   3.0     |   Update to Nimbix Jarvice 2.0 infrastructure
+Date    | Readme Version | Revision Description
+--------|----------------|-------------------------
+JAN2016 |      1.0       | Initial Xilinx release
+MAR2016 |      2.0       | Bug fix: Create /data/automated_test if it does not exist
+MAY2016 |      3.0       | Update to Nimbix Jarvice 2.0 infrastructure
 
 [3-Clause BSD License]: LICENSE.md
 [SDAccel Forums]: https://forums.xilinx.com/t5/SDAccel/bd-p/SDx

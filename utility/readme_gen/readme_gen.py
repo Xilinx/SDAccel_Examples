@@ -7,6 +7,7 @@ import subprocess
 DSA = 'xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2'
 VERSION = 'SDAccel 2016.3'
 DEVICES = {
+    'AWS VU9P': ['TBD'],
     'Alpha Data ADM-PCIE-7V3':['xilinx:adm-pcie-7v3:1ddr:3.0','nx2'],
     'Alpha Data ADM-PCIE-KU3':['xilinx:adm-pcie-ku3:2ddr-xpr:3.2','nx1'],
     'Xilinx KU115':['xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2','nx3']
@@ -21,8 +22,8 @@ def header(target,data):
     target.write("2. HOW TO DOWLOAD THE REPOSITORY\n")
     target.write("3. SOFTWARE TOOLS AND SYSTEM REQUIREMENTS\n")
     target.write("4. DESIGN FILE HIERARCHY\n")
-    target.write("5. COMPILATION AND EXECUTION ON X86 SERVERS\n")
-    target.write("6. COMPILATION AND EXECUTION ON IBM POWER SERVERS\n")
+    target.write("5. COMPILATION AND EXECUTION\n")
+    target.write("6. EXECUTION IN CLOUD ENVIRONMENTS\n")
     target.write("7. SUPPORT\n")
     target.write("8. LICENSE AND CONTRIBUTING TO THE REPOSITORY\n")
     target.write("9. ACKNOWLEDGEMENTS\n")
@@ -37,9 +38,6 @@ def download(target):
     target.write("```\n")
     target.write("where examples is the name of the directory where the repository will be stored on the local system.")
     target.write("This command needs to be executed only once to retrieve the latest version of all SDAccel examples. The only required software is a local installation of git.\n\n")
-    target.write("*NOTE: If the destination of the repository is the user home directory in the Nimbix SDAccel developer instance, the command will need to be executed for every ")
-    target.write("session. Contents of the user home directory in the Nimbix SDAccel developer instance are not preserved between user sessions. Only files placed in the /data ")
-    target.write("directory are kept between SDAccel development sessions.*\n")
     return
 
 def overview(target,data):
@@ -84,8 +82,8 @@ def overview(target,data):
 
 def requirements(target,data):
     target.write("## 3. SOFTWARE AND SYSTEM REQUIREMENTS\n")
-    target.write("Board | Device Name | Software Version | NIMBIX Machine Type\n")
-    target.write("------|-------------|------------------|--------------------\n")
+    target.write("Board | Device Name | Software Version\n")
+    target.write("------|-------------|-----------------\n")
     for board in data["board"]:
         target.write(board)
         target.write("|")
@@ -93,8 +91,8 @@ def requirements(target,data):
         target.write("|")
         for version in VERSION:
             target.write(version)
-        target.write("|")
-        target.write(DEVICES[board][1])
+#        target.write("|")
+#        target.write(DEVICES[board][1])
         target.write("\n")
     target.write("\n\n")
     target.write("Board targeted by default = ***%s***\n\n" %DSA)
@@ -130,7 +128,7 @@ def hierarchy(target):
     return
 
 def compilation(target,data):
-    target.write("## 5. COMPILATION AND EXECUTION FOR X86 SERVERS\n")
+    target.write("## 5. COMPILATION AND EXECUTION\n")
     target.write("### Compiling for Application Emulation\n")
     target.write("As part of the capabilities available to an application developer, SDAccel includes environments to test the correctness of an application at both a software functional level and a hardware emulated level.\n")
     target.write("These modes, which are named sw_emu and hw_emu, allow the developer to profile and evaluate the performance of a design before compiling for board execution.\n")
@@ -172,9 +170,7 @@ def compilation(target,data):
     except:
         target.write('<sw_emu|hw_emu>')
     target.write('\n')
-    target.write("emconfigutil --xdevice '")
-    target.write(DSA)
-    target.write("' --nd 1\n")
+    target.write("emconfigutil --xdevice '" + DSA + " --nd 1\n")
     target.write("```\n")
     target.write("Once the environment has been configured, the application can be executed by\n")
     target.write("```\n")
@@ -187,9 +183,18 @@ def compilation(target,data):
     target.write("make all\n")
     target.write("```\n")
     target.write("The default target for the makefile is to compile for hardware. Therefore, setting the TARGETS option is not required.\n")
-    target.write("*NOTE:* Compilation for application execution in hardware generates custom logic to implement the functionality of the kernels in an application.")
-    target.write("It is typical for hardware compile times to range from 30 minutes to a couple of hours.\n")
-    target.write("### Executing the Application in the FPGA Accelerator Card\n")
+    target.write("*NOTE:* Compilation for application execution in hardware generates custom logic to implement the functionality of the kernels in an application.\n")
+    target.write("It is typical for hardware compile times to range from 30 minutes to a couple of hours.\n\n")
+
+def execution(target):
+    target.write("## 6. Execution in Cloud Environments\n")
+    target.write("FPGA acceleration boards have been deployed to the cloud. For information on how to execute the example within a specific cloud, take a look at the following guides.\n");
+    target.write("* [AWS F1 Application Execution on Xilinx Virtex UltraScale Devices] (Coming Soon)\n")
+    target.write("* [Nimbix Application Execution Xilinx Kintex UltraScale Devices]\n")
+    target.write("* [IBM SuperVessel Research Cloud on Xilinx Virtex Devices]\n")
+    target.write("\n")
+
+def nimbix(target):
     target.write("The developer instance hosting the SDAccel tools on Nimbix is not directly connected to an FPGA accelerator card.\n")
     target.write("FPGA Accelerator cards are available as part of the SDAccel Runtime application. There are several ways of executing an application on the available cards:\n\n")
     target.write("***Submit the application from the developer to runtime instances (recommended flow)***\n")
@@ -227,7 +232,7 @@ def compilation(target,data):
     return
 
 def power(target):
-    target.write("\r\n## 6. COMPILATION AND EXECUTION FOR IBM POWER SERVERS\n")
+    target.write("\n## 6. COMPILATION AND EXECUTION FOR IBM POWER SERVERS\n")
     target.write("View the SuperVessel [Walkthrough Video][] to become familiar with the environment.\n\n")
     target.write("Compile the application with the following command\n")
     target.write("```\n")
@@ -236,21 +241,21 @@ def power(target):
     return
 
 def support(target):
-    target.write("\r\n## 7. SUPPORT\n")
+    target.write("\n## 7. SUPPORT\n")
     target.write("For more information about SDAccel check the [SDAccel User Guides][]\n\n")
     target.write("For questions and to get help on this project or your own projects, visit the [SDAccel Forums][].\n\n")
     target.write("To execute this example using the SDAccel GUI, follow the setup instructions in [SDAccel GUI README][]\n\n")
     return
 
 def license(target):
-    target.write("\r\n## 8. LICENSE AND CONTRIBUTING TO THE REPOSITORY\n")
+    target.write("\n## 8. LICENSE AND CONTRIBUTING TO THE REPOSITORY\n")
     target.write("The source for this project is licensed under the [3-Clause BSD License][]\n\n")
     target.write("To contribute to this project, follow the guidelines in the [Repository Contribution README][]\n")
 
     return
 
 def ack(target,data):
-    target.write("\r\n## 9. ACKNOWLEDGEMENTS\n")
+    target.write("\n## 9. ACKNOWLEDGEMENTS\n")
     target.write("This example is written by developers at\n")
     for contributor in data["contributors"]:
         target.write("- [")
@@ -261,7 +266,7 @@ def ack(target,data):
     return
 
 def revision(target,data):
-    target.write("\r\n## 10. REVISION HISTORY\n")
+    target.write("\n## 10. REVISION HISTORY\n")
     target.write("Date | README Version | Description\n")
     target.write("-----|----------------|------------\n")
     for rev in data["revision"]:
@@ -293,27 +298,18 @@ def relativeTree(levels):
 
 def footer(target):
     relativeLevels = dirTraversal("LICENSE.txt")
-    s = relativeTree(relativeLevels)
-    licPath = s + 'LICENSE.txt'
-    contribPath = s + 'CONTRIBUTING.md'
-    nimbixPath = s + 'utility/nimbix/README.md'
-    guiPath = s + 'GUIREADME.md'
-    target.write("[3-Clause BSD License]:")
-    target.write(licPath)
-    target.write("\n")
+    root = relativeTree(relativeLevels)
+    target.write("[3-Clause BSD License]: " + root + "LICENSE.txt\n")
     target.write("[SDAccel Forums]: https://forums.xilinx.com/t5/SDAccel/bd-p/SDx\n")
     target.write("[SDAccel User Guides]: http://www.xilinx.com/support/documentation-navigation/development-tools/software-development/sdaccel.html?resultsTablePreSelect=documenttype:SeeAll#documentation\n")
     target.write("[Nimbix Getting Started Guide]: http://www.xilinx.com/support/documentation/sw_manuals/xilinx2016_2/ug1240-sdaccel-nimbix-getting-started.pdf\n")
     target.write("[Walkthrough Video]: http://bcove.me/6pp0o482\n")
-    target.write("[Nimbix Application Submission README]:")
-    target.write(nimbixPath)
-    target.write("\n")
-    target.write("[Repository Contribution README]:")
-    target.write(contribPath)
-    target.write("\n")
-    target.write("[SDaccel GUI README]:")
-    target.write(guiPath)
-    target.write("\n")
+    target.write("[Nimbix Application Submission README]: " + root + "utility/nimbix/README.md\n")
+    target.write("[Repository Contribution README]: " + root + "CONTRIBUTING.md\n")
+    target.write("[SDaccel GUI README]: " + root + "GUIREADME.md\n")
+    target.write("[AWS F1 Application Execution on Xilinx Virtex UltraScale Devices]: " + root + "README.md\n")
+    target.write("[Nimbix Application Execution on Xilinx Kintex UltraScale Devices]: " + root + "utility/nimbix/README.md\n")
+    target.write("[IBM SuperVessel Research Cloud on Xilinx Virtex Devices]: http://bcove.me/6pp0o482\n")
     return
 
 # Get the argument from the description
@@ -337,7 +333,9 @@ download(target)
 requirements(target,data)
 hierarchy(target)
 compilation(target,data)
-power(target)
+execution(target)
+#nimbix(target)
+#power(target)
 support(target)
 license(target)
 ack(target,data)
