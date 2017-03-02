@@ -218,7 +218,7 @@ void checkResults(dout_t *Dout_hw, data_t *Dout_sw) {
 		if (word_part != Dout_sw[i]) err_cnt++;
   }
 #else
-  for (int i=0; i<nofSample; i++) {
+	for (int i=0; i<nofSample; i++) {
 		i_word = i / nofPRNG;
 		i_part = i % nofPRNG;
 		word_whole = Dout_hw[i_word];
