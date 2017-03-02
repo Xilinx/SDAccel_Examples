@@ -1,0 +1,26 @@
+{
+    "example" : "pseudo random number generator",
+    "overview" : [
+        "This is an optimized implementation of the pseudo random number generator algorithm",
+        "The method used to generate a random number sequence is called complementary multiply with carry (CMWC)",
+        "targeting exection on an SDAccel support FPGA acceleration card"
+    ],
+    "board": ["Alpha Data ADM-PCIE-7V3", "Xilinx KU115", "Alpha Data ADM-PCIE-KU3"],
+    "xcl": true,
+    "em_cmd" : "./prng <number of blocks>",
+    "hw_cmd" : "../../utility/nimbix/nimbix-run.py -- ./prng <number of blocks",
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ],
+    "revision" : [
+        {
+            "date" : "FEB2017",
+            "version": "1.0",
+            "description": "Initial Xilinx Release"
+        }
+    ]
+
+}
