@@ -57,7 +57,7 @@ ifneq ($(filter $(3),$(call device_whitelist,$(1))),)
 
 $(XCLBIN_DIR)/$(1).$(2).$(call sanitize_dsa,$(3)).xclbin: $($(1)_SRCS) $($(1)_HDRS)
 	mkdir -p ${XCLBIN_DIR}
-	$(CLC) $(CLFLAGS) $($(1)_CLFLAGS) $($(call sanitize_dsa,$(3))_CLFLAGS) -o $$@ -t $(2) --xdevice $(3) $($(1)_SRCS)
+	$(CLC) $(CLFLAGS) $($(1)_CLFLAGS) $($(1)_$(call sanitize_dsa,$(3))_CLFLAGS) -o $$@ -t $(2) --xdevice $(3) $($(1)_SRCS)
 
 XCLBIN_GOALS+= $(XCLBIN_DIR)/$(1).$(2).$(call sanitize_dsa,$(3)).xclbin
 
