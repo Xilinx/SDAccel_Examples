@@ -10,6 +10,7 @@ DEVICES = {
     'AWS VU9P': ['TBD'],
     'Alpha Data ADM-PCIE-7V3':['xilinx:adm-pcie-7v3:1ddr:3.0','nx2'],
     'Alpha Data ADM-PCIE-KU3':['xilinx:adm-pcie-ku3:2ddr-xpr:3.2','nx1'],
+    'Alpha Data ADM-PCIE-8K5':['xilinx:adm-pcie-8k5:2ddr:3.2'],
     'Xilinx KU115':['xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2','nx3']
     }
 
@@ -170,7 +171,7 @@ def compilation(target,data):
     except:
         target.write('<sw_emu|hw_emu>')
     target.write('\n')
-    target.write("emconfigutil --xdevice '" + DSA + " --nd 1\n")
+    target.write("emconfigutil --xdevice '" + DSA + "' --nd 1\n")
     target.write("```\n")
     target.write("Once the environment has been configured, the application can be executed by\n")
     target.write("```\n")
