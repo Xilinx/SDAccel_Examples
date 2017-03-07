@@ -47,12 +47,15 @@ endef
 #  $(1)_SRCS - set of source files
 #  $(1)_HDRS - set of header files
 #  $(1)_CLFLAGS - set clflags per xclbin
+#  $(1)_DEVICES - set whitelist for devices
+#  $(1)_TARGETS - set whitelist for targets
 #  $(2) - compilation target (i.e. hw, hw_emu, sw_emu)
 #  $(3) - device name (i.e. xilinx:adm-pcie-ku3:1ddr:3.0)
 #  $(3)_CLFLAGS - set clflags per device
 
 define mk_xclbin
 
+ifneq ($(filter $(3),$(call target_whitelist,$(1))),)
 ifneq ($(filter $(3),$(call device_whitelist,$(1))),)
 
 $(XCLBIN_DIR)/$(1).$(2).$(call sanitize_dsa,$(3)).xclbin: $($(1)_SRCS) $($(1)_HDRS)
@@ -61,6 +64,7 @@ $(XCLBIN_DIR)/$(1).$(2).$(call sanitize_dsa,$(3)).xclbin: $($(1)_SRCS) $($(1)_HD
 
 XCLBIN_GOALS+= $(XCLBIN_DIR)/$(1).$(2).$(call sanitize_dsa,$(3)).xclbin
 
+endif
 endif
 
 endef
