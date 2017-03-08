@@ -55,7 +55,7 @@ endef
 
 define mk_xclbin
 
-ifneq ($(filter $(3),$(call target_whitelist,$(1))),)
+ifneq ($(filter $(2),$(call target_whitelist,$(1))),)
 ifneq ($(filter $(3),$(call device_whitelist,$(1))),)
 
 $(XCLBIN_DIR)/$(1).$(2).$(call sanitize_dsa,$(3)).xclbin: $($(1)_SRCS) $($(1)_HDRS)
