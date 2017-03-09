@@ -2,5 +2,7 @@
     "overview": [
         "Clock Frequency Optimization Examples"
     ],
-    "description": "Improving Kernel Clock Frequency through Optimized code."
+    "description": [
+        "Improving Kernel Clock Frequency through Optimized code."
+    ]
 }

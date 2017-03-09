@@ -3,16 +3,20 @@
     "overview": [
         "This is an optimized implementation of a watermarking application to add watermarking to images targeting execution on an SDAccel supported FPGA acceleration card."
     ],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
-    "xcl": false,
-    "em_cmd": "./watermark data/inputImage.bmp ./xclbin/krnl_watermark.<emulation type>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin",
-    "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./watermark data/inputImage.bmp ./xclbin/krnl_watermark.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin",
+    "board": ["Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
+    "em_cmd": "./watermark data/inputImage.bmp ./data/golden.bmp",
+    "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./watermark data/inputImage.bmp ./data/golden.bmp",
     "perf_fields": ["Board", "Image Size", "Frames / Second"],
     "performance": [
         {
-            "system": "Alpha Data ADM-PCIE-7V3",
-            "constraint": "64 x 64",
-            "metric": "6,134"
+            "system": "Alpha Data ADM-PCIE-KU3",
+            "constraint": "1024 x 768",
+            "metric": "2,658"
+        },
+        {
+            "system": "Xilinx KU115",
+            "constraint": "1024 x 768",
+            "metric": "3526"
         }
     ],
     "contributors": [
@@ -36,6 +40,11 @@
             "date": "DEC2016",
             "version": "3.0",
             "description": "Update for SDAccel 2016.3"
+        },
+        {
+            "date": "MAR2017",
+            "version": "4.0",
+            "description": "Optimized Kernel using uint16 datawidth. Updated Host code to use xcl_wrapper APIs"
         }
     ]
 }

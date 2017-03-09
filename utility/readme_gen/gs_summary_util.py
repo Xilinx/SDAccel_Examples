@@ -46,7 +46,7 @@ def gen_category(dir ,outfile, subdircount):
     outfile.write("|")
     desc = open(testcase,'r')
     data = json.load(desc)
-    outfile.write(json.dumps(data["overview"]))
+    outfile.write(('\n').join(data["overview"]))
     outfile.write("|")
     if 'key_concepts' in data:
         outfile.write("__Key__ __Concepts__")
@@ -71,9 +71,11 @@ def genReadMe(dir):
   desc = open(os.path.join(dir,"summary.json"),'r')
   data = json.load(desc)
   outfile = open(os.path.join(dir, "README.md"), "w")
-  outfile.write(data["overview"] + "\n")
+  outfile.write(('\n').join((data["overview"])))
+  outfile.write("\n")
   outfile.write("==================================\n")
-  outfile.write(data["description"]+"\n")
+  outfile.write(('\n').join((data["description"])))
+  outfile.write("\n")
   if 'subdirs' in data:
     subDirs = data['subdirs'];
   else:
@@ -89,7 +91,9 @@ def genReadMe(dir):
         subDirDesc = open(os.path.join(subDir,"summary.json"),'r')
         subDirData = json.load(subDirDesc)
         outfile.write(str(counter));
-        outfile.write(" | [" +subDir +"][]      |" + subDirData["description"] + "\n")
+        outfile.write(" | [" +subDir +"][]      |")
+        outfile.write(('\n').join(subDirData["description"]))
+        outfile.write("\n")
         counter = counter + 1;
       
   outfile.write("\n __Examples Table__ \n")
@@ -109,9 +113,11 @@ def genReadMe2(dir):
   desc = open(os.path.join(dir,"summary.json"),'r')
   data = json.load(desc)
   outfile = open(os.path.join(dir, "README.md"), "w")
-  outfile.write(data["overview"] + "\n")
+  outfile.write(('\n').join((data["overview"])))
+  outfile.write("\n")
   outfile.write("==================================\n")
-  outfile.write(data["description"]+"\n")
+  outfile.write(('\n').join((data["description"])))
+  outfile.write("\n")
   outfile.write("\n __Examples Table__ \n")
   table_header = """
 Example        | Description           | Key Concepts / Keywords 

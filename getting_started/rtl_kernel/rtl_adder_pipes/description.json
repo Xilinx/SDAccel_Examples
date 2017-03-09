@@ -1,0 +1,24 @@
+{
+    "example": "Adder With Pipes",
+    "overview": [
+        "This example shows an adder with pipes using 3 RTL kernels."
+    ],
+    "key_concepts": [ "RTL Kernel", "Multiple RTL Kernels"],
+    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
+    "targets": ["hw", "hw_emu"],
+    "em_cmd": "./host",
+    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ],
+    "revision" : [
+        {
+            "date" : "JAN2017",
+            "version": "1.0",
+            "description": "Initial Xilinx Release"
+        }
+    ]
+}

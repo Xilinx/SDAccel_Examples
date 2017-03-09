@@ -21,7 +21,8 @@ This is an optimized implementation of a watermarking application to add waterma
 ### PERFORMANCE
 Board|Image Size|Frames / Second
 ----|-----|-----
-Alpha Data ADM-PCIE-7V3|64 x 64|6,134
+Alpha Data ADM-PCIE-KU3|1024 x 768|2,658
+Xilinx KU115|1024 x 768|3526
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
 ```
@@ -32,8 +33,8 @@ where examples is the name of the directory where the repository will be stored 
 ## 3. SOFTWARE AND SYSTEM REQUIREMENTS
 Board | Device Name | Software Version
 ------|-------------|-----------------
-Alpha Data ADM-PCIE-7V3|xilinx:adm-pcie-7v3:1ddr:3.0|SDAccel 2016.3
 Alpha Data ADM-PCIE-KU3|xilinx:adm-pcie-ku3:2ddr-xpr:3.2|SDAccel 2016.3
+Xilinx KU115|xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2|SDAccel 2016.3
 
 
 Board targeted by default = ***xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2***
@@ -51,6 +52,7 @@ Application code is located in the src directory. Accelerator binary files will 
 .gitignore
 Makefile
 README.md
+data/golden.bmp
 data/inputImage.bmp
 data/inputImage128x128.bmp
 description.json
@@ -95,12 +97,12 @@ An emulated application can also be executed directly from the command line with
 To manually configure the environment to run the application, set the following
 ```
 export LD_LIBRARY_PATH=$XILINX_SDX/runtime/lib/x86_64/:$LD_LIBRARY_PATH
-export XCL_EMULATION_MODE=true
+export XCL_EMULATION_MODE=<sw_emu|hw_emu>
 emconfigutil --xdevice 'xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./watermark data/inputImage.bmp ./xclbin/krnl_watermark.<emulation type>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin
+./watermark data/inputImage.bmp ./data/golden.bmp
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card
@@ -142,6 +144,7 @@ Date | README Version | Description
 FEB2016|1.0|Initial Xilinx Release
 JUL2016|2.0|Conversion to Makefile based compilation
 DEC2016|3.0|Update for SDAccel 2016.3
+MAR2017|4.0|Optimized Kernel using uint16 datawidth. Updated Host code to use xcl_wrapper APIs
 
 [3-Clause BSD License]: ../../LICENSE.txt
 [SDAccel Forums]: https://forums.xilinx.com/t5/SDAccel/bd-p/SDx

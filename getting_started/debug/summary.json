@@ -2,5 +2,7 @@
     "overview": [
         "Debug/Profile Examples"
     ],
-    "description": "Debugging and Profiling of Kernel."
+    "description": [
+        "Debugging and Profiling of Kernel."
+    ]
 }
