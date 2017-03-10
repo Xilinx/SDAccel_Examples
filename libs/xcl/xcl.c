@@ -82,7 +82,7 @@ static int load_file_to_memory(const char *filename, char **result) {
 
 char* xcl_create_and_set(const char* str) {
 	size_t len = strlen(str);
-	char *ret = (char*) malloc(sizeof(char)*len);
+	char *ret = (char*) malloc(sizeof(char)*(len+1));
 	if (ret == NULL) {
 		printf("ERROR: Out of Memory\n");
 		exit(EXIT_FAILURE);
@@ -92,7 +92,7 @@ char* xcl_create_and_set(const char* str) {
 	return ret;
 }
 
-xcl_world xcl_world_single() {
+xcl_world xcl_world_single_vendor(const char* vendor_name) {
 	int err;
 	xcl_world world;
 	cl_uint num_platforms;
@@ -100,6 +100,7 @@ xcl_world xcl_world_single() {
 	char *xcl_mode = getenv("XCL_EMULATION_MODE");
 	char *xcl_target = getenv("XCL_TARGET");
 
+	/* Fall back mode if XCL_EMULATION_MODE is not set is "hw" */
 	if(xcl_mode == NULL) {
 		world.mode = xcl_create_and_set("hw");
 	} else {
@@ -119,6 +120,7 @@ xcl_world xcl_world_single() {
 			world.mode = xcl_create_and_set(xcl_mode);
 		}
 
+		/* TODO: Remove once 2016.4 is released */
 		err = setenv("XCL_EMULATION_MODE", "true", 1);
 		if(err != 0) {
 			printf("Error: cannot set XCL_EMULATION_MODE\n");
@@ -168,7 +170,7 @@ xcl_world xcl_world_single() {
 			exit(EXIT_FAILURE);
 		}
 
-		if (!strcmp(platform_name, "Xilinx")) {
+		if (!strcmp(platform_name, vendor_name)) {
 			free(platform_name);
 			world.platform_id = platform_ids[i];
 			break;
@@ -232,6 +234,10 @@ xcl_world xcl_world_single() {
 	return world;
 }
 
+xcl_world xcl_world_single() {
+	return xcl_world_single_vendor("Xilinx");
+}
+
 void xcl_release_world(xcl_world world) {
 	clReleaseCommandQueue(world.command_queue);
 	clReleaseContext(world.context);
@@ -244,6 +250,8 @@ cl_program xcl_import_binary_file(xcl_world world,
 ) {
 	int err;
 
+	printf("INFO: Importing %s\n", xclbin_file_name);
+
 	if(access(xclbin_file_name, R_OK) != 0) {
 		printf("ERROR: %s xclbin not available please build\n", xclbin_file_name);
 		exit(EXIT_FAILURE);
@@ -251,6 +259,7 @@ cl_program xcl_import_binary_file(xcl_world world,
 
 	char *krnl_bin;
 	const size_t krnl_size = load_file_to_memory(xclbin_file_name, &krnl_bin);
+	printf("INFO: Loaded file\n");
 
 	cl_program program = clCreateProgramWithBinary(world.context, 1,
 	                                    &world.device_id, &krnl_size,
@@ -263,6 +272,8 @@ cl_program xcl_import_binary_file(xcl_world world,
 		exit(EXIT_FAILURE);
 	}
 
+	printf("INFO: Created Binary\n");
+
 	err = clBuildProgram(program, 0, NULL, NULL, NULL, NULL);
 	if (err != CL_SUCCESS) {
 		size_t len;
@@ -274,6 +285,8 @@ cl_program xcl_import_binary_file(xcl_world world,
 		printf("Error: Failed to build program executable!\n");
 		exit(EXIT_FAILURE);
 	}
+
+	printf("INFO: Built Program\n");
 
 	free(krnl_bin);
 
@@ -312,8 +325,27 @@ cl_program xcl_import_binary(xcl_world world,
         }
     }
 
+    char *device_name_versionless = strdup(world.device_name);
+    if (device_name_versionless == NULL) {
+        printf("Error: Out of Memory\n");
+        exit(EXIT_FAILURE);
+    }
+
+    unsigned short colons = 0;
+    for (char *c = device_name_versionless; *c != 0; c++) {
+        if (*c == ':') {
+            colons++;
+            *c = '_';
+        }
+        /* Zero out version area */
+        if (colons == 3) {
+            *c = '\0';
+        }
+    }
+
     const char *file_patterns[] = {
         "%1$s/%2$s.%3$s.%4$s.xclbin",     // <kernel>.<target>.<device>.xclbin
+        "%1$s/%2$s.%3$s.%5$s.xclbin",     // <kernel>.<target>.<device_versionless>.xclbin
         "%1$s/binary_container_1.xclbin", // default for gui projects
         "%1$s/%2$s.xclbin",               // <kernel>.xclbin
         NULL
@@ -327,7 +359,7 @@ cl_program xcl_import_binary(xcl_world world,
             for (const char **pattern = file_patterns; *pattern != NULL; pattern++) {
                 char file_name[PATH_MAX];
                 memset(file_name, 0, PATH_MAX);
-                snprintf(file_name, PATH_MAX, *pattern, *dir, xclbin_name, world.mode, device_name);
+                snprintf(file_name, PATH_MAX, *pattern, *dir, xclbin_name, world.mode, device_name, device_name_versionless);
                 if (stat(file_name, &sb) == 0 && S_ISREG(sb.st_mode)) {
                     world.bindir = strdup(*dir);
                     if (world.bindir == NULL) {
@@ -344,7 +376,7 @@ cl_program xcl_import_binary(xcl_world world,
             }
         }
     }
-	// if no xclbin found, preferred path for error message from xcl_import_binary_file()
+    // if no xclbin found, preferred path for error message from xcl_import_binary_file()
     if (*xclbin_file_name == '\0') {
         snprintf(xclbin_file_name, PATH_MAX, file_patterns[0], *search_dirs, xclbin_name, world.mode, device_name);
     }
@@ -404,6 +436,16 @@ cl_kernel xcl_get_kernel(cl_program program,
 	return kernel;
 }
 
+void xcl_free_kernel(cl_kernel krnl) {
+	int err = clReleaseKernel(krnl);
+
+	if (err != CL_SUCCESS) {
+		printf("Error: Could not free kernel\n");
+		exit(EXIT_FAILURE);
+	}
+}
+
+
 void xcl_set_kernel_arg(cl_kernel krnl,
                         cl_uint num,
                         size_t size,
@@ -426,6 +468,15 @@ cl_mem xcl_malloc(xcl_world world, cl_mem_flags flags, size_t size) {
 	}
 
 	return mem;
+}
+
+void xcl_free(cl_mem mem) {
+	int err = clReleaseMemObject(mem);
+
+	if (err != CL_SUCCESS) {
+		printf("Error: Failed to free device memory!\n");
+		exit(EXIT_FAILURE);
+	}
 }
 
 void xcl_memcpy_to_device(xcl_world world, cl_mem dest, void* src,
