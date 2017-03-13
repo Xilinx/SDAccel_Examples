@@ -55,7 +55,7 @@ int main(int argc, char** argv)
     DTYPE* sw_c = (DTYPE*)malloc(vector_size_bytes);// results returned from software
 
     // Create the test data and Software Result 
-    DTYPE alpha = 3;
+    int alpha = 3;
     for(int i = 0; i < BLOCK_SIZE; i++) {
       a[i] = i;
       c[i] = 0;
@@ -78,7 +78,7 @@ int main(int argc, char** argv)
     //Set the Kernel Arguments
     xcl_set_kernel_arg(krnl_window_array_2d,0,sizeof(cl_mem),&buffer_a);
     xcl_set_kernel_arg(krnl_window_array_2d,1,sizeof(cl_mem),&buffer_c);
-    xcl_set_kernel_arg(krnl_window_array_2d,2,sizeof(DTYPE),&alpha);
+    xcl_set_kernel_arg(krnl_window_array_2d,2,sizeof(int),&alpha);
 
     //Launch the Kernel
     xcl_run_kernel3d(world,krnl_window_array_2d,1,1,1);
