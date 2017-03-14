@@ -1,0 +1,24 @@
+{
+    "example": "Vector Addition with 2 Kernel Clocks",
+    "overview": [
+        "This example shows vector addition with 2 kernel clocks using RTL Kernel. "
+    ],
+    "key_concepts": [ "RTL Kernel"],
+    "board": ["Xilinx KU115"],
+    "targets": ["hw", "hw_emu"],
+    "em_cmd": "./host",
+    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ],
+    "revision" : [
+        {
+            "date" : "JAN2017",
+            "version": "1.0",
+            "description": "Initial Xilinx Release"
+        }
+    ]
+}

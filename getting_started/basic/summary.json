@@ -1,4 +1,8 @@
 {
-    "overview": "Miscellaneous Examples",
-    "description": "OpenCL miscellaneous Examples" 
+    "overview": [
+        "Miscellaneous Examples"
+    ],
+    "description": [
+        "OpenCL miscellaneous Examples"
+    ]
 }

@@ -46,7 +46,7 @@ typedef struct {
  *
  * Description:
  *   Setup an xcl_world for the case when there is a single
- *   device in the system.
+ *   Xilinx device in the system.
  *
  * Inputs:
  *
@@ -70,17 +70,34 @@ void xcl_release_world(xcl_world world);
  *
  * Description:
  *   Import precompiled program (as commonly created by the Xilinx OpenCL
- *   flow).
+ *   flow). Using search path below.
+ *
+ *   Search Path:
+ *      $XCL_BINDIR/<name>.<target>.<device>.xclbin
+ *      $XCL_BINDIR/<name>.<target>.<device_versionless>.xclbin
+ *      $XCL_BINDIR/binary_container_1.xclbin
+ *      $XCL_BINDIR/<name>.xclbin
+ *      xclbin/<name>.<target>.<device>.xclbin
+ *      xclbin/<name>.<target>.<device_versionless>.xclbin
+ *      xclbin/binary_container_1.xclbin
+ *      xclbin/<name>.xclbin
+ *      ../<name>.<target>.<device>.xclbin
+ *      ../<name>.<target>.<device_versionless>.xclbin
+ *      ../binary_container_1.xclbin
+ *      ../<name>.xclbin
+ *      ./<name>.<target>.<device>.xclbin
+ *      ./<name>.<target>.<device_versionless>.xclbin
+ *      ./binary_container_1.xclbin
+ *      ./<name>.xclbin
  *
  * Inputs:
  *   world - xcl_world to import into.
- *   xclbin_file - base name of the xclbin to import.
- *   krnl_name - name of kernel.
+ *   xclbin_name - base name of the xclbin to import.
  *
  * Returns:
- *   An opencl program object that was created from krnl_name file.
+ *   An opencl program object that was created from xclbin_name file.
  */
-cl_program xcl_import_binary(xcl_world world, const char *xclbin_file);
+cl_program xcl_import_binary(xcl_world world, const char *xclbin_name);
 
 /* xcl_import_binary_file
  *
@@ -155,10 +172,10 @@ cl_kernel xcl_create_kernel(cl_program program, const char *krnl_name);
  */
 void xcl_set_kernel_arg(cl_kernel krnl, cl_uint num, size_t size, const void *ptr);
 
-/* xcl_malloc
+/* xcl_malloc/free
  *
  * Description:
- *   Allocate memory for a buffer on the FPGA device.  Exit program on
+ *   Allocate/Free memory for a buffer on the FPGA device.  Exit program on
  *   error.
  *
  * Inputs:
@@ -167,6 +184,7 @@ void xcl_set_kernel_arg(cl_kernel krnl, cl_uint num, size_t size, const void *pt
  *   size  - buffer size in bytes (like malloc).
  */
 cl_mem xcl_malloc(xcl_world world, cl_mem_flags flags, size_t size);
+void xcl_free(cl_mem mem);
 
 /* xcl_memcpy_to_device/xcl_memcpy_from_device
  *
