@@ -97,7 +97,6 @@ try {
 
 	stage("checkout") {
 		checkout scm
-		step([$class: 'GitHubCommitStatusSetter'])
 	}
 
 	stage('pre-check') {
