@@ -6,6 +6,9 @@ artifactNumToKeepStr: '', daysToKeepStr: '30', numToKeepStr: '5')), [$class:
 'https://gitenterprise.xilinx.com/SDx-Hub/apps/'], pipelineTriggers([[$class:
 'GitHubPushTrigger']])])
 
+// Days between clean builds
+days = 10
+
 devices = ''
 devices += ' xilinx:adm-pcie-7v3:1ddr:3.0'
 devices += ' xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2'
@@ -87,16 +90,30 @@ timestamps {
 // Always build on the same host so that the workspace is reused
 node('rhel6 && xsjrdevl && xsjrdevl110') {
 try {
-	Calendar now = Calendar.getInstance();
-
-	if (now.get(Calendar.DAY_OF_WEEK) == Calendar.TUESDAY) {
-		stage('clean') {
-			sh 'echo "FIXME: Clean not implemented"'
-		}
-	}
 
 	stage("checkout") {
 		checkout scm
+	}
+
+	try {
+		lastclean = readFile('lastclean.dat')
+	} catch (e) {
+		lastclean = "01/01/1970"
+	} finally {
+		lastcleanDate = new Date(lastclean)
+		echo "Last Clean Build on ${lastcleanDate}"
+	}
+        
+	def date = new Date()
+	echo "Current Build Date is ${date}"
+
+	if(date > lastcleanDate + days) {
+		echo "Build too old reseting build area"
+		stage("clean") {
+			sh 'git clean -xfd'
+			// After clean write new lastclean Date to lastclean.dat
+			writeFile(file: 'lastclean.dat', text: "${date}")
+		}
 	}
 
 	stage('pre-check') {
