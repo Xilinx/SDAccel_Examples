@@ -8,7 +8,15 @@
     "board": ["Alpha Data ADM-PCIE-7V3", "Xilinx KU115", "Alpha Data ADM-PCIE-KU3"],
     "xcl": true,
     "em_cmd" : "./prng <number of blocks>",
-    "hw_cmd" : "../../utility/nimbix/nimbix-run.py -- ./prng <number of blocks",
+    "hw_cmd" : "../../utility/nimbix/nimbix-run.py -- ./prng <number of blocks>",
+	 "perf_fields" : ["Board", "Total Number of Samples", "Kernel Duration"],
+	 "performance" : [
+		  {
+		      "system" : "Alpha Data ADM-PCIE-KU3",
+		      "constraint" : "16777216",
+		      "metric" : "59.1ms"
+		  }
+	 ],
     "contributors" : [
         {
             "group": "Xilinx",
@@ -22,5 +30,4 @@
             "description": "Initial Xilinx Release"
         }
     ]
-
 }
