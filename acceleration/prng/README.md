@@ -20,6 +20,10 @@ This is an optimized implementation of the pseudo random number generator algori
 The method used to generate a random number sequence is called complementary multiply with carry (CMWC)
 targeting exection on an SDAccel support FPGA acceleration card
 
+### PERFORMANCE
+Board|Total Number of Samples|Kernel Duration
+----|-----|-----
+Alpha Data ADM-PCIE-KU3|16777216|59.1ms
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
 ```
