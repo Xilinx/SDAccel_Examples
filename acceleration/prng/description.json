@@ -9,7 +9,7 @@
     "xcl": true,
     "em_cmd" : "./prng <number of blocks>",
     "hw_cmd" : "../../utility/nimbix/nimbix-run.py -- ./prng <number of blocks>",
-	 "perf_fields" : ["Board", "Total Number of Samples", "Kernel Duration"],
+    "perf_fields" : ["Board", "Total Number of Samples", "Kernel Duration"],
     "performance" : [
 		  {
 		      "system" : "Alpha Data ADM-PCIE-KU3",
