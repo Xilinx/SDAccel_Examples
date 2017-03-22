@@ -8,6 +8,15 @@
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
     "em_cmd": "./loop_pipeline",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./loop_pipeline",
+    "libs": [
+        "xcl"
+    ], 
+    "accelerators": [
+        {
+            "name": "vector_addition", 
+            "location": "src/vector_addition.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

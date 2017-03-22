@@ -21,6 +21,16 @@
         }
 
     ],
+    "libs": [
+        "opencv", 
+        "xcl"
+    ], 
+    "accelerators": [
+        {
+            "name": "krnl_convolve", 
+            "location": "src/krnl_convolve.cl"
+        }
+    ],
     "contributors": [
         {
             "group": "Xilinx",

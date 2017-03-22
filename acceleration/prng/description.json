@@ -17,6 +17,15 @@
             "metric" : "59.1ms"
         }
     ],
+    "libs" : [
+        "xcl"
+    ],
+    "accelerators": [
+        {
+            "name": "dma", 
+            "location": "src/dma.cpp"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

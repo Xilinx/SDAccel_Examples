@@ -16,6 +16,16 @@
             "metric": "22,222"
         }
     ],
+    "libs": [
+        "oclHelper", 
+        "bitmap"
+    ], 
+    "accelerators": [
+        {
+            "name": "krnl_median", 
+            "location": "src/krnl_medianFilter.cl"
+        }
+    ],
     "contributors": [
         {
             "group": "Xilinx",

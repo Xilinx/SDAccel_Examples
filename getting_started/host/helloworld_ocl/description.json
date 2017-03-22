@@ -8,6 +8,15 @@
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
     "em_cmd": "./helloworld vector_addition",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./helloworld vector_addition",
+    "libs": [
+        "xcl"
+    ], 
+    "accelerators": [
+        {
+            "name": "vector_addition", 
+            "location": "src/vector_addition.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

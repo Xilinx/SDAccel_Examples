@@ -8,6 +8,16 @@
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
     "em_cmd": "./host xclbin",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host xclbin",
+    "libs": [
+        "xcl", 
+        "bitmap"
+    ], 
+    "accelerators": [
+        {
+            "name": "sketch", 
+            "location": ""
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",
@@ -20,5 +30,7 @@
             "version": "1.0",
             "description": "Initial Xilinx Release"
         }
-    ]
+    ],
+    "match_makefile": "false",
+    "sdx_gui": "false"
 }

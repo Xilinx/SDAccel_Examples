@@ -19,6 +19,16 @@
             "metric": "3526"
         }
     ],
+    "libs": [
+        "xcl", 
+        "bitmap"
+    ], 
+    "accelerators": [
+        {
+            "name": "apply_watermark", 
+            "location": "src/krnl_watermarking.cl"
+        }
+    ],
     "contributors": [
         {
             "group": "Xilinx",

@@ -8,6 +8,15 @@
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
+    "libs": [
+        "xcl"
+    ], 
+    "accelerators": [
+        {
+            "name": "adder", 
+            "location": "src/adder.cpp"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

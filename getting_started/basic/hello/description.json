@@ -6,6 +6,15 @@
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3", "Xilinx KU115"],
     "em_cmd": "./hello",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./hello",
+    "libs": [
+        "xcl"
+    ], 
+    "accelerators": [
+        {
+            "name": "krnl_hello", 
+            "location": "src/krnl_hello.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

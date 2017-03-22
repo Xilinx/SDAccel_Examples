@@ -10,6 +10,15 @@
     "dsa": "xilinx:adm-pcie-ku3:2ddr:3.2",
     "em_cmd": "./host xclbin",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host xclbin",
+    "libs": [
+        "xcl"
+    ], 
+    "accelerators": [
+        {
+            "name": "mmult", 
+            "location": "src/mmult.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

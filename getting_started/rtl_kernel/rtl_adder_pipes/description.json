@@ -8,6 +8,9 @@
     "targets": ["hw", "hw_emu"],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
+    "libs": [
+        "xcl"
+    ], 
     "contributors" : [
         {
             "group": "Xilinx",
@@ -20,5 +23,7 @@
             "version": "1.0",
             "description": "Initial Xilinx Release"
         }
-    ]
+    ],
+    "match_makefile": "false",
+    "sdx_gui": false
 }

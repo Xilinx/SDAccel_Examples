@@ -21,5 +21,7 @@
             "version": "1.0",
             "description": "Initial Xilinx Release"
         }
-    ]
+    ],
+    "match_makefile": "false",
+    "sdx_gui": "false"
 }

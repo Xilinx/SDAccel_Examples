@@ -8,6 +8,15 @@
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
     "em_cmd": "./loop_fusion",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./loop_fusion",
+    "libs": [
+        "xcl"
+    ], 
+    "accelerators": [
+        {
+            "name": "nearest_neighbor", 
+            "location": "src/nearest_neighbor.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

@@ -9,6 +9,16 @@
     "em_cmd": "./affine ./xclbin/krnl_affine.<emulation mode>.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./affine ./xclbin/krnl_affine.hw.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
     "perf_fields":["Task","Xilinx Execution Time (in ns)", "GTX 780 Execution Time (in ns)"],
+    "libs": [
+        "oclHelper", 
+        "bitmap"
+    ], 
+    "accelerators": [
+        {
+            "name": "krnl_affine", 
+            "location": "src/krnl_affine.cl"
+        }
+    ],
     "performance": [
         {
             "system": "Host to Device",

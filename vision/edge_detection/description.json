@@ -7,6 +7,16 @@
     "opencv": true,
     "em_cmd": "./edge data/input/eiffel.bmp",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./edge data/input/eiffel.bmp",
+    "libs": [
+        "opencv", 
+        "xcl"
+    ], 
+    "accelerators": [
+        {
+            "name": "krnl_edge", 
+            "location": "src/krnl_sobelfilter.cl"
+        }
+    ],
     "contributors": [
         {
             "group": "Xilinx",

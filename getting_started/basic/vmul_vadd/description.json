@@ -8,6 +8,21 @@
     "board": ["Alpha Data ADM-PCIE-7V3"],
     "em_cmd" : "./vaddvmul",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./vaddvmul",
+    "libs": [
+        "xcl"
+    ], 
+    "accelerators": [
+        {
+            "name": "krnl_vmul", 
+            "location": "src/krnl_vmul.cl", 
+            "container": "krnl_vmul"
+        }, 
+        {
+            "name": "krnl_vadd", 
+            "location": "src/krnl_vadd.cl", 
+            "container": "krnl_vadd"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

@@ -8,6 +8,16 @@
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
     "em_cmd": "./concurrent_execution",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./concurrent_execution",
+    "libs": [
+        "oclHelper", 
+        "xcl"
+    ], 
+    "accelerators": [
+        {
+            "name": "matrix_ops", 
+            "location": "src/matrix_ops.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

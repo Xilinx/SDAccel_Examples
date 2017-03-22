@@ -10,6 +10,16 @@
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
+    "libs": [
+        "xcl", 
+        "bitmap"
+    ], 
+    "accelerators": [
+        {
+            "name": "apply_watermark", 
+            "location": "src/apply_watermark.cpp"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

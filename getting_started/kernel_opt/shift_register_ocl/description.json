@@ -8,6 +8,15 @@
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
     "em_cmd": "./shift_register",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./shift_register",
+    "libs": [
+        "xcl"
+    ], 
+    "accelerators": [
+        {
+            "name": "fir", 
+            "location": "src/fir.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

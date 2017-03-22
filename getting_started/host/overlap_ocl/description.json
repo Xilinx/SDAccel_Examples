@@ -8,6 +8,16 @@
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
     "em_cmd": "./overlap",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./overlap",
+    "libs": [
+        "oclHelper", 
+        "xcl"
+    ], 
+    "accelerators": [
+        {
+            "name": "vector_addition", 
+            "location": "src/vector_addition.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

@@ -8,6 +8,16 @@
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
     "em_cmd": "./host ./data/input.bmp",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host ./data/input.bmp",
+    "libs": [
+        "xcl", 
+        "bitmap"
+    ], 
+    "accelerators": [
+        {
+            "name": "rgb_to_hsv", 
+            "location": "src/rgb_to_hsv.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

@@ -8,6 +8,15 @@
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
     "em_cmd": "./multiple_devices xclbin/vector_addition.<emulation target>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./multiple_devices xclbin/vector_addition.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin",
+    "libs": [
+        "xcl"
+    ], 
+    "accelerators": [
+        {
+            "name": "vector_addition", 
+            "location": "src/vector_addition.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

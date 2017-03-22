@@ -7,6 +7,18 @@
     "em_cmd" : "./aes -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:3.1' -k ./xclbin/krnl_aes.<emulation flow>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin -b  data/input.bmp",
     "xcl": false,
     "hw_cmd" : "../../utility/nimbix/nimbix-run.py -- ./aes -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:3.1' -k ./xclbin/krnl_aes.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin -b data/input.bmp",
+    "libs": [
+        "logger", 
+        "cmdparser", 
+        "xcl", 
+        "simplebmp"
+    ], 
+    "accelerators": [
+        {
+            "name": "krnl_aes", 
+            "location": "src/krnl_aes.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",
