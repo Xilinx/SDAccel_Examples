@@ -71,6 +71,7 @@ module add sdaccel/${version}_daily
 module add opencv/vivado_hls
 
 module add proxy
+module add lftp
 
 cd ${dir}
 
