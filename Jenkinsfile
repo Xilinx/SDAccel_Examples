@@ -55,7 +55,10 @@ EOF
 
 """
 		retry(3) {
-			sh """#!/bin/bash -e
+			/* Node is here to prevent too much strain on Nimbix by rate limiting
+			 * to the number of job slots */
+			node("rhel6 && xsjrdevl") {
+				sh """#!/bin/bash -e
 
 cd ${workdir}
 
@@ -82,6 +85,7 @@ export PYTHONUNBUFFERED=true
 make -k TARGETS=${target} DEVICES=\"${devices}\" check
 
 """
+			}
 		}
 	}
 }
@@ -154,14 +158,16 @@ module add proxy
 	}
 
 	stage('hw') {
-		def hwSteps = [:]
+		lock("only_one_hw_stage_at_a_time") {
+			def hwSteps = [:]
 
-		for(int i = 0; i < examples.size(); i++) {
-			name = "${examples[i]}-hw"
-			hwSteps[name] = buildExample('hw', examples[i], devices, workdir)
+			for(int i = 0; i < examples.size(); i++) {
+				name = "${examples[i]}-hw"
+				hwSteps[name] = buildExample('hw', examples[i], devices, workdir)
+			}
+
+			parallel hwSteps
 		}
-
-		parallel hwSteps
 	}
 
 } catch (e) {
