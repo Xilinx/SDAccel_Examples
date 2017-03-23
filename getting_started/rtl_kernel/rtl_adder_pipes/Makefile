@@ -49,7 +49,7 @@ adder_CLFLAGS= -l\
 	   -k $(input_KERNEL)  --nk $(input_KERNEL):1:$(input_KERNEL)_cu0 \
 	   -k $(adder_KERNEL)  --nk $(adder_KERNEL):1:$(adder_KERNEL)_cu0 \
 	   -k $(output_KERNEL) --nk $(output_KERNEL):1:$(output_KERNEL)_cu0   
-adder_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.2
+adder_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 adder_TARGETS=hw_emu hw
 
 EXES=host
@@ -70,5 +70,5 @@ $(warning WARNING:RTL Kernels do not support sw_emu TARGETS. Please use hw_emu f
 endif
 
 #Changing Default device for this example
-DEVICES:=xilinx:adm-pcie-ku3:2ddr-xpr:3.2
+DEVICES:=xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 include $(COMMON_REPO)/utility/rules.mk

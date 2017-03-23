@@ -21,7 +21,7 @@ else
 endif
 
 nearest_CLFLAGS=-k nearest
-nearest_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.2
+nearest_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 
 EXES=host
 XCLBINS=nearest
@@ -33,6 +33,6 @@ check_DEVICES=$(nearest_DEVICES)
 
 CHECKS=check
 
-DEVICES:=xilinx:adm-pcie-ku3:2ddr-xpr:3.2
+DEVICES:=xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 
 include ${COMMON_REPO}/utility/rules.mk

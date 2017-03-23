@@ -28,7 +28,7 @@ host_LDFLAGS=$(opencl_LDFLAGS)
 # Kernel
 vadd_SRCS=$(vadd_KERNEL).xo
 vadd_CLFLAGS= -l -k $(vadd_KERNEL) --nk $(vadd_KERNEL):$(vadd_CU) --kernel_frequency "0:150|1:250"
-vadd_DEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2 
+vadd_DEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3 
 vadd_TARGETS=hw hw_emu
 
 EXES=host
@@ -48,5 +48,5 @@ ifneq (,$(findstring sw_emu,$(TARGETS)))
 $(warning WARNING:RTL Kernels do not support sw_emu TARGETS. Please use hw_emu for running RTL kernel Emulation)
 endif
 
-DEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2 
+DEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3 
 include $(COMMON_REPO)/utility/rules.mk

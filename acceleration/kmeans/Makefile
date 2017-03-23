@@ -44,7 +44,7 @@ host_kmeans_LDFLAGS=$(opencl_LDFLAGS) -lxilinxopencl -lpthread -lrt
 #Kmeans Kernel
 kmeans_SRCS=./src/kmeans.cl
 kmeans_CLFLAGS= --nk kmeans:$(COMPUTE_UNITS) -D PARALLEL_POINTS=$(PARALLEL_POINTS) -D PARALLEL_FEATURES=$(PARALLEL_FEATURES) -D USE_DATA_TYPE=$(DATATYPE_ID)
-kmeans_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.2 
+kmeans_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.3 
 
 EXES=host_kmeans
 XCLBINS=kmeans
@@ -58,6 +58,6 @@ check_DEVICES=$(kmeans_DEVICES)
 
 CHECKS=check
 
-DEVICES:=xilinx:adm-pcie-ku3:2ddr-xpr:3.2
+DEVICES:=xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 include $(COMMON_REPO)/utility/rules.mk
 

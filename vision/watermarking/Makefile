@@ -16,7 +16,7 @@ watermark_LDFLAGS=$(opencl_LDFLAGS)
 # Kernel
 apply_watermark_SRCS=./src/krnl_watermarking.cl
 apply_watermark_CLFLAGS=-s -g -I./src --max_memory_ports apply_watermark --xp misc:map_connect=add.kernel.apply_watermark_1.M_AXI_GMEM0.core.OCL_REGION_0.M00_AXI --xp misc:map_connect=add.kernel.apply_watermark_1.M_AXI_GMEM1.core.OCL_REGION_0.M01_AXI
-apply_watermark_DEVICES=xilinx:adm-pcie-ku3:2ddr-xpr:3.2 xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2
+apply_watermark_DEVICES=xilinx:adm-pcie-ku3:2ddr-xpr:3.3 xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3
 
 EXES=watermark
 XCLBINS=apply_watermark
@@ -26,7 +26,7 @@ EXTRA_CLEAN=./output.bmp
 check_EXE=watermark
 check_XCLBINS=apply_watermark
 check_ARGS=./data/inputImage.bmp ./data/golden.bmp
-check_DEVICES=xilinx:adm-pcie-ku3:2ddr-xpr:3.2 xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2
+check_DEVICES=xilinx:adm-pcie-ku3:2ddr-xpr:3.3 xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3
 
 CHECKS=check
 

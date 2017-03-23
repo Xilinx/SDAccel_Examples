@@ -15,6 +15,7 @@ edge_LDFLAGS=$(opencl_LDFLAGS) $(opencv_LDFLAGS)
 # Edge Detection Kernel
 krnl_edge_SRCS=./src/krnl_sobelfilter.cl
 krnl_edge_HDRS=./src/edge.h
+krnl_edge_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 
 EXES=edge
 XCLBINS=krnl_edge
@@ -23,8 +24,11 @@ XCLBINS=krnl_edge
 check_EXE=edge
 check_XCLBINS=krnl_edge
 check_ARGS=data/input/eiffel.bmp
+check_DEVICES=$(krnl_edge_DEVICES)
 
 CHECKS=check
+
+DEVIES=xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 
 include $(COMMON_REPO)/utility/rules.mk
 

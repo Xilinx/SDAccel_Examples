@@ -16,7 +16,7 @@ CXXFLAGS+=-std=c++0x
 
 # Kernel
 fir_SRCS=./src/fir.cl
-fir_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.2
+fir_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 
 EXES=shift_register
 XCLBINS=fir
@@ -29,5 +29,5 @@ check_DEVICES=$(fir_DEVICES)
 CHECKS=check
 
 #Changing Default Device
-DEVICES:=xilinx:adm-pcie-ku3:2ddr-xpr:3.2
+DEVICES:=xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 include $(COMMON_REPO)/utility/rules.mk

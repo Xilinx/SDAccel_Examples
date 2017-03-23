@@ -22,7 +22,7 @@ smithwaterman_LDFLAGS=$(opencl_LDFLAGS) -fopenmp -lz
 krnl_smithwaterman_SRCS=./src/opencl_sw_maxscore_systolic.cpp
 krnl_smithwaterman_HDRS=./src/sw.h
 krnl_smithwaterman_CLFLAGS=--kernel opencl_sw_maxscore --nk opencl_sw_maxscore:2
-krnl_smithwaterman_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.2
+krnl_smithwaterman_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 
 EXES=smithwaterman
 XCLBINS=krnl_smithwaterman
@@ -34,7 +34,7 @@ check_DEVICES=$(krnl_smithwaterman_DEVICES)
 
 CHECKS=check
 
-DEVICES:=xilinx:adm-pcie-ku3:2ddr-xpr:3.2
+DEVICES:=xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 
 include $(COMMON_REPO)/utility/rules.mk
 

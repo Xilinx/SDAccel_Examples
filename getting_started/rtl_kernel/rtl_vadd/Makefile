@@ -28,7 +28,7 @@ host_LDFLAGS=$(opencl_LDFLAGS)
 # Kernel
 vadd_SRCS=$(vadd_KERNEL).xo
 vadd_CLFLAGS= -l -k $(vadd_KERNEL) --nk $(vadd_KERNEL):$(vadd_CU)
-vadd_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.2 
+vadd_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.3 
 vadd_TARGETS=hw_emu hw
 
 EXES=host
@@ -48,5 +48,5 @@ ifneq (,$(findstring sw_emu,$(TARGETS)))
 $(warning WARNING:RTL Kernels do not support sw_emu TARGETS. Please use hw_emu for running RTL kernel Emulation)
 endif
 
-DEVICES:=xilinx:adm-pcie-ku3:2ddr-xpr:3.2
+DEVICES:=xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 include $(COMMON_REPO)/utility/rules.mk
