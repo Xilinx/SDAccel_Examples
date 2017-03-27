@@ -12,7 +12,7 @@ days = 10
 devices = []
 devices += ['xilinx:adm-pcie-7v3:1ddr:3.0']
 devices += ['xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3']
-devices += ['xilinx:adm-pcie-ku3:2ddr-xpr:3.3']
+//devices += ['xilinx:adm-pcie-ku3:2ddr-xpr:3.3']
 
 version = '2016.4'
 
@@ -39,6 +39,8 @@ echo "-----------------------------------------------"
 echo
 
 rsync -rL \$XILINX_SDX/Vivado_HLS/lnx64/tools/opencv/ lib/
+
+make clean exe
 
 """
 	}
