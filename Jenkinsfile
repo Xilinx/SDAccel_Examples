@@ -78,9 +78,18 @@ echo "PWD: \$(pwd)"
 echo "-----------------------------------------------"
 echo
 
+# Check if a rebuild is necessary
+set +e
+make -q all
+rc=\$?
+set -e
+
+# if rebuild required then use LSF
+if [[ \$rc != 0 ]]; then
 bsub -I -q ${queue} -R "osdistro=rhel && osver==ws6" -n ${cores} -R "span[ptile=${cores}]" -J "\$(basename ${dir})-${target}" <<EOF
 make TARGETS=${target} DEVICES=\"${device}\" all
 EOF
+fi
 
 """
 	}
