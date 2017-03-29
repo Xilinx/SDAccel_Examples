@@ -133,7 +133,7 @@ export PYTHONUNBUFFERED=true
 
 rm -rf \"out/${target}_${devdir}\" && mkdir -p out
 
-make TARGETS=${target} DEVICES=\"${device}\" NIMBIXFLAGS=\"--out out/${target}_${devdir}\" check
+make TARGETS=${target} DEVICES=\"${device}\" NIMBIXFLAGS=\"--out out/${target}_${devdir} --queue_timeout=480\" check
 
 """
 			}
