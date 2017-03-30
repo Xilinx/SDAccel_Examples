@@ -3,18 +3,18 @@
     "overview": [
         "This is an optimized implementation of a watermarking application to add watermarking to images targeting execution on an SDAccel supported FPGA acceleration card."
     ],
-    "board": ["Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
+    "board": ["xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd": "./watermark data/inputImage.bmp ./data/golden.bmp",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./watermark data/inputImage.bmp ./data/golden.bmp",
     "perf_fields": ["Board", "Image Size", "Frames / Second"],
     "performance": [
         {
-            "system": "Alpha Data ADM-PCIE-KU3",
+            "system": "xilinx:adm-pcie-ku3:2ddr-xpr",
             "constraint": "1024 x 768",
             "metric": "2,658"
         },
         {
-            "system": "Xilinx KU115",
+            "system": "xilinx:xil-accel-rd-ku115:4ddr-xpr",
             "constraint": "1024 x 768",
             "metric": "3526"
         }

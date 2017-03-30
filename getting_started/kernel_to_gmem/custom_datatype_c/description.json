@@ -5,7 +5,7 @@
     ],
     "key_concepts": [ "Dataflow", "Custom Datatype"],
     "keywords": ["struct", "#pragma HLS data_pack", "#pragma HLS LOOP_TRIPCOUNT"],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd": "./host ./data/input.bmp",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host ./data/input.bmp",
     "libs": [

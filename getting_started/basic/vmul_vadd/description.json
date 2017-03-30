@@ -5,7 +5,7 @@
     ],
     "key_concepts": [ "Multiple Kernel Binaries" , "Buffer sharing across Multiple binaries", "Multiple Kernels in different Binaries"],
     "keywords": [ "NA"],
-    "board": ["Alpha Data ADM-PCIE-7V3"],
+    "board": ["xilinx:adm-pcie-7v3:1ddr"],
     "em_cmd" : "./vaddvmul",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./vaddvmul",
     "libs": [

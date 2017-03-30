@@ -4,7 +4,7 @@
         "This example shows vector addition with 2 kernel clocks using RTL Kernel. "
     ],
     "key_concepts": [ "RTL Kernel"],
-    "board": ["Xilinx KU115"],
+    "board": ["xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "targets": ["hw", "hw_emu"],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",

@@ -5,7 +5,7 @@
     ],
     "Key Concepts": [ "Kernel Optimization", "Systolic Array"],
     "Keywords": ["__attribute__((xcl_pipeline_loop))", "__attribute__((xcl_array_partition(<type>,<dimension>)))"],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr"],
     "version": ["SDx 2016.3"],
     "dsa": "xilinx:adm-pcie-ku3:2ddr:3.2",
     "em_cmd": "./host xclbin",

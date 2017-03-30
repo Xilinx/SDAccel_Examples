@@ -5,7 +5,7 @@
     ],
     "key_concepts": [ "Kernel Optimization", "Loop Pipelining"],
     "keywords": [ "xcl_pipeline_loop" ],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr"],
     "em_cmd": "./loop_pipeline",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./loop_pipeline",
     "libs": [

@@ -3,7 +3,7 @@
     "overview" :[
         "This is an implementation of a RSA Decryption algorithm targeting execution on an SDAccel supported FPGA acceleration card."
     ],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3", "Xilinx KU115"],
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr", "xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "xcl": false,
     "em_cmd" : "./rsa -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:3.1' -k ./xclbin/krnl_rsa.<emulation flow>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin --in data/0_0_1024_key.cip --out data/0_out.msg --key data/0_1024_key.pem",
     "hw_cmd" : "../../utility/nimbix/nimbix-run.py -- ./rsa -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:3.1' -k ./xclbin/krnl_rsa.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin --in data/0_0_1024_key.cip --out data/0_out.msg --key data/0_1024_key.pem",
@@ -21,7 +21,7 @@
     ],
     "performance": [
         {
-            "system" : "Alpha Data ADM-PCIE-7V3",
+            "system" : "xilinx:adm-pcie-7v3:1ddr",
             "constraint" : "1,024 bits",
             "metric" : "272,340 bytes / second"
         }

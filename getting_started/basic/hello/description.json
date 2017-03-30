@@ -3,7 +3,7 @@
     "overview": [
         "The hello world example is a simple design which tests the correct installation of the FPGA acceleration boards. The example uses the printf function call inside of the kernel code to report on the values provided from the host to the kernel."
     ],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3", "Xilinx KU115"],
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr", "xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd": "./hello",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./hello",
     "libs": [

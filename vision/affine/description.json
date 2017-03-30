@@ -3,7 +3,7 @@
     "overview": [
         "Affine transformation is a linear mapping method that preserves points, straight lines, and planes. Sets of parallel lines remain parallel after an affine transformation. The affine transformation technique is typically used to correct for geometric distortions or deformations that occur with non-ideal camera angles. The demo performs a 30 degree X rotation and a 50% X and Y scaling on a 512 by 512, 16 bits per pixels grayscale, raw MRI image."
     ],
-    "board": ["Alpha Data ADM-PCIE-7V3"],
+    "board": ["xilinx:adm-pcie-7v3:1ddr"],
     "xcl": false,
     "opencv": true,
     "em_cmd": "./affine ./xclbin/krnl_affine.<emulation mode>.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
