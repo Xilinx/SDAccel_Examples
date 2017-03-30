@@ -13,9 +13,10 @@ import os
 import json
 import collections
 import sys
+import subprocess
 
 if len(sys.argv) is not 2:
-    print "Usage: %s <indexfile>.json" % sys.argv[0]
+    print "Usage: %s <catalog>.json" % sys.argv[0]
     sys.exit(os.EX_USAGE)
 
 index_filename = sys.argv[1]
@@ -52,6 +53,11 @@ def addexample(path):
                     example["author"] = author
     print "adding %s" % path
     return example
+
+def get_git_branch():
+    branch = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"])
+    branch = branch.strip()
+    return branch
 
 def searchdir(dir):
     if (not os.path.isdir(dir)):
@@ -101,6 +107,7 @@ def searchdir(dir):
     return None
 
 index = searchdir(".")
+index["branch"] = get_git_branch()
 
 with open(index_filename, "w") as index_file:
     json.dump(index, index_file, indent = 4)
