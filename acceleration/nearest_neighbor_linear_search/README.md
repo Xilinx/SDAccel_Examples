@@ -21,7 +21,7 @@ This is an optimized implementation of a nearest neighbor linear search algorith
 ### PERFORMANCE
 Board|Measurements per Cycle|Gigameasurements / Second
 ----|-----|-----
-Alpha Data ADM-PCIE-KU3|256|37.5
+xilinx:adm-pcie-ku3:2ddr-xpr|256|37.5
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
 ```
@@ -32,7 +32,7 @@ where examples is the name of the directory where the repository will be stored 
 ## 3. SOFTWARE AND SYSTEM REQUIREMENTS
 Board | Device Name | Software Version
 ------|-------------|-----------------
-Alpha Data ADM-PCIE-KU3|xilinx:adm-pcie-ku3:2ddr-xpr:3.2|SDAccel 2016.3
+Alpha Data ADM-PCIE-KU3|xilinx:adm-pcie-ku3:2ddr-xpr|SDAccel 2016.3
 
 
 Board targeted by default = ***xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2***
