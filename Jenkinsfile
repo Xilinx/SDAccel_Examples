@@ -79,8 +79,9 @@ echo "-----------------------------------------------"
 echo
 
 # Check if a rebuild is necessary
+set -x
 set +e
-make -q all
+make -q TARGETS=${target} DEVICES=\"${device}\" all
 rc=\$?
 set -e
 
@@ -90,7 +91,7 @@ bsub -I -q ${queue} -R "osdistro=rhel && osver==ws6" -n ${cores} -R "span[ptile=
 make TARGETS=${target} DEVICES=\"${device}\" all
 EOF
 fi
-
+set +x
 """
 	}
 }
