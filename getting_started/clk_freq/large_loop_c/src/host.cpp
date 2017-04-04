@@ -246,6 +246,12 @@ int main(int argc, char** argv)
     unsigned long bad_duration = run_opencl_cnn(world, false, size,
         weight, image, source_bad_hw_results, i_chan, o_chan);
 
+    //Release Device Memories and Kernels
+    clReleaseMemObject(buffer_image);
+    clReleaseMemObject(buffer_weight);
+    clReleaseMemObject(buffer_output);
+    clReleaseKernel(krnl_cnn_conv);
+    clReleaseProgram(program);
     xcl_release_world(world);
 
     // Compare the results of the Device to the simulation

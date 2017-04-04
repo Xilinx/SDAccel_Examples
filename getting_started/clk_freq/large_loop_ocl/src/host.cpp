@@ -219,6 +219,9 @@ int main(int argc, char** argv)
     for(int i = 0; i < o_chan*OSize*OSize; i++)
         source_sw_results[i] = source_good_hw_results[i] = source_bad_hw_results[i] = 0;
 
+    xcl_release_world(world);
+//OPENCL HOST CODE AREA END
+    
     convGolden(weight, image, source_sw_results, i_chan, o_chan);
 
     xcl_world world = xcl_world_single();
