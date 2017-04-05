@@ -35,16 +35,10 @@ Description:
     nest perfect or semi-perfect can help improve performance.
 
 *******************************************************************************/
-
-#include <iostream>
-#include <cstring>
-
-#include <time.h>
-#include <limits.h>
-#include <stdlib.h>
-
 //OpenCL utility layer include
-#include "xcl.h"
+#include "xcl2.hpp"
+#include <vector>
+#include <limits.h>
 
 // Maximum possible distance between two points
 #define INFINITY ULONG_MAX
@@ -63,125 +57,114 @@ Description:
 
 // Software implementation for finding nearest neighbor
 void nearest_sw(
-    int *in,      // Input Points Array - represented as integer
-    int *point,   // Current Point for which the neighbor is found
-    int *out,     // Output Point
+    std::vector<int>& in,   // Input Points Array - represented as integer
+    std::vector<int>& point,// Current Point for which the neighbor is found
+    std::vector<int>& out,  // Output Point
     int size,     // Size of the input array
     int dim       // #Dimensions of the points
 )
 {
     unsigned long curr_dist, min_dist = INFINITY;
-
     for(int i = 0; i < size; i++) {
         curr_dist = 0;
-
+        
         // Calculate distance
         // No need to compute square root as the distances are only compared
         for(int j = 0; j < dim; j++) {
             curr_dist += SQUARE(point[j] - in[i*dim + j]);
         }
-
+        
         // Update minimum distance
         if(curr_dist < min_dist) {
-
+            
             min_dist = curr_dist;
-
+            
             for(int k = 0; k < dim; k++) {
                 out[k] = in[i*dim + k];
             }
         }
     }
-}
+}  
 
 int main(int argc, char** argv)
 {
     if (DATA_DIM > MAX_DIM) {
-        std::cout << DATA_DIM << "greater than " << MAX_DIM << "!" << " Please use a smaller DATA_DIM" << std::endl;
+        std::cout << DATA_DIM << "greater than " << MAX_DIM 
+            << "!" << " Please use a smaller DATA_DIM" << std::endl;
         return EXIT_FAILURE;
     }
-
+    
     if (DATA_SIZE > MAX_SIZE) {
-        std::cout << DATA_SIZE << "greater than " << MAX_SIZE << "!" << " Please use a smaller DATA_SIZE" << std::endl;
+        std::cout << DATA_SIZE << "greater than " << MAX_SIZE 
+            << "!" << " Please use a smaller DATA_SIZE" << std::endl;
         return EXIT_FAILURE;
     }
-
+    
     //Allocate Memory in Host Memory
     size_t vector_size_bytes = sizeof(int) * DATA_SIZE * DATA_DIM;
-
-    int *source_in  = (int*) malloc(vector_size_bytes);
-    int *source_point = (int*) malloc(sizeof(int)*DATA_DIM);
-    int *source_hw_result = (int*) malloc(sizeof(int)*DATA_DIM);
-    int *source_sw_result = (int*) malloc(sizeof(int)*DATA_DIM);
-
-    srand(time(NULL));
+    std::vector<int>source_in(vector_size_bytes);
+    std::vector<int>source_point(sizeof(int)*DATA_DIM);
+    std::vector<int>source_hw_result(sizeof(int)*DATA_DIM);
+    std::vector<int>source_sw_result(sizeof(int)*DATA_DIM);
+    
+    srand(time(nullptr));
 
     // Create the test data
     for(int i = 0 ; i < DATA_SIZE*DATA_DIM; i++){
         source_in[i] = rand()%100;
     }
-
+    
     for(int i = 0 ; i < DATA_DIM; i++){
         source_point[i] = rand()%100;
     }
-
+    
     int size = DATA_SIZE;
     int dim = DATA_DIM;
-
+    
 //OPENCL HOST CODE AREA START
-    //Create Program and Kernels
-    xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "nearest_GOOD");
-    cl_kernel krnl_nearest = xcl_get_kernel(program, "nearest");
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
+
+    cl::Context context(device);
+    cl::CommandQueue q(context, device);
+    std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+
+    cl::Program::Binaries bins = xcl::import_binary(device_name,"nearest");
+    devices.resize(1);
+    cl::Program program(context, devices, bins);
+    cl::Kernel kernel(program,"nearest");
 
     //Allocate Buffer in Global Memory
-    cl_mem buffer_in    = xcl_malloc(world, CL_MEM_READ_ONLY,  vector_size_bytes);
-    cl_mem buffer_point = xcl_malloc(world, CL_MEM_READ_ONLY,  sizeof(int)*DATA_DIM);
-    cl_mem buffer_out   = xcl_malloc(world, CL_MEM_WRITE_ONLY, sizeof(int)*DATA_DIM);
+    cl::Buffer buffer_in   (context, CL_MEM_READ_ONLY,  vector_size_bytes);
+    cl::Buffer buffer_point(context, CL_MEM_READ_ONLY,  sizeof(int)*DATA_DIM);
+    cl::Buffer buffer_out  (context, CL_MEM_WRITE_ONLY, sizeof(int)*DATA_DIM);
 
     //Copy input data to device global memory
-    xcl_memcpy_to_device(world, buffer_in, source_in, vector_size_bytes);
-    xcl_memcpy_to_device(world, buffer_point, source_point, sizeof(int)*DATA_DIM);
+    q.enqueueWriteBuffer(buffer_in,CL_TRUE,0, vector_size_bytes,source_in.data());
+    q.enqueueWriteBuffer(buffer_point,CL_TRUE,0, sizeof(int)*DATA_DIM,source_point.data());
 
-    //Set the Kernel Arguments
-    int narg = 0;
-
-    xcl_set_kernel_arg(krnl_nearest, narg++, sizeof(cl_mem), &buffer_in);
-    xcl_set_kernel_arg(krnl_nearest, narg++, sizeof(cl_mem), &buffer_point);
-    xcl_set_kernel_arg(krnl_nearest, narg++, sizeof(cl_mem), &buffer_out);
-    xcl_set_kernel_arg(krnl_nearest, narg++, sizeof(int), &size);
-    xcl_set_kernel_arg(krnl_nearest, narg++, sizeof(int), &dim);
+    auto krnl_nearest= cl::KernelFunctor<cl::Buffer&, cl::Buffer&,
+         cl::Buffer&, int, int>(kernel);
 
     //Launch the Kernel
-    xcl_run_kernel3d(world,krnl_nearest,1,1,1);
+    krnl_nearest(cl::EnqueueArgs(q,cl::NDRange(1,1,1), cl::NDRange(1,1,1)), 
+            buffer_in, buffer_point, buffer_out, size, dim);
+    q.finish();
 
     //Copy Result from Device Global Memory to Host Local Memory
-    xcl_memcpy_from_device(world, source_hw_result, buffer_out, sizeof(int)*DATA_DIM);
-    clFinish(world.command_queue);
+    q.enqueueReadBuffer(buffer_out,CL_TRUE,0, sizeof(int)* DATA_DIM, source_hw_result.data());
 
-    //Release Device Memories and Kernels
-    clReleaseMemObject(buffer_in);
-    clReleaseMemObject(buffer_point);
-    clReleaseMemObject(buffer_out);
-    clReleaseKernel(krnl_nearest);
-    xcl_release_world(world);
 //OPENCL HOST CODE AREA END
-
+    
     // Compute Software Results
     nearest_sw(source_in, source_point, source_sw_result, size, dim);
-
+    
     // Compare the nearset distances between software and hardware
     unsigned long dist_sw = 0, dist_hw = 0;
     for(int i = 0; i < dim; i++) {
         dist_sw += SQUARE(source_sw_result[i] - source_point[i]);
         dist_hw += SQUARE(source_sw_result[i] - source_point[i]);
     }
-
-    /* Release Memory from Host Memory*/
-    free(source_in);
-    free(source_point);
-    free(source_hw_result);
-    free(source_sw_result);
-
     if(dist_sw != dist_hw)
     {
         std::cout << "TEST FAILED." << std::endl; 
@@ -189,7 +172,7 @@ int main(int argc, char** argv)
         std::cout << "\tHardware Min Dist = " << dist_hw << std::endl;
         return -1;
     }
-
+ 
     std::cout << "TEST PASSED." << std::endl;
     return 0;
 }

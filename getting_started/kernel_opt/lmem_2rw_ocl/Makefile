@@ -2,26 +2,21 @@ COMMON_REPO := ../../../
 
 # wide Memory Access Application
 include $(COMMON_REPO)/utility/boards.mk
-include $(COMMON_REPO)/libs/xcl/xcl.mk
+include $(COMMON_REPO)/libs/xcl2/xcl2.mk
 include $(COMMON_REPO)/libs/opencl/opencl.mk
 
+CXX:=/tools/batonroot/rodin/devkits/lnx64/gcc-6.2.0/bin/g++
 # vadd Host Application
-host_SRCS=./src/host.cpp $(xcl_SRCS)
-host_HDRS=$(xcl_HDRS)
-host_CXXFLAGS=-I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS)
+host_SRCS=./src/host.cpp $(xcl2_SRCS)
+host_HDRS=$(xcl2_HDRS)
+host_CXXFLAGS=-I./src/ $(xcl2_CXXFLAGS) $(opencl_CXXFLAGS)
 host_LDFLAGS=$(opencl_LDFLAGS)
-
-EXES=host
 
 # vadd Kernels
 vadd_SRCS=./src/vadd.cl
 vadd_CLFLAGS=-k vadd
 
-XOS=vadd
-
-# vadd xclbin
-vadd_XOS=vadd
-
+EXES=host
 XCLBINS=vadd
 
 # check

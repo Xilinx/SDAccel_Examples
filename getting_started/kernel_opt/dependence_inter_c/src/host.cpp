@@ -26,17 +26,12 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
-
-#include <iostream>
-#include <cstring>
-
-//OpenCL utility layer include
-#include "xcl.h"
+#include "xcl2.hpp"
+#include <vector>
 
 #define DATA_SIZE 256
 #define INCR_VALUE 10
-
-void mean_value(int in[], int out[], int n)
+void mean_value(std::vector<int>& in, std::vector<int>& out, int n)
 {
     out[0] = ( in[0] + in[1] ) / 2;
     for (int i = 1 ; i < n-1 ; i++)
@@ -50,10 +45,9 @@ int main(int argc, char** argv)
 {
     //Allocate Memory in Host Memory
     size_t vector_size_bytes = sizeof(int) * DATA_SIZE;
-
-    int *source_input       = (int *) malloc(vector_size_bytes);
-    int *source_hw_results  = (int *) malloc(vector_size_bytes);
-    int *source_sw_results  = (int *) malloc(vector_size_bytes);
+    std::vector<int> source_input(DATA_SIZE);
+    std::vector<int> source_hw_results(DATA_SIZE);
+    std::vector<int> source_sw_results(DATA_SIZE);
 
     // Create the test data and Software Result 
     for(int i = 0 ; i < DATA_SIZE ; i++){
@@ -64,36 +58,38 @@ int main(int argc, char** argv)
     mean_value(source_input,source_sw_results, DATA_SIZE);
 
 //OPENCL HOST CODE AREA START
-    //Create Program and Kernel
-    xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "mean_value");
-    cl_kernel krnl_mean_value = xcl_get_kernel(program, "mean_value");
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
+
+    cl::Context context(device);
+    cl::CommandQueue q(context, device);
+    std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+    std::cout << "Found Device=" << device_name.c_str() << std::endl;
+
+    cl::Program::Binaries bins = xcl::import_binary(device_name,"mean_value");
+    devices.resize(1);
+    cl::Program program(context, devices, bins);
+    cl::Kernel kernel(program,"mean_value");
 
     //Allocate Buffer in Global Memory
-    cl_mem buffer_input  = xcl_malloc(world, CL_MEM_READ_ONLY, vector_size_bytes);
-    cl_mem buffer_output = xcl_malloc(world, CL_MEM_WRITE_ONLY, vector_size_bytes);
+    cl::Buffer buffer_input (context, CL_MEM_READ_ONLY, vector_size_bytes);
+    cl::Buffer buffer_output(context, CL_MEM_WRITE_ONLY, vector_size_bytes);
 
     //Copy input data to device global memory
-    xcl_memcpy_to_device(world,buffer_input,source_input,vector_size_bytes);
+    q.enqueueWriteBuffer(buffer_input,CL_TRUE, 0,vector_size_bytes,source_input.data());
 
     int size = DATA_SIZE;
-    //Set the Kernel Arguments
-    xcl_set_kernel_arg(krnl_mean_value,0,sizeof(cl_mem),&buffer_input);
-    xcl_set_kernel_arg(krnl_mean_value,1,sizeof(cl_mem),&buffer_output);
-    xcl_set_kernel_arg(krnl_mean_value,2,sizeof(int),&size);
+    auto krnl_mean_value = cl::KernelFunctor<cl::Buffer&, cl::Buffer&, int>(kernel);
 
     //Launch the Kernel
-    xcl_run_kernel3d(world,krnl_mean_value,1,1,1);
+    krnl_mean_value(cl::EnqueueArgs(q,cl::NDRange(1,1,1), cl::NDRange(1,1,1)), 
+            buffer_input, buffer_output,size);
+    q.finish();
 
     //Copy Result from Device Global Memory to Host Local Memory
-    xcl_memcpy_from_device(world, source_hw_results, buffer_output,vector_size_bytes);
-    clFinish(world.command_queue);
+    q.enqueueReadBuffer(buffer_output,CL_TRUE, 0, vector_size_bytes, 
+            source_hw_results.data());
 
-    //Release Device Memories and Kernels
-    clReleaseMemObject(buffer_input);
-    clReleaseMemObject(buffer_output);
-    clReleaseKernel(krnl_mean_value);
-    xcl_release_world(world);
 //OPENCL HOST CODE AREA END
     
     // Compare the results of the Device to the simulation
@@ -111,11 +107,6 @@ int main(int argc, char** argv)
             if ( ( (i+1) % 16) == 0) std::cout << std::endl;
         }
     }
-
-    /* Release Memory from Host Memory*/
-    free(source_input);
-    free(source_hw_results);
-    free(source_sw_results);
 
     if (match){
         std::cout << "TEST FAILED." << std::endl; 

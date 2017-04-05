@@ -2,25 +2,20 @@ COMMON_REPO := ../../..
 
 #Common Includes
 include $(COMMON_REPO)/utility/boards.mk
-include $(COMMON_REPO)/libs/xcl/xcl.mk
+include $(COMMON_REPO)/libs/xcl2/xcl2.mk
 include $(COMMON_REPO)/libs/opencl/opencl.mk
 
+CXX:=/tools/batonroot/rodin/devkits/lnx64/gcc-6.2.0/bin/g++
 # Host Application
-helloworld_SRCS=./src/host.cpp $(oclHelper_SRCS) $(xcl_SRCS)
-helloworld_HDRS=$(xcl_HDRS)
-helloworld_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS) $(oclHelper_CXXFLAGS) -std=c++0x
+helloworld_SRCS=./src/host.cpp $(oclHelper_SRCS) $(xcl2_SRCS)
+host_HDRS=$(xcl2_HDRS)
+helloworld_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl2_CXXFLAGS) $(oclHelper_CXXFLAGS) -std=c++0x
 helloworld_LDFLAGS=$(opencl_LDFLAGS)
-
-EXES=helloworld
 
 # Kernel
 vector_addition_SRCS=./src/vector_addition.cl
 
-XOS=vector_addition
-
-# xclbin
-vector_addition_XOS=vector_addition
-
+EXES=helloworld
 XCLBINS=vector_addition
 
 # check

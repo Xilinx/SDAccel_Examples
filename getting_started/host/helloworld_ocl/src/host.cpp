@@ -26,17 +26,13 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
-
-#include <CL/cl.h>
-#include "xcl.h"
-
-#include <cstdio>
+#include "xcl2.hpp"
 #include <vector>
 
 using std::vector;
 
 static const int DATA_SIZE = 256;
-static const char *error_message =
+static const std::string error_message =
     "Error: Result mismatch:\n"
     "i = %d CPU result = %d Device result = %d\n";
 
@@ -46,73 +42,72 @@ int main(int argc, char **argv) {
     // compute the size of array in bytes
     int size_in_bytes = DATA_SIZE * sizeof(int);
 
-    // The xlc_world struct consists of several types of OpenCL objects
-    // including the cl_platform, cl_device_id, cl_context and cl_command_queue.
-    // These objects manage different aspects of the system and can be used to
-    // manage memory and determine where the application will execute the
-    // OpenCL functions.
-    xcl_world world = xcl_world_single();
-
-    // This command will load the OpenCL binary created using the xocc compiler
-    // and load it onto the FPGA fabric. It is referred to as a program in
-    // OpenCL and it can contain many functions which can be executed on the
-    // device.
-    cl_program program = xcl_import_binary(world, "vector_addition");
-
-    // These commands will allocate memory on the FPGA. The cl_mem objects can
-    // be used to reference the memory locations on the device. The cl_mem
-    // object cannot be referenced directly and must be passed to other OpenCL
-    // functions.
-    cl_mem buffer_a = xcl_malloc(world, CL_MEM_READ_ONLY, size_in_bytes);
-    cl_mem buffer_b = xcl_malloc(world, CL_MEM_READ_ONLY, size_in_bytes);
-    cl_mem buffer_result = xcl_malloc(world, CL_MEM_WRITE_ONLY, size_in_bytes);
-
     // Creates a vector of DATA_SIZE elements with an initial value of 10 and 32
     vector<int> source_a(DATA_SIZE, 10);
     vector<int> source_b(DATA_SIZE, 32);
     vector<int> source_results(DATA_SIZE);
 
+
+    // The get_xil_devices will return vector of Xilinx Devices 
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
+
+    //Creating Context and Command Queue for selected Device 
+    cl::Context context(device);
+    cl::CommandQueue q(context, device);
+    std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+    std::cout << "Found Device=" << device_name.c_str() << std::endl;
+
+    // import_binary() command will find the OpenCL binary file created using the 
+    // xocc compiler load into OpenCL Binary and return as Binaries
+    // OpenCL and it can contain many functions which can be executed on the
+    // device.
+    cl::Program::Binaries bins = xcl::import_binary(device_name,"vector_addition");
+    devices.resize(1);
+    cl::Program program(context, devices, bins);
+
+    // These commands will allocate memory on the FPGA. The cl::Buffer objects can
+    // be used to reference the memory locations on the device. The cl::Buffer
+    // object cannot be referenced directly and must be passed to other OpenCL
+    // functions.
+    cl::Buffer buffer_a(context, CL_MEM_READ_ONLY,  size_in_bytes);
+    cl::Buffer buffer_b(context, CL_MEM_READ_ONLY,  size_in_bytes);
+    cl::Buffer buffer_result(context, CL_MEM_WRITE_ONLY, size_in_bytes);
+
     // These commands will load the source_a and source_b vectors from the host
-    // application and into the buffer_a and buffer_b cl_mem objects. The data
+    // application and into the buffer_a and buffer_b cl::Buffer objects. The data
     // will be be transferred from system memory over PCIe to the FPGA on-board
     // DDR memory.
-    xcl_memcpy_to_device(world, buffer_a, source_a.data(), size_in_bytes);
-    xcl_memcpy_to_device(world, buffer_b, source_b.data(), size_in_bytes);
+    q.enqueueWriteBuffer(buffer_a, CL_TRUE, 0, size_in_bytes, source_a.data());
+    q.enqueueWriteBuffer(buffer_b, CL_TRUE, 0, size_in_bytes, source_b.data());
+    q.finish();
 
     // This call will extract a kernel out of the program we loaded in the
     // previous line. A kernel is an OpenCL function that is executed on the
     // FPGA. This function is defined in the src/vetor_addition.cl file.
-    cl_kernel krnl_vector_add = xcl_get_kernel(program, "vector_add");
-
-    // The parameters of the kernel can be set using these function calls.
-    xcl_set_kernel_arg(krnl_vector_add, 0, sizeof(cl_mem), &buffer_result);
-    xcl_set_kernel_arg(krnl_vector_add, 1, sizeof(cl_mem), &buffer_a);
-    xcl_set_kernel_arg(krnl_vector_add, 2, sizeof(cl_mem), &buffer_b);
-    xcl_set_kernel_arg(krnl_vector_add, 3, sizeof(int), &DATA_SIZE);
+    cl::Kernel kernel(program,"vector_add");
+    auto krnl_vector_add = cl::KernelFunctor<cl::Buffer&, cl::Buffer&, cl::Buffer&, 
+         int>(kernel);
 
     // This function will execute the kernel on the FPGA
-    xcl_run_kernel3d_nb(world, krnl_vector_add);
+    krnl_vector_add(cl::EnqueueArgs(q, cl::NDRange(1,1,1), cl::NDRange(1,1,1)), 
+            buffer_result, buffer_a,buffer_b,DATA_SIZE);
+    q.finish();
 
     // The result of the previous kernel execution will need to be retrieved in
     // order to view the results. This call will write the data from the
     // buffer_result cl_mem object to the source_results vector
-    xcl_memcpy_from_device(world, source_results.data(), buffer_result,
-                           size_in_bytes);
+    q.enqueueReadBuffer(buffer_result, CL_TRUE, 0, size_in_bytes, 
+            source_results.data());
+    q.finish();
 
-    // These functions will release the OpenCL resources.
-    clReleaseMemObject(buffer_a);
-    clReleaseMemObject(buffer_b);
-    clReleaseMemObject(buffer_result);
-    clReleaseKernel(krnl_vector_add);
-    clReleaseProgram(program);
-    xcl_release_world(world);
 
     int match = 0;
     printf("Result = \n");
     for (int i = 0; i < DATA_SIZE; i++) {
         int host_result = source_a[i] + source_b[i];
         if (source_results[i] != host_result) {
-            printf(error_message, i, host_result, source_results[i]);
+            printf(error_message.c_str(), i, host_result, source_results[i]);
             match = 1;
             break;
         } else {

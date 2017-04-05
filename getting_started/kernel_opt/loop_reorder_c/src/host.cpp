@@ -35,12 +35,9 @@ Description:
     helps achieve better pipeline initiation interval(II) and better performance.
 
 *******************************************************************************/
-
-#include <iostream>
-#include <cstring>
-
 //OpenCL utility layer include
-#include "xcl.h"
+#include "xcl2.hpp"
+#include <vector>
 
 //Array Size to access 
 #define DATA_SIZE 64
@@ -51,10 +48,10 @@ Description:
 // Software implementation of Matrix Multiplication
 // The inputs are of the size (DATA_SIZE x DATA_SIZE)
 void m_softwareGold(
-                    int *in1,   //Input Matrix 1
-                    int *in2,   //Input Matrix 2
-                    int *out    //Output Matrix
-                   )
+       std::vector<int>& in1,   //Input Matrix 1
+       std::vector<int>& in2,   //Input Matrix 2
+       std::vector<int>& out    //Output Matrix
+       )
 {
     //Perform Matrix multiply Out = In1 x In2
     for(int i = 0; i < DATA_SIZE; i++) {
@@ -71,16 +68,17 @@ int main(int argc, char** argv)
 
     //Allocate Memory in Host Memory
     if (DATA_SIZE > MAX_SIZE) {
-        std::cout << "Size is bigger than internal buffer size, please use a size smaller than " << MAX_SIZE << "!" << std::endl;
+        std::cout << "Size is bigger than internal buffer size,"
+           << " please use a size smaller than " << MAX_SIZE << "!" << std::endl;
         return EXIT_FAILURE;
     }
     
     size_t matrix_size_bytes = sizeof(int) * DATA_SIZE * DATA_SIZE;
 
-    int *source_in1         = (int *) malloc(matrix_size_bytes);
-    int *source_in2         = (int *) malloc(matrix_size_bytes);
-    int *source_hw_results  = (int *) malloc(matrix_size_bytes);
-    int *source_sw_results  = (int *) malloc(matrix_size_bytes);
+    std::vector<int> source_in1(matrix_size_bytes);
+    std::vector<int> source_in2(matrix_size_bytes);
+    std::vector<int> source_hw_results(matrix_size_bytes);
+    std::vector<int> source_sw_results(matrix_size_bytes);
 
     // Create the test data and Software Result 
     for(int i = 0 ; i < DATA_SIZE * DATA_SIZE ; i++){
@@ -91,41 +89,40 @@ int main(int argc, char** argv)
     }
 
 //OPENCL HOST CODE AREA START
-    //Create Program and Kernels
-    xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary(world,  "mmult");
-    cl_kernel krnl_loop_reorder = xcl_get_kernel(program, "mmult");
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
+
+    cl::Context context(device);
+    cl::CommandQueue q(context, device);
+    std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+
+    cl::Program::Binaries bins = xcl::import_binary(device_name,"mmult");
+    devices.resize(1);
+    cl::Program program(context, devices, bins);
+    cl::Kernel kernel(program,"mmult");
 
     //Allocate Buffer in Global Memory
-    cl_mem buffer_in1    = xcl_malloc(world, CL_MEM_READ_ONLY, matrix_size_bytes);
-    cl_mem buffer_in2    = xcl_malloc(world, CL_MEM_READ_ONLY, matrix_size_bytes);
-    cl_mem buffer_output = xcl_malloc(world, CL_MEM_WRITE_ONLY, matrix_size_bytes);
+    cl::Buffer buffer_in1   (context, CL_MEM_READ_ONLY, matrix_size_bytes);
+    cl::Buffer buffer_in2   (context, CL_MEM_READ_ONLY, matrix_size_bytes);
+    cl::Buffer buffer_output(context, CL_MEM_WRITE_ONLY, matrix_size_bytes);
 
     //Copy input data to device global memory
-    xcl_memcpy_to_device(world,buffer_in1,source_in1,matrix_size_bytes);
-    xcl_memcpy_to_device(world,buffer_in2,source_in2,matrix_size_bytes);
-    xcl_memcpy_to_device(world,buffer_output,source_hw_results,matrix_size_bytes);
+    q.enqueueWriteBuffer(buffer_in1,CL_TRUE,0,matrix_size_bytes,source_in1.data());
+    q.enqueueWriteBuffer(buffer_in2,CL_TRUE,0,matrix_size_bytes,source_in2.data());
+    q.enqueueWriteBuffer(buffer_output,CL_TRUE,0,matrix_size_bytes,source_hw_results.data());
 
     int size = DATA_SIZE;
-    //Set the Kernel Arguments
-    xcl_set_kernel_arg(krnl_loop_reorder,0,sizeof(cl_mem),&buffer_in1);
-    xcl_set_kernel_arg(krnl_loop_reorder,1,sizeof(cl_mem),&buffer_in2);
-    xcl_set_kernel_arg(krnl_loop_reorder,2,sizeof(cl_mem),&buffer_output);
-    xcl_set_kernel_arg(krnl_loop_reorder,3,sizeof(int),&size);
+    auto krnl_loop_reorder= cl::KernelFunctor<cl::Buffer&, cl::Buffer&,
+         cl::Buffer&, int>(kernel);
 
     //Launch the Kernel
-    xcl_run_kernel3d(world,krnl_loop_reorder,1,1,1);
+    krnl_loop_reorder(cl::EnqueueArgs(q,cl::NDRange(1,1,1), cl::NDRange(1,1,1)), 
+            buffer_in1, buffer_in2, buffer_output, size);
+    q.finish();
 
     //Copy Result from Device Global Memory to Host Local Memory
-    xcl_memcpy_from_device(world, source_hw_results, buffer_output,matrix_size_bytes);
-    clFinish(world.command_queue);
+    q.enqueueReadBuffer(buffer_output,CL_TRUE,0, matrix_size_bytes, source_hw_results.data());
 
-    //Release Device Memories and Kernels
-    clReleaseMemObject(buffer_in1);
-    clReleaseMemObject(buffer_in2);
-    clReleaseMemObject(buffer_output);
-    clReleaseKernel(krnl_loop_reorder);
-    xcl_release_world(world);
 //OPENCL HOST CODE AREA END
  
     // Compute Software Results
@@ -142,12 +139,6 @@ int main(int argc, char** argv)
             break;
         }
     }
-
-    /* Release Memory from Host Memory*/
-    free(source_in1);
-    free(source_in2);
-    free(source_hw_results);
-    free(source_sw_results);
 
     if (match){
         std::cout << "TEST FAILED." << std::endl; 

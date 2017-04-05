@@ -26,14 +26,10 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
-
-#include "CL/cl.h"
-#include "xcl.h"
-
-#include <algorithm>
-#include <cstdio>
-#include <random>
+#include "xcl2.hpp"
 #include <vector>
+#include <random>
+#include <algorithm>
 
 using std::default_random_engine;
 using std::generate;
@@ -93,7 +89,6 @@ void verify (const vector<int>& gold, const vector<int>& results) {
 // we will explore the performance of dot product using Structure of Arrays and
 // Array of Structures.
 int main(int argc, char **argv) {
-  char *binary_file_path = argv[1];
 
   // allocate memory on host to store input arrays and the output array
   vector<int> results(VERTEX_COUNT);
@@ -114,66 +109,78 @@ int main(int argc, char **argv) {
   compute_dot(gold, soa_vertices.x, soa_vertices.y, soa_vertices.z,
               VERTEX_COUNT);
 
-  // Initialize OpenCL context and load xclbin binary
-  xcl_world world = xcl_world_single();
-  cl_program program = xcl_import_binary(world, "dot");
-
+  std::vector<cl::Device> devices = xcl::get_xil_devices();
+  cl::Device device = devices[0];
+  //Creating Context and Command Queue for selected Device 
+  cl::Context context(device);
+  cl::CommandQueue q(context, device);
+  std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+  std::cout << "Found Device=" << device_name.c_str() << std::endl;
+  cl::Program::Binaries bins = xcl::import_binary(device_name,"dot");
+  devices.resize(1);
+  cl::Program program(context, devices, bins);
+ 
   // Allocate memory on the FPGA
-  cl_mem buffer_result =
-      xcl_malloc(world, CL_MEM_READ_WRITE, results.size() * sizeof(int));
-  cl_mem buffer_x =
-      xcl_malloc(world, CL_MEM_READ_ONLY, soa_vertices.x.size() * sizeof(int));
-  cl_mem buffer_y =
-      xcl_malloc(world, CL_MEM_READ_ONLY, soa_vertices.y.size() * sizeof(int));
-  cl_mem buffer_z =
-      xcl_malloc(world, CL_MEM_READ_ONLY, soa_vertices.z.size() * sizeof(int));
+  cl::Buffer buffer_result(context, CL_MEM_READ_WRITE, results.size() * sizeof(int));
+  cl::Buffer buffer_x(context, CL_MEM_READ_ONLY, soa_vertices.x.size() * sizeof(int));
+  cl::Buffer buffer_y(context, CL_MEM_READ_ONLY, soa_vertices.y.size() * sizeof(int));
+  cl::Buffer buffer_z(context, CL_MEM_READ_ONLY, soa_vertices.z.size() * sizeof(int));
 
   // Transfer data from host to the FPGA
-  xcl_memcpy_to_device(world, buffer_x, soa_vertices.x.data(),
-                       soa_vertices.x.size() * sizeof(int));
-  xcl_memcpy_to_device(world, buffer_y, soa_vertices.y.data(),
-                       soa_vertices.y.size() * sizeof(int));
-  xcl_memcpy_to_device(world, buffer_z, soa_vertices.z.data(),
-                       soa_vertices.z.size() * sizeof(int));
+  q.enqueueWriteBuffer(buffer_x,CL_TRUE,0,soa_vertices.x.size() * sizeof(int),
+          soa_vertices.x.data());
+  q.enqueueWriteBuffer(buffer_y,CL_TRUE,0,soa_vertices.y.size() * sizeof(int),
+          soa_vertices.y.data());
+  q.enqueueWriteBuffer(buffer_z,CL_TRUE,0,soa_vertices.z.size() * sizeof(int),
+          soa_vertices.z.data());
+  q.finish();
   printf( "|-------------------------+-------------------------|\n"
           "| Kernel                  |    Wall-Clock Time (ns) |\n"
           "|-------------------------+-------------------------|\n");
 
   // Allocate memory for the array of struct data structure
-  cl_mem buffer_pts =
-      xcl_malloc(world, CL_MEM_READ_ONLY, aos_vertices.size() * sizeof(vertex));
+  cl::Buffer buffer_pts(context, CL_MEM_READ_ONLY, aos_vertices.size() * sizeof(vertex));
 
   // Transfer the entire array to the FPGA
-  xcl_memcpy_to_device(world, buffer_pts, aos_vertices.data(),
-                       aos_vertices.size() * sizeof(vertex));
-  cl_kernel kernel_aos = xcl_get_kernel(program, "dot_aos");
+  q.enqueueWriteBuffer(buffer_pts,CL_TRUE,0,
+          aos_vertices.size() * sizeof(vertex),aos_vertices.data());
 
-  // Set the kernel parameters and launch the kernel. Reuse the buffer_result.
-  xcl_set_kernel_arg(kernel_aos, 0, sizeof(cl_mem), &buffer_result);
-  xcl_set_kernel_arg(kernel_aos, 1, sizeof(cl_mem), &buffer_pts);
-  xcl_set_kernel_arg(kernel_aos, 2, sizeof(cl_int), &VERTEX_COUNT);
-  auto aos_time = xcl_run_kernel3d(world, kernel_aos, 1, 1, 1);
+  cl::Event event;
+  int nargs=0;
+  uint64_t nstimestart, nstimeend;
+  cl::Kernel kernel_aos(program,"dot_aos");
+  kernel_aos.setArg(nargs++,buffer_result);
+  kernel_aos.setArg(nargs++,buffer_pts);
+  kernel_aos.setArg(nargs++,VERTEX_COUNT);
+  q.enqueueTask(kernel_aos,NULL,&event);
+  q.finish();
+  event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart);
+  event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend);
+  auto aos_time = nstimeend-nstimestart;
   printf("| %-22s  | %23lu |\n", "dot: Array of Structs", aos_time);
 
-  // Transfer the results back from the GPU
-  xcl_memcpy_from_device(world, results.data(), buffer_result,
-                         results.size() * sizeof(int));
+  // Transfer the results back from the FPGA
+  q.enqueueReadBuffer(buffer_result, CL_TRUE, 0, results.size() * sizeof(int), results.data());
+  q.finish();
   verify(gold, results);
 
-  cl_kernel kernel_soa = xcl_get_kernel(program, "dot_soa");
-
-  // Set the kernel parameters and launch the kernel
-  xcl_set_kernel_arg(kernel_soa, 0, sizeof(cl_mem), &buffer_result);
-  xcl_set_kernel_arg(kernel_soa, 1, sizeof(cl_mem), &buffer_x);
-  xcl_set_kernel_arg(kernel_soa, 2, sizeof(cl_mem), &buffer_y);
-  xcl_set_kernel_arg(kernel_soa, 3, sizeof(cl_mem), &buffer_z);
-  xcl_set_kernel_arg(kernel_soa, 4, sizeof(cl_int), &VERTEX_COUNT);
-  auto soa_time = xcl_run_kernel3d(world, kernel_soa, 1, 1, 1);
+  cl::Kernel kernel_soa(program,"dot_soa");
+  nargs=0;
+  kernel_soa.setArg(nargs++,buffer_result);
+  kernel_soa.setArg(nargs++,buffer_x);
+  kernel_soa.setArg(nargs++,buffer_y);
+  kernel_soa.setArg(nargs++,buffer_z);
+  kernel_soa.setArg(nargs++,VERTEX_COUNT);
+  q.enqueueTask(kernel_soa,NULL,&event);
+  q.finish();
+  event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart);
+  event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend);
+  auto soa_time = nstimeend-nstimestart;
   printf("| %-22s  | %23lu |\n", "dot: Struct of Arrays", soa_time);
 
   // Get the results from the FPGA
-  xcl_memcpy_from_device(world, results.data(), buffer_result,
-                         results.size() * sizeof(int));
+  q.enqueueReadBuffer(buffer_result, CL_TRUE, 0, results.size() * sizeof(int),results.data());
+  q.finish();
   verify(gold, results);
   printf("|-------------------------+-------------------------|\n");
   printf("Note: Wall Clock Time is meaningful for real hardware execution only, not for emulation.\n");
