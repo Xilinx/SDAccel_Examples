@@ -1,6 +1,6 @@
 COMMON_REPO := ../../..
 
-#Common Includes
+# Common Includes
 include $(COMMON_REPO)/utility/boards.mk
 include $(COMMON_REPO)/libs/opencl/opencl.mk
 

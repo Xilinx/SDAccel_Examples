@@ -10,13 +10,19 @@ host_HDRS=$(xcl_HDRS)
 host_CXXFLAGS=-I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS)
 host_LDFLAGS=$(opencl_LDFLAGS)
 
+EXES=host
+
 # Kernel
 adder_SRCS=./src/adder.cl
 adder_CLFLAGS= -k adder
 #Specifyinng Fifo depth for Dataflow
 adder_CLFLAGS+=--xp "param:compiler.xclDataflowFifoDepth=32"
 
-EXES=host
+XOS=adder
+
+# xclbin
+adder_XOS=adder
+
 XCLBINS=adder
 
 # check

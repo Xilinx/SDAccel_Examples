@@ -10,11 +10,17 @@ host_HDRS=$(xcl_HDRS)
 host_CXXFLAGS=-I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS) -I$(XILINX_SDACCEL)/Vivado_HLS/include
 host_LDFLAGS=$(opencl_LDFLAGS)
 
+EXES=host
+
 # Kernel
 window_array_2d_SRCS=./src/window_array_2d.cpp
-window_array_2d_CLFLAGS=-k window_array_2d
+window_array_2d_CLFLAGS=-k window_array_2d -I./src/
 
-EXES=host
+XOS=window_array_2d
+
+# xclbin
+window_array_2d_XOS=window_array_2d
+
 XCLBINS=window_array_2d
 
 # check

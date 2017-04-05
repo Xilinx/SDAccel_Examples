@@ -15,10 +15,16 @@ aes_HDRS=./src/aes_app.h $(xcl_HDRS) $(cmdparser_HDRS) $(logger_HDRS) $(simplebm
 aes_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS) $(cmdparser_CXXFLAGS) $(logger_CXXFLAGS) $(simplebmp_CXXFLAGS)
 aes_LDFLAGS=$(opencl_LDFLAGS)
 
+EXES=aes
+
 # AES Kernel
 krnl_aes_SRCS=./src/krnl_aes.cl
 
-EXES=aes
+XOS=krnl_aes
+
+# AES xclbin
+krnl_aes_XOS=krnl_aes
+
 XCLBINS=krnl_aes
 
 # check

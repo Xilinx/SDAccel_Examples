@@ -200,7 +200,7 @@ int main(int argc, char** argv)
 //OPENCL HOST CODE AREA START
     //Create Program and Kernels. 
     xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "sketch");
+    cl_program program = xcl_import_binary(world, "sketch_GOOD");
     cl_kernel krnl_process_image = xcl_get_kernel(program, "process_image");
 
     //Allocate Buffer in Global Memory

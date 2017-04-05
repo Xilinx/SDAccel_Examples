@@ -10,13 +10,19 @@ host_HDRS=$(xcl_HDRS)
 host_CXXFLAGS=-I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS)
 host_LDFLAGS=$(opencl_LDFLAGS)
 
+EXES=host
+
 # Kernel
 vadd_SRCS=./src/vadd.cl
 #Disabled autoPipelining for kernel as pipeline is not feasible with printf statement in kernel.
 #this will allow compiler to generate design quickly as it will not attempt to pipeline.
-vadd_CLFLAGS=--xp "param:compiler.enableAutoPipelining=false"
+vadd_CLFLAGS=--xp "param:compiler.enableAutoPipelining=false" -I./src/
 
-EXES=host
+XOS=vadd
+
+# xclbin
+vadd_XOS=vadd
+
 XCLBINS=vadd
 
 # check

@@ -9,10 +9,16 @@ errors_SRCS=./src/host.cpp $(oclHelper_SRCS)
 errors_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(oclHelper_CXXFLAGS) -std=c++0x
 errors_LDFLAGS=$(opencl_LDFLAGS)
 
+EXES=errors
+
 # Kernel
 vector_addition_SRCS=./src/vector_addition.cl
 
-EXES=errors
+XOS=vector_addition
+
+# xclbin
+vector_addition_XOS=vector_addition
+
 XCLBINS=vector_addition
 
 # check

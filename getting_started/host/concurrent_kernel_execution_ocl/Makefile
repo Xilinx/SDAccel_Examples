@@ -8,14 +8,20 @@ include $(COMMON_REPO)/libs/oclHelper/oclHelper.mk
 
 # Host Application
 concurrent_execution_SRCS=./src/host.cpp $(oclHelper_SRCS) $(xcl_SRCS)
-host_HDRS=$(xcl_HDRS)
+concurrent_execution_HDRS=$(xcl_HDRS)
 concurrent_execution_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS) $(oclHelper_CXXFLAGS) -std=c++0x
 concurrent_execution_LDFLAGS=$(opencl_LDFLAGS)
+
+EXES=concurrent_execution
 
 # Kernel
 matrix_ops_SRCS=./src/matrix_ops.cl
 
-EXES=concurrent_execution
+XOS=matrix_ops
+
+# xclbin
+matrix_ops_XOS=matrix_ops
+
 XCLBINS=matrix_ops
 
 # check

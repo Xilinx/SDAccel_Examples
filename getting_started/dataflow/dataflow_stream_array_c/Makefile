@@ -10,11 +10,17 @@ host_HDRS=$(xcl_HDRS)
 host_CXXFLAGS=-I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS)
 host_LDFLAGS=$(opencl_LDFLAGS)
 
+EXES=host
+
 # Kernel
 N_stage_Adders_SRCS=./src/N_stage_adders.cpp
-N_stage_Adders_CLFLAGS= -k N_stage_Adders 
+N_stage_Adders_CLFLAGS= -k N_stage_Adders
 
-EXES=host
+XOS=N_stage_Adders
+
+# xclbin
+N_stage_Adders_XOS=N_stage_Adders
+
 XCLBINS=N_stage_Adders
 
 # check

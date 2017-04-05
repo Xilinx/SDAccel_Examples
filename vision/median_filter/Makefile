@@ -12,10 +12,16 @@ median_HDRS=$(bitmap_HDRS) $(oclHelper_HDRS)
 median_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(bitmap_CXXFLAGS) $(oclHelper_CXXFLAGS)
 median_LDFLAGS=$(opencl_LDFLAGS)
 
+EXES=median
+
 # Median Filter Kernel
 krnl_median_SRCS=./src/krnl_medianFilter.cl
 
-EXES=median
+XOS=krnl_median
+
+# Median Filter xclbin
+krnl_median_XOS=krnl_median
+
 XCLBINS=krnl_median
 
 # check

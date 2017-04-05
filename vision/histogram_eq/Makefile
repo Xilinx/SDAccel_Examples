@@ -12,10 +12,17 @@ equalizer_HDRS=./src/equalizer.h $(xcl_SRCS)
 equalizer_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS) $(opencv_CXXFLAGS)
 equalizer_LDFLAGS=$(opencl_LDFLAGS) $(opencv_LDFLAGS) -lopencv_imgproc -lavcodec -lavformat -lavutil -lswscale
 
+EXES=equalizer
+
 # Equalizer Kernel
 krnl_equalizer_SRCS=./src/krnl_equalizer.cl
+krnl_equalizer_CLFLAGS=-I./src/
 
-EXES=equalizer
+XOS=krnl_equalizer
+
+# Equalizer xclbin
+krnl_equalizer_XOS=krnl_equalizer
+
 XCLBINS=krnl_equalizer
 
 # check

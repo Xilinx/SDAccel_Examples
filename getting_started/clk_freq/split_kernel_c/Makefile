@@ -8,29 +8,41 @@ include $(COMMON_REPO)/libs/bitmap/bitmap.mk
 # Host Application
 host_SRCS=./src/host.cpp $(bitmap_SRCS) $(xcl_SRCS)
 host_CXXFLAGS=-I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS) $(bitmap_CXXFLAGS)
-host_LDFLAGS=$(opencl_LDFLAGS) 
+host_LDFLAGS=$(opencl_LDFLAGS)
 host_CXXFLAGS+=-Wall
-# Switch between GOOD/BAD Examples
-KFLOW:=GOOD
-
-# Kernel
-ifeq ($(KFLOW),GOOD)
-    sketch_SRCS:=./src/sketch.cpp
-else
-    sketch_SRCS:=./src/sketch_bad.cpp
-endif
-
-sketch_CLFLAGS=-k process_image
 
 EXES=host
-XCLBINS=sketch
-EXTRA_CLEAN=./output.bmp 
+
+# Kernel
+sketch_GOOD_SRCS=./src/sketch.cpp
+sketch_GOOD_CLFLAGS=-k process_image -I./src/
+sketch_GOOD_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.2
+
+sketch_BAD_SRCS=./src/sketch_bad.cpp
+sketch_BAD_CLFLAGS=-k process_image -I./src/
+sketch_BAD_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.2
+
+XOS=sketch_GOOD sketch_BAD
+
+# xclbin
+sketch_GOOD_XOS=sketch_GOOD
+sketch_GOOD_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.2
+
+sketch_BAD_XOS=sketch_BAD
+sketch_BAD_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.2
+
+XCLBINS=sketch_GOOD sketch_BAD
+
+EXTRA_CLEAN=./output.bmp
 
 # check
 check_EXE=host
-check_XCLBINS=sketch
+check_XCLBINS=sketch_GOOD sketch_BAD
 check_ARGS=./data/car_128x128.bmp
+check_DEVICES=$(sketch_GOOD_DEVICES)
 
 CHECKS=check
+
+DEVICES=xilinx:adm-pcie-ku3:2ddr-xpr:3.2
 
 include $(COMMON_REPO)/utility/rules.mk

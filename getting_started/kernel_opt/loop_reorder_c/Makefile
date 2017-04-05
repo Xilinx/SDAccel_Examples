@@ -10,11 +10,17 @@ host_HDRS=$(xcl_HDRS)
 host_CXXFLAGS=-I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS)
 host_LDFLAGS=$(opencl_LDFLAGS)
 
+EXES=host
+
 # Kernel
 mmult_SRCS=./src/mmult.cpp
 mmult_CLFLAGS=-k mmult
 
-EXES=host
+XOS=mmult
+
+# xclbin
+mmult_XOS=mmult
+
 XCLBINS=mmult
 
 # check

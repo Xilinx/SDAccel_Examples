@@ -10,10 +10,12 @@ host_global_SRCS=./src/host_global_bandwidth.c $(xcl_SRCS)
 host_global_HDRS=$(xcl_HDRS)
 host_global_CXXFLAGS= $(xcl_CXXFLAGS) $(opencl_CXXFLAGS)
 host_global_LDFLAGS=$(opencl_LDFLAGS)
+EXES=host_global
 
 krnl_host_global_SRCS=./src/kernel.cl
+XOS=krnl_host_global
 
-EXES=host_global
+krnl_host_global_XOS=krnl_host_global
 XCLBINS=krnl_host_global
 
 # check

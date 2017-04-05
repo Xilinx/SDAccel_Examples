@@ -12,10 +12,16 @@ vdotprod_EXE=vdotprod
 vdotprod_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS)
 vdotprod_LDFLAGS=$(opencl_LDFLAGS)
 
+EXES=vdotprod
+
 # hello Kernel
 krnl_vdotprod_SRCS=./src/krnl_vdotprod.cl
 
-EXES=vdotprod
+XOS=krnl_vdotprod
+
+# hello xclbin
+krnl_vdotprod_XOS=krnl_vdotprod
+
 XCLBINS=krnl_vdotprod
 
 # check

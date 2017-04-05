@@ -130,7 +130,7 @@ int main(int argc, char** argv)
 //OPENCL HOST CODE AREA START
     //Create Program and Kernels
     xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "nearest");
+    cl_program program = xcl_import_binary(world, "nearest_GOOD");
     cl_kernel krnl_nearest = xcl_get_kernel(program, "nearest");
 
     //Allocate Buffer in Global Memory

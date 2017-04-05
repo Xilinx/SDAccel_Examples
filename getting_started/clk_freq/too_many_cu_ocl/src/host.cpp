@@ -66,7 +66,7 @@ int main(int argc, char** argv)
 //OPENCL HOST CODE AREA START
     //Create Program and Kernels
     xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "vadd");
+    cl_program program = xcl_import_binary(world, "vadd_GOOD");
     cl_kernel krnl_vector_add = xcl_get_kernel(program, "vadd");
 
     //Allocate Buffer in Global Memory

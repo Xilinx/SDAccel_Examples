@@ -33,8 +33,8 @@
 # *******************************************************************************/
 
 set path_to_hdl "./src/output_stage/hdl"
-set path_to_packaged "./packaged_kernel/output_stage"
-set path_to_tmp_project "./tmp_kernel_pack_3"
+set path_to_packaged "./packaged_kernel/output_stage_${suffix}"
+set path_to_tmp_project "./tmp_kernel_pack_3_${suffix}"
 
 create_project -force kernel_pack $path_to_tmp_project 
 add_files -norecurse [glob $path_to_hdl/*.v $path_to_hdl/*.sv]

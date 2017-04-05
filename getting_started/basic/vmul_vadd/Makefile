@@ -12,6 +12,8 @@ vmulvadd_EXE=vmulvadd
 vmulvadd_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS)
 vmulvadd_LDFLAGS=$(opencl_LDFLAGS)
 
+EXES=vmulvadd
+
 # vmul Kernel
 krnl_vmul_SRCS=./src/krnl_vmul.cl
 krnl_vmul_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
@@ -20,7 +22,16 @@ krnl_vmul_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 krnl_vadd_SRCS=./src/krnl_vadd.cl
 krnl_vadd_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 
-EXES=vmulvadd
+XOS=krnl_vmul krnl_vadd
+
+# vmul xclbin
+krnl_vmul_XOS=krnl_vmul
+krnl_vmul_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
+
+# vadd xclbin
+krnl_vadd_XOS=krnl_vadd
+krnl_vadd_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
+
 XCLBINS=krnl_vmul krnl_vadd
 
 # check

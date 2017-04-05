@@ -1,4 +1,5 @@
 COMMON_REPO := ../../../
+
 #Common Includes
 include ${COMMON_REPO}/utility/boards.mk
 include ${COMMON_REPO}/libs/xcl/xcl.mk
@@ -11,12 +12,17 @@ host_CXXFLAGS=-I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS)
 host_LDFLAGS=$(opencl_LDFLAGS)
 host_CXXFLAGS+=-Wall
 
+EXES=host
+
 # Kernel
 mmult_SRCS=./src/mmult.cpp
-# Kernel definition
 mmult_CLFLAGS=-k mmult
 
-EXES=host
+XOS=mmult
+
+# xclbin
+mmult_XOS=mmult
+
 XCLBINS=mmult
 
 # check

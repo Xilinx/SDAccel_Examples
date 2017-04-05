@@ -18,13 +18,21 @@ smithwaterman_CXXFLAGS=-std=c++0x -DFPGA_DEVICE -I./src/ $(opencl_CXXFLAGS)
 smithwaterman_CXXFLAGS+= $(logger_CXXFLAGS) $(cmdparser_CXXFLAGS) $(xcl_CXXFLAGS)
 smithwaterman_LDFLAGS=$(opencl_LDFLAGS) -fopenmp -lz
 
+EXES=smithwaterman
+
 # Smithwaterman Kernel
 krnl_smithwaterman_SRCS=./src/opencl_sw_maxscore_systolic.cpp
 krnl_smithwaterman_HDRS=./src/sw.h
-krnl_smithwaterman_CLFLAGS=--kernel opencl_sw_maxscore --nk opencl_sw_maxscore:2
+krnl_smithwaterman_CLFLAGS=--kernel opencl_sw_maxscore -I./src/
 krnl_smithwaterman_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 
-EXES=smithwaterman
+XOS=krnl_smithwaterman
+
+# Smithwaterman xclbin
+krnl_smithwaterman_XOS=krnl_smithwaterman
+krnl_smithwaterman_LDCLFLAGS=--nk opencl_sw_maxscore:2
+krnl_smithwaterman_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.3
+
 XCLBINS=krnl_smithwaterman
 
 # check

@@ -12,10 +12,16 @@ tiny_HDRS=$(bitmap_HDRS) $(oclHelper_HDRS)
 tiny_CXXFLAGS=-I./src/ $(bitmap_CXXFLAGS) $(oclHelper_CXXFLAGS) $(opencl_CXXFLAGS)
 tiny_LDFLAGS=$(opencl_LDFLAGS)
 
+EXES=tiny
+
 # Tiny Encryption Kernel
 krnl_tiny_SRCS=./src/krnl_tinyEncryption.cl
 
-EXES=tiny
+XOS=krnl_tiny
+
+# Tiny Encryption xclbin
+krnl_tiny_XOS=krnl_tiny
+
 XCLBINS=krnl_tiny
 
 # check

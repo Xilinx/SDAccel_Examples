@@ -63,35 +63,35 @@ Description:
 
 // Software implementation for finding nearest neighbor
 void nearest_sw(
-				    int *in,      // Input Points Array - represented as integer
-				    int *point,   // Current Point for which the neighbor is found
-				    int *out,     // Output Point
-				    int size,     // Size of the input array
-				    int dim       // #Dimensions of the points
-			    )
+    int *in,      // Input Points Array - represented as integer
+    int *point,   // Current Point for which the neighbor is found
+    int *out,     // Output Point
+    int size,     // Size of the input array
+    int dim       // #Dimensions of the points
+)
 {
     unsigned long curr_dist, min_dist = INFINITY;
-    
+
     for(int i = 0; i < size; i++) {
         curr_dist = 0;
-        
+
         // Calculate distance
         // No need to compute square root as the distances are only compared
         for(int j = 0; j < dim; j++) {
             curr_dist += SQUARE(point[j] - in[i*dim + j]);
         }
-        
+
         // Update minimum distance
         if(curr_dist < min_dist) {
-            
+
             min_dist = curr_dist;
-            
+
             for(int k = 0; k < dim; k++) {
                 out[k] = in[i*dim + k];
             }
         }
     }
-}  
+}
 
 int main(int argc, char** argv)
 {
@@ -99,12 +99,12 @@ int main(int argc, char** argv)
         std::cout << DATA_DIM << "greater than " << MAX_DIM << "!" << " Please use a smaller DATA_DIM" << std::endl;
         return EXIT_FAILURE;
     }
-    
+
     if (DATA_SIZE > MAX_SIZE) {
         std::cout << DATA_SIZE << "greater than " << MAX_SIZE << "!" << " Please use a smaller DATA_SIZE" << std::endl;
         return EXIT_FAILURE;
     }
-    
+
     //Allocate Memory in Host Memory
     size_t vector_size_bytes = sizeof(int) * DATA_SIZE * DATA_DIM;
 
@@ -112,25 +112,25 @@ int main(int argc, char** argv)
     int *source_point = (int*) malloc(sizeof(int)*DATA_DIM);
     int *source_hw_result = (int*) malloc(sizeof(int)*DATA_DIM);
     int *source_sw_result = (int*) malloc(sizeof(int)*DATA_DIM);
-    
+
     srand(time(NULL));
 
     // Create the test data
     for(int i = 0 ; i < DATA_SIZE*DATA_DIM; i++){
         source_in[i] = rand()%100;
     }
-    
+
     for(int i = 0 ; i < DATA_DIM; i++){
         source_point[i] = rand()%100;
     }
-    
+
     int size = DATA_SIZE;
     int dim = DATA_DIM;
-    
+
 //OPENCL HOST CODE AREA START
     //Create Program and Kernels
     xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "nearest");
+    cl_program program = xcl_import_binary(world, "nearest_GOOD");
     cl_kernel krnl_nearest = xcl_get_kernel(program, "nearest");
 
     //Allocate Buffer in Global Memory
@@ -144,7 +144,7 @@ int main(int argc, char** argv)
 
     //Set the Kernel Arguments
     int narg = 0;
-    
+
     xcl_set_kernel_arg(krnl_nearest, narg++, sizeof(cl_mem), &buffer_in);
     xcl_set_kernel_arg(krnl_nearest, narg++, sizeof(cl_mem), &buffer_point);
     xcl_set_kernel_arg(krnl_nearest, narg++, sizeof(cl_mem), &buffer_out);
@@ -165,23 +165,23 @@ int main(int argc, char** argv)
     clReleaseKernel(krnl_nearest);
     xcl_release_world(world);
 //OPENCL HOST CODE AREA END
-    
+
     // Compute Software Results
     nearest_sw(source_in, source_point, source_sw_result, size, dim);
-    
+
     // Compare the nearset distances between software and hardware
     unsigned long dist_sw = 0, dist_hw = 0;
     for(int i = 0; i < dim; i++) {
         dist_sw += SQUARE(source_sw_result[i] - source_point[i]);
         dist_hw += SQUARE(source_sw_result[i] - source_point[i]);
     }
-    
+
     /* Release Memory from Host Memory*/
     free(source_in);
     free(source_point);
     free(source_hw_result);
     free(source_sw_result);
-   
+
     if(dist_sw != dist_hw)
     {
         std::cout << "TEST FAILED." << std::endl; 
@@ -189,7 +189,7 @@ int main(int argc, char** argv)
         std::cout << "\tHardware Min Dist = " << dist_hw << std::endl;
         return -1;
     }
-    
+
     std::cout << "TEST PASSED." << std::endl;
     return 0;
 }

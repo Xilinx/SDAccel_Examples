@@ -11,12 +11,18 @@ prng_HDRS=src/prng.h $(xcl_HDRS)
 prng_CXXFLAGS=-g -Wall -I./src/ -I$(XILINX_SDACCEL)/Vivado_HLS/include/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS)
 prng_LDFLAGS=$(opencl_LDFLAGS)
 
+EXES=prng
+
 # Pseudo Random Number Generator Kernel
 dma_SRCS=src/dma.cpp
 dma_HDRS=src/dma.h
-dma_CLFLAGS=--kernel dma
+dma_CLFLAGS=--kernel dma -I./src/
 
-EXES=prng
+XOS=dma
+
+# Pseudo Random Number Generator xclbin
+dma_XOS=dma
+
 XCLBINS=dma
 
 # check

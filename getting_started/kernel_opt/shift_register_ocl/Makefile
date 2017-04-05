@@ -1,4 +1,3 @@
-
 COMMON_REPO := ../../..
 
 #Common Includes
@@ -8,17 +7,21 @@ include $(COMMON_REPO)/libs/opencl/opencl.mk
 
 # Host Application
 shift_register_SRCS=./src/host.cpp $(oclHelper_SRCS) $(xcl_SRCS)
-host_HDRS=${xcl_HDRS}
-shift_register_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS) $(oclHelper_CXXFLAGS)
+shift_register_HDRS=${xcl_HDRS}
+shift_register_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS) $(oclHelper_CXXFLAGS) -std=c++0x
 shift_register_LDFLAGS=$(opencl_LDFLAGS)
 
-CXXFLAGS+=-std=c++0x
+EXES=shift_register
 
 # Kernel
 fir_SRCS=./src/fir.cl
 fir_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 
-EXES=shift_register
+XOS=fir
+
+# xclbin
+fir_XOS=fir
+
 XCLBINS=fir
 
 # check

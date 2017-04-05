@@ -11,10 +11,16 @@ host_HDRS=$(xcl_HDRS)
 host_CXXFLAGS=-I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS) $(oclHelper_CXXFLAGS)
 host_LDFLAGS=$(opencl_LDFLAGS)
 
+EXES=host
+
 # Kernel
 adder_SRCS=./src/adder.cl
 
-EXES=host
+XOS=adder
+
+# xclbin
+adder_XOS=adder
+
 XCLBINS=adder
 
 # check

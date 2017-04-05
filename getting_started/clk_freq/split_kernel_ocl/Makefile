@@ -10,29 +10,33 @@ host_SRCS=./src/host.cpp $(bitmap_SRCS) $(xcl_SRCS)
 host_CXXFLAGS=-I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS) $(bitmap_CXXFLAGS)
 host_LDFLAGS=$(opencl_LDFLAGS)
 host_CXXFLAGS+=-Wall
-# Switch between GOOD/BAD Examples
-KFLOW:=GOOD
-
-# Kernel
-ifeq ($(KFLOW),GOOD)
-    sketch_SRCS:=./src/sketch.cl
-else
-    sketch_SRCS:=./src/sketch_bad.cl
-endif
-
-sketch_CLFLAGS=-k process_image
-sketch_CLFLAGS+=--xp "param:compiler.xclDataflowFifoDepth=16"
 
 EXES=host
-XCLBINS=sketch
-EXTRA_CLEAN=./output.bmp 
+
+# Kernel
+sketch_GOOD_SRCS:=./src/sketch.cl
+sketch_GOOD_CLFLAGS=-k process_image -I./src/
+sketch_GOOD_CLFLAGS+=--xp "param:compiler.xclDataflowFifoDepth=16"
+
+sketch_BAD_SRCS:=./src/sketch_bad.cl
+sketch_BAD_CLFLAGS=-k process_image -I./src/
+sketch_BAD_CLFLAGS+=--xp "param:compiler.xclDataflowFifoDepth=16"
+
+XOS=sketch_GOOD sketch_BAD
+
+# xclbin
+sketch_GOOD_XOS=sketch_GOOD
+sketch_BAD_XOS=sketch_BAD
+
+XCLBINS=sketch_GOOD sketch_BAD
+
+EXTRA_CLEAN=./output.bmp
 
 # check
 check_EXE=host
-check_XCLBINS=sketch
+check_XCLBINS=sketch_GOOD sketch_BAD
 check_ARGS=./data/car_128x128.bmp
 
 CHECKS=check
-
 
 include $(COMMON_REPO)/utility/rules.mk

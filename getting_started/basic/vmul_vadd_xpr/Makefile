@@ -12,14 +12,24 @@ vmulvadd_EXE=vmulvadd
 vmulvadd_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS)
 vmulvadd_LDFLAGS=$(opencl_LDFLAGS)
 
+EXES=vmulvadd
+
 # vmul Kernel
 krnl_vmul_SRCS=./src/krnl_vmul.cl
 
 # vadd Kernel
 krnl_vadd_SRCS=./src/krnl_vadd.cl
 
-EXES=vmulvadd
+XOS=krnl_vmul krnl_vadd
+
+# vmul Kernel
+krnl_vmul_XOS=krnl_vmul
+
+# vadd Kernel
+krnl_vadd_XOS=krnl_vadd
+
 XCLBINS=krnl_vmul krnl_vadd
+
 
 # check
 check_EXE=vmulvadd

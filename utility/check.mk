@@ -17,6 +17,7 @@ loader = $(call $(1)_RUNNER,$(2))
 #  $(1)_EXE - executable to run
 #  $(1)_ARGS - arguments to use by default for the check
 #  $(1)_DEVICES - whitelist of devices to run the check
+#  $(1)_DEPS - extra dependencies of the check
 #  $(2) - compilation target (i.e. hw, hw_emu, sw_emu)
 #  $(1)_$(2)_ARGS - specialization of arguments for specific targets
 #  $(3) - device name (i.e. xilinx:adm-pcie-ku3:1ddr:3.0)

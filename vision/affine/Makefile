@@ -1,5 +1,4 @@
-
-# affine Application
+# Affine Application
 COMMON_REPO =../../
 
 include $(COMMON_REPO)/utility/boards.mk
@@ -7,17 +6,22 @@ include $(COMMON_REPO)/libs/oclHelper/oclHelper.mk
 include $(COMMON_REPO)/libs/bitmap/bitmap.mk
 include $(COMMON_REPO)/libs/opencl/opencl.mk
 
-# affine Host Application
-
+# Affine Host Application
 affine_SRCS=./src/affine.cpp $(bitmap_SRCS) $(oclHelper_SRCS)
 affine_HDRS=$(bitmap_HDRS) $(oclHelper_HDRS)
 affine_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(bitmap_CXXFLAGS) $(oclHelper_CXXFLAGS)
 affine_LDFLAGS=$(opencl_LDFLAGS) -Wall -std=c++0x -lrt 
 
-# Median Filter Kernel
+EXES=affine
+
+# Affine Kernel
 krnl_affine_SRCS=./src/krnl_affine.cl
 
-EXES=affine
+XOS=krnl_affine
+
+# Affine xclbin
+krnl_affine_XOS=krnl_affine
+
 XCLBINS=krnl_affine
 
 # check

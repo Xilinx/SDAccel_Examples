@@ -10,11 +10,19 @@ host_HDRS=$(xcl_HDRS)
 host_CXXFLAGS=-I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS)
 host_LDFLAGS=$(opencl_LDFLAGS)
 
+EXES=host
+
 # Kernel
 window_array_2d_SRCS=./src/window_array_2d.cl
+window_array_2d_CLFLAGS=-I./src/
 
-EXES=host
+XOS=window_array_2d
+
+# xclbin
+window_array_2d_XOS=window_array_2d
+
 XCLBINS=window_array_2d
+
 
 # check
 check_EXE=host
