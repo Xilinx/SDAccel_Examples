@@ -221,6 +221,7 @@ int main(int argc, char** argv)
 
     xcl_release_world(world);
 //OPENCL HOST CODE AREA END
+
     
     convGolden(weight, image, source_sw_results, i_chan, o_chan);
 
