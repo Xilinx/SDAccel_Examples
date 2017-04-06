@@ -19,7 +19,6 @@ mmult_CLFLAGS=-k mmult
 
 XOS=mmult
 
-# xcl2bin
 mmult_XOS=mmult
 
 XCLBINS=mmult
