@@ -3,14 +3,15 @@ COMMON_REPO := ../../../
 
 # Make file Includes
 include $(COMMON_REPO)/utility/boards.mk
-include $(COMMON_REPO)/libs/xcl/xcl.mk
+include $(COMMON_REPO)/libs/xcl2/xcl2.mk
 include $(COMMON_REPO)/libs/opencl/opencl.mk
 include $(COMMON_REPO)/libs/bitmap/bitmap.mk
 
+CXX:=/tools/batonroot/rodin/devkits/lnx64/gcc-6.2.0/bin/g++
 # Host files and setting
-host_SRCS=./src/host.cpp $(xcl_SRCS) $(bitmap_SRCS)
-host_HDRS=$(xcl_HDRS) $(bitmap_HDRS) 
-host_CXXFLAGS= -I./src/ -g -std=c++0x -I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS) $(bitmap_CXXFLAGS)
+host_SRCS=./src/host.cpp $(xcl2_SRCS) $(bitmap_SRCS)
+host_HDRS=$(xcl2_HDRS) $(bitmap_HDRS) 
+host_CXXFLAGS= -I./src/ -g -std=c++0x -I./src/ $(xcl2_CXXFLAGS) $(opencl_CXXFLAGS) $(bitmap_CXXFLAGS)
 host_LDFLAGS=$(opencl_LDFLAGS)
 
 EXES=host

@@ -26,11 +26,8 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
-
-#include <iostream>
-
-//Includes
-#include "xcl.h"
+#include "xcl2.hpp"
+#include <vector>
 #include "bitmap.h"
 
 int main(int argc, char* argv[])
@@ -40,24 +37,26 @@ int main(int argc, char* argv[])
         std::cout << "Usage: " << argv[0] << " <input bitmap> <golden bitmap>" << std::endl;
         return EXIT_FAILURE ;
     }
-    const char* bitmapFilename = argv[1];
-    const char* goldenFilename = argv[2];
+    std::string bitmapFilename = argv[1];
+    std::string goldenFilename = argv[2];
   
     //Read the input bit map file into memory
-    BitmapInterface image(bitmapFilename);
+    BitmapInterface image(bitmapFilename.data());
     bool result = image.readBitmapFile() ;
     if (!result)
     {
-        std::cout << "ERROR:Unable to Read Input Bitmap File "<< bitmapFilename << std::endl;
+        std::cout << "ERROR:Unable to Read Input Bitmap File "
+            << bitmapFilename.data() << std::endl;
         return EXIT_FAILURE ;
     }
 
     //Read the golden bit map file into memory
-    BitmapInterface goldenImage(goldenFilename);
+    BitmapInterface goldenImage(goldenFilename.data());
     result = goldenImage.readBitmapFile() ;
     if (!result)
     {
-        std::cout << "ERROR:Unable to Read Golden Bitmap File "<< goldenFilename << std::endl;
+        std::cout << "ERROR:Unable to Read Golden Bitmap File "
+            << goldenFilename.data() << std::endl;
         return EXIT_FAILURE ;
     }
 
@@ -66,8 +65,8 @@ int main(int argc, char* argv[])
    
     //Allocate Memory in Host Memory 
     int image_size_bytes = image.numPixels() * sizeof(int); 
-    int* outImage = (int*)(malloc(image_size_bytes)) ;
-    if (outImage == NULL)
+    std::vector<int> outImage(image.numPixels());
+    if (outImage.size() == 0)
     {
         std::cout << "Unable to allocate host memory!" << std::endl ;
         return EXIT_FAILURE ;
@@ -75,10 +74,17 @@ int main(int argc, char* argv[])
 
 //OPENCL HOST CODE AREA START
 
-   //Create Program and Kernels
-    xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "apply_watermark");
-    cl_kernel krnl_applyWatermark= xcl_get_kernel(program, "apply_watermark");
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
+
+    cl::Context context(device);
+    cl::CommandQueue q(context, device);
+    std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+
+    cl::Program::Binaries bins = xcl::import_binary(device_name,"apply_watermark");
+    devices.resize(1);
+    cl::Program program(context, devices, bins);
+    cl::Kernel kernel(program,"apply_watermark");
 
     // For Allocating Buffer to specific Global Memory Bank, user has to use cl_mem_ext_ptr_t
     // and provide the Banks
@@ -89,43 +95,25 @@ int main(int argc, char* argv[])
     inExt.obj = 0   ; outExt.obj = 0; // Setting Obj and Param to Zero
     inExt.param = 0 ; outExt.param = 0; 
 
-    int err;
     //Allocate Buffer in Bank0 of Global Memory for Input Image using Xilinx Extension
-    cl_mem buffer_inImage = clCreateBuffer(world.context, CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX,
-            image_size_bytes, &inExt, &err);
-    if (err != CL_SUCCESS){
-        std::cout << "Error: Failed to allocate device Memory" << std::endl;
-        return EXIT_FAILURE;
-    }
+    cl::Buffer buffer_inImage(context, CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX,
+            image_size_bytes, &inExt);
     //Allocate Buffer in Bank1 of Global Memory for Input Image using Xilinx Extension
-    cl_mem buffer_outImage = clCreateBuffer(world.context, CL_MEM_WRITE_ONLY | CL_MEM_EXT_PTR_XILINX,
-            image_size_bytes, &outExt, NULL);
-    if (err != CL_SUCCESS){
-        std::cout << "Error: Failed to allocate device Memory" << std::endl;
-        return EXIT_FAILURE;
-    }
+    cl::Buffer buffer_outImage(context, CL_MEM_WRITE_ONLY | CL_MEM_EXT_PTR_XILINX,
+            image_size_bytes, &outExt);
 
     //Copy input Image to device global memory
-    xcl_memcpy_to_device(world,buffer_inImage,image.bitmap(),image_size_bytes);
-   
-    //Set the Kernel Arguments
-    xcl_set_kernel_arg(krnl_applyWatermark,0,sizeof(cl_mem),&buffer_inImage);
-    xcl_set_kernel_arg(krnl_applyWatermark,1,sizeof(cl_mem),&buffer_outImage);
-    xcl_set_kernel_arg(krnl_applyWatermark,2,sizeof(int),&width);
-    xcl_set_kernel_arg(krnl_applyWatermark,3,sizeof(int),&height);
+    q.enqueueWriteBuffer(buffer_inImage,CL_TRUE, 0, image_size_bytes, image.bitmap());
+  
+    auto krnl_applyWatermark= cl::KernelFunctor<cl::Buffer&, cl::Buffer& ,int,int>(kernel);
     
     //Launch the Kernel
-    xcl_run_kernel3d(world,krnl_applyWatermark,1,1,1);
+    krnl_applyWatermark(cl::EnqueueArgs(q,cl::NDRange(1,1,1), cl::NDRange(1,1,1)), 
+            buffer_inImage, buffer_outImage, width, height);
 
     //Copy Result from Device Global Memory to Host Local Memory
-    xcl_memcpy_from_device(world, outImage, buffer_outImage,image_size_bytes);
-    clFinish(world.command_queue);
+    q.enqueueReadBuffer(buffer_outImage,CL_TRUE, 0, image_size_bytes, outImage.data());
 
-    //Release Device Memories and Kernels
-    clReleaseMemObject(buffer_inImage);
-    clReleaseMemObject(buffer_outImage);
-    clReleaseKernel(krnl_applyWatermark);
-    xcl_release_world(world);
 //OPENCL HOST CODE AREA END
 
 
@@ -135,19 +123,17 @@ int main(int argc, char* argv[])
         match = 1;
     }else{
         int* goldImgPtr = goldenImage.bitmap();
-        for (int i = 0 ; i < image.numPixels(); i++){
+        for (unsigned int i = 0 ; i < image.numPixels(); i++){
             if (outImage[i] != goldImgPtr[i]){
                 match = 1;
                 printf ("Pixel %d Mismatch Output %x and Expected %x \n", i, outImage[i], goldImgPtr[i]);
-                //break;
+                break;
             }
         }
     }
     
     // Write the final image to disk
-    image.writeBitmapFile(outImage);
-
-    free(outImage) ;
+    image.writeBitmapFile(outImage.data());
     if (match){
         std::cout << "TEST FAILED." << std::endl; 
         return EXIT_FAILURE;
