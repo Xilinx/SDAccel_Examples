@@ -26,19 +26,14 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
-
-#include <iostream>
-#include <cstring>
-
-//OpenCL utility layer include
-#include "xcl.h"
+#include "xcl2.hpp"
+#include <vector>
 
 //define array size to access
 #define DATA_SIZE 8
 //define max local buffer size
 #define N 256
-
-void mmult_sw(int *a, int *b, int *c, int size)
+void mmult_sw(std::vector<int> &a, std::vector<int> &b, std::vector<int> &c, int size)
 {
   int bufa[N][N], bufb[N][N], bufc[N][N];
   for (int i = 0 ; i < size ; i++) {
@@ -69,11 +64,10 @@ int main(int argc, char** argv)
     }
     //Allocate Memory in Host Memory
     size_t vector_size_bytes = sizeof(int) * matrix_size;
-
-    int *source_input_a     = (int *) malloc(vector_size_bytes);
-    int *source_input_b     = (int *) malloc(vector_size_bytes);
-    int *source_hw_results  = (int *) malloc(vector_size_bytes);
-    int *source_sw_results  = (int *) malloc(vector_size_bytes);
+    std::vector<int> source_input_a   (matrix_size);
+    std::vector<int> source_input_b   (matrix_size);
+    std::vector<int> source_hw_results(matrix_size);
+    std::vector<int> source_sw_results(matrix_size);
 
     // Create the test data and Software Result 
     for(int i = 0 ; i < matrix_size ; i++){
@@ -84,39 +78,37 @@ int main(int argc, char** argv)
     mmult_sw(source_input_a, source_input_b, source_sw_results, size);
 
 //OPENCL HOST CODE AREA START
-    //Create Program and Kernel
-    xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "mmult");
-    cl_kernel krnl_mmult = xcl_get_kernel(program, "mmult");
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
+
+    cl::Context context(device);
+    cl::CommandQueue q(context, device);
+    std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+
+    cl::Program::Binaries bins = xcl::import_binary(device_name,"mmult");
+    devices.resize(1);
+    cl::Program program(context, devices, bins);
+    cl::Kernel kernel(program,"mmult");
 
     //Allocate Buffer in Global Memory
-    cl_mem buffer_a = xcl_malloc(world, CL_MEM_READ_ONLY, vector_size_bytes);
-    cl_mem buffer_b = xcl_malloc(world, CL_MEM_READ_ONLY, vector_size_bytes);
-    cl_mem buffer_c = xcl_malloc(world, CL_MEM_WRITE_ONLY, vector_size_bytes);
+    cl::Buffer buffer_a(context, CL_MEM_READ_ONLY,  vector_size_bytes);
+    cl::Buffer buffer_b(context, CL_MEM_READ_ONLY,  vector_size_bytes);
+    cl::Buffer buffer_c(context, CL_MEM_WRITE_ONLY, vector_size_bytes);
 
     //Copy input data to device global memory
-    xcl_memcpy_to_device(world,buffer_a,source_input_a,vector_size_bytes);
-    xcl_memcpy_to_device(world,buffer_b,source_input_b,vector_size_bytes);
+    q.enqueueWriteBuffer(buffer_a,CL_TRUE,0,vector_size_bytes,source_input_a.data());
+    q.enqueueWriteBuffer(buffer_b,CL_TRUE,0,vector_size_bytes,source_input_b.data());
 
-    //Set the Kernel Arguments
-    xcl_set_kernel_arg(krnl_mmult,0,sizeof(cl_mem),&buffer_a);
-    xcl_set_kernel_arg(krnl_mmult,1,sizeof(cl_mem),&buffer_b);
-    xcl_set_kernel_arg(krnl_mmult,2,sizeof(cl_mem),&buffer_c);
-    xcl_set_kernel_arg(krnl_mmult,3,sizeof(int),&size);
+    auto krnl_mmult 
+        = cl::KernelFunctor<cl::Buffer&,cl::Buffer&,cl::Buffer&,int>(kernel);
 
     //Launch the Kernel
-    xcl_run_kernel3d(world,krnl_mmult,1,1,1);
+    krnl_mmult(cl::EnqueueArgs(q,cl::NDRange(1,1,1), cl::NDRange(1,1,1)), 
+            buffer_a,buffer_b,buffer_c, size);
 
     //Copy Result from Device Global Memory to Host Local Memory
-    xcl_memcpy_from_device(world, source_hw_results, buffer_c ,vector_size_bytes);
-    clFinish(world.command_queue);
+    q.enqueueReadBuffer(buffer_c,CL_TRUE,0, vector_size_bytes, source_hw_results.data());
 
-    //Release Device Memories and Kernels
-    clReleaseMemObject(buffer_a);
-    clReleaseMemObject(buffer_b);
-    clReleaseMemObject(buffer_c);
-    clReleaseKernel(krnl_mmult);
-    xcl_release_world(world);
 //OPENCL HOST CODE AREA END
     
     // Compare the results of the Device to the simulation
@@ -134,12 +126,6 @@ int main(int argc, char** argv)
             if ( ( (i+1) % 16) == 0) std::cout << std::endl;
         }
     }
-
-    // Release Memory from Host Memory
-    free(source_input_a);
-    free(source_input_b);
-    free(source_hw_results);
-    free(source_sw_results);
 
     if (match){
         std::cout << "TEST FAILED." << std::endl; 
