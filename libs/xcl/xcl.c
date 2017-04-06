@@ -1,5 +1,5 @@
 /**********
-Copyright (c) 2016, Xilinx, Inc.
+Copyright (c) 2017, Xilinx, Inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -253,6 +253,7 @@ cl_program xcl_import_binary_file(xcl_world world,
 	printf("INFO: Importing %s\n", xclbin_file_name);
 
 	if(access(xclbin_file_name, R_OK) != 0) {
+		return NULL;
 		printf("ERROR: %s xclbin not available please build\n", xclbin_file_name);
 		exit(EXIT_FAILURE);
 	}
@@ -293,97 +294,114 @@ cl_program xcl_import_binary_file(xcl_world world,
 	return program;
 }
 
-cl_program xcl_import_binary(xcl_world world,
-                            const char *xclbin_name
+char *xcl_get_xclbin_name(xcl_world world,
+                                const char *xclbin_name
 ) {
-    char *xcl_bindir = getenv("XCL_BINDIR");
+	char *xcl_bindir = getenv("XCL_BINDIR");
 
-    // typical locations of directory containing xclbin files
-    const char *dirs[] = {
-        xcl_bindir, // $XCL_BINDIR-specified
-        "xclbin",   // command line build
-        "..",       // gui build + run
-        ".",        // gui build, run in build directory
-        NULL
-    };
-    const char **search_dirs = dirs;
-    if (xcl_bindir == NULL) {
-    	search_dirs++;
-    }
+	// typical locations of directory containing xclbin files
+	const char *dirs[] = {
+		xcl_bindir, // $XCL_BINDIR-specified
+		"xclbin",   // command line build
+		"..",       // gui build + run
+		".",        // gui build, run in build directory
+		NULL
+	};
+	const char **search_dirs = dirs;
+	if (xcl_bindir == NULL) {
+		search_dirs++;
+	}
 
-    char *device_name = strdup(world.device_name);
-    if (device_name == NULL) {
-        printf("Error: Out of Memory\n");
-        exit(EXIT_FAILURE);
-    }
+	char *device_name = strdup(world.device_name);
+	if (device_name == NULL) {
+		printf("Error: Out of Memory\n");
+		exit(EXIT_FAILURE);
+	}
 
-    // fix up device name to avoid colons and dots.
-    // xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2 -> xilinx_xil-accel-rd-ku115_4ddr-xpr_3_2
-    for (char *c = device_name; *c != 0; c++) {
-        if (*c == ':' || *c == '.') {
-            *c = '_';
-        }
-    }
+	// fix up device name to avoid colons and dots.
+	// xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2 -> xilinx_xil-accel-rd-ku115_4ddr-xpr_3_2
+	for (char *c = device_name; *c != 0; c++) {
+		if (*c == ':' || *c == '.') {
+			*c = '_';
+		}
+	}
 
-    char *device_name_versionless = strdup(world.device_name);
-    if (device_name_versionless == NULL) {
-        printf("Error: Out of Memory\n");
-        exit(EXIT_FAILURE);
-    }
+	char *device_name_versionless = strdup(world.device_name);
+	if (device_name_versionless == NULL) {
+		printf("Error: Out of Memory\n");
+		exit(EXIT_FAILURE);
+	}
 
-    unsigned short colons = 0;
-    for (char *c = device_name_versionless; *c != 0; c++) {
-        if (*c == ':') {
-            colons++;
-            *c = '_';
-        }
-        /* Zero out version area */
-        if (colons == 3) {
-            *c = '\0';
-        }
-    }
+	unsigned short colons = 0;
+	for (char *c = device_name_versionless; *c != 0; c++) {
+		if (*c == ':') {
+			colons++;
+			*c = '_';
+		}
+		/* Zero out version area */
+		if (colons == 3) {
+			*c = '\0';
+		}
+	}
 
-    const char *file_patterns[] = {
-        "%1$s/%2$s.%3$s.%4$s.xclbin",     // <kernel>.<target>.<device>.xclbin
-        "%1$s/%2$s.%3$s.%5$s.xclbin",     // <kernel>.<target>.<device_versionless>.xclbin
-        "%1$s/binary_container_1.xclbin", // default for gui projects
-        "%1$s/%2$s.xclbin",               // <kernel>.xclbin
-        NULL
-    };
-    char xclbin_file_name[PATH_MAX];
-    memset(xclbin_file_name, 0, PATH_MAX);
-    ino_t ino = 0; // used to avoid errors if an xclbin found via multiple/repeated paths
-    for (const char **dir = search_dirs; *dir != NULL; dir++) {
-        struct stat sb;
-        if (stat(*dir, &sb) == 0 && S_ISDIR(sb.st_mode)) {
-            for (const char **pattern = file_patterns; *pattern != NULL; pattern++) {
-                char file_name[PATH_MAX];
-                memset(file_name, 0, PATH_MAX);
-                snprintf(file_name, PATH_MAX, *pattern, *dir, xclbin_name, world.mode, device_name, device_name_versionless);
-                if (stat(file_name, &sb) == 0 && S_ISREG(sb.st_mode)) {
-                    world.bindir = strdup(*dir);
-                    if (world.bindir == NULL) {
-                        printf("Error: Out of Memory\n");
-                        exit(EXIT_FAILURE);
-                    }
-                    if (*xclbin_file_name && sb.st_ino != ino) {
-                    	printf("Error: multiple xclbin files discovered:\n %s\n %s\n", file_name, xclbin_file_name);
-                    	exit(EXIT_FAILURE);
-                    }
-                    ino = sb.st_ino;
-                    strncpy(xclbin_file_name, file_name, PATH_MAX);
-                }
-            }
-        }
-    }
-    // if no xclbin found, preferred path for error message from xcl_import_binary_file()
-    if (*xclbin_file_name == '\0') {
-        snprintf(xclbin_file_name, PATH_MAX, file_patterns[0], *search_dirs, xclbin_name, world.mode, device_name);
-    }
+	const char *file_patterns[] = {
+		"%1$s/%2$s.%3$s.%4$s.xclbin",     // <kernel>.<target>.<device>.xclbin
+		"%1$s/%2$s.%3$s.%5$s.xclbin",     // <kernel>.<target>.<device_versionless>.xclbin
+		"%1$s/binary_container_1.xclbin", // default for gui projects
+		"%1$s/%2$s.xclbin",               // <kernel>.xclbin
+		NULL
+	};
+	char *xclbin_file_name = (char*) malloc(sizeof(char)*PATH_MAX);
+	memset(xclbin_file_name, 0, PATH_MAX);
+	ino_t ino = 0; // used to avoid errors if an xclbin found via multiple/repeated paths
+	for (const char **dir = search_dirs; *dir != NULL; dir++) {
+		struct stat sb;
+		if (stat(*dir, &sb) == 0 && S_ISDIR(sb.st_mode)) {
+			for (const char **pattern = file_patterns; *pattern != NULL; pattern++) {
+				char file_name[PATH_MAX];
+				memset(file_name, 0, PATH_MAX);
+				snprintf(file_name, PATH_MAX, *pattern, *dir, xclbin_name, world.mode, device_name, device_name_versionless);
+				if (stat(file_name, &sb) == 0 && S_ISREG(sb.st_mode)) {
+					world.bindir = strdup(*dir);
+					if (world.bindir == NULL) {
+						printf("Error: Out of Memory\n");
+						exit(EXIT_FAILURE);
+					}
+					if (*xclbin_file_name && sb.st_ino != ino) {
+						printf("Error: multiple xclbin files discovered:\n %s\n %s\n", file_name, xclbin_file_name);
+						exit(EXIT_FAILURE);
+					}
+					ino = sb.st_ino;
+					strncpy(xclbin_file_name, file_name, PATH_MAX);
+				}
+			}
+		}
+	}
+	// if no xclbin found, preferred path for error message from xcl_import_binary_file()
+	if (*xclbin_file_name == '\0') {
+		snprintf(xclbin_file_name, PATH_MAX, file_patterns[0], *search_dirs, xclbin_name, world.mode, device_name);
+	}
 
-    free(device_name);
+	free(device_name);
 
-    return xcl_import_binary_file(world, xclbin_file_name);
+	return xclbin_file_name;
+}
+
+cl_program xcl_import_binary(xcl_world world,
+                             const char *xclbin_name
+) {
+	char* xclbin_file_name = xcl_get_xclbin_name(world, xclbin_name);
+
+	cl_program program = xcl_import_binary_file(world, xclbin_file_name);
+
+	if(program == NULL) {
+		printf("ERROR: %s xclbin not available please build\n", xclbin_file_name);
+		exit(EXIT_FAILURE);
+	}
+
+	free(xclbin_file_name);
+
+	return program;
 }
 
 cl_program xcl_import_source(xcl_world world,

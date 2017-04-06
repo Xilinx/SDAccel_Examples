@@ -26,7 +26,6 @@ XCLBINS=adder
 # check
 check_EXE=host
 check_XCLBINS=adder
-check_DEVICES=$(adder_DEVICES)
 
 CHECKS=check
 

@@ -26,7 +26,6 @@ XCLBINS=mmult
 # check
 check_EXE=host
 check_XCLBINS=mmult
-check_DEVICES=$(mmult_DEVICES)
 
 CHECKS=check
 
