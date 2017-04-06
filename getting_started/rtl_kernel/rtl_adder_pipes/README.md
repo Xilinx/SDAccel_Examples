@@ -47,6 +47,8 @@ Application code is located in the src directory. Accelerator binary files will 
 ```
 Makefile
 README.md
+README.md
+README.md
 description.json
 scripts/gen_adder_xo.tcl
 scripts/gen_input_xo.tcl

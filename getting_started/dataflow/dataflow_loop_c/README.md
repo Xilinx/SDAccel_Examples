@@ -50,6 +50,10 @@ Application code is located in the src directory. Accelerator binary files will 
 .gitignore
 Makefile
 README.md
+README.md
+README.md
+description.json
+description.json
 description.json
 src/adder.cpp
 src/host.cpp
