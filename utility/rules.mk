@@ -40,27 +40,77 @@ EXE_GOALS+= $(1)
 
 endef
 
-# mk_xclbin - create an xclbin from a set of krnl sources
+# mk_xo - create an xo from a set of kernel sources
 #  CLC - kernel compiler to use
 #  CLFLAGS - flags to pass to the compiler
-#  $(1) - base name for this xclbin
-#  $(1)_SRCS - set of source files
-#  $(1)_HDRS - set of header files
-#  $(1)_CLFLAGS - set clflags per xclbin
+#  $(1) - base name for this kernel
+#  $(1)_SRCS - set of source kernel
+#  $(1)_HDRS - set of header kernel
+#  $(1)_CLFLAGS - set clflags per kernel 
 #  $(1)_DEVICES - set whitelist for devices
 #  $(1)_TARGETS - set whitelist for targets
 #  $(2) - compilation target (i.e. hw, hw_emu, sw_emu)
 #  $(3) - device name (i.e. xilinx:adm-pcie-ku3:1ddr:3.0)
 #  $(3)_CLFLAGS - set clflags per device
 
+define mk_xo
+
+ifneq ($(filter $(2),$(call target_whitelist,$(1))),)
+ifneq ($(filter $(3),$(call device_whitelist,$(1))),)
+
+$(XCLBIN_DIR)/$(1).$(2).$(call sanitize_dsa,$(3)).xo: $($(1)_SRCS) $($(1)_HDRS)
+	mkdir -p ${XCLBIN_DIR}
+	$(CLC) -c $(CLFLAGS) $($(1)_CLFLAGS) $($(1)_$(call sanitize_dsa,$(3))_CLFLAGS) -o $$@ -t $(2) --xdevice $(3) $($(1)_SRCS)
+
+XO_GOALS+= $(XCLBIN_DIR)/$(1).$(2).$(call sanitize_dsa,$(3)).xo
+
+endif
+endif
+
+endef
+
+# mk_rtlxo - create an xo from a tcl and RTL sources
+#   VIVADO - version of Vivado to use
+#   $(1) - base name for this kernel
+#   $(1)_HDLSRCS - source files used in compilation
+#   $(1)_TCL - tcl file to use for build
+#   $(2) - target to build for
+#   $(3) - device to build for
+define mk_rtlxo
+
+ifneq ($(filter $(2),$(call target_whitelist,$(1))),)
+ifneq ($(filter $(3),$(call device_whitelist,$(1))),)
+
+$(XCLBIN_DIR)/$(1).$(2).$(call sanitize_dsa,$(3)).xo: $($(1)_HDLSRCS)
+	mkdir -p $(XCLBIN_DIR)
+	$(VIVADO) -mode batch -source $($(1)_TCL) -tclargs $(XCLBIN_DIR)/$(1).$(2).$(call sanitize_dsa,$(3)).xo $(1) $(2) $(call sanitize_dsa,$(3))
+
+XO_GOALS+=$(XCLBIN_DIR)/$(1).$(2).$(call sanitize_dsa,$(3)).xo
+
+endif
+endif
+
+endef
+
+# mk_xclbin - create an xclbin from a set of krnl sources
+#  LDCLC - kernel linker to use
+#  LDCLFLAGS - flags to pass to the linker
+#  $(1) - base name for this xclbin
+#  $(1)_XOS - list of xos to link
+#  $(1)_DEVICES - set whitelist for devices
+#  $(1)_TARGETS - set whitelist for targets
+#  $(2) - compilation target (i.e. hw, hw_emu, sw_emu)
+#  $(3) - device name (i.e. xilinx:adm-pcie-ku3:1ddr:3.0)
+#  $(3)_LDCLFLAGS - set linker flags per device
+
 define mk_xclbin
 
 ifneq ($(filter $(2),$(call target_whitelist,$(1))),)
 ifneq ($(filter $(3),$(call device_whitelist,$(1))),)
 
-$(XCLBIN_DIR)/$(1).$(2).$(call sanitize_dsa,$(3)).xclbin: $($(1)_SRCS) $($(1)_HDRS)
+$(XCLBIN_DIR)/$(1).$(2).$(call sanitize_dsa,$(3)).xclbin: $(addprefix $(XCLBIN_DIR)/,$(addsuffix .$(2).$(call sanitize_dsa,$(3)).xo, $($(1)_XOS)))
 	mkdir -p ${XCLBIN_DIR}
-	$(CLC) $(CLFLAGS) $($(1)_CLFLAGS) $($(1)_$(call sanitize_dsa,$(3))_CLFLAGS) -o $$@ -t $(2) --xdevice $(3) $($(1)_SRCS)
+	$(LDCLC) -l $(LDCLFLAGS) $($(1)_LDCLFLAGS) $($(1)_$(call sanitize_dsa,$(3))_LDCLFLAGS) -o $$@ -t $(2) --xdevice $(3) $(addprefix $(XCLBIN_DIR)/,$(addsuffix .$(2).$(call sanitize_dsa,$(3)).xo,$($(1)_XOS)))
 
 XCLBIN_GOALS+= $(XCLBIN_DIR)/$(1).$(2).$(call sanitize_dsa,$(3)).xclbin
 
@@ -71,6 +121,8 @@ endef
 
 $(foreach exe,$(EXES),$(eval $(call mk_exe,$(exe))))
 
+$(foreach xo,$(XOS),$(foreach target,$(TARGETS),$(foreach device,$(DEVICES),$(eval $(call mk_xo,$(xo),$(target),$(device))))))
+$(foreach rtlxo,$(RTLXOS),$(foreach target,$(TARGETS),$(foreach device,$(DEVICES),$(eval $(call mk_rtlxo,$(rtlxo),$(target),$(device))))))
 $(foreach xclbin,$(XCLBINS),$(foreach target,$(TARGETS),$(foreach device,$(DEVICES),$(eval $(call mk_xclbin,$(xclbin),$(target),$(device))))))
 
 .PHONY: all
@@ -79,15 +131,20 @@ all: $(EXE_GOALS) $(XCLBIN_GOALS)
 .PHONY: exe
 exe: $(EXE_GOALS)
 
+.PHONY: xo
+xo: $(XO_GOALS)
+
 .PHONY: xclbin
 xclbin: $(XCLBIN_GOALS)
 
 .PHONY: docs
 docs: README.md
 
-.PHONY: cleanall clean
+.PHONY: cleanall
 cleanall: clean
 	rm -rf $(XCLBIN_DIR)
+
+.PHONY: clean
 clean:
 	rm -rf $(EXE_GOALS) $(XCLBIN_DIR)/{*sw_emu*,*hw_emu*} sdaccel_* TempConfig system_estimate.xtxt *.rpt
 	rm -rf src/*.ll _xocc_* .Xil emconfig.json $(EXTRA_CLEAN) dltmp* xmltmp* *.log *.jou *.wcfg *.wdb
