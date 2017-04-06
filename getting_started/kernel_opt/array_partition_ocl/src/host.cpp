@@ -143,6 +143,14 @@ int main(int argc, char **argv) {
         xcl_run_kernel3d(world, matmul_partition_kernel, 1, 1, 1);
     xcl_memcpy_from_device(world, C.data(), buffer_c, array_size_bytes);
     verify(gold, C);
+
+    clReleaseMemObject(buffer_a);
+    clReleaseMemObject(buffer_b);
+    clReleaseMemObject(buffer_c);
+    clReleaseKernel(matmul_kernel);
+    clReleaseKernel(matmul_partition_kernel);
+    clReleaseProgram(program);
+    xcl_release_world(world);
     printf("| %-23s | %23lu |\n", "matmul: partition", matmul_partition_time);
 
     printf("|-------------------------+-------------------------|\n");

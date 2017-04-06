@@ -175,7 +175,7 @@ unsigned long run_opencl_cnn(
     clReleaseMemObject(buffer_weight);
     clReleaseMemObject(buffer_output);
     clReleaseKernel(krnl_cnn_conv);
-
+    clReleaseProgram(program);
     return duration;
 }
 

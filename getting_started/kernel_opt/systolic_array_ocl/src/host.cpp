@@ -133,6 +133,7 @@ int main(int argc, char** argv)
     clReleaseMemObject(buffer_in2);
     clReleaseMemObject(buffer_output);
     clReleaseKernel(krnl_systolic_array);
+    clReleaseProgram(program);
     xcl_release_world(world);
 //OPENCL HOST CODE AREA END
  

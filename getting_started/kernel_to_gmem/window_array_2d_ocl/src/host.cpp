@@ -107,6 +107,7 @@ int main(int argc, char** argv)
     clReleaseKernel(krnl_read_data);
     clReleaseKernel(krnl_compute);
     clReleaseKernel(krnl_write_data);
+    clReleaseProgram(program);
     xcl_release_world(world);
 //OPENCL HOST CODE AREA END
 

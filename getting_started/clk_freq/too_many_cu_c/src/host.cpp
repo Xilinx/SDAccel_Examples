@@ -130,13 +130,14 @@ int main(int argc, char** argv)
         xcl_memcpy_from_device(world, source_hw_results, buffer_output,vector_size_bytes);
         clFinish(world.command_queue);
 
+    #endif
         //Release Device Memories and Kernels
         clReleaseMemObject(buffer_in1);
         clReleaseMemObject(buffer_in2);
         clReleaseMemObject(buffer_output);
         clReleaseKernel(krnl_vector_add);
+        clReleaseProgram(program);
         xcl_release_world(world);
-    #endif
 //OPENCL HOST CODE AREA END
     
     // Compare the results of the Device to the simulation

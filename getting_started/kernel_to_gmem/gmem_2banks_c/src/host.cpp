@@ -125,6 +125,7 @@ int main(int argc, char* argv[])
     clReleaseMemObject(buffer_inImage);
     clReleaseMemObject(buffer_outImage);
     clReleaseKernel(krnl_applyWatermark);
+    clReleaseProgram(program);
     xcl_release_world(world);
 //OPENCL HOST CODE AREA END
 

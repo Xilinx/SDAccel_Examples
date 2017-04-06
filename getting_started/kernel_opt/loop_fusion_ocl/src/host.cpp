@@ -166,6 +166,7 @@ int main(int argc, char **argv) {
 
   // release other opencl objects
   clReleaseKernel(kernel);
+  clReleaseProgram(program);
   xcl_release_world(world);
 
   printf("TEST PASSED\n");

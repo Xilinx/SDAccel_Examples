@@ -155,6 +155,7 @@ int main(int argc, char** argv)
     clReleaseKernel(krnl_input_stage);
     clReleaseKernel(krnl_adder_stage);
     clReleaseKernel(krnl_output_stage);
+    clReleaseProgram(program);
     xcl_release_world(world);
 //OPENCL HOST CODE AREA END
     

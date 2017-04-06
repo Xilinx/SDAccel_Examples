@@ -83,6 +83,7 @@ int main(int argc, char** argv)
     //Release Device Memories and Kernels
     clReleaseMemObject(buffer_rw);
     clReleaseKernel(krnl_vadd);
+    clReleaseProgram(program);
     xcl_release_world(world);
 //OPENCL HOST CODE AREA END
     

@@ -300,6 +300,8 @@ int main(int argc, char** argv) {
     printf("Execution time = %f (sec) \n", dsduration);
     printf("Concurrent Read and Write Throughput = %f (MB/sec) \n", mbpersec);
 
+    clReleaseKernel(krnl);
+    clReleaseProgram(program);
     xcl_release_world(world);
 
     return EXIT_SUCCESS;

@@ -15,13 +15,11 @@ EXES=host
 # vadd Kernels
 vadd_SRCS=./src/vadd.cl
 vadd_CLFLAGS=-k vadd
-vadd_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 
 XOS=vadd
 
 # vadd xclbin
 vadd_XOS=vadd
-vadd_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.2
 
 XCLBINS=vadd
 
@@ -32,7 +30,5 @@ check_DEVICES=$(vadd_DEVICES)
 
 CHECKS=check
 
-#Changing Default Device
-DEVICES:=xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 include $(COMMON_REPO)/utility/rules.mk
 

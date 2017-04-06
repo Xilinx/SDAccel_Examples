@@ -154,7 +154,6 @@ int main(int argc, char **argv) {
     clReleaseMemObject(buffer_signal);
     clReleaseMemObject(buffer_coeff);
     clReleaseMemObject(buffer_output);
-
     clReleaseProgram(program);
     xcl_release_world(world);
 

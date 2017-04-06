@@ -18,14 +18,13 @@ EXES=host
 # Kernel
 apply_watermark_SRCS=./src/apply_watermark.cl
 apply_watermark_CLFLAGS=-s -g -I./src --max_memory_ports apply_watermark
-apply_watermark_DEVICES=xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 
 XOS=apply_watermark
 
 # xclbin
 apply_watermark_XOS=apply_watermark
 apply_watermark_LDCLFLAGS=--xp misc:map_connect=add.kernel.apply_watermark_1.M_AXI_GMEM0.core.OCL_REGION_0.M00_AXI --xp misc:map_connect=add.kernel.apply_watermark_1.M_AXI_GMEM1.core.OCL_REGION_0.M01_AXI
-apply_watermark_DEVICES=xilinx:adm-pcie-ku3:2ddr-xpr:3.3
+apply_watermark_DEVICES=xilinx:adm-pcie-ku3:2ddr-xpr:3.3 xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3
 
 XCLBINS=apply_watermark
 
@@ -39,7 +38,5 @@ check_DEVICES=$(apply_watermark_DEVICES)
 
 CHECKS=check
 
-#changing Default Device for this example
-DEVICES=xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 include $(COMMON_REPO)/utility/rules.mk
 

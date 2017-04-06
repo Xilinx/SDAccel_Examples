@@ -65,6 +65,7 @@ int main(int argc, char* argv[]) {
 
     clReleaseMemObject(buffer_a);
     clReleaseKernel(krnl);
+    clReleaseProgram(program);
     xcl_release_world(world);
 
 }

@@ -435,6 +435,13 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
+    clReleaseMemObject(buffer_a);
+    clReleaseMemObject(buffer_b);
+    clReleaseMemObject(buffer_result);
+    clReleaseKernel(kernel);
+    clReleaseProgram(program);
+    clReleaseCommandQueue(command_queue);
+	clReleaseContext(context);
     printf("TEST PASSED\n");
     return EXIT_SUCCESS;
 }

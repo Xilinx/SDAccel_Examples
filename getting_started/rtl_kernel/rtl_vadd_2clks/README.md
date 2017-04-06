@@ -16,9 +16,11 @@ This README file contains the following sections:
 
 
 ## 1. OVERVIEW
-This example shows vector addition with 2 kernel clocks using RTL Kernel. 
+This example shows vector addition with 2 kernel clocks using RTL Kernel. Design contains two compute units of kernel. One compute unit is running at 150MHz and another compute unit is running at 250MHz.
 
-***KEY CONCEPTS:*** RTL Kernel
+***KEY CONCEPTS:*** RTL Kernel, Multiple Kernel Clocks
+
+***KEYWORDS:*** --kernel_frequency
 
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:

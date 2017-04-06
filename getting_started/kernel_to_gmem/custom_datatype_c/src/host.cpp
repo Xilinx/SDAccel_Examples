@@ -95,6 +95,7 @@ int main(int argc, char* argv[])
     clReleaseMemObject(buffer_rgbImage);
     clReleaseMemObject(buffer_hsvImage);
     clReleaseKernel(krnl_rgb2hsv);
+    clReleaseProgram(program);
     xcl_release_world(world);
 //OPENCL HOST CODE AREA END
 

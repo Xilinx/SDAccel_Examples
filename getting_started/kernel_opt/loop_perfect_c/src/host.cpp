@@ -163,6 +163,7 @@ int main(int argc, char** argv)
     clReleaseMemObject(buffer_point);
     clReleaseMemObject(buffer_out);
     clReleaseKernel(krnl_nearest);
+    clReleaseProgram(program);
     xcl_release_world(world);
 //OPENCL HOST CODE AREA END
     

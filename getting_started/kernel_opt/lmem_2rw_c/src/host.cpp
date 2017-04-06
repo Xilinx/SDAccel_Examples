@@ -90,6 +90,7 @@ int main(int argc, char** argv)
     clReleaseMemObject(buffer_in2);
     clReleaseMemObject(buffer_output);
     clReleaseKernel(krnl_vector_add);
+    clReleaseProgram(program);
     xcl_release_world(world);
 //OPENCL HOST CODE AREA END
     

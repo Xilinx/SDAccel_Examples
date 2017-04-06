@@ -440,6 +440,7 @@ int main(int argc, char **argv) {
   OCL_CHECK(clReleaseKernel(kernel_mscale));
   OCL_CHECK(clReleaseKernel(kernel_madd));
   OCL_CHECK(clReleaseKernel(kernel_mmult));
+  OCL_CHECK(clReleaseProgram(program));
   xcl_release_world(world);
 
   printf(

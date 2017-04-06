@@ -16,30 +16,23 @@ EXES=host
 # nearest kernels
 nearest_GOOD_SRCS=./src/nearest_good.cpp
 nearest_GOOD_CLFLAGS=-k nearest
-nearest_GOOD_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 
 nearest_BAD_SRCS=./src/nearest_bad.cpp
 nearest_BAD_CLFLAGS=-k nearest
-nearest_BAD_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 
 XOS=nearest_GOOD nearest_BAD
 
 # nearest xclbin
 nearest_GOOD_XOS=nearest_GOOD
-nearest_GOOD_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 
 nearest_BAD_XOS=nearest_BAD
-nearest_BAD_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 
 XCLBINS=nearest_GOOD nearest_BAD
 
 # check
 check_EXE=host
 check_XCLBINS=nearest_GOOD nearest_BAD
-check_DEVICES=$(nearest_GOOD_DEVICES)
 
 CHECKS=check
-
-DEVICES:=xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 
 include ${COMMON_REPO}/utility/rules.mk

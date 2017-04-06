@@ -119,6 +119,7 @@ int main(int argc, char* argv[]) {
     clReleaseMemObject(dev_in);
     clReleaseMemObject(dev_out);
     clReleaseKernel(krnl);
+    clReleaseProgram(program);
     xcl_release_world(world);
 
     /* Compare the results of the kernel to the simulation */

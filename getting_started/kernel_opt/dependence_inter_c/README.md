@@ -16,7 +16,7 @@ This README file contains the following sections:
 
 
 ## 1. OVERVIEW
-This Example to demostrate OpenCL xcl_dependence attribute. Using xcl_dependence user can provide additional dependency details to compiler which allow compiler to perform unrolling/pipelining to get better performance.
+This Example to demonstrate HLS pragma 'DEPENDENCE'. Using 'DEPENDENCE' pragma, user can provide additional dependency details to compiler which allow compiler to perform unrolling/pipelining to get better performance.
 
 ***KEY CONCEPTS:*** Inter Dependence
 

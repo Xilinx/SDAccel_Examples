@@ -15,13 +15,11 @@ EXES=host
 # Kernel
 adder_SRCS=./src/adder.cpp
 adder_CLFLAGS= -k adder
-adder_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 
 XOS=adder
 
 # xclbins
 adder_XOS=adder
-adder_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 
 XCLBINS=adder
 
@@ -32,6 +30,4 @@ check_DEVICES=$(adder_DEVICES)
 
 CHECKS=check
 
-#Changing Default Device
-DEVICES:=xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 include $(COMMON_REPO)/utility/rules.mk

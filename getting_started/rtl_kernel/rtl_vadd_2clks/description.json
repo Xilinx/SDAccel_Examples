@@ -1,9 +1,10 @@
 {
     "example": "Vector Addition with 2 Kernel Clocks",
     "overview": [
-        "This example shows vector addition with 2 kernel clocks using RTL Kernel. "
+        "This example shows vector addition with 2 kernel clocks using RTL Kernel. Design contains two compute units of kernel. One compute unit is running at 150MHz and another compute unit is running at 250MHz."
     ],
-    "key_concepts": [ "RTL Kernel"],
+    "key_concepts": [ "RTL Kernel", "Multiple Kernel Clocks"],
+    "keywords": [ "--kernel_frequency"],
     "board": ["Xilinx KU115"],
     "targets": ["hw", "hw_emu"],
     "em_cmd": "./host",

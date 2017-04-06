@@ -52,7 +52,6 @@ adder_LDCLFLAGS= \
 	   -k krnl_input_stage_rtl  --nk krnl_input_stage_rtl:1:krnl_input_stage_rtl_cu0 \
 	   -k krnl_adder_stage_rtl  --nk krnl_adder_stage_rtl:1:krnl_adder_stage_rtl_cu0 \
 	   -k krnl_output_stage_rtl --nk krnl_output_stage_rtl:1:krnl_output_stage_rtl_cu0
-adder_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 adder_TARGETS=hw_emu hw
 
 XCLBINS=adder
@@ -62,7 +61,6 @@ EXTRA_CLEAN=tmp_kernel_pack* packaged_kernel*
 # check
 check_EXE=host
 check_XCLBINS=adder
-check_DEVICES=$(adder_DEVICES)
 check_TARGETS=$(adder_TARGETS)
 
 CHECKS=check
@@ -72,7 +70,5 @@ ifneq (,$(findstring sw_emu,$(TARGETS)))
 $(warning WARNING:RTL Kernels do not support sw_emu TARGETS. Please use hw_emu for running RTL kernel Emulation)
 endif
 
-#Changing Default device for this example
-DEVICES:=xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 include $(COMMON_REPO)/utility/rules.mk
 
