@@ -26,9 +26,7 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
-
-#include "CL/cl.h"
-#include "xcl.h"
+#include "xcl2.hpp"
 
 #include <algorithm>
 #include <cstdio>
@@ -47,17 +45,6 @@ using std::make_pair;
 using std::numeric_limits;
 using std::uniform_int_distribution;
 using std::vector;
-
-// Wrap any OpenCL API calls that return error code(cl_int)
-// with the below macro to quickly check for an error
-#define OCL_CHECK(call)                                                        \
-  do {                                                                         \
-    cl_int err = call;                                                         \
-    if (err != CL_SUCCESS) {                                                   \
-      printf("Error from " #call ", error code is %d\n", err);                 \
-      exit(1);                                                                 \
-    }                                                                          \
-  } while (0);
 
 void find_nearest_neighbor(vector<int> &out, const int dim,
                            const vector<int> &search_points,
@@ -110,63 +97,71 @@ int main(int argc, char **argv) {
   print_point(gold);
 
   size_t array_size_bytes = num_points * num_dims * sizeof(int);
+  std::vector<cl::Device> devices = xcl::get_xil_devices();
+  cl::Device device = devices[0];
 
-  xcl_world world = xcl_world_single();
-  cl_program program = xcl_import_binary(world, "nearest_neighbor");
+  cl::Context context(device);
+  cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+  std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
 
-  cl_mem buffer_out =
-      xcl_malloc(world, CL_MEM_WRITE_ONLY, num_dims * sizeof(int));
-  cl_mem buffer_points = xcl_malloc(world, CL_MEM_READ_ONLY, array_size_bytes);
-  cl_mem buffer_in =
-      xcl_malloc(world, CL_MEM_READ_ONLY, num_dims * sizeof(int));
+  //Create Program 
+  cl::Program::Binaries bins = xcl::import_binary(device_name,"nearest_neighbor");
+  devices.resize(1);
+  cl::Program program(context, devices, bins);
+
+  cl::Buffer buffer_out   (context, CL_MEM_WRITE_ONLY,num_dims * sizeof(int));
+  cl::Buffer buffer_points(context, CL_MEM_READ_ONLY, array_size_bytes);
+  cl::Buffer buffer_in    (context, CL_MEM_READ_ONLY, num_dims * sizeof(int));
 
   // copy the input arrays to memories allocated on the device
-  xcl_memcpy_to_device(world, buffer_points, data.data(), array_size_bytes);
-  xcl_memcpy_to_device(world, buffer_in, input.data(), num_dims * sizeof(int));
+  q.enqueueWriteBuffer(buffer_points,CL_TRUE,0,array_size_bytes, data.data());
+  q.enqueueWriteBuffer(buffer_in,CL_TRUE,0,num_dims * sizeof(int),input.data());
 
   printf( "|--------------------------------+-------------------------|\n"
           "| Kernel                         |    Wall-Clock Time (ns) |\n"
           "|--------------------------------+-------------------------|\n");
 
   // set kernel parameters
-  cl_kernel kernel = xcl_get_kernel(program, "nearest_neighbor");
-  xcl_set_kernel_arg(kernel, 0, sizeof(cl_mem), &buffer_out);
-  xcl_set_kernel_arg(kernel, 1, sizeof(cl_mem), &buffer_points);
-  xcl_set_kernel_arg(kernel, 2, sizeof(cl_mem), &buffer_in);
-  xcl_set_kernel_arg(kernel, 3, sizeof(cl_int), &num_points);
-  xcl_set_kernel_arg(kernel, 4, sizeof(cl_int), &num_dims);
+  cl::Kernel kernel(program, "nearest_neighbor");
+  kernel.setArg(0,buffer_out);
+  kernel.setArg(1,buffer_points);
+  kernel.setArg(2,buffer_in);
+  kernel.setArg(3,num_points);
+  kernel.setArg(4,num_dims);
 
-  auto simple_time = xcl_run_kernel3d(world, kernel, 1, 1, 1);
+  cl::Event event;
+  uint64_t nstimestart, nstimeend;
+  q.enqueueTask(kernel,NULL,&event);
+  q.finish();
+  event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart);
+  event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend);
+  auto simple_time = nstimeend-nstimestart;
   printf("| %-30s | %23lu |\n", "Nearest Neighbor: simple", simple_time);
 
-  xcl_memcpy_from_device(world, out.data(), buffer_out, num_dims * sizeof(int));
+  q.enqueueReadBuffer(buffer_out, CL_TRUE, 0, num_dims * sizeof(int), out.data());
   verify(gold, out);
 
   // set kernel parameters
-  cl_kernel kernel_loop = xcl_get_kernel(program, "nearest_neighbor_loop_fusion");
-  xcl_set_kernel_arg(kernel_loop, 0, sizeof(cl_mem), &buffer_out);
-  xcl_set_kernel_arg(kernel_loop, 1, sizeof(cl_mem), &buffer_points);
-  xcl_set_kernel_arg(kernel_loop, 2, sizeof(cl_mem), &buffer_in);
-  xcl_set_kernel_arg(kernel_loop, 3, sizeof(cl_int), &num_points);
-  xcl_set_kernel_arg(kernel_loop, 4, sizeof(cl_int), &num_dims);
+  cl::Kernel kernel_loop(program, "nearest_neighbor_loop_fusion");
+  kernel_loop.setArg(0,buffer_out);
+  kernel_loop.setArg(1,buffer_points);
+  kernel_loop.setArg(2,buffer_in);
+  kernel_loop.setArg(3,num_points);
+  kernel_loop.setArg(4,num_dims);
 
-  auto loop_time = xcl_run_kernel3d(world, kernel_loop, 1, 1, 1);
+  q.enqueueTask(kernel_loop,NULL,&event);
+  q.finish();
+  event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart);
+  event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend);
+  auto loop_time = nstimeend-nstimestart;
   printf("| %-30s | %23lu |\n", "Nearest Neighbor: loop fusion", loop_time);
 
-  xcl_memcpy_from_device(world, out.data(), buffer_out, num_dims * sizeof(int));
+  q.enqueueReadBuffer(buffer_out, CL_TRUE, 0, num_dims * sizeof(int), out.data());
+
   verify(gold, out);
   printf("|--------------------------------+-------------------------|\n");
   printf("Note: Wall Clock Time is meaningful for real hardware execution only, not for emulation.\n");
   printf("Please refer to profile summary for kernel execution time for hardware emulation.\n");
-
-  // free memory buffers allocated on the accelerator device
-  OCL_CHECK(clReleaseMemObject(buffer_out));
-  OCL_CHECK(clReleaseMemObject(buffer_points));
-  OCL_CHECK(clReleaseMemObject(buffer_in));
-
-  // release other opencl objects
-  clReleaseKernel(kernel);
-  xcl_release_world(world);
 
   printf("TEST PASSED\n");
   return EXIT_SUCCESS;
