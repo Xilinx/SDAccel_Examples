@@ -26,35 +26,18 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
-
-#include <iostream>
-#include <cstring>
-#include <stdio.h>
-#include <math.h>
-
-//OpenCL utility layer include
-#include "xcl.h"
+#include "xcl2.hpp"
+#include <vector>
 #include "host.h"
-
-//Utility to print array
-void print_array(DTYPE *mat, const char *name, int size, int dim) {
-    int i;
-    printf("%s\n", name);
-    for (i=0;i<size;i++) {
-      printf("%d ",mat[i]);
-      if (((i+1) % dim) == 0)
-        printf("\n");
-    }
-}
 
 int main(int argc, char** argv)
 {
 
     //Allocate Memory in Host Memory
     size_t vector_size_bytes = sizeof(DTYPE) * BLOCK_SIZE;
-    DTYPE* a = (DTYPE*)malloc(vector_size_bytes);// original data set given to device
-    DTYPE* c = (DTYPE*)malloc(vector_size_bytes);// results returned from device
-    DTYPE* sw_c = (DTYPE*)malloc(vector_size_bytes);// results returned from software
+    std::vector<DTYPE> a   (BLOCK_SIZE);// original data set given to device
+    std::vector<DTYPE> c   (BLOCK_SIZE);// results returned from device
+    std::vector<DTYPE> sw_c(BLOCK_SIZE);// results returned from software
 
     // Create the test data and Software Result 
     int alpha = 3;
@@ -66,42 +49,37 @@ int main(int argc, char** argv)
 
 //OPENCL HOST CODE AREA START
 
-    //Create Program and Kernel
-    xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "row_array_2d");
-    cl_kernel krnl_row_array_2d = xcl_get_kernel(program, "row_array_2d");
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
+
+    cl::Context context(device);
+    cl::CommandQueue q(context, device);
+    std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+
+    cl::Program::Binaries bins = xcl::import_binary(device_name,"row_array_2d");
+    devices.resize(1);
+    cl::Program program(context, devices, bins);
+    cl::Kernel krnl_row_array_2d(program,"row_array_2d");
 
     //Allocate Buffer in Global Memory
-    cl_mem buffer_a = xcl_malloc(world, CL_MEM_READ_ONLY, vector_size_bytes);
-    cl_mem buffer_c = xcl_malloc(world, CL_MEM_WRITE_ONLY, vector_size_bytes);
+    cl::Buffer buffer_a(context, CL_MEM_READ_ONLY, vector_size_bytes);
+    cl::Buffer buffer_c(context, CL_MEM_WRITE_ONLY,vector_size_bytes);
 
     //Copy input data to device global memory
-    xcl_memcpy_to_device(world,buffer_a,a,vector_size_bytes);
+    q.enqueueWriteBuffer(buffer_a,CL_TRUE, 0,vector_size_bytes, a.data());
 
-    //Set the Kernel Arguments
-    xcl_set_kernel_arg(krnl_row_array_2d,0,sizeof(cl_mem),&buffer_a);
-    xcl_set_kernel_arg(krnl_row_array_2d,1,sizeof(cl_mem),&buffer_c);
-    xcl_set_kernel_arg(krnl_row_array_2d,2,sizeof(int),&alpha);
+    int nargs=0;
+    krnl_row_array_2d.setArg(nargs++,buffer_a);
+    krnl_row_array_2d.setArg(nargs++,buffer_c);
+    krnl_row_array_2d.setArg(nargs++,alpha);
 
     //Launch the Kernel
-    xcl_run_kernel3d(world,krnl_row_array_2d,1,1,1);
+    q.enqueueTask(krnl_row_array_2d);
 
     //Copy Result from Device Global Memory to Host Local Memory
-    xcl_memcpy_from_device(world, c, buffer_c ,vector_size_bytes);
-    clFinish(world.command_queue);
+    q.enqueueReadBuffer(buffer_c,CL_TRUE, 0, vector_size_bytes, c.data());
 
-    //Release Device Memories and Kernels
-    clReleaseMemObject(buffer_a);
-    clReleaseMemObject(buffer_c);
-    clReleaseKernel(krnl_row_array_2d);
-    xcl_release_world(world);
 //OPENCL HOST CODE AREA END
-
-
-    //uncomment following 3 lines if you want to check all values
-    //print_array(a, "A", BLOCK_SIZE, 16);
-    //print_array(c, "Test C", BLOCK_SIZE, 16);
-    //print_array(sw_c, "Gold C", BLOCK_SIZE, 16);
 
     // Validate
     unsigned int correct = 0;              // number of correct results returned
@@ -109,17 +87,15 @@ int main(int argc, char** argv)
       if(c[i] == sw_c[i]) {
         correct++; 
       } else { 
-        printf("\n wrong sw %d hw %d index %d \n", sw_c[i], c[i], i);
+          std::cout << std::endl << " wrong sw " << sw_c[i] 
+              << " hw " << c[i] << " index " << i << std::endl;
       }
     }
     
     // Print a brief summary detailing the results
-    printf("Computed '%d/%d' correct values!\n", correct, BLOCK_SIZE);
+    std::cout << "Computed '" << correct << "/" << BLOCK_SIZE 
+        << "' correct values!" << std::endl;
 
-    free(a);
-    free(c);
-    free(sw_c);
-    
     if(correct == BLOCK_SIZE){
         std::cout << "TEST PASSED." << std::endl; 
         return EXIT_SUCCESS;
