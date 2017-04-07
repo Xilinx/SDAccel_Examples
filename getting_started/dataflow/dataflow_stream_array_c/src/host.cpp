@@ -26,12 +26,9 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
-
-#include <iostream>
-#include <cstring>
-
 //OpenCL utility layer include
-#include "xcl.h"
+#include "xcl2.hpp"
+#include <vector>
 
 #define DATA_SIZE   4096
 #define INCR_VALUE  4
@@ -44,10 +41,9 @@ int main(int argc, char** argv)
 
     //Allocate Memory in Host Memory
     size_t vector_size_bytes = sizeof(int) * DATA_SIZE;
-
-    int *source_input       = (int *) malloc(vector_size_bytes);
-    int *source_hw_results  = (int *) malloc(vector_size_bytes);
-    int *source_sw_results  = (int *) malloc(vector_size_bytes);
+    std::vector<int> source_input     (DATA_SIZE);
+    std::vector<int> source_hw_results(DATA_SIZE);
+    std::vector<int> source_sw_results(DATA_SIZE);
 
     for(int i = 0 ; i < DATA_SIZE ; i++){
         source_input[i] = i;
@@ -62,36 +58,39 @@ int main(int argc, char** argv)
     }
 
 //OPENCL HOST CODE AREA START
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
+
+    cl::Context context(device);
+    cl::CommandQueue q(context, device);
+    std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+
     //Create Program and Kernel
-    xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "N_stage_Adders");
-    cl_kernel krnl_adders = xcl_get_kernel(program, "N_stage_Adders");
+    cl::Program::Binaries bins = xcl::import_binary(device_name,"N_stage_Adders");
+    devices.resize(1);
+    cl::Program program(context, devices, bins);
+    cl::Kernel krnl_adders(program,"N_stage_Adders");
 
     //Allocate Buffer in Global Memory
-    cl_mem buffer_input  = xcl_malloc(world, CL_MEM_READ_ONLY, vector_size_bytes);
-    cl_mem buffer_output = xcl_malloc(world, CL_MEM_WRITE_ONLY, vector_size_bytes);
+    cl::Buffer buffer_input (context, CL_MEM_READ_ONLY, vector_size_bytes);
+    cl::Buffer buffer_output(context, CL_MEM_WRITE_ONLY,vector_size_bytes);
 
     //Copy input data to device global memory
-    xcl_memcpy_to_device(world,buffer_input,source_input,vector_size_bytes);
+    q.enqueueWriteBuffer(buffer_input,CL_TRUE,0,vector_size_bytes,source_input.data());
 
     //Set the Kernel Arguments
-    xcl_set_kernel_arg(krnl_adders,0,sizeof(cl_mem),&buffer_input);
-    xcl_set_kernel_arg(krnl_adders,1,sizeof(cl_mem),&buffer_output);
-    xcl_set_kernel_arg(krnl_adders,2,sizeof(int),&incr);
-    xcl_set_kernel_arg(krnl_adders,3,sizeof(int),&size);
+    int narg=0;
+    krnl_adders.setArg(narg++,buffer_input);
+    krnl_adders.setArg(narg++,buffer_output);
+    krnl_adders.setArg(narg++,incr);
+    krnl_adders.setArg(narg++,size);
 
     //Launch the Kernel
-    xcl_run_kernel3d(world,krnl_adders,1,1,1);
+    q.enqueueTask(krnl_adders);
 
     //Copy Result from Device Global Memory to Host Local Memory
-    xcl_memcpy_from_device(world, source_hw_results, buffer_output,vector_size_bytes);
-    clFinish(world.command_queue);
+    q.enqueueReadBuffer(buffer_output,CL_TRUE,0,vector_size_bytes, source_hw_results.data());
 
-    //Release Device Memories and Kernels
-    clReleaseMemObject(buffer_input);
-    clReleaseMemObject(buffer_output);
-    clReleaseKernel(krnl_adders);
-    xcl_release_world(world);
 //OPENCL HOST CODE AREA END
     
     // Compare the results of the Device to the simulation
@@ -105,11 +104,6 @@ int main(int argc, char** argv)
             break;
         }
     }
-
-    /* Release Memory from Host Memory*/
-    free(source_input);
-    free(source_hw_results);
-    free(source_sw_results);
 
     if (match){
         std::cout << "TEST FAILED." << std::endl; 
