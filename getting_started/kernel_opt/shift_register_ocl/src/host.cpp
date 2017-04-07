@@ -35,9 +35,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
    NOTE: See the fir.cl file for additional information.
   */
-
-#include "CL/cl.h"
-#include "xcl.h"
+#include "xcl2.hpp"
 
 #include <algorithm>
 #include <random>
@@ -88,24 +86,30 @@ void verify(const vector<int> &gold, const vector<int> &out) {
 }
 
 // Launches the Finite Impulse Response(FIR) kernel and prints the execution time
-vector<int> test_fir(xcl_world world, cl_program program, string kernel_name,
-                     cl_mem buffer_output, cl_mem buffer_signal,
-                     cl_mem buffer_coeff, int signal_size) {
+vector<int> test_fir(cl::CommandQueue &q, cl::Program &program, string kernel_name,
+                     cl::Buffer &buffer_output, cl::Buffer &buffer_signal,
+                     cl::Buffer &buffer_coeff, int signal_size) 
+{
     vector<int> device_output(signal_size, 0);
-    cl_kernel kernel = xcl_get_kernel(program, kernel_name.c_str());
+    cl::Kernel kernel(program, kernel_name.c_str());
 
-    xcl_set_kernel_arg(kernel, 0, sizeof(cl_mem), &buffer_output);
-    xcl_set_kernel_arg(kernel, 1, sizeof(cl_mem), &buffer_signal);
-    xcl_set_kernel_arg(kernel, 2, sizeof(cl_mem), &buffer_coeff);
-    xcl_set_kernel_arg(kernel, 3, sizeof(int), &signal_size);
+    kernel.setArg(0,buffer_output);
+    kernel.setArg(1,buffer_signal);
+    kernel.setArg(2,buffer_coeff);
+    kernel.setArg(3,signal_size);
 
-    auto kernel_time = xcl_run_kernel3d(world, kernel, 1, 1, 1);
+    cl::Event event;
+    uint64_t nstimestart, nstimeend;
+    q.enqueueTask(kernel,NULL,&event);
+    q.finish();
+    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart);
+    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend);
+    auto kernel_time = nstimeend-nstimestart;
 
     printf("| %-30s | %23lu |\n", kernel_name.c_str(), kernel_time);
-    xcl_memcpy_from_device(world, device_output.data(), buffer_output,
-                           signal_size * sizeof(int));
+    q.enqueueReadBuffer(buffer_output, CL_TRUE, 0, signal_size * sizeof(int), 
+            device_output.data());
 
-    clReleaseKernel(kernel);
     return device_output;
 }
 
@@ -122,41 +126,39 @@ int main(int argc, char **argv) {
     size_t coeff_size_in_bytes = coeff.size() * sizeof(int);
 
     // Initialize OpenCL context and load xclbin binary
-    xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "fir");
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
 
-    cl_mem buffer_signal = xcl_malloc(world, CL_MEM_READ_ONLY, size_in_bytes);
-    cl_mem buffer_coeff =
-        xcl_malloc(world, CL_MEM_READ_ONLY, coeff_size_in_bytes);
-    cl_mem buffer_output = xcl_malloc(world, CL_MEM_WRITE_ONLY, size_in_bytes);
+    cl::Context context(device);
+    cl::CommandQueue q(context,device,CL_QUEUE_PROFILING_ENABLE);
+    std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
 
-    xcl_memcpy_to_device(world, buffer_signal, signal.data(), size_in_bytes);
-    xcl_memcpy_to_device(world, buffer_coeff, coeff.data(),
-                         coeff_size_in_bytes);
+    //Create Program 
+    cl::Program::Binaries bins = xcl::import_binary(device_name,"fir");
+    devices.resize(1);
+    cl::Program program(context, devices, bins);
+
+    cl::Buffer buffer_signal(context, CL_MEM_READ_ONLY, size_in_bytes);
+    cl::Buffer buffer_coeff (context, CL_MEM_READ_ONLY, coeff_size_in_bytes);
+    cl::Buffer buffer_output(context, CL_MEM_WRITE_ONLY,size_in_bytes);
+
+    q.enqueueWriteBuffer(buffer_signal,CL_TRUE, 0,size_in_bytes, signal.data());
+    q.enqueueWriteBuffer(buffer_coeff, CL_TRUE, 0,coeff_size_in_bytes, coeff.data());
 
     printf( "|--------------------------------+-------------------------|\n"
             "| Kernel                         |    Wall-Clock Time (ns) |\n"
             "|--------------------------------+-------------------------|\n");
-
-    auto device_output = test_fir(world, program, "fir_naive", buffer_output,
+    auto device_output = test_fir(q,program, "fir_naive", buffer_output,
                                   buffer_signal, buffer_coeff, signal_size);
     verify(gold, device_output);
 
-    device_output =
-        test_fir(world, program, "fir_shift_register", buffer_output,
-                 buffer_signal, buffer_coeff, signal_size);
+    device_output = test_fir(q,program, "fir_shift_register", buffer_output,
+                                  buffer_signal, buffer_coeff, signal_size);
     verify(gold, device_output);
 
     printf("|--------------------------------+-------------------------|\n");
     printf("Note: Wall Clock Time is meaningful for real hardware execution only, not for emulation.\n");
     printf("Please refer to profile summary for kernel execution time for hardware emulation.\n\n");
-
-    clReleaseMemObject(buffer_signal);
-    clReleaseMemObject(buffer_coeff);
-    clReleaseMemObject(buffer_output);
-
-    clReleaseProgram(program);
-    xcl_release_world(world);
 
     print_signal(device_output);
     printf("TEST PASSED\n");
