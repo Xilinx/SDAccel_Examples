@@ -26,10 +26,7 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
-
-#include "CL/cl.h"
-#include "xcl.h"
-
+#include "xcl2.hpp"
 #include <algorithm>
 #include <cstdio>
 #include <random>
@@ -104,44 +101,60 @@ int main(int argc, char **argv) {
 
     printf("Gold:\n");
     print(gold, columns, rows);
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
 
-    xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "matmul");
+    cl::Context context(device);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+    std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+
+    //Create Program 
+    cl::Program::Binaries bins = xcl::import_binary(device_name,"matmul");
+    devices.resize(1);
+    cl::Program program(context, devices, bins);
 
     // compute the size of array in bytes
     size_t array_size_bytes = columns * rows * sizeof(int);
+    cl::Buffer buffer_a(context, CL_MEM_READ_ONLY, array_size_bytes);
+    cl::Buffer buffer_b(context, CL_MEM_READ_ONLY, array_size_bytes);
+    cl::Buffer buffer_c(context, CL_MEM_WRITE_ONLY,array_size_bytes);
 
-    cl_mem buffer_a = xcl_malloc(world, CL_MEM_READ_ONLY, array_size_bytes);
-    cl_mem buffer_b = xcl_malloc(world, CL_MEM_READ_ONLY, array_size_bytes);
-    cl_mem buffer_c = xcl_malloc(world, CL_MEM_WRITE_ONLY, array_size_bytes);
-
-    xcl_memcpy_to_device(world, buffer_a, A.data(), array_size_bytes);
-    xcl_memcpy_to_device(world, buffer_b, B.data(), array_size_bytes);
+    q.enqueueWriteBuffer(buffer_a,CL_TRUE,0,array_size_bytes,A.data());
+    q.enqueueWriteBuffer(buffer_b,CL_TRUE,0,array_size_bytes,B.data());
 
   printf( "|-------------------------+-------------------------|\n"
           "| Kernel                  |    Wall-Clock Time (ns) |\n"
           "|-------------------------+-------------------------|\n");
-    cl_kernel matmul_kernel = xcl_get_kernel(program, "matmul");
-    xcl_set_kernel_arg(matmul_kernel, 0, sizeof(cl_mem), &buffer_a);
-    xcl_set_kernel_arg(matmul_kernel, 1, sizeof(cl_mem), &buffer_b);
-    xcl_set_kernel_arg(matmul_kernel, 2, sizeof(cl_mem), &buffer_c);
-    xcl_set_kernel_arg(matmul_kernel, 3, sizeof(cl_int), &columns);
+    cl::Kernel matmul_kernel(program, "matmul");
+    matmul_kernel.setArg(0,buffer_a);
+    matmul_kernel.setArg(1,buffer_b);
+    matmul_kernel.setArg(2,buffer_c);
+    matmul_kernel.setArg(3,columns);
 
-    auto matmul_time = xcl_run_kernel3d(world, matmul_kernel, 1, 1, 1);
-    xcl_memcpy_from_device(world, C.data(), buffer_c, array_size_bytes);
+    cl::Event event;
+    uint64_t nstimestart, nstimeend;
+    q.enqueueTask(matmul_kernel,NULL,&event);
+    q.enqueueReadBuffer(buffer_c, CL_TRUE, 0, array_size_bytes, C.data());
+
+    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart);
+    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend);
+    auto matmul_time = nstimeend-nstimestart;
+
     verify(gold, C);
     printf("| %-23s | %23lu |\n", "matmul: ", matmul_time);
 
-    cl_kernel matmul_partition_kernel =
-        xcl_get_kernel(program, "matmul_partition");
-    xcl_set_kernel_arg(matmul_partition_kernel, 0, sizeof(cl_mem), &buffer_a);
-    xcl_set_kernel_arg(matmul_partition_kernel, 1, sizeof(cl_mem), &buffer_b);
-    xcl_set_kernel_arg(matmul_partition_kernel, 2, sizeof(cl_mem), &buffer_c);
-    xcl_set_kernel_arg(matmul_partition_kernel, 3, sizeof(cl_int), &columns);
+    cl::Kernel matmul_partition_kernel(program, "matmul");
+    matmul_partition_kernel.setArg(0,buffer_a);
+    matmul_partition_kernel.setArg(1,buffer_b);
+    matmul_partition_kernel.setArg(2,buffer_c);
+    matmul_partition_kernel.setArg(3,columns);
 
-    auto matmul_partition_time =
-        xcl_run_kernel3d(world, matmul_partition_kernel, 1, 1, 1);
-    xcl_memcpy_from_device(world, C.data(), buffer_c, array_size_bytes);
+    q.enqueueTask(matmul_partition_kernel,NULL,&event);
+    q.enqueueReadBuffer(buffer_c, CL_TRUE, 0, array_size_bytes, C.data());
+    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart);
+    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend);
+    auto matmul_partition_time = nstimeend-nstimestart;
+
     verify(gold, C);
     printf("| %-23s | %23lu |\n", "matmul: partition", matmul_partition_time);
 
