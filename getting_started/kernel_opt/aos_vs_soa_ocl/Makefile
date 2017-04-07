@@ -8,14 +8,16 @@ include $(COMMON_REPO)/libs/opencl/opencl.mk
 CXX:=/tools/batonroot/rodin/devkits/lnx64/gcc-6.2.0/bin/g++
 # Host Application
 aos_vs_soa_SRCS=./src/host.cpp $(oclHelper_SRCS) $(xcl2_SRCS)
-host_HDRS=$(xcl2_HDRS)
+aos_vs_soa_HDRS=$(xcl2_HDRS)
 aos_vs_soa_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl2_CXXFLAGS) $(oclHelper_CXXFLAGS)
 aos_vs_soa_LDFLAGS=$(opencl_LDFLAGS)
 
-CXXFLAGS+=-std=c++0x
-
 # Kernel
 dot_SRCS=./src/dot.cl
+
+XOS=dot
+
+dot_XOS=dot
 
 EXES=aos_vs_soa
 XCLBINS=dot

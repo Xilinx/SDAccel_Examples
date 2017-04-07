@@ -113,7 +113,7 @@ int main(int argc, char **argv) {
   cl::Device device = devices[0];
   //Creating Context and Command Queue for selected Device 
   cl::Context context(device);
-  cl::CommandQueue q(context, device);
+  cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
   std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
   std::cout << "Found Device=" << device_name.c_str() << std::endl;
   cl::Program::Binaries bins = xcl::import_binary(device_name,"dot");
@@ -146,8 +146,8 @@ int main(int argc, char **argv) {
           aos_vertices.size() * sizeof(vertex),aos_vertices.data());
 
   cl::Event event;
-  int nargs=0;
   uint64_t nstimestart, nstimeend;
+  int nargs=0;
   cl::Kernel kernel_aos(program,"dot_aos");
   kernel_aos.setArg(nargs++,buffer_result);
   kernel_aos.setArg(nargs++,buffer_pts);
