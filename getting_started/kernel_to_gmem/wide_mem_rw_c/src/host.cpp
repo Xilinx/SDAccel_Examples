@@ -58,7 +58,6 @@ int main(int argc, char** argv)
     }
 
 //OPENCL HOST CODE AREA START
-    //Create Program and Kernels
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
@@ -66,6 +65,7 @@ int main(int argc, char** argv)
     cl::CommandQueue q(context, device);
     std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
 
+    //Create Program and Kernel
     cl::Program::Binaries bins = xcl::import_binary(device_name,"vadd");
     devices.resize(1);
     cl::Program program(context, devices, bins);
