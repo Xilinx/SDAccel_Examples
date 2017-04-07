@@ -50,10 +50,10 @@ std::vector<cl::Device> get_devices(const std::string& vendor_name) {
         platform = platforms[i];
         std::string platformName  = platform.getInfo<CL_PLATFORM_NAME>();
         std::cout << "platformName=" << platformName.c_str() 
-            << "Vendor Name =" << vendor_name.c_str() 
+            << " Vendor Name =" << vendor_name.c_str() 
             << std::endl;
         if (platformName == vendor_name){
-            std::cout << "Found Platform" << std::endl;
+            std::cout << " Found Platform" << std::endl;
             break;
         }
     }
