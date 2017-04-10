@@ -45,10 +45,6 @@ Application code is located in the src directory. Accelerator binary files will 
 ```
 Makefile
 README.md
-README.md
-README.md
-description.json
-description.json
 description.json
 src/host.cpp
 src/mmult.cl

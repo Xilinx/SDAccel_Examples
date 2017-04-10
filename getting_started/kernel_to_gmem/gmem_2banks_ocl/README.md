@@ -49,8 +49,6 @@ Application code is located in the src directory. Accelerator binary files will 
 .gitignore
 Makefile
 README.md
-README.md
-README.md
 data/golden.bmp
 data/input.bmp
 description.json
