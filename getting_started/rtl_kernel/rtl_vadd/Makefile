@@ -28,7 +28,6 @@ RTLXOS=vadd
 # Kernel
 vadd_XOS=vadd
 vadd_LDCLFLAGS=-k $(vadd_KERNEL) --nk $(vadd_KERNEL):$(vadd_CU)
-vadd_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.3 
 vadd_TARGETS=hw_emu hw
 
 XCLBINS=vadd
@@ -37,7 +36,6 @@ EXTRA_CLEAN=tmp_kernel_pack* packaged_kernel* $(vadd_KERNEL).xo
 # check
 check_EXE=host
 check_XCLBINS=vadd
-check_DEVICES=$(vadd_DEVICES)
 check_TARGETS=$(vadd_TARGETS)
 
 CHECKS=check
@@ -47,5 +45,4 @@ ifneq (,$(findstring sw_emu,$(TARGETS)))
 $(warning WARNING:RTL Kernels do not support sw_emu TARGETS. Please use hw_emu for running RTL kernel Emulation)
 endif
 
-DEVICES:=xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 include $(COMMON_REPO)/utility/rules.mk

@@ -17,11 +17,9 @@ EXES=host
 # cnn Kernels
 cnn_GOOD_SRCS=./src/cnn_convolution.cpp
 cnn_GOOD_CLFLAGS=-k cnn -I./src/
-cnn_GOOD_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 
 cnn_BAD_SRCS=./src/cnn_convolution_bad.cpp
 cnn_BAD_CLFLAGS=-k cnn -I./src/
-cnn_BAD_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 
 XOS=cnn_GOOD cnn_BAD
 
@@ -29,19 +27,16 @@ XOS=cnn_GOOD cnn_BAD
 
 cnn_GOOD_XOS=cnn_GOOD
 cnn_GOOD_LDCLFLAGS=--nk cnn:4
-cnn_GOOD_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 
 cnn_BAD_XOS=cnn_BAD
-cnn_BAD_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
+cnn_BAD_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 
 XCLBINS=cnn_GOOD cnn_BAD
 
 # check
 check_EXE=host
-check_XCLBINS=cnn_GOOD cnn_BAD
-check_DEVICES=$(cnn_GOOD_DEVICES)
+check_XCLBINS=cnn_GOOD
 
 CHECKS=check
 
-DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 include $(COMMON_REPO)/utility/rules.mk

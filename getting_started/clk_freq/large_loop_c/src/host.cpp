@@ -1,5 +1,5 @@
 /**********
-Copyright (c) 2016, Xilinx, Inc.
+Copyright (c) 2017, Xilinx, Inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -95,7 +95,23 @@ unsigned long run_opencl_cnn(
     int i_chan,
     int o_chan
 ) {
-    cl_program program = xcl_import_binary(world, good ? "cnn_GOOD" : "cnn_BAD");
+    cl_program program;
+
+    if (good) {
+        program = xcl_import_binary(world, "cnn_GOOD");
+    } else {
+        char* xclbin_file_name = xcl_get_xclbin_name(world, "cnn_BAD");
+        program = xcl_import_binary_file(world, xclbin_file_name);
+
+        if(program == NULL) {
+            std::cout << "WARNING: cnn_BAD xclbin not built" << std::endl;
+            free(xclbin_file_name);
+            return 0;
+        }
+
+        free(xclbin_file_name);
+    }
+
     cl_kernel krnl_cnn_conv = xcl_get_kernel(program, "cnn");
 
     std::cout << "Starting " << (good ? "GOOD" : "BAD") << " Kernel" << std::endl;
@@ -175,6 +191,7 @@ unsigned long run_opencl_cnn(
     clReleaseMemObject(buffer_weight);
     clReleaseMemObject(buffer_output);
     clReleaseKernel(krnl_cnn_conv);
+    clReleaseProgram(program);
 
     return duration;
 }
@@ -241,12 +258,16 @@ int main(int argc, char** argv)
             match = 1;
             break;
         }
-        if (source_bad_hw_results[i] != source_sw_results[i]){
-            std::cout << "Error: Result mismatch in bad kernel" << std::endl;
-            std::cout << "i = " << i << " CPU result = " << source_sw_results[i]
-                << " Device result = " << source_bad_hw_results[i] << std::endl;
-            match = 1;
-            break;
+        /* if bad_duration is 0 then the kernel was unable to be produced for
+         * the hardware thus there's no reason to check the results */
+        if (bad_duration != 0) {
+            if (source_bad_hw_results[i] != source_sw_results[i]){
+                std::cout << "Error: Result mismatch in bad kernel" << std::endl;
+                std::cout << "i = " << i << " CPU result = " << source_sw_results[i]
+                          << " Device result = " << source_bad_hw_results[i] << std::endl;
+                match = 1;
+                break;
+            }
         }
  
     }
@@ -264,7 +285,9 @@ int main(int argc, char** argv)
     }
     std::cout << "TEST PASSED." << std::endl;
     std::cout << "GOOD duration = " << good_duration << " ns" << std::endl;
-    std::cout << "BAD duration = "  << bad_duration  << " ns" << std::endl;
+    if (bad_duration != 0) {
+        std::cout << "BAD duration = "  << bad_duration  << " ns" << std::endl;
+    }
 
     return 0;
 }

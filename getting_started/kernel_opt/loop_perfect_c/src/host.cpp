@@ -1,5 +1,5 @@
 /**********
-Copyright (c) 2016, Xilinx, Inc.
+Copyright (c) 2017, Xilinx, Inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -153,7 +153,6 @@ int main(int argc, char** argv)
 
     //Copy Result from Device Global Memory to Host Local Memory
     q.enqueueReadBuffer(buffer_out,CL_TRUE,0, sizeof(int)* DATA_DIM, source_hw_result.data());
-
 //OPENCL HOST CODE AREA END
     
     // Compute Software Results

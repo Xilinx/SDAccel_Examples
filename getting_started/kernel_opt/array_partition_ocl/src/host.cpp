@@ -1,5 +1,5 @@
 /**********
-Copyright (c) 2016, Xilinx, Inc.
+Copyright (c) 2017, Xilinx, Inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -156,6 +156,14 @@ int main(int argc, char **argv) {
     auto matmul_partition_time = nstimeend-nstimestart;
 
     verify(gold, C);
+
+    clReleaseMemObject(buffer_a);
+    clReleaseMemObject(buffer_b);
+    clReleaseMemObject(buffer_c);
+    clReleaseKernel(matmul_kernel);
+    clReleaseKernel(matmul_partition_kernel);
+    clReleaseProgram(program);
+    xcl_release_world(world);
     printf("| %-23s | %23lu |\n", "matmul: partition", matmul_partition_time);
 
     printf("|-------------------------+-------------------------|\n");

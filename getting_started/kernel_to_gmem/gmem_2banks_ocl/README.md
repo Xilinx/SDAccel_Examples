@@ -32,12 +32,11 @@ where examples is the name of the directory where the repository will be stored 
 ## 3. SOFTWARE AND SYSTEM REQUIREMENTS
 Board | Device Name | Software Version
 ------|-------------|-----------------
-Alpha Data ADM-PCIE-7V3|xilinx:adm-pcie-7v3:1ddr:3.0|SDAccel 2016.3
-Alpha Data ADM-PCIE-KU3|xilinx:adm-pcie-ku3:2ddr-xpr:3.2|SDAccel 2016.3
-Xilinx KU115|xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2|SDAccel 2016.3
+Alpha Data ADM-PCIE-KU3|xilinx:adm-pcie-ku3:2ddr-xpr:3.3|SDAccel 2016.4
+Xilinx KU115|xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3|SDAccel 2016.4
 
 
-Board targeted by default = ***xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2***
+Board targeted by default = ***xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3***
 
 *NOTE:* The board/device used for compilation can be changed by adding the DEVICES variable to the make command as shown below
 ```
@@ -97,7 +96,7 @@ To manually configure the environment to run the application, set the following
 ```
 export LD_LIBRARY_PATH=$XILINX_SDX/runtime/lib/x86_64/:$LD_LIBRARY_PATH
 export XCL_EMULATION_MODE=<sw_emu|hw_emu>
-emconfigutil --xdevice 'xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2' --nd 1
+emconfigutil --xdevice 'xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```

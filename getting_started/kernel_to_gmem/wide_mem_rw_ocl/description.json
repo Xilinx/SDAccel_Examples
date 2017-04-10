@@ -5,7 +5,7 @@
     ],
     "key_concepts": [ "Kernel to DDR", "wide memory access", "burst read and write"],
     "keywords": ["uint16", "xcl_pipeline_loop"],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
+    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3", "Xilinx KU115"],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "contributors" : [
