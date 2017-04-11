@@ -29,7 +29,7 @@ RTLXOS=vadd
 # Kernel
 vadd_XOS=vadd
 vadd_LDCLFLAGS=-k $(vadd_KERNEL) --nk $(vadd_KERNEL):$(vadd_CU) --kernel_frequency "0:150|1:250"
-vadd_DEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3 
+vadd_DEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr 
 vadd_TARGETS=hw hw_emu
 
 XCLBINS=vadd
@@ -48,5 +48,5 @@ ifneq (,$(findstring sw_emu,$(TARGETS)))
 $(warning WARNING:RTL Kernels do not support sw_emu TARGETS. Please use hw_emu for running RTL kernel Emulation)
 endif
 
-DEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3 
+DEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr 
 include $(COMMON_REPO)/utility/rules.mk

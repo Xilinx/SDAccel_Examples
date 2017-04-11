@@ -16,32 +16,32 @@ EXES=vmulvadd
 
 # vmul Kernel
 krnl_vmul_SRCS=./src/krnl_vmul.cl
-krnl_vmul_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
+krnl_vmul_DEVICES=xilinx:adm-pcie-7v3:1ddr
 
 # vadd Kernel
 krnl_vadd_SRCS=./src/krnl_vadd.cl
-krnl_vadd_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
+krnl_vadd_DEVICES=xilinx:adm-pcie-7v3:1ddr
 
 XOS=krnl_vmul krnl_vadd
 
 # vmul xclbin
 krnl_vmul_XOS=krnl_vmul
-krnl_vmul_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
+krnl_vmul_DEVICES=xilinx:adm-pcie-7v3:1ddr
 
 # vadd xclbin
 krnl_vadd_XOS=krnl_vadd
-krnl_vadd_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
+krnl_vadd_DEVICES=xilinx:adm-pcie-7v3:1ddr
 
 XCLBINS=krnl_vmul krnl_vadd
 
 # check
 check_EXE=vmulvadd
 check_XCLBINS=krnl_vmul krnl_vadd
-check_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
+check_DEVICES=xilinx:adm-pcie-7v3:1ddr
 
 CHECKS=check
 
 #Changing default Device for this example
-DEVICES:=xilinx:adm-pcie-7v3:1ddr:3.0
+DEVICES:=xilinx:adm-pcie-7v3:1ddr
 include $(COMMON_REPO)/utility/rules.mk
 

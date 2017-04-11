@@ -15,7 +15,7 @@ EXES=kernel_global
 
 krnl_kernel_global_SRCS=./src/kernel.cl
 krnl_kernel_global_CLFLAGS=--max_memory_ports bandwidth
-krnl_kernel_global_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.2
+krnl_kernel_global_DEVICES=xilinx:adm-pcie-7v3:1ddr xilinx:adm-pcie-ku3:2ddr-xpr
 
 SPACE :=
 SPACE +=
@@ -37,7 +37,7 @@ $(foreach device,$(DEVICES),$(eval $(call ddr_check,$(device))))
 XOS=krnl_kernel_global
 
 krnl_kernel_global_XOS=krnl_kernel_global
-krnl_kernel_global_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.2
+krnl_kernel_global_DEVICES=xilinx:adm-pcie-7v3:1ddr xilinx:adm-pcie-ku3:2ddr-xpr
 
 define ddr_check
 
@@ -65,6 +65,6 @@ check_DEVICES=$(krnl_kernel_global_DEVICES)
 
 CHECKS=check
 
-DEVICES=xilinx:adm-pcie-ku3:2ddr-xpr:3.2
+DEVICES=xilinx:adm-pcie-ku3:2ddr-xpr
 
 include $(COMMON_REPO)/utility/rules.mk

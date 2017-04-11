@@ -19,20 +19,20 @@ KFLOW:=GOOD
 # vadd Kernels
 vadd_GOOD_SRCS=./src/vadd.cl
 vadd_GOOD_CLFLAGS=-k vadd
-vadd_GOOD_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.3
+vadd_GOOD_DEVICES=xilinx:adm-pcie-7v3:1ddr xilinx:adm-pcie-ku3:2ddr-xpr
 
 vadd_BAD_SRCS=./src/vadd_bad.cl
 vadd_BAD_CLFLAGS=-k vadd
-vadd_BAD_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.3
+vadd_BAD_DEVICES=xilinx:adm-pcie-7v3:1ddr xilinx:adm-pcie-ku3:2ddr-xpr
 
 XOS=vadd_GOOD vadd_BAD
 
 vadd_GOOD_XOS=vadd_GOOD
-vadd_GOOD_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.3
+vadd_GOOD_DEVICES=xilinx:adm-pcie-7v3:1ddr xilinx:adm-pcie-ku3:2ddr-xpr
 
 vadd_BAD_XOS=vadd_BAD
 vadd_BAD_LDCLFLAGS=--nk vadd:8
-vadd_BAD_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.3
+vadd_BAD_DEVICES=xilinx:adm-pcie-7v3:1ddr xilinx:adm-pcie-ku3:2ddr-xpr
 
 
 XCLBINS=vadd_GOOD vadd_BAD
@@ -42,6 +42,7 @@ check_EXE=host
 check_XCLBINS=vadd_GOOD vadd_BAD
 check_DEVICES=$(vadd_GOOD_DEVICES)
 
+DEVICES=xilinx:adm-pcie-ku3:2ddr-xpr
 CHECKS=check
 
 include $(COMMON_REPO)/utility/rules.mk

@@ -29,7 +29,7 @@ cnn_GOOD_XOS=cnn_GOOD
 cnn_GOOD_LDCLFLAGS=--nk cnn:4
 
 cnn_BAD_XOS=cnn_BAD
-cnn_BAD_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.3
+cnn_BAD_DEVICES=xilinx:adm-pcie-7v3:1ddr xilinx:adm-pcie-ku3:2ddr-xpr
 
 XCLBINS=cnn_GOOD cnn_BAD
 
