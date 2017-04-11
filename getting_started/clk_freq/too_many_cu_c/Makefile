@@ -17,30 +17,24 @@ EXES=host
 # Add vadd kernel
 vadd_GOOD_SRCS=./src/vadd.cpp
 vadd_GOOD_CLFLAGS=-k vadd
-vadd_GOOD_DEVICES=xilinx:adm-pcie-ku3:2ddr-xpr
 
 vadd_BAD_SRCS=./src/vadd_bad.cpp
 vadd_BAD_CLFLAGS=-k vadd
-vadd_BAD_DEVICES=xilinx:adm-pcie-ku3:2ddr-xpr
 
 XOS=vadd_GOOD vadd_BAD
 
 vadd_GOOD_XOS=vadd_GOOD
-vadd_GOOD_DEVICES=xilinx:adm-pcie-ku3:2ddr-xpr
 
 vadd_BAD_XOS=vadd_BAD
 vadd_BAD_LDCLFLAGS=--nk vadd:8
-vadd_BAD_DEVICES=xilinx:adm-pcie-ku3:2ddr-xpr
+vadd_BAD_DEVICES=xilinx:adm-pcie-ku3:2ddr-xpr xilinx:xil-accel-rd-ku115:4ddr-xpr
 
 XCLBINS=vadd_GOOD vadd_BAD
 
 # check
 check_EXE=host
-check_XCLBINS=vadd_GOOD vadd_BAD
-check_DEVICES=$(vadd_GOOD_DEVICES)
+check_XCLBINS=vadd_GOOD
 
 CHECKS=check
-
-DEVICES=xilinx:adm-pcie-ku3:2ddr-xpr
 
 include $(COMMON_REPO)/utility/rules.mk
