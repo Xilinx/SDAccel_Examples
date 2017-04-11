@@ -16,8 +16,10 @@ host_LDFLAGS=$(opencl_LDFLAGS)
 vadd_SRCS=./src/vadd.cl
 vadd_CLFLAGS=-k vadd
 
+vadd_XOS=vadd
 EXES=host
 XCLBINS=vadd
+XOS=vadd
 
 # check
 check_EXE=host

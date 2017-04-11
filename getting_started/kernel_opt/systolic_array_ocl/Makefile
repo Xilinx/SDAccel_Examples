@@ -17,15 +17,14 @@ mmult_CLFLAGS=-k mmult
 
 XOS=mmult
 
-# xclbin
 mmult_XOS=mmult
 
 XCLBINS=mmult
+EXES=host
 
 # check
 check_EXE=host
 check_XCLBINS=mmult
-check_DEVICES=$(mmult_DEVICES)
 
 CHECKS=check
 

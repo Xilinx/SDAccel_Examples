@@ -16,6 +16,8 @@ KFLOW:=GOOD
 
 EXES=host
 
+XOS=nearest_GOOD nearest_BAD
+
 # nearest kernels
 nearest_GOOD_SRCS=./src/nearest_good.cl
 nearest_GOOD_CLFLAGS=-k nearest

@@ -17,6 +17,9 @@ mmult_SRCS=./src/mmult.cpp
 # Kernel definition
 mmult_CLFLAGS=-k mmult
 
+mmult_XOS=mmult
+
+XOS=mmult
 EXES=host
 XCLBINS=mmult
 

@@ -157,13 +157,6 @@ int main(int argc, char **argv) {
 
     verify(gold, C);
 
-    clReleaseMemObject(buffer_a);
-    clReleaseMemObject(buffer_b);
-    clReleaseMemObject(buffer_c);
-    clReleaseKernel(matmul_kernel);
-    clReleaseKernel(matmul_partition_kernel);
-    clReleaseProgram(program);
-    xcl_release_world(world);
     printf("| %-23s | %23lu |\n", "matmul: partition", matmul_partition_time);
 
     printf("|-------------------------+-------------------------|\n");

@@ -19,6 +19,10 @@ vadd_CLFLAGS=-k vadd
 EXES=host
 XCLBINS=vadd
 
+XOS=vadd
+
+vadd_XOS=vadd
+
 # check
 check_EXE=host
 check_XCLBINS=vadd

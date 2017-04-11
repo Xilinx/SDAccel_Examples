@@ -15,9 +15,11 @@ host_LDFLAGS=$(opencl_LDFLAGS)
 mmult_SRCS=./src/mmult.cl
 mmult_CLFLAGS=-k mmult
 
+XOS=mmult
 EXES=host
 XCLBINS=mmult
 
+mmult_XOS=mmult
 # check
 check_EXE=host
 check_XCLBINS=mmult

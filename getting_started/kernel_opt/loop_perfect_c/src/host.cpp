@@ -129,7 +129,7 @@ int main(int argc, char** argv)
     cl::CommandQueue q(context, device);
     std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
 
-    cl::Program::Binaries bins = xcl::import_binary(device_name,"nearest");
+    cl::Program::Binaries bins = xcl::import_binary(device_name,"nearest_GOOD");
     devices.resize(1);
     cl::Program program(context, devices, bins);
     cl::Kernel kernel(program,"nearest");

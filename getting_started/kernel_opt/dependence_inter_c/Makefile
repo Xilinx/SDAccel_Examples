@@ -15,6 +15,10 @@ host_LDFLAGS=$(opencl_LDFLAGS)
 mean_value_SRCS=./src/mean_value.cpp
 mean_value_CLFLAGS=-k mean_value
 
+XOS=mean_value
+
+mean_value_XOS=mean_value
+
 EXES=host
 XCLBINS=mean_value
 

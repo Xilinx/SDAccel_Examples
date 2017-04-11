@@ -12,10 +12,15 @@ host_HDRS=$(xcl2_HDRS)
 helloworld_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl2_CXXFLAGS) $(oclHelper_CXXFLAGS) -std=c++0x
 helloworld_LDFLAGS=$(opencl_LDFLAGS)
 
+EXES=helloworld
+
 # Kernel
 vector_addition_SRCS=./src/vector_addition.cl
 
-EXES=helloworld
+XOS=vector_addition
+
+vector_addition_XOS=vector_addition
+
 XCLBINS=vector_addition
 
 # check
