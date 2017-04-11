@@ -80,6 +80,9 @@ int main(int argc, char** argv)
          check_status = 1;
       }
    }
+   //Releasing objects related to first program before importing next program
+   clReleaseKernel(krnl_vmul);
+   clReleaseProgram(program_vmul);
 
    printf("INFO: loading vadd_krnl\n");
    cl_program program_vadd = xcl_import_binary(world, "krnl_vadd");
@@ -111,9 +114,7 @@ int main(int argc, char** argv)
    clReleaseMemObject(d_b);
    clReleaseMemObject(d_add_c);
    clReleaseMemObject(d_mul_c);
-   clReleaseKernel(krnl_vmul);
    clReleaseKernel(krnl_vadd);
-   clReleaseProgram(program_vmul);
    clReleaseProgram(program_vadd);
    xcl_release_world(world);
 
