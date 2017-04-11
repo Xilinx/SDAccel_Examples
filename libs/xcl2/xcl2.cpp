@@ -49,11 +49,11 @@ std::vector<cl::Device> get_devices(const std::string& vendor_name) {
     for (i  = 0 ; i < platforms.size(); i++){
         platform = platforms[i];
         std::string platformName  = platform.getInfo<CL_PLATFORM_NAME>();
-        std::cout << "platformName=" << platformName.c_str() 
-            << " Vendor Name =" << vendor_name.c_str() 
+        std::cout << "platform Name: " << platformName.c_str() << std::endl
+            << "Vendor Name : " << vendor_name.c_str() 
             << std::endl;
         if (platformName == vendor_name){
-            std::cout << " Found Platform" << std::endl;
+            std::cout << "Found Platform" << std::endl;
             break;
         }
     }
@@ -95,7 +95,7 @@ cl::Program::Binaries import_binary_file(std::string xclbin_file_name)
 
 cl::Program::Binaries import_binary(const std::string& _device_name, const std::string& xclbin_name) 
 {
-    std::cout << "XCLBIN File Name" << xclbin_name.c_str() << std::endl;
+    std::cout << "XCLBIN File Name: " << xclbin_name.c_str() << std::endl;
     char *xcl_mode = getenv("XCL_EMULATION_MODE");
 	char *xcl_target = getenv("XCL_TARGET");
     std::string mode;
