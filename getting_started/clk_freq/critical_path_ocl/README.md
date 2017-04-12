@@ -16,11 +16,9 @@ This README file contains the following sections:
 
 
 ## 1. OVERVIEW
-This example shows a normal coding style which could least to critical path issue and design will give degraded timing.  Example also contains better coding style which can improve design timing.
+This example shows a normal coding style which could lead to critical path issue and design will give degraded timing.  Example also contains better coding style which can improve design timing.
 
 ***KEY CONCEPTS:*** Critical Path handling, Improve Timing
-
-***KEYWORDS:*** max_memory_ports, misc:map_connect, cl_mem_ext_ptr_t, XCL_MEM_DDR_BANK0, XCL_MEM_DDR_BANK1, XCL_MEM_DDR_BANKx, CL_MEM_EXT_PTR_XILINX
 
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
@@ -49,6 +47,13 @@ where the *DEVICES* variable accepts either 1 device from the table above or a c
 Application code is located in the src directory. Accelerator binary files will be compiled to the xclbin directory. The xclbin directory is required by the Makefile and its contents will be filled during compilation. A listing of all the files in this example is shown below
 
 ```
+Makefile
+README.md
+data/golden.bmp
+data/input.bmp
+description.json
+src/apply_watermark.cl
+src/host.cpp
 ```
 
 ## 5. COMPILATION AND EXECUTION
