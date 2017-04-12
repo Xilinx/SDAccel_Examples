@@ -13,6 +13,7 @@ Example        | Description           | Key Concepts / Keywords
 [helloworld_ocl/][]|This example is a simple OpenCL application. It will highlight the basic flow of an OpenCL application.|__Key__ __Concepts__<br> - OpenCL API<br>__Keywords__<br> - NA
 [multiple_devices_ocl/][]|This example show how to take advantage of multiple FPGAs on a system. It will show how to initialized an OpenCL context, allocate memory on the two devices and execute a kernel on each FPGA.|__Key__ __Concepts__<br> - OpenCL API<br> - Multi-FPGA Execution<br> - Event Handling<br>__Keywords__<br> - cl_device_id<br> - clGetDeviceIDs()
 [overlap_ocl/][]|This examples demonstrates techniques that allow user to overlap Host(CPU) and FPGA computation in an application. It will cover asynchronous operations and event object.|__Key__ __Concepts__<br> - OpenCL API<br> - Synchronize Host and FPGA<br> - Asynchronous Processing<br> - Events<br> - Asynchronous memcpy<br>__Keywords__<br> - cl_event<br> - clCreateCommandQueue<br> - CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE<br> - clEnqueueMigrateMemObjects
+[copy_buffer_ocl/][]|This Copy Buffer example demonstrate how one buffer can be copied from another buffer.|__Key__ __Concepts__<br> - Copy Buffer<br>__Keywords__<br> - cl::CommandQueue::enqueueCopyBuffer()
 
 [.]:.
 [concurrent_kernel_execution_ocl/]:concurrent_kernel_execution_ocl/
@@ -22,3 +23,4 @@ Example        | Description           | Key Concepts / Keywords
 [helloworld_ocl/]:helloworld_ocl/
 [multiple_devices_ocl/]:multiple_devices_ocl/
 [overlap_ocl/]:overlap_ocl/
+[copy_buffer_ocl/]:copy_buffer_ocl/

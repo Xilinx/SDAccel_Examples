@@ -1,0 +1,24 @@
+{
+    "example": "Copy Buffer",
+    "overview": [
+        "This Copy Buffer example demonstrate how one buffer can be copied from another buffer."
+    ],
+    "key_concepts": [ "Copy Buffer"],
+    "keywords": [ "cl::CommandQueue::enqueueCopyBuffer()" ],
+    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
+    "em_cmd": "./host",
+    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ],
+    "revision" : [
+        {
+            "date" : "May2017",
+            "version": "1.0",
+            "description": "Initial Xilinx Release"
+        }
+    ]
+}
