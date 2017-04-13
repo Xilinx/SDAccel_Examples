@@ -56,11 +56,11 @@ int gen_random() {
 }
 
 
-void print(vector<int> &data, int columns, int rows) {
-    vector<int> out(columns * rows);
+void print(vector<int> &data, int dims) {
+    vector<int> out(dims * dims);
     for (int r = 0; r < 10; r++) {
         for (int c = 0; c < 10; c++) {
-            printf("%4d ", data[r * columns + c]);
+            printf("%4d ", data[r * dims + c]);
         }
         printf("…\n");
     }
@@ -82,8 +82,7 @@ void verify(vector<int> &gold, vector<int> &output) {
 // This example illustrates how to use array partitioning attributes in OpenCL
 // kernels for FPGA devices using matmul.
 int main(int argc, char **argv) {
-    static const int columns = 64;
-    static const int rows = 64;
+    static const int dims = 64;
 
     int iteration = 100; 
 
@@ -93,21 +92,21 @@ int main(int argc, char **argv) {
         iteration = 2;
     }
 
-    vector<int> A(columns * rows);
-    vector<int> B(columns * rows);
-    vector<int> gold(columns * rows, 0);
-    vector<int> C(columns * rows, 0);
+    vector<int> A(dims * dims);
+    vector<int> B(dims * dims);
+    vector<int> gold(dims * dims, 0);
+    vector<int> C(dims * dims, 0);
     generate(begin(A), end(A), gen_random);
     generate(begin(B), end(B), gen_random);
 
     printf("A:\n");
-    print(A, columns, rows);
+    print(A, dims);
     printf("B:\n");
-    print(B, columns, rows);
-    matmul(gold, A, B, columns);
+    print(B, dims);
+    matmul(gold, A, B, dims);
 
     printf("Gold:\n");
-    print(gold, columns, rows);
+    print(gold, dims);
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
@@ -121,7 +120,7 @@ int main(int argc, char **argv) {
     cl::Program program(context, devices, bins);
 
     // compute the size of array in bytes
-    size_t array_size_bytes = columns * rows * sizeof(int);
+    size_t array_size_bytes = dims * dims * sizeof(int);
     cl::Buffer buffer_a(context, CL_MEM_READ_ONLY, array_size_bytes);
     cl::Buffer buffer_b(context, CL_MEM_READ_ONLY, array_size_bytes);
     cl::Buffer buffer_c(context, CL_MEM_WRITE_ONLY,array_size_bytes);
@@ -133,7 +132,7 @@ int main(int argc, char **argv) {
     matmul_kernel.setArg(0,buffer_a);
     matmul_kernel.setArg(1,buffer_b);
     matmul_kernel.setArg(2,buffer_c);
-    matmul_kernel.setArg(3,columns);
+    matmul_kernel.setArg(3,dims);
 
     cl::Event event;
     uint64_t nstimestart, nstimeend;
@@ -151,7 +150,7 @@ int main(int argc, char **argv) {
     matmul_partition_kernel.setArg(0,buffer_a);
     matmul_partition_kernel.setArg(1,buffer_b);
     matmul_partition_kernel.setArg(2,buffer_c);
-    matmul_partition_kernel.setArg(3,columns);
+    matmul_partition_kernel.setArg(3,dims);
 
     uint64_t matmul_partition_time = 0;
     for (int i = 0 ; i < iteration ; i++){
