@@ -20,6 +20,7 @@ Example        | Description           | Key Concepts / Keywords
 [shift_register_ocl/][]|This example demonstrates how to shift values in registers in each clock cycle|__Key__ __Concepts__<br> - Kernel Optimization<br> - Shift Register<br> - FIR<br>__Keywords__<br> - xcl_array_partition
 [systolic_array_c/][]|This is a simple example of matrix multiplication (Row x Col) to help developers learn systolic array based algorithm design. Note : Systolic array based algorithm design is well suited for FPGA.|
 [systolic_array_ocl/][]|This is a simple example of matrix multiplication (Row x Col) to help developers learn systolic array based algorithm design. Note: Systolic array based algorithm design is well suited for FPGA.|
+[partition_cyclicblock_ocl/][]|This example shows how to use array block and cyclic partitioning to improve performance of a kernel|__Key__ __Concepts__<br> - Kernel Optimization<br> - Array Partitioning<br> - Block Partition<br> - Cyclic Partition<br>__Keywords__<br> - xcl_array_partition<br> - cyclic<br> - block
 
 [.]:.
 [aos_vs_soa_ocl/]:aos_vs_soa_ocl/
@@ -36,3 +37,4 @@ Example        | Description           | Key Concepts / Keywords
 [shift_register_ocl/]:shift_register_ocl/
 [systolic_array_c/]:systolic_array_c/
 [systolic_array_ocl/]:systolic_array_ocl/
+[partition_cyclicblock_ocl/]:partition_cyclicblock_ocl/
