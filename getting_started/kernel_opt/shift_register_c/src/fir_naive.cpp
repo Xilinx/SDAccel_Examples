@@ -66,13 +66,13 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Number of coefficient components
 #define N_COEFF 11
-// FIR using shift register
+#define min(x,y) ((x) < (y) ? (x) : (y))
+// A naive implementation of the Finite Impulse Response filter.
 extern "C"{
-void fir_shift_register(int *output,
-                        int *signal,
-                        int *coeff,
-                        int signal_length) 
-{
+void fir_naive(int *output,
+               int *signal,
+               int *coeff,
+               long signal_length) {
 #pragma HLS INTERFACE m_axi port=output offset=slave bundle=gmem
 #pragma HLS INTERFACE m_axi port=signal offset=slave bundle=gmem
 #pragma HLS INTERFACE m_axi port=coeff offset=slave bundle=gmem
@@ -83,40 +83,15 @@ void fir_shift_register(int *output,
 #pragma HLS INTERFACE s_axilite port=return bundle=control
 
     int coeff_reg[N_COEFF];
-
-    // Partitioning of this array is required because the shift register
-    // operation will need access to each of the values of the array in
-    // the same clock. Without partitioning the operation will need to
-    // be performed over multiple cycles because of the limited memory
-    // ports available to the array.
-    int shift_reg[N_COEFF];
-    #pragma HLS ARRAY_PARTITION variable=shift_reg complete dim=0
-
-    init_loop:
-    for (int i = 0; i < N_COEFF; i++) {
-        shift_reg[i] = 0;
-        coeff_reg[i] = coeff[i];
-    }
+    read_coef: for (int i = 0 ; i < N_COEFF ; i++) coeff_reg[i] = coeff[i];
 
     outer_loop:
-    for(int j = 0; j < signal_length; j++) {
+    for (int j = 0; j < signal_length; j++) {
         int acc = 0;
-        int x = signal[j];
-
-        // This is the shift register operation. The N_COEFF variable is defined
-        // at compile time so the compiler knows the number of operations
-        // performed by the loop. This loop does not require the unroll
-        // attribute because the outer loop will be automatically pipelined so
-        // the compiler will unroll this loop in the process.
         shift_loop:
-        for (int i = N_COEFF-1; i >= 0; i--) {
-            if (i == 0) {
-                acc += x * coeff_reg[0];
-                shift_reg[0] = x;
-            } else {
-                shift_reg[i] = shift_reg[i-1];
-                acc += shift_reg[i] * coeff_reg[i];
-            }
+        for (int i = min(j,N_COEFF-1); i >= 0; i--) {
+        #pragma HLS PIPELINE
+            acc += signal[j-i] * coeff_reg[i];
         }
         output[j] = acc;
     }

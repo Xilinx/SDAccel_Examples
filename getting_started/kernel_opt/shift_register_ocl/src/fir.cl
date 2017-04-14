@@ -72,7 +72,7 @@ __kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
 void fir_naive(__global int* restrict output,
                __global int* restrict signal,
                __global int* restrict coeff,
-               int signal_length) {
+               long signal_length) {
 
     int coeff_reg[N_COEFF];
     read_coef: for (int i = 0 ; i < N_COEFF ; i++) coeff_reg[i] = coeff[i];
@@ -94,7 +94,7 @@ __kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
 void fir_shift_register(__global int* restrict output,
                         __global int* restrict signal,
                         __global int* restrict coeff,
-                        int signal_length) {
+                        long signal_length) {
     int coeff_reg[N_COEFF];
 
     // Partitioning of this array is required because the shift register

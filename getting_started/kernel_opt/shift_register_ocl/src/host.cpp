@@ -48,79 +48,22 @@ using std::string;
 using std::uniform_int_distribution;
 using std::vector;
 
-// Finite Impulse Response Filter
-void fir(vector<int> &output, const vector<int> &signal,
-         const vector<int> &coeff) {
-    auto out_iter = begin(output);
-    auto rsignal_iter = signal.rend() - 1;
-
-    int i = 0;
-    while (rsignal_iter != signal.rbegin() - 1) {
-        int elements = std::min((int)coeff.size(), i++);
-        *(out_iter++) = inner_product(begin(coeff), begin(coeff) + elements,
-                                      rsignal_iter--, 0);
-    }
-}
-
-int gen_random() {
-    static default_random_engine e;
-    static uniform_int_distribution<int> dist(0, 100);
-
-    return dist(e);
-}
-
-void print_signal(vector<int> &device_output) {
-    for (auto val : device_output) {
-        printf("%d ", val);
-    }
-    printf("\n");
-}
-
-// Verifies the gold and the out data are equal
-void verify(const vector<int> &gold, const vector<int> &out) {
-    bool match = equal(begin(gold), end(gold), begin(out));
-    if (!match) {
-        printf("TEST FAILED\n");
-        exit(EXIT_FAILURE);
-    }
-}
-
-// Launches the Finite Impulse Response(FIR) kernel and prints the execution time
-vector<int> test_fir(cl::CommandQueue &q, cl::Program &program, string kernel_name,
-                     cl::Buffer &buffer_output, cl::Buffer &buffer_signal,
-                     cl::Buffer &buffer_coeff, int signal_size) 
-{
-    vector<int> device_output(signal_size, 0);
-    cl::Kernel kernel(program, kernel_name.c_str());
-
-    kernel.setArg(0,buffer_output);
-    kernel.setArg(1,buffer_signal);
-    kernel.setArg(2,buffer_coeff);
-    kernel.setArg(3,signal_size);
-
-    cl::Event event;
-    uint64_t nstimestart, nstimeend;
-    q.enqueueTask(kernel,NULL,&event);
-    q.finish();
-    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart);
-    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend);
-    auto kernel_time = nstimeend-nstimestart;
-
-    printf("| %-30s | %23lu |\n", kernel_name.c_str(), kernel_time);
-    q.enqueueReadBuffer(buffer_output, CL_TRUE, 0, signal_size * sizeof(int), 
-            device_output.data());
-
-    return device_output;
-}
+//helping functions
+void fir_sw(vector<int> &output, const vector<int> &signal,const vector<int> &coeff);
+void verify(const vector<int> &gold, const vector<int> &out);
+uint64_t get_duration_ns (const cl::Event &event);
+void print_summary(std::string k1, std::string k2, uint64_t t1, uint64_t t2, int iterations );
+int gen_random();
 
 int main(int argc, char **argv) {
-    size_t signal_size = 32;
+    size_t signal_size = 32; 
     vector<int> signal(signal_size);
+    vector<int> out(signal_size);
     generate(begin(signal), end(signal), gen_random);
     vector<int> coeff = {{53, 0, -91, 0, 313, 500, 313, 0, -91, 0, 53}};
     vector<int> gold(signal_size, 0);
 
-    fir(gold, signal, coeff);
+    fir_sw(gold, signal, coeff);
 
     size_t size_in_bytes = signal_size * sizeof(int);
     size_t coeff_size_in_bytes = coeff.size() * sizeof(int);
@@ -145,22 +88,97 @@ int main(int argc, char **argv) {
     q.enqueueWriteBuffer(buffer_signal,CL_TRUE, 0,size_in_bytes, signal.data());
     q.enqueueWriteBuffer(buffer_coeff, CL_TRUE, 0,coeff_size_in_bytes, coeff.data());
 
-    printf( "|--------------------------------+-------------------------|\n"
-            "| Kernel                         |    Wall-Clock Time (ns) |\n"
-            "|--------------------------------+-------------------------|\n");
-    auto device_output = test_fir(q,program, "fir_naive", buffer_output,
-                                  buffer_signal, buffer_coeff, signal_size);
-    verify(gold, device_output);
+    //Creating Naive Kernel Object and setting args
+    cl::Kernel fir_naive_kernel(program, "fir_naive");
+    fir_naive_kernel.setArg(0,buffer_output);
+    fir_naive_kernel.setArg(1,buffer_signal);
+    fir_naive_kernel.setArg(2,buffer_coeff);
+    fir_naive_kernel.setArg(3,signal_size);
 
-    device_output = test_fir(q,program, "fir_shift_register", buffer_output,
-                                  buffer_signal, buffer_coeff, signal_size);
-    verify(gold, device_output);
+    cl::Event event;
+    int iterations = xcl::is_emulation() ? 1 : 100;
+    uint64_t fir_naive_time = 0;
+    //Running naive kernel iterations times
+    for (int i = 0 ; i < iterations ; i++){
+        q.enqueueTask(fir_naive_kernel,NULL,&event);
+        q.enqueueReadBuffer(buffer_output, CL_TRUE, 0, size_in_bytes, out.data());
+        fir_naive_time += get_duration_ns(event);
+        verify(gold, out);
+    }
 
-    printf("|--------------------------------+-------------------------|\n");
-    printf("Note: Wall Clock Time is meaningful for real hardware execution only, not for emulation.\n");
-    printf("Please refer to profile summary for kernel execution time for hardware emulation.\n\n");
+    //Creating FIR Shift Register Kernel object and setting args
+    cl::Kernel fir_sr_kernel(program, "fir_shift_register");
+    fir_sr_kernel.setArg(0,buffer_output);
+    fir_sr_kernel.setArg(1,buffer_signal);
+    fir_sr_kernel.setArg(2,buffer_coeff);
+    fir_sr_kernel.setArg(3,signal_size);
 
-    print_signal(device_output);
+    uint64_t fir_sr_time = 0;
+    //Running Shift Register FIR iterations times
+    for (int i = 0 ; i < iterations ; i++){
+        q.enqueueTask(fir_sr_kernel,NULL,&event);
+        q.enqueueReadBuffer(buffer_output, CL_TRUE, 0, size_in_bytes, out.data());
+        fir_sr_time += get_duration_ns(event);
+        verify(gold, out);
+    }
+    print_summary("fir_naive", "fir_shift_register", fir_naive_time, fir_sr_time,iterations);
     printf("TEST PASSED\n");
     return EXIT_SUCCESS;
+}
+
+// Finite Impulse Response Filter
+void fir_sw(vector<int> &output, const vector<int> &signal,
+         const vector<int> &coeff) {
+    auto out_iter = begin(output);
+    auto rsignal_iter = signal.rend() - 1;
+
+    int i = 0;
+    while (rsignal_iter != signal.rbegin() - 1) {
+        int elements = std::min((int)coeff.size(), i++);
+        *(out_iter++) = inner_product(begin(coeff), begin(coeff) + elements,
+                                      rsignal_iter--, 0);
+    }
+}
+
+int gen_random() {
+    static default_random_engine e;
+    static uniform_int_distribution<int> dist(0, 100);
+
+    return dist(e);
+}
+
+// Verifies the gold and the out data are equal
+void verify(const vector<int> &gold, const vector<int> &out) {
+    bool match = equal(begin(gold), end(gold), begin(out));
+    if (!match) {
+        printf("TEST FAILED\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
+uint64_t get_duration_ns (const cl::Event &event) {
+    uint64_t nstimestart, nstimeend;
+    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart);
+    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend);
+    return(nstimeend-nstimestart);
+}
+void print_summary(std::string k1, std::string k2, uint64_t t1, uint64_t t2, int iterations ) {
+    int percentage_improvement = ((t1-t2)*100) / t1;
+    printf("|-------------------------+-------------------------|\n"
+           "| Kernel(%3d iterations)  |    Wall-Clock Time (ns) |\n"
+           "|-------------------------+-------------------------|\n",iterations);
+    printf("| %-23s | %23lu |\n", k1.c_str(), t1);
+    printf("| %-23s | %23lu |\n", k2.c_str(), t2);
+    printf("|-------------------------+-------------------------|\n");
+    printf("| Percentage improvement: | %23d |\n",percentage_improvement);
+    printf("|-------------------------+-------------------------|\n");
+    printf("Note: Wall Clock Time is meaningful for real hardware execution only, not for emulation.\n");
+    printf("Please refer to profile summary for kernel execution time for hardware emulation.\n");
+
+    //Performance check for real hardware. t2 must less than t1.
+    char *xcl_mode = getenv("XCL_EMULATION_MODE");
+    if ((xcl_mode == NULL) && (t1 < t2)){
+        printf("ERROR: Unexpected Performance is observed\n");
+        exit(EXIT_FAILURE);
+    }
 }

@@ -27,17 +27,9 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 
-#if 1
-#include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
 #include <limits.h>
 #include <sys/stat.h>
-
-#include <string.h>
-#include <math.h>
-#endif
-
 #include "xcl2.hpp"
 namespace xcl {
 std::vector<cl::Device> get_devices(const std::string& vendor_name) {
@@ -207,6 +199,16 @@ cl::Program::Binaries import_binary(const std::string& _device_name, const std::
 
     free(device_name);
     return import_binary_file(xclbin_file_name);
+}
+
+bool is_emulation()
+{
+    bool ret =false;
+    char *xcl_mode = getenv("XCL_EMULATION_MODE");
+    if (xcl_mode != NULL){
+        ret = true;
+    }
+    return ret;
 }
 
 };
