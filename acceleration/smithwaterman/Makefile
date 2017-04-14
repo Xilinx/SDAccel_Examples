@@ -23,15 +23,13 @@ EXES=smithwaterman
 # Smithwaterman Kernel
 krnl_smithwaterman_SRCS=./src/opencl_sw_maxscore_systolic.cpp
 krnl_smithwaterman_HDRS=./src/sw.h
-krnl_smithwaterman_CLFLAGS=--kernel opencl_sw_maxscore -I./src/
-krnl_smithwaterman_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.3
+krnl_smithwaterman_CLFLAGS=--kernel opencl_sw_maxscore -I./src/ --kernel_frequency 235 
 
 XOS=krnl_smithwaterman
 
 # Smithwaterman xclbin
 krnl_smithwaterman_XOS=krnl_smithwaterman
 krnl_smithwaterman_LDCLFLAGS=--nk opencl_sw_maxscore:2
-krnl_smithwaterman_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 
 XCLBINS=krnl_smithwaterman
 
@@ -41,8 +39,6 @@ check_XCLBINS=krnl_smithwaterman
 check_DEVICES=$(krnl_smithwaterman_DEVICES)
 
 CHECKS=check
-
-DEVICES:=xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 
 include $(COMMON_REPO)/utility/rules.mk
 

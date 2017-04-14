@@ -80,6 +80,9 @@ int main(int argc, char** argv)
          check_status = 1;
       }
    }
+   //Releasing objects related to first program before importing next program
+   clReleaseKernel(krnl_vmul);
+   clReleaseProgram(program_vmul);
 
    //Releasing Program before loading next to same device
    clReleaseKernel(krnl_vmul);

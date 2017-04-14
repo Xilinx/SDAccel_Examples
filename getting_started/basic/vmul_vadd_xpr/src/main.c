@@ -97,7 +97,7 @@ int main(int argc, char** argv)
       return EXIT_FAILURE;
    }
 
-   //releasing exist program before loading another on same device
+   //Releasing objects related to first program before importing next program
    clReleaseKernel(krnl_vmul);
    clReleaseProgram(program_vmul);
 

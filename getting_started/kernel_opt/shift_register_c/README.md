@@ -1,4 +1,4 @@
-Smithwaterman Genetic Sequencing Demo
+Shift Register
 ======================
 
 This README file contains the following sections:
@@ -16,12 +16,11 @@ This README file contains the following sections:
 
 
 ## 1. OVERVIEW
-This is an optimized implementation of the smithwaterman algorithm targeting exection on an SDAccel support FPGA acceleration card.
+This example demonstrates how to shift values in registers in each clock cycle
 
-The main algorithm characteristics of this application are
+***KEY CONCEPTS:*** Kernel Optimization, Shift Register, FIR
 
-1. Compute MaxScore
-2. Systolic array implementation
+***KEYWORDS:*** #pragma HLS ARRAY_PARTITION
 
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
@@ -34,7 +33,7 @@ where examples is the name of the directory where the repository will be stored 
 Board | Device Name | Software Version
 ------|-------------|-----------------
 Alpha Data ADM-PCIE-7V3|xilinx:adm-pcie-7v3:1ddr:3.0|SDAccel 2016.4
-Xilinx KU115|xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3|SDAccel 2016.4
+Alpha Data ADM-PCIE-KU3|xilinx:adm-pcie-ku3:2ddr-xpr:3.3|SDAccel 2016.4
 
 
 Board targeted by default = ***xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3***
@@ -49,23 +48,12 @@ where the *DEVICES* variable accepts either 1 device from the table above or a c
 Application code is located in the src directory. Accelerator binary files will be compiled to the xclbin directory. The xclbin directory is required by the Makefile and its contents will be filled during compilation. A listing of all the files in this example is shown below
 
 ```
-.gitignore
 Makefile
 README.md
 description.json
-src/genseq.cpp
-src/intel/kseq.h
-src/intel/sc_demo.c
-src/intel/ssw.c
-src/intel/ssw.h
-src/main.cpp
-src/matcharray.cpp
-src/matcharray.h
-src/opencl_sw_maxscore_basic.cpp
-src/opencl_sw_maxscore_systolic.cpp
-src/smithwaterman.cpp
-src/smithwaterman.h
-src/sw.h
+src/fir.cpp
+src/fir_bad.cpp
+src/host.cpp
 ```
 
 ## 5. COMPILATION AND EXECUTION
@@ -105,12 +93,12 @@ An emulated application can also be executed directly from the command line with
 To manually configure the environment to run the application, set the following
 ```
 export LD_LIBRARY_PATH=$XILINX_SDX/runtime/lib/x86_64/:$LD_LIBRARY_PATH
-export XCL_EMULATION_MODE=true
+export XCL_EMULATION_MODE=<sw_emu|hw_emu>
 emconfigutil --xdevice 'xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./smithwaterman
+./host
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card
@@ -149,18 +137,16 @@ This example is written by developers at
 ## 10. REVISION HISTORY
 Date | README Version | Description
 -----|----------------|------------
-FEB2016|1.0|Initial Xilinx Release
-OCT2016|2.0|Conversion to Makefile based compilation
-DEC2016|3.0|Update for SDAccel 2016.3
+DEC2016|1.0|Initial Xilinx Release
 
-[3-Clause BSD License]: ../../LICENSE.txt
+[3-Clause BSD License]: ../../../LICENSE.txt
 [SDAccel Forums]: https://forums.xilinx.com/t5/SDAccel/bd-p/SDx
 [SDAccel User Guides]: http://www.xilinx.com/support/documentation-navigation/development-tools/software-development/sdaccel.html?resultsTablePreSelect=documenttype:SeeAll#documentation
 [Nimbix Getting Started Guide]: http://www.xilinx.com/support/documentation/sw_manuals/xilinx2016_2/ug1240-sdaccel-nimbix-getting-started.pdf
 [Walkthrough Video]: http://bcove.me/6pp0o482
-[Nimbix Application Submission README]: ../../utility/nimbix/README.md
-[Repository Contribution README]: ../../CONTRIBUTING.md
-[SDaccel GUI README]: ../../GUIREADME.md
-[AWS F1 Application Execution on Xilinx Virtex UltraScale Devices]: ../../README.md
-[Nimbix Application Execution on Xilinx Kintex UltraScale Devices]: ../../utility/nimbix/README.md
+[Nimbix Application Submission README]: ../../../utility/nimbix/README.md
+[Repository Contribution README]: ../../../CONTRIBUTING.md
+[SDaccel GUI README]: ../../../GUIREADME.md
+[AWS F1 Application Execution on Xilinx Virtex UltraScale Devices]: ../../../README.md
+[Nimbix Application Execution on Xilinx Kintex UltraScale Devices]: ../../../utility/nimbix/README.md
 [IBM SuperVessel Research Cloud on Xilinx Virtex Devices]: http://bcove.me/6pp0o482
