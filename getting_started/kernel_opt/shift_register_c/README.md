@@ -51,8 +51,8 @@ Application code is located in the src directory. Accelerator binary files will 
 Makefile
 README.md
 description.json
-src/fir.cpp
-src/fir_bad.cpp
+src/fir_naive.cpp
+src/fir_shift_register.cpp
 src/host.cpp
 ```
 
@@ -137,7 +137,7 @@ This example is written by developers at
 ## 10. REVISION HISTORY
 Date | README Version | Description
 -----|----------------|------------
-DEC2016|1.0|Initial Xilinx Release
+MAY2017|1.0|Initial Xilinx Release
 
 [3-Clause BSD License]: ../../../LICENSE.txt
 [SDAccel Forums]: https://forums.xilinx.com/t5/SDAccel/bd-p/SDx

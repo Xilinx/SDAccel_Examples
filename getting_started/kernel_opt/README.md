@@ -23,6 +23,7 @@ Example        | Description           | Key Concepts / Keywords
 [partition_cyclicblock_c/][]|This example shows how to use array block and cyclic partitioning to improve performance of a kernel|__Key__ __Concepts__<br> - Kernel Optimization<br> - Array Partitioning<br> - Block Partition<br> - Cyclic Partition<br>__Keywords__<br> - #pragma HLS ARRAY_PARTITION<br> - cyclic<br> - block<br> - factor<br> - dim
 [shift_register_c/][]|This example demonstrates how to shift values in registers in each clock cycle|__Key__ __Concepts__<br> - Kernel Optimization<br> - Shift Register<br> - FIR<br>__Keywords__<br> - #pragma HLS ARRAY_PARTITION
 [partition_cyclicblock_ocl/][]|This example shows how to use array block and cyclic partitioning to improve performance of a kernel|__Key__ __Concepts__<br> - Kernel Optimization<br> - Array Partitioning<br> - Block Partition<br> - Cyclic Partition<br>__Keywords__<br> - xcl_array_partition<br> - cyclic<br> - block
+[loop_fusion_c/][]|This example will demonstrate how to fuse two loops into one to improve the performance of an OpenCL  C/C++ Kernel.|__Key__ __Concepts__<br> - Kernel Optimization<br> - Loop Fusion<br> - Loop Pipelining<br>__Keywords__<br> - #pragma HLS PIPELINE
 
 [.]:.
 [aos_vs_soa_ocl/]:aos_vs_soa_ocl/
@@ -42,3 +43,4 @@ Example        | Description           | Key Concepts / Keywords
 [partition_cyclicblock_c/]:partition_cyclicblock_c/
 [shift_register_c/]:shift_register_c/
 [partition_cyclicblock_ocl/]:partition_cyclicblock_ocl/
+[loop_fusion_c/]:loop_fusion_c/
