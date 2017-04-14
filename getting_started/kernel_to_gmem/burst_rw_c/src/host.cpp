@@ -40,15 +40,13 @@ int main(int argc, char** argv)
     int inc_value = INCR_VALUE;
     //Allocate Memory in Host Memory
     size_t vector_size_bytes = sizeof(int) * size;
-    std::vector<int> source_input     (size);
-    std::vector<int> source_hw_results(size);
+    std::vector<int> source_inout     (size);
     std::vector<int> source_sw_results(size);
 
     // Create the test data and Software Result 
     for(int i = 0 ; i < size ; i++){
-        source_input[i] = i;
+        source_inout[i] = i;
         source_sw_results[i] = i + inc_value;
-        source_hw_results[i] = 0;
     }
 
 //OPENCL HOST CODE AREA START
@@ -65,10 +63,13 @@ int main(int argc, char** argv)
     cl::Kernel kernel(program,"vadd");
 
     //Allocate Buffer in Global Memory
-    cl::Buffer buffer_rw(context, CL_MEM_READ_WRITE, vector_size_bytes);
+    std::vector<cl::Memory> bufferVec;
+    cl::Buffer buffer_rw(context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, 
+            vector_size_bytes, source_inout.data());
+    bufferVec.push_back(buffer_rw);
 
     //Copy input data to device global memory
-    q.enqueueWriteBuffer(buffer_rw,CL_TRUE,0,vector_size_bytes,source_input.data());
+    q.enqueueMigrateMemObjects(bufferVec,0/* 0 means from host*/);
 
     auto krnl_add = cl::KernelFunctor<cl::Buffer&, int, int>(kernel);
 
@@ -77,21 +78,21 @@ int main(int argc, char** argv)
             buffer_rw, size, inc_value);
 
     //Copy Result from Device Global Memory to Host Local Memory
-    q.enqueueReadBuffer(buffer_rw,CL_TRUE, 0, vector_size_bytes,source_hw_results.data());
+    q.enqueueMapBuffer(buffer_rw,CL_TRUE, CL_MAP_READ, 0, vector_size_bytes);
 
 //OPENCL HOST CODE AREA END
     
     // Compare the results of the Device to the simulation
     int match = 0;
     for (int i = 0 ; i < size ; i++){
-        if (source_hw_results[i] != source_sw_results[i]){
+        if (source_inout[i] != source_sw_results[i]){
             std::cout << "Error: Result mismatch" << std::endl;
             std::cout << "i = " << i << " CPU result = " << source_sw_results[i]
-                << " Device result = " << source_hw_results[i] << std::endl;
+                << " Device result = " << source_inout[i] << std::endl;
             match = 1;
             break;
         }else{
-            std::cout << source_hw_results[i] << " " ;
+            std::cout << source_inout[i] << " " ;
             if ( ( (i+1) % 16) == 0) std::cout << std::endl;
         }
     }
