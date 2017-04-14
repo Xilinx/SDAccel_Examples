@@ -26,7 +26,6 @@ XCLBINS=vadd
 # check
 check_EXE=host
 check_XCLBINS=vadd
-check_DEVICES=$(vadd_DEVICES)
 
 CHECKS=check
 

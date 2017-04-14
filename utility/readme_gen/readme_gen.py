@@ -96,7 +96,7 @@ def requirements(target,data):
 #        target.write(DEVICES[board][1])
         target.write("\n")
     target.write("\n\n")
-    target.write("Board targeted by default = ***%s***\n\n" %DSA)
+#    target.write("Board targeted by default = ***%s***\n\n" %DSA)
     target.write("*NOTE:* The board/device used for compilation can be changed by adding the DEVICES variable to the make command as shown below\n")
     target.write("```\n")
     target.write("make DEVICES=<device name>\n")
