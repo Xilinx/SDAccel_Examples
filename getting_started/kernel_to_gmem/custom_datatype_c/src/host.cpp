@@ -28,7 +28,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 #include "xcl2.hpp"
 #include <vector>
-
+#define USE_IN_HOST
 #include "bitmap.h"
 #include "rgb_to_hsv.h"
 
@@ -78,11 +78,13 @@ int main(int argc, char* argv[])
     cl::Kernel kernel(program,"rgb_to_hsv");
     
     //Allocate Buffer in Global Memory
-    cl::Buffer buffer_rgbImage(context, CL_MEM_READ_ONLY, image_size_bytes);
-    cl::Buffer buffer_hsvImage(context, CL_MEM_WRITE_ONLY, image_size_bytes);
+    cl::Buffer buffer_rgbImage(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, 
+            image_size_bytes,image.bitmap());
+    cl::Buffer buffer_hsvImage(context, CL_MEM_WRITE_ONLY| CL_MEM_USE_HOST_PTR, 
+            image_size_bytes,hwHsvImage.data());
 
     //Copy input RGB Image to device global memory
-    q.enqueueWriteBuffer(buffer_rgbImage,CL_TRUE, 0, image_size_bytes, image.bitmap());
+    q.enqueueMapBuffer(buffer_rgbImage,CL_TRUE, CL_MAP_WRITE, 0, image_size_bytes);
   
     auto krnl_rgb2hsv = cl::KernelFunctor<cl::Buffer&, cl::Buffer& , int>(kernel);
     
@@ -91,7 +93,7 @@ int main(int argc, char* argv[])
             buffer_rgbImage, buffer_hsvImage, image_size);
 
     //Copy Result from Device Global Memory to Host Local Memory
-    q.enqueueReadBuffer(buffer_hsvImage,CL_TRUE, 0,image_size_bytes, hwHsvImage.data());
+    q.enqueueMapBuffer(buffer_hsvImage,CL_TRUE, CL_MAP_READ, 0, image_size_bytes);
 
 //OPENCL HOST CODE AREA END
 
