@@ -9,7 +9,6 @@ include $(COMMON_REPO)/libs/opencl/opencl.mk
 #or set its value to BAD to shows Deadlock 
 KFLOW:=GOOD
 
-CXX:=/tools/batonroot/rodin/devkits/lnx64/gcc-6.2.0/bin/g++
 # kernel Host Application
 host_SRCS=./src/host.cpp $(xcl2_SRCS)
 host_HDRS=$(xcl2_HDRS)

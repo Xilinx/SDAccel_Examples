@@ -5,7 +5,6 @@ include $(COMMON_REPO)/utility/boards.mk
 include $(COMMON_REPO)/libs/opencl/opencl.mk
 include $(COMMON_REPO)/libs/xcl2/xcl2.mk
 
-CXX:=/tools/batonroot/rodin/devkits/lnx64/gcc-6.2.0/bin/g++
 # vmulvadd Host Application
 vmulvadd_SRCS=./src/main.c $(xcl2_SRCS)
 vmulvadd_HDRS=$(xcl2_HDRS)

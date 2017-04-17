@@ -37,7 +37,7 @@ DEVICES:= xilinx:adm-pcie-7v3:1ddr-ppc64le:2.1
 CXX:=$(XILINX_SDACCEL)/gnu/ppc64le/4.9.3/lnx64/bin/powerpc64le-linux-gnu-g++
 else
 DEVICES:= xilinx:xil-accel-rd-ku115:4ddr-xpr
-CXX:=$(XILINX_SDACCEL)/Vivado_HLS/lnx64/tools/gcc/bin/g++
+CXX:=$(XILINX_SDACCEL)/Vivado/tps/lnx64/gcc-6.2.0/bin/g++
 endif
 
 #if COMMON_REPO is not defined use the default value support existing Designs

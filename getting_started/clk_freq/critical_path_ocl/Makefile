@@ -11,7 +11,6 @@ include $(COMMON_REPO)/libs/bitmap/bitmap.mk
 #or set its value to BAD for degraded design timing
 KFLOW:=GOOD
 
-CXX:=/tools/batonroot/rodin/devkits/lnx64/gcc-6.2.0/bin/g++
 # Host files and setting
 host_SRCS=./src/host.cpp $(xcl2_SRCS) $(bitmap_SRCS)
 host_HDRS=$(xcl2_HDRS) $(bitmap_HDRS) 
