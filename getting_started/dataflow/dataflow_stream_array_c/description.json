@@ -1,11 +1,19 @@
 {
-    "example": "Dataflow Using HLS Stream",
+    "example": "Dataflow Using HLS Stream (C)",
     "overview": [
         "This is simple example of Multiple Stages Vector Addition to demonstrate Array of Stream usage in HLS C Kernel Code."
     ],
     "key_concepts": [ "Array of Stream"],
     "keywords": [ "dataflow" , "hls::stream<>"],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
+    "board": [
+        "All SDAccel"
+    ],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl2"
+    ],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "contributors" : [

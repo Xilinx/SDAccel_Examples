@@ -1,11 +1,19 @@
 {
-    "example": "Memory Coalesce Deadlock/Hang Handling",
+    "example": "Memory Coalesce Deadlock/Hang Handling (C)",
     "overview": [
         "This example shows Memory Coalesce Deadlock/Hand situation and how to handle it. User can switch between BAD and GOOD case using makefile variable KFLOW."
     ],
     "key_concepts": [ "Memory Coalesce", "Memory Deadlock/Hang", "Multiple Interfaces"],
     "keywords": ["HLS INTERFACE", "bundle", "m_axi"],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
+    "board": [
+        "All SDAccel"
+    ],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl2"
+    ],
     "em_cmd": "./host kernel_GOOD",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host ./kernel_GOOD",
     "contributors" : [

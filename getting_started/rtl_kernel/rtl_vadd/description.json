@@ -1,10 +1,18 @@
 {
-    "example": "Vector Addition With RTL Kernel",
+    "example": "Vector Addition With RTL Kernel (RTL)",
     "overview": [
         "Simple example of vector addition using RTL Kernel"
     ],
     "key_concepts": [ "RTL Kernel"],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3", "Xilinx KU115"],
+    "board": [
+        "All SDAccel"
+    ],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl"
+    ],
     "em_cmd": "./host",
     "targets": ["hw", "hw_emu"],
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",

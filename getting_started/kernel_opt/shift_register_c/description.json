@@ -1,11 +1,19 @@
 {
-    "example": "Shift Register",
+    "example": "Shift Register (C)",
     "overview": [
         "This example demonstrates how to shift values in registers in each clock cycle"
     ],
     "key_concepts": [ "Kernel Optimization", "Shift Register", "FIR"],
     "keywords": [ "#pragma HLS ARRAY_PARTITION" ],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
+    "board": [
+        "All SDAccel"
+    ],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl2"
+    ],
     "em_cmd": "./host",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./host",
     "contributors" : [

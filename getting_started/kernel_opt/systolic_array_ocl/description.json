@@ -1,11 +1,19 @@
 {
-    "example": "Systolic Array Implementation",
+    "example": "Systolic Array Implementation (CL)",
     "overview": [
         "This is a simple example of matrix multiplication (Row x Col) to help developers learn systolic array based algorithm design. Note: Systolic array based algorithm design is well suited for FPGA."
     ],
     "Key Concepts": [ "Kernel Optimization", "Systolic Array"],
     "Keywords": ["__attribute__((xcl_pipeline_loop))", "__attribute__((xcl_array_partition(<type>,<dimension>)))"],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3", "Xilinx KU115"],
+    "board": [
+        "All SDAccel"
+    ],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl2"
+    ],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "contributors" : [

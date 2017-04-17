@@ -1,11 +1,19 @@
 {
-    "example": "Multiple FPGA Devices Execution Concurrently",
+    "example": "Multiple FPGA Devices Execution Concurrently (CL)",
     "overview": [
         "This example show how to take advantage of multiple FPGAs on a system. It will show how to initialized an OpenCL context, allocate memory on the two devices and execute a kernel on each FPGA."
     ],
     "key_concepts": [ "OpenCL API" , "Multi-FPGA Execution", "Event Handling"],
     "keywords": [ "cl_device_id", "clGetDeviceIDs()"],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
+    "board": [
+        "All SDAccel"
+    ],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl"
+    ],
     "em_cmd": "./multiple_devices xclbin/vector_addition.<emulation target>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./multiple_devices xclbin/vector_addition.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin",
     "contributors" : [

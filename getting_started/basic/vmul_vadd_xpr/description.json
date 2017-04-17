@@ -5,7 +5,15 @@
     ],
     "key_concepts": [ "Handling Buffer sharing across multiple binaries for XPR Platform", "Multiple Kernel Binaries" , "Buffer sharing across Multiple binaries"],
     "keywords": [ "clEnqueueMigrateMemObjects()", "CL_MIGRATE_MEM_OBJECT_HOST"],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3",  "Xilinx KU115"],
+    "board": [
+        "All SDAccel"
+    ],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl"
+    ],
     "em_cmd" : "./vmulvadd",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./vmulvadd",
     "contributors" : [

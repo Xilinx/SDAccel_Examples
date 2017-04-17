@@ -1,10 +1,18 @@
 {
-    "example": "Adder With Pipes",
+    "example": "Adder With Pipes (RTL)",
     "overview": [
         "This example shows an adder with pipes using 3 RTL kernels."
     ],
     "key_concepts": [ "RTL Kernel", "Multiple RTL Kernels"],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3", "Xilinx KU115"],
+    "board": [
+        "All SDAccel"
+    ],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl"
+    ],
     "targets": ["hw", "hw_emu"],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",

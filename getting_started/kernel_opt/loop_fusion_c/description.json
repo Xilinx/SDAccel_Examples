@@ -1,11 +1,19 @@
 {
-    "example": "Loop Fusion",
+    "example": "Loop Fusion (C)",
     "overview": [
         "This example will demonstrate how to fuse two loops into one to improve the performance of an OpenCL  C/C++ Kernel."
     ],
     "key_concepts": [ "Kernel Optimization", "Loop Fusion", "Loop Pipelining" ],
     "keywords": [ "#pragma HLS PIPELINE"],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
+    "board": [
+        "All SDAccel"
+    ],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl2"
+    ],
     "em_cmd": "./loop_fusion",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./loop_fusion",
     "contributors" : [

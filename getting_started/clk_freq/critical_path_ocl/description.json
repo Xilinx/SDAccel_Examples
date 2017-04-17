@@ -1,10 +1,18 @@
 {
-    "example": "Critical Path",
+    "example": "Critical Path(CL)",
     "overview": [
         "This example shows a normal coding style which could lead to critical path issue and design will give degraded timing.  Example also contains better coding style which can improve design timing."
     ],
     "key_concepts": [ "Critical Path handling", "Improve Timing"],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
+    "board": [
+        "All SDAccel"
+    ],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl2"
+    ],
     "em_cmd": "./host apply_watermark_GOOD ./data/input.bmp ./data/golden.bmp",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host apply_watermark_GOOD ./data/input.bmp ./data/golden.bmp",
     "contributors" : [

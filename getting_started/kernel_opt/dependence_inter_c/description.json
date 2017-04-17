@@ -1,11 +1,19 @@
 {
-    "example": "Loop Iteration Dependency",
+    "example": "Loop Iteration Dependency (CL)",
     "overview": [
       "This Example to demonstrate HLS pragma 'DEPENDENCE'. Using 'DEPENDENCE' pragma, user can provide additional dependency details to compiler which allow compiler to perform unrolling/pipelining to get better performance."
     ],
     "key_concepts": [ "Inter Dependence"],
     "keywords": ["DEPENDENCE", "inter"],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
+    "board": [
+        "All SDAccel"
+    ],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl2"
+    ],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "contributors" : [

@@ -1,11 +1,19 @@
 {
-    "example": "Dataflow Function OpenCL",
+    "example": "Dataflow Function OpenCL(CL)",
     "overview": [
         "This is simple example of vector addition to demonstrate Dataflow functionality in OpenCL Kernel. OpenCL Dataflow allows user to run multiple functions together to achieve higher throughput."
     ],
     "key_concepts": [ "Function/Task Level Parallelism"],
     "keywords": [ "xcl_dataflow" , "xclDataflowFifoDepth"],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
+    "board": [
+        "All SDAccel"
+    ],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl2"
+    ],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "contributors" : [

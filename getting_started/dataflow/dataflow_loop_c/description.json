@@ -1,11 +1,19 @@
 {
-    "example": "Loops Dataflow Using HLS Stream",
+    "example": "Loops Dataflow Using HLS Stream(C)",
     "overview": [
         "This is simple example of vector addition to demonstrate Loops Dataflow functionality of HLS. HLS Dataflow allows user to schedule multiple sequential loops concurrently to achieve higher throughput."
     ],
     "key_concepts": [ "Loop Dataflow"],
     "keywords": [ "dataflow" , "hls::stream<>"],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3", "Xilinx KU115"],
+    "board": [
+        "All SDAccel"
+    ],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl2"
+    ],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "contributors" : [

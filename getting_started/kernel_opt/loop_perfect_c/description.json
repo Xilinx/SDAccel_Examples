@@ -1,11 +1,19 @@
 {
-    "example": "Improve performance using loop perfect or semi-perfect",
+    "example": "Improve performance using loop perfect (C)",
     "overview": [
         "This nearest neighbor example is to demonstrate how to achieve better performance using perfect loop."
     ],
     "Key Concepts": [ "Loop perfect"],
     "Keywords": ["#pragma HLS PIPELINE", "#pragma HLS ARRAY_PARTITION"],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3", "Xilinx KU115"],
+    "board": [
+        "All SDAccel"
+    ],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl2"
+    ],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "contributors" : [

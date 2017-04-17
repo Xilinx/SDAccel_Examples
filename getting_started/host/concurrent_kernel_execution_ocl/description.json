@@ -1,11 +1,20 @@
 {
-    "example": "Concurrent Kernel Execution",
+    "example": "Concurrent Kernel Execution (CL)",
     "overview": [
         "This example will demonstrate how to use multiple and out of order command queues to simultaneously execute multiple kernels on an FPGA."
     ],
     "key_concepts": [ "Concurrent execution", "Out of Order Command Queues", "Multiple Command Queues"],
     "keywords": [ "CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE" , "clSetEventCallback()" ],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
+    "board": [
+        "All SDAccel"
+    ],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl",
+        "oclHelper"
+    ],
     "em_cmd": "./concurrent_execution",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./concurrent_execution",
     "contributors" : [
