@@ -40,8 +40,8 @@ int main(int argc, char** argv)
     int inc_value = INCR_VALUE;
     //Allocate Memory in Host Memory
     size_t vector_size_bytes = sizeof(int) * size;
-    std::vector<int> source_inout     (size);
-    std::vector<int> source_sw_results(size);
+    std::vector<int,aligned_allocator<int>> source_inout     (size);
+    std::vector<int,aligned_allocator<int>> source_sw_results(size);
 
     // Create the test data and Software Result 
     for(int i = 0 ; i < size ; i++){
@@ -79,7 +79,8 @@ int main(int argc, char** argv)
             buffer_rw, size, inc_value);
 
     //Copy Result from Device Global Memory to Host Local Memory
-    q.enqueueMapBuffer(buffer_rw,CL_TRUE, CL_MAP_READ, 0, vector_size_bytes);
+    q.enqueueMigrateMemObjects(bufferVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    q.finish();
 
 //OPENCL HOST CODE AREA END
     

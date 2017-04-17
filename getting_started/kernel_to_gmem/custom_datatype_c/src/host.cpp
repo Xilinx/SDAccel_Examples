@@ -60,9 +60,14 @@ int main(int argc, char* argv[])
     //Allocate Memory in Host Memory 
     int image_size = image.numPixels();
     size_t image_size_bytes = sizeof(int) * image_size;
-    std::vector<int> swHsvImage (image_size) ;
-    std::vector<int> hwHsvImage (image_size) ;
-    std::vector<int> outRgbImage(image_size) ;
+    std::vector<int,aligned_allocator<int>> hwRgbImage(image_size) ;
+    std::vector<int,aligned_allocator<int>> hwHsvImage(image_size) ;
+    std::vector<int,aligned_allocator<int>> swHsvImage(image_size) ;
+    std::vector<int,aligned_allocator<int>> outRgbImage(image_size) ;
+
+    //Copying image host buffer
+    memcpy(hwRgbImage.data(),image.bitmap(),image_size_bytes);
+
    
 //OPENCL HOST CODE AREA START
     std::vector<cl::Device> devices = xcl::get_xil_devices();
@@ -80,12 +85,17 @@ int main(int argc, char* argv[])
     
     //Allocate Buffer in Global Memory
     cl::Buffer buffer_rgbImage(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, 
-            image_size_bytes,image.bitmap());
+            image_size_bytes,hwRgbImage.data());
+    std::vector<cl::Memory> rgbBufVec;
+    rgbBufVec.push_back(buffer_rgbImage);
+
     cl::Buffer buffer_hsvImage(context, CL_MEM_WRITE_ONLY| CL_MEM_USE_HOST_PTR, 
             image_size_bytes,hwHsvImage.data());
+    std::vector<cl::Memory> hsvBufVec;
+    hsvBufVec.push_back(buffer_hsvImage);
 
     //Copy input RGB Image to device global memory
-    q.enqueueMapBuffer(buffer_rgbImage,CL_TRUE, CL_MAP_WRITE, 0, image_size_bytes);
+    q.enqueueMigrateMemObjects(rgbBufVec,0/* 0 means from host*/);
   
     auto krnl_rgb2hsv = cl::KernelFunctor<cl::Buffer&, cl::Buffer& , int>(kernel);
     
@@ -94,7 +104,8 @@ int main(int argc, char* argv[])
             buffer_rgbImage, buffer_hsvImage, image_size);
 
     //Copy Result from Device Global Memory to Host Local Memory
-    q.enqueueMapBuffer(buffer_hsvImage,CL_TRUE, CL_MAP_READ, 0, image_size_bytes);
+    q.enqueueMigrateMemObjects(hsvBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    q.finish();
 
 //OPENCL HOST CODE AREA END
 
