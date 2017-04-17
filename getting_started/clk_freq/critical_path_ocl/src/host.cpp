@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
             << " <input bitmap> <golden bitmap>" << std::endl;
         return EXIT_FAILURE ;
     }
-    std::string binaryFilename = argv[1];
+    std::string binaryName = argv[1];
     std::string bitmapFilename = argv[2];
     std::string goldenFilename = argv[3];
   
@@ -84,26 +84,14 @@ int main(int argc, char* argv[])
     cl::CommandQueue q(context, device);
     std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
 
-    cl::Program::Binaries bins = xcl::import_binary(device_name,binaryFilename.c_str());
+    std::string binaryFile = xcl::find_binary_file(device_name,binaryName.c_str());
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
     cl::Program program(context, devices, bins);
     cl::Kernel kernel(program,"apply_watermark");
 
-    // For Allocating Buffer to specific Global Memory Bank, user has to use cl_mem_ext_ptr_t
-    // and provide the Banks
-    //
-    cl_mem_ext_ptr_t inExt, outExt;  // Declaring two extensions for both buffers
-    inExt.flags  = XCL_MEM_DDR_BANK0; // Specify Bank0 Memory for input memory
-    outExt.flags = XCL_MEM_DDR_BANK1; // Specify Bank1 Memory for output Memory
-    inExt.obj = 0   ; outExt.obj = 0; // Setting Obj and Param to Zero
-    inExt.param = 0 ; outExt.param = 0; 
-
-    //Allocate Buffer in Bank0 of Global Memory for Input Image using Xilinx Extension
-    cl::Buffer buffer_inImage(context, CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX,
-            image_size_bytes, &inExt);
-    //Allocate Buffer in Bank1 of Global Memory for Input Image using Xilinx Extension
-    cl::Buffer buffer_outImage(context, CL_MEM_WRITE_ONLY | CL_MEM_EXT_PTR_XILINX,
-            image_size_bytes, &outExt);
+    cl::Buffer buffer_inImage(context, CL_MEM_READ_ONLY , image_size_bytes);
+    cl::Buffer buffer_outImage(context, CL_MEM_WRITE_ONLY, image_size_bytes);
 
     //Copy input Image to device global memory
     q.enqueueWriteBuffer(buffer_inImage,CL_TRUE, 0, image_size_bytes, image.bitmap());
