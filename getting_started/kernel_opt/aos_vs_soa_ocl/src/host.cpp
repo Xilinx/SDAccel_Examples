@@ -116,7 +116,8 @@ int main(int argc, char **argv) {
   cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
   std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
   std::cout << "Found Device=" << device_name.c_str() << std::endl;
-  cl::Program::Binaries bins = xcl::import_binary(device_name,"dot");
+  std::string binaryFile = xcl::find_binary_file(device_name,"dot");
+  cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
   devices.resize(1);
   cl::Program program(context, devices, bins);
  

@@ -76,8 +76,6 @@ std::vector<cl::Device> get_devices(const std::string& vendor_name);
  */
 std::string find_binary_file(const std::string& _device_name, const std::string& xclbin_name);
 cl::Program::Binaries import_binary_file(std::string xclbin_file_name); 
-cl::Program::Binaries import_binary(const std::string& device_name, const std::string &xclbin_name);
-
 bool is_emulation () ;
 
 }

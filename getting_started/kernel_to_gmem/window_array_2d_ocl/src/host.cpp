@@ -59,7 +59,8 @@ int main(int argc, char** argv)
     std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
 
     //Create Program and Kernel
-    cl::Program::Binaries bins = xcl::import_binary(device_name,"window_array_2d");
+    std::string binaryFile = xcl::find_binary_file(device_name,"window_array_2d");
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
     cl::Program program(context, devices, bins);
     cl::Kernel krnl_read_data (program,"read_data");

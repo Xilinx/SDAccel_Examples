@@ -66,7 +66,8 @@ int main(int argc, char** argv)
     std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
 
     //Create Program 
-    cl::Program::Binaries bins = xcl::import_binary(device_name,"vector_addition");
+    std::string binaryFile = xcl::find_binary_file(device_name,"vector_addition");
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
     cl::Program program(context, devices, bins);
 

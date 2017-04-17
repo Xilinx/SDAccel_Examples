@@ -202,12 +202,6 @@ find_binary_file(const std::string& _device_name, const std::string& xclbin_name
     return (xclbin_file_name);
 }
 
-cl::Program::Binaries import_binary(const std::string& _device_name, const std::string& xclbin_name) 
-{
-    std::string xclbin_file_name = find_binary_file(_device_name, xclbin_name);
-    return import_binary_file(xclbin_file_name);
-}
-
 bool is_emulation()
 {
     bool ret =false;
