@@ -4,14 +4,15 @@ import json
 import os
 import subprocess
 
-DSA = 'xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3'
-VERSION = 'SDAccel 2016.4'
+DSA = 'xilinx:xil-accel-rd-ku115:4ddr-xpr'
+VERSION = 'SDAccel 2017.1'
 DEVICES = {
     'AWS VU9P': ['TBD'],
-    'Alpha Data ADM-PCIE-7V3':['xilinx:adm-pcie-7v3:1ddr:3.0','nx2'],
-    'Alpha Data ADM-PCIE-KU3':['xilinx:adm-pcie-ku3:2ddr-xpr:3.3','nx1'],
-    'Alpha Data ADM-PCIE-8K5':['xilinx:adm-pcie-8k5:2ddr:3.3'],
-    'Xilinx KU115':['xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3','nx3']
+    'Alpha Data ADM-PCIE-7V3':['xilinx:adm-pcie-7v3:1ddr','nx2'],
+    'Alpha Data ADM-PCIE-KU3':['xilinx:adm-pcie-ku3:2ddr-xpr','nx1'],
+    'Alpha Data ADM-PCIE-8K5':['xilinx:adm-pcie-8k5:2ddr'],
+    'Xilinx KU115':['xilinx:xil-accel-rd-ku115:4ddr-xpr','nx3'],
+    'All SDAccel':['xilinx:xil-accel-rd-ku115:4ddr-xpr','nx3']
     }
 
 def header(target,data):
