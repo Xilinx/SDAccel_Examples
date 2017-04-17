@@ -42,11 +42,11 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace xcl {
 std::vector<cl::Device> get_xil_devices();
 std::vector<cl::Device> get_devices(const std::string& vendor_name);
-/* import_binary
+/* find_xclbin_file
  *
  *
  * Description:
- *   Import precompiled program (as commonly created by the Xilinx OpenCL
+ *   Find precompiled program (as commonly created by the Xilinx OpenCL
  *   flow). Using search path below.
  *
  *   Search Path:
@@ -68,11 +68,14 @@ std::vector<cl::Device> get_devices(const std::string& vendor_name);
  *      ./<name>.xclbin
  *
  * Inputs:
+ *   _device_name - Targeted Device name
  *   xclbin_name - base name of the xclbin to import.
  *
  * Returns:
  *   An opencl program Binaries object that was created from xclbin_name file.
  */
+std::string find_binary_file(const std::string& _device_name, const std::string& xclbin_name);
+cl::Program::Binaries import_binary_file(std::string xclbin_file_name); 
 cl::Program::Binaries import_binary(const std::string& device_name, const std::string &xclbin_name);
 
 bool is_emulation () ;

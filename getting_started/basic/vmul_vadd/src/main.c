@@ -26,21 +26,17 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-
-#include "xcl.h"
+#include "xcl2.hpp"
+#include <vector>
 
 #define LENGTH 16
 
 int main(int argc, char** argv)
 {
    int check_status = 0;
-
-   int h_a[LENGTH];                    // host memory for a vector
-   int h_b[LENGTH];                    // host memory for b vector
-   int h_c[LENGTH];                    // host memort for c vector
+   std::vector<int> h_a(LENGTH);        // host memory for a vector
+   std::vector<int> h_b(LENGTH);        // host memory for b vector
+   std::vector<int> h_c(LENGTH);        // host memort for c vector
 
    // Fill our data sets with pattern
    //
@@ -51,27 +47,40 @@ int main(int argc, char** argv)
       h_c[i] = 0;
    }
 
-   xcl_world world = xcl_world_single();
+   std::vector<cl::Device> devices = xcl::get_xil_devices();
+   cl::Device device = devices[0];
+
+   //Creating Context and Command Queue for selected Device 
+   cl::Context context(device);
+   cl::CommandQueue q(context, device);
+   std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+   std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
    printf("INFO: loading vmul kernel\n");
-   cl_program program_vmul = xcl_import_binary(world, "krnl_vmul");
-   cl_kernel  krnl_vmul = xcl_get_kernel(program_vmul, "krnl_vmul");
+   std::string vmulBinaryFile = xcl::find_binary_file(device_name,"krnl_vmul");
+   cl::Program::Binaries bins = xcl::import_binary_file(vmulBinaryFile);
+   devices.resize(1);
+   cl::Program * program_ptr = new cl::Program(context, devices, bins);
+   cl::Kernel krnl_vmul(*program_ptr,"krnl_vmul");
 
-   cl_mem d_a = xcl_malloc(world, CL_MEM_READ_ONLY, sizeof(int) * LENGTH);
-   cl_mem d_b = xcl_malloc(world, CL_MEM_READ_ONLY, sizeof(int) * LENGTH);
-   cl_mem d_mul_c = xcl_malloc(world, CL_MEM_READ_WRITE, sizeof(int) * LENGTH);
+   cl::Buffer d_a(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
+           sizeof(int) * LENGTH, h_a.data());
+   cl::Buffer d_b(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
+           sizeof(int) * LENGTH, h_b.data());
+   cl::Buffer d_mul_c(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, 
+           sizeof(int) * LENGTH, h_c.data());
 
-   xcl_memcpy_to_device(world, d_a, h_a, sizeof(int) * LENGTH);
-   xcl_memcpy_to_device(world, d_b, h_b, sizeof(int) * LENGTH);
+   q.enqueueMapBuffer(d_a,CL_TRUE,CL_MAP_WRITE,0, sizeof(int) * LENGTH);
+   q.enqueueMapBuffer(d_b,CL_TRUE,CL_MAP_WRITE,0, sizeof(int) * LENGTH);
 
-   xcl_set_kernel_arg(krnl_vmul, 0, sizeof(cl_mem), &d_a);
-   xcl_set_kernel_arg(krnl_vmul, 1, sizeof(cl_mem), &d_b);
-   xcl_set_kernel_arg(krnl_vmul, 2, sizeof(cl_mem), &d_mul_c);
+   krnl_vmul.setArg(0,d_a);
+   krnl_vmul.setArg(1,d_b);
+   krnl_vmul.setArg(2,d_mul_c);
 
    // This function will execute the kernel on the FPGA
-   xcl_run_kernel3d(world,krnl_vmul,1,1,1);
+   q.enqueueTask(krnl_vmul);
 
-   xcl_memcpy_from_device(world, h_c, d_mul_c, sizeof(int) * LENGTH);
+   q.enqueueMapBuffer(d_mul_c, CL_TRUE, CL_MAP_READ, 0, sizeof(int) * LENGTH);
 
    // Check Results
    for (int i = 0; i < LENGTH; i++) {
@@ -80,28 +89,27 @@ int main(int argc, char** argv)
          check_status = 1;
       }
    }
-   //Releasing objects related to first program before importing next program
-   clReleaseKernel(krnl_vmul);
-   clReleaseProgram(program_vmul);
 
-   //Releasing Program before loading next to same device
-   clReleaseKernel(krnl_vmul);
-   clReleaseProgram(program_vmul);
-
+   //Deleting existing program object before loading the 2nd program
+   delete(program_ptr);
+   program_ptr = nullptr;
    printf("INFO: loading vadd_krnl\n");
-   cl_program program_vadd = xcl_import_binary(world, "krnl_vadd");
-   cl_kernel krnl_vadd = xcl_get_kernel(program_vadd, "krnl_vadd");
+   std::string vaddBinaryFile = xcl::find_binary_file(device_name,"krnl_vadd");
+   cl::Program::Binaries vadd_bins = xcl::import_binary_file(vaddBinaryFile);
+   program_ptr = new cl::Program(context, devices, vadd_bins);
+   cl::Kernel krnl_vadd(*program_ptr,"krnl_vadd");
 
-   cl_mem d_add_c = xcl_malloc(world, CL_MEM_WRITE_ONLY, sizeof(int) * LENGTH);
+   cl::Buffer d_add_c(context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, 
+            sizeof(int) * LENGTH, h_c.data());
 
    //use the results from vmul as a and b inputs for vadd
-   xcl_set_kernel_arg(krnl_vadd, 0, sizeof(cl_mem), &d_mul_c);
-   xcl_set_kernel_arg(krnl_vadd, 1, sizeof(cl_mem), &d_mul_c);
-   xcl_set_kernel_arg(krnl_vadd, 2, sizeof(cl_mem), &d_add_c);
+   krnl_vadd.setArg(0,d_mul_c);
+   krnl_vadd.setArg(1,d_mul_c);
+   krnl_vadd.setArg(2,d_add_c);
 
    // This function will execute the kernel on the FPGA
-   xcl_run_kernel3d(world,krnl_vadd,1,1,1);
-   xcl_memcpy_from_device(world, h_c, d_add_c, sizeof(int) * LENGTH);
+   q.enqueueTask(krnl_vadd);
+   q.enqueueMapBuffer(d_add_c,CL_TRUE,CL_MAP_READ, 0, sizeof(int) * LENGTH);
 
    // Check Results
    for (int i = 0; i < LENGTH; i++) {
@@ -110,17 +118,6 @@ int main(int argc, char** argv)
          check_status = 1;
       }
    }
-
-   //--------------------------------------------------------------------------
-   // Shutdown and cleanup
-   //--------------------------------------------------------------------------
-   clReleaseMemObject(d_a);
-   clReleaseMemObject(d_b);
-   clReleaseMemObject(d_add_c);
-   clReleaseMemObject(d_mul_c);
-   clReleaseKernel(krnl_vadd);
-   clReleaseProgram(program_vadd);
-   xcl_release_world(world);
 
    if (check_status) {
       printf("TEST FAILED\n");

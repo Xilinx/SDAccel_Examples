@@ -3,13 +3,14 @@
 COMMON_REPO:=../../../
 include $(COMMON_REPO)/utility/boards.mk
 include $(COMMON_REPO)/libs/opencl/opencl.mk
-include $(COMMON_REPO)/libs/xcl/xcl.mk
+include $(COMMON_REPO)/libs/xcl2/xcl2.mk
 
+CXX:=/tools/batonroot/rodin/devkits/lnx64/gcc-6.2.0/bin/g++
 # vmulvadd Host Application
-vmulvadd_SRCS=./src/main.c $(xcl_SRCS)
-vmulvadd_HDRS=$(xcl_HDRS)
+vmulvadd_SRCS=./src/main.c $(xcl2_SRCS)
+vmulvadd_HDRS=$(xcl2_HDRS)
 vmulvadd_EXE=vmulvadd
-vmulvadd_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS)
+vmulvadd_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl2_CXXFLAGS)
 vmulvadd_LDFLAGS=$(opencl_LDFLAGS)
 
 EXES=vmulvadd
