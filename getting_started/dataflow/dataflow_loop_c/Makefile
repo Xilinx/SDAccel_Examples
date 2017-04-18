@@ -10,21 +10,23 @@ host_HDRS=$(xcl_HDRS)
 host_CXXFLAGS=-I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS)
 host_LDFLAGS=$(opencl_LDFLAGS)
 
+EXES=host
+
 # Kernel
 adder_SRCS=./src/adder.cpp
 adder_CLFLAGS= -k adder
-adder_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.2
 
-EXES=host
+XOS=adder
+
+# xclbins
+adder_XOS=adder
+
 XCLBINS=adder
 
 # check
 check_EXE=host
 check_XCLBINS=adder
-check_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.2
 
 CHECKS=check
 
-#Changing Default Device
-DEVICES:=xilinx:adm-pcie-ku3:2ddr-xpr:3.2
 include $(COMMON_REPO)/utility/rules.mk

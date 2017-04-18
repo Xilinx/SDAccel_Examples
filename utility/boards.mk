@@ -11,6 +11,8 @@ ifneq ($(REPORT),none)
 CLFLAGS += --report $(REPORT)
 endif 
 
+LDCLFLAGS:=$(CLFLAGS)
+
 ifdef XILINX_SDX
 XILINX_SDACCEL=${XILINX_SDX}
 endif
@@ -19,8 +21,12 @@ ifndef XILINX_SDACCEL
 $(error XILINX_SDX or XILINX_SDACCEL is not set. Please source the SDx settings64.{csh,sh} script before attempting to run examples)
 endif
 
+VIVADO=$(XILINX_SDX)/Vivado/bin/vivado
+
+
 # Use the Xilinx OpenCL compiler
 CLC:=$(XILINX_SDACCEL)/bin/xocc
+LDCLC:=$(CLC)
 EMCONFIGUTIL := $(XILINX_SDACCEL)/bin/emconfigutil
 
 # By default build for X86, this could also be set to POWER to build for power
@@ -30,7 +36,7 @@ ifeq ($(ARCH),POWER)
 DEVICES:= xilinx:adm-pcie-7v3:1ddr-ppc64le:2.1
 CXX:=$(XILINX_SDACCEL)/gnu/ppc64le/4.9.3/lnx64/bin/powerpc64le-linux-gnu-g++
 else
-DEVICES:= xilinx:xil-accel-rd-ku115:4ddr-xpr:3.2
+DEVICES:= xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3
 CXX:=$(XILINX_SDACCEL)/Vivado_HLS/lnx64/tools/gcc/bin/g++
 endif
 
@@ -42,6 +48,8 @@ COMMON_REPO ?= ../../
 #   sw_emu for software emulation
 #   or a collection of all or none of these
 TARGETS:=hw
+
+# By default only have one device in the system
 NUM_DEVICES:=1
 
 # sanitize_dsa - create a filesystem friendly name from dsa name

@@ -5,11 +5,9 @@
     ],
     "Key Concepts": [ "Kernel Optimization", "Systolic Array"],
     "Keywords": ["__attribute__((xcl_pipeline_loop))", "__attribute__((xcl_array_partition(<type>,<dimension>)))"],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
-    "version": ["SDx 2016.3"],
-    "dsa": "xilinx:adm-pcie-ku3:2ddr:3.2",
-    "em_cmd": "./host xclbin",
-    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host xclbin",
+    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3", "Xilinx KU115"],
+    "em_cmd": "./host",
+    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "contributors" : [
         {
             "group": "Xilinx",

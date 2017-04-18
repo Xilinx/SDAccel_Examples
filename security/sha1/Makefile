@@ -12,13 +12,21 @@ sha1_HDRS=./src/clSha1.h ./src/oswendian.h ./src/sha1.h $(logger_SRCS) $(cmdpars
 sha1_CXXFLAGS=-std=gnu++0x -I./src/ $(opencl_CXXFLAGS) $(logger_CXXFLAGS) $(cmdparser_CXXFLAGS) $(xcl_CXXFLAGS)
 sha1_LDFLAGS=$(opencl_LDFLAGS) -lrt
 
+EXES=sha1
+
 # SHA1 Kernel
 krnl_sha1_SRCS=./src/krnl_clSha1.cl
 krnl_sha1_HDRS=./src/clSha1.h
-krnl_sha1_CLFLAGS=--nk dev_sha1_update:2
+krnl_sha1_CLFLAGS=-I./src/
 krnl_sha1_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 
-EXES=sha1
+XOS=krnl_sha1
+
+# SHA1 xclbin
+krnl_sha1_XOS=krnl_sha1
+krnl_sha1_LDCLFLAGS=--nk dev_sha1_update:2
+krnl_sha1_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
+
 XCLBINS=krnl_sha1
 
 # check

@@ -8,14 +8,20 @@ include $(COMMON_REPO)/libs/opencl/opencl.mk
 
 # Host Application
 multiple_devices_SRCS=./src/host.cpp $(oclHelper_SRCS) $(xcl_SRCS)
-host_HDRS=$(xcl_HDRS)
+multiple_devices_HDRS=$(xcl_HDRS)
 multiple_devices_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS) $(oclHelper_CXXFLAGS) -std=c++0x
 multiple_devices_LDFLAGS=$(opencl_LDFLAGS)
+
+EXES=multiple_devices
 
 # Kernel
 vector_addition_SRCS=./src/vector_addition.cl
 
-EXES=multiple_devices
+XOS=vector_addition
+
+# xclbin
+vector_addition_XOS=vector_addition
+
 XCLBINS=vector_addition
 
 # check

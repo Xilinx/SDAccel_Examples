@@ -1,5 +1,5 @@
 /**********
-Copyright (c) 2016, Xilinx, Inc.
+Copyright (c) 2017, Xilinx, Inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -175,6 +175,14 @@ int main(int argc, char **argv) {
   xcl_memcpy_from_device(world, results.data(), buffer_result,
                          results.size() * sizeof(int));
   verify(gold, results);
+
+  clReleaseMemObject(buffer_x);
+  clReleaseMemObject(buffer_y);
+  clReleaseMemObject(buffer_z);
+  clReleaseKernel(kernel_aos);
+  clReleaseKernel(kernel_soa);
+  clReleaseProgram(program);
+  xcl_release_world(world);
   printf("|-------------------------+-------------------------|\n");
   printf("Note: Wall Clock Time is meaningful for real hardware execution only, not for emulation.\n");
   printf("Please refer to profile summary for kernel execution time for hardware emulation.\n");

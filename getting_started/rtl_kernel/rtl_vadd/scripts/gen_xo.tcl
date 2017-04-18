@@ -32,10 +32,17 @@
 #
 # *******************************************************************************/
 
+set xoname    [lindex $::argv 0]
+set krnl_name [lindex $::argv 1]
+set target    [lindex $::argv 2]
+set device    [lindex $::argv 3]
+
+set suffix "${krnl_name}_${target}_${device}"
+
 source -notrace ./scripts/package_kernel.tcl
 
-if {[file exists "krnl_vadd_rtl.xo"]} {
-    file delete -force "krnl_vadd_rtl.xo"
+if {[file exists "${xoname}"]} {
+    file delete -force "${xoname}"
 }
 
-package_xo -xo_path krnl_vadd_rtl.xo -kernel_name krnl_vadd_rtl -ip_directory ./packaged_kernel -kernel_xml ./src/kernel.xml
+package_xo -xo_path ${xoname} -kernel_name krnl_vadd_rtl -ip_directory ./packaged_kernel_${suffix} -kernel_xml ./src/kernel.xml

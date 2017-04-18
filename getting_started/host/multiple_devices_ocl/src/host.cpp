@@ -1,5 +1,5 @@
 /**********
-Copyright (c) 2016, Xilinx, Inc.
+Copyright (c) 2017, Xilinx, Inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -179,6 +179,15 @@ int main(int argc, char **argv) {
         }
     }
 
+    for (int i = 0 ; i < device_count ; i++){
+        clReleaseMemObject(buffer_a[i]);
+        clReleaseMemObject(buffer_b[i]);
+        clReleaseMemObject(buffer_result[i]);
+        clReleaseKernel(kernels[i]);
+        clReleaseProgram(programs[i]);
+        clReleaseCommandQueue(queues[i]);
+	    clReleaseContext(contexts[i]);
+    }
     if (fail) {
         printf("TEST FAILED\n");
         return EXIT_FAILURE;

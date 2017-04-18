@@ -7,9 +7,9 @@
     "keywords": [ "max_memory_ports", "misc:map_connect",
             "cl_mem_ext_ptr_t", "XCL_MEM_DDR_BANK0", "XCL_MEM_DDR_BANK1", "XCL_MEM_DDR_BANKx",
             "CL_MEM_EXT_PTR_XILINX", "HLS Interface m_axi bundle"],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
-    "em_cmd": "./host",
-    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
+    "board": ["Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
+    "em_cmd": "./host ./data/input.bmp ./data/golden.bmp",
+    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host ./data/input.bmp ./data/golden.bmp",
     "contributors" : [
         {
             "group": "Xilinx",

@@ -41,20 +41,31 @@ host_kmeans_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) -D RECORD_OVERALL_TIME -D USE_D
 host_kmeans_CXXFLAGS+= $(logger_CXXFLAGS) $(cmdparser_CXXFLAGS) $(xcl_CXXFLAGS) $(oclHelper_CXXFLAGS) 
 host_kmeans_LDFLAGS=$(opencl_LDFLAGS) -lxilinxopencl -lpthread -lrt
 
+EXES=host_kmeans
+
 #Kmeans Kernel
 kmeans_SRCS=./src/kmeans.cl
-kmeans_CLFLAGS= --nk kmeans:$(COMPUTE_UNITS) -D PARALLEL_POINTS=$(PARALLEL_POINTS) -D PARALLEL_FEATURES=$(PARALLEL_FEATURES) -D USE_DATA_TYPE=$(DATATYPE_ID)
+kmeans_CLFLAGS=-D PARALLEL_POINTS=$(PARALLEL_POINTS) -D PARALLEL_FEATURES=$(PARALLEL_FEATURES) -D USE_DATA_TYPE=$(DATATYPE_ID)
+kmeans_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.3 
 
-EXES=host_kmeans
+XOS=kmeans
+
+# Kmeans xclbin
+kmeans_XOS=kmeans
+kmeans_CLFLAGS=--nk kmeans:$(COMPUTE_UNITS)
+
 XCLBINS=kmeans
+
 EXTRA_CLEAN=membership.out
 
 # check
 check_EXE=$(EXES)
 check_XCLBINS=$(XCLBINS)
 check_ARGS= -i $(TEST_FILE) -m $(NCLUSTERS) -n $(NCLUSTERS) -c $(GOLD_FILE) -g $(COMPUTE_UNITS) 
+check_DEVICES=$(kmeans_DEVICES)
 
 CHECKS=check
 
+DEVICES:=xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 include $(COMMON_REPO)/utility/rules.mk
 

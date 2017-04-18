@@ -32,10 +32,18 @@
 #
 # *******************************************************************************/
 
+set xoname [lindex $::argv 0]
+set krnl_name [lindex $::argv 1]
+set target    [lindex $::argv 2]
+set device    [lindex $::argv 3]
+
+set suffix "${krnl_name}_${target}_${device}"
+
+
 source -notrace ./scripts/package_kernel_output_stage.tcl
 
-if {[file exists "krnl_output_stage_rtl.xo"]} {
-    file delete -force "krnl_output_stage_rtl.xo"
+if {[file exists "${xoname}"]} {
+    file delete -force "${xoname}"
 }
 
-package_xo -xo_path krnl_output_stage_rtl.xo -kernel_name krnl_output_stage_rtl -ip_directory ./packaged_kernel/output_stage -kernel_xml ./src/kernel_output_stage.xml
+package_xo -xo_path ${xoname} -kernel_name krnl_output_stage_rtl -ip_directory ./packaged_kernel/output_stage_${suffix} -kernel_xml ./src/kernel_output_stage.xml

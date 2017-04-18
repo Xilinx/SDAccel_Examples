@@ -220,18 +220,18 @@ bye
 """ % (username, apikey, testid, testid, testid)
 	return lftp(cmds)
 
-def download_testcase(username, apikey, testid, job_name):
+def download_testcase(username, apikey, testid, job_name, out):
 	cmds = """
 open sftp://drop.jarvice.com
 user %s %s
 cd /data/automated_test/%s
-mirror .
-mirror .
+mirror %s
+mirror %s
 cache flush
 get /data/NACC-OUTPUT/%s.txt
 rm -r /data/automated_test/%s
 bye
-""" % (username, apikey, testid, job_name, testid)
+""" % (username, apikey, testid, out, out, job_name, testid)
 
 	return lftp(cmds)
 
@@ -272,10 +272,11 @@ def submit_testcase(username, apikey, testid, exe, args, type, nae, tt, dp):
 
 description = "Application for Running Jobs on Nimbix"
 parser = optparse.OptionParser(description=description)
-parser.add_option("--nae", help="Set Nimbix Application Environment to use (Advanced)", type=str, default="spenserg-sdx-2016_3")
-parser.add_option("--type", help="Set Nimbix Node Type to use (nx1, nx2, nx3)", type=str, default="nx1")
+parser.add_option("--nae", help="Set Nimbix Application Environment to use (Advanced)", type=str, default="spenserg-sdx")
+parser.add_option("--type", help="Set Nimbix Node Type to use (nx1, nx2, nx3)", type=str, default="nx3")
 parser.add_option("--tt", help="Enable timeline trace", action="store_true", default=False)
 parser.add_option("--dp", help="Enable device profiling", action="store_true", default=False)
+parser.add_option("--out", help="Set output directory", type=str, default=".")
 parser.add_option("--queue_timeout", help="How long to wait for job to run while in queue (minutes)", type=int, default=60)
 parser.add_option("--exe_timeout", help="How long to wait for job to run on the board (minutes)", type=int, default=5)
 parser.add_option("-v", "--verbose", help="Print out additional information", action="store_true", default=False)
@@ -290,6 +291,7 @@ nae = opts.nae
 type = opts.type
 tt = opts.tt
 dp = opts.dp
+out = opts.out
 
 exe_timeout = opts.exe_timeout
 queue_timeout = opts.queue_timeout
@@ -420,7 +422,7 @@ print "Job Completed %s" % rc_str
 
 print "Downloading Test Case"
 
-download_testcase(nimbix_user, nimbix_apikey, testid, job['name'])
+download_testcase(nimbix_user, nimbix_apikey, testid, job['name'], out)
 
 output = output(nimbix_user, nimbix_apikey,
                         job_number=job['number'])

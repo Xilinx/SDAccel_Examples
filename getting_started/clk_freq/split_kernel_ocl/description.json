@@ -6,8 +6,8 @@
     "key_concepts": [ "Dataflow" , "Stream"],
     "keywords": [ "xcl_dataflow", "xcl_array_partition", "xcl_pipeline_loop"],
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
-    "em_cmd": "./host xclbin",
-    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host xclbin",
+    "em_cmd": "./host ./data/car_128x128.bmp",
+    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host ./data/car_128x128.bmp",
     "contributors" : [
         {
             "group": "Xilinx",

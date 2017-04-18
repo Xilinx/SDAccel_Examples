@@ -1,12 +1,12 @@
 # check.mk - defines rules for testing
 
-NIMBIX_DSA_xilinx_adm-pcie-ku3_2ddr-xpr_3_2_1 = nx1
+NIMBIX_DSA_xilinx_adm-pcie-ku3_2ddr-xpr_3_3_1 = nx1
 NIMBIX_DSA_xilinx_adm-pcie-7v3_1ddr_3_0_1 = nx2
-NIMBIX_DSA_xilinx_xil-accel-rd-ku115_4ddr-xpr_3_2_1 = nx3
+NIMBIX_DSA_xilinx_xil-accel-rd-ku115_4ddr-xpr_3_3_1 = nx3
 
 dsa2type = $(NIMBIX_DSA_$(call sanitize_dsa,$(1))_$(if $(NUM_DEVICES),$(NUM_DEVICES),1))
 
-hw_RUNNER = $(COMMON_REPO)/utility/nimbix/nimbix-run.py --type $(call dsa2type,$(1)) --
+hw_RUNNER = $(COMMON_REPO)/utility/nimbix/nimbix-run.py $(NIMBIXFLAGS) --type $(call dsa2type,$(1)) --
 sw_emu_RUNNER = XCL_EMULATION_MODE=sw_emu
 hw_emu_RUNNER = XCL_EMULATION_MODE=hw_emu
 
@@ -17,6 +17,7 @@ loader = $(call $(1)_RUNNER,$(2))
 #  $(1)_EXE - executable to run
 #  $(1)_ARGS - arguments to use by default for the check
 #  $(1)_DEVICES - whitelist of devices to run the check
+#  $(1)_DEPS - extra dependencies of the check
 #  $(2) - compilation target (i.e. hw, hw_emu, sw_emu)
 #  $(1)_$(2)_ARGS - specialization of arguments for specific targets
 #  $(3) - device name (i.e. xilinx:adm-pcie-ku3:1ddr:3.0)

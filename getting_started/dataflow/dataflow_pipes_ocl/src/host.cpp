@@ -1,5 +1,5 @@
 /**********
-Copyright (c) 2016, Xilinx, Inc.
+Copyright (c) 2017, Xilinx, Inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -31,14 +31,26 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Description: SDx Vector Addition using Blocking Pipes Operation
 *******************************************************************************/
 
-#define DATA_SIZE 4096
 #define INCR_VALUE 10
 
 #include <iostream>
 #include <cstring>
+#include <stdio.h>
 
 //OpenCL utility layer include
 #include "xcl.h"
+#include "oclHelper.h"
+
+
+#define OCL_CHECK(call)                                                        \
+  do {                                                                         \
+    cl_int err = call;                                                         \
+    if (err != CL_SUCCESS) {                                                   \
+      printf("Error calling " #call ", error: %s\n", oclErrorCode(err));       \
+      exit(EXIT_FAILURE);                                                      \
+    }                                                                          \
+  } while (0);
+
 
 int main(int argc, char** argv)
 {
@@ -48,15 +60,23 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
+    size_t data_size = 1024*1024;
+
+    /* Reducing the data size for emulation mode */
+    char *xcl_mode = getenv("XCL_EMULATION_MODE");
+    if (xcl_mode != NULL){
+        data_size = 1024;  
+    }
+
     //Allocate Memory in Host Memory
-    size_t vector_size_bytes = sizeof(int) * DATA_SIZE;
+    size_t vector_size_bytes = sizeof(int) * data_size;
 
     int *source_input       = (int *) malloc(vector_size_bytes);
     int *source_hw_results  = (int *) malloc(vector_size_bytes);
     int *source_sw_results  = (int *) malloc(vector_size_bytes);
 
     // Create the test data and Software Result 
-    for(int i = 0 ; i < DATA_SIZE ; i++){
+    for(size_t i = 0 ; i < data_size; i++){
         source_input[i] = i;
         source_sw_results[i] = i + INCR_VALUE;
         source_hw_results[i] = 0;
@@ -87,17 +107,29 @@ int main(int argc, char** argv)
 
 
     //Allocate Buffer in Global Memory
-    cl_mem buffer_input  = xcl_malloc(world, CL_MEM_READ_ONLY, vector_size_bytes);
     cl_mem buffer_output = xcl_malloc(world, CL_MEM_WRITE_ONLY, vector_size_bytes);
-
+    cl_mem buffer_input = clCreateBuffer(world.context,
+            CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
+            vector_size_bytes, source_input, NULL);
+    
+    cl_event write_event;
+    // Using clEnqueueMigrateMemObjects() instead of clEnqueueWriteBuffer() to avoid
+    // deadlock in real hardware which can be noticed only for large dataset.
+    // Rootcause: design leads to a deadlock when host->DDR and 
+    // output_stage->DDR causes a contention and deadlock. In small dataset, the 
+    // data gets transferred from host-> DDR in 1 burst and hence no deadlock.
+    // Solution: Start output_stage when host->DDR data transfer is completed.
+    // clEnqueueMigrateMemObject() event is used for all three kernels to avoid deadlock.
+    
     //Copy input data to device global memory
-    xcl_memcpy_to_device(world,buffer_input,source_input,vector_size_bytes);
+    OCL_CHECK(clEnqueueMigrateMemObjects(world.command_queue,1, &buffer_input,
+                0 /* flags, 0 means from host*/,0, NULL,&write_event));
 
     //Wait
     clFinish(world.command_queue);
 
     int inc = INCR_VALUE;
-    int size = DATA_SIZE;
+    int size = data_size;
     //Set the Kernel Arguments
     xcl_set_kernel_arg(krnl_input_stage,0,sizeof(cl_mem),&buffer_input);
     xcl_set_kernel_arg(krnl_input_stage,1,sizeof(int),&size);
@@ -107,9 +139,9 @@ int main(int argc, char** argv)
     xcl_set_kernel_arg(krnl_output_stage,1,sizeof(int),&size);
 
     //Launch the Kernel
-    xcl_run_kernel3d_nb(world,krnl_input_stage );
-    xcl_run_kernel3d_nb(world,krnl_adder_stage );
-    xcl_run_kernel3d_nb(world,krnl_output_stage);
+    OCL_CHECK(clEnqueueTask(world.command_queue,krnl_input_stage, 1, &write_event, NULL));
+    OCL_CHECK(clEnqueueTask(world.command_queue,krnl_adder_stage, 1, &write_event, NULL));
+    OCL_CHECK(clEnqueueTask(world.command_queue,krnl_output_stage,1, &write_event, NULL));
 
     //wait for all kernels to finish their operations
     clFinish(world.command_queue);
@@ -123,12 +155,13 @@ int main(int argc, char** argv)
     clReleaseKernel(krnl_input_stage);
     clReleaseKernel(krnl_adder_stage);
     clReleaseKernel(krnl_output_stage);
+    clReleaseProgram(program);
     xcl_release_world(world);
 //OPENCL HOST CODE AREA END
     
     // Compare the results of the Device to the simulation
     int match = 0;
-    for (int i = 0 ; i < DATA_SIZE ; i++){
+    for (size_t i = 0 ; i < data_size; i++){
         if (source_hw_results[i] != source_sw_results[i]){
             std::cout << "Error: Result mismatch" << std::endl;
             std::cout << "i = " << i << " CPU result = " << source_sw_results[i]

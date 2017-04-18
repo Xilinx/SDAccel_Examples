@@ -10,24 +10,28 @@ host_HDRS=$(xcl_HDRS)
 host_CXXFLAGS=-I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS)
 host_LDFLAGS=$(opencl_LDFLAGS)
 host_CXXFLAGS+=-Wall
-# Switch between GOOD/BAD Examples
-KFLOW:=GOOD
-
-# Kernel
-ifeq ($(KFLOW),GOOD)
-    nearest_SRCS=./src/nearest_good.cl
-else
-    nearest_SRCS=./src/nearest_bad.cl
-endif
-
-nearest_CLFLAGS=-k nearest
 
 EXES=host
-XCLBINS=nearest
+
+# nearest kernels
+nearest_GOOD_SRCS=./src/nearest_good.cl
+nearest_GOOD_CLFLAGS=-k nearest
+
+nearest_BAD_SRCS=./src/nearest_bad.cl
+nearest_BAD_CLFLAGS=-k nearest
+
+XOS=nearest_GOOD nearest_BAD
+
+# nearest xclbin
+nearest_GOOD_XOS=nearest_GOOD
+
+nearest_BAD_XOS=nearest_BAD
+
+XCLBINS=nearest_GOOD nearest_BAD
 
 # check
 check_EXE=host
-check_XCLBINS=nearest
+check_XCLBINS=nearest_GOOD nearest_BAD
 
 CHECKS=check
 

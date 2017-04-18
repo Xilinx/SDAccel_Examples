@@ -9,16 +9,20 @@ include $(COMMON_REPO)/libs/opencl/opencl.mk
 
 # Host Application
 aos_vs_soa_SRCS=./src/host.cpp $(oclHelper_SRCS) $(xcl_SRCS)
-host_HDRS=$(xcl_HDRS)
-aos_vs_soa_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS) $(oclHelper_CXXFLAGS)
+aos_vs_soa_HDRS=$(xcl_HDRS)
+aos_vs_soa_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS) $(oclHelper_CXXFLAGS) -std=c++0x
 aos_vs_soa_LDFLAGS=$(opencl_LDFLAGS)
 
-CXXFLAGS+=-std=c++0x
+EXES=aos_vs_soa
 
 # Kernel
 dot_SRCS=./src/dot.cl
 
-EXES=aos_vs_soa
+XOS=dot
+
+# xclbin
+dot_XOS=dot
+
 XCLBINS=dot
 
 # check

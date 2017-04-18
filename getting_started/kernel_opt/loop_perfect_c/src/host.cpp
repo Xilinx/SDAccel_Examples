@@ -1,5 +1,5 @@
 /**********
-Copyright (c) 2016, Xilinx, Inc.
+Copyright (c) 2017, Xilinx, Inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -130,7 +130,7 @@ int main(int argc, char** argv)
 //OPENCL HOST CODE AREA START
     //Create Program and Kernels
     xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "nearest");
+    cl_program program = xcl_import_binary(world, "nearest_GOOD");
     cl_kernel krnl_nearest = xcl_get_kernel(program, "nearest");
 
     //Allocate Buffer in Global Memory
@@ -163,6 +163,7 @@ int main(int argc, char** argv)
     clReleaseMemObject(buffer_point);
     clReleaseMemObject(buffer_out);
     clReleaseKernel(krnl_nearest);
+    clReleaseProgram(program);
     xcl_release_world(world);
 //OPENCL HOST CODE AREA END
     

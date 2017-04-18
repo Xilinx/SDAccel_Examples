@@ -1,5 +1,5 @@
 /**********
-Copyright (c) 2016, Xilinx, Inc.
+Copyright (c) 2017, Xilinx, Inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -58,7 +58,13 @@ int main(int argc, char** argv) {
     cl_program program = xcl_import_binary(world, "krnl_host_global");
     cl_kernel krnl = xcl_get_kernel(program, "bandwidth");
 
-    size_t globalbuffersize = 1 << 30;  // 1 GB
+    size_t globalbuffersize = 1024 * 1024 * 1024;  // 1 GB
+
+    /* Reducing the data size for emulation mode */
+    char *xcl_mode = getenv("XCL_EMULATION_MODE");
+    if (xcl_mode != NULL){
+        globalbuffersize = 1024 * 1024;  /* 1MB */
+    }
 
     //--------------------------------------------------------------------------
     //Measure PCIe read bandwidth (clEnqueueMapBuffer)

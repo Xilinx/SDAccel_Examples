@@ -10,12 +10,17 @@ host_HDRS=$(xcl_HDRS)
 host_CXXFLAGS=-I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS)
 host_LDFLAGS=$(opencl_LDFLAGS)
 
+EXES=host
+
 # Kernel
 row_array_2d_SRCS=./src/row_array_2d.cl
-#Specify Kernel name
-row_array_2d_CLFLAGS=-k row_array_2d
+row_array_2d_CLFLAGS=-k row_array_2d -I./src/
 
-EXES=host
+XOS=row_array_2d
+
+# xclbin
+row_array_2d_XOS=row_array_2d
+
 XCLBINS=row_array_2d
 
 # check

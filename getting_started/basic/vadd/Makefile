@@ -11,10 +11,16 @@ vadd_HDRS=$(xcl_HDRS)
 vadd_CXXFLAGS=-I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS)
 vadd_LDFLAGS=$(opencl_LDFLAGS)
 
+EXES=vadd
+
 # vadd Kernel
 krnl_vadd_SRCS=./src/krnl_vadd.cl
 
-EXES=vadd
+XOS=krnl_vadd
+
+# vadd xclbin
+krnl_vadd_XOS=krnl_vadd
+
 XCLBINS=krnl_vadd
 
 # check

@@ -12,19 +12,29 @@ convolve_HDRS= $(xcl_HDRS)
 convolve_CXXFLAGS=$(xcl_CXXFLAGS) $(opencl_CXXFLAGS) $(opencv_CXXFLAGS)
 convolve_LDFLAGS=$(opencl_LDFLAGS) $(opencv_LDFLAGS)
 
+EXES=convolve
+
 # convolve Kernel
 krnl_convolve_SRCS=src/krnl_convolve.cl
-krnl_convolve_CLFLAGS=--nk krnl_convolve:3
 
-EXES=convolve
+XOS=krnl_convolve
+
+# convolve xclbin
+krnl_convolve_XOS=krnl_convolve
+krnl_convolve_CLFLAGS=--nk krnl_convolve:3
+krnl_convolve_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.2
+
 XCLBINS=krnl_convolve
 
 # check
 check_EXE=convolve
 check_XCLBINS=krnl_convolve
 check_ARGS=data/input_buffer_raw.txt data/filter_buffer_raw.txt data/output_buffer_raw.txt
+check_DEVICES=$(krnl_convolve_DEVICES)
 
 CHECKS=check
+
+DEVICES=xilinx:adm-pcie-ku3:2ddr-xpr:3.2
 
 include $(COMMON_REPO)/utility/rules.mk
 

@@ -13,12 +13,19 @@ rsa_HDRS=./src/rsa_app.h ./src/common.h $(cmdparser_HDRS) $(logger_HDRS) $(xcl_H
 rsa_CXXFLAGS=-DRSA_2048 -g -O3 -Wall -I./src/ $(opencl_CXXFLAGS) $(cmdparser_CXXFLAGS) $(logger_CXXFLAGS) $(xcl_CXXFLAGS) -lssl -lcrypto -ldl
 rsa_LDFLAGS=$(opencl_LDFLAGS)
 
+EXES=rsa
+
 # RSA Kernel
 krnl_rsa_SRCS=./src/krnl_rsa.cpp
 krnl_rsa_CLFLAGS=--kernel rsa
 krnl_rsa_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 
-EXES=rsa
+XOS=krnl_rsa
+
+# RSA xclbin
+krnl_rsa_XOS=krnl_rsa
+krnl_rsa_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
+
 XCLBINS=krnl_rsa
 
 # check

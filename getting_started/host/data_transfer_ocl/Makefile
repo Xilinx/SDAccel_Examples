@@ -7,8 +7,7 @@ include $(COMMON_REPO)/libs/opencl/opencl.mk
 
 # Host Application
 data_transfer_SRCS=./src/host.cpp $(oclHelper_SRCS) $(xcl_SRCS)
-host_HDRS=$(xcl_HDRS)
-
+data_transfer_HDRS=$(xcl_HDRS)
 data_transfer_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS) $(oclHelper_CXXFLAGS) -std=c++0x
 data_transfer_LDFLAGS=$(opencl_LDFLAGS)
 

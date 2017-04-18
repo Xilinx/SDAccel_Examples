@@ -33,8 +33,8 @@
 # *******************************************************************************/
 
 set path_to_hdl "./src/adder_stage/hdl"
-set path_to_packaged "./packaged_kernel/adder_stage"
-set path_to_tmp_project "./tmp_kernel_pack_2"
+set path_to_packaged "./packaged_kernel/adder_stage_${suffix}"
+set path_to_tmp_project "./tmp_kernel_pack_2_${suffix}"
 
 create_project -force kernel_pack $path_to_tmp_project 
 add_files -norecurse [glob $path_to_hdl/*.v $path_to_hdl/*.sv]

@@ -1,5 +1,5 @@
 /**********
-Copyright (c) 2016, Xilinx, Inc.
+Copyright (c) 2017, Xilinx, Inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -65,6 +65,38 @@ xcl_world xcl_world_single();
  *   world - xcl_world to release memory from.
  */
 void xcl_release_world(xcl_world world);
+
+/* xcl_get_xclbin_name
+ *
+ * Description:
+ *   Determine xclbin name. Using search path below.
+ *
+ *   Search Path:
+ *      $XCL_BINDIR/<name>.<target>.<device>.xclbin
+ *      $XCL_BINDIR/<name>.<target>.<device_versionless>.xclbin
+ *      $XCL_BINDIR/binary_container_1.xclbin
+ *      $XCL_BINDIR/<name>.xclbin
+ *      xclbin/<name>.<target>.<device>.xclbin
+ *      xclbin/<name>.<target>.<device_versionless>.xclbin
+ *      xclbin/binary_container_1.xclbin
+ *      xclbin/<name>.xclbin
+ *      ../<name>.<target>.<device>.xclbin
+ *      ../<name>.<target>.<device_versionless>.xclbin
+ *      ../binary_container_1.xclbin
+ *      ../<name>.xclbin
+ *      ./<name>.<target>.<device>.xclbin
+ *      ./<name>.<target>.<device_versionless>.xclbin
+ *      ./binary_container_1.xclbin
+ *      ./<name>.xclbin
+ *
+ * Inputs:
+ *   world - xcl_world to import into.
+ *   xclbin_name - base name of the xclbin to import.
+ *
+ * Returns:
+ *   An string that was created from xclbin_name.
+ */
+char *xcl_get_xclbin_name(xcl_world world, const char *xclbin_name);
 
 /* xcl_import_binary
  *

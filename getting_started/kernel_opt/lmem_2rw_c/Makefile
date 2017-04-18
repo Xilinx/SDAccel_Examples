@@ -11,11 +11,17 @@ host_HDRS=$(xcl_HDRS)
 host_CXXFLAGS=-I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS)
 host_LDFLAGS=$(opencl_LDFLAGS)
 
+EXES=host
+
 # vadd Kernels
 vadd_SRCS=./src/vadd.cpp
 vadd_CLFLAGS=-k vadd
 
-EXES=host
+XOS=vadd
+
+# xclbin
+vadd_XOS=vadd
+
 XCLBINS=vadd
 
 # check

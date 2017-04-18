@@ -16,11 +16,18 @@ huffman_HDRS=./src/bit_io.h ./src/huffmancodec_naive.h ./src/huffmancodec_optimi
 huffman_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(cmdparser_CXXFLAGS) $(xcl_CXXFLAGS) $(simplebmp_CXXFLAGS) $(logger_CXXFLAGS)
 huffman_LDFLAGS=$(opencl_LDFLAGS)
 
+EXES=huffman
+
 # Huffman Codec Kernel
 krnl_huffman_SRCS=./src/krnl_huffman_singleptr.cl
 krnl_huffman_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 
-EXES=huffman
+XOS=krnl_huffman
+
+# Huffman Codec xclbin
+krnl_huffman_XOS=krnl_huffman
+krnl_huffman_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
+
 XCLBINS=krnl_huffman
 
 # check

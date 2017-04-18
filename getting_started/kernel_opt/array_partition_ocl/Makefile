@@ -9,15 +9,21 @@ include $(COMMON_REPO)/libs/opencl/opencl.mk
 
 # Host Application
 array_partition_SRCS=./src/host.cpp $(oclHelper_SRCS) $(xcl_SRCS)
-array_partition_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS) $(oclHelper_CXXFLAGS)
+array_partition_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS) $(oclHelper_CXXFLAGS) -std=c++0x
 array_partition_LDFLAGS=$(opencl_LDFLAGS)
-CXXFLAGS+=-std=c++0x
+
+EXES=array_partition
 
 # Kernel
 matmul_SRCS=./src/matmul.cl
 
-EXES=array_partition
+XOS=matmul
+
+# xclbin
+matmul_XOS=matmul
+
 XCLBINS=matmul
+
 EXTRA_CLEAN=./output.png
 
 # check

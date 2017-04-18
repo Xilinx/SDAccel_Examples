@@ -6,8 +6,8 @@
     "key_concepts": [ "Kernel Optimization", "Loop reorder to improve II"],
     "keywords": ["xcl_pipeline_loop", "xcl_array_partition(complete, 2)"],
     "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
-    "em_cmd": "./host xclbin",
-    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host xclbin",
+    "em_cmd": "./host",
+    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "contributors" : [
         {
             "group": "Xilinx",
