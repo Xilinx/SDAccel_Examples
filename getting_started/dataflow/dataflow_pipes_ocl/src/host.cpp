@@ -32,9 +32,25 @@ Description: SDx Vector Addition using Blocking Pipes Operation
 *******************************************************************************/
 
 #define INCR_VALUE 10
+
+#include <iostream>
+#include <cstring>
+#include <stdio.h>
+
 //OpenCL utility layer include
-#include "xcl2.hpp"
-#include <vector>
+#include "xcl.h"
+#include "oclHelper.h"
+
+
+#define OCL_CHECK(call)                                                        \
+  do {                                                                         \
+    cl_int err = call;                                                         \
+    if (err != CL_SUCCESS) {                                                   \
+      printf("Error calling " #call ", error: %s\n", oclErrorCode(err));       \
+      exit(EXIT_FAILURE);                                                      \
+    }                                                                          \
+  } while (0);
+
 
 int main(int argc, char** argv)
 {
@@ -47,17 +63,17 @@ int main(int argc, char** argv)
     size_t data_size = 1024*1024;
 
     /* Reducing the data size for emulation mode */
-    std::string xcl_mode = getenv("XCL_EMULATION_MODE");
-    if (xcl_mode.size() != 0){
+    char *xcl_mode = getenv("XCL_EMULATION_MODE");
+    if (xcl_mode != NULL){
         data_size = 1024;  
     }
 
     //Allocate Memory in Host Memory
     size_t vector_size_bytes = sizeof(int) * data_size;
 
-    std::vector<int> source_input     (data_size);
-    std::vector<int> source_hw_results(data_size);
-    std::vector<int> source_sw_results(data_size);
+    int *source_input       = (int *) malloc(vector_size_bytes);
+    int *source_hw_results  = (int *) malloc(vector_size_bytes);
+    int *source_sw_results  = (int *) malloc(vector_size_bytes);
 
     // Create the test data and Software Result 
     for(size_t i = 0 ; i < data_size; i++){
@@ -67,68 +83,80 @@ int main(int argc, char** argv)
     }
 
 //OPENCL HOST CODE AREA START
-    std::vector<cl::Device> devices = xcl::get_xil_devices();
-    cl::Device device = devices[0];
-
-    cl::Context context(device);
-    //CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE command queue is needed to run
-    //multiple kernels concurrently.
-    cl::CommandQueue q(context, device,CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
-    std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
-
-    //Create Program and Kernel
-    std::string binaryFile = xcl::find_binary_file(device_name,"adder");
-    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
-    devices.resize(1);
-    cl::Program program(context, devices, bins);
-    cl::Kernel krnl_adder_stage(program,"adder_stage");
-    cl::Kernel krnl_input_stage(program,"input_stage");
-    cl::Kernel krnl_output_stage(program,"output_stage");
+    //Create Program and Kernels. 
+    xcl_world world = xcl_world_single();
+    cl_program program = xcl_import_binary(world,"adder");
+    cl_kernel krnl_adder_stage   = xcl_get_kernel(program, "adder_stage");
+    //Creating additional Kernels
+    cl_kernel krnl_input_stage   = xcl_get_kernel(program, "input_stage");
+    cl_kernel krnl_output_stage  = xcl_get_kernel(program, "output_stage");
     
+    
+    // By-default xcl_world_single create command queues with sequential command.
+    // For this example, user to replace command queue with out of order command queue
+    clReleaseCommandQueue(world.command_queue);
+    int err;
+    world.command_queue = clCreateCommandQueue(world.context, world.device_id,
+            CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE | CL_QUEUE_PROFILING_ENABLE,
+            &err);
+    if (err != CL_SUCCESS){
+        std::cout << "Error: Failed to create a command queue!" << std::endl;
+        std::cout << "Test failed" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+
     //Allocate Buffer in Global Memory
-    cl::Buffer buffer_output(context, CL_MEM_WRITE_ONLY, vector_size_bytes);
-    cl::Buffer buffer_input(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
-            vector_size_bytes, source_input.data(), nullptr);
-    cl::Event write_event;
-    // Using enqueueMigrateMemObjects() instead of enqueueWriteBuffer() to avoid
+    cl_mem buffer_output = xcl_malloc(world, CL_MEM_WRITE_ONLY, vector_size_bytes);
+    cl_mem buffer_input = clCreateBuffer(world.context,
+            CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
+            vector_size_bytes, source_input, NULL);
+    
+    cl_event write_event;
+    // Using clEnqueueMigrateMemObjects() instead of clEnqueueWriteBuffer() to avoid
     // deadlock in real hardware which can be noticed only for large dataset.
     // Rootcause: design leads to a deadlock when host->DDR and 
     // output_stage->DDR causes a contention and deadlock. In small dataset, the 
     // data gets transferred from host-> DDR in 1 burst and hence no deadlock.
     // Solution: Start output_stage when host->DDR data transfer is completed.
-    // enqueueMigrateMemObject() event is used for all three kernels to avoid deadlock.
+    // clEnqueueMigrateMemObject() event is used for all three kernels to avoid deadlock.
     
     //Copy input data to device global memory
-    std::vector<cl::Memory> bufferList;
-    bufferList.push_back(buffer_input);
-    q.enqueueMigrateMemObjects(bufferList,0 /* flags, 0 means from host*/,
-                nullptr,&write_event);
+    OCL_CHECK(clEnqueueMigrateMemObjects(world.command_queue,1, &buffer_input,
+                0 /* flags, 0 means from host*/,0, NULL,&write_event));
 
     //Wait
-    q.finish();
+    clFinish(world.command_queue);
 
     int inc = INCR_VALUE;
     int size = data_size;
     //Set the Kernel Arguments
-    krnl_input_stage.setArg(0,buffer_input);
-    krnl_input_stage.setArg(1,size);
-    krnl_adder_stage.setArg(0,inc);
-    krnl_adder_stage.setArg(1,size);
-    krnl_output_stage.setArg(0,buffer_output);
-    krnl_output_stage.setArg(1,size);
+    xcl_set_kernel_arg(krnl_input_stage,0,sizeof(cl_mem),&buffer_input);
+    xcl_set_kernel_arg(krnl_input_stage,1,sizeof(int),&size);
+    xcl_set_kernel_arg(krnl_adder_stage,0,sizeof(int),&inc);
+    xcl_set_kernel_arg(krnl_adder_stage,1,sizeof(int),&size);
+    xcl_set_kernel_arg(krnl_output_stage,0,sizeof(cl_mem),&buffer_output);
+    xcl_set_kernel_arg(krnl_output_stage,1,sizeof(int),&size);
 
     //Launch the Kernel
-    std::vector<cl::Event> eventList;
-    eventList.push_back(write_event);
-    q.enqueueTask(krnl_input_stage, &eventList, nullptr);
-    q.enqueueTask(krnl_adder_stage, &eventList, nullptr);
-    q.enqueueTask(krnl_output_stage,&eventList, nullptr);
+    OCL_CHECK(clEnqueueTask(world.command_queue,krnl_input_stage, 1, &write_event, NULL));
+    OCL_CHECK(clEnqueueTask(world.command_queue,krnl_adder_stage, 1, &write_event, NULL));
+    OCL_CHECK(clEnqueueTask(world.command_queue,krnl_output_stage,1, &write_event, NULL));
 
     //wait for all kernels to finish their operations
-    q.finish();
+    clFinish(world.command_queue);
 
     //Copy Result from Device Global Memory to Host Local Memory
-    q.enqueueReadBuffer(buffer_output,CL_TRUE,0,vector_size_bytes, source_hw_results.data());
+    xcl_memcpy_from_device(world, source_hw_results, buffer_output,vector_size_bytes);
+
+    //Release Device Memories and Kernels
+    clReleaseMemObject(buffer_input);
+    clReleaseMemObject(buffer_output);
+    clReleaseKernel(krnl_input_stage);
+    clReleaseKernel(krnl_adder_stage);
+    clReleaseKernel(krnl_output_stage);
+    clReleaseProgram(program);
+    xcl_release_world(world);
 //OPENCL HOST CODE AREA END
     
     // Compare the results of the Device to the simulation
@@ -142,6 +170,11 @@ int main(int argc, char** argv)
             break;
         }
     }
+
+    /* Release Memory from Host Memory*/
+    free(source_input);
+    free(source_hw_results);
+    free(source_sw_results);
 
     if (match){
         std::cout << "TEST FAILED" << std::endl; 
