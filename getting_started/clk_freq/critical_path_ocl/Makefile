@@ -14,7 +14,7 @@ KFLOW:=GOOD
 # Host files and setting
 host_SRCS=./src/host.cpp $(xcl2_SRCS) $(bitmap_SRCS)
 host_HDRS=$(xcl2_HDRS) $(bitmap_HDRS) 
-host_CXXFLAGS= -I./src/ -g -std=c++0x -I./src/ $(xcl2_CXXFLAGS) $(opencl_CXXFLAGS) $(bitmap_CXXFLAGS)
+host_CXXFLAGS= -I./src/ -std=c++0x -I./src/ $(xcl2_CXXFLAGS) $(opencl_CXXFLAGS) $(bitmap_CXXFLAGS)
 host_LDFLAGS=$(opencl_LDFLAGS)
 
 EXES=host
