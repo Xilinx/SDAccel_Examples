@@ -10,7 +10,7 @@ include $(COMMON_REPO)/libs/opencl/opencl.mk
 # hello Host Application
 rsa_SRCS=./src/rsa_app.cpp ./src/common.cpp ./src/main.cpp $(cmdparser_SRCS) $(xcl_SRCS) $(logger_SRCS)
 rsa_HDRS=./src/rsa_app.h ./src/common.h $(cmdparser_HDRS) $(logger_HDRS) $(xcl_HDRS)
-rsa_CXXFLAGS=-DRSA_2048 -g -O3 -Wall -I./src/ $(opencl_CXXFLAGS) $(cmdparser_CXXFLAGS) $(logger_CXXFLAGS) $(xcl_CXXFLAGS) -lssl -lcrypto -ldl
+rsa_CXXFLAGS=-DRSA_2048 -O3 -Wall -I./src/ $(opencl_CXXFLAGS) $(cmdparser_CXXFLAGS) $(logger_CXXFLAGS) $(xcl_CXXFLAGS) -lssl -lcrypto -ldl
 rsa_LDFLAGS=$(opencl_LDFLAGS)
 
 EXES=rsa

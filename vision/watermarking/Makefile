@@ -10,14 +10,14 @@ include $(COMMON_REPO)/libs/bitmap/bitmap.mk
 # Host files and setting
 watermark_SRCS=./src/watermarking.cpp $(xcl_SRCS) $(bitmap_SRCS)
 watermark_HDRS=$(xcl_HDRS) $(bitmap_HDRS) 
-watermark_CXXFLAGS= -I./src/ -g -std=c++0x -I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS) $(bitmap_CXXFLAGS) 
+watermark_CXXFLAGS= -I./src/ -std=c++0x -I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS) $(bitmap_CXXFLAGS) 
 watermark_LDFLAGS=$(opencl_LDFLAGS)
 
 EXES=watermark
 
 # Kernel
 apply_watermark_SRCS=./src/krnl_watermarking.cl
-apply_watermark_CLFLAGS=-s -g -I./src --max_memory_ports apply_watermark
+apply_watermark_CLFLAGS=-s -I./src --max_memory_ports apply_watermark
 apply_watermark_NDEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 
 XOS=apply_watermark
