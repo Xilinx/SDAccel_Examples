@@ -5,9 +5,6 @@
     ],
     "key_concepts": [ "Concurrent execution", "Out of Order Command Queues", "Multiple Command Queues"],
     "keywords": [ "CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE" , "clSetEventCallback()" ],
-    "board": [
-        "All SDAccel"
-    ],
     "os": [
         "Linux"
     ],
@@ -15,8 +12,15 @@
         "xcl",
         "oclHelper"
     ],
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd": "./concurrent_execution",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./concurrent_execution",
+    "accelerators": [
+        {
+            "name": "matrix_ops", 
+            "location": "src/matrix_ops.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

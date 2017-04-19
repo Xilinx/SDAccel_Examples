@@ -5,9 +5,6 @@
     ],
     "key_concepts": [ "Clock Frequency" , "Data Level Parallelism", "Multiple Compute Units"],
     "keywords": [ "xcl_array_partition(complete, 1)", "xcl_pipeline_loop"],
-    "board": [
-        "All SDAccel"
-    ],
     "os": [
         "Linux"
     ],
@@ -16,6 +13,13 @@
     ],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
+    "accelerators": [
+        {
+            "name": "vadd", 
+            "location": "src/vadd.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

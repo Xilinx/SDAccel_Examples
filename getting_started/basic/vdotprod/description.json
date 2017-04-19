@@ -3,17 +3,21 @@
     "overview" : [
         "Simple example of vector dot-product."
     ],
-    "board": [
-        "All SDAccel"
-    ],
     "os": [
         "Linux"
     ],
-    "libs": [
-        "xcl"
-    ],
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd" : "./vdotprod",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./vdotprod",
+    "libs": [
+        "xcl"
+    ], 
+    "accelerators": [
+        {
+            "name": "krnl_vdotprod", 
+            "location": "src/krnl_vdotprod.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

@@ -3,17 +3,21 @@
     "overview" : [
         "Host to global memory bandwidth test"
     ],
-     "board": [
-        "All SDAccel"
-    ],
     "os": [
         "Linux"
     ],
-    "libs": [
-        "xcl"
-    ],
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd" : "./host_global",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./host_global",
+    "libs": [
+        "xcl"
+    ], 
+    "accelerators": [
+        {
+            "name": "krnl_host_global", 
+            "location": "src/kernel.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

@@ -5,14 +5,18 @@
     ],
     "key_concepts": [ "OpenCL API" , "Error handling"],
     "keywords": [ "CL_SUCCESS", "CL_DEVICE_NOT_FOUND", "CL_DEVICE_NOT_AVAILABLE"],
-    "board": [
-        "All SDAccel"
-    ],
     "os": [
         "Linux"
     ],
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd": "./errors ./xclbin/vector_addition.<emulation target>.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./errors ./xclbin/vector_addition.hw.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
+    "accelerators": [
+        {
+            "name": "vector_addition", 
+            "location": "src/vector_addition.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

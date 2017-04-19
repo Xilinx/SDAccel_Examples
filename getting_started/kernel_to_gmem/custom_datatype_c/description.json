@@ -5,17 +5,21 @@
     ],
     "key_concepts": [ "Dataflow", "Custom Datatype"],
     "keywords": ["struct", "#pragma HLS data_pack", "#pragma HLS LOOP_TRIPCOUNT"],
-    "board": [
-        "All SDAccel"
-    ],
     "os": [
         "Linux"
     ],
     "libs": [
         "xcl2"
     ],
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd": "./host ./data/input.bmp",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host ./data/input.bmp",
+    "accelerators": [
+        {
+            "name": "rgb_to_hsv", 
+            "location": "src/rgb_to_hsv.cpp"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

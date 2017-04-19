@@ -5,17 +5,22 @@
     ],
     "key_concepts": [ "OpenCL API", "Synchronize Host and FPGA", "Asynchronous Processing", "Events", "Asynchronous memcpy"],
     "keywords": [ "cl_event" , "clCreateCommandQueue", "CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE", "clEnqueueMigrateMemObjects"],
-    "board": [
-        "All SDAccel"
-    ],
     "os": [
         "Linux"
     ],
-    "libs": [
-        "xcl","oclHelper"
-    ],
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd": "./overlap",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./overlap",
+    "libs": [
+        "oclHelper", 
+        "xcl"
+    ], 
+    "accelerators": [
+        {
+            "name": "vector_addition", 
+            "location": "src/vector_addition.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

@@ -5,9 +5,7 @@
     ],
     "key_concepts": [ "Kernel Optimization", "Array Partitioning", "Block Partition", "Cyclic Partition"],
     "keywords": [ "#pragma HLS ARRAY_PARTITION", "cyclic", "block", "factor", "dim"],
-    "board": [
-        "All SDAccel"
-    ],
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr", "xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "os": [
         "Linux"
     ],

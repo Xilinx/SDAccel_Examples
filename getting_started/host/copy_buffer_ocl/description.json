@@ -5,14 +5,19 @@
     ],
     "key_concepts": [ "Copy Buffer"],
     "keywords": [ "cl::CommandQueue::enqueueCopyBuffer()" ],
-    "board": [
-        "All SDAccel"
-    ],
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr", "xilinx:xil-accel-rd-ku115:4ddr-xpr"],
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "os": [
         "Linux"
     ],
     "libs": [
         "xcl2"
+    ],
+    "accelerators": [
+        {
+            "name": "vector_addition", 
+            "location": "src/vector_addition.cl"
+        }
     ],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",

@@ -5,17 +5,21 @@
     ],
     "key_concepts": [ "Kernel Optimization", "Shift Register", "FIR"],
     "keywords": [ "xcl_array_partition" ],
-    "board": [
-        "All SDAccel"
-    ],
     "os": [
         "Linux"
     ],
     "libs": [
         "xcl2"
     ],
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd": "./shift_register",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./shift_register",
+    "accelerators": [
+        {
+            "name": "fir", 
+            "location": "src/fir.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

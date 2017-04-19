@@ -5,17 +5,21 @@
     ],
     "key_concepts": [ "Kernel to DDR", "wide memory access", "burst read and write"],
     "keywords": ["uint16", "xcl_pipeline_loop"],
-    "board": [
-        "All SDAccel"
-    ],
     "os": [
         "Linux"
     ],
     "libs": [
         "xcl2"
     ],
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
+    "accelerators": [
+        {
+            "name": "vadd", 
+            "location": "src/vadd.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

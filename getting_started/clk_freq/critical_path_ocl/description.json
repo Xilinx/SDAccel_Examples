@@ -4,14 +4,18 @@
         "This example shows a normal coding style which could lead to critical path issue and design will give degraded timing.  Example also contains better coding style which can improve design timing."
     ],
     "key_concepts": [ "Critical Path handling", "Improve Timing"],
-    "board": [
-        "All SDAccel"
-    ],
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr", "xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "os": [
         "Linux"
     ],
     "libs": [
-        "xcl2"
+        "xcl2", "bitmap"
+    ],
+    "accelerators": [
+        {
+            "name": "apply_watermark", 
+            "location": "src/apply_watermark.cl"
+        }
     ],
     "em_cmd": "./host apply_watermark_GOOD ./data/input.bmp ./data/golden.bmp",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host apply_watermark_GOOD ./data/input.bmp ./data/golden.bmp",

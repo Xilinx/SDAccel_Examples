@@ -5,17 +5,21 @@
     ],
     "key_concepts": [ "Kernel Optimization", "Data Layout"],
     "keywords": [ "NA"],
-    "board": [
-        "All SDAccel"
-    ],
     "os": [
         "Linux"
     ],
     "libs": [
         "xcl2"
     ],
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd": "./aos_vs_soa",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./aos_vs_soa",
+    "accelerators": [
+        {
+            "name": "dot", 
+            "location": "src/dot.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

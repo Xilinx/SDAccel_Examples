@@ -5,9 +5,6 @@
     ],
     "key_concepts": [ "Multiple Kernel Binaries" , "Buffer sharing across Multiple binaries", "Multiple Kernels in different Binaries"],
     "keywords": [ "NA"],
-    "board": [
-        "All SDAccel"
-    ],
     "os": [
         "Linux"
     ],
@@ -16,6 +13,19 @@
     ],
     "em_cmd" : "./vmulvadd",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./vmulvadd",
+    "board": ["xilinx:adm-pcie-7v3:1ddr"],
+    "accelerators": [
+        {
+            "name": "krnl_vmul", 
+            "location": "src/krnl_vmul.cl", 
+            "container": "krnl_vmul"
+        }, 
+        {
+            "name": "krnl_vadd", 
+            "location": "src/krnl_vadd.cl", 
+            "container": "krnl_vadd"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

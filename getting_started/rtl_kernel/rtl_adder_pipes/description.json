@@ -4,15 +4,13 @@
         "This example shows an adder with pipes using 3 RTL kernels."
     ],
     "key_concepts": [ "RTL Kernel", "Multiple RTL Kernels"],
-    "board": [
-        "All SDAccel"
-    ],
     "os": [
         "Linux"
     ],
     "libs": [
         "xcl"
     ],
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr", "xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "targets": ["hw", "hw_emu"],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
@@ -28,5 +26,7 @@
             "version": "1.0",
             "description": "Initial Xilinx Release"
         }
-    ]
+    ],
+    "match_makefile": "false",
+    "sdx_gui": false
 }

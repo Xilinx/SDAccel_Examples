@@ -5,17 +5,21 @@
     ],
     "key_concepts": [ "Use of Profile API" , "Waveform Dumping and loading"],
     "keywords": [ "xcl_get_event_duration()"],
-    "board": [
-        "All SDAccel"
-    ],
     "os": [
         "Linux"
     ],
     "libs": [
         "xcl"
     ],
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
+    "accelerators": [
+        {
+            "name": "vadd", 
+            "location": "src/vadd.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

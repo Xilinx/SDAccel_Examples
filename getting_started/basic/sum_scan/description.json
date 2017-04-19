@@ -3,17 +3,21 @@
     "overview" : [
         "Example of parallel prefix sum"
     ],
-    "board": [
-        "All SDAccel"
-    ],
     "os": [
         "Linux"
     ],
-    "libs": [
-        "xcl"
-    ],
+    "board": ["xilinx:adm-pcie-7v3:1ddr"],
     "em_cmd" : "./sum_scan",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./sum_scan",
+    "libs": [
+        "xcl"
+    ], 
+    "accelerators": [
+        {
+            "name": "krnl_sum_scan", 
+            "location": "src/krnl_sum_scan.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

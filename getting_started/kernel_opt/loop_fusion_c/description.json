@@ -5,9 +5,7 @@
     ],
     "key_concepts": [ "Kernel Optimization", "Loop Fusion", "Loop Pipelining" ],
     "keywords": [ "#pragma HLS PIPELINE"],
-    "board": [
-        "All SDAccel"
-    ],
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr", "xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "os": [
         "Linux"
     ],
@@ -16,6 +14,16 @@
     ],
     "em_cmd": "./loop_fusion",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./loop_fusion",
+    "accelerators": [
+        {
+            "name": "nearest_neighbor_loop_fusion", 
+            "location": "src/nearest_neighbor.cpp"
+        },
+        {
+            "name": "nearest_neighbor", 
+            "location": "src/nearest_neighbor_bad.cpp"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

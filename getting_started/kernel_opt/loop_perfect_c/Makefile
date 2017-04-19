@@ -25,7 +25,6 @@ nearest_BAD_CLFLAGS=-k nearest
 XOS=nearest_GOOD nearest_BAD
 
 nearest_CLFLAGS=-k nearest
-nearest_DEVICES=xilinx:adm-pcie-7v3:1ddr xilinx:adm-pcie-ku3:2ddr-xpr
 
 # nearest xclbin
 nearest_GOOD_XOS=nearest_GOOD

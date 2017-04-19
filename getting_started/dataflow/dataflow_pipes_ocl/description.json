@@ -5,17 +5,21 @@
     ],
     "key_concepts": [ "Dataflow" , "kernel to kernel pipes"],
     "keywords": [ "pipe" , "xcl_reqd_pipe_depth", "read_pipe_block()", "write_pipe_block()"],
-    "board": [
-        "All SDAccel"
-    ],
     "os": [
         "Linux"
     ],
     "libs": [
         "xcl2"
     ],
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
+    "accelerators": [
+        {
+            "name": "adder", 
+            "location": "src/adder.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

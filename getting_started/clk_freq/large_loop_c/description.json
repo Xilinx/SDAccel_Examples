@@ -5,16 +5,13 @@
     ],
     "key_concepts": [ "Clock Frequency" , "Multiple Compute Units", "Convolutional Neural Networks"],
     "keywords": [ "#pragma HLS ARRAY_PARTITION", "#pragma HLS PIPELINE"],
-    "board": [
-        "All SDAccel"
-    ],
     "os": [
         "Linux"
     ],
     "libs": [
         "xcl"
     ],
- 
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "contributors" : [
@@ -29,5 +26,7 @@
             "version": "1.0",
             "description": "Initial Xilinx Release"
         }
-    ]
+    ],
+    "match_makefile": "false",
+    "sdx_gui": "false"
 }

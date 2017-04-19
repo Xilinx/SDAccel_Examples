@@ -3,17 +3,21 @@
     "overview" : [
         "Bandwidth test of global to local memory."
     ],
-     "board": [
-        "All SDAccel"
-    ],
     "os": [
         "Linux"
     ],
     "libs": [
         "xcl"
     ],
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr",  "xilinx:adm-pcie-8k5:2ddr", "xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd" : "./kernel_global",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./kernel_global",
+    "accelerators": [
+        {
+            "name": "krnl_kernel_global", 
+            "location": "src/kernel.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

@@ -5,15 +5,19 @@
     ],
     "Key Concepts": [ "Loop perfect"],
     "Keywords": ["#pragma HLS PIPELINE", "#pragma HLS ARRAY_PARTITION"],
-    "board": [
-        "All SDAccel"
-    ],
     "os": [
         "Linux"
     ],
     "libs": [
         "xcl2"
     ],
+    "accelerators": [
+        {
+            "name": "nearest", 
+            "location": "src/nearest_good.cpp"
+        }
+    ],
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "contributors" : [
@@ -28,5 +32,7 @@
             "version": "1.0",
             "description": "Initial Xilinx Release"
         }
-    ]
+    ],
+    "match_makefile" : "false",
+    "sdx_gui": "false"
 }

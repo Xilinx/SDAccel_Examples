@@ -5,17 +5,22 @@
     ],
     "key_concepts": [ "Dataflow" , "Stream"],
     "keywords": [ "xcl_dataflow", "xcl_array_partition", "xcl_pipeline_loop"],
-    "board": [
-        "All SDAccel"
-    ],
     "os": [
         "Linux"
     ],
-    "libs": [
-        "xcl"
-    ],
     "em_cmd": "./host ./data/car_128x128.bmp",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host ./data/car_128x128.bmp",
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
+    "libs": [
+        "xcl", 
+        "bitmap"
+    ], 
+    "accelerators": [
+        {
+            "name": "sketch", 
+            "location": ""
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",
@@ -28,5 +33,7 @@
             "version": "1.0",
             "description": "Initial Xilinx Release"
         }
-    ]
+    ],
+    "match_makefile": "false",
+    "sdx_gui": "false"
 }

@@ -5,17 +5,21 @@
     ],
     "key_concepts": [ "window/tile of 2D data array access"],
     "keywords": ["pipe", "xcl_pipeline_loop", "xcl_reqd_pipe_depth"],
-    "board": [
-        "All SDAccel"
-    ],
     "os": [
         "Linux"
     ],
     "libs": [
         "xcl2"
     ],
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
+    "accelerators": [
+        {
+            "name": "window_array_2d", 
+            "location": "src/window_array_2d.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",
