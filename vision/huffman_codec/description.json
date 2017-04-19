@@ -4,6 +4,7 @@
         "This is an implementation of a huffman encoding/decoding algorithm targeting execution on an SDAccel supported FPGA acceleration card."
     ],
     "board": ["Alpha Data ADM-PCIE-7V3"],
+	 "targets": ["sw_emu", "hw"],¬
     "xcl": false,
     "opencv": true,
     "em_cmd": "./huffman -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:3.1' --kernel ./xclbin/krnl_huffman.<emulation type>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin data/rect_1024.bmp",
