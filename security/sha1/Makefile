@@ -18,21 +18,21 @@ EXES=sha1
 krnl_sha1_SRCS=./src/krnl_clSha1.cl
 krnl_sha1_HDRS=./src/clSha1.h
 krnl_sha1_CLFLAGS=-I./src/
-krnl_sha1_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
+krnl_sha1_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3 xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 
 XOS=krnl_sha1
 
 # SHA1 xclbin
 krnl_sha1_XOS=krnl_sha1
 krnl_sha1_LDCLFLAGS=--nk dev_sha1_update:2
-krnl_sha1_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
+krnl_sha1_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3 xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 
 XCLBINS=krnl_sha1
 
 # check
 check_EXE=sha1
 check_XCLBINS=krnl_sha1
-check_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
+check_NDEVICES=$(krnl_sha1_NDEVICES)
 
 # Pattern to allow cmdline to determine xclbin name
 define mk_args
@@ -42,6 +42,8 @@ endef
 $(foreach target,$(TARGETS),$(foreach device,$(DEVICES),$(eval $(call mk_args,$(target),$(device)))))
 
 CHECKS=check
+
+DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 
 include $(COMMON_REPO)/utility/rules.mk
 

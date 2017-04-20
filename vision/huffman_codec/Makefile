@@ -20,13 +20,13 @@ EXES=huffman
 
 # Huffman Codec Kernel
 krnl_huffman_SRCS=./src/krnl_huffman_singleptr.cl
-krnl_huffman_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
+krnl_huffman_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3 xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 
 XOS=krnl_huffman
 
 # Huffman Codec xclbin
 krnl_huffman_XOS=krnl_huffman
-krnl_huffman_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
+krnl_huffman_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3 xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 
 XCLBINS=krnl_huffman
 
@@ -34,7 +34,7 @@ XCLBINS=krnl_huffman
 check_EXE=huffman
 check_XCLBINS=krnl_huffman
 check_ARGS=-b data/rect_1024.bmp
-check_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
+check_NDEVICES=$(krnl_huffman_NDEVICES)
 
 EXTRA_CLEAN=out.bmp
 
