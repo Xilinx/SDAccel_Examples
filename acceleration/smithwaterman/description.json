@@ -9,6 +9,7 @@
         "2. Systolic array implementation"
     ],
     "board": ["Alpha Data ADM-PCIE-7V3", "Xilinx KU115"],
+	 "targets": ["sw_emu", "hw"],
     "xcl": false,
    "em_cmd" : "./smithwaterman",
     "hw_cmd" : "../../utility/nimbix/nimbix-run.py -- ./smithwaterman -p xilinx -d xilinx:adm-pcie-ku3:2ddr:3.1 -k xclbin/krnl_smithwaterman.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin",
