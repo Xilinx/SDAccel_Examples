@@ -16,7 +16,7 @@ S.No.   | Category  | Description
 5 | [clk_freq][]      |Improving Kernel Clock Frequency through Optimized code.
 6 | [debug][]      |Debugging and Profiling of Kernel.
 7 | [rtl_kernel][]      |RTL Kernel Based Examples
-8 | [basic][]      |OpenCL miscellaneous Examples
+8 | [misc][]      |OpenCL miscellaneous Examples
 
  __Examples Table__ 
 
@@ -80,14 +80,14 @@ Example        | Description           | Key Concepts / Keywords
 [rtl_kernel/rtl_adder_pipes/][]|This example shows an adder with pipes using 3 RTL kernels.|__Key__ __Concepts__<br> - RTL Kernel<br> - Multiple RTL Kernels<br>
 [rtl_kernel/rtl_vadd/][]|Simple example of vector addition using RTL Kernel|__Key__ __Concepts__<br> - RTL Kernel<br>
 [rtl_kernel/rtl_vadd_2clks/][]|This example shows vector addition with 2 kernel clocks using RTL Kernel. Design contains two compute units of kernel. One compute unit is running at 150MHz and another compute unit is running at 250MHz.|__Key__ __Concepts__<br> - RTL Kernel<br> - Multiple Kernel Clocks<br>__Keywords__<br> - --kernel_frequency
-[basic/hello/][]|The hello world example is a simple design which tests the correct installation of the FPGA acceleration boards. The example uses the printf function call inside of the kernel code to report on the values provided from the host to the kernel.|
-[basic/host_global_bandwidth/][]|Host to global memory bandwidth test|
-[basic/kernel_global_bandwidth/][]|Bandwidth test of global to local memory.|
-[basic/sum_scan/][]|Example of parallel prefix sum|
-[basic/vadd/][]|Simple example of vector addition.|
-[basic/vdotprod/][]|Simple example of vector dot-product.|
-[basic/vmul_vadd/][]|This example shows how data stored in global memory can be shared between kernels in different binary containers. This functionality is available only for non-XPR Devices.|__Key__ __Concepts__<br> - Multiple Kernel Binaries<br> - Buffer sharing across Multiple binaries<br> - Multiple Kernels in different Binaries<br>__Keywords__<br> - NA
-[basic/vmul_vadd_xpr/][]|This example shows how data stored in global memory should be migrated from device to host and later from host to device to share between kernels in different binary containers. This buffer migration is only needed for XPR(Extended Partial Reconfiguration) Specific Devices. As XPR devices do not persist data when user reload another binary container.|__Key__ __Concepts__<br> - Handling Buffer sharing across multiple binaries for XPR Platform<br> - Multiple Kernel Binaries<br> - Buffer sharing across Multiple binaries<br>__Keywords__<br> - clEnqueueMigrateMemObjects()<br> - CL_MIGRATE_MEM_OBJECT_HOST
+[misc/hello/][]|The hello world example is a simple design which tests the correct installation of the FPGA acceleration boards. The example uses the printf function call inside of the kernel code to report on the values provided from the host to the kernel.|
+[misc/host_global_bandwidth/][]|Host to global memory bandwidth test|
+[misc/kernel_global_bandwidth/][]|Bandwidth test of global to local memory.|
+[misc/sum_scan/][]|Example of parallel prefix sum|
+[misc/vadd/][]|Simple example of vector addition.|
+[misc/vdotprod/][]|Simple example of vector dot-product.|
+[misc/vmul_vadd/][]|This example shows how data stored in global memory can be shared between kernels in different binary containers. This functionality is available only for non-XPR Devices.|__Key__ __Concepts__<br> - Multiple Kernel Binaries<br> - Buffer sharing across Multiple binaries<br> - Multiple Kernels in different Binaries<br>__Keywords__<br> - NA
+[misc/vmul_vadd_xpr/][]|This example shows how data stored in global memory should be migrated from device to host and later from host to device to share between kernels in different binary containers. This buffer migration is only needed for XPR(Extended Partial Reconfiguration) Specific Devices. As XPR devices do not persist data when user reload another binary container.|__Key__ __Concepts__<br> - Handling Buffer sharing across multiple binaries for XPR Platform<br> - Multiple Kernel Binaries<br> - Buffer sharing across Multiple binaries<br>__Keywords__<br> - clEnqueueMigrateMemObjects()<br> - CL_MIGRATE_MEM_OBJECT_HOST
 
 [host]:host
 [host/concurrent_kernel_execution_ocl/]:host/concurrent_kernel_execution_ocl/
@@ -154,12 +154,12 @@ Example        | Description           | Key Concepts / Keywords
 [rtl_kernel/rtl_adder_pipes/]:rtl_kernel/rtl_adder_pipes/
 [rtl_kernel/rtl_vadd/]:rtl_kernel/rtl_vadd/
 [rtl_kernel/rtl_vadd_2clks/]:rtl_kernel/rtl_vadd_2clks/
-[basic]:basic
-[basic/hello/]:basic/hello/
-[basic/host_global_bandwidth/]:basic/host_global_bandwidth/
-[basic/kernel_global_bandwidth/]:basic/kernel_global_bandwidth/
-[basic/sum_scan/]:basic/sum_scan/
-[basic/vadd/]:basic/vadd/
-[basic/vdotprod/]:basic/vdotprod/
-[basic/vmul_vadd/]:basic/vmul_vadd/
-[basic/vmul_vadd_xpr/]:basic/vmul_vadd_xpr/
+[misc]:misc
+[misc/hello/]:misc/hello/
+[misc/host_global_bandwidth/]:misc/host_global_bandwidth/
+[misc/kernel_global_bandwidth/]:misc/kernel_global_bandwidth/
+[misc/sum_scan/]:misc/sum_scan/
+[misc/vadd/]:misc/vadd/
+[misc/vdotprod/]:misc/vdotprod/
+[misc/vmul_vadd/]:misc/vmul_vadd/
+[misc/vmul_vadd_xpr/]:misc/vmul_vadd_xpr/
