@@ -36,7 +36,6 @@ XCLBINS=krnl_smithwaterman
 # check
 check_EXE=smithwaterman
 check_XCLBINS=krnl_smithwaterman
-check_DEVICES=$(krnl_smithwaterman_DEVICES)
 
 CHECKS=check
 

@@ -52,7 +52,7 @@ adder_LDCLFLAGS= \
 	   -k krnl_input_stage_rtl  --nk krnl_input_stage_rtl:1:krnl_input_stage_rtl_cu0 \
 	   -k krnl_adder_stage_rtl  --nk krnl_adder_stage_rtl:1:krnl_adder_stage_rtl_cu0 \
 	   -k krnl_output_stage_rtl --nk krnl_output_stage_rtl:1:krnl_output_stage_rtl_cu0
-adder_TARGETS=hw_emu hw
+adder_NTARGETS=sw_emu
 
 XCLBINS=adder
 
@@ -61,7 +61,7 @@ EXTRA_CLEAN=tmp_kernel_pack* packaged_kernel*
 # check
 check_EXE=host
 check_XCLBINS=adder
-check_TARGETS=$(adder_TARGETS)
+check_NTARGETS=$(adder_NTARGETS)
 
 CHECKS=check
 

@@ -17,21 +17,22 @@ EXES=edge
 # Edge Detection Kernel
 krnl_edge_SRCS=./src/krnl_sobelfilter.cl
 krnl_edge_HDRS=./src/edge.h
-krnl_edge_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.3
+krnl_edge_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3
 krnl_edge_CLFLAGS=-I./src/
 
 XOS=krnl_edge
 
 # Edge Detection xclbin
 krnl_edge_XOS=krnl_edge
-krnl_edge_DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:adm-pcie-ku3:2ddr-xpr:3.3
+krnl_edge_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3
+
 XCLBINS=krnl_edge
 
 # check
 check_EXE=edge
 check_XCLBINS=krnl_edge
 check_ARGS=data/input/eiffel.bmp
-check_DEVICES=$(krnl_edge_DEVICES)
+check_NDEVICES=$(krnl_edge_NDEVICES)
 
 CHECKS=check
 
