@@ -20,8 +20,6 @@ This is a simple example of accessing full data from 2d array
 
 ***KEY CONCEPTS:*** 2D data full array Access
 
-***KEYWORDS:*** NA
-
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
 ```

@@ -4,7 +4,6 @@
         "This example is a simple OpenCL application. It will highlight the basic flow of an OpenCL application."
     ],
     "key_concepts": [ "OpenCL API"],
-    "keywords": [ "NA" ],
     "os": [
         "Linux"
     ],
@@ -16,7 +15,7 @@
     "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "accelerators": [
         {
-            "name": "vector_addition", 
+            "name": "vector_add", 
             "location": "src/vector_addition.cl"
         }
     ],
