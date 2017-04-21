@@ -27,19 +27,19 @@ loader = $(call $(1)_RUNNER,$(2))
 #                        devices
 define mk_check
 
-ifneq ($(filter $(2),$(call target_whitelist,$(1))),)
-ifneq ($(filter $(3),$(call device_whitelist,$(1))),)
+ifneq ($(filter $(2),$(call target_blacklist,$(1))),$(2))
+ifneq ($(filter $(3),$(call device_blacklist,$(1))),$(3))
 
-.PHONY: $(1)_$(2)_$(call sanitize_dsa,$(3))_check
-$(1)_$(2)_$(call sanitize_dsa,$(3))_check: $($(1)_DEPS) $($(1)_EXE) $(foreach xclbin,$($(1)_XCLBINS),$(XCLBIN_DIR)/$(xclbin).$(2).$(call sanitize_dsa,$(3)).xclbin)
+.PHONY: $(1)_$(2)_$(call device2sandsa,$(3))_check
+$(1)_$(2)_$(call device2sandsa,$(3))_check: $($(1)_DEPS) $($(1)_EXE) $(foreach xclbin,$($(1)_XCLBINS),$(XCLBIN_DIR)/$(xclbin).$(2).$(call device2sandsa,$(3)).xclbin)
 ifneq ($(2),hw)
-	$(EMCONFIGUTIL) --xdevice $(3) --nd $(NUM_DEVICES)
+	$(EMCONFIGUTIL) --platform $(3) --nd $(NUM_DEVICES)
 endif
-ifdef $(1)_$(2)_$(call sanitize_dsa,$(3))_ARGS
-	$(call loader,$(2),$(3)) ./$($(1)_EXE) $($(1)_$(2)_$(call sanitize_dsa,$(3))_ARGS)
+ifdef $(1)_$(2)_$(call device2sandsa,$(3))_ARGS
+	$(call loader,$(2),$(3)) ./$($(1)_EXE) $($(1)_$(2)_$(call device2sandsa,$(3))_ARGS)
 else
-ifdef $(1)_$(call sanitize_dsa,$(3))_ARGS
-	$(call loader,$(2),$(3)) ./$($(1)_EXE) $($(1)_$(call sanitize_dsa,$(3))_ARGS)
+ifdef $(1)_$(call device2sandsa,$(3))_ARGS
+	$(call loader,$(2),$(3)) ./$($(1)_EXE) $($(1)_$(call device2sandsa,$(3))_ARGS)
 else
 ifdef $(1)_$(2)_ARGS
 	$(call loader,$(2),$(3)) ./$($(1)_EXE) $($(1)_$(2)_ARGS)
@@ -49,12 +49,15 @@ endif
 endif
 endif
 
-CHECK_GOALS += $(1)_$(2)_$(call sanitize_dsa,$(3))_check
+CHECK_GOALS += $(1)_$(2)_$(call device2sandsa,$(3))_check
 
 endif
 endif
 
 endef
+
+$(foreach check,$(CHECKS),$(foreach target,$(TARGETS),$(foreach device,$(DEVICES),$(info $(call mk_check,$(check),$(target),$(device))))))
+
 
 $(foreach check,$(CHECKS),$(foreach target,$(TARGETS),$(foreach device,$(DEVICES),$(eval $(call mk_check,$(check),$(target),$(device))))))
 

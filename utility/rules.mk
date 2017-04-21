@@ -21,10 +21,6 @@ help::
 target_blacklist = $(if $($(1)_NTARGETS), $($(1)_NTARGETS),)
 device_blacklist = $(if $($(1)_NDEVICES), $($(1)_NDEVICES),)
 
-device2dsa = $(if $(filter $(suffix $(1)),.xpfm),$(shell $(COMMON_REPO)/utility/parsexpmf.py $(1) dsa 2>/dev/null),$(1))
-device2dep = $(if $(filter $(suffix $(1)),.xpfm),$(dir $(1))/$(shell $(COMMON_REPO)/utility/parsexpmf.py $(1) hw 2>/dev/null) $(1),)
-
-
 # mk_exe - build an exe from host code
 #   CXX - compiler to use
 #   CXXFLAGS - base compiler flags to use
@@ -62,11 +58,11 @@ define mk_xo
 ifneq ($(filter $(2),$(call target_blacklist,$(1))),$(2))
 ifneq ($(filter $(3),$(call device_blacklist,$(1))),$(3))
 
-$(XCLBIN_DIR)/$(1).$(2).$(call sanitize_dsa,$(call device2dsa,$(3))).xo: $($(1)_SRCS) $($(1)_HDRS) $(call device2dep,$(3))
+$(XCLBIN_DIR)/$(1).$(2).$(call device2sandsa,$(3)).xo: $($(1)_SRCS) $($(1)_HDRS) $(call device2dep,$(3))
 	mkdir -p ${XCLBIN_DIR}
-	$(CLC) -c $(CLFLAGS) $($(1)_CLFLAGS) $($(1)_$(call sanitize_dsa,$(call device2dsa,$(3)))_CLFLAGS) -o $$@ -t $(2) --platform $(3) $($(1)_SRCS)
+	$(CLC) -c $(CLFLAGS) $($(1)_CLFLAGS) $($(1)_$(call device2sandsa,$(3))_CLFLAGS) -o $$@ -t $(2) --platform $(3) $($(1)_SRCS)
 
-XO_GOALS+= $(XCLBIN_DIR)/$(1).$(2).$(call sanitize_dsa,$(call device2dsa,$(3))).xo
+XO_GOALS+= $(XCLBIN_DIR)/$(1).$(2).$(call device2sandsa,$(3)).xo
 
 endif
 endif
@@ -86,11 +82,11 @@ define mk_rtlxo
 ifneq ($(filter $(2),$(call target_blacklist,$(1))),$(2))
 ifneq ($(filter $(3),$(call device_blacklist,$(1))),$(3))
 
-$(XCLBIN_DIR)/$(1).$(2).$(call sanitize_dsa,$(call device2dsa,$(3))).xo: $($(1)_HDLSRCS) $(call device2dep,$(3))
+$(XCLBIN_DIR)/$(1).$(2).$(call device2sandsa,$(3)).xo: $($(1)_HDLSRCS) $(call device2dep,$(3))
 	mkdir -p $(XCLBIN_DIR)
-	$(VIVADO) -mode batch -source $($(1)_TCL) -tclargs $(XCLBIN_DIR)/$(1).$(2).$(call sanitize_dsa,$(call device2dsa,$(3))).xo $(1) $(2) $(call sanitize_dsa,$(call device2dsa,$(3)))
+	$(VIVADO) -mode batch -source $($(1)_TCL) -tclargs $(XCLBIN_DIR)/$(1).$(2).$(call device2sandsa,$(3)).xo $(1) $(2) $(call device2sandsa,$(3))
 
-XO_GOALS+=$(XCLBIN_DIR)/$(1).$(2).$(call sanitize_dsa,$(call device2dsa,$(3))).xo
+XO_GOALS+=$(XCLBIN_DIR)/$(1).$(2).$(call device2sandsa,$(3)).xo
 
 endif
 endif
@@ -113,12 +109,12 @@ define mk_xclbin
 ifneq ($(filter $(2),$(call target_blacklist,$(1))),$(2))
 ifneq ($(filter $(3),$(call device_blacklist,$(1))),$(3))
 
-$(XCLBIN_DIR)/$(1).$(2).$(call sanitize_dsa,$(call device2dsa,$(3))).xclbin: $(addprefix $(XCLBIN_DIR)/,$(addsuffix .$(2).$(call sanitize_dsa,$(call device2dsa,$(3))).xo, $($(1)_XOS))) $(call device2dep,$(3))
+$(XCLBIN_DIR)/$(1).$(2).$(call device2sandsa,$(3)).xclbin: $(addprefix $(XCLBIN_DIR)/,$(addsuffix .$(2).$(call device2sandsa,$(3)).xo, $($(1)_XOS))) $(call device2dep,$(3))
 
 	mkdir -p ${XCLBIN_DIR}
-	$(LDCLC) -l $(LDCLFLAGS) $($(1)_LDCLFLAGS) $($(1)_$(call sanitize_dsa,$(call device2dsa,$(3)))_LDCLFLAGS) -o $$@ -t $(2) --platform $(3) $(addprefix $(XCLBIN_DIR)/,$(addsuffix .$(2).$(call sanitize_dsa,$(call device2dsa,$(3))).xo,$($(1)_XOS)))
+	$(LDCLC) -l $(LDCLFLAGS) $($(1)_LDCLFLAGS) $($(1)_$(call device2sandsa,$(3))_LDCLFLAGS) -o $$@ -t $(2) --platform $(3) $(addprefix $(XCLBIN_DIR)/,$(addsuffix .$(2).$(call device2sandsa,$(3)).xo,$($(1)_XOS)))
 
-XCLBIN_GOALS+= $(XCLBIN_DIR)/$(1).$(2).$(call sanitize_dsa,$(call device2dsa,$(3))).xclbin
+XCLBIN_GOALS+= $(XCLBIN_DIR)/$(1).$(2).$(call device2sandsa,$(3)).xclbin
 
 endif
 endif
