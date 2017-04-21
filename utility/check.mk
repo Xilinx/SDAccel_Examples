@@ -56,9 +56,6 @@ endif
 
 endef
 
-$(foreach check,$(CHECKS),$(foreach target,$(TARGETS),$(foreach device,$(DEVICES),$(info $(call mk_check,$(check),$(target),$(device))))))
-
-
 $(foreach check,$(CHECKS),$(foreach target,$(TARGETS),$(foreach device,$(DEVICES),$(eval $(call mk_check,$(check),$(target),$(device))))))
 
 ifdef CHECK_GOALS
