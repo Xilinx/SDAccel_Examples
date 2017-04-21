@@ -37,7 +37,7 @@ XCLBINS=krnl_vmul krnl_vadd
 # check
 check_EXE=vmulvadd
 check_XCLBINS=krnl_vmul krnl_vadd
-check_DEVICES=$(krnl_vadd_NDEVICES)
+check_NDEVICES=$(krnl_vadd_NDEVICES)
 
 CHECKS=check
 
