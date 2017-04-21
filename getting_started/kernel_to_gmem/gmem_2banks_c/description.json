@@ -18,6 +18,7 @@
     "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "accelerators": [
         {
+            "container": "apply_watermark", 
             "name": "apply_watermark", 
             "location": "src/apply_watermark.cpp"
         }

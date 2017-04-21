@@ -11,6 +11,7 @@
     ], 
     "accelerators": [
         {
+            "accelerator": "krnl_hello", 
             "name": "krnl_hello", 
             "location": "src/krnl_hello.cl"
         }

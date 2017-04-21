@@ -14,7 +14,8 @@
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./kernel_global",
     "accelerators": [
         {
-            "name": "krnl_kernel_global", 
+            "container": "krnl_kernel_global", 
+            "name": "bandwidth", 
             "location": "src/kernel.cl"
         }
     ],

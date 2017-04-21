@@ -16,6 +16,7 @@
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "accelerators": [
         {
+            "container": "window_array_2d", 
             "name": "window_array_2d", 
             "location": "src/window_array_2d.cl"
         }

@@ -14,6 +14,7 @@
     ], 
     "accelerators": [
         {
+            "container": "krnl_vadd", 
             "name": "krnl_vadd", 
             "location": "src/krnl_vadd.cl"
         }

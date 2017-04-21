@@ -14,7 +14,8 @@
     ], 
     "accelerators": [
         {
-            "name": "krnl_host_global", 
+            "container": "krnl_host_global", 
+            "name": "bandwidth", 
             "location": "src/kernel.cl"
         }
     ],

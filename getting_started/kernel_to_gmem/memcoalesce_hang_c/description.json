@@ -9,11 +9,19 @@
     "os": [
         "Linux"
     ],
+    "cmd_args" : "kernel_GOOD",
     "libs": [
         "xcl2"
     ],
     "em_cmd": "./host kernel_GOOD",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host ./kernel_GOOD",
+    "accelerators": [
+        {
+            "container": "kernel_GOOD", 
+            "name": "dummy_op", 
+            "location": "src/kernel.cpp"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

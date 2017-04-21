@@ -14,6 +14,7 @@
     ], 
     "accelerators": [
         {
+            "container": "krnl_sum_scan", 
             "name": "krnl_sum_scan", 
             "location": "src/krnl_sum_scan.cl"
         }
