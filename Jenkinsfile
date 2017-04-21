@@ -107,7 +107,8 @@ def runExample(target, dir, device, workdir) {
 		 * to the number of job slots */
 		node("rhel6 && xsjrdevl && !xsjrdevl110") {
 			retry(3) {
-				sh """#!/bin/bash -e
+				lock("${dir}") {
+					sh """#!/bin/bash -e
 
 cd ${workdir}
 
@@ -137,6 +138,7 @@ rm -rf \"out/${target}_${devdir}\" && mkdir -p out
 make TARGETS=${target} DEVICES=\"${device}\" NIMBIXFLAGS=\"--out out/${target}_${devdir} --queue_timeout=480\" check
 
 """
+				}
 			}
 		}
 	}
