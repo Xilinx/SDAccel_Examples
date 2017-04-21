@@ -16,7 +16,8 @@
     "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "accelerators": [
         {
-            "name": "vector_addition", 
+            "container": "vector_addition", 
+            "name": "vector_add", 
             "location": "src/vector_addition.cl"
         }
     ],

@@ -16,6 +16,7 @@
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host ./data/input.bmp",
     "accelerators": [
         {
+            "container": "rgb_to_hsv", 
             "name": "rgb_to_hsv", 
             "location": "src/rgb_to_hsv.cpp"
         }

@@ -13,6 +13,7 @@
     ],
     "accelerators": [
         {
+            "container": "apply_watermark", 
             "name": "apply_watermark", 
             "location": "src/apply_watermark.cl"
         }

@@ -16,6 +16,7 @@
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "accelerators": [
         {
+            "container": "N_stage_Adders", 
             "name": "N_stage_Adders", 
             "location": "src/N_stage_adders.cpp"
         }

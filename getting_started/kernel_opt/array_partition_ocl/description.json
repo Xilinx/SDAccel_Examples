@@ -16,6 +16,7 @@
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./array_partition",
     "accelerators": [
         {
+            "container": "matmul", 
             "name": "matmul", 
             "location": "src/matmul.cl"
         }

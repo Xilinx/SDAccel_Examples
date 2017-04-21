@@ -9,14 +9,25 @@
         "Linux"
     ],
     "libs": [
-        "xcl2"
+        "xcl", "oclHelper"
     ],
     "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "accelerators": [
         {
-            "name": "adder", 
+            "container": "adder", 
+            "name": "adder_stage", 
+            "location": "src/adder.cl"
+        },
+        {
+            "container": "adder", 
+            "name": "input_stage", 
+            "location": "src/adder.cl"
+        },
+        {
+            "container": "adder", 
+            "name": "output_stage", 
             "location": "src/adder.cl"
         }
     ],

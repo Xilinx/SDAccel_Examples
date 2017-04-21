@@ -17,8 +17,19 @@
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./concurrent_execution",
     "accelerators": [
         {
-            "name": "matrix_ops", 
-            "location": "src/matrix_ops.cl"
+            "name": "madd", 
+            "location": "src/matrix_ops.cl",
+            "container": "matrix_ops"
+        },
+        {
+            "name": "mscale", 
+            "location": "src/matrix_ops.cl",
+            "container": "matrix_ops"
+        },
+        {
+            "name": "mmult", 
+            "location": "src/matrix_ops.cl",
+            "container": "matrix_ops"
         }
     ],
     "contributors" : [

@@ -15,7 +15,8 @@
     ],
     "accelerators": [
         {
-            "name": "vector_addition", 
+            "container": "vector_addition", 
+            "name": "vector_add", 
             "location": "src/vector_addition.cl"
         }
     ],

@@ -14,6 +14,13 @@
     "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
+    "accelerators": [
+        {
+            "container": "cnn_GOOD", 
+            "name": "cnn", 
+            "location": "src/cnn_convolution.cpp"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",
@@ -26,7 +33,5 @@
             "version": "1.0",
             "description": "Initial Xilinx Release"
         }
-    ],
-    "match_makefile": "false",
-    "sdx_gui": "false"
+    ]
 }

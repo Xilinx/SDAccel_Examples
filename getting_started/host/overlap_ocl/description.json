@@ -17,7 +17,8 @@
     ], 
     "accelerators": [
         {
-            "name": "vector_addition", 
+            "container": "vector_addition", 
+            "name": "vadd", 
             "location": "src/vector_addition.cl"
         }
     ],

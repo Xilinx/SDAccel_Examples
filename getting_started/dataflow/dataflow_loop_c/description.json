@@ -16,6 +16,7 @@
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "accelerators": [
         {
+            "container": "adder", 
             "name": "adder", 
             "location": "src/adder.cpp"
         }

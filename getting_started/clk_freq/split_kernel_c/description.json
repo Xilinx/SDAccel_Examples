@@ -17,8 +17,14 @@
     ], 
     "accelerators": [
         {
-            "name": "sketch", 
+            "container": "sketch_GOOD", 
+            "name": "process_image", 
             "location": "src/sketch.cpp"
+        },
+        {
+            "container": "sketch_BAD", 
+            "name": "process_image", 
+            "location": "src/sketch_bad.cpp"
         }
     ],
     "contributors" : [

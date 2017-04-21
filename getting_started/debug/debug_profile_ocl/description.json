@@ -16,7 +16,8 @@
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "accelerators": [
         {
-            "name": "vadd", 
+            "container": "vadd", 
+            "name": "krnl_vadd", 
             "location": "src/vadd.cl"
         }
     ],

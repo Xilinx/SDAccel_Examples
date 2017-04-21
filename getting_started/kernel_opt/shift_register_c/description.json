@@ -14,6 +14,18 @@
     ],
     "em_cmd": "./host",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./host",
+    "accelerators": [
+        {
+            "container": "fir", 
+            "name": "fir_naive", 
+            "location": "src/fir_naive.cpp"
+        },
+        {
+            "container": "fir", 
+            "name": "fir_shift_register", 
+            "location": "src/fir_shift_register.cpp"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

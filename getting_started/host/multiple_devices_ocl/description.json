@@ -16,7 +16,8 @@
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./multiple_devices xclbin/vector_addition.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin",
     "accelerators": [
         {
-            "name": "vector_addition", 
+            "container": "vector_addition", 
+            "name": "vadd", 
             "location": "src/vector_addition.cl"
         }
     ],

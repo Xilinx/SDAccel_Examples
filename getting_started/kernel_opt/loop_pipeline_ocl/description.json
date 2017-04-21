@@ -16,7 +16,8 @@
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./loop_pipeline",
     "accelerators": [
         {
-            "name": "vector_addition", 
+            "container": "vector_addition", 
+            "name": "vadd", 
             "location": "src/vector_addition.cl"
         }
     ],

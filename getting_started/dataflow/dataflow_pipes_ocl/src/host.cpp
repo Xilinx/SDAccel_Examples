@@ -54,12 +54,6 @@ Description: SDx Vector Addition using Blocking Pipes Operation
 
 int main(int argc, char** argv)
 {
-    if (argc != 1)
-    {
-        std::cout << "Usage: " << argv[0] << std::endl;
-        return EXIT_FAILURE;
-    }
-
     size_t data_size = 1024*1024;
 
     /* Reducing the data size for emulation mode */

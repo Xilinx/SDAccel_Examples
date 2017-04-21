@@ -16,7 +16,13 @@
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./shift_register",
     "accelerators": [
         {
-            "name": "fir", 
+            "container": "fir", 
+            "name": "fir_naive", 
+            "location": "src/fir.cl"
+        },
+        {
+            "container": "fir", 
+            "name": "fir_shift_register", 
             "location": "src/fir.cl"
         }
     ],

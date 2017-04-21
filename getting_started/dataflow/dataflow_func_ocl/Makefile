@@ -15,7 +15,7 @@ EXES=host
 # Kernel
 adder_SRCS=./src/adder.cl
 adder_CLFLAGS= -k adder
-#Specifyinng Fifo depth for Dataflow
+#Specifying Fifo depth for Dataflow
 adder_CLFLAGS+=--xp "param:compiler.xclDataflowFifoDepth=32"
 
 XOS=adder

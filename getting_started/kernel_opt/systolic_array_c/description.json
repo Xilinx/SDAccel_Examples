@@ -16,6 +16,7 @@
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "accelerators": [
         {
+            "container": "mmult", 
             "name": "mmult", 
             "location": "src/mmult.cpp"
         }

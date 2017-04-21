@@ -16,6 +16,7 @@
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./aos_vs_soa",
     "accelerators": [
         {
+            "container": "dot", 
             "name": "dot", 
             "location": "src/dot.cl"
         }
