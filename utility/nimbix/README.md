@@ -26,6 +26,15 @@ This program will execute the following steps
 * lftp
 
 ## 3. INSTALLATION AND OPERATING INSTRUCTIONS
+Make sure you have "lftp" installed. If you don't, you can install it by "sudo
+yum install lftp -y" in RedHAT/CentOS.
+
+Make sure you have "sftp" installed. If not, you can install it the same way.
+
+If you are using the script behind a proxy, like Xilinx internal network, you
+need to follow the instruction on how to create "~.ssh/config".
+
+
 - Add the script to the environment PATH
 ```
 export PATH=<repo location>/utility/nimbix:$PATH
