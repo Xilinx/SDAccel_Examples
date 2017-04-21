@@ -20,8 +20,6 @@ This example is a simple OpenCL application. It will highlight the basic flow of
 
 ***KEY CONCEPTS:*** OpenCL API
 
-***KEYWORDS:*** NA
-
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
 ```

@@ -20,8 +20,6 @@ This example shows how data stored in global memory can be shared between kernel
 
 ***KEY CONCEPTS:*** Multiple Kernel Binaries, Buffer sharing across Multiple binaries, Multiple Kernels in different Binaries
 
-***KEYWORDS:*** NA
-
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
 ```
