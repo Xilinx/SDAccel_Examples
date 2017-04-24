@@ -36,6 +36,7 @@ Description: SDx Vector Addition using Blocking Pipes Operation
 #include <iostream>
 #include <cstring>
 #include <stdio.h>
+#include <vector>
 
 //OpenCL utility layer include
 #include "xcl.h"
@@ -51,6 +52,22 @@ Description: SDx Vector Addition using Blocking Pipes Operation
     }                                                                          \
   } while (0);
 
+template <typename T>
+struct aligned_allocator
+{
+  using value_type = T;
+  T* allocate(std::size_t num)
+  {
+    void* ptr = nullptr;
+    if (posix_memalign(&ptr,4096,num*sizeof(T)))
+      throw std::bad_alloc();
+    return reinterpret_cast<T*>(ptr);
+  }
+  void deallocate(T* p, std::size_t num)
+  {
+    free(p);
+  }
+};
 
 int main(int argc, char** argv)
 {
@@ -64,10 +81,9 @@ int main(int argc, char** argv)
 
     //Allocate Memory in Host Memory
     size_t vector_size_bytes = sizeof(int) * data_size;
-
-    int *source_input       = (int *) malloc(vector_size_bytes);
-    int *source_hw_results  = (int *) malloc(vector_size_bytes);
-    int *source_sw_results  = (int *) malloc(vector_size_bytes);
+    std::vector<int,aligned_allocator<int>> source_input     (data_size);
+    std::vector<int,aligned_allocator<int>> source_hw_results(data_size);
+    std::vector<int,aligned_allocator<int>> source_sw_results(data_size);
 
     // Create the test data and Software Result 
     for(size_t i = 0 ; i < data_size; i++){
@@ -104,7 +120,7 @@ int main(int argc, char** argv)
     cl_mem buffer_output = xcl_malloc(world, CL_MEM_WRITE_ONLY, vector_size_bytes);
     cl_mem buffer_input = clCreateBuffer(world.context,
             CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
-            vector_size_bytes, source_input, NULL);
+            vector_size_bytes, source_input.data(), NULL);
     
     cl_event write_event;
     // Using clEnqueueMigrateMemObjects() instead of clEnqueueWriteBuffer() to avoid
@@ -141,7 +157,7 @@ int main(int argc, char** argv)
     clFinish(world.command_queue);
 
     //Copy Result from Device Global Memory to Host Local Memory
-    xcl_memcpy_from_device(world, source_hw_results, buffer_output,vector_size_bytes);
+    xcl_memcpy_from_device(world, source_hw_results.data(), buffer_output,vector_size_bytes);
 
     //Release Device Memories and Kernels
     clReleaseMemObject(buffer_input);
@@ -164,11 +180,6 @@ int main(int argc, char** argv)
             break;
         }
     }
-
-    /* Release Memory from Host Memory*/
-    free(source_input);
-    free(source_hw_results);
-    free(source_sw_results);
 
     if (match){
         std::cout << "TEST FAILED" << std::endl; 
