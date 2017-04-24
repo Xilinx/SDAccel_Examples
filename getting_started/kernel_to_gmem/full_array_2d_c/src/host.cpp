@@ -33,7 +33,9 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DATA_SIZE 8
 //define max local buffer size
 #define N 256
-void mmult_sw(std::vector<int> &a, std::vector<int> &b, std::vector<int> &c, int size)
+void mmult_sw(  std::vector<int,aligned_allocator<int>> &a, 
+                std::vector<int,aligned_allocator<int>> &b, 
+                std::vector<int,aligned_allocator<int>> &c, int size)
 {
   int bufa[N][N], bufb[N][N], bufc[N][N];
   for (int i = 0 ; i < size ; i++) {
@@ -64,10 +66,10 @@ int main(int argc, char** argv)
     }
     //Allocate Memory in Host Memory
     size_t vector_size_bytes = sizeof(int) * matrix_size;
-    std::vector<int> source_input_a   (matrix_size);
-    std::vector<int> source_input_b   (matrix_size);
-    std::vector<int> source_hw_results(matrix_size);
-    std::vector<int> source_sw_results(matrix_size);
+    std::vector<int,aligned_allocator<int>> source_input_a   (matrix_size);
+    std::vector<int,aligned_allocator<int>> source_input_b   (matrix_size);
+    std::vector<int,aligned_allocator<int>> source_hw_results(matrix_size);
+    std::vector<int,aligned_allocator<int>> source_sw_results(matrix_size);
 
     // Create the test data and Software Result 
     for(int i = 0 ; i < matrix_size ; i++){
@@ -92,13 +94,18 @@ int main(int argc, char** argv)
     cl::Kernel kernel(program,"mmult");
 
     //Allocate Buffer in Global Memory
-    cl::Buffer buffer_a(context, CL_MEM_READ_ONLY,  vector_size_bytes);
-    cl::Buffer buffer_b(context, CL_MEM_READ_ONLY,  vector_size_bytes);
-    cl::Buffer buffer_c(context, CL_MEM_WRITE_ONLY, vector_size_bytes);
+    cl::Buffer buffer_a(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
+            vector_size_bytes,source_input_a.data());
+    cl::Buffer buffer_b(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
+            vector_size_bytes,source_input_b.data());
+    cl::Buffer buffer_c(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
+            vector_size_bytes, source_hw_results.data());
 
-    //Copy input data to device global memory
-    q.enqueueWriteBuffer(buffer_a,CL_TRUE,0,vector_size_bytes,source_input_a.data());
-    q.enqueueWriteBuffer(buffer_b,CL_TRUE,0,vector_size_bytes,source_input_b.data());
+    std::vector<cl::Memory> writeBufVec;
+    writeBufVec.push_back(buffer_a);
+    writeBufVec.push_back(buffer_b);
+    //Migrate  input data to device global memory
+    q.enqueueMigrateMemObjects(writeBufVec,0/* 0 means from host*/);
 
     auto krnl_mmult 
         = cl::KernelFunctor<cl::Buffer&,cl::Buffer&,cl::Buffer&,int>(kernel);
@@ -107,8 +114,11 @@ int main(int argc, char** argv)
     krnl_mmult(cl::EnqueueArgs(q,cl::NDRange(1,1,1), cl::NDRange(1,1,1)), 
             buffer_a,buffer_b,buffer_c, size);
 
+    std::vector<cl::Memory> readBufVec;
+    readBufVec.push_back(buffer_c);
     //Copy Result from Device Global Memory to Host Local Memory
-    q.enqueueReadBuffer(buffer_c,CL_TRUE,0, vector_size_bytes, source_hw_results.data());
+    q.enqueueMigrateMemObjects(readBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    q.finish();
 //OPENCL HOST CODE AREA END
     
     // Compare the results of the Device to the simulation
