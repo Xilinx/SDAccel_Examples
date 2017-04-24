@@ -144,7 +144,7 @@ int main(int argc, char **argv) {
     verify(gold, C);
     printf("| %-23s | %23lu |\n", "matmul: ", matmul_time);
 
-    cl::Kernel matmul_partition_kernel(program, "matmul");
+    cl::Kernel matmul_partition_kernel(program, "matmul_partition");
     matmul_partition_kernel.setArg(0,buffer_a);
     matmul_partition_kernel.setArg(1,buffer_b);
     matmul_partition_kernel.setArg(2,buffer_c);
