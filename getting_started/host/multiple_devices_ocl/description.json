@@ -12,6 +12,7 @@
         "xcl"
     ],
     "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
+    "cmd_args" : "BUILD/default.xclbin",
     "em_cmd": "./multiple_devices xclbin/vector_addition.<emulation target>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./multiple_devices xclbin/vector_addition.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin",
     "accelerators": [
