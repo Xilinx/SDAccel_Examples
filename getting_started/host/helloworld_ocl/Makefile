@@ -7,7 +7,7 @@ include $(COMMON_REPO)/libs/opencl/opencl.mk
 
 # Host Application
 helloworld_SRCS=./src/host.cpp $(oclHelper_SRCS) $(xcl2_SRCS)
-host_HDRS=$(xcl2_HDRS)
+helloworld_HDRS=$(xcl2_HDRS)
 helloworld_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl2_CXXFLAGS) $(oclHelper_CXXFLAGS) -std=c++0x
 helloworld_LDFLAGS=$(opencl_LDFLAGS)
 
