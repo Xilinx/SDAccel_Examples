@@ -268,6 +268,6 @@ int main(int argc, char** argv) {
     xcl_release_world(world);
 
     printf("------------------------------------------------------\n");
-    printf("Test passed!\n");
+    printf("TEST PASSED\n");
     return EXIT_SUCCESS;
 }

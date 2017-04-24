@@ -144,9 +144,11 @@ int main(int argc, char* argv[]) {
 
     if(krnl_match == 1) {
         printf("Fail! kernel results do not match cpu results\n");
+        printf("TEST FAILED\n");
         return EXIT_FAILURE;
     } else{
         printf("Success! Kernel took %ld ns to execute\n", duration);
+        printf("TEST PASSED\n");
         return EXIT_SUCCESS;
     }
 }

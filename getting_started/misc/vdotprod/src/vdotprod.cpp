@@ -86,7 +86,7 @@ int main(int argc, char* argv[]) {
     clSetKernelArg(krnl, 4, sizeof(int), &nhalf);
 
     /* Launch the kernel */
-    unsigned long duration = xcl_run_kernel3d(world, krnl, 1, 1, 1);
+    xcl_run_kernel3d(world, krnl, 1, 1, 1);
 
     /* Allocate result buffer on host memory */
     int *result_krnl = (int*) malloc(output_size_bytes);
@@ -121,9 +121,11 @@ int main(int argc, char* argv[]) {
     free(result_krnl);
 
     if(krnl_match == 1) {
+        printf("TEST FAILED\n");
         return EXIT_FAILURE;
     } else{
-        printf("Success! kernel results match cpu results.");
+        printf("Success! kernel results match cpu results.\n");
+        printf("TEST PASSED\n");
         return EXIT_SUCCESS;
     }
 }

@@ -124,5 +124,6 @@ int main(int argc, char** argv)
       return EXIT_FAILURE;
    } else {
       printf("TEST PASSED\n");
+      return EXIT_SUCCESS;
    }
 }

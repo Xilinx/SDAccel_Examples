@@ -67,5 +67,6 @@ int main(int argc, char* argv[]) {
     clReleaseKernel(krnl);
     clReleaseProgram(program);
     xcl_release_world(world);
-
+    printf("TEST PASSED\n");
+    return EXIT_SUCCESS;
 }

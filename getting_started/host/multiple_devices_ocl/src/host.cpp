@@ -179,7 +179,7 @@ int main(int argc, char **argv) {
         }
     }
 
-    for (int i = 0 ; i < device_count ; i++){
+    for (int i = 0 ; i < (int)device_count ; i++){
         clReleaseMemObject(buffer_a[i]);
         clReleaseMemObject(buffer_b[i]);
         clReleaseMemObject(buffer_result[i]);
