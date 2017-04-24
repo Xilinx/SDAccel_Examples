@@ -105,6 +105,24 @@ using std::generate;
 using std::uniform_int_distribution;
 using std::vector;
 
+//Allocator template to align buffer to Page boundary for better data transfer
+template <typename T>
+struct aligned_allocator
+{
+  using value_type = T;
+  T* allocate(std::size_t num)
+  {
+    void* ptr = nullptr;
+    if (posix_memalign(&ptr,4096,num*sizeof(T)))
+      throw std::bad_alloc();
+    return reinterpret_cast<T*>(ptr);
+  }
+  void deallocate(T* p, std::size_t num)
+  {
+    free(p);
+  }
+};
+
 const int ARRAY_SIZE = 1 << 14;
 static const char *error_message =
     "Error: Result mismatch:\n"
@@ -207,11 +225,11 @@ int main(int argc, char **argv) {
                            CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err);
 
   // Allocate memory on the host and fill with random data.
-  vector<int> A(ARRAY_SIZE);
-  vector<int> B(ARRAY_SIZE);
+  vector<int,aligned_allocator<int>> A(ARRAY_SIZE);
+  vector<int,aligned_allocator<int>> B(ARRAY_SIZE);
   generate(begin(A), end(A), gen_random);
   generate(begin(B), end(B), gen_random);
-  vector<int> device_result(ARRAY_SIZE);
+  vector<int,aligned_allocator<int>> device_result(ARRAY_SIZE);
 
   cl_kernel kernel = xcl_get_kernel(program, "vadd");
 
