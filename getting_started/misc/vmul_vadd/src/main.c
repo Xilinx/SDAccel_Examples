@@ -34,9 +34,9 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 int main(int argc, char** argv)
 {
    int check_status = 0;
-   std::vector<int> h_a(LENGTH);        // host memory for a vector
-   std::vector<int> h_b(LENGTH);        // host memory for b vector
-   std::vector<int> h_c(LENGTH);        // host memort for c vector
+   std::vector<int,aligned_allocator<int>> h_a(LENGTH);// host memory for a vector
+   std::vector<int,aligned_allocator<int>> h_b(LENGTH);// host memory for b vector
+   std::vector<int,aligned_allocator<int>> h_c(LENGTH);// host memort for c vector
 
    // Fill our data sets with pattern
    //
