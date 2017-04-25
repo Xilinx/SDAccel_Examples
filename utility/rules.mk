@@ -33,10 +33,10 @@ device_blacklist = $(if $($(1)_NDEVICES), $($(1)_NDEVICES),)
 
 define mk_exe
 
-$(1): $($(1)_SRCS) $($(1)_HDRS)
+$(1)_$(ARCH).exe: $($(1)_SRCS) $($(1)_HDRS)
 	$(CXX) $(CXXFLAGS) $($(1)_CXXFLAGS) -o $$@ $($(1)_SRCS) $($(1)_LDFLAGS) $(LDFLAGS)
 
-EXE_GOALS+= $(1)
+EXE_GOALS+= $(1)_$(ARCH).exe
 
 endef
 
