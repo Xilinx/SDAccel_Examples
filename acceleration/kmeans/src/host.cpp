@@ -64,7 +64,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include <stdio.h>
-#include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
 #include "kmeans.h"
