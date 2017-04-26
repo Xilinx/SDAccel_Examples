@@ -9,7 +9,7 @@
         "Linux"
     ],
     "libs": [
-        "xcl"
+        "xcl2"
     ],
     "em_cmd" : "./vmulvadd",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./vmulvadd",
