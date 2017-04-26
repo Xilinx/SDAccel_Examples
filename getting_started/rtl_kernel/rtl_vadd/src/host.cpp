@@ -26,12 +26,8 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
-
-#include <iostream>
-#include <cstring>
-
-//OpenCL utility layer include
-#include "xcl.h"
+#include "xcl2.hpp"
+#include <vector>
 
 #define DATA_SIZE 256
 
@@ -40,11 +36,10 @@ int main(int argc, char** argv)
     int size = DATA_SIZE;
     //Allocate Memory in Host Memory
     size_t vector_size_bytes = sizeof(int) * size;
-
-    int *source_input1      = (int *) malloc(vector_size_bytes);
-    int *source_input2      = (int *) malloc(vector_size_bytes);
-    int *source_hw_results  = (int *) malloc(vector_size_bytes);
-    int *source_sw_results  = (int *) malloc(vector_size_bytes);
+    std::vector<int,aligned_allocator<int>> source_input1    (size);
+    std::vector<int,aligned_allocator<int>> source_input2    (size);
+    std::vector<int,aligned_allocator<int>> source_hw_results(size);
+    std::vector<int,aligned_allocator<int>> source_sw_results(size);
 
     // Create the test data and Software Result 
     for(int i = 0 ; i < size ; i++){
@@ -56,38 +51,47 @@ int main(int argc, char** argv)
 
 //OPENCL HOST CODE AREA START
     //Create Program and Kernel
-    xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "vadd");
-    cl_kernel krnl_vadd = xcl_get_kernel(program, "krnl_vadd_rtl");
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
+
+    cl::Context context(device);
+    cl::CommandQueue q(context, device);
+    std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+
+    std::string binaryFile = xcl::find_binary_file(device_name,"vadd");
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    devices.resize(1);
+    cl::Program program(context, devices, bins);
+    cl::Kernel krnl_vadd(program,"krnl_vadd_rtl");
 
     //Allocate Buffer in Global Memory
-    cl_mem buffer_r1 = xcl_malloc(world, CL_MEM_READ_ONLY, vector_size_bytes);
-    cl_mem buffer_r2 = xcl_malloc(world, CL_MEM_READ_ONLY, vector_size_bytes);
-    cl_mem buffer_w = xcl_malloc(world, CL_MEM_WRITE_ONLY, vector_size_bytes);
+    std::vector<cl::Memory> inBufVec, outBufVec;
+    cl::Buffer buffer_r1(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            vector_size_bytes, source_input1.data());
+    cl::Buffer buffer_r2(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            vector_size_bytes, source_input2.data());
+    cl::Buffer buffer_w (context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
+            vector_size_bytes, source_hw_results.data());
+    inBufVec.push_back(buffer_r1);
+    inBufVec.push_back(buffer_r2);
+    outBufVec.push_back(buffer_w);
 
     //Copy input data to device global memory
-    xcl_memcpy_to_device(world,buffer_r1,source_input1,vector_size_bytes);
-    xcl_memcpy_to_device(world,buffer_r2,source_input2,vector_size_bytes);
+    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
 
     //Set the Kernel Arguments
-    xcl_set_kernel_arg(krnl_vadd,0,sizeof(cl_mem),&buffer_r1);
-    xcl_set_kernel_arg(krnl_vadd,1,sizeof(cl_mem),&buffer_r2);
-    xcl_set_kernel_arg(krnl_vadd,2,sizeof(cl_mem),&buffer_w);
-    xcl_set_kernel_arg(krnl_vadd,3,sizeof(int),&size);
+    krnl_vadd.setArg(0,buffer_r1);
+    krnl_vadd.setArg(1,buffer_r2);
+    krnl_vadd.setArg(2,buffer_w);
+    krnl_vadd.setArg(3,size);
 
     //Launch the Kernel
-    xcl_run_kernel3d(world,krnl_vadd,1,1,1);
+    q.enqueueTask(krnl_vadd);
 
     //Copy Result from Device Global Memory to Host Local Memory
-    xcl_memcpy_from_device(world, source_hw_results, buffer_w ,vector_size_bytes);
+    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    q.finish();
 
-    //Release Device Memories and Kernels
-    clReleaseMemObject(buffer_r1);
-    clReleaseMemObject(buffer_r2);
-    clReleaseMemObject(buffer_w);
-    clReleaseKernel(krnl_vadd);
-    clReleaseProgram(program);
-    xcl_release_world(world);
 //OPENCL HOST CODE AREA END
     
     // Compare the results of the Device to the simulation
@@ -101,12 +105,6 @@ int main(int argc, char** argv)
             break;
         }
     }
-
-    // Release Memory from Host Memory
-    free(source_input1);
-    free(source_input2);
-    free(source_hw_results);
-    free(source_sw_results);
 
     if (match){
         std::cout << "TEST FAILED." << std::endl; 
