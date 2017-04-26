@@ -6,7 +6,7 @@ include $(COMMON_REPO)/libs/opencl/opencl.mk
 include $(COMMON_REPO)/libs/xcl/xcl.mk
 
 # vmulvadd Host Application
-vmulvadd_SRCS=./src/main.c $(xcl_SRCS)
+vmulvadd_SRCS=./src/host.cpp $(xcl_SRCS)
 vmulvadd_HDRS=$(xcl_HDRS)
 vmulvadd_EXE=vmulvadd
 vmulvadd_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS)

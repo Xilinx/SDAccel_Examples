@@ -5,7 +5,7 @@ include $(COMMON_REPO)/libs/xcl/xcl.mk
 include $(COMMON_REPO)/libs/opencl/opencl.mk
 
 # hello Host Application
-hello_SRCS=./src/hello.cpp $(xcl_SRCS)
+hello_SRCS=./src/host.cpp $(xcl_SRCS)
 hello_HDRS=$(xcl_HDRS)
 hello_CXXFLAGS=-I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS)
 hello_LDFLAGS=$(opencl_LDFLAGS)

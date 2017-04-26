@@ -47,8 +47,8 @@ Application code is located in the src directory. Accelerator binary files will 
 Makefile
 README.md
 description.json
+src/host.cpp
 src/krnl_vdotprod.cl
-src/vdotprod.cpp
 src/vdotprod.h
 ```
 

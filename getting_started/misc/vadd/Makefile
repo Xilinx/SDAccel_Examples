@@ -6,7 +6,7 @@ include $(COMMON_REPO)/libs/xcl/xcl.mk
 include $(COMMON_REPO)/libs/opencl/opencl.mk
 
 # vadd Host Application
-vadd_SRCS=./src/vadd.cpp $(xcl_SRCS)
+vadd_SRCS=./src/host.cpp $(xcl_SRCS)
 vadd_HDRS=$(xcl_HDRS)
 vadd_CXXFLAGS=-I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS)
 vadd_LDFLAGS=$(opencl_LDFLAGS)

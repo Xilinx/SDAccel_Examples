@@ -6,7 +6,7 @@ include $(COMMON_REPO)/libs/xcl/xcl.mk
 include $(COMMON_REPO)/libs/opencl/opencl.mk
 
 # vdotprod Host Application
-vdotprod_SRCS=./src/vdotprod.cpp $(xcl_SRCS)
+vdotprod_SRCS=./src/host.cpp $(xcl_SRCS)
 vdotprod_HDRS=./src/vdotprod.h $(xcl_HDRS)
 vdotprod_EXE=vdotprod
 vdotprod_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS)
