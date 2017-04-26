@@ -10,7 +10,7 @@
     "em_cmd" : "./vadd",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./vadd",
     "libs": [
-        "xcl"
+        "xcl2"
     ], 
     "accelerators": [
         {

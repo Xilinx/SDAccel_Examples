@@ -26,29 +26,17 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
-
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
-
-//OpenCL includes
-#include "xcl.h"
+#include "xcl2.hpp"
+#include <vector>
 #include "vadd.h"
 
 int main(int argc, char* argv[]) {
 
-    xcl_world world    = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "krnl_vadd");
-    cl_kernel krnl     = xcl_get_kernel(program, "krnl_vadd");
-
     size_t vector_size_bytes = sizeof(int) * LENGTH;
-    cl_mem buffer_a = xcl_malloc(world, CL_MEM_READ_ONLY, vector_size_bytes);
-    cl_mem buffer_b = xcl_malloc(world,CL_MEM_READ_ONLY, vector_size_bytes);
-    cl_mem buffer_c = xcl_malloc(world, CL_MEM_WRITE_ONLY, vector_size_bytes);
-
-    int *source_a = (int *) malloc(vector_size_bytes);
-    int *source_b = (int *) malloc(vector_size_bytes);
-    int *result_sim = (int *) malloc(vector_size_bytes);
+    std::vector<int,aligned_allocator<int>> source_a   (LENGTH);
+    std::vector<int,aligned_allocator<int>> source_b   (LENGTH);
+    std::vector<int,aligned_allocator<int>> result_sim (LENGTH);
+    std::vector<int,aligned_allocator<int>> result_krnl (LENGTH);
 
     /* Create the test data and run the vector addition locally */
     for(int i=0; i < LENGTH; i++){
@@ -57,36 +45,48 @@ int main(int argc, char* argv[]) {
         result_sim[i] = source_a[i] + source_b[i];
     }
 
-    /* Copy input vectors to memory */
-    xcl_memcpy_to_device(world,buffer_a,source_a,vector_size_bytes);
-    xcl_memcpy_to_device(world,buffer_b,source_b,vector_size_bytes);
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
 
-    /* Release the memory for temporary source data buffers on the host */
-    free(source_a);
-    free(source_b);
+    cl::Context context(device);
+    cl::CommandQueue q(context, device);
+    std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+
+    std::string binaryFile = xcl::find_binary_file(device_name,"krnl_vadd");
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    devices.resize(1);
+    cl::Program program(context, devices, bins);
+    cl::Kernel krnl(program,"krnl_vadd");
+
+    std::vector<cl::Memory> inBufVec, outBufVec;
+    cl::Buffer buffer_a(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            vector_size_bytes, source_a.data());
+    cl::Buffer buffer_b(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            vector_size_bytes, source_b.data());
+    cl::Buffer buffer_c(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
+            vector_size_bytes, result_krnl.data());
+    inBufVec.push_back(buffer_a);
+    inBufVec.push_back(buffer_b);
+    outBufVec.push_back(buffer_c);
+
+   
+    /* Copy input vectors to memory */
+    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
 
     /* Set the kernel arguments */
     int vector_length = LENGTH;
-    clSetKernelArg(krnl, 0, sizeof(cl_mem), &buffer_a);
-    clSetKernelArg(krnl, 1, sizeof(cl_mem), &buffer_b);
-    clSetKernelArg(krnl, 2, sizeof(cl_mem), &buffer_c);
-    clSetKernelArg(krnl, 3, sizeof(int), &vector_length);
+    krnl.setArg(0, buffer_a);
+    krnl.setArg(1, buffer_b);
+    krnl.setArg(2, buffer_c);
+    krnl.setArg(3, vector_length);
 
     /* Launch the kernel */
-    xcl_run_kernel3d(world, krnl, 1, 1, 1);
-
-    /* Allocate result buffer on host memory */
-    int *result_krnl = (int*) malloc(vector_size_bytes);
+    q.enqueueTask(krnl);
 
      /* Copy result to local buffer */
-    xcl_memcpy_from_device(world, result_krnl, buffer_c, vector_size_bytes);
+    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    q.finish();
 
-    clReleaseMemObject(buffer_a);
-    clReleaseMemObject(buffer_b);
-    clReleaseMemObject(buffer_c);
-    clReleaseKernel(krnl);
-    clReleaseProgram(program);
-    xcl_release_world(world);
 
     /* Compare the results of the kernel to the simulation */
     int krnl_match = 0;
@@ -100,10 +100,6 @@ int main(int argc, char* argv[]) {
             printf("Result Match: i = %d CPU result = %d Krnl Result = %d\n", i, result_sim[i], result_krnl[i]);
         }
     }
-
-    /* Release memory objects from the host */
-    free(result_sim);
-    free(result_krnl);
 
     if(krnl_match == 1){
         return EXIT_FAILURE;
