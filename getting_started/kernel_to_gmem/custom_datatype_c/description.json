@@ -9,9 +9,10 @@
         "Linux"
     ],
     "libs": [
-        "xcl2"
+        "xcl2", "bitmap"
     ],
     "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
+    "cmd_args" : "PROJECT/data/input.bmp",
     "em_cmd": "./host ./data/input.bmp",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host ./data/input.bmp",
     "accelerators": [

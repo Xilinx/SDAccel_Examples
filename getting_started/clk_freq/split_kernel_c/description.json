@@ -9,6 +9,7 @@
         "Linux"
     ],
     "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
+    "cmd_args": "PROJECT/data/car_128x128.bmp",
     "em_cmd": "./host ./data/car_128x128.bmp",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host ./data/car_128x128.bmp",
     "libs": [
@@ -20,11 +21,6 @@
             "container": "sketch_GOOD", 
             "name": "process_image", 
             "location": "src/sketch.cpp"
-        },
-        {
-            "container": "sketch_BAD", 
-            "name": "process_image", 
-            "location": "src/sketch_bad.cpp"
         }
     ],
     "contributors" : [
@@ -39,7 +35,5 @@
             "version": "1.0",
             "description": "Initial Xilinx Release"
         }
-    ],
-    "match_makefile": "false",
-    "sdx_gui": "false"
+    ]
 }
