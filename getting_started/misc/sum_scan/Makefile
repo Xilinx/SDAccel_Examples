@@ -1,13 +1,13 @@
 # sum_scan Application
 COMMON_REPO:=../../../
 include $(COMMON_REPO)/utility/boards.mk
-include $(COMMON_REPO)/libs/xcl/xcl.mk
+include $(COMMON_REPO)/libs/xcl2/xcl2.mk
 include $(COMMON_REPO)/libs/opencl/opencl.mk
 
 # sum_scan Host Application
-sum_scan_SRCS=./src/host.cpp $(xcl_SRCS)
-sum_scan_HDRS=$(xcl_HDRS)
-sum_scan_CXXFLAGS=-I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS)
+sum_scan_SRCS=./src/host.cpp $(xcl2_SRCS)
+sum_scan_HDRS=$(xcl2_HDRS)
+sum_scan_CXXFLAGS=-I./src/ $(xcl2_CXXFLAGS) $(opencl_CXXFLAGS)
 sum_scan_LDFLAGS=$(opencl_LDFLAGS)
 
 EXES=sum_scan

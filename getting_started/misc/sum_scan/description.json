@@ -10,7 +10,7 @@
     "em_cmd" : "./sum_scan",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./sum_scan",
     "libs": [
-        "xcl"
+        "xcl2"
     ], 
     "accelerators": [
         {

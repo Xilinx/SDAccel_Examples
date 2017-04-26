@@ -26,14 +26,10 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
-
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include <math.h>
 #include <fenv.h>
-
-#include "xcl.h"
+#include "xcl2.hpp"
+#include <vector>
 
 float get_rand() {
     float ret = ((float) rand() / (float)(RAND_MAX)) * 1.0f - 0.5f;
@@ -80,47 +76,67 @@ int main(int argc, char* argv[]) {
     srand(seed);
     fesetround(FE_TOWARDZERO);
 
-    xcl_world world    = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "krnl_sum_scan");
-    cl_kernel krnl     = xcl_get_kernel(program, "krnl_sum_scan");
+    int size =  ((length-1)/16 + 1) * 16;
+    size_t vector_size_bytes = sizeof(float) * size;
 
-    size_t vector_size_bytes = sizeof(float) * ((length-1)/16 + 1) * 16;
-    cl_mem dev_in  = xcl_malloc(world, CL_MEM_READ_ONLY, vector_size_bytes);
-    cl_mem dev_out = xcl_malloc(world,CL_MEM_READ_ONLY, vector_size_bytes);
-
-    float *in = (float *) malloc(vector_size_bytes);
-    float *out = (float *) malloc(vector_size_bytes);
+    std::vector<float,aligned_allocator<float>> in (size);
+    std::vector<float,aligned_allocator<float>> out(size);
+    std::vector<float,aligned_allocator<float>> out_fpga(size);
 
     float sum = 0;
-
     /* Create the test data and run the vector addition locally */
     for(unsigned i=0; i < length; i++) {
         in[i] = get_rand();
         out[i] = (sum += in[i]);
     }
 
+
+//OPENCL HOST CODE AREA START
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
+
+    cl::Context context(device);
+    cl::CommandQueue q(context, device);
+    std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+
+    std::string binaryFile = xcl::find_binary_file(device_name,"krnl_sum_scan");
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    devices.resize(1);
+    cl::Program program(context, devices, bins);
+    cl::Kernel krnl(program,"krnl_sum_scan");
+
+    std::vector<cl::Memory> inBufVec, outBufVec;
+    cl::Buffer dev_in (context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            vector_size_bytes,in.data());
+    cl::Buffer dev_out(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            vector_size_bytes,out_fpga.data());
+    inBufVec.push_back(dev_in);
+    outBufVec.push_back(dev_out);
+
+    
     /* Copy input vectors to memory */
-    xcl_memcpy_to_device(world, dev_in, in, vector_size_bytes);
+    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
 
     /* Set the kernel arguments */
-    xcl_set_kernel_arg(krnl, 0, sizeof(cl_mem), &dev_in);
-    xcl_set_kernel_arg(krnl, 1, sizeof(cl_mem), &dev_out);
-    xcl_set_kernel_arg(krnl, 2, sizeof(unsigned), &length);
+    krnl.setArg(0, dev_in);
+    krnl.setArg(1, dev_out);
+    krnl.setArg(2, length);
 
     /* Launch the kernel */
-    unsigned long duration = xcl_run_kernel3d(world, krnl, 1, 1, 1);
-
-    /* Allocate result buffer on host memory */
-    float *out_fpga = (float *) malloc(vector_size_bytes);
+    cl::Event event;
+    q.enqueueTask(krnl,NULL,&event);
+    q.finish();
 
      /* Copy result to local buffer */
-    xcl_memcpy_from_device(world, out_fpga, dev_out, vector_size_bytes);
+    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    q.finish();
 
-    clReleaseMemObject(dev_in);
-    clReleaseMemObject(dev_out);
-    clReleaseKernel(krnl);
-    clReleaseProgram(program);
-    xcl_release_world(world);
+    uint64_t nstimestart, nstimeend;
+    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart);
+    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend);
+    auto duration = nstimeend-nstimestart;
+
+//OPENCL HOST CODE AREA END
 
     /* Compare the results of the kernel to the simulation */
     size_t krnl_match = 0;
@@ -136,11 +152,6 @@ int main(int argc, char* argv[]) {
             break;
         }
     }
-
-    /* Release memory objects from the host */
-    free(in);
-    free(out);
-    free(out_fpga);
 
     if(krnl_match == 1) {
         printf("Fail! kernel results do not match cpu results\n");
