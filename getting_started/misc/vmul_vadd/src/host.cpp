@@ -63,15 +63,17 @@ int main(int argc, char** argv)
    cl::Program * program_ptr = new cl::Program(context, devices, bins);
    cl::Kernel krnl_vmul(*program_ptr,"krnl_vmul");
 
+   std::vector<cl::Memory> inBufVec, outBufVec;
    cl::Buffer d_a(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
            sizeof(int) * LENGTH, h_a.data());
    cl::Buffer d_b(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
            sizeof(int) * LENGTH, h_b.data());
    cl::Buffer d_mul_c(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, 
            sizeof(int) * LENGTH, h_c.data());
-
-   q.enqueueMapBuffer(d_a,CL_TRUE,CL_MAP_WRITE,0, sizeof(int) * LENGTH);
-   q.enqueueMapBuffer(d_b,CL_TRUE,CL_MAP_WRITE,0, sizeof(int) * LENGTH);
+   inBufVec.push_back(d_a);
+   inBufVec.push_back(d_b);
+   outBufVec.push_back(d_mul_c);
+   q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
 
    krnl_vmul.setArg(0,d_a);
    krnl_vmul.setArg(1,d_b);
@@ -80,7 +82,9 @@ int main(int argc, char** argv)
    // This function will execute the kernel on the FPGA
    q.enqueueTask(krnl_vmul);
 
-   q.enqueueMapBuffer(d_mul_c, CL_TRUE, CL_MAP_READ, 0, sizeof(int) * LENGTH);
+   q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+   q.finish();
+
 
    // Check Results
    for (int i = 0; i < LENGTH; i++) {
@@ -102,6 +106,11 @@ int main(int argc, char** argv)
    cl::Buffer d_add_c(context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, 
             sizeof(int) * LENGTH, h_c.data());
 
+   // Here Result of previous kernel is already available in Device, so 
+   // it is not required to copy again from Host to device. 
+   // Kernel will re-use the same buffer directly from DDR. 
+   // Note: It is only true for Non-XPR Devices.
+   
    //use the results from vmul as a and b inputs for vadd
    krnl_vadd.setArg(0,d_mul_c);
    krnl_vadd.setArg(1,d_mul_c);
@@ -109,7 +118,10 @@ int main(int argc, char** argv)
 
    // This function will execute the kernel on the FPGA
    q.enqueueTask(krnl_vadd);
-   q.enqueueMapBuffer(d_add_c,CL_TRUE,CL_MAP_READ, 0, sizeof(int) * LENGTH);
+   outBufVec.clear();
+   outBufVec.push_back(d_add_c);
+   q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+   q.finish();
 
    // Check Results
    for (int i = 0; i < LENGTH; i++) {
