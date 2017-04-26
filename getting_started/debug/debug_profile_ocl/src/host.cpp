@@ -26,21 +26,17 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
-
-#include <cstring>
-#include <iostream>
-
-//OpenCL includes
-#include "xcl.h"
+#include "xcl2.hpp"
+#include <vector>
 #include "host.h"
 
 int main(int argc, char* argv[])
 {
     // Allocate result buffer on host memory 
     size_t vector_size_bytes = sizeof(int) * LENGTH;
-    int *source_a = (int *) malloc(4*vector_size_bytes);
-    int *result_sim = (int *) malloc(vector_size_bytes);
-    int *result_krnl = (int*) malloc(vector_size_bytes);
+    std::vector<int,aligned_allocator<int>> source_a(4 * LENGTH);
+    std::vector<int,aligned_allocator<int>> result_sim(LENGTH);
+    std::vector<int,aligned_allocator<int>> result_krnl(LENGTH);
 
     // Create the test data and run the vector addition locally 
     for(int i=0; i < LENGTH; i++){
@@ -52,39 +48,50 @@ int main(int argc, char* argv[])
     }
 
 // OPENCL HOST CODE AREA START
-    xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "vadd");
-    cl_kernel krnl = xcl_get_kernel(program, "krnl_vadd");
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
 
-    cl_mem buffer_a = xcl_malloc(world, CL_MEM_READ_ONLY, 4*vector_size_bytes);
-    cl_mem buffer_e = xcl_malloc(world, CL_MEM_WRITE_ONLY, vector_size_bytes);
+    cl::Context context(device);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+    std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+
+    std::string binaryFile = xcl::find_binary_file(device_name,"vadd");
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    devices.resize(1);
+    cl::Program program(context, devices, bins);
+    cl::Kernel krnl(program,"krnl_vadd");
+ 
+    std::vector<cl::Memory> inBufVec,outBufVec;
+    cl::Buffer buffer_a(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            4*vector_size_bytes,source_a.data());
+    cl::Buffer buffer_e(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,  
+            vector_size_bytes,result_krnl.data());
+    inBufVec.push_back(buffer_a);
+    outBufVec.push_back(buffer_e);
 
     // Copy input vectors to memory 
-    xcl_memcpy_to_device(world,buffer_a,source_a,4*vector_size_bytes);
+    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
 
     // Set the kernel arguments 
     int vector_length = LENGTH;
 
-    xcl_set_kernel_arg(krnl, 0, sizeof(cl_mem), &buffer_a);
-    xcl_set_kernel_arg(krnl, 1, sizeof(cl_mem), &buffer_e);
-    xcl_set_kernel_arg(krnl, 2, sizeof(int), &vector_length);
+    krnl.setArg(0, buffer_a);
+    krnl.setArg(1, buffer_e);
+    krnl.setArg(2, vector_length);
 
     // Launch the kernel and get profile data (stop-start)
-
-    // Note that xcl_run_kernel3d will call Profiling API clGetEventProfilingInfo 
-    // to get start and stop time and returns difference i.e. stop - start
-    unsigned long duration_nanosec = xcl_run_kernel3d(world, krnl, 1, 1, 1);
+    uint64_t nstimestart, nstimeend;
+    cl::Event event;
+    q.enqueueTask(krnl,NULL,&event);
+    q.finish();
+    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart);
+    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend);
+    auto duration_nanosec = nstimeend-nstimestart;
     std::cout << " **** Duration returned by profile API is " << (duration_nanosec * (1.0e-6) ) << " ms **** " << std::endl;
 
     // Copy result to local buffer 
-    xcl_memcpy_from_device(world, result_krnl, buffer_e, vector_size_bytes);
-    clFinish(world.command_queue);
-
-    clReleaseMemObject(buffer_a);
-    clReleaseMemObject(buffer_e);
-    clReleaseKernel(krnl);
-    clReleaseProgram(program);
-    xcl_release_world(world);
+    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    q.finish();
 
 // OPENCL HOST CODE AREA END
 
@@ -101,11 +108,6 @@ int main(int argc, char* argv[])
             ; // nothing...Or you could print additional debug message with result matched
         }
     }
-
-    // Release memory objects from the host 
-    free(source_a);
-    free(result_sim);
-    free(result_krnl);
 
     if(krnl_match == 1)
     {
