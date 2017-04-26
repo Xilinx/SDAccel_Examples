@@ -212,4 +212,15 @@ bool is_emulation()
     return ret;
 }
 
+bool is_hw_emulation()
+{
+    bool ret =false;
+    char *xcl_mode = getenv("XCL_EMULATION_MODE");
+    if ((xcl_mode != NULL) && !strcmp(xcl_mode, "hw_emu")){
+        ret = true;
+    }
+    return ret;
+}
+
+
 };
