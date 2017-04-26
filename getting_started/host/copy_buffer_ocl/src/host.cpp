@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
     cl::Device device = devices[0];
 
     cl::Context context(device);
-    cl::CommandQueue q(context, device);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
     std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 

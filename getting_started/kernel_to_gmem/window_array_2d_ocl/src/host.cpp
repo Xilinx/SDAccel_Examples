@@ -55,7 +55,8 @@ int main(int argc, char** argv)
     cl::Context context(device);
     // For this example, command queue with out of order is needed to run kernel
     // concurrently.
-    cl::CommandQueue q(context, device,CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    cl::CommandQueue q(context, device,
+            CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE | CL_QUEUE_PROFILING_ENABLE);
     std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
 
     //Create Program and Kernel
