@@ -5,7 +5,7 @@
     ],
     "key_concepts": [ "Dataflow" , "Stream"],
     "keywords": [ "xcl_dataflow", "xcl_array_partition", "xcl_pipeline_loop"],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd": "./host ./data/car_128x128.bmp",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host ./data/car_128x128.bmp",
     "contributors" : [

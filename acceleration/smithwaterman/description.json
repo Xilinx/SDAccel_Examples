@@ -8,7 +8,7 @@
         "1. Compute MaxScore",
         "2. Systolic array implementation"
     ],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Xilinx KU115"],
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:xil-accel-rd-ku115:4ddr-xpr"],
 	 "targets": ["sw_emu", "hw"],
     "xcl": false,
    "em_cmd" : "./smithwaterman",

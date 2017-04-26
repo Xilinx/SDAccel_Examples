@@ -3,19 +3,19 @@
     "overview": [
         "The convolve example is a performant design which showcases convolutional image filtering. The example processes the image 8 pixels at a time."
     ],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr"],
     "opencv": true,
     "em_cmd": "./convolve data/input_buffer_raw.txt data/filter_buffer_raw.txt data/output_buffer_raw.txt",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./convolve data/input_buffer_raw.txt data/filter_buffer_raw.txt data/output_buffer_raw.txt",
     "perf_fields": ["Board", "Image Size", "Frames / Second"],
     "performance": [
         {
-            "system": "Alpha Data ADM-PCIE-7V3",
+            "system": "xilinx:adm-pcie-7v3:1ddr",
             "constraint": "1,024 x 1,024",
             "metric": "1,000"
         },
         {
-            "system": "Alpha Data ADM-PCIE-KU3",
+            "system": "xilinx:adm-pcie-ku3:2ddr-xpr",
             "constraint": "1,024 x 1,024",
             "metric": "1,000"
         }

@@ -3,7 +3,7 @@
     "overview": [
         "Implementation of a Sobel Filter for edge detection."
     ],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr"],
     "opencv": true,
     "em_cmd": "./edge data/input/eiffel.bmp",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./edge data/input/eiffel.bmp",

@@ -3,7 +3,7 @@
     "overview" : [
         "Example of parallel prefix sum"
     ],
-    "board": ["Alpha Data ADM-PCIE-7V3"],
+    "board": ["xilinx:adm-pcie-7v3:1ddr"],
     "em_cmd" : "./sum_scan",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./sum_scan",
     "contributors" : [
