@@ -13,7 +13,7 @@
     "em_cmd": "./host ./data/car_128x128.bmp",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host ./data/car_128x128.bmp",
     "libs": [
-        "xcl", 
+        "xcl2", 
         "bitmap"
     ], 
     "accelerators": [

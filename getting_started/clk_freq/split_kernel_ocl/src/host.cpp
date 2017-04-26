@@ -35,30 +35,23 @@ Description:
         single complex kernel.
 
 *******************************************************************************/
-
-#include <iostream>
-#include <cstring>
-#include <cstdio>
-#include <cstdlib>
-#include <cfloat>
-
-// OpenCL utility layer include
-#include "xcl.h"
+#include "xcl2.hpp"
+#include <vector>
 
 // Bitmap image utility
 #include "bitmap.h"
 
-// Support functions 
-#define SW_FLOW 
+// Support functions
+#define SW_FLOW
 #include "defns.h"
 
 // Software solution of image sketch operation
 void software_sketch(int *image, int *output, int width, int height)
 {
-    printf("Software Solution Launched.... \n");        
+    printf("Software Solution Launched.... \n");
     int temp_res[MAX_WIDTH * MAX_HEIGHT]; //Hold boost and sketch outputs
     int med_out[MAX_WIDTH * MAX_HEIGHT];
-
+    
     //Hold the window for processing
     uint rgbWindow[SIZE];
     
@@ -189,61 +182,64 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    int* hw_outImage = (int*)(malloc(image.numPixels() * sizeof(int)));
-    int* sw_outImage = (int*)(malloc(image.numPixels() * sizeof(int)));
+    size_t image_size_bytes = sizeof(int) * image.numPixels();
+    std::vector<int,aligned_allocator<int>> hw_inImage(image.numPixels());
+    std::vector<int,aligned_allocator<int>> hw_outImage(image.numPixels());
+    std::vector<int,aligned_allocator<int>> sw_outImage(image.numPixels());
+    //Copying image host buffer
+    memcpy(hw_inImage.data(),image.bitmap(),image_size_bytes);
 
-    if (hw_outImage == NULL || sw_outImage == NULL)
-    {
-        fprintf(stderr, "Unable to allocate host memory!\n") ;
-        return 0 ;
-    }
 //OPENCL HOST CODE AREA START
     //Create Program and Kernels. 
-    xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "sketch_GOOD");
-    cl_kernel krnl_process_image = xcl_get_kernel(program, "process_image");
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
+
+    cl::Context context(device);
+    cl::CommandQueue q(context, device);
+    std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+
+    std::string binaryFile = xcl::find_binary_file(device_name,"sketch_GOOD");
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    devices.resize(1);
+    cl::Program program(context, devices, bins);
+    cl::Kernel krnl_process_image(program,"process_image");
 
     //Allocate Buffer in Global Memory
-    size_t image_size_bytes = sizeof(int) * image.numPixels();
-    cl_mem buffer_input     = xcl_malloc(world, CL_MEM_READ_ONLY, image_size_bytes);
-    cl_mem buffer_output    = xcl_malloc(world, CL_MEM_WRITE_ONLY, image_size_bytes);
+    std::vector<cl::Memory> inBufVec, outBufVec;
+    cl::Buffer buffer_input (context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            image_size_bytes,hw_inImage.data());
+    cl::Buffer buffer_output(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
+            image_size_bytes,hw_outImage.data());
+    inBufVec.push_back(buffer_input);
+    outBufVec.push_back(buffer_output);
 
     std::cout << "Writing input image to buffer...\n";
 
     //Copy input data to device global memory
-    xcl_memcpy_to_device(world, buffer_input, image.bitmap(), image_size_bytes);
+    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
 
     int size = image.numPixels();
     int narg = 0;
     //Set the Kernel Arguments
-    xcl_set_kernel_arg(krnl_process_image, narg++, sizeof(cl_mem), &buffer_input);
-    xcl_set_kernel_arg(krnl_process_image, narg++, sizeof(cl_mem), &buffer_output);
-    xcl_set_kernel_arg(krnl_process_image, narg++, sizeof(int), &width);
-    xcl_set_kernel_arg(krnl_process_image, narg++, sizeof(int), &height);
+    krnl_process_image.setArg(narg++, buffer_input);
+    krnl_process_image.setArg(narg++, buffer_output);
+    krnl_process_image.setArg(narg++, width);
+    krnl_process_image.setArg(narg++, height);
 
     std::cout << "Launching Kernels...." << std::endl;
     //Launch the Kernel
-    xcl_run_kernel3d(world, krnl_process_image, 1, 1, 1);
+    q.enqueueTask(krnl_process_image);
 
-    //Wait for all kernels to finish 
-    clFinish(world.command_queue);
-    
     std::cout << "Kernel Execution Finished...." << std::endl;
 
     //Copy Result from Device Global Memory to Host Local Memory
-    xcl_memcpy_from_device(world, hw_outImage, buffer_output, image_size_bytes);
-    clFinish(world.command_queue);
+    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    q.finish();
 
-    //Release Device Memories and Kernels
-    clReleaseMemObject(buffer_input);
-    clReleaseMemObject(buffer_output);
-    clReleaseKernel(krnl_process_image);
-    clReleaseProgram(program);
-    xcl_release_world(world);
 //OPENCL HOST CODE AREA END
 
     // Software sketch function 
-    software_sketch(image.bitmap(), sw_outImage, width, height);
+    software_sketch(image.bitmap(), sw_outImage.data(), width, height);
 
     // Compare software with hardware results
     int match = 0;
@@ -256,9 +252,7 @@ int main(int argc, char** argv)
         } 
     }
     //Write the final image to disk
-    image.writeBitmapFile(hw_outImage);
-    free(hw_outImage);
-    free(sw_outImage);
+    image.writeBitmapFile(hw_outImage.data());
  
     if(match){
         std::cout << "TEST FAILED" << std::endl;
