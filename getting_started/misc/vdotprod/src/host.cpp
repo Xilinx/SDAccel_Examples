@@ -26,32 +26,19 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
-
-//OpenCL includes
-#include "xcl.h"
+#include "xcl2.hpp"
+#include <vector>
 #include "vdotprod.h"
 
 int main(int argc, char* argv[]) {
-    xcl_world world    = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "krnl_vdotprod");
-    cl_kernel krnl     = xcl_get_kernel(program, "krnl_vdotprod");
-
     int nhalf = NPOINTS >> 1;
     size_t input_size_bytes = sizeof(int) * NPOINTS;
     size_t output_size_bytes = sizeof(int) * nhalf;
-
-    cl_mem buffer_x = xcl_malloc(world, CL_MEM_READ_ONLY, input_size_bytes);
-    cl_mem buffer_y = xcl_malloc(world, CL_MEM_READ_ONLY, input_size_bytes);
-    cl_mem buffer_z = xcl_malloc(world, CL_MEM_READ_ONLY, input_size_bytes);
-    cl_mem buffer_d = xcl_malloc(world, CL_MEM_WRITE_ONLY, output_size_bytes);
-
-    int *source_x = (int *) malloc(input_size_bytes);
-    int *source_y = (int *) malloc(input_size_bytes);
-    int *source_z = (int *) malloc(input_size_bytes);
-    int *result_sim = (int *) malloc(output_size_bytes);
+    std::vector<int> source_x(NPOINTS);
+    std::vector<int> source_y(NPOINTS);
+    std::vector<int> source_z(NPOINTS);
+    std::vector<int> result_sim(nhalf);
+    std::vector<int> result_krnl(nhalf);
 
     /* Create the test data and run the vector addition locally */
     for(int i=0; i < NPOINTS; i++) {
@@ -68,41 +55,53 @@ int main(int argc, char* argv[]) {
                         source_z[i] * source_z[j];
     }
 
-    /* Copy input vectors to memory */
-    xcl_memcpy_to_device(world, buffer_x, source_x, input_size_bytes);
-    xcl_memcpy_to_device(world, buffer_y, source_y, input_size_bytes);
-    xcl_memcpy_to_device(world, buffer_z, source_z, input_size_bytes);
+//OPENCL HOST CODE AREA START
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
 
-    /* Release the memory for temporary source data buffers on the host */
-    free(source_x);
-    free(source_y);
-    free(source_z);
+    cl::Context context(device);
+    cl::CommandQueue q(context, device);
+    std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+
+    std::string binaryFile = xcl::find_binary_file(device_name,"krnl_vdotprod");
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    devices.resize(1);
+    cl::Program program(context, devices, bins);
+    cl::Kernel krnl(program,"krnl_vdotprod");
+
+    std::vector<cl::Memory> inBufVec, outBufVec;
+    cl::Buffer buffer_x(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            input_size_bytes,source_x.data());
+    cl::Buffer buffer_y(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            input_size_bytes,source_y.data());
+    cl::Buffer buffer_z(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            input_size_bytes,source_z.data());
+    cl::Buffer buffer_d(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
+            output_size_bytes, result_krnl.data());
+    inBufVec.push_back(buffer_x);
+    inBufVec.push_back(buffer_y);
+    inBufVec.push_back(buffer_z);
+    outBufVec.push_back(buffer_d);
+    
+    /* Copy input vectors to memory */
+    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
 
     /* Set the kernel arguments */
-    clSetKernelArg(krnl, 0, sizeof(cl_mem), &buffer_x);
-    clSetKernelArg(krnl, 1, sizeof(cl_mem), &buffer_y);
-    clSetKernelArg(krnl, 2, sizeof(cl_mem), &buffer_z);
-    clSetKernelArg(krnl, 3, sizeof(cl_mem), &buffer_d);
-    clSetKernelArg(krnl, 4, sizeof(int), &nhalf);
+    krnl.setArg( 0, buffer_x);
+    krnl.setArg( 1, buffer_y);
+    krnl.setArg( 2, buffer_z);
+    krnl.setArg( 3, buffer_d);
+    krnl.setArg( 4, nhalf);
 
     /* Launch the kernel */
-    xcl_run_kernel3d(world, krnl, 1, 1, 1);
-
-    /* Allocate result buffer on host memory */
-    int *result_krnl = (int*) malloc(output_size_bytes);
+    q.enqueueTask(krnl);
 
      /* Copy result to local buffer */
-    xcl_memcpy_from_device(world, result_krnl, buffer_d, output_size_bytes);
+    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    q.finish();
 
-    clReleaseMemObject(buffer_x);
-    clReleaseMemObject(buffer_y);
-    clReleaseMemObject(buffer_z);
-    clReleaseMemObject(buffer_d);
-    clReleaseKernel(krnl);
-    clReleaseProgram(program);
-    xcl_release_world(world);
+// OPENCL HOST CODE AREA END
 
-	// OPENCL HOST CODE AREA END
     /* Compare the results of the kernel to the simulation */
     int krnl_match = 0;
     for(int i = 0; i < nhalf; i++){
@@ -115,10 +114,6 @@ int main(int argc, char* argv[]) {
             printf("Result Match: i = %d CPU result = %d Krnl Result = %d\n", i, result_sim[i], result_krnl[i]);
         }
     }
-
-    /* Release memory objects from the host */
-    free(result_sim);
-    free(result_krnl);
 
     if(krnl_match == 1) {
         printf("TEST FAILED\n");

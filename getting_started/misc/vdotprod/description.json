@@ -10,7 +10,7 @@
     "em_cmd" : "./vdotprod",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./vdotprod",
     "libs": [
-        "xcl"
+        "xcl2"
     ], 
     "accelerators": [
         {
