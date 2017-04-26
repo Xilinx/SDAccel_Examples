@@ -39,8 +39,6 @@ Xilinx KU115|xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3|SDAccel 2016.4
 Alpha Data ADM-PCIE-KU3|xilinx:adm-pcie-ku3:2ddr-xpr:3.3|SDAccel 2016.4
 
 
-Board targeted by default = ***xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3***
-
 *NOTE:* The board/device used for compilation can be changed by adding the DEVICES variable to the make command as shown below
 ```
 make DEVICES=<device name>
@@ -102,7 +100,7 @@ emconfigutil --xdevice 'xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./prng <number of blocks>
+./prng
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card

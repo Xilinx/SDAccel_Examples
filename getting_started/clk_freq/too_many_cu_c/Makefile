@@ -27,7 +27,7 @@ vadd_GOOD_XOS=vadd_GOOD
 
 vadd_BAD_XOS=vadd_BAD
 vadd_BAD_LDCLFLAGS=--nk vadd:8
-vadd_BAD_DEVICES=xilinx:adm-pcie-ku3:2ddr-xpr xilinx:xil-accel-rd-ku115:4ddr-xpr
+vadd_BAD_NDEVICES=xilinx:adm-pcie-7v3:1ddr
 
 XCLBINS=vadd_GOOD vadd_BAD
 

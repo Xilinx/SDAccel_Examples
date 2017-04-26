@@ -29,8 +29,8 @@ RTLXOS=vadd
 # Kernel
 vadd_XOS=vadd
 vadd_LDCLFLAGS=-k $(vadd_KERNEL) --nk $(vadd_KERNEL):$(vadd_CU) --kernel_frequency "0:150|1:250"
-vadd_DEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr 
-vadd_TARGETS=hw hw_emu
+vadd_NDEVICES=xilinx:adm-pcie-7v3:1ddr xilinx:adm-pcie-ku3:2ddr-xpr
+vadd_NTARGETS=sw_emu
 
 XCLBINS=vadd
 EXTRA_CLEAN=tmp_kernel_pack* packaged_kernel*
@@ -38,8 +38,8 @@ EXTRA_CLEAN=tmp_kernel_pack* packaged_kernel*
 # check
 check_EXE=host
 check_XCLBINS=vadd
-check_DEVICES=$(vadd_DEVICES)
-check_TARGETS=$(vadd_TARGETS)
+check_NDEVICES=$(vadd_NDEVICES)
+check_NTARGETS=$(vadd_NTARGETS)
 
 CHECKS=check
 

@@ -8,7 +8,7 @@ include $(COMMON_REPO)/libs/opencl/opencl.mk
 # Pseudo Random Number Generator Host Application
 prng_SRCS=src/prng.cpp $(xcl_SRCS)
 prng_HDRS=src/prng.h $(xcl_HDRS)
-prng_CXXFLAGS=-g -Wall -I./src/ -I$(XILINX_SDACCEL)/Vivado_HLS/include/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS)
+prng_CXXFLAGS=-Wall -I./src/ -I$(XILINX_SDACCEL)/Vivado_HLS/include/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS)
 prng_LDFLAGS=$(opencl_LDFLAGS)
 
 EXES=prng

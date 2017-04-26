@@ -53,8 +53,6 @@ Alpha Data ADM-PCIE-7V3|xilinx:adm-pcie-7v3:1ddr:3.0|SDAccel 2016.4
 Alpha Data ADM-PCIE-KU3|xilinx:adm-pcie-ku3:2ddr-xpr:3.3|SDAccel 2016.4
 
 
-Board targeted by default = ***xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3***
-
 *NOTE:* The board/device used for compilation can be changed by adding the DEVICES variable to the make command as shown below
 ```
 make DEVICES=<device name>
@@ -122,7 +120,7 @@ emconfigutil --xdevice 'xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./host_kmeans -i ./data/100 -c .data/100.gold_c5 -m 5 -n 5 -g 2
+./host_kmeans -i ./data/100 -c ./data/100.gold_c5 -m 5 -n 5 -g 2
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card

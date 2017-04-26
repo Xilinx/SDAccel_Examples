@@ -24,7 +24,7 @@ XOS=apply_watermark
 # xclbin
 apply_watermark_XOS=apply_watermark
 apply_watermark_LDCLFLAGS=--xp misc:map_connect=add.kernel.apply_watermark_1.M_AXI_GMEM0.core.OCL_REGION_0.M00_AXI --xp misc:map_connect=add.kernel.apply_watermark_1.M_AXI_GMEM1.core.OCL_REGION_0.M01_AXI
-apply_watermark_DEVICES=xilinx:adm-pcie-ku3:2ddr-xpr xilinx:xil-accel-rd-ku115:4ddr-xpr
+apply_watermark_NDEVICES=xilinx:adm-pcie-7v3:1ddr
 
 XCLBINS=apply_watermark
 
@@ -34,7 +34,7 @@ EXTRA_CLEAN=./output.bmp
 check_EXE=host
 check_XCLBINS=apply_watermark
 check_ARGS=./data/input.bmp ./data/golden.bmp
-check_DEVICES=$(apply_watermark_DEVICES)
+check_NDEVICES=$(apply_watermark_NDEVICES)
 
 CHECKS=check
 

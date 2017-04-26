@@ -28,7 +28,7 @@ RTLXOS=vadd
 # Kernel
 vadd_XOS=vadd
 vadd_LDCLFLAGS=-k $(vadd_KERNEL) --nk $(vadd_KERNEL):$(vadd_CU)
-vadd_TARGETS=hw_emu hw
+vadd_NTARGETS=sw_emu
 
 XCLBINS=vadd
 EXTRA_CLEAN=tmp_kernel_pack* packaged_kernel* $(vadd_KERNEL).xo
@@ -36,7 +36,7 @@ EXTRA_CLEAN=tmp_kernel_pack* packaged_kernel* $(vadd_KERNEL).xo
 # check
 check_EXE=host
 check_XCLBINS=vadd
-check_TARGETS=$(vadd_TARGETS)
+check_NTARGETS=$(vadd_NTARGETS)
 
 CHECKS=check
 

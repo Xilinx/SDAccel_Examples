@@ -7,7 +7,7 @@
     ],
     "board": ["Alpha Data ADM-PCIE-7V3", "Xilinx KU115", "Alpha Data ADM-PCIE-KU3"],
     "xcl": true,
-    "em_cmd" : "./prng <number of blocks>",
+    "em_cmd" : "./prng",
     "hw_cmd" : "../../utility/nimbix/nimbix-run.py -- ./prng <number of blocks>",
     "perf_fields" : ["Board", "Total Number of Samples", "Kernel Duration"],
     "performance" : [

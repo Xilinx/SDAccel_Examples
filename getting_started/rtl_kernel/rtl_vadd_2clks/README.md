@@ -35,8 +35,6 @@ Board | Device Name | Software Version
 Xilinx KU115|xilinx:xil-accel-rd-ku115:4ddr-xpr|SDAccel 2017.1
 
 
-Board targeted by default = ***xilinx:xil-accel-rd-ku115:4ddr-xpr***
-
 *NOTE:* The board/device used for compilation can be changed by adding the DEVICES variable to the make command as shown below
 ```
 make DEVICES=<device name>

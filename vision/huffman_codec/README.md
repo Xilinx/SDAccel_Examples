@@ -31,8 +31,6 @@ Board | Device Name | Software Version
 Alpha Data ADM-PCIE-7V3|xilinx:adm-pcie-7v3:1ddr:3.0|SDAccel 2016.4
 
 
-Board targeted by default = ***xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3***
-
 *NOTE:* The board/device used for compilation can be changed by adding the DEVICES variable to the make command as shown below
 ```
 make DEVICES=<device name>
@@ -115,7 +113,7 @@ emconfigutil --xdevice 'xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./huffman -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:3.1' --kernel ./xclbin/krnl_huffman.<emulation type>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin data/rect_1024.bmp
+./huffman -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:3.1' --kernel ./xclbin/krnl_huffman.<emulation type>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin -b data/rect_1024.bmp
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card
