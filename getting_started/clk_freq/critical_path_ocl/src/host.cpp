@@ -67,13 +67,12 @@ int main(int argc, char* argv[])
     int height = image.getHeight() ;
    
     //Allocate Memory in Host Memory 
-    int image_size_bytes = image.numPixels() * sizeof(int); 
-    std::vector<int> outImage(image.numPixels());
-    if (outImage.size() == 0)
-    {
-        std::cout << "Unable to allocate host memory!" << std::endl ;
-        return EXIT_FAILURE ;
-    }
+    size_t image_size_bytes = image.numPixels() * sizeof(int); 
+    std::vector<int,aligned_allocator<int>> inImage(image.numPixels());
+    std::vector<int,aligned_allocator<int>> outImage(image.numPixels());
+
+    //Copying image host buffer
+    memcpy(inImage.data(),image.bitmap(),image_size_bytes);
 
 //OPENCL HOST CODE AREA START
 
@@ -90,11 +89,16 @@ int main(int argc, char* argv[])
     cl::Program program(context, devices, bins);
     cl::Kernel kernel(program,"apply_watermark");
 
-    cl::Buffer buffer_inImage(context, CL_MEM_READ_ONLY , image_size_bytes);
-    cl::Buffer buffer_outImage(context, CL_MEM_WRITE_ONLY, image_size_bytes);
+    std::vector<cl::Memory> inBufVec, outBufVec;
+    cl::Buffer buffer_inImage(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, 
+            image_size_bytes, inImage.data());
+    cl::Buffer buffer_outImage(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
+            image_size_bytes, outImage.data());
+    inBufVec.push_back(buffer_inImage);
+    outBufVec.push_back(buffer_outImage);
 
     //Copy input Image to device global memory
-    q.enqueueWriteBuffer(buffer_inImage,CL_TRUE, 0, image_size_bytes, image.bitmap());
+    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
   
     auto krnl_applyWatermark= cl::KernelFunctor<cl::Buffer&, cl::Buffer& ,int,int>(kernel);
     
@@ -103,7 +107,8 @@ int main(int argc, char* argv[])
             buffer_inImage, buffer_outImage, width, height);
 
     //Copy Result from Device Global Memory to Host Local Memory
-    q.enqueueReadBuffer(buffer_outImage,CL_TRUE, 0, image_size_bytes, outImage.data());
+    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    q.finish();
 //OPENCL HOST CODE AREA END
 
 
