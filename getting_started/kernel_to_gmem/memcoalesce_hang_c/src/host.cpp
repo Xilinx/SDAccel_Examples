@@ -73,7 +73,6 @@ int main(int argc, char* argv[]) {
     }
     dummy_op(din1,din2,din3,dout);
 
-
 //OPENCL HOST CODE AREA START
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];

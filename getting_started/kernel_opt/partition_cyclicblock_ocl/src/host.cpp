@@ -54,7 +54,6 @@ void matmul(vector<int,aligned_allocator<int>>& C,
 int gen_random() {
   static default_random_engine e;
   static uniform_int_distribution<int> dist(0, 10);
-
   return dist(e);
 }
 

@@ -46,7 +46,6 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE ;
     }
     std::string bitmapFilename = argv[1];
-
  
     //Read the bit map file into memory
     BitmapInterface image(bitmapFilename.data());
@@ -68,7 +67,6 @@ int main(int argc, char* argv[])
     //Copying image host buffer
     memcpy(hwRgbImage.data(),image.bitmap(),image_size_bytes);
 
-   
 //OPENCL HOST CODE AREA START
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
@@ -126,7 +124,6 @@ int main(int argc, char* argv[])
     std::cout << "TEST PASSED." << std::endl;
     return EXIT_SUCCESS;
 }
-
 
 //Utility Functions Definitions Start Here
 

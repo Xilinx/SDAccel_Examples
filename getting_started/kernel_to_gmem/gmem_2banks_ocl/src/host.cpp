@@ -116,7 +116,6 @@ int main(int argc, char* argv[])
     q.enqueueReadBuffer(buffer_outImage,CL_TRUE, 0, image_size_bytes, outImage.data());
 //OPENCL HOST CODE AREA END
 
-
     //Compare Golden Image with Output image
     bool match = 0;
     if ( image.getHeight() != goldenImage.getHeight() || image.getWidth() != goldenImage.getWidth()){
