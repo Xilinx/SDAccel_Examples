@@ -49,19 +49,23 @@ using std::uniform_int_distribution;
 using std::vector;
 
 //helping functions
-void fir_sw(vector<int> &output, const vector<int> &signal,const vector<int> &coeff);
-void verify(const vector<int> &gold, const vector<int> &out);
+void fir_sw(      vector<int,aligned_allocator<int>> &output, 
+            const vector<int,aligned_allocator<int>> &signal,
+            const vector<int,aligned_allocator<int>> &coeff);
+
+void verify( const vector<int,aligned_allocator<int>> &gold, 
+             const vector<int,aligned_allocator<int>> &out);
 uint64_t get_duration_ns (const cl::Event &event);
 void print_summary(std::string k1, std::string k2, uint64_t t1, uint64_t t2, int iterations );
 int gen_random();
 
 int main(int argc, char **argv) {
     size_t signal_size = 32; 
-    vector<int> signal(signal_size);
-    vector<int> out(signal_size);
+    vector<int,aligned_allocator<int>> signal(signal_size);
+    vector<int,aligned_allocator<int>> out(signal_size);
+    vector<int,aligned_allocator<int>> coeff = {{53, 0, -91, 0, 313, 500, 313, 0, -91, 0, 53}};
+    vector<int,aligned_allocator<int>> gold(signal_size, 0);
     generate(begin(signal), end(signal), gen_random);
-    vector<int> coeff = {{53, 0, -91, 0, 313, 500, 313, 0, -91, 0, 53}};
-    vector<int> gold(signal_size, 0);
 
     fir_sw(gold, signal, coeff);
 
@@ -82,12 +86,20 @@ int main(int argc, char **argv) {
     devices.resize(1);
     cl::Program program(context, devices, bins);
 
-    cl::Buffer buffer_signal(context, CL_MEM_READ_ONLY, size_in_bytes);
-    cl::Buffer buffer_coeff (context, CL_MEM_READ_ONLY, coeff_size_in_bytes);
-    cl::Buffer buffer_output(context, CL_MEM_WRITE_ONLY,size_in_bytes);
+    //Allocate Buffer in Global Memory
+    cl::Buffer buffer_signal(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            size_in_bytes, signal.data());
+    cl::Buffer buffer_coeff (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            coeff_size_in_bytes, coeff.data());
+    cl::Buffer buffer_output(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+            size_in_bytes, out.data());
+    std::vector<cl::Memory> inBufVec, outBufVec;
+    inBufVec.push_back(buffer_signal);
+    inBufVec.push_back(buffer_coeff);
+    outBufVec.push_back(buffer_output);
 
-    q.enqueueWriteBuffer(buffer_signal,CL_TRUE, 0,size_in_bytes, signal.data());
-    q.enqueueWriteBuffer(buffer_coeff, CL_TRUE, 0,coeff_size_in_bytes, coeff.data());
+    //Copy input data to device global memory
+    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
 
     //Creating Naive Kernel Object and setting args
     cl::Kernel fir_naive_kernel(program, "fir_naive");
@@ -102,7 +114,8 @@ int main(int argc, char **argv) {
     //Running naive kernel iterations times
     for (int i = 0 ; i < iterations ; i++){
         q.enqueueTask(fir_naive_kernel,NULL,&event);
-        q.enqueueReadBuffer(buffer_output, CL_TRUE, 0, size_in_bytes, out.data());
+        q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+        q.finish();
         fir_naive_time += get_duration_ns(event);
         verify(gold, out);
     }
@@ -118,7 +131,8 @@ int main(int argc, char **argv) {
     //Running Shift Register FIR iterations times
     for (int i = 0 ; i < iterations ; i++){
         q.enqueueTask(fir_sr_kernel,NULL,&event);
-        q.enqueueReadBuffer(buffer_output, CL_TRUE, 0, size_in_bytes, out.data());
+        q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+        q.finish();
         fir_sr_time += get_duration_ns(event);
         verify(gold, out);
     }
@@ -128,8 +142,9 @@ int main(int argc, char **argv) {
 }
 
 // Finite Impulse Response Filter
-void fir_sw(vector<int> &output, const vector<int> &signal,
-         const vector<int> &coeff) {
+void fir_sw(      vector<int,aligned_allocator<int>> &output, 
+            const vector<int,aligned_allocator<int>> &signal,
+            const vector<int,aligned_allocator<int>> &coeff){
     auto out_iter = begin(output);
     auto rsignal_iter = signal.rend() - 1;
 
@@ -149,7 +164,8 @@ int gen_random() {
 }
 
 // Verifies the gold and the out data are equal
-void verify(const vector<int> &gold, const vector<int> &out) {
+void verify( const vector<int,aligned_allocator<int>> &gold, 
+             const vector<int,aligned_allocator<int>> &out){
     bool match = equal(begin(gold), end(gold), begin(out));
     if (!match) {
         printf("TEST FAILED\n");

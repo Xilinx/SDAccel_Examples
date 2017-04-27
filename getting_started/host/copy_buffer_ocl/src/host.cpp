@@ -39,10 +39,10 @@ static const std::string error_message =
 // This example illustrates the simple OpenCL example that performs
 // buffer copy from one buffer to another
 int main(int argc, char **argv) {
-    int size_in_bytes = DATA_SIZE * sizeof(int);
+    size_t size_in_bytes = DATA_SIZE * sizeof(int);
 
-    vector<int> source_a(DATA_SIZE, 13);
-    vector<int> source_results(DATA_SIZE);
+    vector<int,aligned_allocator<int>> source_a(DATA_SIZE, 13);
+    vector<int,aligned_allocator<int>> source_results(DATA_SIZE);
 
 
     std::vector<cl::Device> devices = xcl::get_xil_devices();
@@ -58,14 +58,20 @@ int main(int argc, char **argv) {
     devices.resize(1);
     cl::Program program(context, devices, bins);
 
-    cl::Buffer buffer_a(context, CL_MEM_READ_ONLY,  size_in_bytes);
+    std::vector<cl::Memory> inBufVec, outBufVec;
+    cl::Buffer buffer_a(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
+            size_in_bytes, source_a.data());
+    cl::Buffer buffer_result(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
+            size_in_bytes,source_results.data());
     cl::Buffer buffer_b(context, CL_MEM_READ_ONLY,  size_in_bytes);
-    cl::Buffer buffer_result(context, CL_MEM_WRITE_ONLY, size_in_bytes);
+    inBufVec.push_back(buffer_a);
+    outBufVec.push_back(buffer_result);
 
-    q.enqueueWriteBuffer(buffer_a, CL_TRUE, 0, size_in_bytes, source_a.data());
+    //copy buffer a to device.
+    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
+
     // This enqueueCopyBuffer() command will copy buffer from buffer_a to buffer_b
     q.enqueueCopyBuffer(buffer_a, buffer_b,0,0, size_in_bytes);
-    q.finish();
 
     cl::Kernel kernel(program,"vector_add");
     auto krnl_vector_add = cl::KernelFunctor<cl::Buffer&, cl::Buffer&, cl::Buffer&, 
@@ -74,10 +80,8 @@ int main(int argc, char **argv) {
     // This function will execute the kernel on the FPGA
     krnl_vector_add(cl::EnqueueArgs(q, cl::NDRange(1,1,1), cl::NDRange(1,1,1)), 
             buffer_result, buffer_a,buffer_b,DATA_SIZE);
-    q.finish();
 
-    q.enqueueReadBuffer(buffer_result, CL_TRUE, 0, size_in_bytes, 
-            source_results.data());
+    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
     q.finish();
 
 

@@ -47,7 +47,8 @@ int gen_random() {
   return dist(e);
 }
 
-void verify(const vector<int> &gold, const vector<int> &out) {
+void verify(const vector<int,aligned_allocator<int>> &gold, 
+            const vector<int,aligned_allocator<int>> &out) {
   if (!equal(begin(gold), end(gold), begin(out))) {
     printf("TEST FAILED\n");
     exit(EXIT_FAILURE);
@@ -57,7 +58,16 @@ void verify(const vector<int> &gold, const vector<int> &out) {
 int main(int argc, char** argv)
 {
     // compute the size of array in bytes
-    int size_in_bytes = DATA_SIZE * sizeof(int);
+    size_t size_in_bytes = DATA_SIZE * sizeof(int);
+
+    // Creates a vector of DATA_SIZE elements with an initial value of 10 and 32
+    vector<int,aligned_allocator<int>> source_a(DATA_SIZE);
+    vector<int,aligned_allocator<int>> source_b(DATA_SIZE);
+    vector<int,aligned_allocator<int>> source_results(DATA_SIZE);
+    generate(begin(source_a), end(source_a), gen_random);
+    generate(begin(source_b), end(source_b), gen_random);
+
+    //Getting Xilinx Device and creating program and context
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
@@ -71,22 +81,24 @@ int main(int argc, char** argv)
     devices.resize(1);
     cl::Program program(context, devices, bins);
 
-    cl::Buffer buffer_a     (context, CL_MEM_READ_ONLY, size_in_bytes);
-    cl::Buffer buffer_b     (context, CL_MEM_READ_ONLY, size_in_bytes);
-    cl::Buffer buffer_result(context, CL_MEM_WRITE_ONLY,size_in_bytes);
+    //Allocate Buffer in Global Memory
+    std::vector<cl::Memory> inBufVec, outBufVec;
+    cl::Buffer buffer_a(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            size_in_bytes, source_a.data());
+    cl::Buffer buffer_b(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            size_in_bytes, source_b.data());
+    cl::Buffer buffer_result(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+            size_in_bytes, source_results.data());
+    inBufVec.push_back(buffer_a);
+    inBufVec.push_back(buffer_b);
+    outBufVec.push_back(buffer_result);
 
-    // Creates a vector of DATA_SIZE elements with an initial value of 10 and 32
-    vector<int> source_a(DATA_SIZE);
-    vector<int> source_b(DATA_SIZE);
-    vector<int> source_results(DATA_SIZE);
-    generate(begin(source_a), end(source_a), gen_random);
-    generate(begin(source_b), end(source_b), gen_random);
-
-    vector<int> gold(DATA_SIZE);
+    vector<int,aligned_allocator<int>> gold(DATA_SIZE);
     transform(begin(source_a), end(source_a),
               begin(source_b), begin(gold), std::plus<int>());
-    q.enqueueWriteBuffer(buffer_a,CL_TRUE,0,size_in_bytes,source_a.data());
-    q.enqueueWriteBuffer(buffer_b,CL_TRUE,0,size_in_bytes,source_b.data());
+
+    //Copy input data to device global memory
+    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
 
     printf( "|-------------------------+-------------------------|\n"
             "| Kernel                  |    Wall-Clock Time (ns) |\n"
@@ -107,7 +119,9 @@ int main(int argc, char** argv)
 
     printf("| %-22s  | %23lu |\n", "vadd: simple", simple_time);
 
-    q.enqueueReadBuffer(buffer_result, CL_TRUE, 0, size_in_bytes, source_results.data());
+    //Copy Result from Device Global Memory to Host Local Memory
+    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    q.finish();
     verify(gold, source_results);
 
     cl::Kernel kernel_pipelined(program, "vadd");
@@ -128,7 +142,9 @@ int main(int argc, char** argv)
     printf("Note: Wall Clock Time is meaningful for real hardware execution only, not for emulation.\n");
     printf("Please refer to profile summary for kernel execution time for hardware emulation.\n");
 
-    q.enqueueReadBuffer(buffer_result, CL_TRUE, 0, size_in_bytes, source_results.data());
+    //Copy Result from Device Global Memory to Host Local Memory
+    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    q.finish();
     verify(gold, source_results);
 
     printf("TEST PASSED.\n");

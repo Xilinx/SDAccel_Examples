@@ -57,9 +57,9 @@ Description:
 
 // Software implementation for finding nearest neighbor
 void nearest_sw(
-    std::vector<int>& in,   // Input Points Array - represented as integer
-    std::vector<int>& point,// Current Point for which the neighbor is found
-    std::vector<int>& out,  // Output Point
+    int *in,   // Input Points Array - represented as integer
+    int *point,// Current Point for which the neighbor is found
+    int *out,  // Output Point
     int size,     // Size of the input array
     int dim       // #Dimensions of the points
 )
@@ -102,10 +102,10 @@ int main(int argc, char** argv)
     
     //Allocate Memory in Host Memory
     size_t vector_size_bytes = sizeof(int) * DATA_SIZE * DATA_DIM;
-    std::vector<int>source_in(vector_size_bytes);
-    std::vector<int>source_point(sizeof(int)*DATA_DIM);
-    std::vector<int>source_hw_result(sizeof(int)*DATA_DIM);
-    std::vector<int>source_sw_result(sizeof(int)*DATA_DIM);
+    std::vector<int,aligned_allocator<int>> source_in(vector_size_bytes);
+    std::vector<int,aligned_allocator<int>> source_point(sizeof(int)*DATA_DIM);
+    std::vector<int,aligned_allocator<int>> source_hw_result(sizeof(int)*DATA_DIM);
+    std::vector<int,aligned_allocator<int>> source_sw_result(sizeof(int)*DATA_DIM);
     
     srand(time(nullptr));
 
@@ -136,13 +136,19 @@ int main(int argc, char** argv)
     cl::Kernel kernel(program,"nearest");
 
     //Allocate Buffer in Global Memory
-    cl::Buffer buffer_in   (context, CL_MEM_READ_ONLY,  vector_size_bytes);
-    cl::Buffer buffer_point(context, CL_MEM_READ_ONLY,  sizeof(int)*DATA_DIM);
-    cl::Buffer buffer_out  (context, CL_MEM_WRITE_ONLY, sizeof(int)*DATA_DIM);
+    cl::Buffer buffer_in   (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
+            vector_size_bytes, source_in.data());
+    cl::Buffer buffer_point(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
+            sizeof(int)*DATA_DIM, source_point.data());
+    cl::Buffer buffer_out  (context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
+            sizeof(int)*DATA_DIM, source_hw_result.data());
+    std::vector<cl::Memory> inBufVec, outBufVec;
+    inBufVec.push_back(buffer_in);
+    inBufVec.push_back(buffer_point);
+    outBufVec.push_back(buffer_out);
 
     //Copy input data to device global memory
-    q.enqueueWriteBuffer(buffer_in,CL_TRUE,0, vector_size_bytes,source_in.data());
-    q.enqueueWriteBuffer(buffer_point,CL_TRUE,0, sizeof(int)*DATA_DIM,source_point.data());
+    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
 
     auto krnl_nearest= cl::KernelFunctor<cl::Buffer&, cl::Buffer&,
          cl::Buffer&, int, int>(kernel);
@@ -150,15 +156,15 @@ int main(int argc, char** argv)
     //Launch the Kernel
     krnl_nearest(cl::EnqueueArgs(q,cl::NDRange(1,1,1), cl::NDRange(1,1,1)), 
             buffer_in, buffer_point, buffer_out, size, dim);
-    q.finish();
 
     //Copy Result from Device Global Memory to Host Local Memory
-    q.enqueueReadBuffer(buffer_out,CL_TRUE,0, sizeof(int)* DATA_DIM, source_hw_result.data());
-
+    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    q.finish();
 //OPENCL HOST CODE AREA END
     
     // Compute Software Results
-    nearest_sw(source_in, source_point, source_sw_result, size, dim);
+    nearest_sw(source_in.data(), source_point.data(), 
+            source_sw_result.data(), size, dim);
     
     // Compare the nearset distances between software and hardware
     unsigned long dist_sw = 0, dist_hw = 0;

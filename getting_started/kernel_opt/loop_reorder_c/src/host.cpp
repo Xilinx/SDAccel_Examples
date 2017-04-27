@@ -48,9 +48,9 @@ Description:
 // Software implementation of Matrix Multiplication
 // The inputs are of the size (DATA_SIZE x DATA_SIZE)
 void m_softwareGold(
-       std::vector<int>& in1,   //Input Matrix 1
-       std::vector<int>& in2,   //Input Matrix 2
-       std::vector<int>& out    //Output Matrix
+       std::vector<int,aligned_allocator<int>>& in1,   //Input Matrix 1
+       std::vector<int,aligned_allocator<int>>& in2,   //Input Matrix 2
+       std::vector<int,aligned_allocator<int>>& out    //Output Matrix
        )
 {
     //Perform Matrix multiply Out = In1 x In2
@@ -75,10 +75,10 @@ int main(int argc, char** argv)
     
     size_t matrix_size_bytes = sizeof(int) * DATA_SIZE * DATA_SIZE;
 
-    std::vector<int> source_in1(matrix_size_bytes);
-    std::vector<int> source_in2(matrix_size_bytes);
-    std::vector<int> source_hw_results(matrix_size_bytes);
-    std::vector<int> source_sw_results(matrix_size_bytes);
+    std::vector<int,aligned_allocator<int>> source_in1(matrix_size_bytes);
+    std::vector<int,aligned_allocator<int>> source_in2(matrix_size_bytes);
+    std::vector<int,aligned_allocator<int>> source_hw_results(matrix_size_bytes);
+    std::vector<int,aligned_allocator<int>> source_sw_results(matrix_size_bytes);
 
     // Create the test data and Software Result 
     for(int i = 0 ; i < DATA_SIZE * DATA_SIZE ; i++){
@@ -103,14 +103,19 @@ int main(int argc, char** argv)
     cl::Kernel kernel(program,"mmult");
 
     //Allocate Buffer in Global Memory
-    cl::Buffer buffer_in1   (context, CL_MEM_READ_ONLY, matrix_size_bytes);
-    cl::Buffer buffer_in2   (context, CL_MEM_READ_ONLY, matrix_size_bytes);
-    cl::Buffer buffer_output(context, CL_MEM_WRITE_ONLY, matrix_size_bytes);
+    std::vector<cl::Memory> inBufVec, outBufVec;
+    cl::Buffer buffer_in1(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            matrix_size_bytes,source_in1.data());    
+    cl::Buffer buffer_in2(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            matrix_size_bytes,source_in2.data());
+    cl::Buffer buffer_output(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
+            matrix_size_bytes,source_hw_results.data());
+    inBufVec.push_back(buffer_in1);
+    inBufVec.push_back(buffer_in2);
+    outBufVec.push_back(buffer_output);
 
     //Copy input data to device global memory
-    q.enqueueWriteBuffer(buffer_in1,CL_TRUE,0,matrix_size_bytes,source_in1.data());
-    q.enqueueWriteBuffer(buffer_in2,CL_TRUE,0,matrix_size_bytes,source_in2.data());
-    q.enqueueWriteBuffer(buffer_output,CL_TRUE,0,matrix_size_bytes,source_hw_results.data());
+    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
 
     int size = DATA_SIZE;
     auto krnl_loop_reorder= cl::KernelFunctor<cl::Buffer&, cl::Buffer&,
@@ -122,7 +127,8 @@ int main(int argc, char** argv)
     q.finish();
 
     //Copy Result from Device Global Memory to Host Local Memory
-    q.enqueueReadBuffer(buffer_output,CL_TRUE,0, matrix_size_bytes, source_hw_results.data());
+    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    q.finish();
 
 //OPENCL HOST CODE AREA END
  

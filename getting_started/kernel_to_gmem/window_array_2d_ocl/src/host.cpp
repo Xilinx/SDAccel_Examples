@@ -36,9 +36,9 @@ int main(int argc, char** argv)
 {
     //Allocate Memory in Host Memory
     size_t vector_size_bytes = sizeof(int) * BLOCK_SIZE;
-    std::vector<int> a   (BLOCK_SIZE);// original data set given to device
-    std::vector<int> c   (BLOCK_SIZE);// results returned from device
-    std::vector<int> sw_c(BLOCK_SIZE);// results returned from software
+    std::vector<int,aligned_allocator<int>> a   (BLOCK_SIZE);// original data set given to device
+    std::vector<int,aligned_allocator<int>> c   (BLOCK_SIZE);// results returned from device
+    std::vector<int,aligned_allocator<int>> sw_c(BLOCK_SIZE);// results returned from software
  
     // Create the test data and Software Result 
     int alpha = 3;
@@ -69,11 +69,16 @@ int main(int argc, char** argv)
     cl::Kernel krnl_compute   (program, "compute");
 
     //Allocate Buffer in Global Memory
-    cl::Buffer buffer_a(context, CL_MEM_READ_ONLY,  vector_size_bytes);
-    cl::Buffer buffer_c(context, CL_MEM_WRITE_ONLY, vector_size_bytes);
+    cl::Buffer buffer_a(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
+            vector_size_bytes, a.data());
+    cl::Buffer buffer_c(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
+            vector_size_bytes, c.data());
+    std::vector<cl::Memory> inBufVec, outBufVec;
+    inBufVec.push_back(buffer_a);
+    outBufVec.push_back(buffer_c);
 
     //Copy input data to device global memory
-    q.enqueueWriteBuffer(buffer_a,CL_TRUE,0,vector_size_bytes,a.data());
+    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
 
     //Set the Kernel Arguments
     krnl_read_data.setArg(0,buffer_a);
@@ -89,7 +94,7 @@ int main(int argc, char** argv)
     q.finish();
 
     //Copy Result from Device Global Memory to Host Local Memory
-    q.enqueueReadBuffer(buffer_c,CL_TRUE,0, vector_size_bytes, c.data());
+    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
     q.finish();
 //OPENCL HOST CODE AREA END
 

@@ -40,10 +40,10 @@ int main(int argc, char** argv)
     //Allocate Memory in Host Memory
     size_t vector_size_bytes = sizeof(int) * DATA_SIZE;
 
-    std::vector<int> source_in1       (DATA_SIZE);
-    std::vector<int> source_in2       (DATA_SIZE);
-    std::vector<int> source_hw_results(DATA_SIZE);
-    std::vector<int> source_sw_results(DATA_SIZE);
+    std::vector<int,aligned_allocator<int>> source_in1(DATA_SIZE);
+    std::vector<int,aligned_allocator<int>> source_in2(DATA_SIZE);
+    std::vector<int,aligned_allocator<int>> source_hw_results(DATA_SIZE);
+    std::vector<int,aligned_allocator<int>> source_sw_results(DATA_SIZE);
 
     // Create the test data and Software Result 
     for(int i = 0 ; i < DATA_SIZE ; i++){
@@ -68,13 +68,19 @@ int main(int argc, char** argv)
     cl::Kernel kernel(program,"vadd");
 
     //Allocate Buffer in Global Memory
-    cl::Buffer buffer_in1   (context, CL_MEM_READ_ONLY, vector_size_bytes);
-    cl::Buffer buffer_in2   (context, CL_MEM_READ_ONLY, vector_size_bytes);
-    cl::Buffer buffer_output(context, CL_MEM_WRITE_ONLY, vector_size_bytes);
+    std::vector<cl::Memory> inBufVec, outBufVec;
+    cl::Buffer buffer_in1   (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            vector_size_bytes, source_in1.data());
+    cl::Buffer buffer_in2   (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            vector_size_bytes, source_in2.data());
+    cl::Buffer buffer_output(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
+            vector_size_bytes, source_hw_results.data());
+    inBufVec.push_back(buffer_in1);
+    inBufVec.push_back(buffer_in2);
+    outBufVec.push_back(buffer_output);
 
     //Copy input data to device global memory
-    q.enqueueWriteBuffer(buffer_in1,CL_TRUE,0,vector_size_bytes,source_in1.data());
-    q.enqueueWriteBuffer(buffer_in2,CL_TRUE,0,vector_size_bytes,source_in2.data());
+    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
 
     int size = DATA_SIZE;
     auto krnl_vector_add = cl::KernelFunctor<cl::Buffer&, cl::Buffer&, 
@@ -85,8 +91,8 @@ int main(int argc, char** argv)
             buffer_in1, buffer_in2, buffer_output, size);
 
     //Copy Result from Device Global Memory to Host Local Memory
-    q.enqueueReadBuffer(buffer_output,CL_TRUE, 0, vector_size_bytes, 
-            source_hw_results.data());
+    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    q.finish();
 //OPENCL HOST CODE AREA END
     
     // Compare the results of the Device to the simulation

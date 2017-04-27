@@ -49,9 +49,9 @@ struct vertex {
 // structure of arrays. This means that each element of the arrays represents
 // one vertix in a triangle.
 struct vertex_array {
-  vector<int> x;
-  vector<int> y;
-  vector<int> z;
+  vector<int,aligned_allocator<int>> x;
+  vector<int,aligned_allocator<int>> y;
+  vector<int,aligned_allocator<int>> z;
   vertex_array(int count) : x(count), y(count), z(count) {}
 };
 
@@ -65,8 +65,8 @@ int gen_random() {
   return dist(e);
 }
 
-void compute_dot(vector<int> &result, const vector<int> &X,
-                 const vector<int> &Y, const vector<int> &Z,
+void compute_dot(int *result, const int *X,
+                 const int *Y, const int *Z,
                  const int num_vertices) {
   for (int t = 0; t < num_vertices; ++t) {
     result[t] = X[t] * X[t];
@@ -75,7 +75,8 @@ void compute_dot(vector<int> &result, const vector<int> &X,
   }
 }
 
-void verify (const vector<int>& gold, const vector<int>& results) {
+void verify (const vector<int,aligned_allocator<int>>& gold, 
+             const vector<int,aligned_allocator<int>>& results) {
   if(!equal(begin(gold), end(gold), begin(results))) {
     printf("TEST FAILED\n");
     exit(EXIT_FAILURE);
@@ -91,23 +92,23 @@ void verify (const vector<int>& gold, const vector<int>& results) {
 int main(int argc, char **argv) {
 
   // allocate memory on host to store input arrays and the output array
-  vector<int> results(VERTEX_COUNT);
+  vector<int,aligned_allocator<int>> results(VERTEX_COUNT);
 
   vertex_array soa_vertices(VERTEX_COUNT);
   generate(begin(soa_vertices.x), end(soa_vertices.x), gen_random);
   generate(begin(soa_vertices.y), end(soa_vertices.y), gen_random);
   generate(begin(soa_vertices.z), end(soa_vertices.z), gen_random);
 
-  vector<vertex> aos_vertices(VERTEX_COUNT);
+  vector<vertex,aligned_allocator<vertex>> aos_vertices(VERTEX_COUNT);
   for (int i = 0; i < (int)aos_vertices.size(); i++) {
     aos_vertices[i].x = soa_vertices.x[i];
     aos_vertices[i].y = soa_vertices.y[i];
     aos_vertices[i].z = soa_vertices.z[i];
   }
   // Calculate gold result
-  vector<int> gold(VERTEX_COUNT);
-  compute_dot(gold, soa_vertices.x, soa_vertices.y, soa_vertices.z,
-              VERTEX_COUNT);
+  vector<int,aligned_allocator<int>> gold(VERTEX_COUNT);
+  compute_dot(gold.data(), soa_vertices.x.data(), soa_vertices.y.data(), 
+          soa_vertices.z.data(),VERTEX_COUNT);
 
   std::vector<cl::Device> devices = xcl::get_xil_devices();
   cl::Device device = devices[0];
@@ -122,29 +123,34 @@ int main(int argc, char **argv) {
   cl::Program program(context, devices, bins);
  
   // Allocate memory on the FPGA
-  cl::Buffer buffer_result(context, CL_MEM_READ_WRITE, results.size() * sizeof(int));
-  cl::Buffer buffer_x(context, CL_MEM_READ_ONLY, soa_vertices.x.size() * sizeof(int));
-  cl::Buffer buffer_y(context, CL_MEM_READ_ONLY, soa_vertices.y.size() * sizeof(int));
-  cl::Buffer buffer_z(context, CL_MEM_READ_ONLY, soa_vertices.z.size() * sizeof(int));
+  cl::Buffer buffer_result(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, 
+          results.size() * sizeof(int), results.data());
+  cl::Buffer buffer_x(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+          soa_vertices.x.size() * sizeof(int), soa_vertices.x.data());
+  cl::Buffer buffer_y(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+          soa_vertices.y.size() * sizeof(int), soa_vertices.y.data());
+  cl::Buffer buffer_z(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+          soa_vertices.z.size() * sizeof(int), soa_vertices.z.data());
 
   // Transfer data from host to the FPGA
-  q.enqueueWriteBuffer(buffer_x,CL_TRUE,0,soa_vertices.x.size() * sizeof(int),
-          soa_vertices.x.data());
-  q.enqueueWriteBuffer(buffer_y,CL_TRUE,0,soa_vertices.y.size() * sizeof(int),
-          soa_vertices.y.data());
-  q.enqueueWriteBuffer(buffer_z,CL_TRUE,0,soa_vertices.z.size() * sizeof(int),
-          soa_vertices.z.data());
-  q.finish();
+  std::vector<cl::Memory> inBufVec, outBufVec;
+  inBufVec.push_back(buffer_x);
+  inBufVec.push_back(buffer_y);
+  inBufVec.push_back(buffer_z);
+  outBufVec.push_back(buffer_result);
+  q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
   printf( "|-------------------------+-------------------------|\n"
           "| Kernel                  |    Wall-Clock Time (ns) |\n"
           "|-------------------------+-------------------------|\n");
 
   // Allocate memory for the array of struct data structure
-  cl::Buffer buffer_pts(context, CL_MEM_READ_ONLY, aos_vertices.size() * sizeof(vertex));
+  cl::Buffer buffer_pts(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+          aos_vertices.size() * sizeof(vertex), aos_vertices.data());
 
   // Transfer the entire array to the FPGA
-  q.enqueueWriteBuffer(buffer_pts,CL_TRUE,0,
-          aos_vertices.size() * sizeof(vertex),aos_vertices.data());
+  inBufVec.clear();
+  inBufVec.push_back(buffer_pts);
+  q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
 
   cl::Event event;
   uint64_t nstimestart, nstimeend;
@@ -161,7 +167,7 @@ int main(int argc, char **argv) {
   printf("| %-22s  | %23lu |\n", "dot: Array of Structs", aos_time);
 
   // Transfer the results back from the FPGA
-  q.enqueueReadBuffer(buffer_result, CL_TRUE, 0, results.size() * sizeof(int), results.data());
+  q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
   q.finish();
   verify(gold, results);
 
@@ -180,7 +186,7 @@ int main(int argc, char **argv) {
   printf("| %-22s  | %23lu |\n", "dot: Struct of Arrays", soa_time);
 
   // Get the results from the FPGA
-  q.enqueueReadBuffer(buffer_result, CL_TRUE, 0, results.size() * sizeof(int),results.data());
+  q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
   q.finish();
   verify(gold, results);
 

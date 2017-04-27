@@ -46,9 +46,9 @@ using std::numeric_limits;
 using std::uniform_int_distribution;
 using std::vector;
 
-void find_nearest_neighbor(vector<int> &out, const int dim,
-                           const vector<int> &search_points,
-                           const vector<int> &points, const int len);
+void find_nearest_neighbor(int *out, const int dim,
+                           int *search_points,
+                           int *points, const int num_points);
 
 int gen_random() {
   static default_random_engine e;
@@ -57,7 +57,8 @@ int gen_random() {
   return dist(e);
 }
 
-void verify(vector<int> gold, vector<int> test) {
+void verify(vector<int,aligned_allocator<int>> &gold, 
+            vector<int,aligned_allocator<int>> &test) {
   bool match = true;
   match = equal(begin(gold), end(gold), begin(test));
 
@@ -68,7 +69,7 @@ void verify(vector<int> gold, vector<int> test) {
 }
 
 void
-print_point(vector<int>& point) {
+print_point(vector<int,aligned_allocator<int>>& point) {
   for (int element : point) printf("%d ", element);
   printf("\n");
 }
@@ -80,9 +81,9 @@ int main(int argc, char **argv) {
   static const int num_points = 512;
   static const int num_dims = 2;
 
-  vector<int> data(num_points * num_dims);
-  vector<int> input(1 * num_dims);
-  vector<int> out(input.size());
+  vector<int,aligned_allocator<int>> data(num_points * num_dims);
+  vector<int,aligned_allocator<int>> input(1 * num_dims);
+  vector<int,aligned_allocator<int>> out(input.size());
   generate(begin(data), end(data), gen_random);
   generate(begin(input), end(input), gen_random);
 
@@ -91,8 +92,8 @@ int main(int argc, char **argv) {
   printf("\nInput Point:      ");
   print_point(input);
 
-  vector<int> gold;
-  find_nearest_neighbor(gold, num_dims, input, data, num_points);
+  vector<int,aligned_allocator<int>> gold(num_dims);
+  find_nearest_neighbor(gold.data(), num_dims, input.data(), data.data(), num_points);
   printf("Nearest Neighbor: ");
   print_point(gold);
 
@@ -110,13 +111,19 @@ int main(int argc, char **argv) {
   devices.resize(1);
   cl::Program program(context, devices, bins);
 
-  cl::Buffer buffer_out   (context, CL_MEM_WRITE_ONLY,num_dims * sizeof(int));
-  cl::Buffer buffer_points(context, CL_MEM_READ_ONLY, array_size_bytes);
-  cl::Buffer buffer_in    (context, CL_MEM_READ_ONLY, num_dims * sizeof(int));
+  std::vector<cl::Memory> inBufVec, outBufVec;
+  cl::Buffer buffer_out(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+          num_dims * sizeof(int), out.data());
+  cl::Buffer buffer_points(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+          array_size_bytes, data.data());
+  cl::Buffer buffer_in (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+          num_dims * sizeof(int), input.data());
+  inBufVec.push_back(buffer_points);
+  inBufVec.push_back(buffer_in);
+  outBufVec.push_back(buffer_out);
 
   // copy the input arrays to memories allocated on the device
-  q.enqueueWriteBuffer(buffer_points,CL_TRUE,0,array_size_bytes, data.data());
-  q.enqueueWriteBuffer(buffer_in,CL_TRUE,0,num_dims * sizeof(int),input.data());
+  q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
 
   printf( "|--------------------------------+-------------------------|\n"
           "| Kernel                         |    Wall-Clock Time (ns) |\n"
@@ -139,7 +146,8 @@ int main(int argc, char **argv) {
   auto simple_time = nstimeend-nstimestart;
   printf("| %-30s | %23lu |\n", "Nearest Neighbor: simple", simple_time);
 
-  q.enqueueReadBuffer(buffer_out, CL_TRUE, 0, num_dims * sizeof(int), out.data());
+  q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+  q.finish();
   verify(gold, out);
 
   // set kernel parameters
@@ -157,7 +165,8 @@ int main(int argc, char **argv) {
   auto loop_time = nstimeend-nstimestart;
   printf("| %-30s | %23lu |\n", "Nearest Neighbor: loop fusion", loop_time);
 
-  q.enqueueReadBuffer(buffer_out, CL_TRUE, 0, num_dims * sizeof(int), out.data());
+  q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+  q.finish();
 
   verify(gold, out);
   printf("|--------------------------------+-------------------------|\n");
@@ -167,9 +176,9 @@ int main(int argc, char **argv) {
   return EXIT_SUCCESS;
 }
 
-void find_nearest_neighbor(vector<int> &out, const int dim,
-                           const vector<int> &search_points,
-                           const vector<int> &points, const int num_points) {
+void find_nearest_neighbor(int *out, const int dim,
+                           int *search_points,
+                           int *points, const int num_points) {
   // points is the list of data points that need to be searched for the given
   // point (x, y)
   //
@@ -191,7 +200,6 @@ void find_nearest_neighbor(vector<int> &out, const int dim,
     }
   }
 
-  out.resize(dim);
   for (int c = 0; c < dim; ++c) {
     out[c] = points[best_i * dim + c];
   }

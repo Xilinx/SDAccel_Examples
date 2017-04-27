@@ -38,7 +38,10 @@ using std::uniform_int_distribution;
 using std::vector;
 
 // row major
-void matmul(vector<int> &C, vector<int> &A, vector<int> &B, int M) {
+void matmul(vector<int,aligned_allocator<int>>& C, 
+            vector<int,aligned_allocator<int>>& A, 
+            vector<int,aligned_allocator<int>>& B, 
+            int M) {
     for (int k = 0; k < M; k++) {
         for (int j = 0; j < M; j++) {
             for (int i = 0; i < M; i++) {
@@ -56,7 +59,7 @@ int gen_random() {
 }
 
 
-void print(vector<int> &data, int dims) {
+void print(vector<int,aligned_allocator<int>> &data, int dims) {
     vector<int> out(dims * dims);
     for (int r = 0; r < 10; r++) {
         for (int c = 0; c < 10; c++) {
@@ -70,7 +73,8 @@ void print(vector<int> &data, int dims) {
     printf("⋱\n\n");
 }
 
-void verify(vector<int> &gold, vector<int> &output) {
+void verify(vector<int,aligned_allocator<int>> &gold, 
+            vector<int,aligned_allocator<int>> &output) {
     for (int i = 0; i < (int)output.size(); i++) {
         if (output[i] != gold[i]) {
             printf("Mismatch %d: gold: %d device: %d\n", i, gold[i], output[i]);
@@ -92,10 +96,10 @@ int main(int argc, char **argv) {
         iteration = 2;
     }
 
-    vector<int> A(dims * dims);
-    vector<int> B(dims * dims);
-    vector<int> gold(dims * dims, 0);
-    vector<int> C(dims * dims, 0);
+    vector<int,aligned_allocator<int>> A(dims * dims);
+    vector<int,aligned_allocator<int>> B(dims * dims);
+    vector<int,aligned_allocator<int>> gold(dims * dims, 0);
+    vector<int,aligned_allocator<int>> C(dims * dims, 0);
     generate(begin(A), end(A), gen_random);
     generate(begin(B), end(B), gen_random);
 
@@ -122,12 +126,19 @@ int main(int argc, char **argv) {
 
     // compute the size of array in bytes
     size_t array_size_bytes = dims * dims * sizeof(int);
-    cl::Buffer buffer_a(context, CL_MEM_READ_ONLY, array_size_bytes);
-    cl::Buffer buffer_b(context, CL_MEM_READ_ONLY, array_size_bytes);
-    cl::Buffer buffer_c(context, CL_MEM_WRITE_ONLY,array_size_bytes);
+    cl::Buffer buffer_a(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            array_size_bytes, A.data());
+    cl::Buffer buffer_b(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            array_size_bytes, B.data());
+    cl::Buffer buffer_c(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+            array_size_bytes, C.data());
+    std::vector<cl::Memory> inBufVec, outBufVec;
+    inBufVec.push_back(buffer_a);
+    inBufVec.push_back(buffer_b);
+    outBufVec.push_back(buffer_c);
 
-    q.enqueueWriteBuffer(buffer_a,CL_TRUE,0,array_size_bytes,A.data());
-    q.enqueueWriteBuffer(buffer_b,CL_TRUE,0,array_size_bytes,B.data());
+    //Copy input data to device global memory
+    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
 
     cl::Kernel matmul_kernel(program, "matmul_naive");
     matmul_kernel.setArg(0,buffer_a);
@@ -140,7 +151,8 @@ int main(int argc, char **argv) {
     uint64_t matmul_time = 0;
     for (int i = 0 ; i < iteration ; i++){
         q.enqueueTask(matmul_kernel,NULL,&event);
-        q.enqueueReadBuffer(buffer_c, CL_TRUE, 0, array_size_bytes, C.data());
+        q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+        q.finish();
         event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart);
         event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend);
         matmul_time += nstimeend-nstimestart;
@@ -156,7 +168,8 @@ int main(int argc, char **argv) {
     uint64_t matmul_partition_time = 0;
     for (int i = 0 ; i < iteration ; i++){
         q.enqueueTask(matmul_partition_kernel,NULL,&event);
-        q.enqueueReadBuffer(buffer_c, CL_TRUE, 0, array_size_bytes, C.data());
+        q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+        q.finish();
         event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart);
         event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend);
         matmul_partition_time += nstimeend-nstimestart;

@@ -31,8 +31,10 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define LENGTH 8
 #define ITERATION 64
-void dummy_op(std::vector<int> & din1,std::vector<int> &din2, 
-        std::vector<int> &din3,std::vector<int> &dout)
+void dummy_op(  std::vector<int,aligned_allocator<int>> & din1,
+                std::vector<int,aligned_allocator<int>> &din2, 
+                std::vector<int,aligned_allocator<int>> &din3,
+                std::vector<int,aligned_allocator<int>> &dout)
 {
     for (int i = 0; i < ITERATION; i++) {
         int sum = 0;
@@ -53,15 +55,15 @@ int main(int argc, char* argv[]) {
     }
     std::string binary_name = argv[1];
 
-    int total_size = (LENGTH) * (ITERATION);
+    size_t total_size = (LENGTH) * (ITERATION);
     //Allocate Memory in Host Memory
-    std::vector<int> din1(total_size);
-    std::vector<int> din2(total_size);
-    std::vector<int> din3(ITERATION);
-    std::vector<int> dout(ITERATION);
-    std::vector<int> result_krnl(ITERATION);
+    std::vector<int,aligned_allocator<int>> din1(total_size);
+    std::vector<int,aligned_allocator<int>> din2(total_size);
+    std::vector<int,aligned_allocator<int>> din3(ITERATION);
+    std::vector<int,aligned_allocator<int>> dout(ITERATION);
+    std::vector<int,aligned_allocator<int>> result_krnl(ITERATION);
 
-    for (int i = 0 ; i < total_size; i++ ){
+    for (size_t i = 0 ; i < total_size; i++ ){
         din1[i] = i; 
         din2[i] = i + 2;
         if (i < ITERATION){
@@ -86,19 +88,28 @@ int main(int argc, char* argv[]) {
     cl::Program program(context, devices, bins);
     cl::Kernel krnl(program,"dummy_op");
 
-    cl::Buffer buffer_din1  (context,CL_MEM_READ_ONLY, sizeof(int) * total_size);
-    cl::Buffer buffer_vedin2(context,CL_MEM_READ_ONLY, sizeof(int) * total_size);
-    cl::Buffer buffer_din3  (context,CL_MEM_READ_ONLY, sizeof(int) * (ITERATION));
-    cl::Buffer buffer_dout  (context,CL_MEM_WRITE_ONLY,sizeof(int) * (ITERATION));
+    //Allocate Buffer in Global Memory
+    cl::Buffer buffer_din1  (context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            sizeof(int) * total_size, din1.data());
+    cl::Buffer buffer_din2(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            sizeof(int) * total_size, din2.data());
+    cl::Buffer buffer_din3  (context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            sizeof(int) * (ITERATION), din3.data());
+    cl::Buffer buffer_dout  (context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+            sizeof(int) * (ITERATION), result_krnl.data());
 
-    q.enqueueWriteBuffer(buffer_din1,  CL_TRUE,0,sizeof(int) * total_size,din1.data());
-    q.enqueueWriteBuffer(buffer_vedin2,CL_TRUE,0,sizeof(int) * total_size,din2.data());
-    q.enqueueWriteBuffer(buffer_din3,  CL_TRUE,0,sizeof(int) * ITERATION ,din3.data());
+    std::vector<cl::Memory> inBufVec, outBufVec;
+    inBufVec.push_back(buffer_din1);
+    inBufVec.push_back(buffer_din2);
+    inBufVec.push_back(buffer_din3);
+    outBufVec.push_back(buffer_dout);
+    //Copy input RGB Image to device global memory
+    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
 
     /* Set the kernel arguments */
     int nargs=0;
     krnl.setArg(nargs++,buffer_din1);
-    krnl.setArg(nargs++,buffer_vedin2);
+    krnl.setArg(nargs++,buffer_din2);
     krnl.setArg(nargs++,buffer_din3);
     krnl.setArg(nargs++,buffer_dout);
 
@@ -106,7 +117,8 @@ int main(int argc, char* argv[]) {
     q.enqueueTask(krnl);
 
      /* Copy result to local buffer */
-    q.enqueueReadBuffer(buffer_dout,CL_TRUE, 0, sizeof(int) * ITERATION, result_krnl.data());
+    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    q.finish();
 
     /* Compare the results of the kernel to the simulation */
     int krnl_match = 0;

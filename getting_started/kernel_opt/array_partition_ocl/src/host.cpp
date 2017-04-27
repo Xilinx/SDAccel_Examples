@@ -38,7 +38,7 @@ using std::uniform_int_distribution;
 using std::vector;
 
 // row major
-void matmul(vector<int> &C, vector<int> &A, vector<int> &B, int M) {
+void matmul(int *C, int *A, int *B, int M) {
     for (int k = 0; k < M; k++) {
         for (int j = 0; j < M; j++) {
             for (int i = 0; i < M; i++) {
@@ -56,7 +56,7 @@ int gen_random() {
 }
 
 
-void print(vector<int> &data, int columns, int rows) {
+void print(int *data, int columns, int rows) {
     vector<int> out(columns * rows);
     for (int r = 0; r < 10; r++) {
         for (int c = 0; c < 10; c++) {
@@ -70,11 +70,12 @@ void print(vector<int> &data, int columns, int rows) {
     printf("⋱\n\n");
 }
 
-void verify(vector<int> &gold, vector<int> &output) {
+void verify(vector<int,aligned_allocator<int>> &gold, 
+            vector<int,aligned_allocator<int>> &output) {
     for (int i = 0; i < (int)output.size(); i++) {
         if (output[i] != gold[i]) {
             printf("Mismatch %d: gold: %d device: %d\n", i, gold[i], output[i]);
-            print(output, 16, 16);
+            print(output.data(), 16, 16);
             exit(EXIT_FAILURE);
         }
     }
@@ -86,21 +87,21 @@ int main(int argc, char **argv) {
     static const int columns = 64;
     static const int rows = 64;
 
-    vector<int> A(columns * rows);
-    vector<int> B(columns * rows);
-    vector<int> gold(columns * rows, 0);
-    vector<int> C(columns * rows, 0);
+    vector<int,aligned_allocator<int>> A(columns * rows);
+    vector<int,aligned_allocator<int>> B(columns * rows);
+    vector<int,aligned_allocator<int>> gold(columns * rows, 0);
+    vector<int,aligned_allocator<int>> C(columns * rows, 0);
     generate(begin(A), end(A), gen_random);
     generate(begin(B), end(B), gen_random);
 
     printf("A:\n");
-    print(A, columns, rows);
+    print(A.data(), columns, rows);
     printf("B:\n");
-    print(B, columns, rows);
-    matmul(gold, A, B, columns);
+    print(B.data(), columns, rows);
+    matmul(gold.data(), A.data(), B.data(), columns);
 
     printf("Gold:\n");
-    print(gold, columns, rows);
+    print(gold.data(), columns, rows);
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
@@ -116,12 +117,18 @@ int main(int argc, char **argv) {
 
     // compute the size of array in bytes
     size_t array_size_bytes = columns * rows * sizeof(int);
-    cl::Buffer buffer_a(context, CL_MEM_READ_ONLY, array_size_bytes);
-    cl::Buffer buffer_b(context, CL_MEM_READ_ONLY, array_size_bytes);
-    cl::Buffer buffer_c(context, CL_MEM_WRITE_ONLY,array_size_bytes);
+    cl::Buffer buffer_a(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            array_size_bytes, A.data());
+    cl::Buffer buffer_b(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            array_size_bytes, B.data());
+    cl::Buffer buffer_c(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+            array_size_bytes, C.data());
 
-    q.enqueueWriteBuffer(buffer_a,CL_TRUE,0,array_size_bytes,A.data());
-    q.enqueueWriteBuffer(buffer_b,CL_TRUE,0,array_size_bytes,B.data());
+    std::vector<cl::Memory> inBufVec, outBufVec;
+    inBufVec.push_back(buffer_a);
+    inBufVec.push_back(buffer_b);
+    outBufVec.push_back(buffer_c);
+    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
 
   printf( "|-------------------------+-------------------------|\n"
           "| Kernel                  |    Wall-Clock Time (ns) |\n"
@@ -135,8 +142,8 @@ int main(int argc, char **argv) {
     cl::Event event;
     uint64_t nstimestart, nstimeend;
     q.enqueueTask(matmul_kernel,NULL,&event);
-    q.enqueueReadBuffer(buffer_c, CL_TRUE, 0, array_size_bytes, C.data());
-
+    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    q.finish();
     event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart);
     event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend);
     auto matmul_time = nstimeend-nstimestart;
@@ -151,7 +158,8 @@ int main(int argc, char **argv) {
     matmul_partition_kernel.setArg(3,columns);
 
     q.enqueueTask(matmul_partition_kernel,NULL,&event);
-    q.enqueueReadBuffer(buffer_c, CL_TRUE, 0, array_size_bytes, C.data());
+    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    q.finish();
     event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart);
     event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend);
     auto matmul_partition_time = nstimeend-nstimestart;

@@ -40,12 +40,12 @@ static const std::string error_message =
 // an addition on two vectors
 int main(int argc, char **argv) {
     // compute the size of array in bytes
-    int size_in_bytes = DATA_SIZE * sizeof(int);
+    size_t size_in_bytes = DATA_SIZE * sizeof(int);
 
     // Creates a vector of DATA_SIZE elements with an initial value of 10 and 32
-    vector<int> source_a(DATA_SIZE, 10);
-    vector<int> source_b(DATA_SIZE, 32);
-    vector<int> source_results(DATA_SIZE);
+    vector<int,aligned_allocator<int>> source_a(DATA_SIZE, 10);
+    vector<int,aligned_allocator<int>> source_b(DATA_SIZE, 32);
+    vector<int,aligned_allocator<int>> source_results(DATA_SIZE);
 
 
     // The get_xil_devices will return vector of Xilinx Devices 
@@ -71,35 +71,44 @@ int main(int argc, char **argv) {
     // be used to reference the memory locations on the device. The cl::Buffer
     // object cannot be referenced directly and must be passed to other OpenCL
     // functions.
-    cl::Buffer buffer_a(context, CL_MEM_READ_ONLY,  size_in_bytes);
-    cl::Buffer buffer_b(context, CL_MEM_READ_ONLY,  size_in_bytes);
-    cl::Buffer buffer_result(context, CL_MEM_WRITE_ONLY, size_in_bytes);
+    cl::Buffer buffer_a(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
+            size_in_bytes, source_a.data());
+    cl::Buffer buffer_b(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
+            size_in_bytes, source_b.data());
+    cl::Buffer buffer_result(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
+            size_in_bytes, source_results.data());
+    //Separate Read/write Buffer vector is needed to migrate data between host/device
+    std::vector<cl::Memory> inBufVec, outBufVec;
+    inBufVec.push_back(buffer_a);
+    inBufVec.push_back(buffer_b);
+    outBufVec.push_back(buffer_result);
+
 
     // These commands will load the source_a and source_b vectors from the host
     // application and into the buffer_a and buffer_b cl::Buffer objects. The data
     // will be be transferred from system memory over PCIe to the FPGA on-board
     // DDR memory.
-    q.enqueueWriteBuffer(buffer_a, CL_TRUE, 0, size_in_bytes, source_a.data());
-    q.enqueueWriteBuffer(buffer_b, CL_TRUE, 0, size_in_bytes, source_b.data());
-    q.finish();
+    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
 
     // This call will extract a kernel out of the program we loaded in the
     // previous line. A kernel is an OpenCL function that is executed on the
     // FPGA. This function is defined in the src/vetor_addition.cl file.
-    cl::Kernel kernel(program,"vector_add");
-    auto krnl_vector_add = cl::KernelFunctor<cl::Buffer&, cl::Buffer&, cl::Buffer&, 
-         int>(kernel);
+    cl::Kernel krnl_vector_add(program,"vector_add");
 
-    // This function will execute the kernel on the FPGA
-    krnl_vector_add(cl::EnqueueArgs(q, cl::NDRange(1,1,1), cl::NDRange(1,1,1)), 
-            buffer_result, buffer_a,buffer_b,DATA_SIZE);
-    q.finish();
+    //set the kernel Arguments
+    int narg=0;
+    krnl_vector_add.setArg(narg++,buffer_result);
+    krnl_vector_add.setArg(narg++,buffer_a);
+    krnl_vector_add.setArg(narg++,buffer_b);
+    krnl_vector_add.setArg(narg++,DATA_SIZE);
+
+    //Launch the Kernel
+    q.enqueueTask(krnl_vector_add);
 
     // The result of the previous kernel execution will need to be retrieved in
     // order to view the results. This call will write the data from the
     // buffer_result cl_mem object to the source_results vector
-    q.enqueueReadBuffer(buffer_result, CL_TRUE, 0, size_in_bytes, 
-            source_results.data());
+    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
     q.finish();
 
 

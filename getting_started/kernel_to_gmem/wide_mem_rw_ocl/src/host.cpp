@@ -27,10 +27,6 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 
-/*******************************************************************************
-Description: SDx Vector Addition using uint16 datatype to utilize full memory 
-datawidth
-*******************************************************************************/
 #include "xcl2.hpp"
 #include <vector>
 
@@ -44,10 +40,10 @@ int main(int argc, char** argv)
 
     //Allocate Memory in Host Memory
     size_t vector_size_bytes = sizeof(int) * DATA_SIZE;
-    std::vector<int> source_in1       (DATA_SIZE);
-    std::vector<int> source_in2       (DATA_SIZE);
-    std::vector<int> source_hw_results(DATA_SIZE);
-    std::vector<int> source_sw_results(DATA_SIZE);
+    std::vector<int,aligned_allocator<int>> source_in1       (DATA_SIZE);
+    std::vector<int,aligned_allocator<int>> source_in2       (DATA_SIZE);
+    std::vector<int,aligned_allocator<int>> source_hw_results(DATA_SIZE);
+    std::vector<int,aligned_allocator<int>> source_sw_results(DATA_SIZE);
 
     // Create the test data and Software Result 
     for(int i = 0 ; i < DATA_SIZE ; i++){
@@ -58,7 +54,6 @@ int main(int argc, char** argv)
     }
 
 //OPENCL HOST CODE AREA START
-    //Create Program and Kernels
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
@@ -66,6 +61,7 @@ int main(int argc, char** argv)
     cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
     std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
 
+    //Create Program and Kernel
     std::string binaryFile = xcl::find_binary_file(device_name,"vadd");
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
@@ -73,13 +69,19 @@ int main(int argc, char** argv)
     cl::Kernel krnl_vector_add(program,"vadd");
 
     //Allocate Buffer in Global Memory
-    cl::Buffer buffer_in1   (context, CL_MEM_READ_ONLY, vector_size_bytes);
-    cl::Buffer buffer_in2   (context, CL_MEM_READ_ONLY, vector_size_bytes);
-    cl::Buffer buffer_output(context, CL_MEM_WRITE_ONLY, vector_size_bytes);
+    cl::Buffer buffer_in1   (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            vector_size_bytes, source_in1.data());
+    cl::Buffer buffer_in2   (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            vector_size_bytes, source_in2.data());
+    cl::Buffer buffer_output(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
+            vector_size_bytes, source_hw_results.data());
+    std::vector<cl::Memory> inBufVec, outBufVec;
+    inBufVec.push_back(buffer_in1);
+    inBufVec.push_back(buffer_in2);
+    outBufVec.push_back(buffer_output);
 
     //Copy input data to device global memory
-    q.enqueueWriteBuffer(buffer_in1,CL_TRUE,0,vector_size_bytes,source_in1.data());
-    q.enqueueWriteBuffer(buffer_in2,CL_TRUE,0,vector_size_bytes,source_in2.data());
+    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
 
     int size = DATA_SIZE;
     //Set the Kernel Arguments
@@ -93,8 +95,8 @@ int main(int argc, char** argv)
     q.enqueueTask(krnl_vector_add);
 
     //Copy Result from Device Global Memory to Host Local Memory
-    q.enqueueReadBuffer(buffer_output,CL_TRUE,0, vector_size_bytes,source_hw_results.data());
-
+    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    q.finish();
 //OPENCL HOST CODE AREA END
     
     // Compare the results of the Device to the simulation
