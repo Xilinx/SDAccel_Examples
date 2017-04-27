@@ -25,6 +25,18 @@
     "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr"],
     "em_cmd": "./host_kmeans -i ./data/100 -c ./data/100.gold_c5 -m 5 -n 5 -g 2",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host_kmeans -i ./data/100 -c ./data/100.gold_c100 -m 100 -n 100 -g 2",
+    "libs": [
+        "logger", 
+        "oclHelper", 
+        "cmdparser", 
+        "xcl"
+    ], 
+    "accelerators": [
+        {
+            "name": "kmeans", 
+            "location": "src/kmeans.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Northwestern University",

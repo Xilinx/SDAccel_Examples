@@ -6,6 +6,15 @@
     "board": ["xilinx:adm-pcie-ku3:2ddr-xpr"],
     "em_cmd" : "./nearest data/queries.txt data/queries.txt",
     "hw_cmd" : "../../utility/nimbix/nimbix-run.py -- ./nearest data/queries.txt data/queries.txt",
+    "libs": [
+        "xcl"
+    ], 
+    "accelerators": [
+        {
+            "name": "krnl_nearest", 
+            "location": "src/krnl_linear_search.cpp"
+        }
+    ],
     "perf_fields" : ["Board", "Measurements per Cycle", "Gigameasurements / Second"],
     "performance": [
         {

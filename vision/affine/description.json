@@ -9,6 +9,16 @@
     "opencv": true,
     "em_cmd": "./affine ./xclbin/krnl_affine.<emulation mode>.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./affine ./xclbin/krnl_affine.hw.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
+    "libs": [
+        "oclHelper", 
+        "bitmap"
+    ], 
+    "accelerators": [
+        {
+            "name": "affine_kernel", 
+            "location": "src/krnl_affine.cl"
+        }
+    ],
     "perf_fields":["Task","Xilinx Execution Time (in ns)", "GTX 780 Execution Time (in ns)"],
     "performance": [
         {
@@ -58,5 +68,6 @@
             "version":"2.0",
             "description": "Update for SDAccel 2016.3"
         }
-    ]
+    ],
+    "match_makefile" : "false"
 }

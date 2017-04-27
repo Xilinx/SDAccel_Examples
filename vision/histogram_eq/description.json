@@ -16,6 +16,16 @@
     "opencv": true,
     "em_cmd": "./equalizer data/race_2k.bmp",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./equalizer data/race_2k.bmp",
+    "libs": [
+        "opencv", 
+        "xcl"
+    ], 
+    "accelerators": [
+        {
+            "name": "krnl_equalizer", 
+            "location": "src/krnl_equalizer.cl"
+        }
+    ],
     "contributors": [
         {
             "group": "Xilinx",

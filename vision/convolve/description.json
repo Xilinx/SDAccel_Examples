@@ -7,6 +7,16 @@
     "opencv": true,
     "em_cmd": "./convolve data/input_buffer_raw.txt data/filter_buffer_raw.txt data/output_buffer_raw.txt",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./convolve data/input_buffer_raw.txt data/filter_buffer_raw.txt data/output_buffer_raw.txt",
+    "libs": [
+        "opencv", 
+        "xcl"
+    ], 
+    "accelerators": [
+        {
+            "name": "krnl_convolve", 
+            "location": "src/krnl_convolve.cl"
+        }
+    ],
     "perf_fields": ["Board", "Image Size", "Frames / Second"],
     "performance": [
         {

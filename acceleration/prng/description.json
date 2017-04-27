@@ -9,6 +9,15 @@
     "xcl": true,
     "em_cmd" : "./prng",
     "hw_cmd" : "../../utility/nimbix/nimbix-run.py -- ./prng <number of blocks>",
+    "libs" : [
+        "xcl"
+    ],
+    "accelerators": [
+        {
+            "name": "dma", 
+            "location": "src/dma.cpp"
+        }
+    ],
     "perf_fields" : ["Board", "Total Number of Samples", "Kernel Duration"],
     "performance" : [
         {
