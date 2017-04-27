@@ -32,7 +32,7 @@ where examples is the name of the directory where the repository will be stored 
 ## 3. SOFTWARE AND SYSTEM REQUIREMENTS
 Board | Device Name | Software Version
 ------|-------------|-----------------
-Xilinx KU115|xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3|SDAccel 2016.4
+Xilinx KU115|xilinx:xil-accel-rd-ku115:4ddr-xpr|SDAccel 2016.4
 
 
 *NOTE:* The board/device used for compilation can be changed by adding the DEVICES variable to the make command as shown below

@@ -23,7 +23,7 @@ targeting exection on an SDAccel support FPGA acceleration card
 ### PERFORMANCE
 Board|Total Number of Samples|Kernel Duration
 ----|-----|-----
-Alpha Data ADM-PCIE-KU3|16777216|59.1ms
+xilinx:adm-pcie-ku3:2ddr-xpr|16777216|59.1ms
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
 ```
@@ -34,9 +34,9 @@ where examples is the name of the directory where the repository will be stored 
 ## 3. SOFTWARE AND SYSTEM REQUIREMENTS
 Board | Device Name | Software Version
 ------|-------------|-----------------
-Alpha Data ADM-PCIE-7V3|xilinx:adm-pcie-7v3:1ddr:3.0|SDAccel 2016.4
-Xilinx KU115|xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3|SDAccel 2016.4
-Alpha Data ADM-PCIE-KU3|xilinx:adm-pcie-ku3:2ddr-xpr:3.3|SDAccel 2016.4
+Alpha Data ADM-PCIE-7V3|xilinx:adm-pcie-7v3:1ddr|SDAccel 2016.4
+Xilinx KU115|xilinx:xil-accel-rd-ku115:4ddr-xpr|SDAccel 2016.4
+Alpha Data ADM-PCIE-KU3|xilinx:adm-pcie-ku3:2ddr-xpr|SDAccel 2016.4
 
 
 *NOTE:* The board/device used for compilation can be changed by adding the DEVICES variable to the make command as shown below
