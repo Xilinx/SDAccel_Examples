@@ -135,7 +135,7 @@ int main(int argc, char** argv) {
     if (err != CL_SUCCESS) {
         printf("Error: Failed to clEnqueueUnmapMemObject OpenCL buffer\n");
         printf("Error: Test failed\n");
-        return -1;
+        return EXIT_FAILURE;
     }
     clFinish(world.command_queue);
 
@@ -165,7 +165,7 @@ int main(int argc, char** argv) {
     if (err != CL_SUCCESS) {
         printf("Error: Failed to clEnqueueMapBuffer OpenCL buffer\n");
         printf("Error: Test failed\n");
-        return -1;
+        return EXIT_FAILURE;
     }
     clFinish(world.command_queue);
 
@@ -179,7 +179,7 @@ int main(int argc, char** argv) {
     if (err != CL_SUCCESS) {
         printf("Error: Failed to clEnqueueUnmapMemObject OpenCL buffer\n");
         printf("Error: Test failed\n");
-        return -1;
+        return EXIT_FAILURE;
     }
 
     // map buffer1 (PCIe read buffer1) in parallel to unmap buffer0
@@ -196,7 +196,7 @@ int main(int argc, char** argv) {
     if (err != CL_SUCCESS) {
         printf("Error: Failed to clEnqueueMapBuffer OpenCL buffer\n");
         printf("Error: Test failed\n");
-        return -1;
+        return EXIT_FAILURE;
     }
     clFinish(world.command_queue);
 
@@ -208,14 +208,14 @@ int main(int argc, char** argv) {
     if (err != CL_SUCCESS) {
         printf("Error: Failed to clGetEventProfilingInfo\n");
         printf("Error: Test failed\n");
-        return -1;
+        return EXIT_FAILURE;
     }
 
     err = clGetEventProfilingInfo(event0, CL_PROFILING_COMMAND_END,    sizeof(uint64_t),((void *)(&nstimeend0)),   NULL);
     if (err != CL_SUCCESS) {
         printf("Error: Failed to clGetEventProfilingInfo\n");
         printf("Error: Test failed\n");
-        return -1;
+        return EXIT_FAILURE;
     }
 
     // Get profiling info for map buffer1
@@ -223,14 +223,14 @@ int main(int argc, char** argv) {
     if (err != CL_SUCCESS) {
         printf("Error: Failed to clGetEventProfilingInfo\n");
         printf("Error: Test failed\n");
-        return -1;
+        return EXIT_FAILURE;
     }
 
     err = clGetEventProfilingInfo(event1, CL_PROFILING_COMMAND_END,    sizeof(uint64_t), ((void *)(&nstimeend1)),    NULL);
     if (err != CL_SUCCESS) {
         printf("Error: Failed to clGetEventProfilingInfo\n");
         printf("Error: Test failed\n");
-        return -1;
+        return EXIT_FAILURE;
     }
 
     if (nstimequeued0 < nstimequeued1)

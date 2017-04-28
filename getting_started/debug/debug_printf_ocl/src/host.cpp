@@ -101,13 +101,6 @@ int main(int argc, char* argv[])
         }
     }
 
-    if(krnl_match == 1)
-    {
-        std::cout << "TEST FAILED! Kernel results do not match cpu results." << std::endl;
-        return EXIT_FAILURE;
-    }
-    else{
-        std::cout << "TEST PASSED! Kernel results match cpu results." << std::endl;
-        return EXIT_SUCCESS;
-    }
+    std::cout << "TEST " << (krnl_match ? "FAILED" : "PASSED") << std::endl; 
+    return (krnl_match? EXIT_FAILURE :  EXIT_SUCCESS);
 }

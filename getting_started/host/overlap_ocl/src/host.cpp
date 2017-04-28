@@ -341,11 +341,6 @@ int main(int argc, char **argv) {
   OCL_CHECK(clReleaseProgram(program));
   xcl_release_world(world);
 
-  if (match) {
-    printf("TEST FAILED.\n");
-    return EXIT_FAILURE;
-  }
-
-  printf("TEST PASSED.\n");
-  return EXIT_SUCCESS;
+  printf("TEST %s\n", (match ? "FAILED" : "PASSED"));
+  return (match ? EXIT_FAILURE :  EXIT_SUCCESS);
 }

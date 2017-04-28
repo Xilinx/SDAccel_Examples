@@ -145,11 +145,7 @@ int main(int argc, char** argv)
    //cleanup
    delete(program_ptr);
    program_ptr = nullptr;
-   if (check_status) {
-      printf("TEST FAILED\n");
-      return EXIT_FAILURE;
-   } else {
-      printf("TEST PASSED\n");
-      return EXIT_SUCCESS;
-   }
+   
+   std::cout << "TEST " << (check_status ? "FAILED" : "PASSED") << std::endl; 
+   return (check_status ? EXIT_FAILURE :  EXIT_SUCCESS);
 }

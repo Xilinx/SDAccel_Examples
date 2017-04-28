@@ -177,9 +177,9 @@ int main(int argc, char** argv)
         std::cout << "TEST FAILED." << std::endl; 
         std::cout << "\tSoftware Min Dist = " << dist_sw << std::endl;
         std::cout << "\tHardware Min Dist = " << dist_hw << std::endl;
-        return -1;
+        return EXIT_FAILURE;
     }
  
     std::cout << "TEST PASSED." << std::endl;
-    return 0;
+    return EXIT_SUCCESS;
 }

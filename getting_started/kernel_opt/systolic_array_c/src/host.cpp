@@ -148,10 +148,7 @@ int main(int argc, char** argv)
             break;
         }
     }
-    if (match){
-        std::cout << "TEST FAILED." << std::endl; 
-        return -1;
-    }
-    std::cout << "TEST PASSED." << std::endl;
-    return 0;
+
+    std::cout << "TEST " << (match ? "FAILED" : "PASSED") << std::endl; 
+    return (match ? EXIT_FAILURE :  EXIT_SUCCESS);
 }

@@ -115,12 +115,6 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    if(krnl_match == 1) {
-        printf("TEST FAILED\n");
-        return EXIT_FAILURE;
-    } else{
-        printf("Success! kernel results match cpu results.\n");
-        printf("TEST PASSED\n");
-        return EXIT_SUCCESS;
-    }
+    std::cout << "TEST " << (krnl_match ? "FAILED" : "PASSED") << std::endl; 
+    return (krnl_match ? EXIT_FAILURE :  EXIT_SUCCESS);
 }

@@ -138,4 +138,6 @@ int main(int argc, char** argv)
       printf("TEST PASSED\n");
       return EXIT_SUCCESS;
    }
+   std::cout << "TEST " << (check_status ? "FAILED" : "PASSED") << std::endl; 
+   return (check_status ? EXIT_FAILURE :  EXIT_SUCCESS);
 }

@@ -131,10 +131,6 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    if(krnl_match){
-        std::cout << "TEST FAILED." << std::endl; 
-        return EXIT_FAILURE;
-    }
-    std::cout << "TEST PASSED." << std::endl; 
-    return EXIT_SUCCESS; 
+    std::cout << "TEST " << (krnl_match ? "FAILED" : "PASSED") << std::endl; 
+    return (krnl_match ? EXIT_FAILURE :  EXIT_SUCCESS);
 }

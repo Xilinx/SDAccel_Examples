@@ -76,7 +76,7 @@ int main(int argc, char** argv) {
     unsigned char *input_host = ((unsigned char *) malloc(globalbuffersize));
     if(input_host==NULL) {
         printf("Error: Failed to allocate host side copy of OpenCL source buffer of size %zu\n",globalbuffersize);
-        return -1;
+        return EXIT_FAILURE;
     }
 
     for(size_t i = 0; i < globalbuffersize; i++) {
@@ -116,7 +116,7 @@ int main(int argc, char** argv) {
                                        &err);
             if(err != CL_SUCCESS) {
                 printf("Error: Failed to allocate buffer in DDR bank %zu\n", globalbuffersize);
-                return -1;
+                return EXIT_FAILURE;
             }
         } /* End for (i < ddr_banks) */
     } else { /* End if (ddr_banks >= 2) */
@@ -134,7 +134,7 @@ int main(int argc, char** argv) {
 
          if(err != CL_SUCCESS) {
             printf("Error: Failed to allocate input/output_buffer0 in BANK0 of size %zu\n", globalbuffersize);
-            return -1;
+            return EXIT_FAILURE;
          }
     } /* End else */
 
@@ -159,7 +159,7 @@ int main(int argc, char** argv) {
     if (err != CL_SUCCESS) {
             printf("Error: Failed to clEnqueueMapBuffer0 OpenCL buffer\n");
             printf("Error: Test failed\n");
-            return -1;
+            return EXIT_FAILURE;
     }
     clFinish(world.command_queue);
 
@@ -177,7 +177,7 @@ int main(int argc, char** argv) {
     if (err != CL_SUCCESS) {
         printf("Error: Failed to copy input dataset to OpenCL buffer\n");
         printf("Error: Test failed\n");
-        return -1;
+        return EXIT_FAILURE;
     }
     clFinish(world.command_queue);
 
@@ -196,7 +196,7 @@ int main(int argc, char** argv) {
         if (err != CL_SUCCESS) {
             printf("Error: Failed to clEnqueueMapBuffer1 OpenCL buffer\n");
             printf("Error: Test failed\n");
-            return -1;
+            return EXIT_FAILURE;
         }
         clFinish(world.command_queue);
 
@@ -214,7 +214,7 @@ int main(int argc, char** argv) {
         if (err != CL_SUCCESS) {
             printf("Error: Failed to copy input dataset to OpenCL buffer\n");
             printf("Error: Test failed\n");
-            return -1;
+            return EXIT_FAILURE;
         }
         clFinish(world.command_queue);
     } /* End if (ddr_banks == 4) */

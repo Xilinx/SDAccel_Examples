@@ -105,12 +105,6 @@ int main(int argc, char** argv)
     std::cout << "Computed '" << correct << "/" << BLOCK_SIZE 
         << "' correct values!" << std::endl;
 
-    if(correct == BLOCK_SIZE){
-        std::cout << "TEST PASSED." << std::endl; 
-        return EXIT_SUCCESS;
-    }
-    else{
-        std::cout << "TEST FAILED." << std::endl; 
-        return EXIT_FAILURE;
-    }
+    std::cout << "TEST " << (correct!=BLOCK_SIZE? "FAILED" : "PASSED") << std::endl; 
+    return (correct!=BLOCK_SIZE? EXIT_FAILURE :  EXIT_SUCCESS);
 }

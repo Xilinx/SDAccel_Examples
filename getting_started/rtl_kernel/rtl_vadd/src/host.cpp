@@ -106,11 +106,6 @@ int main(int argc, char** argv)
         }
     }
 
-    if (match){
-        std::cout << "TEST FAILED." << std::endl; 
-        return EXIT_FAILURE;
-    }
-    std::cout << "All Device results match CPU results! " << std::endl;
-    std::cout << "TEST PASSED." << std::endl; 
-    return EXIT_SUCCESS; 
+    std::cout << "TEST " << (match ? "FAILED" : "PASSED") << std::endl; 
+    return (match ? EXIT_FAILURE :  EXIT_SUCCESS);
 }

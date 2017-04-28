@@ -188,12 +188,8 @@ int main(int argc, char **argv) {
         clReleaseCommandQueue(queues[i]);
 	    clReleaseContext(contexts[i]);
     }
-    if (fail) {
-        printf("TEST FAILED\n");
-        return EXIT_FAILURE;
-    }
-    printf("TEST PASSED\n");
-    return EXIT_SUCCESS;
+    printf("TEST %s\n", (fail ? "FAILED" : "PASSED"));
+    return (fail ? EXIT_FAILURE :  EXIT_SUCCESS);
 }
 
 cl_program load_cl_binary(const char *file_path, cl_device_id device,

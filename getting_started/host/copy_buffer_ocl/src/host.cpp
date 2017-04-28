@@ -99,11 +99,6 @@ int main(int argc, char **argv) {
         }
     }
 
-    if (match) {
-        printf("TEST FAILED.\n");
-        return EXIT_FAILURE;
-    } else {
-        printf("TEST PASSED.\n");
-        return EXIT_SUCCESS;
-    }
+    std::cout << "TEST " << (match ? "FAILED" : "PASSED") << std::endl; 
+    return (match ? EXIT_FAILURE :  EXIT_SUCCESS);
 }
