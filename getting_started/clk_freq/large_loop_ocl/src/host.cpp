@@ -130,12 +130,6 @@ unsigned long run_opencl_cnn(
         int work_group = WORK_GROUP;
         int work_item_per_group = WORK_ITEM_PER_GROUP;
 
-        const char *xcl_emu = getenv("XCL_EMULATION_MODE");
-        if(xcl_emu && !strcmp(xcl_emu, "hw_emu")) {
-            work_group = 1;
-            work_item_per_group = 1;
-        }
- 
         int err = 0; 
         
         //Declare global & local Grids
