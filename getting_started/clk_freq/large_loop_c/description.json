@@ -14,11 +14,16 @@
     "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
-    "accelerators": [
+    "containers" : [
         {
-            "container": "cnn_GOOD", 
-            "name": "cnn", 
-            "location": "src/cnn_convolution.cpp"
+            "name": "cnn_GOOD", 
+            "accelerators": [
+                {
+                    "name": "cnn", 
+                    "num_compute_units" : "4",
+                    "location": "src/cnn_convolution.cpp"
+                }
+            ]
         }
     ],
     "contributors" : [

@@ -1,4 +1,4 @@
-Two Parallel Read/Write on Local Memory (CL)
+Two Parallel Read/Write on Local Memory (C)
 ======================
 
 This README file contains the following sections:

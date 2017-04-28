@@ -16,11 +16,24 @@
         "xcl2", 
         "bitmap"
     ], 
-    "accelerators": [
+    "containers": [
         {
-            "container": "sketch_GOOD", 
-            "name": "process_image", 
-            "location": "src/sketch.cpp"
+            "name": "sketch_GOOD", 
+            "accelerators" : [
+                {
+                    "name": "process_image", 
+                    "location": "src/sketch.cpp"
+                }
+            ]
+        },
+        {
+            "name": "sketch_BAD", 
+            "accelerators" : [
+                {
+                    "name": "process_image", 
+                    "location": "src/sketch.cpp"
+                }
+            ]
         }
     ],
     "contributors" : [

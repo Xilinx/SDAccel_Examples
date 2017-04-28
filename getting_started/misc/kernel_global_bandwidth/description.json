@@ -12,11 +12,15 @@
     "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr",  "xilinx:adm-pcie-8k5:2ddr", "xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd" : "./kernel_global",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./kernel_global",
-    "accelerators": [
+    "container": [
         {
-            "container": "krnl_kernel_global", 
-            "name": "bandwidth", 
-            "location": "src/kernel.cl"
+            "name": "krnl_kernel_global", 
+            "accelerators": [
+                {
+                    "name": "bandwidth", 
+                    "location": "src/kernel.cl"
+                }
+            ]
         }
     ],
     "contributors" : [

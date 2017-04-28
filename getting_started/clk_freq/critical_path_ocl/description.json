@@ -11,11 +11,16 @@
     "libs": [
         "xcl2", "bitmap"
     ],
-    "accelerators": [
+    "containers": [
         {
-            "container": "apply_watermark_GOOD", 
-            "name": "apply_watermark", 
-            "location": "src/apply_watermark.cl"
+            "name": "apply_watermark_GOOD", 
+            "accelerators": [
+                {
+                    "name": "apply_watermark", 
+                    "clflags" : "-DBAD_DESIGN=0",
+                    "location": "src/apply_watermark.cl"
+                }
+            ]
         }
     ],
     "cmd_args" : "apply_watermark_GOOD PROJECT/data/input.bmp PROJECT/data/golden.bmp",

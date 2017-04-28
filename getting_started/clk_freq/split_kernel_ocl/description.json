@@ -14,19 +14,29 @@
     "libs": [
         "xcl2", 
         "bitmap"
-    ], 
-    "accelerators": [
+    ],
+    "containers": [
         {
-            "container": "sketch_GOOD", 
-            "name": "process_image", 
-            "location": "src/sketch.cpp"
+            "name": "sketch_GOOD", 
+            "accelerators" : [
+                {
+                    "name": "process_image",
+                    "clflags" : "--xp param:compiler.xclDataflowFifoDepth=16",
+                    "location": "src/sketch.cl"
+                }
+            ]
         },
         {
-            "container": "sketch_BAD", 
-            "name": "process_image", 
-            "location": "src/sketch_bad.cpp"
+            "name": "sketch_BAD", 
+            "accelerators" : [
+                {
+                    "name": "process_image", 
+                    "location": "src/sketch_bad.cl"
+                }
+            ]
         }
     ],
+ 
     "contributors" : [
         {
             "group": "Xilinx",
@@ -39,7 +49,5 @@
             "version": "1.0",
             "description": "Initial Xilinx Release"
         }
-    ],
-    "match_makefile": "false",
-    "sdx_gui": "false"
+    ]
 }
