@@ -20,7 +20,6 @@ sketch_GOOD_CLFLAGS+=--xp "param:compiler.xclDataflowFifoDepth=16"
 
 sketch_BAD_SRCS:=./src/sketch_bad.cl
 sketch_BAD_CLFLAGS=-k process_image -I./src/
-sketch_BAD_CLFLAGS+=--xp "param:compiler.xclDataflowFifoDepth=16"
 
 XOS=sketch_GOOD sketch_BAD
 
