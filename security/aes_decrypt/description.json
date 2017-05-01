@@ -3,10 +3,22 @@
     "overview" : [
         "Implementation of an AES-128 ECB Encrypt in software, followed by decryption written in OpenCL and targeting execution on an SDAccel supported FPGA acceleration card."
     ],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3", "Xilinx KU115"],
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr", "xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd" : "./aes -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:3.1' -k ./xclbin/krnl_aes.<emulation flow>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin -b  data/input.bmp",
     "xcl": false,
     "hw_cmd" : "../../utility/nimbix/nimbix-run.py -- ./aes -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:3.1' -k ./xclbin/krnl_aes.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin -b data/input.bmp",
+    "libs": [
+        "logger", 
+        "cmdparser", 
+        "xcl", 
+        "simplebmp"
+    ], 
+    "accelerators": [
+        {
+            "name": "krnl_aes", 
+            "location": "src/krnl_aes.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

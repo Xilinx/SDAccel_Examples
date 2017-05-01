@@ -5,14 +5,23 @@
         "The method used to generate a random number sequence is called complementary multiply with carry (CMWC)",
         "targeting exection on an SDAccel support FPGA acceleration card"
     ],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Xilinx KU115", "Alpha Data ADM-PCIE-KU3"],
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:xil-accel-rd-ku115:4ddr-xpr", "xilinx:adm-pcie-ku3:2ddr-xpr"],
     "xcl": true,
     "em_cmd" : "./prng",
     "hw_cmd" : "../../utility/nimbix/nimbix-run.py -- ./prng <number of blocks>",
+    "libs" : [
+        "xcl"
+    ],
+    "accelerators": [
+        {
+            "name": "dma", 
+            "location": "src/dma.cpp"
+        }
+    ],
     "perf_fields" : ["Board", "Total Number of Samples", "Kernel Duration"],
     "performance" : [
         {
-            "system" : "Alpha Data ADM-PCIE-KU3",
+            "system" : "xilinx:adm-pcie-ku3:2ddr-xpr",
             "constraint" : "16777216",
             "metric" : "59.1ms"
         }

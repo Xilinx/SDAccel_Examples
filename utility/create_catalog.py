@@ -36,6 +36,10 @@ def addexample(path):
                 example["description"] = data.get("overview")
             if data.get("example"):
                 example["displayName"] = data.get("example")
+            if data.get("keywords"):
+                example["keywords"] = data.get("keywords")
+            if data.get("key_concepts"):
+                example["key_concepts"] = data.get("key_concepts")
             if data.get("revision"):
                 revisions = data.get("revision")
                 highestVersion = ""
@@ -108,6 +112,11 @@ def searchdir(dir):
 
 index = searchdir(".")
 index["branch"] = get_git_branch()
+
+indexdir = os.path.dirname(index_filename)
+if (indexdir):
+    if (not os.path.exists(indexdir)):
+        os.makedirs(indexdir)
 
 with open(index_filename, "w") as index_file:
     json.dump(index, index_file, indent = 4)

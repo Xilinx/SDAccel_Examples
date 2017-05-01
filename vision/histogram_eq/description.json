@@ -6,16 +6,26 @@
     "perf_fields": ["Board", "Image Size", "Frames per Second"],
     "performance": [
         {
-            "system": "Alpha Data ADM-PCIE-7V3",
+            "system": "xilinx:adm-pcie-7v3:1ddr",
             "constraint": "2,048 x 1,080",
             "metric": "333"
         }
     ],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
+    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr"],
     "xcl": false,
     "opencv": true,
     "em_cmd": "./equalizer data/race_2k.bmp",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./equalizer data/race_2k.bmp",
+    "libs": [
+        "opencv", 
+        "xcl"
+    ], 
+    "accelerators": [
+        {
+            "name": "krnl_equalizer", 
+            "location": "src/krnl_equalizer.cl"
+        }
+    ],
     "contributors": [
         {
             "group": "Xilinx",

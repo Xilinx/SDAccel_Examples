@@ -35,6 +35,20 @@ with open("description.json") as json_file:
             match_makefile = False
     if data.get("libs"):
         jsonLibs = data.get("libs")
+    if data.get("containers"):
+        containers = data.get("containers")
+        for containerobj in containers:
+            container = containerobj.get("name")
+            if containerobj.get("accelerators"):
+                accelerators = containerobj.get("accelerators")
+                if accelerators:
+                    for accelerator in accelerators:
+                        name = container + "/" + accelerator.get("name")
+                        src = accelerator.get("location")
+                        if src.startswith("./"):
+                            src = src[2:]
+                        jsonKernels[name] = src
+                        print "found accelerator %s, src = %s" % (name,jsonKernels[name])
     if data.get("accelerators"):
         accelerators = data.get("accelerators")
         if accelerators:
@@ -42,7 +56,7 @@ with open("description.json") as json_file:
                 name = accelerator.get("name")
                 container = accelerator.get("container")
                 if container:
-                    name = name + "/" + container
+                    name = container + "/" + name
                 src = accelerator.get("location")
                 if src.startswith("./"):
                     src = src[2:]
