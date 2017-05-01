@@ -87,13 +87,8 @@ void verify(vector<int,aligned_allocator<int>> &gold,
 int main(int argc, char **argv) {
     static const int dims = 64;
 
-    int iteration = 100; 
-
-    /* Reducing the iteration for emulation mode */
-    char *xcl_mode = getenv("XCL_EMULATION_MODE");
-    if (xcl_mode != NULL){
-        iteration = 2;
-    }
+    /* less iteration for emulation mode */
+    int iteration = xcl::is_emulation() ? 2: 100; 
 
     vector<int,aligned_allocator<int>> A(dims * dims);
     vector<int,aligned_allocator<int>> B(dims * dims);

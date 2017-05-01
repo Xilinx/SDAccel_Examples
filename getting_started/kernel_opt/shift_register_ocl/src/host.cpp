@@ -42,6 +42,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <vector>
 
+#define SIGNAL_SIZE (1024 * 1024)
+
 using std::default_random_engine;
 using std::inner_product;
 using std::string;
@@ -60,7 +62,7 @@ void print_summary(std::string k1, std::string k2, uint64_t t1, uint64_t t2, int
 int gen_random();
 
 int main(int argc, char **argv) {
-    size_t signal_size = 32; 
+    size_t signal_size = SIGNAL_SIZE; 
     vector<int,aligned_allocator<int>> signal(signal_size);
     vector<int,aligned_allocator<int>> out(signal_size);
     vector<int,aligned_allocator<int>> coeff = {{53, 0, -91, 0, 313, 500, 313, 0, -91, 0, 53}};
@@ -192,9 +194,8 @@ void print_summary(std::string k1, std::string k2, uint64_t t1, uint64_t t2, int
     printf("Note: Wall Clock Time is meaningful for real hardware execution only, not for emulation.\n");
     printf("Please refer to profile summary for kernel execution time for hardware emulation.\n");
 
-    //Performance check for real hardware. t2 must less than t1.
-    char *xcl_mode = getenv("XCL_EMULATION_MODE");
-    if ((xcl_mode == NULL) && (t1 < t2)){
+    //Performance check for real hardware. t2 must be less than t1.
+    if (!xcl::is_emulation() && (t1 < t2)){
         printf("ERROR: Unexpected Performance is observed\n");
         exit(EXIT_FAILURE);
     }
