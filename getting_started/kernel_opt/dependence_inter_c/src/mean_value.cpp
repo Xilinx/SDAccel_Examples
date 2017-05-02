@@ -34,10 +34,6 @@ Description:
     compiler to implement unrolling/pipelining with optimized way.
 *******************************************************************************/
 
-//Includes 
-#include <hls_stream.h>
-#include <ap_int.h>
-
 #define MAX_SIZE 1024
 extern "C" {
 /*
