@@ -43,6 +43,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 
 #define SIGNAL_SIZE (1024 * 1024)
+#define SIGNAL_SIZE_IN_EMU 1024 
 
 using std::default_random_engine;
 using std::inner_product;
@@ -62,7 +63,7 @@ void print_summary(std::string k1, std::string k2, uint64_t t1, uint64_t t2, int
 int gen_random();
 
 int main(int argc, char **argv) {
-    size_t signal_size = SIGNAL_SIZE; 
+    size_t signal_size = xcl::is_emulation() ? SIGNAL_SIZE_IN_EMU : SIGNAL_SIZE; 
     vector<int,aligned_allocator<int>> signal(signal_size);
     vector<int,aligned_allocator<int>> out(signal_size);
     vector<int,aligned_allocator<int>> coeff = {{53, 0, -91, 0, 313, 500, 313, 0, -91, 0, 53}};
@@ -111,7 +112,7 @@ int main(int argc, char **argv) {
     fir_naive_kernel.setArg(3,signal_size);
 
     cl::Event event;
-    int iterations = xcl::is_emulation() ? 1 : 100;
+    int iterations = xcl::is_emulation() ? 2 : 100;
     uint64_t fir_naive_time = 0;
     //Running naive kernel iterations times
     for (int i = 0 ; i < iterations ; i++){
@@ -138,6 +139,8 @@ int main(int argc, char **argv) {
         fir_sr_time += get_duration_ns(event);
         verify(gold, out);
     }
+    printf("Example Testdata Signal_Length=%lu for %d iteration\n",
+            signal_size, iterations);
     print_summary("fir_naive", "fir_shift_register", fir_naive_time, fir_sr_time,iterations);
     printf("TEST PASSED\n");
     return EXIT_SUCCESS;
