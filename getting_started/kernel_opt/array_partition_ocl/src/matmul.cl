@@ -30,6 +30,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Maximum Array Size
 #define MAX_SIZE 64
 
+// Naive implementation of matrix multiplication 
+// In this implementation array partition is not done
 // Computes matrix multiply
 // C = AxB, where A, B and C are square matrices of dimension (sizexsize)
 kernel __attribute__((reqd_work_group_size(1, 1, 1)))
@@ -37,7 +39,7 @@ void matmul(const __global int *in1,  // Read-Only Matrix 1
            const __global int *in2,  // Read-Only Matrix 2
            __global int *out,        // Output Result
            int size) {               // Local memory to store input and output matrices
-  // Local memory is implemented as BRAM memory blocks
+    // Local memory is implemented as BRAM memory blocks
     local int A[MAX_SIZE][MAX_SIZE];
     local int B[MAX_SIZE][MAX_SIZE];
     local int C[MAX_SIZE][MAX_SIZE];
@@ -66,43 +68,15 @@ void matmul(const __global int *in1,  // Read-Only Matrix 1
         B[i][j] = in2[itr];
     }
 
-    // Performs matrix multiply over matrices A and B and stores the result
-    // in C. All the matrices are square matrices of the form (size x size)
-
-    // Pipeline attribute is specified for the innermost loop (lreorder3)
-    // and the order of the loops lreorder2 and lreorder 3 are changed here.
-
-    // When the iteration variables j and k are interchanged between the loops,
-    // lreoder2 and lreorder3, the pipeline initiation interval (II) improves
-    // and becomes 1 (ideal).
-
-    // Also the reordering avoids creating an adder tree for calculating the
-    // sum(output) of a single output element
-
-    // lreorder1: for (int i = 0; i < size; i++) {
-    //     lreorder2: for (int j = 0; j < size; j++) {
-    //     __attribute__((xcl_pipeline_loop))
-    //         lreorder3: for (int k = 0; k < MAX_SIZE; k++) {
-    //             int result = (k == 0) ? 0 : temp_sum[j];
-    //             result += A[i][k] * B[k][j];
-    //             temp_sum[j] = result;
-    //             if (k== size -1) C[i][j] = result;
-    //         }
-    //     }
-    // }
-
-    // The above code snippent of the Matrix Multiply kernel in which the loops
-    // lreorder2 and lreorder3 are not interchanged, gives a pipeline initiation
-    // interval (II) of 64
 
     // Calculate matrix multiplication using local data buffer based on input size
     // and write results into local buffer for C
-    lreorder1:
+    nopart1:
     for (int i = 0; i < size; i++) {
         __attribute__((xcl_pipeline_loop))
-        lreorder2 :
+        nopart2 :
         for (int k = 0; k < size; k++) {
-            lreorder3:
+            nopart3:
             for (int j = 0; j < MAX_SIZE; j++) {
                 int result = (k == 0) ? 0 : temp_sum[j];
                 result += A[i][k] * B[k][j];
@@ -125,6 +99,9 @@ void matmul(const __global int *in1,  // Read-Only Matrix 1
     }
 }
 
+
+// Matrix multiplication kernel 
+// This kernel presents array partition concept
 kernel __attribute__((reqd_work_group_size(1, 1, 1)))
 void matmul_partition(const __global int *in1,  // Read-Only Matrix 1
            const __global int *in2,  // Read-Only Matrix 2
@@ -132,9 +109,15 @@ void matmul_partition(const __global int *in1,  // Read-Only Matrix 1
            int size) {               // Local memory to store input and output matrices
     // Local memory is implemented as BRAM memory blocks
     int A[MAX_SIZE][MAX_SIZE];
+    
+    // Partition Matrix B on 2nd dimension completely
     int B[MAX_SIZE][MAX_SIZE] __attribute__((xcl_array_partition(complete, 2)));
+    
+    // Partition Matrix C on 2nd dimension completely
     int C[MAX_SIZE][MAX_SIZE] __attribute__((xcl_array_partition(complete, 2)));
-    int temp_sum[MAX_SIZE] __attribute__((xcl_array_partition(complete, 1)));
+
+    // Partition Matrix temp_sum completely  
+    int temp_sum[MAX_SIZE]    __attribute__((xcl_array_partition(complete, 1)));
 
     // Burst reads on input matrices from global memory
     // Burst read for matrix A
@@ -161,41 +144,14 @@ void matmul_partition(const __global int *in1,  // Read-Only Matrix 1
 
     // Performs matrix multiply over matrices A and B and stores the result
     // in C. All the matrices are square matrices of the form (size x size)
-
-    // Pipeline attribute is specified for the innermost loop (lreorder3)
-    // and the order of the loops lreorder2 and lreorder 3 are changed here.
-
-    // When the iteration variables j and k are interchanged between the loops,
-    // lreoder2 and lreorder3, the pipeline initiation interval (II) improves
-    // and becomes 1 (ideal).
-
-    // Also the reordering avoids creating an adder tree for calculating the
-    // sum(output) of a single output element
-
-    // lreorder1: for (int i = 0; i < size; i++) {
-    //     lreorder2: for (int j = 0; j < size; j++) {
-    //     __attribute__((xcl_pipeline_loop))
-    //         lreorder3: for (int k = 0; k < MAX_SIZE; k++) {
-    //             int result = (k == 0) ? 0 : temp_sum[j];
-    //             result += A[i][k] * B[k][j];
-    //             temp_sum[j] = result;
-    //             if (k== size -1) C[i][j] = result;
-    //         }
-    //     }
-    // }
-
-    // The above code snippent of the Matrix Multiply kernel in which the loops
-    // lreorder2 and lreorder3 are not interchanged, gives a pipeline initiation
-    // interval (II) of 64
-
     // Calculate matrix multiplication using local data buffer based on input size
     // and write results into local buffer for C
-    lreorder1:
+    arraypart1:
     for (int i = 0; i < size; i++) {
         __attribute__((xcl_pipeline_loop))
-        lreorder2 :
+        arraypart2 :
         for (int k = 0; k < size; k++) {
-            lreorder3:
+            arraypart3:
             for (int j = 0; j < MAX_SIZE; j++) {
                 int result = (k == 0) ? 0 : temp_sum[j];
                 result += A[i][k] * B[k][j];
