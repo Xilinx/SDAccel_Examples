@@ -7,6 +7,7 @@
 	 "targets": ["sw_emu", "hw"],
     "xcl": false,
     "opencv": true,
+    "cmd_args": "-p Xilinx -d ${sdx:platform} -k BUILD/default.xclbin -b PROJECT/data/rect_1024.bmp",
     "em_cmd": "./huffman -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:3.1' --kernel ./xclbin/krnl_huffman.<emulation type>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin -b data/rect_1024.bmp",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./huffman -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:2.1' --kernel ./xclbin/krnl_huffman.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin data/rect_1024.bmp",
     "libs": [
@@ -15,10 +16,19 @@
         "simplebmp", 
         "xcl"
     ], 
-    "accelerators": [
+    "containers" : [
         {
-            "name": "krnl_huffman", 
-            "location": "src/krnl_huffman_singleptr.cl"
+            "name" : "krnl_huffman",
+            "accelerators": [
+                {
+                    "name": "encode", 
+                    "location": "src/krnl_huffman_singleptr.cl"
+                },
+                {
+                    "name": "decode", 
+                    "location": "src/krnl_huffman_singleptr.cl"
+                }
+            ]
         }
     ],
     "contributors": [

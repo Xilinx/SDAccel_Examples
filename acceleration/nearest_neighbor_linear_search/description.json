@@ -4,6 +4,7 @@
        "This is an optimized implementation of a nearest neighbor linear search algorithm targeting execution on a SDAccel supported FPGA acceleration card."
     ],
     "board": ["xilinx:adm-pcie-ku3:2ddr-xpr"],
+    "cmd_args" : "PROJECT/data/queries.txt PROJECT/data/queries.txt",
     "em_cmd" : "./nearest data/queries.txt data/queries.txt",
     "hw_cmd" : "../../utility/nimbix/nimbix-run.py -- ./nearest data/queries.txt data/queries.txt",
     "libs": [
@@ -11,7 +12,7 @@
     ], 
     "accelerators": [
         {
-            "name": "krnl_nearest", 
+            "name": "krnl_linear_search", 
             "location": "src/krnl_linear_search.cpp"
         }
     ],

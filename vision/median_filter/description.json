@@ -6,6 +6,7 @@
     "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr"],
     "xcl": false,
     "opencv": true,
+    "cmd_args": "PROJECT/data/inputImage.bmp BUILD/default.xclbin",
     "em_cmd": "./median data/inputImage.bmp ./xclbin/krnl_median.<emulation type>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./median data/inputImage.bmp ./xclbin/krnl_median.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin",
     "libs": [
@@ -14,7 +15,7 @@
     ], 
     "accelerators": [
         {
-            "name": "krnl_median", 
+            "name": "median", 
             "location": "src/krnl_medianFilter.cl"
         }
     ],
