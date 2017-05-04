@@ -6,19 +6,32 @@
     "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr", "xilinx:xil-accel-rd-ku115:4ddr-xpr"],
 	 "targets": ["sw_emu", "hw"],
     "xcl": false,
+    "cmd_args" : "-p Xilinx -d ${sdx:platform} -k default.xclbin --in PROJECT/data/0_0_1024_key.cip --out PROJECT/data/0_out.msg --key PROJECT/data/0_1024_key.pem",
     "em_cmd" : "./rsa -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:3.1' -k ./xclbin/krnl_rsa.<emulation flow>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin --in data/0_0_1024_key.cip --out data/0_out.msg --key data/0_1024_key.pem",
     "hw_cmd" : "../../utility/nimbix/nimbix-run.py -- ./rsa -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:3.1' -k ./xclbin/krnl_rsa.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin --in data/0_0_1024_key.cip --out data/0_out.msg --key data/0_1024_key.pem",
     "libs": [
-        "logger", 
-        "cmdparser", 
+        "logger",
+        "cmdparser",
         "xcl"
-    ], 
+    ],
     "accelerators": [
         {
-            "name": "krnl_rsa", 
+            "name": "rsa",
             "location": "src/krnl_rsa.cpp"
         }
     ],
+    "compiler" : {
+        "symbols" : [
+            "RSA_2048"
+        ]
+    },
+    "linker" : {
+        "libraries" : [
+            "ssl",
+            "crypto",
+            "dl"
+        ]
+    },
     "perf_fields" : ["Board", "Cipher Text Length", "Throughput"],
     "performance": [
         {
