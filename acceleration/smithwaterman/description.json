@@ -13,6 +13,10 @@
     "xcl": false,
    "em_cmd" : "./smithwaterman",
     "hw_cmd" : "../../utility/nimbix/nimbix-run.py -- ./smithwaterman -p xilinx -d xilinx:adm-pcie-ku3:2ddr:3.1 -k xclbin/krnl_smithwaterman.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin",
+    "linker" : {
+        "options" : [ "-fopenmp" ],
+        "libraries" : [ "z" ]
+    },
     "libs": [
         "logger", 
         "cmdparser", 
@@ -20,7 +24,7 @@
     ], 
     "accelerators": [
         {
-            "name": "krnl_smithwaterman", 
+            "name": "opencl_sw_maxscore", 
             "location": "src/opencl_sw_maxscore_systolic.cpp"
         }
     ],

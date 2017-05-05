@@ -14,6 +14,7 @@
     "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr"],
     "xcl": false,
     "opencv": true,
+    "cmd_args": "PROJECT/data/race_2k.bmp",
     "em_cmd": "./equalizer data/race_2k.bmp",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./equalizer data/race_2k.bmp",
     "libs": [

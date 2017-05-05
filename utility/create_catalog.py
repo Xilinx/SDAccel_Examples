@@ -59,7 +59,9 @@ def addexample(path):
     return example
 
 def get_git_branch():
-    branch = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"])
+    branch = subprocess.Popen(["git", "rev-parse", "--abbrev-ref", "HEAD"], stdout=subprocess.PIPE).communicate()[0]
+    # only works on python 2.7+:
+    #branch = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"])
     branch = branch.strip()
     return branch
 
