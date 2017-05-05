@@ -35,6 +35,7 @@ ifeq ($(findstring 4ddr,$(call spaced_dsa,$(1))),4ddr)
     --xp misc:map_connect=add.kernel.bandwidth_1.M_AXI_GMEM3.core.OCL_REGION_0.M03_AXI
 endif
 ifeq ($(findstring 2ddr,$(call spaced_dsa,$(1))),2ddr)
+	kernel_global_CXXFLAGS+=-DUSE_2DDR
     krnl_kernel_global_$(call sanitize_dsa,$(1))_LDCLFLAGS+= \
     --xp misc:map_connect=add.kernel.bandwidth_1.M_AXI_GMEM0.core.OCL_REGION_0.M00_AXI \
     --xp misc:map_connect=add.kernel.bandwidth_1.M_AXI_GMEM1.core.OCL_REGION_0.M01_AXI
