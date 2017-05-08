@@ -103,10 +103,10 @@ def dirsafe(device) {
 def runExample(target, dir, device, workdir) {
 	return { ->
 		devdir = dirsafe(device)
-		/* Node is here to prevent too much strain on Nimbix by rate limiting
-		 * to the number of job slots */
-		node("rhel6 && xsjrdevl && !xsjrdevl110") {
-			retry(3) {
+		retry(3) {
+			/* Node is here to prevent too much strain on Nimbix by rate limiting
+			 * to the number of job slots */
+			node("rhel6 && xsjrdevl && !xsjrdevl110") {
 				lock("${dir}") {
 					sh """#!/bin/bash -e
 
