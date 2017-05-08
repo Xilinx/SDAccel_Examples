@@ -170,7 +170,7 @@ int main(int argc, char** argv)
     unsigned long dist_sw = 0, dist_hw = 0;
     for(int i = 0; i < dim; i++) {
         dist_sw += SQUARE(source_sw_result[i] - source_point[i]);
-        dist_hw += SQUARE(source_sw_result[i] - source_point[i]);
+        dist_hw += SQUARE(source_hw_result[i] - source_point[i]);
     }
     if(dist_sw != dist_hw)
     {
