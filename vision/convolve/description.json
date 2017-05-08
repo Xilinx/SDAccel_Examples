@@ -5,6 +5,7 @@
     ],
     "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr"],
     "opencv": true,
+    "cmd_args": "PROJECT/data/input_buffer_raw.txt PROJECT/data/filter_buffer_raw.txt PROJECT/data/output_buffer_raw.txt",
     "em_cmd": "./convolve data/input_buffer_raw.txt data/filter_buffer_raw.txt data/output_buffer_raw.txt",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./convolve data/input_buffer_raw.txt data/filter_buffer_raw.txt data/output_buffer_raw.txt",
     "libs": [
