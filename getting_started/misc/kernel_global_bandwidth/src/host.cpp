@@ -26,6 +26,55 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
+/*****************************************************************************************
+*  GUI Flow :
+*      
+*  By default this example supports 1DDR execution in GUI mode for 
+*  all the DSAs. To make this example to work with multi DDR DSAs
+*  please follow steps mentioned below.
+*
+*  Note : "bandwidth" in map_connect options below is the kernel name defined in kernel.cl   
+*
+*  ***************************************************************************************
+*  DSA  (2DDR):
+*              
+*  1.<SDx Project> > Properties > C/C++ Build > Settings > SDx XOCC Kernel Compiler 
+*                  > Miscellaneous > Other flags
+*  2.In "Other flags" box enter following
+*     a. --max_memory_ports all 
+*     b. --xp misc:map_connect=add.kernel.bandwidth_1.M_AXI_GMEM0.core.OCL_REGION_0.M00_AXI
+*     c. --xp misc:map_connect=add.kernel.bandwidth_1.M_AXI_GMEM1.core.OCL_REGION_0.M01_AXI 
+*  3.<SDx Project> > Properties > C/C++ Build > Settings > SDx XOCC Kernel Linker
+*                  > Miscellaneous > Other flags
+*  4.Repeat step 2 above
+*  5.Define DDR macro in host enter "#define USE_2DDR" at the top of host.cpp
+*
+* *****************************************************************************************
+*  DSA  (4DDR):
+*              
+*  1.<SDx Project> > Properties > C/C++ Build > Settings > SDx XOCC Kernel Compiler 
+*                  > Miscellaneous > Other flags
+*  2.In "Other flags" box enter following
+*     a. --max_memory_ports all 
+*     b. --xp misc:map_connect=add.kernel.bandwidth_1.M_AXI_GMEM0.core.OCL_REGION_0.M00_AXI
+*     c. --xp misc:map_connect=add.kernel.bandwidth_1.M_AXI_GMEM1.core.OCL_REGION_0.M01_AXI 
+*     d. --xp misc:map_connect=add.kernel.bandwidth_1.M_AXI_GMEM2.core.OCL_REGION_0.M02_AXI 
+*     e. --xp misc:map_connect=add.kernel.bandwidth_1.M_AXI_GMEM3.core.OCL_REGION_0.M03_AXI 
+*  3.<SDx Project> > Properties > C/C++ Build > Settings > SDx XOCC Kernel Linker
+*                  > Miscellaneous > Other flags
+*  4.Repeat step 2 above
+*  5.Define DDR macro in host enter "#define USE_4DDR" at the top of host.cpp
+*  6.Define NUM_BANKS_4 macro in kernel "#define NUM_BANKS_4" at the top of kernel.cl 
+* 
+* *****************************************************************************************
+*
+*  CLI Flow:
+*
+*  In CLI flow makefile detects the DDR of a device and based on that
+*  automatically it adds all the flags that are necessary. This example can be
+*  used similar to other examples in CLI flow, extra setup is not needed.
+*
+*********************************************************************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -96,7 +145,7 @@ int main(int argc, char** argv) {
 
     cl_mem_ext_ptr_t ext_buffer[num_buffers];
 
-    if (ddr_banks >= 2) {
+#if defined(USE_2DDR) || defined(USE_4DDR)
         unsigned xcl_bank[4] = {
             XCL_MEM_DDR_BANK0,
             XCL_MEM_DDR_BANK1,
@@ -119,7 +168,7 @@ int main(int argc, char** argv) {
                 return EXIT_FAILURE;
             }
         } /* End for (i < ddr_banks) */
-    } else { /* End if (ddr_banks >= 2) */
+#else
         buffer[0] = clCreateBuffer(world.context,
                                    CL_MEM_READ_WRITE,
                                    globalbuffersize,
@@ -136,8 +185,7 @@ int main(int argc, char** argv) {
             printf("Error: Failed to allocate input/output_buffer0 in BANK0 of size %zu\n", globalbuffersize);
             return EXIT_FAILURE;
          }
-    } /* End else */
-
+#endif
     cl_ulong num_blocks = globalbuffersize/64;
     double dbytes = globalbuffersize;
     double dmbytes = dbytes / (((double)1024) * ((double)1024));
@@ -181,7 +229,7 @@ int main(int argc, char** argv) {
     }
     clFinish(world.command_queue);
 
-    if (ddr_banks == 4) {
+#ifdef USE_4DDR
         unsigned char *map_input_buffer1;
         map_input_buffer1 = (unsigned char *) clEnqueueMapBuffer(world.command_queue,
                                                                  buffer[2],
@@ -217,8 +265,7 @@ int main(int argc, char** argv) {
             return EXIT_FAILURE;
         }
         clFinish(world.command_queue);
-    } /* End if (ddr_banks == 4) */
-
+#endif 
 
     /* Execute kernel */
     int arg_index = 0;
@@ -226,10 +273,11 @@ int main(int argc, char** argv) {
 
     xcl_set_kernel_arg(krnl, arg_index++, sizeof(cl_mem), &buffer[buffer_index++]);
     xcl_set_kernel_arg(krnl, arg_index++, sizeof(cl_mem), &buffer[buffer_index++]);
-    if (ddr_banks == 4) {
+        
+    #ifdef USE_4DDR
         xcl_set_kernel_arg(krnl, arg_index++, sizeof(cl_mem), &buffer[buffer_index++]);
         xcl_set_kernel_arg(krnl, arg_index++, sizeof(cl_mem), &buffer[buffer_index++]);
-    }
+    #endif
     xcl_set_kernel_arg(krnl, arg_index++, sizeof(cl_ulong), &num_blocks);
 
     unsigned long nsduration = xcl_run_kernel3d(world, krnl, 1, 1, 1);
@@ -260,7 +308,8 @@ int main(int argc, char** argv) {
             return EXIT_FAILURE;
         }
     }
-    if (ddr_banks == 4) {
+
+#ifdef USE_4DDR
         unsigned char *map_output_buffer1;
         map_output_buffer1 = (unsigned char *)clEnqueueMapBuffer(world.command_queue,
                                                                  buffer[3],
@@ -287,8 +336,7 @@ int main(int argc, char** argv) {
                 return EXIT_FAILURE;
             }
         }
-    } /* End if (ddr_banks == 4) */
-
+#endif 
     /* Profiling information */
     double dnsduration = ((double)nsduration);
     double dsduration = dnsduration / ((double) 1000000000);
