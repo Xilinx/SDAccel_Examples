@@ -33,29 +33,35 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *  all the DSAs. To make this example to work with multi DDR DSAs
 *  please follow steps mentioned below.
 *
+*  Note : "bandwidth" in map_connect options below is the kernel name defined in kernel.cl   
+*
 *  ***************************************************************************************
 *  DSA  (2DDR):
 *              
-*  1.<SDx Project> > Properties > C/C++ Build > Settings > SDx XOCC Kernel Compiler
-*  2.In "Command line pattern:" box next to $(XOCC_OPTS) enter following
+*  1.<SDx Project> > Properties > C/C++ Build > Settings > SDx XOCC Kernel Compiler 
+*                  > Miscellaneous > Other flags
+*  2.In "Other flags" box enter following
 *     a. --max_memory_ports all 
 *     b. --xp misc:map_connect=add.kernel.bandwidth_1.M_AXI_GMEM0.core.OCL_REGION_0.M00_AXI
 *     c. --xp misc:map_connect=add.kernel.bandwidth_1.M_AXI_GMEM1.core.OCL_REGION_0.M01_AXI 
 *  3.<SDx Project> > Properties > C/C++ Build > Settings > SDx XOCC Kernel Linker
+*                  > Miscellaneous > Other flags
 *  4.Repeat step 2 above
 *  5.Define DDR macro in host enter "#define USE_2DDR" at the top of host.cpp
 *
 * *****************************************************************************************
 *  DSA  (4DDR):
 *              
-*  1.<SDx Project> > Properties > C/C++ Build > Settings > SDx XOCC Kernel 
-*  2.In "Command line pattern:" box next to $(XOCC_OPTS) enter following
+*  1.<SDx Project> > Properties > C/C++ Build > Settings > SDx XOCC Kernel Compiler 
+*                  > Miscellaneous > Other flags
+*  2.In "Other flags" box enter following
 *     a. --max_memory_ports all 
 *     b. --xp misc:map_connect=add.kernel.bandwidth_1.M_AXI_GMEM0.core.OCL_REGION_0.M00_AXI
 *     c. --xp misc:map_connect=add.kernel.bandwidth_1.M_AXI_GMEM1.core.OCL_REGION_0.M01_AXI 
 *     d. --xp misc:map_connect=add.kernel.bandwidth_1.M_AXI_GMEM2.core.OCL_REGION_0.M02_AXI 
 *     e. --xp misc:map_connect=add.kernel.bandwidth_1.M_AXI_GMEM3.core.OCL_REGION_0.M03_AXI 
 *  3.<SDx Project> > Properties > C/C++ Build > Settings > SDx XOCC Kernel Linker
+*                  > Miscellaneous > Other flags
 *  4.Repeat step 2 above
 *  5.Define DDR macro in host enter "#define USE_4DDR" at the top of host.cpp
 *  6.Define NUM_BANKS_4 macro in kernel "#define NUM_BANKS_4" at the top of kernel.cl 
