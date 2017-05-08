@@ -24,7 +24,7 @@ XOS=apply_watermark
 # xclbin
 apply_watermark_XOS=apply_watermark
 apply_watermark_LDCLFLAGS=--xp misc:map_connect=add.kernel.apply_watermark_1.M_AXI_GMEM0.core.OCL_REGION_0.M00_AXI --xp misc:map_connect=add.kernel.apply_watermark_1.M_AXI_GMEM1.core.OCL_REGION_0.M01_AXI
-apply_watermark_NDEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
+apply_watermark_NDEVICES=xilinx:adm-pcie-7v3:1ddr
 
 XCLBINS=apply_watermark
 
