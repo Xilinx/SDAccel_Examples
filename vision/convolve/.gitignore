@@ -1,4 +1,5 @@
 convolve
 input.bmp
 output.bmp
+golden.bmp
 coef.bmp
