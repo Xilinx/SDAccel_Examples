@@ -107,7 +107,7 @@ emconfigutil --xdevice 'xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./affine ./xclbin/krnl_affine.<emulation mode>.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin
+./affine ./data/CT-MONO2-16-brain.raw ./xclbin/krnl_affine.<emulation mode>.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card

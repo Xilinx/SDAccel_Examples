@@ -13,5 +13,10 @@
             "opencv_highgui",
             "opencv_imgproc"
         ]
+    },
+    "launch" : {
+        "ld_library_path" : [
+            "$(XILINX_SDX)/lnx64/tools/opencv/"
+        ]
     }
 }

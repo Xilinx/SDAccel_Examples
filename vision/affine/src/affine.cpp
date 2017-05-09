@@ -54,9 +54,9 @@ void checkErrorStatus(cl_int error, const char* message)
 int main(int argc, char** argv)
 {
 
-if (argc != 2)
+if (argc != 3)
   {
-    printf("Usage: %s <xclbin>\n", argv[0]) ;
+    printf("Usage: %s <image> <xclbin>\n", argv[0]) ;
     return -1 ;
 }
    
@@ -72,10 +72,11 @@ if (argc != 2)
   std::cout << "Reading input image...\n";
 
  // Load the input image
-   input_file = fopen("data/CT-MONO2-16-brain.raw", "rb");
+   const char *imageFilename = argv[1];
+   input_file = fopen(imageFilename, "rb");
    if (!input_file)
    {
-      printf("Error: Unable to open input image file!\n");
+      printf("Error: Unable to open input image file %s!\n", imageFilename);
       return 1;
    }
    
@@ -87,7 +88,7 @@ if (argc != 2)
   // Set up OpenCL hardware and software constructs
   std::cout << "Setting up OpenCL hardware and software...\n";
   cl_int err = 0 ;
-  const char* xclbinFilename = argv[1] ;
+  const char* xclbinFilename = argv[2] ;
 
   oclHardware hardware = getOclHardware(CL_DEVICE_TYPE_ACCELERATOR) ;
   oclSoftware software ;
