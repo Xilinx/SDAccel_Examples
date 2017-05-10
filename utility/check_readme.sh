@@ -30,10 +30,11 @@ check_file() {
 	else
 		pushd . > /dev/null 
 		cd $(dirname $1)
-		mv README.md README.md.check > /dev/null
-		make README.md 2>/dev/null 1>&2 || make README.md
+		mv README.md README.md.check > /dev/null 2>&1
+		make README.md 2>/dev/null 1>&2
+		rc=$?
 		diff README.md README.md.check 2>/dev/null 1>&2
-		if [[ $? == 0 ]]; then
+		if [[ $rc == 0 && $? == 0 ]]; then
 			if [[ $VERBOSE == "true" ]]; then
 				echo "PASS"
 			fi
@@ -46,7 +47,7 @@ check_file() {
 			fi
 			(( FAIL += 1 ))
 		fi
-		mv README.md.check README.md
+		mv README.md.check README.md > /dev/null 2>&1
 		popd >/dev/null
 	fi
 }
