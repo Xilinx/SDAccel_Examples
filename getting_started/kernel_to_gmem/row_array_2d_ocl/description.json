@@ -1,4 +1,5 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Read/Write Row of 2D Array (CL)",
     "overview": [
         "This is a simple example of accessing each row of data from 2d array"

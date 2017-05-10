@@ -1,4 +1,5 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Adder With Pipes (RTL)",
     "overview": [
         "This example shows an adder with pipes using 3 RTL kernels."

@@ -1,4 +1,5 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Copy Buffer (CL)",
     "overview": [
         "This Copy Buffer example demonstrate how one buffer can be copied from another buffer."

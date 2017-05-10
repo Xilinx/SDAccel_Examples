@@ -1,4 +1,5 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Memory Coalesce Deadlock/Hang Handling (C)",
     "overview": [
         "This example shows Memory Coalesce Deadlock/Hand situation and how to handle it. User can switch between BAD and GOOD case using makefile variable KFLOW."

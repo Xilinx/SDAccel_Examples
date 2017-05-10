@@ -1,4 +1,5 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Critical Path(CL)",
     "overview": [
         "This example shows a normal coding style which could lead to critical path issue and design will give degraded timing.  Example also contains better coding style which can improve design timing."
