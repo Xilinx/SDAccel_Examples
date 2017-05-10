@@ -1,4 +1,5 @@
 {
+    "runtime": ["OpenCL"],
     "example" : "Vector Dot-Product",
     "overview" : [
         "Simple example of vector dot-product."

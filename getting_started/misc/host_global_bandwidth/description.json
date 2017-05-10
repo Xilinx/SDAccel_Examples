@@ -1,4 +1,5 @@
 {
+    "runtime": ["OpenCL"],
     "example" : "host_global",
     "overview" : [
         "Host to global memory bandwidth test"

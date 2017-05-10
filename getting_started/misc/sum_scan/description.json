@@ -1,4 +1,5 @@
 {
+    "runtime": ["OpenCL"],
     "example" : "Parallel Prefix Sum",
     "overview" : [
         "Example of parallel prefix sum"

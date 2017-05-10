@@ -1,4 +1,5 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Shift Register (C)",
     "overview": [
         "This example demonstrates how to shift values in registers in each clock cycle"

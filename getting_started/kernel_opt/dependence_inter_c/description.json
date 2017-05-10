@@ -1,4 +1,5 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Loop Iteration Dependency (CL)",
     "overview": [
       "This Example to demonstrate HLS pragma 'DEPENDENCE'. Using 'DEPENDENCE' pragma, user can provide additional dependency details to compiler which allow compiler to perform unrolling/pipelining to get better performance."

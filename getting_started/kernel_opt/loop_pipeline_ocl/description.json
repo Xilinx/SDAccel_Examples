@@ -1,4 +1,5 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Loop Pipelining (CL)",
     "overview": [
         "This example demonstrates how loop pipelining can be used to improve the performance of a kernel."

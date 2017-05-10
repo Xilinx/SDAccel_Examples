@@ -1,9 +1,10 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Median Filter",
     "overview": [
         "This is an optimized implementation of a median filter being used to remove noise in images targeting execution on an SDAccel supported FPGA acceleration card."
     ],
-    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr"],
+    "nboards": ["xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "xcl": false,
     "opencv": true,
     "cmd_args": "PROJECT/data/inputImage.bmp BUILD/default.xclbin",

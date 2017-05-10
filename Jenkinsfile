@@ -51,9 +51,11 @@ def buildExample(target, dir, device, workdir) {
 	return { ->
 		if ( target == "sw_emu" ) {
 			cores = 1
+			mem = 4000
 			queue = "medium"
 		} else {
 			cores = 8
+			mem = 32000
 			queue = "long"
 		}
 
@@ -87,7 +89,7 @@ set -e
 
 # if rebuild required then use LSF
 if [[ \$rc != 0 ]]; then
-bsub -I -q ${queue} -R "osdistro=rhel && osver==ws6" -n ${cores} -R "span[ptile=${cores}]" -J "\$(basename ${dir})-${target}" <<EOF
+bsub -I -q ${queue} -R "osdistro=rhel && osver==ws6" -n ${cores} -R "rusage[mem=${mem}] span[ptile=${cores}]" -J "\$(basename ${dir})-${target}" <<EOF
 make TARGETS=${target} DEVICES=\"${device}\" all
 EOF
 fi

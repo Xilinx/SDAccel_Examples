@@ -1,4 +1,5 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Dataflow Using HLS Stream (C)",
     "overview": [
         "This is simple example of Multiple Stages Vector Addition to demonstrate Array of Stream usage in HLS C Kernel Code."

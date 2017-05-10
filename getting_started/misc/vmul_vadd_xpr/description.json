@@ -1,4 +1,5 @@
 {
+    "runtime": ["OpenCL"],
     "example" : "Vector Add - Vector Multiplication for XPR Devices",
     "overview" : [
         "This example shows how data stored in global memory should be migrated from device to host and later from host to device to share between kernels in different binary containers. This buffer migration is only needed for XPR(Extended Partial Reconfiguration) Specific Devices. As XPR devices do not persist data when user reload another binary container."

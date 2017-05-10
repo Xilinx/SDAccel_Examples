@@ -1,4 +1,5 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Error Handling (CL)",
     "overview": [
         "This example discuss the different reasons for errors in OpenCL and how to handle them at runtime."

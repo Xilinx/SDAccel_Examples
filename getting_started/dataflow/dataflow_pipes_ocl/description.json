@@ -1,4 +1,5 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Blocking Pipes (CL)",
     "overview": [
         "This is simple example of vector addition to demonstrate OpenCL Pipe Memory usage. OpenCL PIPE memory functionality allows user to achieve kernel-to-kernel data transfer without using global memory."

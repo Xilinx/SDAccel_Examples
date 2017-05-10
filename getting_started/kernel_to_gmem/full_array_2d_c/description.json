@@ -1,4 +1,5 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Full 2D Array Read/Write (C)",
     "overview": [
         "This is a simple example of accessing full data from 2d array"

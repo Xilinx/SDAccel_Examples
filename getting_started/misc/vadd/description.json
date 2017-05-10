@@ -1,4 +1,5 @@
 {
+    "runtime": ["OpenCL"],
     "example" : "Vector Addition",
     "overview" : [
         "Simple example of vector addition."

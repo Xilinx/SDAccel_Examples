@@ -1,4 +1,5 @@
 {
+    "runtime": ["OpenCL"],
     "example" : "Vector Add - Vector Multiplication",
     "overview" : [
         "This example shows how data stored in global memory can be shared between kernels in different binary containers. This functionality is available only for non-XPR Devices."

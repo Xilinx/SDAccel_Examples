@@ -1,4 +1,5 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Overlap Host and OpenCL kernels (CL)",
     "overview": [
         "This examples demonstrates techniques that allow user to overlap Host(CPU) and FPGA computation in an application. It will cover asynchronous operations and event object."

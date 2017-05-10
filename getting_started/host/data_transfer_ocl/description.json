@@ -1,4 +1,5 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Data Transfer (CL)",
     "overview": [
         "This example illustrates several ways to use the OpenCL API to transfer data to and from the FPGA"

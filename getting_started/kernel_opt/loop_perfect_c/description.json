@@ -1,4 +1,5 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Improve performance using loop perfect (C)",
     "overview": [
         "This nearest neighbor example is to demonstrate how to achieve better performance using perfect loop."

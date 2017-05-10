@@ -1,9 +1,9 @@
 {
+    "runtime": ["OpenCL"],
     "example" : "SHA1",
     "overview" : [
         "This is an optimized implementation of SHA1 secure hash algorithm targeting execution on an SDAccel supported FPGA acceleration card."
     ],
-    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "targets": ["sw_emu", "hw"],
     "xcl": false,
     "cmd_args" : "-p Xilinx -d ${sdx:platform} -k BUILD/default.xclbin",

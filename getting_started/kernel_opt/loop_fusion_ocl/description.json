@@ -1,4 +1,5 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Loop Fusion (CL)",
     "overview": [
         "This example will demonstrate how to fuse two loops into one to improve the performance of an OpenCL kernel."

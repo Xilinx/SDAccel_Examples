@@ -1,4 +1,5 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Clock Frequency ~ Large Loop Count (CL) ",
     "overview": [
         "This is a CNN (Convolutional Neural Network) based example which mainly focuses on Convolution operation of a CNN network. The goal of this example is to demonstrate a method to overcome kernel design timing failure issue. It also presents the effectiveness of using multiple compute units to improve performance."

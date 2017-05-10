@@ -1,4 +1,5 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Printf Usage in Kernel code (CL)",
     "overview": [
         "This is simple example of vector addition and printing of data that is computational result (addition). It is based on vectored addition that demonstrates printing of work item data (integer product in this case)"

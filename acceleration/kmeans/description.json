@@ -1,4 +1,5 @@
 {
+    "runtime": ["OpenCL"],
     "example": "K-Means",
     "overview": [
         "This is OpenCL Based K-Means clustering Implementation for Xilinx FPGA ",
@@ -22,7 +23,7 @@
         "\t -b               : input file is in binary format",
         "\t -o               : output cluster center coordinates [default=off]"
     ],
-    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr"],
+    "nboards": ["xilinx:xil-accel-rd-ku115"],
     "cmd_args": "-i PROJECT/data/100 -c PROJECT/data/100.gold_c5 -m 5 -n 5 -g 2",
     "em_cmd": "./host_kmeans -i ./data/100 -c ./data/100.gold_c5 -m 5 -n 5 -g 2",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host_kmeans -i ./data/100 -c ./data/100.gold_c100 -m 100 -n 100 -g 2",

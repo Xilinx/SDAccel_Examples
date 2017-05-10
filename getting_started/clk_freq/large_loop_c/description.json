@@ -1,4 +1,5 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Clock Frequency ~ Large Loop Count (C)",
     "overview": [
         "This is a CNN (Convolutional Neural Network) based example which mainly focuses on Convolution operation of a CNN network. The goal of this example is to demonstrate a method to overcome kernel design timing failure issue. It also presents the effectiveness of using multiple compute units to improve performance."
@@ -11,8 +12,6 @@
     "libs": [
         "xcl"
     ],
-    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr", "xilinx:xil-accel-rd-ku115:4ddr-xpr"],
- 
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "containers" : [

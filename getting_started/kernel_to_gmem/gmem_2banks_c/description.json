@@ -1,4 +1,5 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Global Memory Two Banks (C)",
     "overview": [
         "This example of 2ddr to demonstrate on how to use 2ddr DSA. How to create buffers in each DDR."

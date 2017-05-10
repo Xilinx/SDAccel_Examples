@@ -1,4 +1,5 @@
 {
+    "runtime": ["OpenCL"],
     "example" : "kernel_global",
     "overview" : [
         "Bandwidth test of global to local memory."

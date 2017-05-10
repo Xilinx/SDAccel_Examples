@@ -1,4 +1,5 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Dataflow Function OpenCL(CL)",
     "overview": [
         "This is simple example of vector addition to demonstrate Dataflow functionality in OpenCL Kernel. OpenCL Dataflow allows user to run multiple functions together to achieve higher throughput."

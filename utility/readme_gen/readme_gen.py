@@ -7,20 +7,22 @@ import subprocess
 DSA = 'xilinx:xil-accel-rd-ku115:4ddr-xpr'
 VERSION = 'SDAccel 2017.1'
 DEVICES = {
-    'AWS_VU9P':['AWS VU9P','TBD'],
-
-    # versioned
-    'xilinx:adm-pcie-7v3:1ddr:3.0':['Alpha Data ADM-PCIE-7V3','nx2'],
-    'xilinx:adm-pcie-ku3:2ddr-xpr:3.3':['Alpha Data ADM-PCIE-KU3','nx1'],
-    'xilinx:adm-pcie-8k5:2ddr:3.3':['Alpha Data ADM-PCIE-8K5'],
-    'xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3':['Xilinx KU115','nx3'],
-
-    # versionless
-    'xilinx:adm-pcie-7v3:1ddr':['Alpha Data ADM-PCIE-7V3','nx2'],
-    'xilinx:adm-pcie-ku3:2ddr-xpr':['Alpha Data ADM-PCIE-KU3','nx1'],
-    'xilinx:adm-pcie-8k5:2ddr':['Alpha Data ADM-PCIE-8K5'],
-    'xilinx:xil-accel-rd-ku115:4ddr-xpr':['Xilinx KU115','nx3']    
+    'xilinx:adm-pcie-7v3:1ddr': {
+       'version': '3.0',
+       'name': 'Alpha Data ADM-PCIE-7V3',
+       'nae':  'nx2'
+    },
+    'xilinx:adm-pcie-ku3:2ddr-xpr': {
+       'version': '3.3',
+       'name': 'Alpha Data ADM-PCIE-KU3',
+       'nae': 'nx1',
+    },
+    'xilinx:xil-accel-rd-ku115:4ddr-xpr': {
+       'version': '3.3',
+       'name': 'Xilinx KU115',
+       'nae': 'nx3',
     }
+}
 
 def header(target,data):
     target.write(data["example"])
@@ -93,8 +95,15 @@ def requirements(target,data):
     target.write("## 3. SOFTWARE AND SYSTEM REQUIREMENTS\n")
     target.write("Board | Device Name | Software Version\n")
     target.write("------|-------------|-----------------\n")
-    for board in data["board"]:
-        target.write(DEVICES[board][0])
+
+    nboards = []
+    if 'nboards' in data:
+        nboards = data['nboards']
+
+    boards = [word for word in DEVICES if word not in nboards]
+
+    for board in boards:
+        target.write(DEVICES[board]['name'])
         target.write("|")
         target.write(board)
         target.write("|")

@@ -1,4 +1,5 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Device Query (CL)",
     "overview": [
         "This example prints the OpenCL properties of the platform and its devices. It also displays the limits and capabilities of the hardware."

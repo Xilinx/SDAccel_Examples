@@ -1,9 +1,10 @@
 {
+    "runtime": ["OpenCL"],
     "example" : "Nearest Neighbor Linear Search",
     "overview" : [
        "This is an optimized implementation of a nearest neighbor linear search algorithm targeting execution on a SDAccel supported FPGA acceleration card."
     ],
-    "board": ["xilinx:adm-pcie-ku3:2ddr-xpr"],
+    "nboards": ["xilinx:adm-pcie-7v3:1ddr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "cmd_args" : "PROJECT/data/queries.txt PROJECT/data/queries.txt",
     "em_cmd" : "./nearest data/queries.txt data/queries.txt",
     "hw_cmd" : "../../utility/nimbix/nimbix-run.py -- ./nearest data/queries.txt data/queries.txt",

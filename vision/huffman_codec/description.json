@@ -1,10 +1,11 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Huffman Encoding/Decoding",
     "overview": [
         "This is an implementation of a huffman encoding/decoding algorithm targeting execution on an SDAccel supported FPGA acceleration card."
     ],
-    "board": ["xilinx:adm-pcie-7v3:1ddr"],
-	 "targets": ["sw_emu", "hw"],
+    "nboards": ["xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
+    "targets": ["sw_emu", "hw"],
     "xcl": false,
     "opencv": true,
     "cmd_args": "-p Xilinx -d ${sdx:platform} -k BUILD/default.xclbin -b PROJECT/data/rect_1024.bmp",
