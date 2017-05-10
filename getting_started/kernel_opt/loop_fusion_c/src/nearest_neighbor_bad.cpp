@@ -71,7 +71,7 @@ void nearest_neighbor(int *out, const int *points,
         // Calculate the distance in a n-dimensional space
         dist_calc:
         for (int c = 0; c < dim; ++c) {
-            int dx = abs(points[dim * p + c] - s_point[c]);
+            int dx = points[dim * p + c] - s_point[c];
             dist += dx * dx;
         }
 
