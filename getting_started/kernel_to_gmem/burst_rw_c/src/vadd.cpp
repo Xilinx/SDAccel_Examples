@@ -37,7 +37,7 @@ Description:
 #include <string.h>
 
 //define internal buffer max size
-#define BURSTBUFFERSIZE 2048
+#define BURSTBUFFERSIZE 256
 
 extern "C" {
 void vadd(int *a, int size, int inc_value){

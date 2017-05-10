@@ -29,10 +29,10 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "xcl2.hpp"
 #include <vector>
 
-#define DATA_SIZE 256
+#define DATA_SIZE 2048
 #define INCR_VALUE 10
 //define internal buffer max size
-#define BURSTBUFFERSIZE 2048
+#define BURSTBUFFERSIZE 256
 
 int main(int argc, char** argv)
 {
