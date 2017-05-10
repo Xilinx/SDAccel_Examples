@@ -32,7 +32,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
    Loop fusion is a technique to combine a nested loop with its parent. This
    technique produces more efficient hardware in some cases.
-  */
+*/
 #define MAX_DIMS 5
 #include <stdlib.h>
 #include <limits.h>
@@ -71,7 +71,7 @@ void nearest_neighbor_loop_fusion(int *out, const int *points,
     find_best:
     for (int p = 0, c = 0, itr = 0; itr < iterations; itr++) {
     #pragma HLS PIPELINE
-        int dx = abs(points[dim * p + c] - s_point[c]);
+        int dx = points[dim * p + c] - s_point[c];
         dist += dx * dx;
         // Defines the end of the dimension calculation(The inner loop in the
         // previous example)
