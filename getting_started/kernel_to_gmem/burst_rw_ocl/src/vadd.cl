@@ -36,7 +36,7 @@ Description:
 // Below Macro should be commented for optimized design. Xilinx recommends to use for loop approach instead of async_work_grop_copy() API burst read/write
 //#define USE_ASYNC_API 
 
-#define BURSTBUFFERSIZE 2048
+#define BURSTBUFFERSIZE 256
 
 __kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
 void vadd(__global int *a, int size, int inc_value){
