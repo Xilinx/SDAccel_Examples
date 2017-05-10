@@ -343,6 +343,8 @@ print "Parsing the description file"
 data = json.load(desc)
 desc.close()
 
+assert("OpenCL" in data['runtime'])
+
 print "Generating the README for %s" % data["example"]
 target = open("README.md","w")
 header(target,data)
