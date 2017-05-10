@@ -1,11 +1,11 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Device Query",
     "overview": [
         "This example prints the OpenCL properties of the platform and its devices. It also displays the limits and capabilities of the hardware."
     ],
     "key_concepts": [ "OpenCL API" , "Querying device properties"],
     "keywords": [ "clGetPlatformIDs()" , "clGetPlatformInfo()", "clGetDeviceIDs()", "clGetDeviceInfo()"],
-    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd": "./device_query",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./device_query",
     "contributors" : [

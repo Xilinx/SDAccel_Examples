@@ -1,9 +1,10 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Edge Detection",
     "overview": [
         "Implementation of a Sobel Filter for edge detection."
     ],
-    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr"],
+    "nboards": ["xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "opencv": true,
     "cmd_args": "PROJECT/data/input/eiffel.bmp",
     "em_cmd": "./edge data/input/eiffel.bmp",

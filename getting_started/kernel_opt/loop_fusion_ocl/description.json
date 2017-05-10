@@ -1,11 +1,11 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Loop Fusion",
     "overview": [
         "This example will demonstrate how to fuse two loops into one to improve the performance of an OpenCL kernel."
     ],
     "key_concepts": [ "Kernel Optimization", "Loop Fusion", "Loop Pipelining" ],
     "keywords": [ "xcl_pipeline_loop"],
-    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd": "./loop_fusion",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./loop_fusion",
     "contributors" : [

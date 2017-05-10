@@ -1,9 +1,9 @@
 {
+    "runtime": ["OpenCL"],
     "example" : "Vector Addition",
     "overview" : [
         "Simple example of vector addition."
     ],
-    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd" : "./vadd",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./vadd",
     "contributors" : [

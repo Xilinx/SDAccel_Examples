@@ -1,11 +1,11 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Dataflow Function OpenCL",
     "overview": [
         "This is simple example of vector addition to demonstrate Dataflow functionality in OpenCL Kernel. OpenCL Dataflow allows user to run multiple functions together to achieve higher throughput."
     ],
     "key_concepts": [ "Function/Task Level Parallelism"],
     "keywords": [ "xcl_dataflow" , "xclDataflowFifoDepth"],
-    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "contributors" : [

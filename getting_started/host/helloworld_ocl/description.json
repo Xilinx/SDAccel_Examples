@@ -1,11 +1,11 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Hello World",
     "overview": [
         "This example is a simple OpenCL application. It will highlight the basic flow of an OpenCL application."
     ],
     "key_concepts": [ "OpenCL API"],
     "keywords": [ "NA" ],
-    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd": "./helloworld",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./helloworld",
     "contributors" : [

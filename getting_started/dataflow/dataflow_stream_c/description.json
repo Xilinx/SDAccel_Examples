@@ -1,11 +1,11 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Dataflow Using HLS Stream",
     "overview": [
         "This is simple example of vector addition to demonstrate Dataflow functionality of HLS. HLS Dataflow allows user to schedule multiple task together to achieve higher throughput."
     ],
     "key_concepts": [ "Task Level Parallelism"],
     "keywords": [ "dataflow" , "hls::stream<>"],
-    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "contributors" : [

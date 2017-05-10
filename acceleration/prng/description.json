@@ -1,11 +1,11 @@
 {
+    "runtime": ["OpenCL"],
     "example" : "pseudo random number generator",
     "overview" : [
         "This is an optimized implementation of the pseudo random number generator algorithm",
         "The method used to generate a random number sequence is called complementary multiply with carry (CMWC)",
         "targeting exection on an SDAccel support FPGA acceleration card"
     ],
-    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:xil-accel-rd-ku115:4ddr-xpr", "xilinx:adm-pcie-ku3:2ddr-xpr"],
     "xcl": true,
     "em_cmd" : "./prng",
     "hw_cmd" : "../../utility/nimbix/nimbix-run.py -- ./prng <number of blocks>",

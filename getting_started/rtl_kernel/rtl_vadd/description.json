@@ -1,10 +1,10 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Vector Addition With RTL Kernel",
     "overview": [
         "Simple example of vector addition using RTL Kernel"
     ],
     "key_concepts": [ "RTL Kernel"],
-    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr", "xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd": "./host",
     "targets": ["hw", "hw_emu"],
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",

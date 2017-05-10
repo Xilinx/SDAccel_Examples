@@ -1,11 +1,11 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Data Transfer",
     "overview": [
         "This example illustrates several ways to use the OpenCL API to transfer data to and from the FPGA"
     ],
     "key_concepts": [ "OpenCL API" , "Data Transfer", "Write Buffers", "Read Buffers", "Map Buffers", "Async Memcpy"],
     "keywords": [ "clEnqueueWriteBuffer()" , "clEnqueueReadBuffer()", "clEnqueueMapBuffer()", "clEnqueueUnmapMemObject()"],
-    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd": "./data_transfer",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./data_transfer",
     "contributors" : [
