@@ -28,23 +28,34 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 
 /*******************************************************************************
-Description: 
-    OpenCL Kernel Example of Matrix Multiplication to demonstrate 2-D full array access
+Description:
+ 
+    OpenCL Kernel Example of Matrix Multiplication to demonstrate 2-D 
+    full array access
+
 *******************************************************************************/
-//define max local buffer size
-#define N 256
+
+// Define max local buffer size
+#define MAX_MATRIX_DIM 256
 
 __kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
-void mmult(__global int *a, __global int *b, __global int *c, int size){
-    local int bufa[N][N], bufb[N][N], bufc[N][N];
-    int matrix_size = size * size;
+void mmult(__global int *a, __global int *b, __global int *c, int dim){
+
+    // Define local buffers to hold global memory data
+    local int bufa[MAX_MATRIX_DIM][MAX_MATRIX_DIM];
+    local int bufb[MAX_MATRIX_DIM][MAX_MATRIX_DIM];
+    local int bufc[MAX_MATRIX_DIM][MAX_MATRIX_DIM];
+
+    // Size of the matrix
+    int matrix_size = dim * dim;
   
-    // Read data from global memory and write into local buffer for a, loop pipeline will be automatically inferred
+    // Read data from global memory and write into local buffer
+    // Loop pipeline will be automatically inferred
     int x = 0, y = 0;
     read_data_a: for (int i = 0 ; i < matrix_size ; i++){
         int tmpData_a = a[i];
         bufa[x][y] = tmpData_a;
-        if (y == size-1){
+        if (y == dim - 1){
             x++;
             y = 0;
         }else{
@@ -52,11 +63,12 @@ void mmult(__global int *a, __global int *b, __global int *c, int size){
         }
     }
   
-    // Read data from global memory and write into local buffer for b, loop pipeline will be automatically inferred
+    // Read data from global memory and write into local buffer
+    // Loop pipeline will be automatically inferred
     read_data_b: for (int i = 0, x = 0, y = 0; i < matrix_size ; i++){
         int tmpData_b = b[i];
         bufb[x][y] = tmpData_b;
-        if (y == size-1){
+        if (y == dim - 1){
             x++;
             y = 0;
         }else{
@@ -64,24 +76,26 @@ void mmult(__global int *a, __global int *b, __global int *c, int size){
         }
     }
   
-    // Calculate matrix multiplication using local data buffer based on input size, and write results into local buffer for c
-    matrix_mult: for (int row = 0; row < size; row++) {
-        for (int col = 0; col < size; col++) {
+    // Calculate matrix multiplication using local data buffer based on 
+    // input size and write results into local buffer
+    matrix_mult: for (int row = 0; row < dim; row++) {
+        for (int col = 0; col < dim; col++) {
             int result = 0;
             __attribute__((xcl_pipeline_loop))
-            for (int k = 0; k < size; k++) {
+            for (int k = 0; k < dim; k++) {
                 result += bufa[row][k] * bufb[k][col];
             }
             bufc[row][col] = result;
         }
     }
   
-    // Write results from local buffer to global memory for c, loop pipeline will be automatically inferred
+    // Write results from local buffer to global memory
+    // Loop pipeline will be automatically inferred
     int m = 0, n = 0;
     write_data: for (int i = 0 ; i < matrix_size ; i++){
         int tmpData_c = bufc[m][n];
         c[i] = tmpData_c;
-        if (n == size-1){
+        if (n == dim - 1){
             m++;
             n = 0;
         }else{

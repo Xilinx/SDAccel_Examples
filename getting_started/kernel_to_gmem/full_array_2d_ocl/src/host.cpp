@@ -29,43 +29,44 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "xcl2.hpp"
 #include <vector>
 
-//define array size to access
-#define DATA_SIZE 8
-//define max local buffer size
-#define N 256
+// Define array size 
+#define TEST_MATRIX_DIM 256
+ 
+// Define max local buffer size
+#define MAX_MATRIX_DIM 256
+
 void mmult_sw(  std::vector<int,aligned_allocator<int>> &a, 
                 std::vector<int,aligned_allocator<int>> &b, 
                 std::vector<int,aligned_allocator<int>> &c, int size)
 {
-  int bufa[N][N], bufb[N][N], bufc[N][N];
-  for (int i = 0 ; i < size ; i++) {
-      memcpy(bufa[i], (int *) &a[i*size], size*sizeof(int));
-      memcpy(bufb[i], (int *) &b[i*size], size*sizeof(int));
-  }
-
   for (int row = 0; row < size; row++) {
     for (int col = 0; col < size; col++) {
       int result = 0;
       for (int k = 0; k < size; k++) {
-        result += bufa[row][k] * bufb[k][col];
+        result += a[row * size + k] * b[k * size + col];
       }
-      bufc[row][col] = result;
+      c[row * size + col] = result;
     }
   }
-  for (int i = 0 ; i < size ; i++)
-      memcpy((int *) &c[i*size], bufc[i], size*sizeof(int));
 }
 
 int main(int argc, char** argv)
 {
-    int size = DATA_SIZE;
-    int matrix_size = size * size;
-    if (size > N) {
+    const char *xcl_emu = getenv("XCL_EMULATION_MODE");
+    if(xcl_emu && !strcmp(xcl_emu, "hw_emu")){
+        #undef TEST_MATRIX_DIM
+        #define TEST_MATRIX_DIM 16
+    }
+    
+    int dim = TEST_MATRIX_DIM;
+    int matrix_size = dim * dim;
+    
+    if (dim > MAX_MATRIX_DIM) {
         std::cout << "Size is bigger than internal buffer size, please use a size smaller than 256!" << std::endl;
         return EXIT_FAILURE;
     }
     //Allocate Memory in Host Memory
-    size_t vector_size_bytes = sizeof(int) * matrix_size;
+    size_t matrix_size_in_bytes = sizeof(int) * matrix_size;
     std::vector<int,aligned_allocator<int>> source_input_a   (matrix_size);
     std::vector<int,aligned_allocator<int>> source_input_b   (matrix_size);
     std::vector<int,aligned_allocator<int>> source_hw_results(matrix_size);
@@ -77,7 +78,7 @@ int main(int argc, char** argv)
         source_input_b[i] = i;
         source_hw_results[i] = 0;
     }
-    mmult_sw(source_input_a, source_input_b, source_sw_results, size);
+    mmult_sw(source_input_a, source_input_b, source_sw_results, dim);
 
 //OPENCL HOST CODE AREA START
     std::vector<cl::Device> devices = xcl::get_xil_devices();
@@ -95,11 +96,11 @@ int main(int argc, char** argv)
 
     //Allocate Buffer in Global Memory
     cl::Buffer buffer_a(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
-            vector_size_bytes,source_input_a.data());
+            matrix_size_in_bytes,source_input_a.data());
     cl::Buffer buffer_b(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
-            vector_size_bytes,source_input_b.data());
+            matrix_size_in_bytes,source_input_b.data());
     cl::Buffer buffer_c(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
-            vector_size_bytes, source_hw_results.data());
+            matrix_size_in_bytes, source_hw_results.data());
 
     std::vector<cl::Memory> writeBufVec;
     writeBufVec.push_back(buffer_a);
@@ -112,7 +113,7 @@ int main(int argc, char** argv)
 
     //Launch the Kernel
     krnl_mmult(cl::EnqueueArgs(q,cl::NDRange(1,1,1), cl::NDRange(1,1,1)), 
-            buffer_a,buffer_b,buffer_c, size);
+            buffer_a,buffer_b,buffer_c, dim);
 
     std::vector<cl::Memory> readBufVec;
     readBufVec.push_back(buffer_c);
@@ -123,7 +124,6 @@ int main(int argc, char** argv)
     
     // Compare the results of the Device to the simulation
     int match = 0;
-    std::cout << "Result = " << std::endl;
     for (int i = 0 ; i < matrix_size ; i++){
         if (source_hw_results[i] != source_sw_results[i]){
             std::cout << "Error: Result mismatch" << std::endl;
@@ -131,9 +131,6 @@ int main(int argc, char** argv)
                 << " Device result = " << source_hw_results[i] << std::endl;
             match = 1;
             break;
-        }else{
-            std::cout << source_hw_results[i] << " " ;
-            if ( ( (i+1) % 16) == 0) std::cout << std::endl;
         }
     }
 
