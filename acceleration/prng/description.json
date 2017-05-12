@@ -8,7 +8,7 @@
     ],
     "xcl": true,
     "em_cmd" : "./prng",
-    "hw_cmd" : "../../utility/nimbix/nimbix-run.py -- ./prng <number of blocks>",
+    "hw_cmd" : "../../utility/nimbix/nimbix-run.py -- ./prng",
     "libs" : [
         "xcl"
     ],
