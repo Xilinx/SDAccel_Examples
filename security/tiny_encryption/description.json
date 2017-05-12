@@ -6,8 +6,8 @@
     ],
     "xcl": false,
     "cmd_args" : "PROJECT/data/image1.bmp PROJECT/data/image2.bmp BUILD/default.xclbin",
-    "em_cmd" : "./tiny data/image1.bmp data/image2.bmp xclbin/krnl_tiny.hw.xilinx_xil-accel-rd-ku115_4ddr-xpr_3_4.xclbin",
-    "hw_cmd" : "../../utility/nimbix/nimbix-run.py -- ./tiny ./xclbin/krnl_vadd.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin",
+    "em_cmd" : "./tiny data/image1.bmp data/image2.bmp xclbin/krnl_tiny.<emulation flow>.xilinx_xil-accel-rd-ku115_4ddr-xpr_3_3.xclbin",
+    "hw_cmd" : "../../utility/nimbix/nimbix-run.py -- ./tiny data/image1.bmp data/image2.bmp ./xclbin/krnl_vadd.hw.xilinx_xil-accel-rd-ku115_4ddr-xpr_3_3.xclbin",
     "libs": [
         "oclHelper",
         "bitmap"
