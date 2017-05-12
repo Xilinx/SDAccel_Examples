@@ -51,9 +51,11 @@ def buildExample(target, dir, device, workdir) {
 	return { ->
 		if ( target == "sw_emu" ) {
 			cores = 1
+			mem = 4000
 			queue = "medium"
 		} else {
 			cores = 8
+			mem = 32000
 			queue = "long"
 		}
 
@@ -87,7 +89,7 @@ set -e
 
 # if rebuild required then use LSF
 if [[ \$rc != 0 ]]; then
-bsub -I -q ${queue} -R "osdistro=rhel && osver==ws6" -n ${cores} -R "span[ptile=${cores}]" -J "\$(basename ${dir})-${target}" <<EOF
+bsub -I -q ${queue} -R "osdistro=rhel && osver==ws6" -n ${cores} -R "rusage[mem=${mem}] span[ptile=${cores}]" -J "\$(basename ${dir})-${target}" <<EOF
 make TARGETS=${target} DEVICES=\"${device}\" all
 EOF
 fi
@@ -103,11 +105,11 @@ def dirsafe(device) {
 def runExample(target, dir, device, workdir) {
 	return { ->
 		devdir = dirsafe(device)
-		/* Node is here to prevent too much strain on Nimbix by rate limiting
-		 * to the number of job slots */
-		node("rhel6 && xsjrdevl && !xsjrdevl110") {
-			retry(3) {
-				lock("${dir}") {
+		retry(3) {
+			lock("${dir}") {
+				/* Node is here to prevent too much strain on Nimbix by rate limiting
+				 * to the number of job slots */
+				node("rhel6 && xsjrdevl && !xsjrdevl110") {
 					sh """#!/bin/bash -e
 
 cd ${workdir}

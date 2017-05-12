@@ -21,8 +21,8 @@ This is an optimized implementation of a watermarking application to add waterma
 ### PERFORMANCE
 Board|Image Size|Frames / Second
 ----|-----|-----
-Alpha Data ADM-PCIE-KU3|1024 x 768|2,658
-Xilinx KU115|1024 x 768|3526
+xilinx:adm-pcie-ku3:2ddr-xpr|1024 x 768|2,658
+xilinx:xil-accel-rd-ku115:4ddr-xpr|1024 x 768|3526
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
 ```
@@ -33,8 +33,8 @@ where examples is the name of the directory where the repository will be stored 
 ## 3. SOFTWARE AND SYSTEM REQUIREMENTS
 Board | Device Name | Software Version
 ------|-------------|-----------------
-Alpha Data ADM-PCIE-KU3|xilinx:adm-pcie-ku3:2ddr-xpr:3.3|SDAccel 2016.4
-Xilinx KU115|xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3|SDAccel 2016.4
+Xilinx KU115|xilinx:xil-accel-rd-ku115:4ddr-xpr|SDAccel 2016.4
+Alpha Data ADM-PCIE-KU3|xilinx:adm-pcie-ku3:2ddr-xpr|SDAccel 2016.4
 
 
 *NOTE:* The board/device used for compilation can be changed by adding the DEVICES variable to the make command as shown below

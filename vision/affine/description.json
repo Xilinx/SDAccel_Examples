@@ -1,14 +1,26 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Affine",
     "overview": [
         "Affine transformation is a linear mapping method that preserves points, straight lines, and planes. Sets of parallel lines remain parallel after an affine transformation. The affine transformation technique is typically used to correct for geometric distortions or deformations that occur with non-ideal camera angles. The demo performs a 30 degree X rotation and a 50% X and Y scaling on a 512 by 512, 16 bits per pixels grayscale, raw MRI image."
     ],
-    "board": ["Alpha Data ADM-PCIE-7V3"],
-	 "targets": ["sw_emu", "hw"],
+    "nboards": ["xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
+    "targets": ["sw_emu", "hw"],
     "xcl": false,
     "opencv": true,
-    "em_cmd": "./affine ./xclbin/krnl_affine.<emulation mode>.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
-    "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./affine ./xclbin/krnl_affine.hw.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
+    "cmd_args": "PROJECT/data/CT-MONO2-16-brain.raw BUILD/default.xclbin",
+    "em_cmd": "./affine ./data/CT-MONO2-16-brain.raw ./xclbin/krnl_affine.<emulation mode>.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
+    "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./affine ./data/CT-MONO2-16-brain.raw ./xclbin/krnl_affine.hw.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
+    "libs": [
+        "oclHelper", 
+        "bitmap"
+    ], 
+    "accelerators": [
+        {
+            "name": "affine_kernel", 
+            "location": "src/krnl_affine.cl"
+        }
+    ],
     "perf_fields":["Task","Xilinx Execution Time (in ns)", "GTX 780 Execution Time (in ns)"],
     "performance": [
         {
@@ -58,5 +70,6 @@
             "version":"2.0",
             "description": "Update for SDAccel 2016.3"
         }
-    ]
+    ],
+    "match_makefile" : "false"
 }

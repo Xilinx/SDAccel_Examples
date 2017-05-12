@@ -12,3 +12,9 @@ runtime/
 *.log
 xclbin/
 lib/
+*.orig
+*_BACKUP_*
+*_BASE_*
+*_LOCAL_*
+*_REMOTE_*
+*.swp

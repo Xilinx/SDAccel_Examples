@@ -1,11 +1,11 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Shift Register",
     "overview": [
         "This example demonstrates how to shift values in registers in each clock cycle"
     ],
     "key_concepts": [ "Kernel Optimization", "Shift Register", "FIR"],
     "keywords": [ "xcl_array_partition" ],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3", "Xilinx KU115"],
     "em_cmd": "./shift_register",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./shift_register",
     "contributors" : [

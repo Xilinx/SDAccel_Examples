@@ -1,4 +1,5 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Global Memory Two Banks",
     "overview": [
         "This example of 2ddr to demonstrate on how to use 2ddr DSA. How to create buffers in each DDR."
@@ -7,7 +8,7 @@
     "keywords": [ "max_memory_ports", "misc:map_connect",
             "cl_mem_ext_ptr_t", "XCL_MEM_DDR_BANK0", "XCL_MEM_DDR_BANK1", "XCL_MEM_DDR_BANKx",
             "CL_MEM_EXT_PTR_XILINX"],
-    "board": ["Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
+    "nboards": ["xilinx:adm-pcie-7v3:1ddr"],
     "em_cmd": "./host ./data/input.bmp ./data/golden.bmp",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host ./data/input.bmp ./data/golden.bmp",
     "contributors" : [

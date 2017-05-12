@@ -1,11 +1,11 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Improve performance using loop perfect",
     "overview": [
         "This nearest neighbor example is to demonstrate how to achieve better performance using loop perfect."
     ],
     "Key Concepts": [ "Loop perfect"],
     "Keywords": ["xcl_pipeline_loop", "xcl_array_partition"],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "contributors" : [

@@ -21,7 +21,7 @@ This is an optimized implementation of a median filter being used to remove nois
 ### PERFORMANCE
 Board|Image Size|Frames / Second
 ----|-----|-----
-Alpha Data ADM-PCIE-7V3|128 x 128|22,222
+xilinx:adm-pcie-7v3:1ddr|128 x 128|22,222
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
 ```
@@ -32,8 +32,8 @@ where examples is the name of the directory where the repository will be stored 
 ## 3. SOFTWARE AND SYSTEM REQUIREMENTS
 Board | Device Name | Software Version
 ------|-------------|-----------------
-Alpha Data ADM-PCIE-7V3|xilinx:adm-pcie-7v3:1ddr:3.0|SDAccel 2016.4
-Alpha Data ADM-PCIE-KU3|xilinx:adm-pcie-ku3:2ddr-xpr:3.3|SDAccel 2016.4
+Alpha Data ADM-PCIE-7V3|xilinx:adm-pcie-7v3:1ddr|SDAccel 2016.4
+Alpha Data ADM-PCIE-KU3|xilinx:adm-pcie-ku3:2ddr-xpr|SDAccel 2016.4
 
 
 *NOTE:* The board/device used for compilation can be changed by adding the DEVICES variable to the make command as shown below

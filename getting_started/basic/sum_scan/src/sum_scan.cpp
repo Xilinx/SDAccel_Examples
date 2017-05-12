@@ -130,7 +130,7 @@ int main(int argc, char* argv[]) {
 #endif
         float relative_error = fabs(out[i] - out_fpga[i]) / fabs(out[i]);
         if(relative_error  > max_relative_error){
-            printf("Error: Result mismatch (relative_error = %f)\n", relative_error);
+            printf("Error: Result mismatch (kernel results do not match cpu results)\n", relative_error);
             printf("i = %d CPU result = %f(%a) Krnl Result = %f(%a)\n", i, out[i], out[i], out_fpga[i],out_fpga[i]);
             krnl_match = 1;
             break;

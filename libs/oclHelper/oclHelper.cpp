@@ -74,6 +74,9 @@ static void getDeviceVersion(oclHardware& hardware)
     unsigned minor = 0;
     unsigned state = 0;
     for (size_t i = 0; i < size; i++) {
+        if (!versionString[i]) {
+            break;
+        }
         if (versionString[i] == ' ') {
             state++;
             continue;

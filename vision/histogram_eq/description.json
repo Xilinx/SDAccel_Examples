@@ -1,4 +1,5 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Histogram Equalization",
     "overview": [
         "This is an optimized implementation of a 12-bit histogram equalizer targeting execution on an SDAccel supported FPGA acceleration card."
@@ -6,16 +7,27 @@
     "perf_fields": ["Board", "Image Size", "Frames per Second"],
     "performance": [
         {
-            "system": "Alpha Data ADM-PCIE-7V3",
+            "system": "xilinx:adm-pcie-7v3:1ddr",
             "constraint": "2,048 x 1,080",
             "metric": "333"
         }
     ],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
+    "nboards": ["xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "xcl": false,
     "opencv": true,
+    "cmd_args": "PROJECT/data/race_2k.bmp",
     "em_cmd": "./equalizer data/race_2k.bmp",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./equalizer data/race_2k.bmp",
+    "libs": [
+        "opencv", 
+        "xcl"
+    ], 
+    "accelerators": [
+        {
+            "name": "krnl_equalizer", 
+            "location": "src/krnl_equalizer.cl"
+        }
+    ],
     "contributors": [
         {
             "group": "Xilinx",

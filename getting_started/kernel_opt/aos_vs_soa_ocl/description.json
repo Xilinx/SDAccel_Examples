@@ -1,11 +1,11 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Array of Structure(AoS) vs Structure of Arrays(SoA)",
     "overview": [
         "This example demonstrates how data layout can impact the performance of certain kernels. The example we will demonstrate how using the Structure of Array data layout can impact certain data parallel problems."
     ],
     "key_concepts": [ "Kernel Optimization", "Data Layout"],
     "keywords": [ "NA"],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
     "em_cmd": "./aos_vs_soa",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./aos_vs_soa",
     "contributors" : [

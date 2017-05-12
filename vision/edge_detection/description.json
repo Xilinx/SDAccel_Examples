@@ -1,12 +1,29 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Edge Detection",
     "overview": [
         "Implementation of a Sobel Filter for edge detection."
     ],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3"],
+    "nboards": ["xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "opencv": true,
+    "cmd_args": "PROJECT/data/input/eiffel.bmp",
     "em_cmd": "./edge data/input/eiffel.bmp",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./edge data/input/eiffel.bmp",
+    "libs": [
+        "opencv", 
+        "xcl"
+    ], 
+    "containers" : [
+        {
+            "name": "krnl_edge",
+            "accelerators": [
+                {
+                    "name": "krnl_sobel", 
+                    "location": "src/krnl_sobelfilter.cl"
+                }
+            ]
+        }
+    ],
     "contributors": [
         {
             "group": "Xilinx",
@@ -29,5 +46,6 @@
             "version": "3.0",
             "description": "Update for SDAccel 2016.3"
         }
-    ]
+    ],
+    "match_makefile" : "false"
 }

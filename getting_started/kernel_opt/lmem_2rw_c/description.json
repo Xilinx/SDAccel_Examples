@@ -1,11 +1,11 @@
 {
+    "runtime": ["OpenCL"],
     "example": "Two Parallel Read/Write on Local Memory",
     "overview": [
         "This is simple example of vector addition to demonstrate how to utilized both ports of Local Memory memory."
     ], 
     "key_concepts": [ "Kernel Optimization", "2port BRAM Utilization", "two read/write Local Memory"],
     "keywords": ["#pragma HLS UNROLL FACTOR=2"],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3","Xilinx KU115"],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "contributors" : [

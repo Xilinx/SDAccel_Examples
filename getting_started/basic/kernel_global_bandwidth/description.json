@@ -1,9 +1,9 @@
 {
+    "runtime": ["OpenCL"],
     "example" : "kernel_global",
     "overview" : [
         "Bandwidth test of global to local memory."
     ],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3",  "Alpha Data ADM-PCIE-8K5", "Xilinx KU115"],
     "em_cmd" : "./kernel_global",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./kernel_global",
     "contributors" : [

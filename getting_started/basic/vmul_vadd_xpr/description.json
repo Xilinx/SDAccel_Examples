@@ -1,11 +1,11 @@
 {
+    "runtime": ["OpenCL"],
     "example" : "Vector Add - Vector Multiplication for XPR Devices",
     "overview" : [
         "This example shows how data stored in global memory should be migrated from device to host and later from host to device to share between kernels in different binary containers. This buffer migration is only needed for XPR(Extended Partial Reconfiguration) Specific Devices. As XPR devices do not persist data when user reload another binary container."
     ],
     "key_concepts": [ "Handling Buffer sharing across multiple binaries for XPR Platform", "Multiple Kernel Binaries" , "Buffer sharing across Multiple binaries"],
     "keywords": [ "clEnqueueMigrateMemObjects()", "CL_MIGRATE_MEM_OBJECT_HOST"],
-    "board": ["Alpha Data ADM-PCIE-7V3", "Alpha Data ADM-PCIE-KU3",  "Xilinx KU115"],
     "em_cmd" : "./vmulvadd",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./vmulvadd",
     "contributors" : [
