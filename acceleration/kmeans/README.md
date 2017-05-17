@@ -23,7 +23,7 @@ aims to partition n observations into k clusters in which each
 observation belongs to the cluster with the nearest mean, serving as
 a prototype of the cluster.
 
-Note__: This application is ported from Rodinia
+__Note__: This application is ported from Rodinia
 
 (https://www.cs.virginia.edu/~skadron/wiki/rodinia/)
 
