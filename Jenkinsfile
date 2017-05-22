@@ -11,11 +11,11 @@ disableConcurrentBuilds()
 days = 10
 
 devices = []
-devices += ['xilinx:adm-pcie-7v3:1ddr:3.0']
-devices += ['xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3']
-devices += ['xilinx:adm-pcie-ku3:2ddr-xpr:3.3']
+devices += ['xilinx:adm-pcie-7v3:1ddr']
+devices += ['xilinx:xil-accel-rd-ku115:4ddr-xpr']
+devices += ['xilinx:adm-pcie-ku3:2ddr-xpr']
 
-version = '2016.4'
+version = '2017.1'
 
 def setupExample(dir, workdir) {
 	return { ->
@@ -29,7 +29,7 @@ module use.own /proj/picasso/modulefiles
 module add vivado/${version}_daily
 module add vivado_hls/${version}_daily
 module add sdaccel/${version}_daily
-module add opencv/vivado_hls
+module add opencv/sdaccel
 
 cd ${dir}
 
@@ -39,7 +39,7 @@ echo "PWD: \$(pwd)"
 echo "-----------------------------------------------"
 echo
 
-rsync -rL \$XILINX_SDX/Vivado_HLS/lnx64/tools/opencv/ lib/
+rsync -rL \$XILINX_SDX/lnx64/tools/opencv/ lib/
 
 make clean exe
 
@@ -90,7 +90,9 @@ set -e
 # if rebuild required then use LSF
 if [[ \$rc != 0 ]]; then
 bsub -I -q ${queue} -R "osdistro=rhel && osver==ws6" -n ${cores} -R "rusage[mem=${mem}] span[ptile=${cores}]" -J "\$(basename ${dir})-${target}" <<EOF
+export TEMPDIR=\$(mktemp -d -p $PWD)
 make TARGETS=${target} DEVICES=\"${device}\" all
+rm -rf \$TEMPDIR
 EOF
 fi
 set +x
@@ -120,7 +122,7 @@ module use.own /proj/picasso/modulefiles
 module add vivado/${version}_daily
 module add vivado_hls/${version}_daily
 module add sdaccel/${version}_daily
-module add opencv/vivado_hls
+module add opencv/sdaccel
 
 module add proxy
 module add lftp
@@ -184,7 +186,7 @@ module use.own /proj/picasso/modulefiles
 module add vivado/${version}_daily
 module add vivado_hls/${version}_daily
 module add sdaccel/${version}_daily
-module add opencv/vivado_hls
+module add opencv/sdaccel
 
 module add proxy
 

@@ -4,6 +4,10 @@ NIMBIX_DSA_xilinx_adm-pcie-ku3_2ddr-xpr_3_3 = nx1
 NIMBIX_DSA_xilinx_adm-pcie-7v3_1ddr_3_0 = nx2
 NIMBIX_DSA_xilinx_xil-accel-rd-ku115_4ddr-xpr_3_3 = nx3
 
+NIMBIX_DSA_xilinx_adm-pcie-ku3_2ddr-xpr_4_0 = nx1test
+NIMBIX_DSA_xilinx_adm-pcie-7v3_1ddr_3_0 = nx2test
+NIMBIX_DSA_xilinx_xil-accel-rd-ku115_4ddr-xpr_4_0 = nx3test
+
 dsa2type = $(NIMBIX_DSA_$(call sanitize_dsa,$(1)))
 
 hw_RUNNER = $(COMMON_REPO)/utility/nimbix/nimbix-run.py $(NIMBIXFLAGS) --type $(call dsa2type,$(1)) --

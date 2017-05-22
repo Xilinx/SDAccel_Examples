@@ -16,7 +16,7 @@ This README file contains the following sections:
 
 
 ## 1. OVERVIEW
-This example shows vector addition with 2 kernel clocks using RTL Kernel. Design contains two compute units of kernel. One compute unit is running at 150MHz and another compute unit is running at 250MHz.
+This example shows vector addition with 2 kernel clocks using RTL Kernel.
 
 ***KEY CONCEPTS:*** RTL Kernel, Multiple Kernel Clocks
 

@@ -95,7 +95,7 @@ emconfigutil --xdevice 'xilinx:xil-accel-rd-ku115:4ddr-xpr' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./tiny data/image1.bmp data/image2.bmp xclbin/krnl_tiny.hw.xilinx_xil-accel-rd-ku115_4ddr-xpr_3_4.xclbin
+./tiny data/image1.bmp data/image2.bmp xclbin/krnl_tiny.<emulation flow>.xilinx_xil-accel-rd-ku115_4ddr-xpr_3_3.xclbin
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card
