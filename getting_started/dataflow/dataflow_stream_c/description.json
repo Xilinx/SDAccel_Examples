@@ -1,6 +1,6 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Dataflow Using HLS Stream (CL)",
+    "example": "Dataflow Using HLS Stream",
     "overview": [
         "This is simple example of vector addition to demonstrate Dataflow functionality of HLS. HLS Dataflow allows user to schedule multiple task together to achieve higher throughput."
     ],

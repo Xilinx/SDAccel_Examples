@@ -1,4 +1,4 @@
-Dataflow Using HLS Stream (CL)
+Dataflow Using HLS Stream
 ======================
 
 This README file contains the following sections:
