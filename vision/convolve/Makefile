@@ -35,7 +35,7 @@ check_NDEVICES=$(krnl_convolve_NDEVICES)
 
 CHECKS=check
 
-DEVICES=xilinx:adm-pcie-ku3:2ddr-xpr:3.2
+DEVICES=xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 
 include $(COMMON_REPO)/utility/rules.mk
 
