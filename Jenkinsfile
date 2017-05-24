@@ -232,7 +232,7 @@ module add proxy
 			parallel swEmuRunSteps
 		}
 	}
-/*
+
 	stage('hw') {
 		def hwSteps = [:]
 		def hwRunSteps = [:]
@@ -252,7 +252,7 @@ module add proxy
 		}
 */
 	}
-*/
+
 } catch (e) {
 	currentBuild.result = "FAILED"
 	throw e
