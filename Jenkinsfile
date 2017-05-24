@@ -246,10 +246,11 @@ module add proxy
 		}
 
 		parallel hwSteps
-
+/*
 		lock("only_one_run_stage_at_a_time") {
 			parallel hwRunSteps
 		}
+*/
 	}
 */
 } catch (e) {
