@@ -96,11 +96,11 @@ def requirements(target,data):
     target.write("Board | Device Name | Software Version\n")
     target.write("------|-------------|-----------------\n")
 
-    nboards = []
-    if 'nboards' in data:
-        nboards = data['nboards']
+    nboard = []
+    if 'nboard' in data:
+        nboard = data['nboard']
 
-    boards = [word for word in DEVICES if word not in nboards]
+    boards = [word for word in DEVICES if word not in nboard]
 
     for board in boards:
         target.write(DEVICES[board]['name'])

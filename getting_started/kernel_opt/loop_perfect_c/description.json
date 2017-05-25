@@ -24,7 +24,6 @@
             "location": "src/nearest_bad.cpp"
         }
     ],
-    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr", "xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "contributors" : [
@@ -40,6 +39,5 @@
             "description": "Initial Xilinx Release"
         }
     ],
-    "match_makefile" : "false",
-    "sdx_gui": "false"
+    "match_makefile" : "false"
 }

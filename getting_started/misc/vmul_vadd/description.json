@@ -13,7 +13,10 @@
     ],
     "em_cmd" : "./vmulvadd",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./vmulvadd",
-    "board": ["xilinx:adm-pcie-7v3:1ddr"],
+    "nboard" : [
+        "xilinx:xil-accel-rd-ku115:4ddr-xpr",
+        "xilinx:adm-pcie-ku3:2ddr-xpr"
+    ],
     "accelerators": [
         {
             "name": "krnl_vmul", 

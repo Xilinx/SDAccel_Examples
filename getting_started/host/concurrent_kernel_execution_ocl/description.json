@@ -13,7 +13,6 @@
         "xcl",
         "oclHelper"
     ],
-    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "em_cmd": "./concurrent_execution",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./concurrent_execution",
     "accelerators": [

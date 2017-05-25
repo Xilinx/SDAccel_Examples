@@ -6,7 +6,6 @@
     ],
     "key_concepts": [ "Memory Coalesce", "Memory Deadlock/Hang", "Multiple Interfaces"],
     "keywords": ["HLS INTERFACE", "bundle", "m_axi"],
-    "board": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr", "xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "os": [
         "Linux"
     ],

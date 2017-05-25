@@ -9,7 +9,7 @@
         "1. Compute MaxScore",
         "2. Systolic array implementation"
     ],
-    "nboards": ["xilinx:adm-pcie-ku3:2ddr-xpr"],
+    "nboard": ["xilinx:adm-pcie-ku3:2ddr-xpr"],
     "targets": ["sw_emu", "hw"],
     "xcl": false,
     "em_cmd" : "./smithwaterman",

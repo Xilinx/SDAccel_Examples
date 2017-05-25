@@ -1,4 +1,4 @@
-Loop Iteration Dependency (CL)
+Loop Iteration Dependency (C)
 ======================
 
 This README file contains the following sections:
