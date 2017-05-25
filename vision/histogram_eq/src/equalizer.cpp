@@ -123,6 +123,7 @@ int main(int argc, char* argv[])
     clReleaseMemObject(mem_image);
     clReleaseMemObject(mem_eqimage);
     clReleaseKernel(krnl);
+    clReleaseProgram(program);
     xcl_release_world(world);
 
     std::cout << "Kernel Duration: " << duration << " ns" << std::endl;
