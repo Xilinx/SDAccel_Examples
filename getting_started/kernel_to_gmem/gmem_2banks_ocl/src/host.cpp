@@ -64,13 +64,13 @@ int main(int argc, char* argv[])
     int height = image.getHeight() ;
    
     //Allocate Memory in Host Memory 
-    int image_size_bytes = image.numPixels() * sizeof(int); 
-    std::vector<int> outImage(image.numPixels());
-    if (outImage.size() == 0)
-    {
-        std::cout << "Unable to allocate host memory!" << std::endl ;
-        return EXIT_FAILURE ;
-    }
+    int image_size = image.numPixels();
+    int image_size_bytes = image_size * sizeof(int); 
+    std::vector<int,aligned_allocator<int>> inputImage(image_size);
+    std::vector<int,aligned_allocator<int>> outImage(image_size);
+    
+    // Copy image host buffer
+    memcpy(inputImage.data(), image.bitmap(), image_size_bytes);
 
 //OPENCL HOST CODE AREA START
 
@@ -93,19 +93,24 @@ int main(int argc, char* argv[])
     cl_mem_ext_ptr_t inExt, outExt;  // Declaring two extensions for both buffers
     inExt.flags  = XCL_MEM_DDR_BANK0; // Specify Bank0 Memory for input memory
     outExt.flags = XCL_MEM_DDR_BANK1; // Specify Bank1 Memory for output Memory
-    inExt.obj = 0   ; outExt.obj = 0; // Setting Obj and Param to Zero
+    inExt.obj   = inputImage.data(); 
+    outExt.obj  = outImage.data(); // Setting Obj and Param to Zero
     inExt.param = 0 ; outExt.param = 0; 
 
     //Allocate Buffer in Bank0 of Global Memory for Input Image using Xilinx Extension
-    cl::Buffer buffer_inImage(context, CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX,
+    cl::Buffer buffer_inImage(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR | CL_MEM_EXT_PTR_XILINX,
             image_size_bytes, &inExt);
     //Allocate Buffer in Bank1 of Global Memory for Input Image using Xilinx Extension
-    cl::Buffer buffer_outImage(context, CL_MEM_WRITE_ONLY | CL_MEM_EXT_PTR_XILINX,
+    cl::Buffer buffer_outImage(context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR | CL_MEM_EXT_PTR_XILINX,
             image_size_bytes, &outExt);
 
+    std::vector<cl::Memory> inBufVec, outBufVec;
+    inBufVec.push_back(buffer_inImage);
+    outBufVec.push_back(buffer_outImage);
+
     //Copy input Image to device global memory
-    q.enqueueWriteBuffer(buffer_inImage,CL_TRUE, 0, image_size_bytes, image.bitmap());
-  
+    q.enqueueMigrateMemObjects(inBufVec, 0 /* 0 means from host*/); 
+ 
     auto krnl_applyWatermark= cl::KernelFunctor<cl::Buffer&, cl::Buffer& ,int,int>(kernel);
     
     //Launch the Kernel
@@ -113,7 +118,8 @@ int main(int argc, char* argv[])
             buffer_inImage, buffer_outImage, width, height);
 
     //Copy Result from Device Global Memory to Host Local Memory
-    q.enqueueReadBuffer(buffer_outImage,CL_TRUE, 0, image_size_bytes, outImage.data());
+    q.enqueueMigrateMemObjects(outBufVec, CL_MIGRATE_MEM_OBJECT_HOST);
+    q.finish();
 //OPENCL HOST CODE AREA END
 
     //Compare Golden Image with Output image

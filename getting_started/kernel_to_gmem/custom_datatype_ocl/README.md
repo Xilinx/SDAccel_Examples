@@ -18,7 +18,7 @@ This README file contains the following sections:
 ## 1. OVERVIEW
 This is simple example of RGB to HSV conversion to demonstrate Custom DATA Type usages in OpenCL Based Kernel. Xilinx HLS Compiler Supports Custom Data Type to use for operation as well as Memory Interface between Kernel and Global Memory.
 
-***KEY CONCEPTS:*** dataflow, Custom Datatype
+***KEY CONCEPTS:*** Dataflow, Custom Datatype
 
 ***KEYWORDS:*** struct
 
