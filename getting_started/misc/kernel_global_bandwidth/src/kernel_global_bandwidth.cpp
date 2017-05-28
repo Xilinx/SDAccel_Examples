@@ -47,7 +47,6 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *  3.<SDx Project> > Properties > C/C++ Build > Settings > SDx XOCC Kernel Linker
 *                  > Miscellaneous > Other flags
 *  4.Repeat step 2 above
-*  5.Define DDR macro in host enter "#define USE_2DDR" at the top of host.cpp
 *
 * *****************************************************************************************
 *  DSA  (4DDR):
@@ -63,8 +62,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *  3.<SDx Project> > Properties > C/C++ Build > Settings > SDx XOCC Kernel Linker
 *                  > Miscellaneous > Other flags
 *  4.Repeat step 2 above
-*  5.Define DDR macro in host enter "#define USE_4DDR" at the top of host.cpp
-*  6.Define NUM_BANKS_4 macro in kernel "#define NUM_BANKS_4" at the top of kernel.cl 
+*  5.Define NUM_BANKS_4 macro in kernel "#define NUM_BANKS_4" at the top of kernel.cl 
 * 
 * *****************************************************************************************
 *
