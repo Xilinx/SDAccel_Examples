@@ -273,7 +273,7 @@ def submit_testcase(username, apikey, testid, exe, args, type, nae, tt, dp):
 description = "Application for Running Jobs on Nimbix"
 parser = optparse.OptionParser(description=description)
 parser.add_option("--nae", help="Set Nimbix Application Environment to use (Advanced)", type=str, default="spenserg-sdx")
-parser.add_option("--type", help="Set Nimbix Node Type to use (nx1, nx2, nx3)", type=str, default="nx3")
+parser.add_option("--type", help="Set Nimbix Node Type to use (nx1, nx2, nx3, nx4)", type=str, default="nx3")
 parser.add_option("--tt", help="Enable timeline trace", action="store_true", default=False)
 parser.add_option("--dp", help="Enable device profiling", action="store_true", default=False)
 parser.add_option("--out", help="Set output directory", type=str, default=".")

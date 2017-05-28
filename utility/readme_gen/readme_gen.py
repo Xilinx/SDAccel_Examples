@@ -13,14 +13,19 @@ DEVICES = {
        'nae':  'nx2'
     },
     'xilinx:adm-pcie-ku3:2ddr-xpr': {
-       'version': '3.3',
+       'version': '4.1',
        'name': 'Alpha Data ADM-PCIE-KU3',
        'nae': 'nx1',
     },
     'xilinx:xil-accel-rd-ku115:4ddr-xpr': {
-       'version': '3.3',
+       'version': '4.1',
        'name': 'Xilinx KU115',
        'nae': 'nx3',
+    },
+    'xilinx:xil-accel-rd-vu9p:4ddr-xpr': {
+       'version': '4.1',
+       'name': 'Xilinx VU9P',
+       'nae': 'nx4',
     }
 }
 
