@@ -26,19 +26,19 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
+
 #ifdef __ECLIPSE__
 #define kernel
 #define global
 #define __constant
 #endif
 
-typedef unsigned char		u8;
-typedef unsigned short		u16;
-typedef unsigned int		u32;
-typedef			 char		i8;
-typedef			 short		i16;
-typedef			 int		i32;
-
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef unsigned int u32;
+typedef char i8;
+typedef short i16;
+typedef int i32;
 
 #define OFFSET_WEIGHT 0
 #define OFFSET_CHILDREN 1
@@ -74,7 +74,6 @@ void write_ht_node(u32* pht_current, const struct FLAT_HTREE* pnode) {
 	pht_current[OFFSET_SYM_BITLEN] = (u32)((u32)(pnode->symbol << 16) | pnode->bitlen);
 }
 
-
 void read_ht_node(const u32* pht_current, struct FLAT_HTREE* pnode) {
 	pnode->weight = pht_current[OFFSET_WEIGHT];
 	pnode->lc = (u16)((pht_current[OFFSET_CHILDREN] >> 16) & 0xFFFF);
@@ -83,7 +82,6 @@ void read_ht_node(const u32* pht_current, struct FLAT_HTREE* pnode) {
 	pnode->symbol = (u8)((u8)(pht_current[OFFSET_SYM_BITLEN] >> 16) & 0xFF);
 	pnode->bitlen = (u16)(pht_current[OFFSET_SYM_BITLEN] & 0xFFFF);
 }
-
 
 int find_next_min(u32* pht, u32 count, const u8* visited) {
 	if(count == 0)
@@ -110,7 +108,7 @@ int find_next_min(u32* pht, u32 count, const u8* visited) {
 }
 
 //returns 1 if the pointer is incremented otherwise 0
-u8 bit_writer(__global u8* ptr, u32* p_total_bit_count, u8 bit) {
+inline u8 bit_writer(__global u8* ptr, u32* p_total_bit_count, u8 bit) {
 	u8 bit_index = (*p_total_bit_count) % 8;
 
 	if(bit == 1)
@@ -127,7 +125,7 @@ u8 is_bit_set(u8 byte, u8 index) {
 }
 
 
-u8 multiple_bits_writer(__global u8* ptr, u32* p_total_bit_count, u32 bits, u32 len) {
+inline u8 multiple_bits_writer(__global u8* ptr, u32* p_total_bit_count, u32 bits, u32 len) {
 	u8 bytes_written = 0;
 
 	if(len == 0)
@@ -138,7 +136,7 @@ u8 multiple_bits_writer(__global u8* ptr, u32* p_total_bit_count, u32 bits, u32 
 	{
 		u8 b = (bits >> i) & 0x01;
 		bool full = bit_writer(ptr, p_total_bit_count, b);
-		
+
 		if(full) {
 			bytes_written++;
 			ptr++;
@@ -184,7 +182,6 @@ inline int write_word(__global u8* ptr, u32 word) {
 }
 
 inline int read_word(__global u8* ptr, u32* pword) {
-
 	*pword = 0;
 	for(int i=0; i < 4; i++) {
 		(*pword) |= ((*ptr) << (i * 8));
@@ -193,8 +190,6 @@ inline int read_word(__global u8* ptr, u32* pword) {
 
 	return 4;
 }
-
-
 
 __kernel
 __attribute__ ((reqd_work_group_size(1,1,1)))
@@ -215,50 +210,43 @@ void encode(__global uchar* in_data, uint size_in_data, __global uchar* out_data
 	u32 alphabet_usage[MAX_TREE_LEAVES];
 	u16 alphabet_to_htree_node[MAX_TREE_LEAVES];
 	for(u32 i=0; i < MAX_TREE_LEAVES; i++) {
-	  alphabet_usage[i] = 0;
-	  alphabet_to_htree_node[i] = C_INVALID_LINK;
+		alphabet_usage[i] = 0;
+		alphabet_to_htree_node[i] = C_INVALID_LINK;
 	}
 
 	for(u32 i=0; i < size_in_data; i++) {
 		u8 d = in_data[i];
-		alphabet_usage[d] ++;
+		alphabet_usage[d]++;
 	}
 
 	u8 ctLeaves = 0;
 	for(u16 i=0; i < MAX_TREE_LEAVES; i++) {
-	  if(alphabet_usage[i] > 0) {
-		  ctLeaves ++;
+		if(alphabet_usage[i] > 0) {
+			ctLeaves ++;
 
-		  //HTREE leaf node
-		  struct FLAT_HTREE node;
-		  node.lc = node.rc = C_INVALID_LINK;
-		  node.code = node.bitlen = 0;
-		  node.symbol = (u16)i;
-		  node.weight = alphabet_usage[i];
+			//HTREE leaf node
+			struct FLAT_HTREE node;
+			node.lc = node.rc = C_INVALID_LINK;
+			node.code = node.bitlen = 0;
+			node.symbol = (u16)i;
+			node.weight = alphabet_usage[i];
 
-		  //final codebook lut
-		  alphabet_to_htree_node[i] = ht_current;
+			//final codebook lut
+			alphabet_to_htree_node[i] = ht_current;
 
-		  //write ht node
-		  write_ht_node(&ht[ht_current * ENTRY_STRIDE], &node);
-		  ht_current++;
-	  }
+			//write ht node
+			write_ht_node(&ht[ht_current * ENTRY_STRIDE], &node);
+			ht_current++;
+		}
 	}
-
-	//now
-	//u32 nMaxTreeNodes = ctLeaves * 2 - 1;
-	//printf("There are %u unique symbols\n", ctLeaves);
-
 
 	u32 ctUnvisited = ctLeaves;
 	while(ctUnvisited > 1) {
 
 		int idxS0 = find_next_min(&ht[0], ht_current, &visited[0]);
-		//assert(idxS0 >= 0 && idxS0 < (int)ht_current);
 		visited[idxS0] = 1;
 
 		int idxS1 = find_next_min(&ht[0], ht_current, &visited[0]);
-		//assert(idxS1 >= 0 && idxS1 < (int)ht_current);
 		visited[idxS1] = 1;
 
 		struct FLAT_HTREE lc_node;
@@ -283,7 +271,6 @@ void encode(__global uchar* in_data, uint size_in_data, __global uchar* out_data
 
 		ctUnvisited--;
 	}
-
 
 	//now compute bit-codes
 	u32 idxRoot = ht_current - 1;
@@ -349,7 +336,6 @@ void encode(__global uchar* in_data, uint size_in_data, __global uchar* out_data
 
 	u32 total_bitcode_dict_bytes = (total_bitcode_dict_bits + 7) / 8;
 
-
 	//estimate total size
 	u32 total_payload_bits = 0;
 	for(u32 i=0; i < size_in_data; i++) {
@@ -372,34 +358,33 @@ void encode(__global uchar* in_data, uint size_in_data, __global uchar* out_data
 	if(fetch_size_only == 1) {
 		*size_out_data = estimate_total;
 		return;
-	}
-	else if(*size_out_data < estimate_total) {
-		printf("Not enough output memory!");
+	} else if(*size_out_data < estimate_total) {
+		/* ERROR: Not enought output memory */
+		*size_out_data = 0;
 		return;
 	}
 
 	//encode data
 
 	//MSG LEN
-	__global u8* ptr = &out_data[0];
-	write_word(ptr, size_in_data);
-	ptr += 4;
+	u32 p = 0;
+	write_word(&out_data[p], size_in_data);
+	p += 4;
 
 	//S
-	*ptr = ctLeaves;
-	ptr++;
+	out_data[p] = ctLeaves;
+	p++;
 
 	//Symbols + BitLens Interlaced
 	for(int i=0; i < ctLeaves; i++) {
 		struct FLAT_HTREE node;
 		read_ht_node(&ht[i * ENTRY_STRIDE], &node);
 
-		*ptr = node.symbol;
-		ptr++;
-		*ptr = node.bitlen;
-		ptr++;
+		out_data[p] = node.symbol;
+		p++;
+		out_data[p] = node.bitlen;
+		p++;
 	}
-
 
 	//Bit-Codes
 	u32 total_bits_written = 0;
@@ -408,14 +393,14 @@ void encode(__global uchar* in_data, uint size_in_data, __global uchar* out_data
 		struct FLAT_HTREE node;
 		read_ht_node(&ht[i * ENTRY_STRIDE], &node);
 
-		int nbytes = multiple_bits_writer(ptr, &total_bits_written, node.code, node.bitlen);
-		ptr += nbytes; 
+		int nbytes = multiple_bits_writer(&out_data[p], &total_bits_written, node.code, node.bitlen);
+		p += nbytes; 
 		total_bytes += nbytes;
 	}
 
 	//check if need to increment
 	if(total_bits_written % 8 != 0) {
-		ptr++;
+		p++;
 	}
 
 	/*
@@ -426,12 +411,12 @@ void encode(__global uchar* in_data, uint size_in_data, __global uchar* out_data
 	u8 payload_rem = total_payload_bits % 8;
 
 	//Payload SIZE
-	write_word(ptr, total_payload_bytes);
-	ptr += 4;
+	write_word(&out_data[p], total_payload_bytes);
+	p += 4;
 
 	//Payload REM
-	*ptr = payload_rem;
-	ptr++;
+	out_data[p] = payload_rem;
+	p++;
 
 	//Payload
 	total_bits_written = 0;
@@ -444,8 +429,8 @@ void encode(__global uchar* in_data, uint size_in_data, __global uchar* out_data
 		read_ht_node(&ht[ht_index * ENTRY_STRIDE], &node);
 
 		//count the output bits
-		int nbytes = multiple_bits_writer(ptr, &total_bits_written, node.code, node.bitlen);
-		ptr += nbytes;
+		int nbytes = multiple_bits_writer(&out_data[p], &total_bits_written, node.code, node.bitlen);
+		p += nbytes;
 		total_bytes += nbytes;
 	}
 }
@@ -499,6 +484,7 @@ void decode(__global uchar* in_data, uint size_in_data, __global uchar* out_data
 	*/
 
 	//MSG_LEN
+
 	__global u8* ptr = &in_data[0];
 	u32 msg_len = 0;
 	read_word(ptr, &msg_len);
@@ -508,19 +494,20 @@ void decode(__global uchar* in_data, uint size_in_data, __global uchar* out_data
 	if(fetch_size_only) {
 		*size_out_data = msg_len;
 		return;
-	}
-	else if(*size_out_data < msg_len) {
-		printf("Not enough memory\n");
+	} else if(*size_out_data < msg_len) {
+		// ERROR: not enough output memory
+		*size_out_data = 0;
+		return;
 	}
 
 	u8 ctLeaves = *ptr;
 	ptr++;
-
+	
 	//Read Symbols
 	u32 total_bitcodes_bits = 0;
 	for(u32 i=0; i<ctLeaves; i++) {
-	  leaf_symbols[i] = *ptr;
-	  ptr++;
+		leaf_symbols[i] = *ptr;
+		ptr++;
 
 	  leaf_bitlen[i] = *ptr;
 	  ptr++;
@@ -544,7 +531,6 @@ void decode(__global uchar* in_data, uint size_in_data, __global uchar* out_data
 	//increment in case at middle byte
 	if(total_bits_read % 8 != 0)
 		ptr++;
-
 
 	u32 ht_root = ht_current;
 	//Create a root node now
@@ -593,8 +579,7 @@ void decode(__global uchar* in_data, uint size_in_data, __global uchar* out_data
 			if((msb == 0) && (node.lc == C_INVALID_LINK)) {
 				need_new_node = true;
 				new_node_on_left = true;
-			}
-			else if((msb == 1) && (node.rc == C_INVALID_LINK)) {
+			} else if((msb == 1) && (node.rc == C_INVALID_LINK)) {
 				need_new_node = true;
 			}
 
