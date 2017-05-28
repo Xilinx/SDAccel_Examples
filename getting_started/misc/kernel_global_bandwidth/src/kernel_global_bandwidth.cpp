@@ -145,7 +145,7 @@ int main(int argc, char** argv) {
 
     cl_mem_ext_ptr_t ext_buffer[num_buffers];
 
-#if defined(USE_2DDR) || defined(USE_4DDR)
+    if (ddr_banks >= 2) {
         unsigned xcl_bank[4] = {
             XCL_MEM_DDR_BANK0,
             XCL_MEM_DDR_BANK1,
@@ -168,7 +168,7 @@ int main(int argc, char** argv) {
                 return EXIT_FAILURE;
             }
         } /* End for (i < ddr_banks) */
-#else
+    } else { /* End if (ddr_banks >= 2) */
         buffer[0] = clCreateBuffer(world.context,
                                    CL_MEM_READ_WRITE,
                                    globalbuffersize,
@@ -185,7 +185,8 @@ int main(int argc, char** argv) {
             printf("Error: Failed to allocate input/output_buffer0 in BANK0 of size %zu\n", globalbuffersize);
             return EXIT_FAILURE;
          }
-#endif
+    } /* End else */
+
     cl_ulong num_blocks = globalbuffersize/64;
     double dbytes = globalbuffersize;
     double dmbytes = dbytes / (((double)1024) * ((double)1024));
@@ -229,7 +230,7 @@ int main(int argc, char** argv) {
     }
     clFinish(world.command_queue);
 
-#ifdef USE_4DDR
+    if (ddr_banks == 4) {
         unsigned char *map_input_buffer1;
         map_input_buffer1 = (unsigned char *) clEnqueueMapBuffer(world.command_queue,
                                                                  buffer[2],
@@ -265,7 +266,8 @@ int main(int argc, char** argv) {
             return EXIT_FAILURE;
         }
         clFinish(world.command_queue);
-#endif 
+    } /* End if (ddr_banks == 4) */
+
 
     /* Execute kernel */
     int arg_index = 0;
@@ -273,11 +275,10 @@ int main(int argc, char** argv) {
 
     xcl_set_kernel_arg(krnl, arg_index++, sizeof(cl_mem), &buffer[buffer_index++]);
     xcl_set_kernel_arg(krnl, arg_index++, sizeof(cl_mem), &buffer[buffer_index++]);
-        
-    #ifdef USE_4DDR
+    if (ddr_banks == 4) {
         xcl_set_kernel_arg(krnl, arg_index++, sizeof(cl_mem), &buffer[buffer_index++]);
         xcl_set_kernel_arg(krnl, arg_index++, sizeof(cl_mem), &buffer[buffer_index++]);
-    #endif
+    }
     xcl_set_kernel_arg(krnl, arg_index++, sizeof(cl_ulong), &num_blocks);
 
     unsigned long nsduration = xcl_run_kernel3d(world, krnl, 1, 1, 1);
@@ -308,8 +309,7 @@ int main(int argc, char** argv) {
             return EXIT_FAILURE;
         }
     }
-
-#ifdef USE_4DDR
+    if (ddr_banks == 4) {
         unsigned char *map_output_buffer1;
         map_output_buffer1 = (unsigned char *)clEnqueueMapBuffer(world.command_queue,
                                                                  buffer[3],
@@ -336,7 +336,8 @@ int main(int argc, char** argv) {
                 return EXIT_FAILURE;
             }
         }
-#endif 
+    } /* End if (ddr_banks == 4) */
+
     /* Profiling information */
     double dnsduration = ((double)nsduration);
     double dsduration = dnsduration / ((double) 1000000000);
