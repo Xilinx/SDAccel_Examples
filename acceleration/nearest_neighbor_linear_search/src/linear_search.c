@@ -56,13 +56,13 @@ void linear_search_read_datafile(char* filename, float* data, size_t size) {
 	fclose(fp);
 }
 
-void linear_search_init( xcl_world *world, cl_kernel *krnl,
+void linear_search_init( xcl_world *world, cl_program *program, cl_kernel *krnl,
 	cl_mem *dev_targets, cl_mem *dev_queries, cl_mem *dev_indices
 ) {
 
 	*world = xcl_world_single();
-	cl_program program = xcl_import_binary(*world, "krnl_nearest");
-	*krnl = xcl_get_kernel(program, KRNL_NAME);
+	*program = xcl_import_binary(*world, "krnl_nearest");
+	*krnl = xcl_get_kernel(*program, KRNL_NAME);
 
 	/* Create Buffers padded to 512 bit boundry */
 	*dev_targets = xcl_malloc(*world, CL_MEM_READ_ONLY, ((TARGETS * DIMS - 1) / 16 + 1) * 16 * sizeof(float));
@@ -72,7 +72,7 @@ void linear_search_init( xcl_world *world, cl_kernel *krnl,
 }
 
 void linear_search_exit(
-	xcl_world *world, cl_kernel *krnl,
+	xcl_world *world, cl_program *program, cl_kernel *krnl,
 	cl_mem *dev_targets, cl_mem *dev_queries, cl_mem *dev_indices
 ) {
 	clReleaseMemObject(*dev_targets);
@@ -80,6 +80,7 @@ void linear_search_exit(
 	clReleaseMemObject(*dev_indices);
 
 	clReleaseKernel(*krnl);
+	clReleaseProgram(*program);
 	xcl_release_world(*world);
 }
 
@@ -148,18 +149,19 @@ int main(int argc, char** argv) {
 	}
 
 	xcl_world world;
+	cl_program program;
 	cl_kernel krnl;
 
 	cl_mem dev_targets, dev_queries, dev_indices;
 
-	linear_search_init(&world, &krnl,
+	linear_search_init(&world, &program, &krnl,
 	    &dev_targets, &dev_queries, &dev_indices);
 
 	unsigned long duration = linear_search_exec(
 	    &world, &krnl, targets, queries, indices,
 	    &dev_targets, &dev_queries, &dev_indices);
 
-	linear_search_exit(&world, &krnl,
+	linear_search_exit(&world, &program, &krnl,
 	    &dev_targets, &dev_queries, &dev_indices);
 
 	printf("Kernel Execution Time: %ld ns\n", duration);
