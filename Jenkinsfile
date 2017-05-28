@@ -107,9 +107,9 @@ def dirsafe(device) {
 def runExample(target, dir, device, workdir) {
 	return { ->
 		if ( target == "sw_emu" ) {
-			secs = 300
+			secs = 5
 		} else {
-			secs = 7200
+			secs = 150
 		}
 
 		devdir = dirsafe(device)
