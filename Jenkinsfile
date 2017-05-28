@@ -223,7 +223,7 @@ module add proxy
 		parallel exSteps
 	}
 
-	stage('sw_emu') {
+	stage('sw_emu build') {
 		def swEmuSteps = [:]
 		def swEmuRunSteps = [:]
 
@@ -236,13 +236,15 @@ module add proxy
 		}
 
 		parallel swEmuSteps
+	}
 
+	stage('sw_emu run')
 		lock("only_one_run_stage_at_a_time") {
 			parallel swEmuRunSteps
 		}
 	}
 
-	stage('hw') {
+	stage('hw build') {
 		def hwSteps = [:]
 		def hwRunSteps = [:]
 
@@ -255,12 +257,14 @@ module add proxy
 		}
 
 		parallel hwSteps
+	}
 /*
+	stage('hw run') {
 		lock("only_one_run_stage_at_a_time") {
 			parallel hwRunSteps
 		}
-*/
 	}
+*/
 
 } catch (e) {
 	currentBuild.result = "FAILED"
