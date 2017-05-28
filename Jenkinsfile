@@ -107,9 +107,9 @@ def dirsafe(device) {
 def runExample(target, dir, device, workdir) {
 	return { ->
 		if ( target == "sw_emu" ) {
-			timeout = 300
+			secs = 300
 		} else {
-			timeout = 7200
+			secs = 7200
 		}
 
 		devdir = dirsafe(device)
@@ -118,7 +118,7 @@ def runExample(target, dir, device, workdir) {
 				/* Node is here to prevent too much strain on Nimbix by rate limiting
 				 * to the number of job slots */
 				node("rhel6 && xsjrdevl && !xsjrdevl110") {
-					timeout($timeout) {
+					timeout(secs) {
 						sh """#!/bin/bash -e
 
 cd ${workdir}
