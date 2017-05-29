@@ -223,10 +223,10 @@ module add proxy
 		parallel exSteps
 	}
 
-	stage('sw_emu build') {
-		def swEmuSteps = [:]
-		def swEmuRunSteps = [:]
+	def swEmuSteps = [:]
+	def swEmuRunSteps = [:]
 
+	stage('sw_emu build') {
 		for(int i = 0; i < examples.size(); i++) {
 			for(int j = 0; j < devices.size(); j++) {
 				name = "${examples[i]}-${devices[j]}-sw_emu"
@@ -238,16 +238,16 @@ module add proxy
 		parallel swEmuSteps
 	}
 
-	stage('sw_emu run')
+	stage('sw_emu run') {
 		lock("only_one_run_stage_at_a_time") {
 			parallel swEmuRunSteps
 		}
 	}
 
-	stage('hw build') {
-		def hwSteps = [:]
-		def hwRunSteps = [:]
+	def hwSteps = [:]
+	def hwRunSteps = [:]
 
+	stage('hw build') {
 		for(int i = 0; i < examples.size(); i++) {
 			for(int j = 0; j < devices.size(); j++) {
 				name = "${examples[i]}-${devices[j]}-hw"
