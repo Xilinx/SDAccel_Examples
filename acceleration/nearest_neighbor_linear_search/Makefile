@@ -16,14 +16,14 @@ EXES=nearest
 # Nearest Neighbor Kernel
 krnl_nearest_SRCS=./src/krnl_linear_search.cpp
 krnl_nearest_CLFLAGS=--kernel krnl_linear_search -I./src/
-krnl_nearest_NDEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3
+krnl_nearest_NDEVICES=xilinx:adm-pcie-7v3:1ddr xilinx:xil-accel-rd-ku115:4ddr-xpr
 
 XOS=krnl_nearest
 
 # Nearest Neighbor xclbin
 krnl_nearest_XOS=krnl_nearest
 krnl_nearest_LDCLFLAGS=--nk krnl_linear_search:3
-krnl_nearest_NDEVICES=xilinx:adm-pcie-7v3:1ddr:3.0 xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3
+krnl_nearest_NDEVICES=xilinx:adm-pcie-7v3:1ddr xilinx:xil-accel-rd-ku115:4ddr-xpr
 
 XCLBINS=krnl_nearest
 
@@ -35,6 +35,7 @@ check_NDEVICES=$(krnl_nearest_NDEVICES)
 
 CHECKS=check
 
-DEVICES:=xilinx:adm-pcie-ku3:2ddr-xpr:3.3
+DEVICES:=xilinx:adm-pcie-ku3:2ddr-xpr
+
 include $(COMMON_REPO)/utility/rules.mk
 

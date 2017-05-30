@@ -46,7 +46,7 @@ EXES=host_kmeans
 #Kmeans Kernel
 kmeans_SRCS=./src/kmeans.cl
 kmeans_CLFLAGS=-D PARALLEL_POINTS=$(PARALLEL_POINTS) -D PARALLEL_FEATURES=$(PARALLEL_FEATURES) -D USE_DATA_TYPE=$(DATATYPE_ID)
-kmeans_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3
+kmeans_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr
 
 XOS=kmeans
 
@@ -66,6 +66,7 @@ check_NDEVICES=$(kmeans_NDEVICES)
 
 CHECKS=check
 
-DEVICES:=xilinx:adm-pcie-ku3:2ddr-xpr:3.3
+DEVICES:=xilinx:adm-pcie-ku3:2ddr-xpr
+
 include $(COMMON_REPO)/utility/rules.mk
 
