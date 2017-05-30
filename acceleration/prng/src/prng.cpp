@@ -167,6 +167,7 @@ int main(int argc, char** argv) {
 	clReleaseMemObject(cmem_Q);
 	clReleaseMemObject(cmem_output);
 	clReleaseKernel(krnl);
+	clReleaseProgram(program);
 	xcl_release_world(world);
 
 	std::cout << "Completed Successfully" << std::endl;

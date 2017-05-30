@@ -106,15 +106,14 @@ int cluster(int     npoints,                /* number of data points */
         fprintf(stderr, "Error: Failed to run malloc\n");
         exit(1);
     }
-        
+
+     fpga_kmeans_init();
 
     /* sweep k from min to max_nclusters to find the best number of clusters */
     for(nclusters = min_nclusters; nclusters <= max_nclusters; nclusters++)
     {
         if (nclusters > npoints) break;    /* cannot have more clusters than points */
-
         clock_gettime(CLOCK_MONOTONIC,&d_start);
-        fpga_kmeans_init();
         clock_gettime(CLOCK_MONOTONIC,&d_end);
         d_time = time_elapsed(d_start,d_end);
         printf("Device Initialization Time %f ms\n",d_time);
@@ -234,6 +233,7 @@ int cluster(int     npoints,                /* number of data points */
         fpga_kmeans_print_report();
     }
 
+    fpga_kmeans_shutdown();
     free(membership);
     free(cmodel_membership);
 

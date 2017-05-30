@@ -40,5 +40,7 @@ EXTRA_CLEAN=out.bmp
 
 CHECKS=check
 
+DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
+
 include $(COMMON_REPO)/utility/rules.mk
 

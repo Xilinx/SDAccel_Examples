@@ -49,6 +49,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //Global Variables
 xcl_world       g_world;
+cl_program      g_prog;
 INT_DATA_TYPE   *g_membership_OCL;
 cl_kernel       g_kernel_kmeans;
 
@@ -361,14 +362,16 @@ float** fpga_kmeans_clustering(
 int fpga_kmeans_shutdown()
 {
     // release resources
+    clReleaseKernel(g_kernel_kmeans);
+    clReleaseProgram(g_prog);
     xcl_release_world(g_world);
     return 0;
 }
 int fpga_kmeans_init()
 {
     g_world = xcl_world_single();
-    cl_program prog = xcl_import_binary(g_world, "kmeans");
-    g_kernel_kmeans = xcl_get_kernel(prog, "kmeans");
+    g_prog = xcl_import_binary(g_world, "kmeans");
+    g_kernel_kmeans = xcl_get_kernel(g_prog, "kmeans");
     return 0;
 }
 int fpga_kmeans_allocate(int n_points, int n_features, int n_clusters, float **feature)
