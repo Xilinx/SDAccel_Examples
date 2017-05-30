@@ -152,6 +152,68 @@ void software_sketch(int *image, int *output, int width, int height)
     }
 }//end of software
 
+void run_opencl_sketch
+ (
+   std::vector<cl::Device> &devices,
+   cl::CommandQueue &q,
+   cl::Context &context,
+   std::string &device_name,
+   bool good,
+   std::vector<int, aligned_allocator<int>> &hw_inImage,
+   std::vector<int, aligned_allocator<int>> &hw_outImage,
+   int size,
+   int width,
+   int height
+ )
+ {
+    std::string binaryFile;
+    size_t image_size_bytes = sizeof(int) * size;
+
+    if(good)
+       binaryFile = xcl::find_binary_file(device_name,"sketch_GOOD");
+    else
+       binaryFile = xcl::find_binary_file(device_name,"sketch_BAD");
+
+
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    devices.resize(1);
+    cl::Program program(context, devices, bins);
+    cl::Kernel krnl_process_image(program,"process_image");
+
+    //Allocate Buffer in Global Memory
+    std::vector<cl::Memory> inBufVec, outBufVec;
+    cl::Buffer buffer_input (context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                  image_size_bytes,hw_inImage.data());
+    cl::Buffer buffer_output(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+            image_size_bytes,hw_outImage.data());
+    inBufVec.push_back(buffer_input);
+    outBufVec.push_back(buffer_output);
+
+    std::cout << "Writing input image to buffer...\n";
+
+    //Copy input data to device global memory
+    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
+    
+    int narg = 0;
+    //Set the Kernel Arguments
+    krnl_process_image.setArg(narg++, buffer_input);
+    krnl_process_image.setArg(narg++, buffer_output);
+    krnl_process_image.setArg(narg++, width);
+    krnl_process_image.setArg(narg++, height);
+    
+    std::cout << "Launching Kernels...." << std::endl;
+
+    //Launch the Kernel
+    q.enqueueTask(krnl_process_image);
+    std::cout << "Kernel Execution Finished...." << std::endl;
+    
+    //Copy Result from Device Global Memory to Host Local Memory
+    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    q.finish();
+
+  }  
+ 
+
 int main(int argc, char** argv)
 {
     if (argc != 2)
@@ -189,7 +251,10 @@ int main(int argc, char** argv)
     //Copying image host buffer
     memcpy(hw_inImage.data(),image.bitmap(),image_size_bytes);
 
+    int size = image.numPixels();
+
 //OPENCL HOST CODE AREA START
+
     //Create Program and Kernels. 
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
@@ -198,43 +263,8 @@ int main(int argc, char** argv)
     cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
     std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
 
-    std::string binaryFile = xcl::find_binary_file(device_name,"sketch_GOOD");
-    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
-    devices.resize(1);
-    cl::Program program(context, devices, bins);
-    cl::Kernel krnl_process_image(program,"process_image");
-
-    //Allocate Buffer in Global Memory
-    std::vector<cl::Memory> inBufVec, outBufVec;
-    cl::Buffer buffer_input (context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-            image_size_bytes,hw_inImage.data());
-    cl::Buffer buffer_output(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
-            image_size_bytes,hw_outImage.data());
-    inBufVec.push_back(buffer_input);
-    outBufVec.push_back(buffer_output);
-
-    std::cout << "Writing input image to buffer...\n";
-
-    //Copy input data to device global memory
-    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
-
-    int size = image.numPixels();
-    int narg = 0;
-    //Set the Kernel Arguments
-    krnl_process_image.setArg(narg++, buffer_input);
-    krnl_process_image.setArg(narg++, buffer_output);
-    krnl_process_image.setArg(narg++, width);
-    krnl_process_image.setArg(narg++, height);
-
-    std::cout << "Launching Kernels...." << std::endl;
-    //Launch the Kernel
-    q.enqueueTask(krnl_process_image);
-
-    std::cout << "Kernel Execution Finished...." << std::endl;
-
-    //Copy Result from Device Global Memory to Host Local Memory
-    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
-    q.finish();
+    run_opencl_sketch(devices,q,context,device_name,true,hw_inImage,hw_outImage,size,width,height);
+    run_opencl_sketch(devices,q,context,device_name,false,hw_inImage,hw_outImage,size,width,height);
 
 //OPENCL HOST CODE AREA END
 
