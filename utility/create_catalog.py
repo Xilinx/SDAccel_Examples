@@ -15,21 +15,24 @@ import collections
 import sys
 import subprocess
 
-if len(sys.argv) is not 2:
-    print "Usage: %s <catalog>.json" % sys.argv[0]
+if len(sys.argv) > 2:
+    print "Usage: %s [<catalog>.json]" % sys.argv[0]
     sys.exit(os.EX_USAGE)
 
-index_filename = sys.argv[1]
+echo_progress = (len(sys.argv) == 2)
 
 def addexample(path):
     example = collections.OrderedDict()
     example["name"] = os.path.basename(path)
+    example["commit_id"] = get_commit_id(path)
     example_json_file = os.path.join(path, "description.json")
     if (os.path.isfile(example_json_file)):
         with open(example_json_file) as json_file:
             data = json.load(json_file)
-            if data.get("sdx_gui"):
+            if data.get("sdx_gui") or data.get("sdx_gui") == False:
                 supported_in_gui = data.get("sdx_gui")
+                if supported_in_gui == False:
+                    return None
                 if supported_in_gui.lower() not in [ "true", "1", "yes" ]:
                     return None
             if data.get("overview"):
@@ -55,8 +58,14 @@ def addexample(path):
                     contributor = contributors[r]
                     author = contributor["group"]
                     example["author"] = author
-    print "adding %s" % path
+    if echo_progress:
+        print "adding %s" % path
     return example
+
+def get_commit_id(filename):
+    # git log -n 1 --pretty=format:%H $filename
+    id = subprocess.Popen(["git", "log", "-n", "1", "--pretty=format:%H", filename], stdout=subprocess.PIPE).communicate()[0]
+    return id
 
 def get_git_branch():
     branch = subprocess.Popen(["git", "rev-parse", "--abbrev-ref", "HEAD"], stdout=subprocess.PIPE).communicate()[0]
@@ -67,7 +76,7 @@ def get_git_branch():
 
 def searchdir(dir):
     if (not os.path.isdir(dir)):
-        print "%s not found, but indexed in parent summary.json" % dir
+        sys.stderr.write("%s not found, but indexed in parent summary.json\n" % dir)
         emptycat = collections.OrderedDict()
         emptycat["categories"] = []
         emptycat["examples"] = []
@@ -115,10 +124,14 @@ def searchdir(dir):
 index = searchdir(".")
 index["branch"] = get_git_branch()
 
-indexdir = os.path.dirname(index_filename)
-if (indexdir):
-    if (not os.path.exists(indexdir)):
-        os.makedirs(indexdir)
-
-with open(index_filename, "w") as index_file:
-    json.dump(index, index_file, indent = 4)
+if len(sys.argv) == 2:
+    index_filename = sys.argv[1]
+    indexdir = os.path.dirname(index_filename)
+    if (indexdir):
+        if (not os.path.exists(indexdir)):
+            os.makedirs(indexdir)
+    index_file = open(index_filename, "w")
+else:
+    index_file = sys.stdout
+    
+json.dump(index, index_file, indent = 4)
