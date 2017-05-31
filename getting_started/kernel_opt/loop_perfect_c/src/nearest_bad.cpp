@@ -81,7 +81,7 @@ Kernel Description : [Bad case]
 #define MAX_SIZE 16384
 
 extern "C"{
-    void nearest(
+    void nearest_bad(
 				    const int *in,      // Input Points Array
 				    const int *point,   // Current Point
 				    int *out,           // Output Point

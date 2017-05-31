@@ -12,16 +12,19 @@
     "libs": [
         "xcl2"
     ],
-    "accelerators": [
+    "containers": [
         {
-            "container": "nearest_GOOD", 
-            "name": "nearest", 
-            "location": "src/nearest_good.cpp"
-        },
-        {
-            "container": "nearest_BAD", 
-            "name": "nearest", 
-            "location": "src/nearest_bad.cpp"
+            "name": "nearest",
+            "accelerators": [
+                {
+                    "name": "nearest_good",
+                    "location": "src/nearest_good.cpp"
+                },
+                {
+                    "name": "nearest_bad",
+                    "location": "src/nearest_bad.cpp"
+                }
+            ]
         }
     ],
     "em_cmd": "./host",
