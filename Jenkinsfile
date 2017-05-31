@@ -92,7 +92,7 @@ set -e
 if [[ \$rc != 0 ]]; then
 bsub -I -q ${queue} -R "osdistro=rhel && osver==ws6" -n ${cores} -R "rusage[mem=${mem}] span[ptile=${cores}]" -J "\$(basename ${dir})-${target}" <<EOF
 #!/bin/bash -ex
-export TEMPDIR=\$(mktemp -d -p $PWD)
+export TEMPDIR=\$(mktemp -d -p ${dir})
 make TARGETS=${target} DEVICES=\"${device}\" all
 rm -rf \$TEMPDIR
 EOF
