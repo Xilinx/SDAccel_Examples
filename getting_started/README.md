@@ -16,7 +16,6 @@ S.No.   | Category  | Description
 5 | [clk_freq][]      |Improving Kernel Clock Frequency through Optimized code.
 6 | [debug][]      |Debugging and Profiling of Kernel.
 7 | [rtl_kernel][]      |RTL Kernel Based Examples
-8 | [basic][]      |OpenCL miscellaneous Examples
 
  __Examples Table__ 
 
@@ -54,17 +53,17 @@ Example        | Description           | Key Concepts / Keywords
 [kernel_opt/loop_pipeline_ocl/][]|This example demonstrates how loop pipelining can be used to improve the performance of a kernel.|__Key__ __Concepts__<br> - Kernel Optimization<br> - Loop Pipelining<br>__Keywords__<br> - xcl_pipeline_loop
 [kernel_opt/loop_reorder_c/][]|This is a simple example of matrix multiplication (Row x Col) to demonstrate how to achieve better pipeline II factor by loop reordering.|__Key__ __Concepts__<br> - Kernel Optimization<br> - Loop reorder to improve II<br>__Keywords__<br> - #pragma HLS PIPELINE<br> - #pragma HLS ARRAY_PARTITION
 [kernel_opt/loop_reorder_ocl/][]|This is a simple example of matrix multiplication (Row x Col) to demonstrate how to achieve better pipeline II factor by loop reordering.|__Key__ __Concepts__<br> - Kernel Optimization<br> - Loop reorder to improve II<br>__Keywords__<br> - xcl_pipeline_loop<br> - xcl_array_partition(complete, 2)
+[kernel_opt/shift_register_c/][]|This example demonstrates how to shift values in registers in each clock cycle|__Key__ __Concepts__<br> - Kernel Optimization<br> - Shift Register<br> - FIR<br>__Keywords__<br> - #pragma HLS ARRAY_PARTITION
 [kernel_opt/shift_register_ocl/][]|This example demonstrates how to shift values in registers in each clock cycle|__Key__ __Concepts__<br> - Kernel Optimization<br> - Shift Register<br> - FIR<br>__Keywords__<br> - xcl_array_partition
 [kernel_opt/systolic_array_c/][]|This is a simple example of matrix multiplication (Row x Col) to help developers learn systolic array based algorithm design. Note : Systolic array based algorithm design is well suited for FPGA.|
 [kernel_opt/systolic_array_ocl/][]|This is a simple example of matrix multiplication (Row x Col) to help developers learn systolic array based algorithm design. Note: Systolic array based algorithm design is well suited for FPGA.|
-[kernel_opt/shift_register_c/][]|This example demonstrates how to shift values in registers in each clock cycle|__Key__ __Concepts__<br> - Kernel Optimization<br> - Shift Register<br> - FIR<br>__Keywords__<br> - #pragma HLS ARRAY_PARTITION
 [dataflow/dataflow_func_ocl/][]|This is simple example of vector addition to demonstrate Dataflow functionality in OpenCL Kernel. OpenCL Dataflow allows user to run multiple functions together to achieve higher throughput.|__Key__ __Concepts__<br> - Function/Task Level Parallelism<br>__Keywords__<br> - xcl_dataflow<br> - xclDataflowFifoDepth
 [dataflow/dataflow_loop_c/][]|This is simple example of vector addition to demonstrate Loops Dataflow functionality of HLS. HLS Dataflow allows user to schedule multiple sequential loops concurrently to achieve higher throughput.|__Key__ __Concepts__<br> - Loop Dataflow<br>__Keywords__<br> - dataflow<br> - hls::stream<>
 [dataflow/dataflow_pipes_ocl/][]|This is simple example of vector addition to demonstrate OpenCL Pipe Memory usage. OpenCL PIPE memory functionality allows user to achieve kernel-to-kernel data transfer without using global memory.|__Key__ __Concepts__<br> - Dataflow<br> - kernel to kernel pipes<br>__Keywords__<br> - pipe<br> - xcl_reqd_pipe_depth<br> - read_pipe_block()<br> - write_pipe_block()
 [dataflow/dataflow_stream_array_c/][]|This is simple example of Multiple Stages Vector Addition to demonstrate Array of Stream usage in HLS C Kernel Code.|__Key__ __Concepts__<br> - Array of Stream<br>__Keywords__<br> - dataflow<br> - hls::stream<>
 [dataflow/dataflow_stream_c/][]|This is simple example of vector addition to demonstrate Dataflow functionality of HLS. HLS Dataflow allows user to schedule multiple task together to achieve higher throughput.|__Key__ __Concepts__<br> - Task Level Parallelism<br>__Keywords__<br> - dataflow<br> - hls::stream<>
-[clk_freq/large_loop_c/][]|This is a CNN (Convolutional Neural Network) based example which mainly focuses on Convolution operation of a CNN network. The goal of this example is to demonstrate a method to overcome kernel design timing failure issue. It also presents the effectiveness of using multiple compute units to improve performance.|__Key__ __Concepts__<br> - Clock Frequency<br> - Multiple Compute Units<br> - Convolutional Neural Networks<br>__Keywords__<br> - #pragma HLS ARRAY_PARTITION<br> - #pragma HLS PIPELINE
-[clk_freq/large_loop_ocl/][]|This is a CNN (Convolutional Neural Network) based example which mainly focuses on Convolution operation of a CNN network. The goal of this example is to demonstrate a method to overcome kernel design timing failure issue. It also presents the effectiveness of using multiple compute units to improve performance.|__Key__ __Concepts__<br> - Clock Frequency<br> - Multiple Compute Units<br> - Convolutional Neural Networks<br>__Keywords__<br> - xcl_array_partition<br> - xcl_pipeline_loop
+[clk_freq/large_loop_c/][]|This is a CNN (Convolutional Neural Network) based example which mainly focuses on Convolution operation of a CNN network. The goal of this example is to demonstrate a method to overcome kernel design timing failure issue. It also presents the effectiveness of using multiple compute units to improve performance.|__Key__ __Concepts__<br> - Clock Frequency<br> - Multiple Compute Units<br> - Convolutional Neural Networks<br>__Keywords__<br> - #pragma HLS ARRAY_PARTITION<br> - #pragma HLS PIPELINE<br> - #pragma HLS INLINE
+[clk_freq/large_loop_ocl/][]|This is a CNN (Convolutional Neural Network) based example which mainly focuses on Convolution operation of a CNN network. The goal of this example is to demonstrate a method to overcome kernel design timing failure issue. It also presents the effectiveness of using multiple compute units to improve performance.|__Key__ __Concepts__<br> - Clock Frequency<br> - Multiple Compute Units<br> - Convolutional Neural Networks<br>__Keywords__<br> - xcl_array_partition<br> - xcl_pipeline_loop<br> - always_inline
 [clk_freq/split_kernel_c/][]|This is a multi-filter image processing application to showcase effectiveness of Dataflow/Streams usage. This examples is intended to help developers to break down the complex kernels into multiple sub-functions using HLS Dataflow/Streams. It presents a way to concurrently execute multiple functions with better area utilization compared to a complex single kernel implementation. The main objective of this example is to showcase a way to build a optimal FPGA design which achieves maximum frequency with optimal resource utilization and achieves better performance compared to single complex kernel implementations.|__Key__ __Concepts__<br> - Dataflow<br> - Stream<br>__Keywords__<br> - #pragma HLS DATAFLOW<br> - hls::stream<br> - #pragma HLS INLINE<br> - #pragma HLS ARRAY_PARTITION<br> - #pragma HLS PIPELINE
 [clk_freq/split_kernel_ocl/][]|This is a multi-filter image processing application to showcase effectiveness of Dataflow/Streams usage. This examples is intended to help developers to break down the complex kernel into multiple sub-functions using OpenCL Dataflow. It presents a way to concurrently execute multiple functions with better area utilization compared to a complex single kernel implementation. The main objective of this example is to showcase a way to build a optimal FPGA design which achieves maximum frequency with optimal resource utilization and achieves better performance compared to single kernel implementations.|__Key__ __Concepts__<br> - Dataflow<br> - Stream<br>__Keywords__<br> - xcl_dataflow<br> - xcl_array_partition<br> - xcl_pipeline_loop
 [clk_freq/too_many_cu_c/][]|This is simple example of vector addition to demonstrate effectiveness of using single compute unit with heavy work load to achieve better performance. Bad example uses multiple compute units to achieve good performance but it results in heavy usage of FPGA resources and area due to which design fails timing. Good example uses single compute unit to compute with heavier work load, it helps in less resource utilization and also helps in kernel scalability. To switch between Good/Bad cases use the flag provided in makefile.|__Key__ __Concepts__<br> - Clock Frequency<br> - Data Level Parallelism<br> - Multiple Compute Units<br>__Keywords__<br> - #pragma HLS PIPELINE<br> - #pragma HLS ARRAY_PARTITION
@@ -73,15 +72,7 @@ Example        | Description           | Key Concepts / Keywords
 [debug/debug_profile_ocl/][]|This is simple example of vector addition and printing profile data (wall clock time taken between start and stop). It also dump a waveform file which can be reloaded to vivado to see the waveform. Run command 'vivado -source ./scripts/open_waveform.tcl -tclargs <device_name>-<kernel_name>.<target>.<device_name>.wdb' to launch waveform viewer. User can also update batch to gui in sdaccel.ini file to see the live waveform while running application.|__Key__ __Concepts__<br> - Use of Profile API<br> - Waveform Dumping and loading<br>__Keywords__<br> - xcl_get_event_duration()
 [rtl_kernel/rtl_adder_pipes/][]|This example shows an adder with pipes using 3 RTL kernels.|__Key__ __Concepts__<br> - RTL Kernel<br> - Multiple RTL Kernels<br>
 [rtl_kernel/rtl_vadd/][]|Simple example of vector addition using RTL Kernel|__Key__ __Concepts__<br> - RTL Kernel<br>
-[rtl_kernel/rtl_vadd_2clks/][]|This example shows vector addition with 2 kernel clocks using RTL Kernel. Design contains two compute units of kernel. One compute unit is running at 150MHz and another compute unit is running at 250MHz.|__Key__ __Concepts__<br> - RTL Kernel<br> - Multiple Kernel Clocks<br>__Keywords__<br> - --kernel_frequency
-[basic/hello/][]|The hello world example is a simple design which tests the correct installation of the FPGA acceleration boards. The example uses the printf function call inside of the kernel code to report on the values provided from the host to the kernel.|
-[basic/host_global_bandwidth/][]|Host to global memory bandwidth test|
-[basic/kernel_global_bandwidth/][]|Bandwidth test of global to local memory.|
-[basic/sum_scan/][]|Example of parallel prefix sum|
-[basic/vadd/][]|Simple example of vector addition.|
-[basic/vdotprod/][]|Simple example of vector dot-product.|
-[basic/vmul_vadd/][]|This example shows how data stored in global memory can be shared between kernels in different binary containers. This functionality is available only for non-XPR Devices.|__Key__ __Concepts__<br> - Multiple Kernel Binaries<br> - Buffer sharing across Multiple binaries<br> - Multiple Kernels in different Binaries<br>__Keywords__<br> - NA
-[basic/vmul_vadd_xpr/][]|This example shows how data stored in global memory should be migrated from device to host and later from host to device to share between kernels in different binary containers. This buffer migration is only needed for XPR(Extended Partial Reconfiguration) Specific Devices. As XPR devices do not persist data when user reload another binary container.|__Key__ __Concepts__<br> - Handling Buffer sharing across multiple binaries for XPR Platform<br> - Multiple Kernel Binaries<br> - Buffer sharing across Multiple binaries<br>__Keywords__<br> - clEnqueueMigrateMemObjects()<br> - CL_MIGRATE_MEM_OBJECT_HOST
+[rtl_kernel/rtl_vadd_2clks/][]|This example shows vector addition with 2 kernel clocks using RTL Kernel.|__Key__ __Concepts__<br> - RTL Kernel<br> - Multiple Kernel Clocks<br>__Keywords__<br> - --kernel_frequency
 
 [host]:host
 [host/concurrent_kernel_execution_ocl/]:host/concurrent_kernel_execution_ocl/
@@ -118,10 +109,10 @@ Example        | Description           | Key Concepts / Keywords
 [kernel_opt/loop_pipeline_ocl/]:kernel_opt/loop_pipeline_ocl/
 [kernel_opt/loop_reorder_c/]:kernel_opt/loop_reorder_c/
 [kernel_opt/loop_reorder_ocl/]:kernel_opt/loop_reorder_ocl/
+[kernel_opt/shift_register_c/]:kernel_opt/shift_register_c/
 [kernel_opt/shift_register_ocl/]:kernel_opt/shift_register_ocl/
 [kernel_opt/systolic_array_c/]:kernel_opt/systolic_array_c/
 [kernel_opt/systolic_array_ocl/]:kernel_opt/systolic_array_ocl/
-[kernel_opt/shift_register_c/]:kernel_opt/shift_register_c/
 [dataflow]:dataflow
 [dataflow/dataflow_func_ocl/]:dataflow/dataflow_func_ocl/
 [dataflow/dataflow_loop_c/]:dataflow/dataflow_loop_c/
@@ -143,11 +134,3 @@ Example        | Description           | Key Concepts / Keywords
 [rtl_kernel/rtl_vadd/]:rtl_kernel/rtl_vadd/
 [rtl_kernel/rtl_vadd_2clks/]:rtl_kernel/rtl_vadd_2clks/
 [basic]:basic
-[basic/hello/]:basic/hello/
-[basic/host_global_bandwidth/]:basic/host_global_bandwidth/
-[basic/kernel_global_bandwidth/]:basic/kernel_global_bandwidth/
-[basic/sum_scan/]:basic/sum_scan/
-[basic/vadd/]:basic/vadd/
-[basic/vdotprod/]:basic/vdotprod/
-[basic/vmul_vadd/]:basic/vmul_vadd/
-[basic/vmul_vadd_xpr/]:basic/vmul_vadd_xpr/
