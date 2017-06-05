@@ -62,6 +62,17 @@ def addexample(path):
         print "adding %s" % path
     return example
 
+def get_git_root_directory():
+    # git rev-parse --show-toplevel
+    p = subprocess.Popen(["git", "rev-parse", "--show-toplevel"], stdout=subprocess.PIPE)
+    dir = p.communicate()[0].strip()
+    returncode = p.returncode
+    if returncode == 0:
+        return dir
+    else:
+        sys.stderr.write("Not a git repository. Could not find .git\n")
+        sys.exit(os.EX_CONFIG)
+
 def get_commit_id(filename):
     # git log -n 1 --pretty=format:%H $filename
     id = subprocess.Popen(["git", "log", "-n", "1", "--pretty=format:%H", filename], stdout=subprocess.PIPE).communicate()[0]
@@ -121,7 +132,8 @@ def searchdir(dir):
         return category
     return None
 
-index = searchdir(".")
+root = get_git_root_directory()
+index = searchdir(root)
 index["branch"] = get_git_branch()
 
 if len(sys.argv) == 2:
