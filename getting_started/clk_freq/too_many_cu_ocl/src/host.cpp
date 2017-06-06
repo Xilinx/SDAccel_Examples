@@ -38,112 +38,161 @@ Description:
 #include <iostream>
 #include <cstring>
 #include <cstdio>
+#include <vector>
+#include <unistd.h>
+
 //OpenCL utility layer include
-#include "xcl.h"
+#include "xcl2.hpp"
 
 #define DATA_SIZE 81920 
 #define WORK_GROUP 8 
 #define WORK_ITEM_PER_GROUP 1
+
+
+int run_opencl_vadd(
+  std::vector<cl::Device> &devices,
+  cl::CommandQueue &q,
+  cl::Context &context,
+  std::string &device_name,
+  bool good,
+  int size,
+  std::vector<int, aligned_allocator<int>> &source_in1,
+  std::vector<int, aligned_allocator<int>> &source_in2,
+  std::vector<int, aligned_allocator<int>> &source_hw_results
+)
+{
+    std::string binaryFile;
+
+    if(good){
+       binaryFile = xcl::find_binary_file(device_name,"vadd_GOOD");
+      }
+    else{
+       binaryFile = xcl::find_binary_file(device_name,"vadd_BAD");
+       if(access(binaryFile.c_str(), R_OK) != 0) {
+           std::cout << "WARNING: vadd_BAD xclbin not built" << std::endl;
+           return 0;
+        }
+     }
+
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    devices.resize(1);
+    cl::Program program(context, devices, bins);
+    cl::Kernel krnl_vector_add(program,"vadd");
+
+    std::cout << "Starting " << (good ? "GOOD" : "BAD") << " Kernel" << std::endl;
+
+    size_t vector_size_bytes = sizeof(int) * size;
+   
+    //Allocate Buffer in Global Memory    
+    std::vector<cl::Memory> inBufVec, outBufVec;
+    cl::Buffer buffer_in1 (context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                            vector_size_bytes,source_in1.data());
+    cl::Buffer buffer_in2(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+            vector_size_bytes,source_in2.data());
+    cl::Buffer buffer_output(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+            vector_size_bytes,source_hw_results.data());
+
+    inBufVec.push_back(buffer_in1);
+    inBufVec.push_back(buffer_in2);
+    outBufVec.push_back(buffer_output);
+
+    //Copy input data to device global memory
+    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
+
+    auto krnl_vadd
+        = cl::KernelFunctor<cl::Buffer&,cl::Buffer&,cl::Buffer&,int>(krnl_vector_add);
+
+    if(good){
+       std::cout << "Launching Kernel...." << std::endl;
+
+     //Launch the Kernel
+     krnl_vadd(cl::EnqueueArgs(q, cl::NDRange(1,1,1), cl::NDRange(1,1,1)),
+            buffer_in1,buffer_in2,buffer_output, size);
+
+     std::cout << "Kernel Execution Finished...." << std::endl;
+
+     //Copy Result from Device Global Memory to Host Local Memory 
+       q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+        q.finish();
+     }
+
+   else{
+        // Launch 8 threads for the bad case for the whole data set
+        // 8 Compute Units are created and one CU is allocated per thread
+        
+        //Launch the Kernel  
+        krnl_vadd(cl::EnqueueArgs(q, cl::NDRange(WORK_GROUP,1,1), cl::NDRange(1,1,1)),
+              buffer_in1,buffer_in2,buffer_output, size);
+
+        std::cout << "Kernel Execution Finished...." << std::endl;
+       //Copy Result from Device Global Memory to Host Local Memory
+         q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+         q.finish();
+
+     }
+  return 1;
+}
+
+
 
 int main(int argc, char** argv)
 {
     //Allocate Memory in Host Memory
     size_t vector_size_bytes = sizeof(int) * DATA_SIZE;
 
-    int *source_in1         = (int *) malloc(vector_size_bytes);
-    int *source_in2         = (int *) malloc(vector_size_bytes);
-    int *source_hw_results  = (int *) malloc(vector_size_bytes);
-    int *source_sw_results  = (int *) malloc(vector_size_bytes);
+    //Amount of vector data to be processed by kernel
+    int size = DATA_SIZE;
+
+    std::vector<int, aligned_allocator<int>> source_in1(size);
+    std::vector<int, aligned_allocator<int>> source_in2(size);
+    std::vector<int, aligned_allocator<int>> source_hw_good_results(size);
+    std::vector<int, aligned_allocator<int>> source_hw_bad_results(size);
+    std::vector<int, aligned_allocator<int>> source_sw_results(size);
 
     // Create the test data and Software Result 
     for(int i = 0 ; i < DATA_SIZE ; i++){
         source_in1[i] = i;
         source_in2[i] = i * i;
         source_sw_results[i] = i * i + i;
-        source_hw_results[i] = 0;
+        source_hw_good_results[i] = 0;
+        source_hw_bad_results[i] = 0;
     }
 
 //OPENCL HOST CODE AREA START
     //Create Program and Kernels
-    xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "vadd_GOOD");
-    cl_kernel krnl_vector_add = xcl_get_kernel(program, "vadd");
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
 
-    //Allocate Buffer in Global Memory
-    cl_mem buffer_in1    = xcl_malloc(world, CL_MEM_READ_ONLY, vector_size_bytes);
-    cl_mem buffer_in2    = xcl_malloc(world, CL_MEM_READ_ONLY, vector_size_bytes);
-    cl_mem buffer_output = xcl_malloc(world, CL_MEM_WRITE_ONLY, vector_size_bytes);
+    cl::Context context(device);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+    std::string device_name = device.getInfo<CL_DEVICE_NAME>();
 
-    //Copy input data to device global memory
-    xcl_memcpy_to_device(world,buffer_in1,source_in1,vector_size_bytes);
-    xcl_memcpy_to_device(world,buffer_in2,source_in2,vector_size_bytes);
-    
-    //Amount of vector data to be processed by kernel
-    int size = DATA_SIZE;
-    
-    //Set the Kernel Arguments
-    xcl_set_kernel_arg(krnl_vector_add,0,sizeof(cl_mem),&buffer_in1);
-    xcl_set_kernel_arg(krnl_vector_add,1,sizeof(cl_mem),&buffer_in2);
-    xcl_set_kernel_arg(krnl_vector_add,2,sizeof(cl_mem),&buffer_output);
-    xcl_set_kernel_arg(krnl_vector_add,3,sizeof(int),&size);
+    int good_return = run_opencl_vadd(devices,q,context,device_name, true, size, source_in1, source_in2, source_hw_good_results);
+    int bad_return = run_opencl_vadd(devices,q,context,device_name, false, size, source_in1, source_in2, source_hw_bad_results);
 
-    #ifdef BAD
-        // Launch 8 threads for the bad case for the whole data set
-        // 8 Compute Units are created and one CU is allocated per thread
-        
-        // Declare global & local Grids
-        cl_uint dimension = 1;
-        size_t global_size[dimension];
-        size_t local_size[dimension];
-
-        //Set global & local grids
-        global_size[0] = WORK_GROUP;
-        local_size[0]  = WORK_ITEM_PER_GROUP; 
-        
-        //Launch the Kernel
-        int err = clEnqueueNDRangeKernel(world.command_queue, krnl_vector_add, 1, NULL, global_size, local_size, 0, NULL, NULL);
-        if(err != CL_SUCCESS){
-            printf("Error: failed to execute kernel! %d\n", err);
-            printf("Test failed\n");
-            exit(EXIT_FAILURE);
-        }
-    #else
-        // Launch a single thread to perform the same computation
-        // The kernel takes care of running over the whole data set
-        xcl_run_kernel3d(world,krnl_vector_add,1,1,1);
-    #endif
-
-    //Copy Result from Device Global Memory to Host Local Memory
-    xcl_memcpy_from_device(world, source_hw_results, buffer_output,vector_size_bytes);
-    clFinish(world.command_queue);
-
-    //Release Device Memories and Kernels
-    clReleaseMemObject(buffer_in1);
-    clReleaseMemObject(buffer_in2);
-    clReleaseMemObject(buffer_output);
-    clReleaseKernel(krnl_vector_add);
-    clReleaseProgram(program);
-    xcl_release_world(world);
 //OPENCL HOST CODE AREA END
     
     // Compare the results of the Device to the simulation
     int match = 0;
-    for (int i = 0 ; i < DATA_SIZE ; i++){
-        if (source_hw_results[i] != source_sw_results[i]){
+    if(good_return==1 || bad_return==1){
+      for (int i = 0 ; i < DATA_SIZE ; i++){
+         if (source_hw_good_results[i] != source_sw_results[i]){
             std::cout << "Error: Result mismatch" << std::endl;
             std::cout << "i = " << i << " CPU result = " << source_sw_results[i]
-                << " Device result = " << source_hw_results[i] << std::endl;
+                << " Device result = " << source_hw_good_results[i] << std::endl;
             match = 1;
             break;
         }
-    }
-
-    /* Release Memory from Host Memory*/
-    free(source_in1);
-    free(source_in2);
-    free(source_hw_results);
-    free(source_sw_results);
-
-    std::cout << "TEST " << (match ? "FAILED" : "PASSED") << std::endl; 
-    return (match ? EXIT_FAILURE :  EXIT_SUCCESS);
+         if (source_hw_bad_results[i] != source_sw_results[i]){
+           std::cout << "Error: Result mismatch in vadd_BAD" << std::endl;
+           std::cout << "i = " << i << " CPU result = " << source_sw_results[i]
+                 << " Device result = " << source_hw_bad_results[i] << std::endl;
+           match = 1;
+           break;
+        }
+     } 
+    std::cout << "TEST " << (match ? "FAILED" : "PASSED") << std::endl;
+  }
+   
+  return (match ? EXIT_FAILURE :  EXIT_SUCCESS);
 }
