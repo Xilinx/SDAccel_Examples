@@ -35,7 +35,6 @@ endef
 
 $(foreach target,$(TARGETS),$(foreach device,$(DEVICES),$(eval $(call mk_args,$(target),$(device)))))
 
-
 CHECKS=check
 
 include $(COMMON_REPO)/utility/rules.mk

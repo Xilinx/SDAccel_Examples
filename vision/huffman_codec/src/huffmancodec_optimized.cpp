@@ -87,6 +87,7 @@ void HuffmanOptimized::cleanup() {
 
 	clReleaseKernel(m_clKernelHuffmanDecoder);
 	clReleaseKernel(m_clKernelHuffmanEncoder);
+	clReleaseProgram(m_program);
 	xcl_release_world(m_world);
 }
 

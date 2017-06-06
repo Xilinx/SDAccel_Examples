@@ -36,7 +36,7 @@ check_NDEVICES=$(krnl_edge_NDEVICES)
 
 CHECKS=check
 
-DEVIES=xilinx:adm-pcie-ku3:2ddr-xpr:3.3
+DEVICES=xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 
 include $(COMMON_REPO)/utility/rules.mk
 

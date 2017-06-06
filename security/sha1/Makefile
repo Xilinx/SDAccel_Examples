@@ -39,11 +39,11 @@ define mk_args
 check_$(1)_$(call sanitize_dsa,$(2))_ARGS = -t 20 -p Xilinx -d $(2) -k ./xclbin/krnl_sha1.$(1).$(call sanitize_dsa,$(2)).xclbin
 endef
 
+DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
+
 $(foreach target,$(TARGETS),$(foreach device,$(DEVICES),$(eval $(call mk_args,$(target),$(device)))))
 
 CHECKS=check
-
-DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 
 include $(COMMON_REPO)/utility/rules.mk
 
