@@ -45,13 +45,11 @@ Description:
 #include "xcl2.hpp"
 
 #define DATA_SIZE 81920
-#define WORK_GROUP 8
-#define WORK_ITEM_PER_GROUP 1
 
 #define NUM_CU 8
 
 
-int run_opencl_vadd(
+bool run_opencl_vadd(
   std::vector<cl::Device> &devices,
   cl::CommandQueue &q,
   cl::Context &context,
@@ -72,7 +70,7 @@ int run_opencl_vadd(
        binaryFile = xcl::find_binary_file(device_name,"vadd_BAD");
        if(access(binaryFile.c_str(), R_OK) != 0) {
            std::cout << "WARNING: vadd_BAD xclbin not built" << std::endl;
-           return 0;
+           return false;
         }
      }
 
@@ -102,15 +100,17 @@ int run_opencl_vadd(
     q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
 
     if(good){
-
-       auto krnl_vadd
-              = cl::KernelFunctor<cl::Buffer&,cl::Buffer&,cl::Buffer&,int>(krnl_vector_add);
+       
+        krnl_vector_add.setArg(0,buffer_in1);
+        krnl_vector_add.setArg(1,buffer_in2);
+        krnl_vector_add.setArg(2,buffer_output);
+        krnl_vector_add.setArg(3,size);
 
        std::cout << "Launching Kernels...." << std::endl;
 
        //Launch the Kernel
-       krnl_vadd(cl::EnqueueArgs(q, cl::NDRange(1,1,1), cl::NDRange(1,1,1)),
-            buffer_in1,buffer_in2,buffer_output, size);
+       q.enqueueTask(krnl_vector_add);
+       q.finish();
 
        std::cout << "Kernel Execution Finished...." << std::endl;
 
@@ -120,15 +120,19 @@ int run_opencl_vadd(
 
      }
    else{
-       for(int i = 0; i < NUM_CU; i++){
+        for(int i = 0; i < NUM_CU; i++){
 
-         int global_size = WORK_GROUP;
-
-         auto krnl_vadd
-              = cl::KernelFunctor<cl::Buffer&,cl::Buffer&,cl::Buffer&,int,int,int>(krnl_vector_add);
+        int narg = 0 ;
  
-         krnl_vadd(cl::EnqueueArgs(q, cl::NDRange(WORK_GROUP,1,1), cl::NDRange(1,1,1)),
-                   buffer_in1,buffer_in2,buffer_output, size, i, global_size);
+         krnl_vector_add.setArg(narg++,buffer_in1);
+         krnl_vector_add.setArg(narg++,buffer_in2);
+         krnl_vector_add.setArg(narg++,buffer_output);
+         krnl_vector_add.setArg(narg++,size);
+         krnl_vector_add.setArg(narg++,i);
+
+         //Launch the Kernel
+         q.enqueueTask(krnl_vector_add);
+         q.finish();
 
          //Copy Result from Device Global Memory to Host Local Memory
          q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
@@ -137,14 +141,11 @@ int run_opencl_vadd(
         std::cout << "Kernel Execution Finished...." << std::endl;
 
      }
-  return 1;
+  return true;
 }
 
 int main(int argc, char** argv)
 {
-    //Allocate Memory in Host Memory
-    size_t vector_size_bytes = sizeof(int) * DATA_SIZE;
-
     //Amount of vector data to be processed by kernel
     int size = DATA_SIZE;
 
@@ -169,36 +170,35 @@ int main(int argc, char** argv)
     cl::Device device = devices[0];
 
     cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+    cl::CommandQueue q(context, device, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE | CL_QUEUE_PROFILING_ENABLE);
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
 
-    int good_return = run_opencl_vadd(devices,q,context,device_name, true, size, source_in1, source_in2, source_hw_good_results);
-    int bad_return = run_opencl_vadd(devices,q,context,device_name, false, size, source_in1, source_in2, source_hw_bad_results);
+    bool good_return = run_opencl_vadd(devices,q,context,device_name, true, size, source_in1, source_in2, source_hw_good_results);
+    bool bad_return = run_opencl_vadd(devices,q,context,device_name, false, size, source_in1, source_in2, source_hw_bad_results);
 
 //OPENCL HOST CODE AREA END
     
     // Compare the results of the Device to the simulation
-    int match = 0;
-    if(good_return==1 || bad_return==1){
-      for (int i = 0 ; i < DATA_SIZE ; i++){
-         if (source_hw_good_results[i] != source_sw_results[i]){
-            std::cout << "Error: Result mismatch" << std::endl;
+    bool match = true;
+    for (int i = 0 ; i < DATA_SIZE ; i++){
+       if (source_hw_good_results[i] != source_sw_results[i]){
+            std::cout << "Error: Result mismatch in vadd_GOOD" << std::endl;
             std::cout << "i = " << i << " CPU result = " << source_sw_results[i]
                 << " Device result = " << source_hw_good_results[i] << std::endl;
-            match = 1;
+            match = false;
             break;
          }
-        if (source_hw_bad_results[i] != source_sw_results[i]){
+       if(bad_return){ 
+         if (source_hw_bad_results[i] != source_sw_results[i]){
             std::cout << "Error: Result mismatch in vadd_BAD" << std::endl;
             std::cout << "i = " << i << " CPU result = " << source_sw_results[i]
                 << " Device result = " << source_hw_bad_results[i] << std::endl;
-            match = 1;
+            match = false;
             break;
-        }
-
+         }
+      }
     }
 
-    std::cout << "TEST " << (match ? "FAILED" : "PASSED") << std::endl;
-  } 
-  return (match ? EXIT_FAILURE :  EXIT_SUCCESS);
+  std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl;
+  return (match ? EXIT_SUCCESS :  EXIT_FAILURE);
 }
