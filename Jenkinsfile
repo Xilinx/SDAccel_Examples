@@ -60,6 +60,7 @@ def buildExample(target, dir, device, workdir) {
 			queue = "long"
 		}
 
+	retry(3) {
 		sh """#!/bin/bash -e
 
 cd ${workdir}
@@ -88,17 +89,20 @@ make -q TARGETS=${target} DEVICES=\"${device}\" all
 rc=\$?
 set -e
 
+export TMPDIR=\$(mktemp -d -p \$(pwd))
+
 # if rebuild required then use LSF
 if [[ \$rc != 0 ]]; then
 bsub -I -q ${queue} -R "osdistro=rhel && osver==ws6" -n ${cores} -R "rusage[mem=${mem}] span[ptile=${cores}]" -J "\$(basename ${dir})-${target}" <<EOF
 #!/bin/bash -ex
-export TEMPDIR=\$(mktemp -d -p ${dir})
+export TMPDIR=\$TMPDIR
 make TARGETS=${target} DEVICES=\"${device}\" all
-rm -rf \$TEMPDIR
+rm -rf \$TMPDIR
 EOF
 fi
 set +x
 """
+		}
 	}
 }
 
