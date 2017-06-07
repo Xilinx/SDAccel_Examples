@@ -48,13 +48,14 @@ void mmult_sw(  std::vector<int,aligned_allocator<int>> &a,
 }
 
 int main(int argc, char** argv)
-{
+{   
+    int test_matrix_dim = TEST_MATRIX_DIM;
     const char *xcl_emu = getenv("XCL_EMULATION_MODE");
     if(xcl_emu && !strcmp(xcl_emu, "hw_emu")){
-        #undef TEST_MATRIX_DIM 
-        #define TEST_MATRIX_DIM 16 
+        test_matrix_dim = 16;
+        std::cout << "Data Size Reduced to  "<< test_matrix_dim << " for Hardware Emulation" << std::endl;
     }
-    int dim = TEST_MATRIX_DIM;
+    int dim = test_matrix_dim;
     int matrix_size = dim * dim;
     if (dim > MAX_MATRIX_DIM) {
         std::cout << "Size is bigger than internal buffer size, please use a size smaller than 256!" << std::endl;
