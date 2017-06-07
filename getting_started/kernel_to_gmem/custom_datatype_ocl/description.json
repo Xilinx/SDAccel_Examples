@@ -4,8 +4,8 @@
     "overview": [
         "This is simple example of RGB to HSV conversion to demonstrate Custom DATA Type usages in OpenCL Based Kernel. Xilinx HLS Compiler Supports Custom Data Type to use for operation as well as Memory Interface between Kernel and Global Memory."
     ],
-    "key_concepts": [ "dataflow", "Custom Datatype"],
-    "keywords": ["struct"],
+    "key_concepts": ["Custom Datatype"],
+    "keywords": ["struct", "xcl_pipeline_loop"],
     "em_cmd": "./host ./data/input.bmp",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host ./data/input.bmp",
     "contributors" : [
