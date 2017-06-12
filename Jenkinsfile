@@ -27,9 +27,9 @@ cd ${workdir}
 . /tools/local/bin/modinit.sh > /dev/null 2>&1
 module use.own /proj/picasso/modulefiles
 
-module add vivado/${version}_daily
-module add vivado_hls/${version}_daily
-module add sdaccel/${version}_daily
+module add vivado/${version}_rel
+module add vivado_hls/${version}_rel
+module add sdaccel/${version}_rel
 module add opencv/sdaccel
 
 cd ${dir}
@@ -68,9 +68,9 @@ cd ${workdir}
 . /tools/local/bin/modinit.sh > /dev/null 2>&1
 module use.own /proj/picasso/modulefiles
 
-module add vivado/${version}_daily
-module add vivado_hls/${version}_daily
-module add sdaccel/${version}_daily
+module add vivado/${version}_rel
+module add vivado_hls/${version}_rel
+module add sdaccel/${version}_rel
 module add opencv/vivado_hls
 module add lsf
 
@@ -132,9 +132,9 @@ cd ${workdir}
 . /tools/local/bin/modinit.sh > /dev/null 2>&1
 module use.own /proj/picasso/modulefiles
 
-module add vivado/${version}_daily
-module add vivado_hls/${version}_daily
-module add sdaccel/${version}_daily
+module add vivado/${version}_rel
+module add vivado_hls/${version}_rel
+module add sdaccel/${version}_rel
 module add opencv/sdaccel
 
 module add proxy
@@ -197,9 +197,9 @@ try {
 . /tools/local/bin/modinit.sh > /dev/null 2>&1
 module use.own /proj/picasso/modulefiles
 
-module add vivado/${version}_daily
-module add vivado_hls/${version}_daily
-module add sdaccel/${version}_daily
+module add vivado/${version}_rel
+module add vivado_hls/${version}_rel
+module add sdaccel/${version}_rel
 module add opencv/sdaccel
 
 module add proxy
