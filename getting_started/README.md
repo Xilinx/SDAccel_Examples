@@ -1,4 +1,4 @@
-Getting Started Examples
+ Getting Started Examples
 ==================================
 This page contains examples for users who are new to Xilinx SDx OpenCL Flows. The focus of the examples is towards code optimization for Xilinx devices.The table lists various categories of examples in suggested order which users can follow.
 
