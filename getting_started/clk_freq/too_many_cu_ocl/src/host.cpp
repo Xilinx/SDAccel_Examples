@@ -64,15 +64,15 @@ bool run_opencl_vadd(
     std::string binaryFile;
 
     if(good){
-       binaryFile = xcl::find_binary_file(device_name,"vadd_GOOD");
-      }
+        binaryFile = xcl::find_binary_file(device_name,"vadd_GOOD");
+    }
     else{
-       binaryFile = xcl::find_binary_file(device_name,"vadd_BAD");
-       if(access(binaryFile.c_str(), R_OK) != 0) {
-           std::cout << "WARNING: vadd_BAD xclbin not built" << std::endl;
-           return false;
+        binaryFile = xcl::find_binary_file(device_name,"vadd_BAD");
+        if(access(binaryFile.c_str(), R_OK) != 0) {
+            std::cout << "WARNING: vadd_BAD xclbin not built" << std::endl;
+            return false;
         }
-     }
+    }
 
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
@@ -103,20 +103,20 @@ bool run_opencl_vadd(
         = cl::KernelFunctor<cl::Buffer&,cl::Buffer&,cl::Buffer&,int>(krnl_vector_add);
 
     if(good){
-       std::cout << "Launching Kernel...." << std::endl;
+        std::cout << "Launching Kernel...." << std::endl;
 
-     //Launch the Kernel
-     krnl_vadd(cl::EnqueueArgs(q, cl::NDRange(1,1,1), cl::NDRange(1,1,1)),
+        //Launch the Kernel
+        krnl_vadd(cl::EnqueueArgs(q, cl::NDRange(1,1,1), cl::NDRange(1,1,1)),
             buffer_in1,buffer_in2,buffer_output, size);
-     q.finish();
-     std::cout << "Kernel Execution Finished...." << std::endl;
-
-     //Copy Result from Device Global Memory to Host Local Memory 
-       q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
         q.finish();
-     }
+        std::cout << "Kernel Execution Finished...." << std::endl;
 
-   else{
+        //Copy Result from Device Global Memory to Host Local Memory 
+        q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+        q.finish();
+    }
+
+    else{
         // Launch 8 threads for the bad case for the whole data set
         // 8 Compute Units are created and one CU is allocated per thread
         
@@ -126,12 +126,11 @@ bool run_opencl_vadd(
         q.finish();
         std::cout << "Kernel Execution Finished...." << std::endl;
 
-       //Copy Result from Device Global Memory to Host Local Memory
-         q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
-         q.finish();
-
-     }
-  return true;
+        //Copy Result from Device Global Memory to Host Local Memory
+        q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+        q.finish();
+    }
+    return true;
 }
 
 int main(int argc, char** argv)
@@ -171,24 +170,24 @@ int main(int argc, char** argv)
     // Compare the results of the Device to the simulation
     bool match = true;
     for (int i = 0 ; i < DATA_SIZE ; i++){
-      if (source_hw_good_results[i] != source_sw_results[i]){
+        if (source_hw_good_results[i] != source_sw_results[i]){
             std::cout << "Error: Result mismatch in vadd_GOOD" << std::endl;
             std::cout << "i = " << i << " CPU result = " << source_sw_results[i]
                 << " Device result = " << source_hw_good_results[i] << std::endl;
             match = false;
             break;
-         }
-      if(bad_return){
-         if (source_hw_bad_results[i] != source_sw_results[i]){
-           std::cout << "Error: Result mismatch in vadd_BAD" << std::endl;
-           std::cout << "i = " << i << " CPU result = " << source_sw_results[i]
-                 << " Device result = " << source_hw_bad_results[i] << std::endl;
-           match = false;
-           break;
         }
-      }
-   }
+        if(bad_return){
+            if (source_hw_bad_results[i] != source_sw_results[i]){
+                std::cout << "Error: Result mismatch in vadd_BAD" << std::endl;
+                std::cout << "i = " << i << " CPU result = " << source_sw_results[i]
+                     << " Device result = " << source_hw_bad_results[i] << std::endl;
+                match = false;
+                break;
+            }
+        }
+    }
  
-   std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl;
-   return (match ? EXIT_SUCCESS :  EXIT_FAILURE);
+    std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl;
+    return (match ? EXIT_SUCCESS :  EXIT_FAILURE);
 }
