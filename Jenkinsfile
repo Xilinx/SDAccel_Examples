@@ -214,7 +214,7 @@ module add proxy
 	def examples = []
 
 	stage('configure') {
-		sh 'git ls-files | grep description.json | sed -e \'s/\\.\\///\' -e \'s/\\/description.json//\' > examples.dat'
+		sh 'utility/build_what.sh remotes/origin/$CHANGE_TARGET > examples.dat'
 		examplesFile = readFile 'examples.dat'
 		examples = examplesFile.split('\\n')
 
