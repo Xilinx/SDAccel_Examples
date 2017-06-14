@@ -86,7 +86,6 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "CL/cl.h"
-#include "oclHelper.h"
 #include "xcl.h"
 
 #include <algorithm>
@@ -128,13 +127,13 @@ static const char *error_message =
     "Error: Result mismatch:\n"
     "i = %d CPU result = %d Device result = %d\n";
 
-// Wrap any OpenCL API calls that return error code(cl_int) with the below macro
+// Wrap any OpenCL API calls that return error code(cl_int) with the below macros
 // to quickly check for an error
 #define OCL_CHECK(call)                                                        \
   do {                                                                         \
     cl_int err = call;                                                         \
     if (err != CL_SUCCESS) {                                                   \
-      printf("Error calling " #call ", error: %s\n", oclErrorCode(err));       \
+      printf("Error calling " #call ", error code is: %d\n", err);       \
       exit(EXIT_FAILURE);                                                      \
     }                                                                          \
   } while (0);
@@ -269,14 +268,14 @@ int main(int argc, char **argv) {
     // the events from the previous kernel call into the wait list, it will wait
     // for the previous operations to complete before continuing
     OCL_CHECK(clEnqueueMigrateMemObjects(
-        world.command_queue, 1, &buffer_a[iteration_idx % 2],
+        world.command_queue, 1, &buffer_a[flag],
         0 /* flags, 0 means from host */,
         0, NULL, 
         &write_events[0]));
     set_callback(write_events[0], "ooo_queue");
 
     OCL_CHECK(clEnqueueMigrateMemObjects(
-        world.command_queue, 1, &buffer_b[iteration_idx % 2],
+        world.command_queue, 1, &buffer_b[flag],
         0 /* flags, 0 means from host */,
         0, NULL, 
         &write_events[1]));
@@ -300,7 +299,7 @@ int main(int argc, char **argv) {
     // This operation only needs to wait for the kernel call. This call will
     // potentially overlap the next kernel call as well as the next read
     // operations
-    OCL_CHECK( clEnqueueMigrateMemObjects(world.command_queue, 1, &buffer_c[iteration_idx % 2], 
+    OCL_CHECK(clEnqueueMigrateMemObjects(world.command_queue, 1, &buffer_c[flag], 
                 CL_MIGRATE_MEM_OBJECT_HOST, 1, &kernel_events[flag], &read_events[flag]));
 
     set_callback(read_events[flag], "ooo_queue");

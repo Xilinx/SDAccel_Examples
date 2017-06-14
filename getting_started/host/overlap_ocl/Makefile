@@ -5,12 +5,11 @@ COMMON_REPO := ../../..
 include $(COMMON_REPO)/utility/boards.mk
 include $(COMMON_REPO)/libs/xcl/xcl.mk
 include $(COMMON_REPO)/libs/opencl/opencl.mk
-include $(COMMON_REPO)/libs/oclHelper/oclHelper.mk
 
 # Host Application
-overlap_SRCS=./src/host.cpp $(oclHelper_SRCS) $(xcl_SRCS)
+overlap_SRCS=./src/host.cpp $(xcl_SRCS)
 overlap_HDRS=$(xcl_HDRS)
-overlap_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS) $(oclHelper_CXXFLAGS) -std=c++0x
+overlap_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS) -std=c++0x
 overlap_LDFLAGS=$(opencl_LDFLAGS)
 
 EXES=overlap
