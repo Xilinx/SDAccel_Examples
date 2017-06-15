@@ -38,10 +38,12 @@ for change in $CHANGES; do
 	fi
 done
 
+UNIQ_REBUILDS=$(echo $REBUILDS | xargs -n 1 | sort -u | xargs)
+
 # if we know that we only changed something inside a single example then do a rebuild
 # of that example only else rebuild all examples.
 if [[ "$NUM_CHANGES" == "0" ]]; then
-	for rebuild in $REBUILDS; do
+	for rebuild in $UNIQ_REBUILDS; do
 		echo $rebuild
 	done
 else
