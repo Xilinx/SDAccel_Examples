@@ -2,8 +2,6 @@
 
 properties([
 buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '30', numToKeepStr: '5')), 
-[$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://gitenterprise.xilinx.com/SDx-Hub/apps/'], 
-pipelineTriggers([[$class: 'GitHubPushTrigger']]),
 disableConcurrentBuilds()
 ])
 
