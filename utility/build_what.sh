@@ -1,6 +1,12 @@
 #!/bin/bash -e
 
-HEAD=$1
+HEAD=
+
+if [[ "$CHANGE_TARGET" == "" ]]; then
+	HEAD=remotes/origin/master
+else
+	HEAD=remotes/origin/${CHANGE_TARGET}
+fi
 
 PROJS=$(git ls-files | grep description.json | sed -e 's/\.\///' -e 's/\/description.json//')
 CHANGES=$(git diff --name-only $HEAD)
