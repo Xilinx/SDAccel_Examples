@@ -18,6 +18,10 @@ devices += ['xilinx:adm-pcie-ku3:2ddr-xpr']
 
 version = '2017.1'
 
+precheck_status = 'FAILURE'
+sw_status = 'FAILURE'
+hw_status = 'FAILURE'
+
 def setupExample(dir, workdir) {
 	return { ->
 		sh """#!/bin/bash -e
@@ -169,6 +173,34 @@ try {
 
 	stage("checkout") {
 		checkout scm
+		precheck_status = 'PENDING'
+		sw_emu_status = 'PENDING'
+		hw_status = 'PENDING'
+
+		step([$class: 'GitHubCommitStatusSetter',
+		     contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'ci-precheck'],
+		     statusResultSource: [$class: 'ConditionalStatusResultSource',
+		                          results: [[$class: 'AnyBuildResult', message: 'pre-build checks pending',
+		                                   state: precheck_status 
+		                          ]]
+		     ]
+		])
+		step([$class: 'GitHubCommitStatusSetter',
+		     contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'ci-sw_emu'],
+		     statusResultSource: [$class: 'ConditionalStatusResultSource',
+		                          results: [[$class: 'AnyBuildResult', message: 'sw_emu checks pending',
+		                                   state: sw_emu_status
+		                          ]]
+		     ]
+		])
+		step([$class: 'GitHubCommitStatusSetter',
+		     contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'ci-hw'],
+		     statusResultSource: [$class: 'ConditionalStatusResultSource',
+		                          results: [[$class: 'AnyBuildResult', message: 'hw checks pending',
+		                                   state: hw_status
+		                          ]]
+		     ]
+		])
 	}
 
 	stage("clean") {
@@ -209,12 +241,23 @@ module add proxy
 """
 	}
 
+	precheck_status = 'SUCCESS'
+
+	step([$class: 'GitHubCommitStatusSetter',
+	     contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'ci-precheck'],
+	     statusResultSource: [$class: 'ConditionalStatusResultSource',
+	                          results: [[$class: 'AnyBuildResult', message: 'pre-build checks passed',
+	                                   state: precheck_status
+	                          ]]
+	     ]
+	])
+	
 	workdir = pwd()
 
 	def examples = []
 
 	stage('configure') {
-		sh 'utility/build_what.sh remotes/origin/$CHANGE_TARGET > examples.dat'
+		sh 'utility/build_what.sh > examples.dat'
 		examplesFile = readFile 'examples.dat'
 		examples = examplesFile.split('\\n')
 
@@ -249,6 +292,17 @@ module add proxy
 		}
 	}
 
+	sw_emu_status = 'SUCCESS'
+
+	step([$class: 'GitHubCommitStatusSetter',
+	     contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'ci-sw_emu'],
+	     statusResultSource: [$class: 'ConditionalStatusResultSource',
+	                          results: [[$class: 'AnyBuildResult', message: 'sw_emu checks passed',
+	                                   state: sw_emu_status
+	                          ]]
+	     ]
+	])
+
 	def hwSteps = [:]
 	def hwRunSteps = [:]
 
@@ -271,12 +325,55 @@ module add proxy
 	}
 */
 
+	hw_status = 'SUCCESS'
+
+	step([$class: 'GitHubCommitStatusSetter',
+	     contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'ci-hw'],
+	     statusResultSource: [$class: 'ConditionalStatusResultSource',
+	                          results: [[$class: 'AnyBuildResult', message: 'hw checks passed',
+	                                   state: hw_status
+	                          ]]
+	     ]
+	])
 } catch (e) {
+	if ( precheck_status == 'PENDING' ) {
+		precheck_status = 'FAILURE'
+		step([$class: 'GitHubCommitStatusSetter',
+	     contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'ci-precheck'],
+	     statusResultSource: [$class: 'ConditionalStatusResultSource',
+	                          results: [[$class: 'AnyBuildResult', message: 'prechecks failed',
+	                                   state: precheck_status
+	                          ]]
+	     ]
+	])
+	}
+	if ( sw_emu_status == 'PENDING' ) {
+		sw_emu_status = 'FAILURE'
+	step([$class: 'GitHubCommitStatusSetter',
+	     contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'ci-sw_emu'],
+	     statusResultSource: [$class: 'ConditionalStatusResultSource',
+	                          results: [[$class: 'AnyBuildResult', message: 'sw_emu checks failed',
+	                                   state: sw_emu_status
+	                          ]]
+	     ]
+	])
+
+	}
+	if ( hw_status == 'PENDING' ) {
+		hw_status = 'FAILURE'
+		step([$class: 'GitHubCommitStatusSetter',
+	     contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'ci-hw'],
+	     statusResultSource: [$class: 'ConditionalStatusResultSource',
+	                          results: [[$class: 'AnyBuildResult', message: 'hw checks failed',
+	                                   state: hw_status
+	                          ]]
+	     ]
+	])
+	}
 	currentBuild.result = "FAILED"
 	throw e
 } finally {
 	stage('post-check') {
-		step([$class: 'GitHubCommitStatusSetter'])
 		step([$class: 'Mailer', notifyEveryUnstableBuild: true, recipients: 'spenserg@xilinx.com', sendToIndividuals: false])
 	}
 	stage('cleanup') {
