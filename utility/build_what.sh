@@ -14,17 +14,9 @@ CHANGES=$(git diff --name-only $HEAD)
 howmany() { echo $#; }
 NUM_CHANGES=$(howmany $CHANGES)
 
+echo NUM_CHANGES=$NUM_CHANGES
+
 REBUILDS=
-
-# Ignore the following patterns these are checked by the pre-check scripts
-for change in $CHANGES; do
-	if [[ "$change" == */README.md
-		|| "$change" == "utility/build_what.sh"
-		|| "$change" == "Jenkinsfile" ]]; then
-		NUM_CHANGES=$((NUM_CHANGES-1))
-	fi
-done
-
 for change in $CHANGES; do
 	IN_PROJS=
 	for proj in $PROJS; do
@@ -32,22 +24,35 @@ for change in $CHANGES; do
 			IN_PROJS="$proj $IN_PROJS"
 		fi
 	done
-	if [[ "$IN_PROJS" != "" ]]; then
+
+	if [[ "$change" == */README.md
+		|| "$change" == "utility/build_what.sh"
+		|| "$change" == "Jenkinsfile" ]]; then
+		echo "SKIPPING $change"
+		NUM_CHANGES=$((NUM_CHANGES-1))
+	elif [[ "$IN_PROJS" != "" ]]; then
+		echo "REBUILD $change"
 		NUM_CHANGES=$((NUM_CHANGES-1))
 		REBUILDS="$IN_PROJS $REBUILDS"
+	else
+		echo "UNKNOWN $change"
 	fi
 done
 
 UNIQ_REBUILDS=$(echo $REBUILDS | xargs -n 1 | sort -u | xargs)
 
+echo UNIQ_REBUILDS = $UNIQ_REBUILDS
+echo NUM_CHANGES = $NUM_CHANGES
+
 # if we know that we only changed something inside a single example then do a rebuild
 # of that example only else rebuild all examples.
+cat /dev/null > examples.dat
 if [[ "$NUM_CHANGES" == "0" ]]; then
 	for rebuild in $UNIQ_REBUILDS; do
-		echo $rebuild
+		echo $rebuild >> examples.dat
 	done
 else
 	for proj in $PROJS; do
-		echo $proj
+		echo $proj >> examples.dat
 	done
 fi

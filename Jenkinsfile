@@ -11,7 +11,7 @@ devices = []
 devices += ['xilinx:adm-pcie-7v3:1ddr']
 devices += ['xilinx:xil-accel-rd-ku115:4ddr-xpr']
 devices += ['xilinx:adm-pcie-ku3:2ddr-xpr']
-//devices += ['xilinx:xil-accel-rd-vu9p:4ddr-xpr']
+//devices += ['\$XILINX_SDX/../../../../internal_platforms/xilinx_xil-accel-rd-vu9p_4ddr-xpr_4_0/xilinx_xil-accel-rd-vu9p_4ddr-xpr_4_0.xpfm']
 
 version = '2017.1'
 
@@ -254,7 +254,7 @@ module add proxy
 	def examples = []
 
 	stage('configure') {
-		sh 'utility/build_what.sh > examples.dat'
+		sh 'utility/build_what.sh'
 		examplesFile = readFile 'examples.dat'
 		examples = examplesFile.split('\\n')
 
