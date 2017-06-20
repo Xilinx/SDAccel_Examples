@@ -23,6 +23,14 @@ aims to partition n observations into k clusters in which each
 observation belongs to the cluster with the nearest mean, serving as
 a prototype of the cluster.
 
+The application sets two compute units by default so that it will fit 
+all Xilinx Devices. For bigger Xilinx Devices, user can increase the 
+number of Compute units in Makefile and can get better performance.
+It is tested upto 6 compute units for ku115 device and got 
+approximately 6x improvement with respect to single compute units, which 
+shows that application is more compute bound (not memory bound) and 
+performance is directly proportional to number of compute units.
+
 __Note__: This application is ported from Rodinia
 
 (https://www.cs.virginia.edu/~skadron/wiki/rodinia/)
