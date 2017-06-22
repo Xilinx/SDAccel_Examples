@@ -175,6 +175,19 @@ EOF
 	}
 }
 
+function buildStatus(context, message, state) {
+		step([$class: 'GitHubCommitStatusSetter',
+		     contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: context],
+		     statusResultSource: [$class: 'ConditionalStatusResultSource',
+		                          results: [[$class: 'AnyBuildResult', message: message,
+		                                   state: state 
+		                          ]]
+		     ]
+		])
+
+		return state
+}
+
 timestamps {
 // Always build on the same host so that the workspace is reused
 node('rhel6 && xsjrdevl && xsjrdevl110') {
@@ -182,36 +195,12 @@ try {
 
 	stage("checkout") {
 		checkout scm
-		precheck_status = 'PENDING'
-		sw_emu_status = 'PENDING'
-		hw_status = 'PENDING'
-
-		step([$class: 'GitHubCommitStatusSetter',
-		     contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'ci-precheck'],
-		     statusResultSource: [$class: 'ConditionalStatusResultSource',
-		                          results: [[$class: 'AnyBuildResult', message: 'pre-build checks pending',
-		                                   state: precheck_status 
-		                          ]]
-		     ]
-		])
-		step([$class: 'GitHubCommitStatusSetter',
-		     contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'ci-sw_emu'],
-		     statusResultSource: [$class: 'ConditionalStatusResultSource',
-		                          results: [[$class: 'AnyBuildResult', message: 'sw_emu checks pending',
-		                                   state: sw_emu_status
-		                          ]]
-		     ]
-		])
-		step([$class: 'GitHubCommitStatusSetter',
-		     contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'ci-hw'],
-		     statusResultSource: [$class: 'ConditionalStatusResultSource',
-		                          results: [[$class: 'AnyBuildResult', message: 'hw checks pending',
-		                                   state: hw_status
-		                          ]]
-		     ]
-		])
 	}
 
+	precheck_status = buildStatus('ci-precheck', 'pre-build checks pending', 'PENDING')
+	sw_emu_status = buildStatus('ci-sw_emu', 'sw_emu checks pending', 'PENDING')
+	hw_status = buildStatus('ci-hw', 'hw checks pending', 'PENDING')
+	
 	stage("clean") {
 		try {
 			lastclean = readFile('lastclean.dat')
@@ -250,17 +239,8 @@ module add proxy
 """
 	}
 
-	precheck_status = 'SUCCESS'
+	precheck_status = buildStatus('ci-precheck', 'pre-build checks passed', 'SUCCESS')
 
-	step([$class: 'GitHubCommitStatusSetter',
-	     contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'ci-precheck'],
-	     statusResultSource: [$class: 'ConditionalStatusResultSource',
-	                          results: [[$class: 'AnyBuildResult', message: 'pre-build checks passed',
-	                                   state: precheck_status
-	                          ]]
-	     ]
-	])
-	
 	workdir = pwd()
 
 	def examples = []
@@ -280,104 +260,75 @@ module add proxy
 		parallel exSteps
 	}
 
-	def swEmuSteps = [:]
-	def swEmuRunSteps = [:]
+	def swBatches = 10
+	def swEmuSteps = []
+	def swEmuRunSteps = []
 
 	stage('sw_emu build') {
 		for(int i = 0; i < examples.size(); i++) {
 			for(int j = 0; j < devices.size(); j++) {
+				batch = (i * devices.size() + j) % swBatches
 				name = "${examples[i]}-${devices[j]}-sw_emu"
-				swEmuSteps["${name}-build"]  = buildExample('sw_emu', examples[i], devices[j], workdir)
-				swEmuRunSteps["${name}-run"] = runExample(  'sw_emu', examples[i], devices[j], workdir)
+				swEmuSteps[batch]["${name}-build"]  = buildExample('sw_emu', examples[i], devices[j], workdir)
+				swEmuRunSteps[batch]["${name}-run"] = runExample(  'sw_emu', examples[i], devices[j], workdir)
 			}
 		}
 
-		parallel swEmuSteps
+		for(int i = 0; i < swBatches; i++) {
+			parallel swEmuSteps[i]
+		}
 	}
 
 	stage('sw_emu run') {
 		lock("only_one_run_stage_at_a_time") {
-			parallel swEmuRunSteps
+			for(int i = 0; i < swBatches; i++) {
+				parallel swEmuRunSteps[i]
+			}
 		}
 	}
 
-	sw_emu_status = 'SUCCESS'
+	sw_emu_status = buildStatus('ci-sw_emu', 'sw_emu checks passed', 'SUCCESS')
 
-	step([$class: 'GitHubCommitStatusSetter',
-	     contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'ci-sw_emu'],
-	     statusResultSource: [$class: 'ConditionalStatusResultSource',
-	                          results: [[$class: 'AnyBuildResult', message: 'sw_emu checks passed',
-	                                   state: sw_emu_status
-	                          ]]
-	     ]
-	])
-
-	def hwSteps = [:]
-	def hwRunSteps = [:]
+	def hwBatches = 10
+	def hwSteps = []
+	def hwRunSteps = []
 
 	stage('hw build') {
 		for(int i = 0; i < examples.size(); i++) {
 			for(int j = 0; j < devices.size(); j++) {
+				batch = (i * devices.size() + j) % hwBatches
 				name = "${examples[i]}-${devices[j]}-hw"
-				hwSteps["${name}-build"]  = buildExample('hw', examples[i], devices[j], workdir)
-				hwRunSteps["${name}-run"] = runExample(  'hw', examples[i], devices[j], workdir)
+				hwSteps[batch]["${name}-build"]  = buildExample('hw', examples[i], devices[j], workdir)
+				hwRunSteps[batch]["${name}-run"] = runExample(  'hw', examples[i], devices[j], workdir)
 			}
 		}
 
-		parallel hwSteps
+		for(int i = 0; i < hwBatches; i++) {
+			parallel hwSteps[i]
+		}
 	}
 
 	stage('hw run') {
 		lock("only_one_run_stage_at_a_time") {
-			parallel hwRunSteps
+			for(int i = 0; i < hwBatches; i++) {
+				parallel hwRunSteps[i]
+			}
 		}
 	}
 
-	hw_status = 'SUCCESS'
+	hw_status = buildStatus('ci-hw', 'hw checks passed', 'SUCCESS')
 
-	step([$class: 'GitHubCommitStatusSetter',
-	     contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'ci-hw'],
-	     statusResultSource: [$class: 'ConditionalStatusResultSource',
-	                          results: [[$class: 'AnyBuildResult', message: 'hw checks passed',
-	                                   state: hw_status
-	                          ]]
-	     ]
-	])
 } catch (e) {
 	if ( precheck_status == 'PENDING' ) {
-		precheck_status = 'FAILURE'
-		step([$class: 'GitHubCommitStatusSetter',
-	     contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'ci-precheck'],
-	     statusResultSource: [$class: 'ConditionalStatusResultSource',
-	                          results: [[$class: 'AnyBuildResult', message: 'prechecks failed',
-	                                   state: precheck_status
-	                          ]]
-	     ]
-	])
+		precheck_status = buildStatus('ci-precheck', 'prechecks passed', 'FAILURE')
 	}
 	if ( sw_emu_status == 'PENDING' ) {
-		sw_emu_status = 'FAILURE'
-	step([$class: 'GitHubCommitStatusSetter',
-	     contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'ci-sw_emu'],
-	     statusResultSource: [$class: 'ConditionalStatusResultSource',
-	                          results: [[$class: 'AnyBuildResult', message: 'sw_emu checks failed',
-	                                   state: sw_emu_status
-	                          ]]
-	     ]
-	])
-
+		sw_emu_status = buildStatus('ci-sw_emu', 'sw_emu checks passed', 'FAILURE')
 	}
 	if ( hw_status == 'PENDING' ) {
-		hw_status = 'FAILURE'
-		step([$class: 'GitHubCommitStatusSetter',
-	     contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'ci-hw'],
-	     statusResultSource: [$class: 'ConditionalStatusResultSource',
-	                          results: [[$class: 'AnyBuildResult', message: 'hw checks failed',
-	                                   state: hw_status
-	                          ]]
-	     ]
-	])
+		hw_status = buildStatus('ci-hw', 'hw checks passed', 'FAILURE')
 	}
+	
 	currentBuild.result = "FAILED"
 	throw e
 } finally {
