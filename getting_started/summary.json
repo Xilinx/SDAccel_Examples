@@ -13,5 +13,5 @@
         " - User is familiar with basics of OpenCL flow.",
         " - User has gone through SDx tutorial and is familiar with basics of tool functionality and terminology."
     ],
-    "subdirs" : [ "host", "kernel_to_gmem", "kernel_opt", "dataflow", "clk_freq" , "debug", "rtl_kernel", "basic"]
+    "subdirs" : [ "host", "kernel_to_gmem", "kernel_opt", "dataflow", "clk_freq" , "debug", "rtl_kernel", "misc"]
 }
