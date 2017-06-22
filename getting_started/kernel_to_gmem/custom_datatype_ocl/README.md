@@ -18,9 +18,9 @@ This README file contains the following sections:
 ## 1. OVERVIEW
 This is simple example of RGB to HSV conversion to demonstrate Custom DATA Type usages in OpenCL Based Kernel. Xilinx HLS Compiler Supports Custom Data Type to use for operation as well as Memory Interface between Kernel and Global Memory.
 
-***KEY CONCEPTS:*** dataflow, Custom Datatype
+***KEY CONCEPTS:*** Custom Datatype
 
-***KEYWORDS:*** struct
+***KEYWORDS:*** struct, xcl_pipeline_loop
 
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
