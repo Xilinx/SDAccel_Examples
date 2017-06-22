@@ -1,13 +1,13 @@
 # check.mk - defines rules for testing
 
 NIMBIX_DSA_xilinx_adm-pcie-ku3_2ddr-xpr = nx1test
-NIMBIX_DSA_xilinx_adm-pcie-7v3_1ddr = nx2test
+NIMBIX_DSA_xilinx_adm-pcie-7v3_1ddr = nx2
 NIMBIX_DSA_xilinx_xil-accel-rd-ku115_4ddr-xpr = nx3test
 NIMBIX_DSA_xilinx_xil-accel-rd-vu9p_4ddr-xpr = nx4test
 
 dsa2type = $(NIMBIX_DSA_$(call sanitize_dsa,$(1)))
 
-hw_RUNNER = $(COMMON_REPO)/utility/nimbix/nimbix-run.py $(NIMBIXFLAGS) --type $(call dsa2type,$(1)) --
+hw_RUNNER = $(COMMON_REPO)/utility/nimbix/nimbix-run.py $(NIMBIXFLAGS) --nae spenserg-sdx-preview --type $(call dsa2type,$(1)) --
 sw_emu_RUNNER = XCL_EMULATION_MODE=sw_emu
 hw_emu_RUNNER = XCL_EMULATION_MODE=hw_emu
 

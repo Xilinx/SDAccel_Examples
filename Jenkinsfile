@@ -10,8 +10,8 @@ days = 10
 devices = []
 devices += ['xilinx:adm-pcie-7v3:1ddr']
 devices += ['xilinx:xil-accel-rd-ku115:4ddr-xpr']
-devices += ['xilinx:adm-pcie-ku3:2ddr-xpr']
-//devices += ['\$XILINX_SDX/../../../../internal_platforms/xilinx_xil-accel-rd-vu9p_4ddr-xpr_4_0/xilinx_xil-accel-rd-vu9p_4ddr-xpr_4_0.xpfm']
+//devices += ['xilinx:adm-pcie-ku3:2ddr-xpr']
+//devices += ['\$XILINX_SDX/../../../../internal_platforms/xilinx_xil-accel-rd-vu9p_4ddr-xpr_4_1/xilinx_xil-accel-rd-vu9p_4ddr-xpr_4_1.xpfm']
 
 version = '2017.1'
 
@@ -55,10 +55,12 @@ def buildExample(target, dir, device, workdir) {
 			cores = 1
 			mem = 4000
 			queue = "medium"
+			mins = 5
 		} else {
 			cores = 8
 			mem = 32000
 			queue = "long"
+			mins = 4*60
 		}
 
 	retry(3) {
@@ -73,6 +75,7 @@ module add vivado/${version}_rel
 module add vivado_hls/${version}_rel
 module add sdaccel/${version}_rel
 module add opencv/vivado_hls
+
 module add lsf
 
 cd ${dir}
@@ -94,7 +97,7 @@ export TMPDIR=\$(mktemp -d -p \$(pwd))
 
 # if rebuild required then use LSF
 if [[ \$rc != 0 ]]; then
-bsub -I -q ${queue} -R "osdistro=rhel && osver==ws6" -n ${cores} -R "rusage[mem=${mem}] span[ptile=${cores}]" -J "\$(basename ${dir})-${target}" <<EOF
+bsub -W ${mins} -I -q ${queue} -R "osdistro=rhel && osver==ws6" -n ${cores} -R "rusage[mem=${mem}] span[ptile=${cores}]" -J "\$(basename ${dir})-${target}" <<EOF
 #!/bin/bash -ex
 export TMPDIR=\$TMPDIR
 make TARGETS=${target} DEVICES=\"${device}\" all
@@ -114,19 +117,22 @@ def dirsafe(device) {
 def runExample(target, dir, device, workdir) {
 	return { ->
 		if ( target == "sw_emu" ) {
+			cores = 1
+			mem = 4000
+			queue = "medium"
 			mins = 15
 		} else {
-			mins = 150
+			cores = 8
+			mem = 32000
+			queue = "long"
+			mins = 4*60
 		}
 
 		devdir = dirsafe(device)
+
 		retry(3) {
 			lock("${dir}") {
-				/* Node is here to prevent too much strain on Nimbix by rate limiting
-				 * to the number of job slots */
-				node("rhel6 && xsjrdevl && !xsjrdevl110") {
-					timeout(mins) {
-						sh """#!/bin/bash -e
+				sh """#!/bin/bash -e
 
 cd ${workdir}
 
@@ -140,6 +146,7 @@ module add opencv/sdaccel
 
 module add proxy
 module add lftp
+module add lsf
 
 cd ${dir}
 
@@ -151,13 +158,18 @@ echo
 
 export PYTHONUNBUFFERED=true
 
+export TMPDIR=\$(mktemp -d -p \$(pwd))
+
 rm -rf \"out/${target}_${devdir}\" && mkdir -p out
 
-make TARGETS=${target} DEVICES=\"${device}\" NIMBIXFLAGS=\"--out out/${target}_${devdir} --queue_timeout=480\" check
+bsub -W ${mins} -I -q ${queue} -R "osdistro=rhel && osver==ws6" -n ${cores} -R "rusage[mem=${mem}] span[ptile=${cores}]" -J "\$(basename ${dir})-${target}-run" <<EOF
+#!/bin/bash -ex
+export TMPDIR=\$TMPDIR
+make TARGETS=${target} DEVICES=\"${device}\" NIMBIXFLAGS=\"--out out/${target}_${devdir} --queue_timeout=${mins}\" check
+rm -rf \$TMPDIR
+EOF
 
 """
-					}
-				}
 			}
 		}
 	}
@@ -314,13 +326,12 @@ module add proxy
 
 		parallel hwSteps
 	}
-/*
+
 	stage('hw run') {
 		lock("only_one_run_stage_at_a_time") {
 			parallel hwRunSteps
 		}
 	}
-*/
 
 	hw_status = 'SUCCESS'
 
