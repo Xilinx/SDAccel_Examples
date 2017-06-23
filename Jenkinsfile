@@ -299,8 +299,8 @@ module add proxy
 	def hwRunSteps = []
 
 	for(int i = 0; i < hwBatches; i++) {
-		hwEmuSteps[i] = [:]
-		hwEmuRunSteps[i] = [:]
+		hwSteps[i] = [:]
+		hwRunSteps[i] = [:]
 	}
 
 	for(int i = 0; i < examples.size(); i++) {
