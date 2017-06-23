@@ -14,25 +14,19 @@ EXES=sum_scan
 
 # sum_scan Kernel
 krnl_sum_scan_SRCS=./src/krnl_sum_scan.cl
-krnl_sum_scan_NDEVICES=xilinx:xil-accel-rd-vu9p:4ddr-xpr xilinx:xil-accel-rd-ku115:4ddr-xpr xilinx:adm-pcie-ku3:2ddr-xpr
 
 XOS=krnl_sum_scan
 
 # sum_scan xclbin
 krnl_sum_scan_XOS=krnl_sum_scan
-krnl_sum_scan_NDEVICES=xilinx:xil-accel-rd-vu9p:4ddr-xpr xilinx:xil-accel-rd-ku115:4ddr-xpr xilinx:adm-pcie-ku3:2ddr-xpr
 
 XCLBINS=krnl_sum_scan
 
 # check
 check_EXE=sum_scan
 check_XCLBINS=krnl_sum_scan
-check_NDEVICES=$(krnl_sum_scan_NDEVICES)
 
 CHECKS=check
-
-#Changing Default Device for this example
-DEVICES:=xilinx:adm-pcie-7v3:1ddr
 
 include $(COMMON_REPO)/utility/rules.mk
 
