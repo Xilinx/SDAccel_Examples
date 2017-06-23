@@ -100,7 +100,7 @@ if [[ \$rc != 0 ]]; then
 bsub -W ${mins} -I -q ${queue} -R "osdistro=rhel && osver==ws6" -n ${cores} -R "rusage[mem=${mem}] span[ptile=${cores}]" -J "\$(basename ${dir})-${target}" <<EOF
 #!/bin/bash -ex
 export TMPDIR=\$TMPDIR
-make TARGETS=${target} DEVICES=\"${device}\" all
+make -j TARGETS=${target} DEVICES=\"${device}\" all
 rm -rf \$TMPDIR
 EOF
 fi
