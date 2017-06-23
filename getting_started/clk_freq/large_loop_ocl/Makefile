@@ -29,11 +29,11 @@ cnn_GOOD_LDCLFLAGS=--nk cnn:4
 
 cnn_BAD_XOS=cnn_BAD
 
-XCLBINS=cnn_GOOD cnn_BAD
+XCLBINS=cnn_GOOD
 
 # check
 check_EXE=host
-check_XCLBINS=cnn_GOOD cnn_BAD
+check_XCLBINS=cnn_GOOD
 
 CHECKS=check
 
