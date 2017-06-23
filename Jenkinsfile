@@ -260,7 +260,7 @@ module add proxy
 		parallel exSteps
 	}
 
-	def swBatches = 10
+	def swBatches = devices.size()
 	def swEmuSteps = []
 	def swEmuRunSteps = []
 
@@ -294,7 +294,7 @@ module add proxy
 
 	sw_emu_status = buildStatus('ci-sw_emu', 'sw_emu checks passed', 'SUCCESS')
 
-	def hwBatches = 10
+	def hwBatches = devices.size()
 	def hwSteps = []
 	def hwRunSteps = []
 
