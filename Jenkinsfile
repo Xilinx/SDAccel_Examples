@@ -131,7 +131,7 @@ def runExample(target, dir, device, workdir) {
 		devdir = dirsafe(device)
 
 		retry(3) {
-			lock("${dir}") {
+		//	lock("${dir}") {
 				sh """#!/bin/bash -e
 
 cd ${workdir}
@@ -170,7 +170,7 @@ rm -rf \$TMPDIR
 EOF
 
 """
-			}
+//			}
 		}
 	}
 }
