@@ -175,7 +175,7 @@ EOF
 	}
 }
 
-function buildStatus(context, message, state) {
+def buildStatus(context, message, state) {
 		step([$class: 'GitHubCommitStatusSetter',
 		     contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: context],
 		     statusResultSource: [$class: 'ConditionalStatusResultSource',
@@ -264,16 +264,21 @@ module add proxy
 	def swEmuSteps = []
 	def swEmuRunSteps = []
 
-	stage('sw_emu build') {
-		for(int i = 0; i < examples.size(); i++) {
-			for(int j = 0; j < devices.size(); j++) {
-				batch = (i * devices.size() + j) % swBatches
-				name = "${examples[i]}-${devices[j]}-sw_emu"
-				swEmuSteps[batch]["${name}-build"]  = buildExample('sw_emu', examples[i], devices[j], workdir)
-				swEmuRunSteps[batch]["${name}-run"] = runExample(  'sw_emu', examples[i], devices[j], workdir)
-			}
-		}
+	for(int i = 0; i < swBatches; i++) {
+		swEmuSteps[i] = [:]
+		swEmuRunSteps[i] = [:]
+	}
 
+	for(int i = 0; i < examples.size(); i++) {
+		for(int j = 0; j < devices.size(); j++) {
+			batch = (i * devices.size() + j) % swBatches
+			name = "${examples[i]}-${devices[j]}-sw_emu"
+			swEmuSteps[batch]["${name}-build"]  = buildExample('sw_emu', examples[i], devices[j], workdir)
+			swEmuRunSteps[batch]["${name}-run"] = runExample(  'sw_emu', examples[i], devices[j], workdir)
+		}
+	}
+
+	stage('sw_emu build') {
 		for(int i = 0; i < swBatches; i++) {
 			parallel swEmuSteps[i]
 		}
@@ -293,16 +298,21 @@ module add proxy
 	def hwSteps = []
 	def hwRunSteps = []
 
-	stage('hw build') {
-		for(int i = 0; i < examples.size(); i++) {
-			for(int j = 0; j < devices.size(); j++) {
-				batch = (i * devices.size() + j) % hwBatches
-				name = "${examples[i]}-${devices[j]}-hw"
-				hwSteps[batch]["${name}-build"]  = buildExample('hw', examples[i], devices[j], workdir)
-				hwRunSteps[batch]["${name}-run"] = runExample(  'hw', examples[i], devices[j], workdir)
-			}
-		}
+	for(int i = 0; i < hwBatches; i++) {
+		hwEmuSteps[i] = [:]
+		hwEmuRunSteps[i] = [:]
+	}
 
+	for(int i = 0; i < examples.size(); i++) {
+		for(int j = 0; j < devices.size(); j++) {
+			batch = (i * devices.size() + j) % hwBatches
+			name = "${examples[i]}-${devices[j]}-hw"
+			hwSteps[batch]["${name}-build"]  = buildExample('hw', examples[i], devices[j], workdir)
+			hwRunSteps[batch]["${name}-run"] = runExample(  'hw', examples[i], devices[j], workdir)
+		}
+	}
+
+	stage('hw build') {
 		for(int i = 0; i < hwBatches; i++) {
 			parallel hwSteps[i]
 		}
