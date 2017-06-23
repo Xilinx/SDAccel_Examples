@@ -125,7 +125,7 @@ def runExample(target, dir, device, workdir) {
 			cores = 8
 			mem = 32000
 			queue = "long"
-			mins = 4*60
+			mins = 8*60
 		}
 
 		devdir = dirsafe(device)
