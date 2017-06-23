@@ -271,7 +271,7 @@ module add proxy
 
 	for(int i = 0; i < examples.size(); i++) {
 		for(int j = 0; j < devices.size(); j++) {
-			batch = (i * devices.size() + j) % swBatches
+			batch = (j * examples.size() + i) % swBatches
 			name = "${examples[i]}-${devices[j]}-sw_emu"
 			swEmuSteps[batch]["${name}-build"]  = buildExample('sw_emu', examples[i], devices[j], workdir)
 			swEmuRunSteps[batch]["${name}-run"] = runExample(  'sw_emu', examples[i], devices[j], workdir)
@@ -305,7 +305,7 @@ module add proxy
 
 	for(int i = 0; i < examples.size(); i++) {
 		for(int j = 0; j < devices.size(); j++) {
-			batch = (i * devices.size() + j) % hwBatches
+			batch = (j * examples.size() + i) % hwBatches
 			name = "${examples[i]}-${devices[j]}-hw"
 			hwSteps[batch]["${name}-build"]  = buildExample('hw', examples[i], devices[j], workdir)
 			hwRunSteps[batch]["${name}-run"] = runExample(  'hw', examples[i], devices[j], workdir)
