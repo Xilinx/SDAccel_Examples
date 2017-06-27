@@ -8,7 +8,7 @@ disableConcurrentBuilds()
 days = 10
 
 devices = []
-devices += ['xilinx:adm-pcie-7v3:1ddr']
+//devices += ['xilinx:adm-pcie-7v3:1ddr']
 devices += ['xilinx:xil-accel-rd-ku115:4ddr-xpr']
 //devices += ['xilinx:adm-pcie-ku3:2ddr-xpr']
 //devices += ['\$XILINX_SDX/../../../../internal_platforms/xilinx_xil-accel-rd-vu9p_4ddr-xpr_4_1/xilinx_xil-accel-rd-vu9p_4ddr-xpr_4_1.xpfm']
@@ -117,13 +117,13 @@ def dirsafe(device) {
 def runExample(target, dir, device, workdir) {
 	return { ->
 		if ( target == "sw_emu" ) {
-			cores = 1
-			mem = 4000
+			cores = 4
+			mem = 32000
 			queue = "medium"
 			mins = 15
 		} else {
-			cores = 8
-			mem = 32000
+			cores = 1
+			mem = 4000
 			queue = "long"
 			mins = 8*60
 		}
