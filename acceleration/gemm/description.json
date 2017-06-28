@@ -1,0 +1,45 @@
+{
+    "runtime": ["OpenCL"],
+    "example" : "general matrix multiplication",
+    "overview" : [
+        "This is the General Matrix Multiply (GEMM) kernel performs matrix multiplication on two input matrices, A and B, to produce an output Matrix C.",
+		  "The int16 GEMM kernel processes matrices of type int16 and produces int16 results. The GEMM SDAccel design consists of two parallel GEMM kernels,", 
+		  "placed on each Super Logic Region (SLR) component of the targeted KU115 device. The two kernels can be deployed simultaneously on disjoint input matrices.",
+		  "Each kernel has a systolic array of 2048 DSP units and is attached to two DDR banks. The DSP array runs at 400 MHz whereas the logic around the array runs at 300 MHz.",
+		  "A variation of the GEMM kernel operates on int8 data points, performing twice as many multiplication and accumulation per cycle, effectively doubling the number of operations and throughput. ",
+        "The design is targeting exection on an SDAccel support FPGA acceleration card"
+    ],
+    "xcl": true,
+    "em_cmd" : "./gemm",
+    "hw_cmd" : "../../utility/nimbix/nimbix-run.py -- ./gemm",
+    "libs" : [
+        "xcl"
+    ],
+    "accelerators": [
+        {
+            "name": "dma", 
+            "location": "src/main.cpp"
+        }
+    ],
+    "perf_fields" : ["Board", "Total Number of Samples", "Kernel Duration"],
+    "performance" : [
+        {
+            "system" : "xilinx:xil-accel-rd-ku115:4ddr-xpr:4.0",
+            "constraint" : "16777216",
+            "metric" : "59.1ms"
+        }
+    ],
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ],
+    "revision" : [
+        {
+            "date" : "JUne2017",
+            "version": "1.0",
+            "description": "Initial Xilinx Release"
+        }
+    ]
+}
