@@ -1,0 +1,67 @@
+/*
+
+sdx v2017.1 (64-bit) [Major: 2017, Minor: 1]
+SW Build 1917677 on Jun 26 2017 18:36:02
+
+
+Process ID: 152414
+License: Customer
+
+Current time: 	6/28/17 7:01:47 PM IST
+Time zone: 	India Standard Time (Asia/Kolkata)
+
+OS: Red Hat Enterprise Linux Workstation release 6.5 (Santiago)
+OS Version: 2.6.32-431.el6.x86_64
+OS Architecture: amd64
+Available processors (cores): 32
+
+Display: xhdrdevl105:13.0
+Screen size: 1920x1080
+Screen resolution (DPI): 99
+Available screens: 1
+Available disk space: 0 GB
+
+Java version: 	1.8.0_112 64-bit
+Java home: 	/proj/xbuilds/2017.1_sdx_0627_1/installs/lin64/SDx/2017.1/SDK/tps/lnx64/jre
+JVM executable location: 	/proj/xbuilds/2017.1_sdx_0627_1/installs/lin64/SDx/2017.1/SDK/tps/lnx64/jre/bin/java
+Java library paths: /proj/xbuilds/2017.1_sdx_0627_1/installs/lin64/SDx/2017.1/SDK/tps/lnx64/jre/lib/amd64/server:/proj/xbuilds/2017.1_sdx_0627_1/installs/lin64/SDx/2017.1/SDK/tps/lnx64/jre/lib/amd64:/proj/xbuilds/2017.1_sdx_0627_1/installs/lin64/SDx/2017.1/SDK/tps/lnx64/lib/amd64:/proj/xbuilds/2017.1_sdx_0627_1/installs/lin64/SDx/2017.1/SDK/lib/lnx64.o:/proj/xbuilds/2017.1_sdx_0627_1/installs/lin64/SDx/2017.1/SDK/tps/lnx64/jre/lib/amd64:/proj/xbuilds/2017.1_sdx_0627_1/installs/lin64/SDx/2017.1/SDK/tps/lnx64/jre/lib/amd64/server:/proj/xbuilds/2017.1_sdx_0627_1/installs/lin64/SDx/2017.1/lib/lnx64.o:/proj/xbuilds/2017.1_sdx_0627_1/installs/lin64/SDx/2017.1/runtime/lib/x86_64:/proj/xbuilds/2017.1_sdx_0627_1/installs/lin64/SDx/2017.1/lib/lnx64.o:/proj/xbuilds/2017.1_sdx_0627_1/installs/lin64/SDx/2017.1/SDK/lnx64/tools/dot/lib:/usr/java/packages/lib/amd64:/usr/lib64:/lib64:/lib:/usr/lib
+
+User name: 	hatchuta
+User home directory: /home/hatchuta
+User working directory: /wrk/xhdhdnobkup1/hatchuta/git_repo/sdaccel_repo/cleanup_repo/apps/getting_started/kernel_opt/loop_perfect_ocl
+User country: 	US
+User language: 	en
+User locale: 	en_US
+
+RDI_BASEROOT: /proj/xbuilds/2017.1_sdx_0627_1/installs/lin64/SDx/2017.1
+HDI_APPROOT: /proj/xbuilds/2017.1_sdx_0627_1/installs/lin64/SDx/2017.1/SDK
+RDI_DATADIR: /proj/xbuilds/2017.1_sdx_0627_1/installs/lin64/SDx/2017.1/SDK/data
+RDI_BINDIR: /proj/xbuilds/2017.1_sdx_0627_1/installs/lin64/SDx/2017.1/SDK/bin
+Engine tmp dir: 	./.Xil/sdx-152414-xhdrdevl105
+
+Copyright 1986-2017 Xilinx, Inc. All Rights Reserved.
+
+*/
+
+bot.tree().getTreeItem("loop_perfect_c").select();
+bot.menu("File").menu("New").menu("Xilinx SDx Project...").click();
+bot.textWithLabel("&Project name:").setText("loop");
+bot.textWithLabel("&Project name:").pressShortcut(SWT.SHIFT, '_');
+bot.textWithLabel("&Project name:").setText("loop_perfect");
+bot.textWithLabel("&Project name:").pressShortcut(SWT.SHIFT, '_');
+bot.textWithLabel("&Project name:").setText("loop_perfect_ocl");
+bot.textWithLabel("&Project name:").pressShortcut(SWT.SHIFT, '_');
+bot.textWithLabel("&Project name:").setText("loop_perfect_ocl_113");
+bot.tree().getTreeItem("KCU1500 (4ddr-xpr)").select();
+bot.button("Next >").click();
+bot.button("Next >").click();
+bot.tree().getTreeItem("Getting Started Examples").getNode("Kernel Optimization Examples").getNode("Improve performance using loop perfect (CL)").select();
+bot.tree().getTreeItem("Getting Started Examples").getNode("Kernel Optimization Examples").getNode("Improve performance using loop perfect (CL)").select();
+bot.button("Finish").click();
+bot.toolbarDropDownButtonWithTooltip("Run loop_perfect_ocl_113-Default").click();
+bot.toolbarButtonWithTooltip("Maximize").click();
+bot.toolbarButtonWithTooltip("Restore").click();
+bot.tree().getTreeItem("loop_perfect_ocl_113").select();
+bot.contextMenu("Build Configurations").menu("Clean All").click();
+bot.comboBox().setSelection("Emulation-HW");
+bot.comboBox().setText("");
