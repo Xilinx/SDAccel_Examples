@@ -10,7 +10,7 @@ days = 10
 devices = []
 //devices += ['xilinx:adm-pcie-7v3:1ddr']
 devices += ['xilinx:xil-accel-rd-ku115:4ddr-xpr']
-//devices += ['xilinx:adm-pcie-ku3:2ddr-xpr']
+devices += ['xilinx:adm-pcie-ku3:2ddr-xpr']
 //devices += ['\$XILINX_SDX/../../../../internal_platforms/xilinx_xil-accel-rd-vu9p_4ddr-xpr_4_1/xilinx_xil-accel-rd-vu9p_4ddr-xpr_4_1.xpfm']
 
 version = '2017.1'
