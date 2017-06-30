@@ -1,9 +1,9 @@
 # check.mk - defines rules for testing
 
-NIMBIX_DSA_xilinx_adm-pcie-ku3_2ddr-xpr = nx1test
+NIMBIX_DSA_xilinx_adm-pcie-ku3_2ddr-xpr = nx1
 NIMBIX_DSA_xilinx_adm-pcie-7v3_1ddr = nx2
-NIMBIX_DSA_xilinx_xil-accel-rd-ku115_4ddr-xpr = nx3test
-NIMBIX_DSA_xilinx_xil-accel-rd-vu9p_4ddr-xpr = nx4test
+NIMBIX_DSA_xilinx_xil-accel-rd-ku115_4ddr-xpr = nx3
+NIMBIX_DSA_xilinx_xil-accel-rd-vu9p_4ddr-xpr = nx4
 
 dsa2type = $(NIMBIX_DSA_$(call sanitize_dsa,$(1)))
 
