@@ -20,12 +20,14 @@ XOS=window_array_2d
 
 # xclbin
 window_array_2d_XOS=window_array_2d
+window_array_2d_NDEVICES=xilinx:adm-pcie-ku3:2ddr-xpr
 
 XCLBINS=window_array_2d
 
 # check
 check_EXE=host
 check_XCLBINS=window_array_2d
+check_NDEVICES=xilinx:adm-pcie-ku3:2ddr-xpr
 
 CHECKS=check
 
