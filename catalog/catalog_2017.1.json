@@ -1,5 +1,5 @@
 {
-    "name": ".", 
+    "name": "apps", 
     "displayName": "", 
     "description": "", 
     "categories": [
@@ -11,7 +11,7 @@
             "examples": [
                 {
                     "name": "kmeans", 
-                    "commit_id": "90e0c6824966d2cf380b9db8a5b6a25fb3750c0f", 
+                    "commit_id": "fe1e6b248fc5fe8b5876c678b180da2bf3771908", 
                     "description": [
                         "This is OpenCL Based K-Means clustering Implementation for Xilinx FPGA ", 
                         "Devices. K-means clustering is a method of vector quantization, that ", 
@@ -19,6 +19,14 @@
                         "aims to partition n observations into k clusters in which each ", 
                         "observation belongs to the cluster with the nearest mean, serving as", 
                         "a prototype of the cluster.", 
+                        "", 
+                        "The application sets two compute units by default so that it will fit ", 
+                        "all Xilinx Devices. For bigger Xilinx Devices, user can increase the ", 
+                        "number of Compute units in Makefile and can get better performance.", 
+                        "It is tested upto 6 compute units for ku115 device and got ", 
+                        "approximately 6x improvement with respect to single compute units, which ", 
+                        "shows that application is more compute bound (not memory bound) and ", 
+                        "performance is directly proportional to number of compute units.", 
                         "", 
                         "__Note__: This application is ported from Rodinia", 
                         "", 
@@ -40,7 +48,7 @@
                 }, 
                 {
                     "name": "nearest_neighbor_linear_search", 
-                    "commit_id": "90e0c6824966d2cf380b9db8a5b6a25fb3750c0f", 
+                    "commit_id": "80b5109964cc15ac3d009397101cf28b3aad19dc", 
                     "description": [
                         "This is an optimized implementation of a nearest neighbor linear search algorithm targeting execution on a SDAccel supported FPGA acceleration card."
                     ], 
@@ -62,7 +70,7 @@
                 }, 
                 {
                     "name": "smithwaterman", 
-                    "commit_id": "ff1506c9ec782a15d38a2796c293a6c0ad284fe7", 
+                    "commit_id": "80b5109964cc15ac3d009397101cf28b3aad19dc", 
                     "description": [
                         "This is an optimized implementation of the smithwaterman algorithm targeting exection on an SDAccel support FPGA acceleration card.", 
                         "", 
@@ -117,7 +125,7 @@
                         }, 
                         {
                             "name": "large_loop_c", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "3d2ce92c2a429a98092eaf5edad09cbdd0b4c4ac", 
                             "description": [
                                 "This is a CNN (Convolutional Neural Network) based example which mainly focuses on Convolution operation of a CNN network. The goal of this example is to demonstrate a method to overcome kernel design timing failure issue. It also presents the effectiveness of using multiple compute units to improve performance."
                             ], 
@@ -136,7 +144,7 @@
                         }, 
                         {
                             "name": "large_loop_ocl", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5b5cb2c92c6ba9067062f233f29d037159e1470f", 
                             "description": [
                                 "This is a CNN (Convolutional Neural Network) based example which mainly focuses on Convolution operation of a CNN network. The goal of this example is to demonstrate a method to overcome kernel design timing failure issue. It also presents the effectiveness of using multiple compute units to improve performance."
                             ], 
@@ -155,7 +163,7 @@
                         }, 
                         {
                             "name": "split_kernel_c", 
-                            "commit_id": "f65b6a295897a3f6352e8bda482f7b5031b88493", 
+                            "commit_id": "2693d7704ad4b780a1a41c96506dbdf40f802724", 
                             "description": [
                                 "This is a multi-filter image processing application to showcase effectiveness of Dataflow/Streams usage. This examples is intended to help developers to break down the complex kernels into multiple sub-functions using HLS Dataflow/Streams. It presents a way to concurrently execute multiple functions with better area utilization compared to a complex single kernel implementation. The main objective of this example is to showcase a way to build a optimal FPGA design which achieves maximum frequency with optimal resource utilization and achieves better performance compared to single complex kernel implementations."
                             ], 
@@ -176,7 +184,7 @@
                         }, 
                         {
                             "name": "split_kernel_ocl", 
-                            "commit_id": "f65b6a295897a3f6352e8bda482f7b5031b88493", 
+                            "commit_id": "b95e9f974baa410e5677b766523c2f947ad206d2", 
                             "description": [
                                 "This is a multi-filter image processing application to showcase effectiveness of Dataflow/Streams usage. This examples is intended to help developers to break down the complex kernel into multiple sub-functions using OpenCL Dataflow. It presents a way to concurrently execute multiple functions with better area utilization compared to a complex single kernel implementation. The main objective of this example is to showcase a way to build a optimal FPGA design which achieves maximum frequency with optimal resource utilization and achieves better performance compared to single kernel implementations."
                             ], 
@@ -214,7 +222,7 @@
                         }, 
                         {
                             "name": "too_many_cu_ocl", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "7ab429bc6e5582fa7c8979796584da5d7f3318e1", 
                             "description": [
                                 "This is simple example of vector addition to demonstrate effectiveness of using single compute unit with heavy work load to achieve better performance. Bad example uses multiple compute units to achieve good performance but it results in heavy usage of FPGA resources and area due to which design fails timing. Good example uses single compute unit to compute with heavier work load, it helps in less resource utilization and also helps in kernel scalability. To switch between Good/Bad cases use the flag provided in makefile."
                             ], 
@@ -345,7 +353,7 @@
                     "examples": [
                         {
                             "name": "debug_printf_ocl", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "68dc3588471bf62f96a59de6badc497491466302", 
                             "description": [
                                 "This is simple example of vector addition and printing of data that is computational result (addition). It is based on vectored addition that demonstrates printing of work item data (integer product in this case)"
                             ], 
@@ -521,7 +529,7 @@
                         }, 
                         {
                             "name": "overlap_ocl", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "9fecf4bec654f9b82bb2c26b76bff2fb15222435", 
                             "description": [
                                 "This examples demonstrates techniques that allow user to overlap Host(CPU) and FPGA computation in an application. It will cover asynchronous operations and event object."
                             ], 
@@ -687,7 +695,7 @@
                         }, 
                         {
                             "name": "loop_perfect_ocl", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "7ab429bc6e5582fa7c8979796584da5d7f3318e1", 
                             "description": [
                                 "This nearest neighbor example is to demonstrate how to achieve better performance using loop perfect."
                             ], 
@@ -750,7 +758,7 @@
                         }, 
                         {
                             "name": "partition_cyclicblock_c", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "7ab429bc6e5582fa7c8979796584da5d7f3318e1", 
                             "description": [
                                 "This example shows how to use array block and cyclic partitioning to improve performance of a kernel"
                             ], 
@@ -773,7 +781,7 @@
                         }, 
                         {
                             "name": "partition_cyclicblock_ocl", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "7ab429bc6e5582fa7c8979796584da5d7f3318e1", 
                             "description": [
                                 "This example shows how to use array block and cyclic partitioning to improve performance of a kernel"
                             ], 
@@ -812,7 +820,7 @@
                         }, 
                         {
                             "name": "shift_register_ocl", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "7ab429bc6e5582fa7c8979796584da5d7f3318e1", 
                             "description": [
                                 "This example demonstrates how to shift values in registers in each clock cycle"
                             ], 
@@ -891,7 +899,7 @@
                         }, 
                         {
                             "name": "custom_datatype_c", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "80b5109964cc15ac3d009397101cf28b3aad19dc", 
                             "description": [
                                 "This is simple example of RGB to HSV conversion to demonstrate Custom DATA Type usages in C Based Kernel. Xilinx HLS Compiler Supports Custom Data Type to use for operation as well as Memory Interface between Kernel and Global Memory."
                             ], 
@@ -902,7 +910,6 @@
                                 "#pragma HLS LOOP_TRIPCOUNT"
                             ], 
                             "key_concepts": [
-                                "Dataflow", 
                                 "Custom Datatype"
                             ], 
                             "version": "1.0", 
@@ -927,7 +934,7 @@
                         }, 
                         {
                             "name": "full_array_2d_c", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "602ce10157ac71a620d3d06f89822e0c10f0aefb", 
                             "description": [
                                 "This is a simple example of accessing full data from 2d array"
                             ], 
@@ -940,7 +947,7 @@
                         }, 
                         {
                             "name": "full_array_2d_ocl", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "602ce10157ac71a620d3d06f89822e0c10f0aefb", 
                             "description": [
                                 "This is a simple example of accessing full data from 2d array"
                             ], 
@@ -1089,7 +1096,7 @@
                         }, 
                         {
                             "name": "window_array_2d_c", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "810ac15e2484d267984b42b3bbb6efecd4a6b362", 
                             "description": [
                                 "This is a simple example of accessing each window of data from 2d array"
                             ], 
@@ -1157,7 +1164,7 @@
                         }, 
                         {
                             "name": "sum_scan", 
-                            "commit_id": "2f990e465c5e89a85664645d2ca12efff3578f37", 
+                            "commit_id": "d523831af56cc6d07af71dce4e77a5b701f90cb8", 
                             "description": [
                                 "Example of parallel prefix sum"
                             ], 
@@ -1167,7 +1174,7 @@
                         }, 
                         {
                             "name": "vadd", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "f3c216dc46efd93c0e6f8866bb7e935b5d326b9d", 
                             "description": [
                                 "Simple example of vector addition."
                             ], 
@@ -1202,7 +1209,7 @@
                         }, 
                         {
                             "name": "vmul_vadd_xpr", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5424bbb3939e9cdf4d370716a5578d6d9c0ffa63", 
                             "description": [
                                 "This example shows how data stored in global memory should be migrated from device to host and later from host to device to share between kernels in different binary containers. This buffer migration is only needed for XPR(Extended Partial Reconfiguration) Specific Devices. As XPR devices do not persist data when user reload another binary container."
                             ], 
@@ -1232,7 +1239,7 @@
             "examples": [
                 {
                     "name": "aes_decrypt", 
-                    "commit_id": "ff1506c9ec782a15d38a2796c293a6c0ad284fe7", 
+                    "commit_id": "80b5109964cc15ac3d009397101cf28b3aad19dc", 
                     "description": [
                         "Implementation of an AES-128 ECB Encrypt in software, followed by decryption written in OpenCL and targeting execution on an SDAccel supported FPGA acceleration card."
                     ], 
@@ -1242,7 +1249,7 @@
                 }, 
                 {
                     "name": "rsa", 
-                    "commit_id": "90e0c6824966d2cf380b9db8a5b6a25fb3750c0f", 
+                    "commit_id": "80b5109964cc15ac3d009397101cf28b3aad19dc", 
                     "description": [
                         "This is an implementation of a RSA Decryption algorithm targeting execution on an SDAccel supported FPGA acceleration card."
                     ], 
@@ -1252,7 +1259,7 @@
                 }, 
                 {
                     "name": "sha1", 
-                    "commit_id": "11ffda845e15094baff2af504b1936484d78353c", 
+                    "commit_id": "80b5109964cc15ac3d009397101cf28b3aad19dc", 
                     "description": [
                         "This is an optimized implementation of SHA1 secure hash algorithm targeting execution on an SDAccel supported FPGA acceleration card."
                     ], 
@@ -1280,7 +1287,7 @@
             "examples": [
                 {
                     "name": "affine", 
-                    "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                    "commit_id": "80b5109964cc15ac3d009397101cf28b3aad19dc", 
                     "description": [
                         "Affine transformation is a linear mapping method that preserves points, straight lines, and planes. Sets of parallel lines remain parallel after an affine transformation. The affine transformation technique is typically used to correct for geometric distortions or deformations that occur with non-ideal camera angles. The demo performs a 30 degree X rotation and a 50% X and Y scaling on a 512 by 512, 16 bits per pixels grayscale, raw MRI image."
                     ], 
@@ -1290,7 +1297,7 @@
                 }, 
                 {
                     "name": "convolve", 
-                    "commit_id": "90e0c6824966d2cf380b9db8a5b6a25fb3750c0f", 
+                    "commit_id": "80b5109964cc15ac3d009397101cf28b3aad19dc", 
                     "description": [
                         "The convolve example is a performant design which showcases convolutional image filtering. The example processes the image 8 pixels at a time."
                     ], 
@@ -1300,7 +1307,7 @@
                 }, 
                 {
                     "name": "edge_detection", 
-                    "commit_id": "90e0c6824966d2cf380b9db8a5b6a25fb3750c0f", 
+                    "commit_id": "80b5109964cc15ac3d009397101cf28b3aad19dc", 
                     "description": [
                         "Implementation of a Sobel Filter for edge detection."
                     ], 
@@ -1310,7 +1317,7 @@
                 }, 
                 {
                     "name": "histogram_eq", 
-                    "commit_id": "ff1506c9ec782a15d38a2796c293a6c0ad284fe7", 
+                    "commit_id": "80b5109964cc15ac3d009397101cf28b3aad19dc", 
                     "description": [
                         "This is an optimized implementation of a 12-bit histogram equalizer targeting execution on an SDAccel supported FPGA acceleration card."
                     ], 
@@ -1329,8 +1336,18 @@
                     "author": "Xilinx"
                 }, 
                 {
+                    "name": "idct", 
+                    "commit_id": "6357289c467f838bc7c90771ae6be7e2356fa863", 
+                    "description": [
+                        "Example of processing Inverse Discrete Cosine Transfom on multiple blocks of data."
+                    ], 
+                    "displayName": "Inverse Discrete Cosine Transform", 
+                    "version": "1.0", 
+                    "author": "Xilinx"
+                }, 
+                {
                     "name": "median_filter", 
-                    "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                    "commit_id": "80b5109964cc15ac3d009397101cf28b3aad19dc", 
                     "description": [
                         "This is an optimized implementation of a median filter being used to remove noise in images targeting execution on an SDAccel supported FPGA acceleration card."
                     ], 
@@ -1340,7 +1357,7 @@
                 }, 
                 {
                     "name": "watermarking", 
-                    "commit_id": "ff1506c9ec782a15d38a2796c293a6c0ad284fe7", 
+                    "commit_id": "80b5109964cc15ac3d009397101cf28b3aad19dc", 
                     "description": [
                         "This is an optimized implementation of a watermarking application to add watermarking to images targeting execution on an SDAccel supported FPGA acceleration card."
                     ], 
@@ -1352,5 +1369,5 @@
         }
     ], 
     "examples": [], 
-    "branch": "next"
+    "branch": "master"
 }
