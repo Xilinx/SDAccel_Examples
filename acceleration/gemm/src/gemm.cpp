@@ -102,7 +102,7 @@ int main(int argc, char** argv)
     std::cout << "Creating context..." << std::endl;
   	xcl_world world = xcl_world_single();
   	cl_program program = xcl_import_binary(world, "gemm");    // compute programs
-  	cl_kernel kernelSgemm_0 = xcl_get_kernel(program, "gemm");    // compute kernel
+  	cl_kernel kernelSgemm_0 = xcl_get_kernel(program, "kernelSgemm_0");    // compute kernel
 
 #if (TWO_KERN)
     short *h_c1;
@@ -240,10 +240,10 @@ int main(int argc, char** argv)
     cl_mem d_c1;                         // device memory used for c vector
 
 #endif
-    d_a = xcl_malloc(world, CL_MEM_READ_ONLY |  CL_MEM_EXT_PTR_XILINX,sizeof(short) * num_of_rows * depth);
-    d_b = xcl_malloc(world, CL_MEM_READ_ONLY |  CL_MEM_EXT_PTR_XILINX,sizeof(short) * (num_of_cols/2) * depth);
-    d_d = xcl_malloc(world, CL_MEM_READ_ONLY |  CL_MEM_EXT_PTR_XILINX,sizeof(short) * (num_of_cols/2) * depth);
-    d_c = xcl_malloc(world, CL_MEM_WRITE_ONLY | CL_MEM_EXT_PTR_XILINX,sizeof(short) * num_of_rows * num_of_cols);
+    d_a = clCreateBuffer(world.context, CL_MEM_READ_ONLY |  CL_MEM_EXT_PTR_XILINX, sizeof(short) * num_of_rows * depth, &d_a_ext, &err);
+	 d_b = clCreateBuffer(world.context, CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX,  sizeof(short) * (num_of_cols/2) * depth , &d_b_ext, &err);
+	 d_d = clCreateBuffer(world.context, CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX,  sizeof(short) * (num_of_cols/2) * depth , &d_d_ext, &err);
+    d_c = clCreateBuffer(world.context, CL_MEM_WRITE_ONLY | CL_MEM_EXT_PTR_XILINX,  sizeof(short) * num_of_rows * num_of_cols, &d_c_ext, &err);
 
     std::cout << "Copying Buffers to device...." << std::endl;
     xcl_memcpy_to_device(world,d_a,h_a,sizeof(short) * num_of_rows * depth);

@@ -14,8 +14,7 @@ EXES=gemm
 
 # General Matrix Multiply Kernel
 gemm0_SRCS=src/gemm.cpp
-gemm0_CLFLAGS= -I./src/ --xp \
-misc:map_connect=add.kernel.krnl_0.m00_axi.core.OCL_REGION_0.M00_AXI  --xp misc:map_connect=add.kernel.krnl_0.m01_axi.core.OCL_REGION_0.M01_AXI --xp vivado_prop:run.dr_krnl_0_0_synth_1.STEPS.SYNTH_DESIGN.TCL.PRE=presynth.tcl --xp vivado_prop:run.impl_1.STEPS.OPT_DESIGN.TCL.PRE=ku115-constraints-pblock-1kernel.tcl --xp vivado_prop:run.impl_1.STEPS.OPT_DESIGN.ARGS.DIRECTIVE=Explore --xp vivado_prop:run.impl_1.STEPS.PLACE_DESIGN.ARGS.DIRECTIVE=Explore --xp vivado_prop:run.impl_1.STEPS.PHYS_OPT_DESIGN.IS_ENABLED=true --xp vivado_prop:run.impl_1.STEPS.PHYS_OPT_DESIGN.ARGS.DIRECTIVE=AggressiveExplore--xp vivado_prop:run.impl_1.STEPS.ROUTE_DESIGN.ARGS.DIRECTIVE=Explore --nk kernelSgemm_0:1:krnl_0 kernelSgemm_0.xo
+gemm0_LDCLFLAGS= -I./src/ --xp misc:map_connect=add.kernel.krnl_0.m00_axi.core.OCL_REGION_0.M00_AXI  --xp misc:map_connect=add.kernel.krnl_0.m01_axi.core.OCL_REGION_0.M01_AXI --xp vivado_prop:run.dr_krnl_0_0_synth_1.STEPS.SYNTH_DESIGN.TCL.PRE=presynth.tcl --xp vivado_prop:run.impl_1.STEPS.OPT_DESIGN.TCL.PRE=ku115-constraints-pblock-1kernel.tcl --xp vivado_prop:run.impl_1.STEPS.OPT_DESIGN.ARGS.DIRECTIVE=Explore --xp vivado_prop:run.impl_1.STEPS.PLACE_DESIGN.ARGS.DIRECTIVE=Explore --xp vivado_prop:run.impl_1.STEPS.PHYS_OPT_DESIGN.IS_ENABLED=true --xp vivado_prop:run.impl_1.STEPS.PHYS_OPT_DESIGN.ARGS.DIRECTIVE=AggressiveExplore --xp vivado_prop:run.impl_1.STEPS.ROUTE_DESIGN.ARGS.DIRECTIVE=Explore --nk kernelSgemm_0:1:krnl_0 
 
 # General Matrix Multiply xclbin
 gemm0_XOS=gemm0
@@ -29,3 +28,4 @@ check_XCLBINS=gemm0
 CHECKS=check
 
 include $(COMMON_REPO)/utility/rules.mk
+
