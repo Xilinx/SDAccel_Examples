@@ -1,4 +1,4 @@
-pseudo random number generator
+general matrix multiplication
 ======================
 
 This README file contains the following sections:
@@ -16,14 +16,17 @@ This README file contains the following sections:
 
 
 ## 1. OVERVIEW
-This is an optimized implementation of the pseudo random number generator algorithm
-The method used to generate a random number sequence is called complementary multiply with carry (CMWC)
-targeting exection on an SDAccel support FPGA acceleration card
+This is the General Matrix Multiply (GEMM) kernel performs matrix multiplication on two input matrices, A and B, to produce an output Matrix C.
+The int16 GEMM kernel processes matrices of type int16 and produces int16 results. The GEMM SDAccel design consists of two parallel GEMM kernels,
+placed on each Super Logic Region (SLR) component of the targeted KU115 device. The two kernels can be deployed simultaneously on disjoint input matrices.
+Each kernel has a systolic array of 2048 DSP units and is attached to two DDR banks. The DSP array runs at 400 MHz whereas the logic around the array runs at 300 MHz.
+A variation of the GEMM kernel operates on int8 data points, performing twice as many multiplication and accumulation per cycle, effectively doubling the number of operations and throughput. 
+The design is targeting exection on an SDAccel support FPGA acceleration card
 
 ### PERFORMANCE
 Board|Total Number of Samples|Kernel Duration
 ----|-----|-----
-xilinx:adm-pcie-ku3:2ddr-xpr|16777216|59.1ms
+xilinx:xil-accel-rd-ku115:4ddr-xpr:4.0|16777216|59.1ms
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
 ```
@@ -34,9 +37,7 @@ where examples is the name of the directory where the repository will be stored 
 ## 3. SOFTWARE AND SYSTEM REQUIREMENTS
 Board | Device Name | Software Version
 ------|-------------|-----------------
-Alpha Data ADM-PCIE-7V3|xilinx:adm-pcie-7v3:1ddr|SDAccel 2016.4
-Xilinx KU115|xilinx:xil-accel-rd-ku115:4ddr-xpr|SDAccel 2016.4
-Alpha Data ADM-PCIE-KU3|xilinx:adm-pcie-ku3:2ddr-xpr|SDAccel 2016.4
+Xilinx KU115|xilinx:xil-accel-rd-ku115:4ddr-xpr|SDAccel 2017.1
 
 
 *NOTE:* The board/device used for compilation can be changed by adding the DEVICES variable to the make command as shown below
@@ -53,10 +54,10 @@ Application code is located in the src directory. Accelerator binary files will 
 Makefile
 README.md
 description.json
-src/dma.cpp
-src/dma.h
-src/prng.cpp
-src/prng.h
+src/gemm.cpp
+src/kernelSgemm_0.xo
+src/ku115-constraints-pblock-1kernel.tcl
+src/presynth.tcl
 ```
 
 ## 5. COMPILATION AND EXECUTION
@@ -97,11 +98,11 @@ To manually configure the environment to run the application, set the following
 ```
 export LD_LIBRARY_PATH=$XILINX_SDX/runtime/lib/x86_64/:$LD_LIBRARY_PATH
 export XCL_EMULATION_MODE=<sw_emu|hw_emu>
-emconfigutil --xdevice 'xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3' --nd 1
+emconfigutil --xdevice 'xilinx:xil-accel-rd-ku115:4ddr-xpr' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./prng
+./gemm
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card
@@ -140,7 +141,7 @@ This example is written by developers at
 ## 10. REVISION HISTORY
 Date | README Version | Description
 -----|----------------|------------
-FEB2017|1.0|Initial Xilinx Release
+JUne2017|1.0|Initial Xilinx Release
 
 [3-Clause BSD License]: ../../LICENSE.txt
 [SDAccel Forums]: https://forums.xilinx.com/t5/SDAccel/bd-p/SDx
