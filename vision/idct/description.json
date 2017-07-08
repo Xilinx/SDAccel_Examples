@@ -1,0 +1,36 @@
+{
+    "runtime": ["OpenCL"],
+    "example" : "Inverse Discrete Cosine Transform",
+    "overview" : [
+        "Example of processing Inverse Discrete Cosine Transfom on multiple blocks of data."
+    ],
+    "os": [
+        "Linux"
+    ],
+    "em_cmd" : "./idct",
+    "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./idct",
+    "libs": [
+        "xcl2"
+    ], 
+    "accelerators": [
+        {
+            "container": "krnl_idct", 
+            "name": "krnl_idct", 
+            "location": "src/krnl_idct.cl"
+        }
+    ],
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ],
+    "revision" : [
+        {
+            "date" : "JUN2017",
+            "version": "1.0",
+            "description": "Initial Xilinx Release"
+        }
+    ]
+
+}

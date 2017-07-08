@@ -5,10 +5,30 @@
         "This example shows how data stored in global memory can be shared between kernels in different binary containers. This functionality is available only for non-XPR Devices."
     ],
     "key_concepts": [ "Multiple Kernel Binaries" , "Buffer sharing across Multiple binaries", "Multiple Kernels in different Binaries"],
-    "keywords": [ "NA"],
-    "nboards": ["xilinx:adm-pcie-ku3:2ddr-xpr", "xilinx:xil-accel-rd-ku115:4ddr-xpr"],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl2"
+    ],
     "em_cmd" : "./vmulvadd",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./vmulvadd",
+    "nboard" : [
+        "xilinx:xil-accel-rd-ku115:4ddr-xpr",
+        "xilinx:adm-pcie-ku3:2ddr-xpr"
+    ],
+    "accelerators": [
+        {
+            "name": "krnl_vmul", 
+            "location": "src/krnl_vmul.cl", 
+            "container": "krnl_vmul"
+        }, 
+        {
+            "name": "krnl_vadd", 
+            "location": "src/krnl_vadd.cl", 
+            "container": "krnl_vadd"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

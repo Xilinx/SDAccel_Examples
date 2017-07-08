@@ -4,8 +4,21 @@
     "overview" : [
         "Simple example of vector addition."
     ],
+    "os": [
+        "Linux"
+    ],
     "em_cmd" : "./vadd",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./vadd",
+    "libs": [
+        "xcl2"
+    ], 
+    "accelerators": [
+        {
+            "container": "krnl_vadd", 
+            "name": "krnl_vadd", 
+            "location": "src/krnl_vadd.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

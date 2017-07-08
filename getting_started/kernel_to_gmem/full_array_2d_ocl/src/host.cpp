@@ -26,54 +26,52 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
+#include "xcl2.hpp"
+#include <vector>
 
-#include <iostream>
-#include <cstring>
+// Define array size 
+#define TEST_MATRIX_DIM 256
+ 
+// Define max local buffer size
+#define MAX_MATRIX_DIM 256
 
-//OpenCL utility layer include
-#include "xcl.h"
-
-//define array size to access
-#define DATA_SIZE 8
-//define max local buffer size
-#define N 256
-
-void mmult_sw(int *a, int *b, int *c, int size)
+void mmult_sw(  std::vector<int,aligned_allocator<int>> &a, 
+                std::vector<int,aligned_allocator<int>> &b, 
+                std::vector<int,aligned_allocator<int>> &c, int size)
 {
-  int bufa[N][N], bufb[N][N], bufc[N][N];
-  for (int i = 0 ; i < size ; i++) {
-      memcpy(bufa[i], (int *) &a[i*size], size*sizeof(int));
-      memcpy(bufb[i], (int *) &b[i*size], size*sizeof(int));
-  }
-
   for (int row = 0; row < size; row++) {
     for (int col = 0; col < size; col++) {
       int result = 0;
       for (int k = 0; k < size; k++) {
-        result += bufa[row][k] * bufb[k][col];
+        result += a[row * size + k] * b[k * size + col];
       }
-      bufc[row][col] = result;
+      c[row * size + col] = result;
     }
   }
-  for (int i = 0 ; i < size ; i++)
-      memcpy((int *) &c[i*size], bufc[i], size*sizeof(int));
 }
 
 int main(int argc, char** argv)
 {
-    int size = DATA_SIZE;
-    int matrix_size = size * size;
-    if (size > N) {
+    int test_matrix_dim = TEST_MATRIX_DIM;
+    const char *xcl_emu = getenv("XCL_EMULATION_MODE");
+    if(xcl_emu && !strcmp(xcl_emu, "hw_emu")){
+        test_matrix_dim = 16;
+        std::cout << "Data Size Reduced to  "<< test_matrix_dim << " for Hardware Emulation" << std::endl;
+    }
+    
+    int dim = test_matrix_dim;
+    int matrix_size = dim * dim;
+    
+    if (dim > MAX_MATRIX_DIM) {
         std::cout << "Size is bigger than internal buffer size, please use a size smaller than 256!" << std::endl;
         return EXIT_FAILURE;
     }
     //Allocate Memory in Host Memory
-    size_t vector_size_bytes = sizeof(int) * matrix_size;
-
-    int *source_input_a     = (int *) malloc(vector_size_bytes);
-    int *source_input_b     = (int *) malloc(vector_size_bytes);
-    int *source_hw_results  = (int *) malloc(vector_size_bytes);
-    int *source_sw_results  = (int *) malloc(vector_size_bytes);
+    size_t matrix_size_in_bytes = sizeof(int) * matrix_size;
+    std::vector<int,aligned_allocator<int>> source_input_a   (matrix_size);
+    std::vector<int,aligned_allocator<int>> source_input_b   (matrix_size);
+    std::vector<int,aligned_allocator<int>> source_hw_results(matrix_size);
+    std::vector<int,aligned_allocator<int>> source_sw_results(matrix_size);
 
     // Create the test data and Software Result 
     for(int i = 0 ; i < matrix_size ; i++){
@@ -81,48 +79,52 @@ int main(int argc, char** argv)
         source_input_b[i] = i;
         source_hw_results[i] = 0;
     }
-    mmult_sw(source_input_a, source_input_b, source_sw_results, size);
+    mmult_sw(source_input_a, source_input_b, source_sw_results, dim);
 
 //OPENCL HOST CODE AREA START
-    //Create Program and Kernel
-    xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "mmult");
-    cl_kernel krnl_mmult = xcl_get_kernel(program, "mmult");
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
+
+    cl::Context context(device);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+    std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+
+    std::string binaryFile = xcl::find_binary_file(device_name,"mmult");
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    devices.resize(1);
+    cl::Program program(context, devices, bins);
+    cl::Kernel kernel(program,"mmult");
 
     //Allocate Buffer in Global Memory
-    cl_mem buffer_a = xcl_malloc(world, CL_MEM_READ_ONLY, vector_size_bytes);
-    cl_mem buffer_b = xcl_malloc(world, CL_MEM_READ_ONLY, vector_size_bytes);
-    cl_mem buffer_c = xcl_malloc(world, CL_MEM_WRITE_ONLY, vector_size_bytes);
+    cl::Buffer buffer_a(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
+            matrix_size_in_bytes,source_input_a.data());
+    cl::Buffer buffer_b(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
+            matrix_size_in_bytes,source_input_b.data());
+    cl::Buffer buffer_c(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
+            matrix_size_in_bytes, source_hw_results.data());
 
-    //Copy input data to device global memory
-    xcl_memcpy_to_device(world,buffer_a,source_input_a,vector_size_bytes);
-    xcl_memcpy_to_device(world,buffer_b,source_input_b,vector_size_bytes);
+    std::vector<cl::Memory> writeBufVec;
+    writeBufVec.push_back(buffer_a);
+    writeBufVec.push_back(buffer_b);
+    //Migrate  input data to device global memory
+    q.enqueueMigrateMemObjects(writeBufVec,0/* 0 means from host*/);
 
-    //Set the Kernel Arguments
-    xcl_set_kernel_arg(krnl_mmult,0,sizeof(cl_mem),&buffer_a);
-    xcl_set_kernel_arg(krnl_mmult,1,sizeof(cl_mem),&buffer_b);
-    xcl_set_kernel_arg(krnl_mmult,2,sizeof(cl_mem),&buffer_c);
-    xcl_set_kernel_arg(krnl_mmult,3,sizeof(int),&size);
+    auto krnl_mmult 
+        = cl::KernelFunctor<cl::Buffer&,cl::Buffer&,cl::Buffer&,int>(kernel);
 
     //Launch the Kernel
-    xcl_run_kernel3d(world,krnl_mmult,1,1,1);
+    krnl_mmult(cl::EnqueueArgs(q,cl::NDRange(1,1,1), cl::NDRange(1,1,1)), 
+            buffer_a,buffer_b,buffer_c, dim);
 
+    std::vector<cl::Memory> readBufVec;
+    readBufVec.push_back(buffer_c);
     //Copy Result from Device Global Memory to Host Local Memory
-    xcl_memcpy_from_device(world, source_hw_results, buffer_c ,vector_size_bytes);
-    clFinish(world.command_queue);
-
-    //Release Device Memories and Kernels
-    clReleaseMemObject(buffer_a);
-    clReleaseMemObject(buffer_b);
-    clReleaseMemObject(buffer_c);
-    clReleaseKernel(krnl_mmult);
-    clReleaseProgram(program);
-    xcl_release_world(world);
+    q.enqueueMigrateMemObjects(readBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    q.finish();
 //OPENCL HOST CODE AREA END
     
     // Compare the results of the Device to the simulation
     int match = 0;
-    std::cout << "Result = " << std::endl;
     for (int i = 0 ; i < matrix_size ; i++){
         if (source_hw_results[i] != source_sw_results[i]){
             std::cout << "Error: Result mismatch" << std::endl;
@@ -130,22 +132,9 @@ int main(int argc, char** argv)
                 << " Device result = " << source_hw_results[i] << std::endl;
             match = 1;
             break;
-        }else{
-            std::cout << source_hw_results[i] << " " ;
-            if ( ( (i+1) % 16) == 0) std::cout << std::endl;
         }
     }
 
-    // Release Memory from Host Memory
-    free(source_input_a);
-    free(source_input_b);
-    free(source_hw_results);
-    free(source_sw_results);
-
-    if (match){
-        std::cout << "TEST FAILED." << std::endl; 
-        return EXIT_FAILURE;
-    }
-    std::cout << "TEST PASSED." << std::endl; 
-    return EXIT_SUCCESS; 
+    std::cout << "TEST " << (match ? "FAILED" : "PASSED") << std::endl; 
+    return (match ? EXIT_FAILURE :  EXIT_SUCCESS);
 }

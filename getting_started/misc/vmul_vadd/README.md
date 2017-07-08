@@ -20,8 +20,6 @@ This example shows how data stored in global memory can be shared between kernel
 
 ***KEY CONCEPTS:*** Multiple Kernel Binaries, Buffer sharing across Multiple binaries, Multiple Kernels in different Binaries
 
-***KEYWORDS:*** NA
-
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
 ```
@@ -32,7 +30,8 @@ where examples is the name of the directory where the repository will be stored 
 ## 3. SOFTWARE AND SYSTEM REQUIREMENTS
 Board | Device Name | Software Version
 ------|-------------|-----------------
-Alpha Data ADM-PCIE-7V3|xilinx:adm-pcie-7v3:1ddr|SDAccel 2016.4
+Alpha Data ADM-PCIE-7V3|xilinx:adm-pcie-7v3:1ddr|SDAccel 2017.1
+Xilinx VU9P|xilinx:xil-accel-rd-vu9p:4ddr-xpr|SDAccel 2017.1
 
 
 *NOTE:* The board/device used for compilation can be changed by adding the DEVICES variable to the make command as shown below
@@ -49,9 +48,9 @@ Application code is located in the src directory. Accelerator binary files will 
 Makefile
 README.md
 description.json
+src/host.cpp
 src/krnl_vadd.cl
 src/krnl_vmul.cl
-src/main.c
 ```
 
 ## 5. COMPILATION AND EXECUTION
@@ -92,7 +91,7 @@ To manually configure the environment to run the application, set the following
 ```
 export LD_LIBRARY_PATH=$XILINX_SDX/runtime/lib/x86_64/:$LD_LIBRARY_PATH
 export XCL_EMULATION_MODE=<sw_emu|hw_emu>
-emconfigutil --xdevice 'xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3' --nd 1
+emconfigutil --xdevice 'xilinx:xil-accel-rd-ku115:4ddr-xpr' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```

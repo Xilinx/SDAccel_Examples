@@ -4,9 +4,21 @@
     "overview" : [
         "Example of parallel prefix sum"
     ],
-    "nboards": ["xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr"],
+    "os": [
+        "Linux"
+    ],
     "em_cmd" : "./sum_scan",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./sum_scan",
+    "libs": [
+        "xcl2"
+    ], 
+    "accelerators": [
+        {
+            "container": "krnl_sum_scan", 
+            "name": "krnl_sum_scan", 
+            "location": "src/krnl_sum_scan.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

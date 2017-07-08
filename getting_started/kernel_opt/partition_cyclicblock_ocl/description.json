@@ -1,0 +1,43 @@
+{
+    "runtime": ["OpenCL"],
+    "example": "Array Block and Cyclic Partitioning (CL)",
+    "overview": [
+        "This example shows how to use array block and cyclic partitioning to improve performance of a kernel"
+    ],
+    "key_concepts": [ "Kernel Optimization", "Array Partitioning", "Block Partition", "Cyclic Partition"],
+    "keywords": [ "xcl_array_partition", "cyclic", "block"],
+    "nboard": ["xilinx:adm-pcie-7v3:1ddr"],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl2"
+    ],
+    "em_cmd": "./array_partition",
+    "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./array_partition",
+    "accelerators": [
+        {
+            "container": "matmul", 
+            "name": "matmul_naive", 
+            "location": "src/matmul.cl"
+        },
+        {
+            "container": "matmul", 
+            "name": "matmul_partition", 
+            "location": "src/matmul.cl"
+        }
+    ],
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ],
+    "revision" : [
+        {
+            "date" : "MAY2017",
+            "version": "1.0",
+            "description": "Initial Xilinx Release"
+        }
+    ]
+}

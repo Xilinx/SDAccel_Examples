@@ -29,9 +29,9 @@ cnn_GOOD_XOS=cnn_GOOD
 cnn_GOOD_LDCLFLAGS=--nk cnn:4
 
 cnn_BAD_XOS=cnn_BAD
-cnn_BAD_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3
+cnn_BAD_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr
 
-XCLBINS=cnn_GOOD cnn_BAD
+XCLBINS=cnn_GOOD
 
 # check
 check_EXE=host

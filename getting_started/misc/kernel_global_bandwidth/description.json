@@ -4,8 +4,25 @@
     "overview" : [
         "Bandwidth test of global to local memory."
     ],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl"
+    ],
     "em_cmd" : "./kernel_global",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./kernel_global",
+    "containers": [
+        {
+            "name": "krnl_kernel_global", 
+            "accelerators": [
+                {
+                    "name": "bandwidth", 
+                    "location": "src/kernel.cl"
+                }
+            ]
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

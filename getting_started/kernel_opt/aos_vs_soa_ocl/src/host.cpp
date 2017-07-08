@@ -26,14 +26,10 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
-
-#include "CL/cl.h"
-#include "xcl.h"
-
-#include <algorithm>
-#include <cstdio>
-#include <random>
+#include "xcl2.hpp"
 #include <vector>
+#include <random>
+#include <algorithm>
 
 using std::default_random_engine;
 using std::generate;
@@ -53,9 +49,9 @@ struct vertex {
 // structure of arrays. This means that each element of the arrays represents
 // one vertix in a triangle.
 struct vertex_array {
-  vector<int> x;
-  vector<int> y;
-  vector<int> z;
+  vector<int,aligned_allocator<int>> x;
+  vector<int,aligned_allocator<int>> y;
+  vector<int,aligned_allocator<int>> z;
   vertex_array(int count) : x(count), y(count), z(count) {}
 };
 
@@ -69,8 +65,8 @@ int gen_random() {
   return dist(e);
 }
 
-void compute_dot(vector<int> &result, const vector<int> &X,
-                 const vector<int> &Y, const vector<int> &Z,
+void compute_dot(int *result, const int *X,
+                 const int *Y, const int *Z,
                  const int num_vertices) {
   for (int t = 0; t < num_vertices; ++t) {
     result[t] = X[t] * X[t];
@@ -79,7 +75,8 @@ void compute_dot(vector<int> &result, const vector<int> &X,
   }
 }
 
-void verify (const vector<int>& gold, const vector<int>& results) {
+void verify (const vector<int,aligned_allocator<int>>& gold, 
+             const vector<int,aligned_allocator<int>>& results) {
   if(!equal(begin(gold), end(gold), begin(results))) {
     printf("TEST FAILED\n");
     exit(EXIT_FAILURE);
@@ -93,96 +90,106 @@ void verify (const vector<int>& gold, const vector<int>& results) {
 // we will explore the performance of dot product using Structure of Arrays and
 // Array of Structures.
 int main(int argc, char **argv) {
-  char *binary_file_path = argv[1];
 
   // allocate memory on host to store input arrays and the output array
-  vector<int> results(VERTEX_COUNT);
+  vector<int,aligned_allocator<int>> results(VERTEX_COUNT);
 
   vertex_array soa_vertices(VERTEX_COUNT);
   generate(begin(soa_vertices.x), end(soa_vertices.x), gen_random);
   generate(begin(soa_vertices.y), end(soa_vertices.y), gen_random);
   generate(begin(soa_vertices.z), end(soa_vertices.z), gen_random);
 
-  vector<vertex> aos_vertices(VERTEX_COUNT);
+  vector<vertex,aligned_allocator<vertex>> aos_vertices(VERTEX_COUNT);
   for (int i = 0; i < (int)aos_vertices.size(); i++) {
     aos_vertices[i].x = soa_vertices.x[i];
     aos_vertices[i].y = soa_vertices.y[i];
     aos_vertices[i].z = soa_vertices.z[i];
   }
   // Calculate gold result
-  vector<int> gold(VERTEX_COUNT);
-  compute_dot(gold, soa_vertices.x, soa_vertices.y, soa_vertices.z,
-              VERTEX_COUNT);
+  vector<int,aligned_allocator<int>> gold(VERTEX_COUNT);
+  compute_dot(gold.data(), soa_vertices.x.data(), soa_vertices.y.data(), 
+          soa_vertices.z.data(),VERTEX_COUNT);
 
-  // Initialize OpenCL context and load xclbin binary
-  xcl_world world = xcl_world_single();
-  cl_program program = xcl_import_binary(world, "dot");
-
+  std::vector<cl::Device> devices = xcl::get_xil_devices();
+  cl::Device device = devices[0];
+  //Creating Context and Command Queue for selected Device 
+  cl::Context context(device);
+  cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+  std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+  std::cout << "Found Device=" << device_name.c_str() << std::endl;
+  std::string binaryFile = xcl::find_binary_file(device_name,"dot");
+  cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+  devices.resize(1);
+  cl::Program program(context, devices, bins);
+ 
   // Allocate memory on the FPGA
-  cl_mem buffer_result =
-      xcl_malloc(world, CL_MEM_READ_WRITE, results.size() * sizeof(int));
-  cl_mem buffer_x =
-      xcl_malloc(world, CL_MEM_READ_ONLY, soa_vertices.x.size() * sizeof(int));
-  cl_mem buffer_y =
-      xcl_malloc(world, CL_MEM_READ_ONLY, soa_vertices.y.size() * sizeof(int));
-  cl_mem buffer_z =
-      xcl_malloc(world, CL_MEM_READ_ONLY, soa_vertices.z.size() * sizeof(int));
+  cl::Buffer buffer_result(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, 
+          results.size() * sizeof(int), results.data());
+  cl::Buffer buffer_x(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+          soa_vertices.x.size() * sizeof(int), soa_vertices.x.data());
+  cl::Buffer buffer_y(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+          soa_vertices.y.size() * sizeof(int), soa_vertices.y.data());
+  cl::Buffer buffer_z(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+          soa_vertices.z.size() * sizeof(int), soa_vertices.z.data());
 
   // Transfer data from host to the FPGA
-  xcl_memcpy_to_device(world, buffer_x, soa_vertices.x.data(),
-                       soa_vertices.x.size() * sizeof(int));
-  xcl_memcpy_to_device(world, buffer_y, soa_vertices.y.data(),
-                       soa_vertices.y.size() * sizeof(int));
-  xcl_memcpy_to_device(world, buffer_z, soa_vertices.z.data(),
-                       soa_vertices.z.size() * sizeof(int));
+  std::vector<cl::Memory> inBufVec, outBufVec;
+  inBufVec.push_back(buffer_x);
+  inBufVec.push_back(buffer_y);
+  inBufVec.push_back(buffer_z);
+  outBufVec.push_back(buffer_result);
+  q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
   printf( "|-------------------------+-------------------------|\n"
           "| Kernel                  |    Wall-Clock Time (ns) |\n"
           "|-------------------------+-------------------------|\n");
 
   // Allocate memory for the array of struct data structure
-  cl_mem buffer_pts =
-      xcl_malloc(world, CL_MEM_READ_ONLY, aos_vertices.size() * sizeof(vertex));
+  cl::Buffer buffer_pts(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+          aos_vertices.size() * sizeof(vertex), aos_vertices.data());
 
   // Transfer the entire array to the FPGA
-  xcl_memcpy_to_device(world, buffer_pts, aos_vertices.data(),
-                       aos_vertices.size() * sizeof(vertex));
-  cl_kernel kernel_aos = xcl_get_kernel(program, "dot_aos");
+  inBufVec.clear();
+  inBufVec.push_back(buffer_pts);
+  q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
 
-  // Set the kernel parameters and launch the kernel. Reuse the buffer_result.
-  xcl_set_kernel_arg(kernel_aos, 0, sizeof(cl_mem), &buffer_result);
-  xcl_set_kernel_arg(kernel_aos, 1, sizeof(cl_mem), &buffer_pts);
-  xcl_set_kernel_arg(kernel_aos, 2, sizeof(cl_int), &VERTEX_COUNT);
-  auto aos_time = xcl_run_kernel3d(world, kernel_aos, 1, 1, 1);
+  cl::Event event;
+  uint64_t nstimestart, nstimeend;
+  int nargs=0;
+  cl::Kernel kernel_aos(program,"dot_aos");
+  kernel_aos.setArg(nargs++,buffer_result);
+  kernel_aos.setArg(nargs++,buffer_pts);
+  kernel_aos.setArg(nargs++,VERTEX_COUNT);
+  q.enqueueTask(kernel_aos,NULL,&event);
+  q.finish();
+  event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart);
+  event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend);
+  auto aos_time = nstimeend-nstimestart;
   printf("| %-22s  | %23lu |\n", "dot: Array of Structs", aos_time);
 
-  // Transfer the results back from the GPU
-  xcl_memcpy_from_device(world, results.data(), buffer_result,
-                         results.size() * sizeof(int));
+  // Transfer the results back from the FPGA
+  q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+  q.finish();
   verify(gold, results);
 
-  cl_kernel kernel_soa = xcl_get_kernel(program, "dot_soa");
-
-  // Set the kernel parameters and launch the kernel
-  xcl_set_kernel_arg(kernel_soa, 0, sizeof(cl_mem), &buffer_result);
-  xcl_set_kernel_arg(kernel_soa, 1, sizeof(cl_mem), &buffer_x);
-  xcl_set_kernel_arg(kernel_soa, 2, sizeof(cl_mem), &buffer_y);
-  xcl_set_kernel_arg(kernel_soa, 3, sizeof(cl_mem), &buffer_z);
-  xcl_set_kernel_arg(kernel_soa, 4, sizeof(cl_int), &VERTEX_COUNT);
-  auto soa_time = xcl_run_kernel3d(world, kernel_soa, 1, 1, 1);
+  cl::Kernel kernel_soa(program,"dot_soa");
+  nargs=0;
+  kernel_soa.setArg(nargs++,buffer_result);
+  kernel_soa.setArg(nargs++,buffer_x);
+  kernel_soa.setArg(nargs++,buffer_y);
+  kernel_soa.setArg(nargs++,buffer_z);
+  kernel_soa.setArg(nargs++,VERTEX_COUNT);
+  q.enqueueTask(kernel_soa,NULL,&event);
+  q.finish();
+  event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart);
+  event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend);
+  auto soa_time = nstimeend-nstimestart;
   printf("| %-22s  | %23lu |\n", "dot: Struct of Arrays", soa_time);
 
   // Get the results from the FPGA
-  xcl_memcpy_from_device(world, results.data(), buffer_result,
-                         results.size() * sizeof(int));
+  q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+  q.finish();
   verify(gold, results);
 
-  clReleaseMemObject(buffer_x);
-  clReleaseMemObject(buffer_y);
-  clReleaseMemObject(buffer_z);
-  clReleaseKernel(kernel_aos);
-  clReleaseKernel(kernel_soa);
-  clReleaseProgram(program);
-  xcl_release_world(world);
   printf("|-------------------------+-------------------------|\n");
   printf("Note: Wall Clock Time is meaningful for real hardware execution only, not for emulation.\n");
   printf("Please refer to profile summary for kernel execution time for hardware emulation.\n");

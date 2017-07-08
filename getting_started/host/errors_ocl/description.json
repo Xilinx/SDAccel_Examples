@@ -1,13 +1,24 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Error Handling",
+    "example": "Error Handling (CL)",
     "overview": [
         "This example discuss the different reasons for errors in OpenCL and how to handle them at runtime."
     ],
     "key_concepts": [ "OpenCL API" , "Error handling"],
     "keywords": [ "CL_SUCCESS", "CL_DEVICE_NOT_FOUND", "CL_DEVICE_NOT_AVAILABLE"],
+    "os": [
+        "Linux"
+    ],
+    "cmd_args" : "BUILD/default.xclbin",
     "em_cmd": "./errors ./xclbin/vector_addition.<emulation target>.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./errors ./xclbin/vector_addition.hw.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
+    "accelerators": [
+        {
+            "container": "vector_addition", 
+            "name": "vector_add", 
+            "location": "src/vector_addition.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

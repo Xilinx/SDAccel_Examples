@@ -26,17 +26,13 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
+#include "xcl2.hpp"
+#include <vector>
 
-#include <iostream>
-#include <cstring>
-
-//OpenCL utility layer include
-#include "xcl.h"
-
-#define DATA_SIZE 256
+#define DATA_SIZE 2048
 #define INCR_VALUE 10
 //define internal buffer max size
-#define BURSTBUFFERSIZE 2048
+#define BURSTBUFFERSIZE 256
 
 int main(int argc, char** argv)
 {
@@ -44,74 +40,65 @@ int main(int argc, char** argv)
     int inc_value = INCR_VALUE;
     //Allocate Memory in Host Memory
     size_t vector_size_bytes = sizeof(int) * size;
-
-    int *source_input       = (int *) malloc(vector_size_bytes);
-    int *source_hw_results  = (int *) malloc(vector_size_bytes);
-    int *source_sw_results  = (int *) malloc(vector_size_bytes);
+    std::vector<int,aligned_allocator<int>> source_inout     (size);
+    std::vector<int,aligned_allocator<int>> source_sw_results(size);
 
     // Create the test data and Software Result 
     for(int i = 0 ; i < size ; i++){
-        source_input[i] = i;
+        source_inout[i] = i;
         source_sw_results[i] = i + inc_value;
-        source_hw_results[i] = 0;
     }
 
 //OPENCL HOST CODE AREA START
-    //Create Program and Kernel
-    xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "vadd");
-    cl_kernel krnl_vadd = xcl_get_kernel(program, "vadd");
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
+
+    cl::Context context(device);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+    std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+
+    std::string binaryFile = xcl::find_binary_file(device_name,"vadd");
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    devices.resize(1);
+    cl::Program program(context, devices, bins);
+    cl::Kernel kernel(program,"vadd");
 
     //Allocate Buffer in Global Memory
-    cl_mem buffer_rw = xcl_malloc(world, CL_MEM_READ_WRITE, vector_size_bytes);
+    std::vector<cl::Memory> bufferVec;
+    cl::Buffer buffer_rw(context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, 
+            vector_size_bytes, source_inout.data());
+    bufferVec.push_back(buffer_rw);
 
     //Copy input data to device global memory
-    xcl_memcpy_to_device(world,buffer_rw,source_input,vector_size_bytes);
+    q.enqueueMigrateMemObjects(bufferVec,0/* 0 means from host*/);
 
-    //Set the Kernel Arguments
-    xcl_set_kernel_arg(krnl_vadd,0,sizeof(cl_mem),&buffer_rw);
-    xcl_set_kernel_arg(krnl_vadd,1,sizeof(int),&size);
-    xcl_set_kernel_arg(krnl_vadd,2,sizeof(int),&inc_value);
+    auto krnl_add = cl::KernelFunctor<cl::Buffer&, int, int>(kernel);
 
     //Launch the Kernel
-    xcl_run_kernel3d(world,krnl_vadd,1,1,1);
+    krnl_add(cl::EnqueueArgs(q,cl::NDRange(1,1,1), cl::NDRange(1,1,1)), 
+            buffer_rw, size, inc_value);
 
     //Copy Result from Device Global Memory to Host Local Memory
-    xcl_memcpy_from_device(world, source_hw_results, buffer_rw ,vector_size_bytes);
-    clFinish(world.command_queue);
+    q.enqueueMigrateMemObjects(bufferVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    q.finish();
 
-    //Release Device Memories and Kernels
-    clReleaseMemObject(buffer_rw);
-    clReleaseKernel(krnl_vadd);
-    clReleaseProgram(program);
-    xcl_release_world(world);
 //OPENCL HOST CODE AREA END
     
     // Compare the results of the Device to the simulation
     int match = 0;
     for (int i = 0 ; i < size ; i++){
-        if (source_hw_results[i] != source_sw_results[i]){
+        if (source_inout[i] != source_sw_results[i]){
             std::cout << "Error: Result mismatch" << std::endl;
             std::cout << "i = " << i << " CPU result = " << source_sw_results[i]
-                << " Device result = " << source_hw_results[i] << std::endl;
+                << " Device result = " << source_inout[i] << std::endl;
             match = 1;
             break;
         }else{
-            std::cout << source_hw_results[i] << " " ;
+            std::cout << source_inout[i] << " " ;
             if ( ( (i+1) % 16) == 0) std::cout << std::endl;
         }
     }
 
-    // Release Memory from Host Memory
-    free(source_input);
-    free(source_hw_results);
-    free(source_sw_results);
-
-    if (match){
-        std::cout << "TEST FAILED." << std::endl; 
-        return EXIT_FAILURE;
-    }
-    std::cout << "All Device results match CPU results! " << std::endl;
-    std::cout << "TEST PASSED." << std::endl; 
-    return EXIT_SUCCESS; 
+    std::cout << "TEST " << (match ? "FAILED" : "PASSED") << std::endl; 
+    return (match ? EXIT_FAILURE :  EXIT_SUCCESS);
 }

@@ -26,33 +26,18 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
-
-#include <iostream>
-#include <cstring>
-#include <stdio.h>
-
 //OpenCL utility layer include
-#include "xcl.h"
+#include "xcl2.hpp"
+#include <vector>
 #include "host.h"
-
-//Utilily to print array
-void print_array(DTYPE *mat, const char *name, int size, int dim) {
-    int i;
-    printf("%s\n", name);
-    for (i=0;i<size;i++) {
-      printf("%d ",mat[i]);
-      if (((i+1) % dim) == 0)
-        printf("\n");
-    }
-}
 
 int main(int argc, char** argv)
 {
     //Allocate Memory in Host Memory
     size_t vector_size_bytes = sizeof(DTYPE) * BLOCK_SIZE;
-    DTYPE* a = (DTYPE*)malloc(vector_size_bytes);// original data set given to device
-    DTYPE* c = (DTYPE*)malloc(vector_size_bytes);// results returned from device
-    DTYPE* sw_c = (DTYPE*)malloc(vector_size_bytes);// results returned from software
+    std::vector<DTYPE,aligned_allocator<DTYPE>> a   (BLOCK_SIZE);// original data set given to device
+    std::vector<DTYPE,aligned_allocator<DTYPE>> c   (BLOCK_SIZE);// results returned from device
+    std::vector<DTYPE,aligned_allocator<DTYPE>> sw_c(BLOCK_SIZE);// results returned from software
 
     // Create the test data and Software Result 
     int alpha = 3;
@@ -63,44 +48,47 @@ int main(int argc, char** argv)
     }
 
 //OPENCL HOST CODE AREA START
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
+
+    cl::Context context(device);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+    std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+
     //Create Program and Kernel
-    xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "window_array_2d");
-    cl_kernel krnl_window_array_2d = xcl_get_kernel(program, "window_array_2d");
+    std::string binaryFile = xcl::find_binary_file(device_name,"window_array_2d");
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    devices.resize(1);
+    cl::Program program(context, devices, bins);
+    cl::Kernel krnl_window_array_2d(program,"window_array_2d");
 
     //Allocate Buffer in Global Memory
-    cl_mem buffer_a = xcl_malloc(world, CL_MEM_READ_ONLY, vector_size_bytes);
-    cl_mem buffer_c = xcl_malloc(world, CL_MEM_WRITE_ONLY, vector_size_bytes);
+    cl::Buffer buffer_a(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
+            vector_size_bytes, a.data());
+    cl::Buffer buffer_c(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
+            vector_size_bytes, c.data());
+    std::vector<cl::Memory> inBufVec, outBufVec;
+    inBufVec.push_back(buffer_a);
+    outBufVec.push_back(buffer_c);
 
     //Copy input data to device global memory
-    xcl_memcpy_to_device(world,buffer_a,a,vector_size_bytes);
+    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
 
     //Set the Kernel Arguments
-    xcl_set_kernel_arg(krnl_window_array_2d,0,sizeof(cl_mem),&buffer_a);
-    xcl_set_kernel_arg(krnl_window_array_2d,1,sizeof(cl_mem),&buffer_c);
-    xcl_set_kernel_arg(krnl_window_array_2d,2,sizeof(int),&alpha);
+    int nargs=0;
+    krnl_window_array_2d.setArg(nargs++,buffer_a);
+    krnl_window_array_2d.setArg(nargs++,buffer_c);
+    krnl_window_array_2d.setArg(nargs++,alpha);
 
     //Launch the Kernel
-    xcl_run_kernel3d(world,krnl_window_array_2d,1,1,1);
-
+    q.enqueueTask(krnl_window_array_2d);
 
     //Copy Result from Device Global Memory to Host Local Memory
-    xcl_memcpy_from_device(world, c, buffer_c ,vector_size_bytes);
-    clFinish(world.command_queue);
+    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    q.finish();
 
-    //Release Device Memories and Kernels
-    clReleaseMemObject(buffer_a);
-    clReleaseMemObject(buffer_c);
-    clReleaseKernel(krnl_window_array_2d);
-    clReleaseProgram(program);
-    xcl_release_world(world);
 //OPENCL HOST CODE AREA END
 
-
-    //uncomment following 3 lines if you want to check all values
-    //print_array(a, "A", BLOCK_SIZE, 16);
-    //print_array(c, "Test C", BLOCK_SIZE, 16);
-    //print_array(sw_c, "Gold C", BLOCK_SIZE, 16);
 
     // Validate
     unsigned int correct = 0;              // number of correct results returned
@@ -108,23 +96,15 @@ int main(int argc, char** argv)
       if(c[i] == sw_c[i]) {
         correct++; 
       } else { 
-        printf("\n wrong sw %d hw %d index %d \n", sw_c[i], c[i], i);
+          std::cout << std::endl << " wrong sw " << sw_c[i] << " hw " 
+            << c[i] << ": index " << std::endl;
       }
     }
     
     // Print a brief summary detailing the results
-    printf("Computed '%d/%d' correct values!\n", correct, BLOCK_SIZE);
+    std::cout << "Computed '" << correct << "/" << BLOCK_SIZE 
+        << "' correct values!" << std::endl;
 
-    free(a);
-    free(c);
-    free(sw_c);
-    
-    if(correct == BLOCK_SIZE){
-        std::cout << "TEST PASSED." << std::endl; 
-        return EXIT_SUCCESS;
-    }
-    else{
-        std::cout << "TEST FAILED." << std::endl; 
-        return EXIT_FAILURE;
-    }
+    std::cout << "TEST " << (correct!=BLOCK_SIZE? "FAILED" : "PASSED") << std::endl; 
+    return (correct!=BLOCK_SIZE? EXIT_FAILURE :  EXIT_SUCCESS);
 }

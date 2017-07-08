@@ -26,18 +26,16 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
-
-#include <iostream>
+#include "xcl2.hpp"
+#include <vector>
 #define USE_IN_HOST
-//OpenCL utility layer include
-#include "xcl.h"
 #include "bitmap.h"
 #include "rgb_to_hsv.h"
 
 //Utility Function Declaration
-void sw_RgbToHsv(int* in, int *out, int image_size);
-void sw_HsvToRgb(int *in, int *out, int image_size);
-int compareImages(int * _in, int * _out, int image_size);
+void sw_RgbToHsv (int *in, int *out, size_t image_size);
+void sw_HsvToRgb (int *in, int *out, size_t image_size);
+int compareImages(int *in, int *out, size_t image_size);
 
 
 int main(int argc, char* argv[])
@@ -47,90 +45,91 @@ int main(int argc, char* argv[])
         std::cout << "Usage: " << argv[0] << " <input bitmap>" << std::endl;
         return EXIT_FAILURE ;
     }
-    const char* bitmapFilename = argv[1];
-
+    std::string bitmapFilename = argv[1];
  
     //Read the bit map file into memory
-    BitmapInterface image(bitmapFilename);
+    BitmapInterface image(bitmapFilename.data());
     bool result = image.readBitmapFile() ;
     if (!result)
     {
-        std::cout << "ERROR:Unable to Read Bitmap File "<< bitmapFilename << std::endl;
+        std::cout << "ERROR:Unable to Read Bitmap File "<< bitmapFilename.data() << std::endl;
       return EXIT_FAILURE ;
     }
    
     //Allocate Memory in Host Memory 
     int image_size = image.numPixels();
     size_t image_size_bytes = sizeof(int) * image_size;
-    int* swHsvImage  = (int*)(malloc(image_size_bytes)) ;
-    int* hwHsvImage  = (int*)(malloc(image_size_bytes)) ;
-    int* outRgbImage = (int*)(malloc(image_size_bytes)) ;
-   
+    std::vector<int,aligned_allocator<int>> hwRgbImage(image_size) ;
+    std::vector<int,aligned_allocator<int>> hwHsvImage(image_size) ;
+    std::vector<int,aligned_allocator<int>> swHsvImage(image_size) ;
+    std::vector<int,aligned_allocator<int>> outRgbImage(image_size) ;
+
+    //Copying image host buffer
+    memcpy(hwRgbImage.data(),image.bitmap(),image_size_bytes);
+
 //OPENCL HOST CODE AREA START
-   //Create Program and Kernels
-    xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "rgb_to_hsv");
-    cl_kernel krnl_rgb2hsv = xcl_get_kernel(program, "rgb_to_hsv");
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
+
+    cl::Context context(device);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+    std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+
+    std::string binaryFile = xcl::find_binary_file(device_name,"rgb_to_hsv");
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    devices.resize(1);
+    cl::Program program(context, devices, bins);
+    cl::Kernel kernel(program,"rgb_to_hsv");
     
     //Allocate Buffer in Global Memory
-    cl_mem buffer_rgbImage = xcl_malloc(world, CL_MEM_READ_ONLY, image_size_bytes);
-    cl_mem buffer_hsvImage = xcl_malloc(world, CL_MEM_WRITE_ONLY, image_size_bytes);
+    cl::Buffer buffer_rgbImage(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, 
+            image_size_bytes,hwRgbImage.data());
+    std::vector<cl::Memory> rgbBufVec;
+    rgbBufVec.push_back(buffer_rgbImage);
+
+    cl::Buffer buffer_hsvImage(context, CL_MEM_WRITE_ONLY| CL_MEM_USE_HOST_PTR, 
+            image_size_bytes,hwHsvImage.data());
+    std::vector<cl::Memory> hsvBufVec;
+    hsvBufVec.push_back(buffer_hsvImage);
 
     //Copy input RGB Image to device global memory
-    xcl_memcpy_to_device(world,buffer_rgbImage,image.bitmap(),image_size_bytes);
-   
-    //Set the Kernel Arguments
-    xcl_set_kernel_arg(krnl_rgb2hsv,0,sizeof(cl_mem),&buffer_rgbImage);
-    xcl_set_kernel_arg(krnl_rgb2hsv,1,sizeof(cl_mem),&buffer_hsvImage);
-    xcl_set_kernel_arg(krnl_rgb2hsv,2,sizeof(int),&image_size);
+    q.enqueueMigrateMemObjects(rgbBufVec,0/* 0 means from host*/);
+  
+    auto krnl_rgb2hsv = cl::KernelFunctor<cl::Buffer&, cl::Buffer& , int>(kernel);
     
     //Launch the Kernel
-    xcl_run_kernel3d(world,krnl_rgb2hsv,1,1,1);
+    krnl_rgb2hsv(cl::EnqueueArgs(q,cl::NDRange(1,1,1), cl::NDRange(1,1,1)), 
+            buffer_rgbImage, buffer_hsvImage, image_size);
 
     //Copy Result from Device Global Memory to Host Local Memory
-    xcl_memcpy_from_device(world, hwHsvImage, buffer_hsvImage,image_size_bytes);
-    clFinish(world.command_queue);
+    q.enqueueMigrateMemObjects(hsvBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    q.finish();
 
-    //Release Device Memories and Kernels
-    clReleaseMemObject(buffer_rgbImage);
-    clReleaseMemObject(buffer_hsvImage);
-    clReleaseKernel(krnl_rgb2hsv);
-    clReleaseProgram(program);
-    xcl_release_world(world);
 //OPENCL HOST CODE AREA END
 
     //Calculating sw based HSV Image 
-    sw_RgbToHsv(image.bitmap(), swHsvImage, image.numPixels());
+    sw_RgbToHsv(image.bitmap(), swHsvImage.data(), image.numPixels());
 
     //Compare the results of the Device to the Sw Based
-    int match= compareImages(swHsvImage, hwHsvImage,image.numPixels());
+    int match= compareImages(swHsvImage.data(), hwHsvImage.data(),image.numPixels());
 
     //Converting Generated HSV to back to RGB and Writing RGB file to disk
-    sw_HsvToRgb(hwHsvImage, outRgbImage, image.numPixels());
-    image.writeBitmapFile(outRgbImage) ;
+    sw_HsvToRgb(hwHsvImage.data(), outRgbImage.data(), image.numPixels());
+    image.writeBitmapFile(outRgbImage.data()) ;
 
-    // Release Memory from Host Memory
-    free(hwHsvImage) ;
-    free(swHsvImage) ;
-    free(outRgbImage) ;
-
-    if (match){
-        std::cout << "TEST FAILED." << std::endl; 
-        return EXIT_FAILURE;
-    }
-    std::cout << "TEST PASSED." << std::endl;
-    return EXIT_SUCCESS;
+    std::cout << "TEST " << (match ? "FAILED" : "PASSED") << std::endl; 
+    return (match ? EXIT_FAILURE :  EXIT_SUCCESS);
 }
-
 
 //Utility Functions Definitions Start Here
 
 //Convert RGB to HSV Format
-void sw_RgbToHsv(int* in, int *out, int image_size)
+void sw_RgbToHsv(int *in, int *out, size_t image_size)
 {
     RGBcolor rgb;
     HSVcolor hsv;
-    for(unsigned int i = 0 ; i < image_size ; out[i] = hsv.h | (hsv.s << 8) | (hsv.v << 16), i++){
+    for(size_t i = 0 ; i < image_size ; 
+            out[i] = hsv.h | (hsv.s << 8) | (hsv.v << 16), i++){
         rgb.r =  (in[i]) & 0xff;
         rgb.g = ( (in[i]) & 0xff00 ) >> 8 ;
         rgb.b = ( (in[i]) & 0xff0000 ) >> 16 ;
@@ -164,11 +163,12 @@ void sw_RgbToHsv(int* in, int *out, int image_size)
 }
 
 //Convert RGB to HSV Format
-void sw_HsvToRgb(int *in, int *out, int image_size)
+void sw_HsvToRgb(int *in, int *out, size_t image_size)
 {
     RGBcolor rgb;
     HSVcolor hsv;
-    for (int i = 0 ; i < image_size ; out[i] = rgb.r | (rgb.g << 8) | (rgb.b << 16), i++)
+    for (size_t i = 0 ; i < image_size ; 
+            out[i] = rgb.r | (rgb.g << 8) | (rgb.b << 16), i++)
     {
         hsv.h = in[i] & 0xff;
         hsv.s = (in[i] & 0xff00) >> 8;
@@ -232,9 +232,9 @@ void sw_HsvToRgb(int *in, int *out, int image_size)
     }
 }
 
-int compareImages(int * _in, int * _out, int image_size)
+int compareImages(int *_in, int *_out, size_t image_size)
 {
-    for (int i = 0, cnt = 0 ; i < image_size ; i++)
+    for (size_t i = 0, cnt = 0 ; i < image_size ; i++)
     {
         int in  = _in[i];
         int out = _out[i];

@@ -1,4 +1,4 @@
-Vector Addition with 2 Kernel Clocks
+Vector Addition with 2 Kernel Clocks (RTL)
 ======================
 
 This README file contains the following sections:
@@ -32,7 +32,8 @@ where examples is the name of the directory where the repository will be stored 
 ## 3. SOFTWARE AND SYSTEM REQUIREMENTS
 Board | Device Name | Software Version
 ------|-------------|-----------------
-Xilinx KU115|xilinx:xil-accel-rd-ku115:4ddr-xpr|SDAccel 2016.4
+Xilinx VU9P|xilinx:xil-accel-rd-vu9p:4ddr-xpr|SDAccel 2017.1
+Xilinx KU115|xilinx:xil-accel-rd-ku115:4ddr-xpr|SDAccel 2017.1
 
 
 *NOTE:* The board/device used for compilation can be changed by adding the DEVICES variable to the make command as shown below
@@ -100,7 +101,7 @@ To manually configure the environment to run the application, set the following
 ```
 export LD_LIBRARY_PATH=$XILINX_SDX/runtime/lib/x86_64/:$LD_LIBRARY_PATH
 export XCL_EMULATION_MODE=<sw_emu|hw_emu>
-emconfigutil --xdevice 'xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3' --nd 1
+emconfigutil --xdevice 'xilinx:xil-accel-rd-ku115:4ddr-xpr' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```

@@ -1,11 +1,32 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Improve performance using loop perfect or semi-perfect",
+    "example": "Improve performance using loop perfect (C)",
     "overview": [
         "This nearest neighbor example is to demonstrate how to achieve better performance using perfect loop."
     ],
     "Key Concepts": [ "Loop perfect"],
     "Keywords": ["#pragma HLS PIPELINE", "#pragma HLS ARRAY_PARTITION"],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl2"
+    ],
+    "containers": [
+        {
+            "name": "nearest",
+            "accelerators": [
+                {
+                    "name": "nearest_good",
+                    "location": "src/nearest_good.cpp"
+                },
+                {
+                    "name": "nearest_bad",
+                    "location": "src/nearest_bad.cpp"
+                }
+            ]
+        }
+    ],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "contributors" : [
@@ -20,5 +41,6 @@
             "version": "1.0",
             "description": "Initial Xilinx Release"
         }
-    ]
+    ],
+    "match_makefile" : "false"
 }

@@ -86,7 +86,6 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "CL/cl.h"
-#include "oclHelper.h"
 #include "xcl.h"
 
 #include <algorithm>
@@ -105,18 +104,36 @@ using std::generate;
 using std::uniform_int_distribution;
 using std::vector;
 
+//Allocator template to align buffer to Page boundary for better data transfer
+template <typename T>
+struct aligned_allocator
+{
+  using value_type = T;
+  T* allocate(std::size_t num)
+  {
+    void* ptr = nullptr;
+    if (posix_memalign(&ptr,4096,num*sizeof(T)))
+      throw std::bad_alloc();
+    return reinterpret_cast<T*>(ptr);
+  }
+  void deallocate(T* p, std::size_t num)
+  {
+    free(p);
+  }
+};
+
 const int ARRAY_SIZE = 1 << 14;
 static const char *error_message =
     "Error: Result mismatch:\n"
     "i = %d CPU result = %d Device result = %d\n";
 
-// Wrap any OpenCL API calls that return error code(cl_int) with the below macro
+// Wrap any OpenCL API calls that return error code(cl_int) with the below macros
 // to quickly check for an error
 #define OCL_CHECK(call)                                                        \
   do {                                                                         \
     cl_int err = call;                                                         \
     if (err != CL_SUCCESS) {                                                   \
-      printf("Error calling " #call ", error: %s\n", oclErrorCode(err));       \
+      printf("Error calling " #call ", error code is: %d\n", err);       \
       exit(EXIT_FAILURE);                                                      \
     }                                                                          \
   } while (0);
@@ -207,11 +224,11 @@ int main(int argc, char **argv) {
                            CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err);
 
   // Allocate memory on the host and fill with random data.
-  vector<int> A(ARRAY_SIZE);
-  vector<int> B(ARRAY_SIZE);
+  vector<int,aligned_allocator<int>> A(ARRAY_SIZE);
+  vector<int,aligned_allocator<int>> B(ARRAY_SIZE);
   generate(begin(A), end(A), gen_random);
   generate(begin(B), end(B), gen_random);
-  vector<int> device_result(ARRAY_SIZE);
+  vector<int,aligned_allocator<int>> device_result(ARRAY_SIZE);
 
   cl_kernel kernel = xcl_get_kernel(program, "vadd");
 
@@ -251,14 +268,14 @@ int main(int argc, char **argv) {
     // the events from the previous kernel call into the wait list, it will wait
     // for the previous operations to complete before continuing
     OCL_CHECK(clEnqueueMigrateMemObjects(
-        world.command_queue, 1, &buffer_a[iteration_idx % 2],
+        world.command_queue, 1, &buffer_a[flag],
         0 /* flags, 0 means from host */,
         0, NULL, 
         &write_events[0]));
     set_callback(write_events[0], "ooo_queue");
 
     OCL_CHECK(clEnqueueMigrateMemObjects(
-        world.command_queue, 1, &buffer_b[iteration_idx % 2],
+        world.command_queue, 1, &buffer_b[flag],
         0 /* flags, 0 means from host */,
         0, NULL, 
         &write_events[1]));
@@ -282,7 +299,7 @@ int main(int argc, char **argv) {
     // This operation only needs to wait for the kernel call. This call will
     // potentially overlap the next kernel call as well as the next read
     // operations
-    OCL_CHECK( clEnqueueMigrateMemObjects(world.command_queue, 1, &buffer_c[iteration_idx % 2], 
+    OCL_CHECK(clEnqueueMigrateMemObjects(world.command_queue, 1, &buffer_c[flag], 
                 CL_MIGRATE_MEM_OBJECT_HOST, 1, &kernel_events[flag], &read_events[flag]));
 
     set_callback(read_events[flag], "ooo_queue");
@@ -323,11 +340,6 @@ int main(int argc, char **argv) {
   OCL_CHECK(clReleaseProgram(program));
   xcl_release_world(world);
 
-  if (match) {
-    printf("TEST FAILED.\n");
-    return EXIT_FAILURE;
-  }
-
-  printf("TEST PASSED.\n");
-  return EXIT_SUCCESS;
+  printf("TEST %s\n", (match ? "FAILED" : "PASSED"));
+  return (match ? EXIT_FAILURE :  EXIT_SUCCESS);
 }

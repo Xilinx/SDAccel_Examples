@@ -1,13 +1,25 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Hello World",
+    "example": "Hello World (CL)",
     "overview": [
         "This example is a simple OpenCL application. It will highlight the basic flow of an OpenCL application."
     ],
     "key_concepts": [ "OpenCL API"],
-    "keywords": [ "NA" ],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl2"
+    ],
     "em_cmd": "./helloworld",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./helloworld",
+    "accelerators": [
+        {
+            "container": "vector_addition", 
+            "name": "vector_add", 
+            "location": "src/vector_addition.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

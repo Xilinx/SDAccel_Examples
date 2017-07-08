@@ -1,13 +1,13 @@
 COMMON_REPO := ../../../
 
 include $(COMMON_REPO)/utility/boards.mk
-include $(COMMON_REPO)/libs/xcl/xcl.mk
+include $(COMMON_REPO)/libs/xcl2/xcl2.mk
 include $(COMMON_REPO)/libs/opencl/opencl.mk
 
 # Host Application
-host_SRCS=./src/host.cpp $(xcl_SRCS)
-host_HDRS=$(xcl_HDRS)
-host_CXXFLAGS=-I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS) -I$(XILINX_SDACCEL)/Vivado_HLS/include
+host_SRCS=./src/host.cpp $(xcl2_SRCS)
+host_HDRS=$(xcl2_HDRS)
+host_CXXFLAGS=-I./src/ $(xcl2_CXXFLAGS) $(opencl_CXXFLAGS) -I$(XILINX_SDACCEL)/Vivado_HLS/include
 host_LDFLAGS=$(opencl_LDFLAGS)
 
 EXES=host

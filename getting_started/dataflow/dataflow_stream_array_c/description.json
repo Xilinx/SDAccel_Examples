@@ -1,13 +1,26 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Dataflow Using HLS Stream",
+    "example": "Dataflow Using HLS Stream (C)",
     "overview": [
         "This is simple example of Multiple Stages Vector Addition to demonstrate Array of Stream usage in HLS C Kernel Code."
     ],
     "key_concepts": [ "Array of Stream"],
     "keywords": [ "dataflow" , "hls::stream<>"],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl2"
+    ],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
+    "accelerators": [
+        {
+            "container": "N_stage_Adders", 
+            "name": "N_stage_Adders", 
+            "location": "src/N_stage_adders.cpp"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

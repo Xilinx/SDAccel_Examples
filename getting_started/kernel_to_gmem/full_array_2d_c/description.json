@@ -1,13 +1,25 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Full 2D Array Read/Write",
+    "example": "Full 2D Array Read/Write (C)",
     "overview": [
         "This is a simple example of accessing full data from 2d array"
     ],
     "key_concepts": [ "2D data full array Access"],
-    "keywords": ["NA"],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl2"
+    ],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
+    "accelerators": [
+        {
+            "container": "mmult", 
+            "name": "mmult", 
+            "location": "src/mmult.cpp"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

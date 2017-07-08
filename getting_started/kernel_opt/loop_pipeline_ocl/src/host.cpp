@@ -26,9 +26,7 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
-
-#include "CL/cl.h"
-#include "xcl.h"
+#include "xcl2.hpp"
 
 #include <algorithm>
 #include <cstdio>
@@ -49,7 +47,8 @@ int gen_random() {
   return dist(e);
 }
 
-void verify(const vector<int> &gold, const vector<int> &out) {
+void verify(const vector<int,aligned_allocator<int>> &gold, 
+            const vector<int,aligned_allocator<int>> &out) {
   if (!equal(begin(gold), end(gold), begin(out))) {
     printf("TEST FAILED\n");
     exit(EXIT_FAILURE);
@@ -59,71 +58,94 @@ void verify(const vector<int> &gold, const vector<int> &out) {
 int main(int argc, char** argv)
 {
     // compute the size of array in bytes
-    int size_in_bytes = DATA_SIZE * sizeof(int);
-
-    xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "vector_addition");
-
-    cl_mem buffer_a = xcl_malloc(world, CL_MEM_READ_ONLY, size_in_bytes);
-    cl_mem buffer_b = xcl_malloc(world, CL_MEM_READ_ONLY, size_in_bytes);
-    cl_mem buffer_result = xcl_malloc(world, CL_MEM_WRITE_ONLY, size_in_bytes);
+    size_t size_in_bytes = DATA_SIZE * sizeof(int);
 
     // Creates a vector of DATA_SIZE elements with an initial value of 10 and 32
-    vector<int> source_a(DATA_SIZE);
-    vector<int> source_b(DATA_SIZE);
-    vector<int> source_results(DATA_SIZE);
+    vector<int,aligned_allocator<int>> source_a(DATA_SIZE);
+    vector<int,aligned_allocator<int>> source_b(DATA_SIZE);
+    vector<int,aligned_allocator<int>> source_results(DATA_SIZE);
     generate(begin(source_a), end(source_a), gen_random);
     generate(begin(source_b), end(source_b), gen_random);
 
-    vector<int> gold(DATA_SIZE);
+    //Getting Xilinx Device and creating program and context
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
+
+    cl::Context context(device);
+    cl::CommandQueue q(context,device,CL_QUEUE_PROFILING_ENABLE);
+    std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+
+    //Create Program 
+    std::string binaryFile = xcl::find_binary_file(device_name,"vector_addition");
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    devices.resize(1);
+    cl::Program program(context, devices, bins);
+
+    //Allocate Buffer in Global Memory
+    std::vector<cl::Memory> inBufVec, outBufVec;
+    cl::Buffer buffer_a(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            size_in_bytes, source_a.data());
+    cl::Buffer buffer_b(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            size_in_bytes, source_b.data());
+    cl::Buffer buffer_result(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+            size_in_bytes, source_results.data());
+    inBufVec.push_back(buffer_a);
+    inBufVec.push_back(buffer_b);
+    outBufVec.push_back(buffer_result);
+
+    vector<int,aligned_allocator<int>> gold(DATA_SIZE);
     transform(begin(source_a), end(source_a),
               begin(source_b), begin(gold), std::plus<int>());
 
-    xcl_memcpy_to_device(world, buffer_a, source_a.data(), size_in_bytes);
-    xcl_memcpy_to_device(world, buffer_b, source_b.data(), size_in_bytes);
+    //Copy input data to device global memory
+    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
 
     printf( "|-------------------------+-------------------------|\n"
             "| Kernel                  |    Wall-Clock Time (ns) |\n"
             "|-------------------------+-------------------------|\n");
+    cl::Kernel kernel_vadd(program, "vadd");
+    kernel_vadd.setArg(0,buffer_result);
+    kernel_vadd.setArg(1,buffer_a);
+    kernel_vadd.setArg(2,buffer_b);
+    kernel_vadd.setArg(3,DATA_SIZE);
 
-    cl_kernel kernel_vadd = xcl_get_kernel(program, "vadd");
+    cl::Event event;
+    uint64_t nstimestart, nstimeend;
+    q.enqueueTask(kernel_vadd,NULL,&event);
+    q.finish();
+    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart);
+    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend);
+    auto simple_time = nstimeend-nstimestart;
 
-    xcl_set_kernel_arg(kernel_vadd, 0, sizeof(cl_mem), &buffer_result);
-    xcl_set_kernel_arg(kernel_vadd, 1, sizeof(cl_mem), &buffer_a);
-    xcl_set_kernel_arg(kernel_vadd, 2, sizeof(cl_mem), &buffer_b);
-    xcl_set_kernel_arg(kernel_vadd, 3, sizeof(int), &DATA_SIZE);
-
-    auto simple_time = xcl_run_kernel3d(world, kernel_vadd, 1, 1, 1);
     printf("| %-22s  | %23lu |\n", "vadd: simple", simple_time);
 
-    xcl_memcpy_from_device(world, source_results.data(), buffer_result,
-                           size_in_bytes);
+    //Copy Result from Device Global Memory to Host Local Memory
+    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    q.finish();
     verify(gold, source_results);
 
-    cl_kernel kernel_pipelined = xcl_get_kernel(program, "vadd_pipelined");
+    cl::Kernel kernel_pipelined(program, "vadd");
+    kernel_pipelined.setArg(0,buffer_result);
+    kernel_pipelined.setArg(1,buffer_a);
+    kernel_pipelined.setArg(2,buffer_b);
+    kernel_pipelined.setArg(3,DATA_SIZE);
 
-    xcl_set_kernel_arg(kernel_pipelined, 0, sizeof(cl_mem), &buffer_result);
-    xcl_set_kernel_arg(kernel_pipelined, 1, sizeof(cl_mem), &buffer_a);
-    xcl_set_kernel_arg(kernel_pipelined, 2, sizeof(cl_mem), &buffer_b);
-    xcl_set_kernel_arg(kernel_pipelined, 3, sizeof(int), &DATA_SIZE);
+    q.enqueueTask(kernel_pipelined,NULL,&event);
+    q.finish();
 
-    auto pipelined_time = xcl_run_kernel3d(world, kernel_pipelined, 1, 1, 1);
+    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart);
+    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend);
+    auto pipelined_time = nstimeend-nstimestart;
+
     printf("| %-22s  | %23lu |\n", "vadd: pipelined", pipelined_time);
     printf("|-------------------------+-------------------------|\n");
     printf("Note: Wall Clock Time is meaningful for real hardware execution only, not for emulation.\n");
     printf("Please refer to profile summary for kernel execution time for hardware emulation.\n");
 
-    xcl_memcpy_from_device(world, source_results.data(), buffer_result,
-                           size_in_bytes);
+    //Copy Result from Device Global Memory to Host Local Memory
+    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    q.finish();
     verify(gold, source_results);
-
-    // These functions will release the OpenCL resources.
-    clReleaseMemObject(buffer_a);
-    clReleaseMemObject(buffer_b);
-    clReleaseMemObject(buffer_result);
-    clReleaseKernel(kernel_vadd);
-    clReleaseProgram(program);
-    xcl_release_world(world);
 
     printf("TEST PASSED.\n");
     return EXIT_SUCCESS;
