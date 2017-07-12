@@ -20,13 +20,13 @@ EXES=huffman
 
 # Huffman Codec Kernel
 krnl_huffman_SRCS=./src/krnl_huffman_singleptr.cl
-krnl_huffman_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr xilinx:adm-pcie-ku3:2ddr-xpr
+krnl_huffman_NDEVICES=xilinx:xil-accel-rd-vu9p:4ddr-xpr xilinx:xil-accel-rd-ku115:4ddr-xpr xilinx:adm-pcie-ku3:2ddr-xpr
 
 XOS=krnl_huffman
 
 # Huffman Codec xclbin
 krnl_huffman_XOS=krnl_huffman
-krnl_huffman_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr xilinx:adm-pcie-ku3:2ddr-xpr
+krnl_huffman_NDEVICES=xilinx:xil-accel-rd-vu9p:4ddr-xpr xilinx:xil-accel-rd-ku115:4ddr-xpr xilinx:adm-pcie-ku3:2ddr-xpr
 
 XCLBINS=krnl_huffman
 
