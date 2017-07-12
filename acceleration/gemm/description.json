@@ -10,6 +10,7 @@
         "The design is targeting exection on an SDAccel support FPGA acceleration card"
     ],
     "nboard": ["xilinx:xil-accel-rd-vu9p:4ddr-xpr", "xilinx:adm-pcie-ku3:2ddr-xpr", "xilinx:adm-pcie-7v3:1ddr" ],
+    "targets": ["hw", "hw_emu"],
     "xcl": true,
     "em_cmd" : "./gemm",
     "hw_cmd" : "../../utility/nimbix/nimbix-run.py -- ./gemm",
