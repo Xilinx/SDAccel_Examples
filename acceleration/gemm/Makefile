@@ -25,6 +25,7 @@ check_EXE=gemm
 check_XCLBINS=gemm0
 check_ARGS=64 64 64
 check_NDEVICES=$(gemm0_NDEVICES)
+check_NTARGETS=sw_emu
 
 CHECKS=check
 
