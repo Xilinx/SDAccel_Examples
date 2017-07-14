@@ -84,6 +84,7 @@ RSAApp::~RSAApp() {
 void RSAApp::cleanup() {
 
 	clReleaseKernel(m_clKernelRSA);
+	clReleaseProgram(m_program);
 	xcl_release_world(m_world);
 }
 

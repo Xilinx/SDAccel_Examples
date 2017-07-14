@@ -1,0 +1,49 @@
+{
+    "runtime": ["OpenCL"],
+    "example" : "kernel_global",
+    "overview" : [
+        "Bandwidth test of global to local memory."
+    ],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl"
+    ],
+    "em_cmd" : "./kernel_global",
+    "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./kernel_global",
+    "containers": [
+        {
+            "name": "krnl_kernel_global", 
+            "accelerators": [
+                {
+                    "name": "bandwidth", 
+                    "location": "src/kernel.cl"
+                }
+            ]
+        }
+    ],
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ],
+    "revision" : [
+        {
+            "date" : "AUG2016",
+            "version": "1.0",
+            "description": "Initial Xilinx Release"
+        },
+        {
+            "date" : "DEC2016",
+            "version": "2.0",
+            "description": "Update for SDAccel 2016.3"
+        },
+        {
+            "date" : "FEB2017",
+            "version": "3.0",
+            "description": "Updated to support 4 DDR banks"
+        }
+    ]
+}

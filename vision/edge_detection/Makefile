@@ -17,14 +17,14 @@ EXES=edge
 # Edge Detection Kernel
 krnl_edge_SRCS=./src/krnl_sobelfilter.cl
 krnl_edge_HDRS=./src/edge.h
-krnl_edge_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3
+krnl_edge_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr
 krnl_edge_CLFLAGS=-I./src/
 
 XOS=krnl_edge
 
 # Edge Detection xclbin
 krnl_edge_XOS=krnl_edge
-krnl_edge_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3
+krnl_edge_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr
 
 XCLBINS=krnl_edge
 
@@ -36,7 +36,7 @@ check_NDEVICES=$(krnl_edge_NDEVICES)
 
 CHECKS=check
 
-DEVIES=xilinx:adm-pcie-ku3:2ddr-xpr:3.3
+DEVICES=xilinx:adm-pcie-ku3:2ddr-xpr
 
 include $(COMMON_REPO)/utility/rules.mk
 

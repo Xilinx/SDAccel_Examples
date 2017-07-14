@@ -1,13 +1,36 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Blocking Pipes",
+    "example": "Blocking Pipes (CL)",
     "overview": [
         "This is simple example of vector addition to demonstrate OpenCL Pipe Memory usage. OpenCL PIPE memory functionality allows user to achieve kernel-to-kernel data transfer without using global memory."
     ],
     "key_concepts": [ "Dataflow" , "kernel to kernel pipes"],
     "keywords": [ "pipe" , "xcl_reqd_pipe_depth", "read_pipe_block()", "write_pipe_block()"],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl", "oclHelper"
+    ],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
+    "accelerators": [
+        {
+            "container": "adder", 
+            "name": "adder_stage", 
+            "location": "src/adder.cl"
+        },
+        {
+            "container": "adder", 
+            "name": "input_stage", 
+            "location": "src/adder.cl"
+        },
+        {
+            "container": "adder", 
+            "name": "output_stage", 
+            "location": "src/adder.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

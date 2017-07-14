@@ -21,12 +21,13 @@ XOS=krnl_affine
 
 # Affine xclbin
 krnl_affine_XOS=krnl_affine
-
+krnl_affine_NDEVICES=xilinx:adm-pcie-ku3:2ddr-xpr xilinx:xil-accel-rd-ku115:4ddr-xpr xilinx:xil-accel-rd-vu9p:4ddr-xpr xilinx:adm-pcie-7v3:1ddr
 XCLBINS=krnl_affine
 
 # check
 check_EXE=affine
 check_XCLBINS=krnl_affine
+check_NDEVICES=xilinx:adm-pcie-ku3:2ddr-xpr xilinx:xil-accel-rd-ku115:4ddr-xpr xilinx:xil-accel-rd-vu9p:4ddr-xpr xilinx:adm-pcie-7v3:1ddr
 
 # Pattern to allow cmdline to determine xclbin name
 define mk_args
@@ -34,7 +35,6 @@ check_$(1)_$(call sanitize_dsa,$(2))_ARGS = ./data/CT-MONO2-16-brain.raw ./xclbi
 endef
 
 $(foreach target,$(TARGETS),$(foreach device,$(DEVICES),$(eval $(call mk_args,$(target),$(device)))))
-
 
 CHECKS=check
 

@@ -1,10 +1,16 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Vector Addition With RTL Kernel",
+    "example": "Vector Addition With RTL Kernel (RTL)",
     "overview": [
         "Simple example of vector addition using RTL Kernel"
     ],
     "key_concepts": [ "RTL Kernel"],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl2"
+    ],
     "em_cmd": "./host",
     "targets": ["hw", "hw_emu"],
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
@@ -20,5 +26,7 @@
             "version": "1.0",
             "description": "Initial Xilinx Release"
         }
-    ]
+    ],
+    "match_makefile": "false",
+    "sdx_gui": false
 }

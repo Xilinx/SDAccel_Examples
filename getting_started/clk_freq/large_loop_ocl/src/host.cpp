@@ -130,12 +130,6 @@ unsigned long run_opencl_cnn(
         int work_group = WORK_GROUP;
         int work_item_per_group = WORK_ITEM_PER_GROUP;
 
-        const char *xcl_emu = getenv("XCL_EMULATION_MODE");
-        if(xcl_emu && !strcmp(xcl_emu, "hw_emu")) {
-            work_group = 1;
-            work_item_per_group = 1;
-        }
- 
         int err = 0; 
         
         //Declare global & local Grids
@@ -258,13 +252,9 @@ int main(int argc, char** argv)
     free(source_bad_hw_results);
     free(source_sw_results);
 
-    if (match){
-        std::cout << "TEST FAILED." << std::endl; 
-        return -1;
-    }
-    std::cout << "TEST PASSED." << std::endl;
     std::cout << "GOOD duration = " << good_duration << " ns" << std::endl;
     std::cout << "BAD duration = "  << bad_duration  << " ns" << std::endl;
 
-    return 0;
+    std::cout << "TEST " << (match ? "FAILED" : "PASSED") << std::endl; 
+    return (match ? EXIT_FAILURE :  EXIT_SUCCESS);
 }

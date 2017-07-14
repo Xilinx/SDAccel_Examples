@@ -1,13 +1,26 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Loop Pipelining",
+    "example": "Loop Pipelining (CL)",
     "overview": [
         "This example demonstrates how loop pipelining can be used to improve the performance of a kernel."
     ],
     "key_concepts": [ "Kernel Optimization", "Loop Pipelining"],
     "keywords": [ "xcl_pipeline_loop" ],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl2"
+    ],
     "em_cmd": "./loop_pipeline",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./loop_pipeline",
+    "accelerators": [
+        {
+            "container": "vector_addition", 
+            "name": "vadd", 
+            "location": "src/vector_addition.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

@@ -26,10 +26,7 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
-
-#include "CL/cl.h"
-#include "xcl.h"
-
+#include "xcl2.hpp"
 #include <algorithm>
 #include <cstdio>
 #include <random>
@@ -41,7 +38,7 @@ using std::uniform_int_distribution;
 using std::vector;
 
 // row major
-void matmul(vector<int> &C, vector<int> &A, vector<int> &B, int M) {
+void matmul(int *C, int *A, int *B, int M) {
     for (int k = 0; k < M; k++) {
         for (int j = 0; j < M; j++) {
             for (int i = 0; i < M; i++) {
@@ -59,7 +56,7 @@ int gen_random() {
 }
 
 
-void print(vector<int> &data, int columns, int rows) {
+void print(int *data, int columns, int rows) {
     vector<int> out(columns * rows);
     for (int r = 0; r < 10; r++) {
         for (int c = 0; c < 10; c++) {
@@ -73,11 +70,12 @@ void print(vector<int> &data, int columns, int rows) {
     printf("⋱\n\n");
 }
 
-void verify(vector<int> &gold, vector<int> &output) {
+void verify(vector<int,aligned_allocator<int>> &gold, 
+            vector<int,aligned_allocator<int>> &output) {
     for (int i = 0; i < (int)output.size(); i++) {
         if (output[i] != gold[i]) {
             printf("Mismatch %d: gold: %d device: %d\n", i, gold[i], output[i]);
-            print(output, 16, 16);
+            print(output.data(), 16, 16);
             exit(EXIT_FAILURE);
         }
     }
@@ -89,68 +87,85 @@ int main(int argc, char **argv) {
     static const int columns = 64;
     static const int rows = 64;
 
-    vector<int> A(columns * rows);
-    vector<int> B(columns * rows);
-    vector<int> gold(columns * rows, 0);
-    vector<int> C(columns * rows, 0);
+    vector<int,aligned_allocator<int>> A(columns * rows);
+    vector<int,aligned_allocator<int>> B(columns * rows);
+    vector<int,aligned_allocator<int>> gold(columns * rows, 0);
+    vector<int,aligned_allocator<int>> C(columns * rows, 0);
     generate(begin(A), end(A), gen_random);
     generate(begin(B), end(B), gen_random);
 
     printf("A:\n");
-    print(A, columns, rows);
+    print(A.data(), columns, rows);
     printf("B:\n");
-    print(B, columns, rows);
-    matmul(gold, A, B, columns);
+    print(B.data(), columns, rows);
+    matmul(gold.data(), A.data(), B.data(), columns);
 
     printf("Gold:\n");
-    print(gold, columns, rows);
+    print(gold.data(), columns, rows);
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
 
-    xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "matmul");
+    cl::Context context(device);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+    std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+
+    //Create Program 
+    std::string binaryFile = xcl::find_binary_file(device_name,"matmul");
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    devices.resize(1);
+    cl::Program program(context, devices, bins);
 
     // compute the size of array in bytes
     size_t array_size_bytes = columns * rows * sizeof(int);
+    cl::Buffer buffer_a(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            array_size_bytes, A.data());
+    cl::Buffer buffer_b(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            array_size_bytes, B.data());
+    cl::Buffer buffer_c(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+            array_size_bytes, C.data());
 
-    cl_mem buffer_a = xcl_malloc(world, CL_MEM_READ_ONLY, array_size_bytes);
-    cl_mem buffer_b = xcl_malloc(world, CL_MEM_READ_ONLY, array_size_bytes);
-    cl_mem buffer_c = xcl_malloc(world, CL_MEM_WRITE_ONLY, array_size_bytes);
-
-    xcl_memcpy_to_device(world, buffer_a, A.data(), array_size_bytes);
-    xcl_memcpy_to_device(world, buffer_b, B.data(), array_size_bytes);
+    std::vector<cl::Memory> inBufVec, outBufVec;
+    inBufVec.push_back(buffer_a);
+    inBufVec.push_back(buffer_b);
+    outBufVec.push_back(buffer_c);
+    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
 
   printf( "|-------------------------+-------------------------|\n"
           "| Kernel                  |    Wall-Clock Time (ns) |\n"
           "|-------------------------+-------------------------|\n");
-    cl_kernel matmul_kernel = xcl_get_kernel(program, "matmul");
-    xcl_set_kernel_arg(matmul_kernel, 0, sizeof(cl_mem), &buffer_a);
-    xcl_set_kernel_arg(matmul_kernel, 1, sizeof(cl_mem), &buffer_b);
-    xcl_set_kernel_arg(matmul_kernel, 2, sizeof(cl_mem), &buffer_c);
-    xcl_set_kernel_arg(matmul_kernel, 3, sizeof(cl_int), &columns);
+    cl::Kernel matmul_kernel(program, "matmul");
+    matmul_kernel.setArg(0,buffer_a);
+    matmul_kernel.setArg(1,buffer_b);
+    matmul_kernel.setArg(2,buffer_c);
+    matmul_kernel.setArg(3,columns);
 
-    auto matmul_time = xcl_run_kernel3d(world, matmul_kernel, 1, 1, 1);
-    xcl_memcpy_from_device(world, C.data(), buffer_c, array_size_bytes);
+    cl::Event event;
+    uint64_t nstimestart, nstimeend;
+    q.enqueueTask(matmul_kernel,NULL,&event);
+    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    q.finish();
+    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart);
+    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend);
+    auto matmul_time = nstimeend-nstimestart;
+
     verify(gold, C);
     printf("| %-23s | %23lu |\n", "matmul: ", matmul_time);
 
-    cl_kernel matmul_partition_kernel =
-        xcl_get_kernel(program, "matmul_partition");
-    xcl_set_kernel_arg(matmul_partition_kernel, 0, sizeof(cl_mem), &buffer_a);
-    xcl_set_kernel_arg(matmul_partition_kernel, 1, sizeof(cl_mem), &buffer_b);
-    xcl_set_kernel_arg(matmul_partition_kernel, 2, sizeof(cl_mem), &buffer_c);
-    xcl_set_kernel_arg(matmul_partition_kernel, 3, sizeof(cl_int), &columns);
+    cl::Kernel matmul_partition_kernel(program, "matmul_partition");
+    matmul_partition_kernel.setArg(0,buffer_a);
+    matmul_partition_kernel.setArg(1,buffer_b);
+    matmul_partition_kernel.setArg(2,buffer_c);
+    matmul_partition_kernel.setArg(3,columns);
 
-    auto matmul_partition_time =
-        xcl_run_kernel3d(world, matmul_partition_kernel, 1, 1, 1);
-    xcl_memcpy_from_device(world, C.data(), buffer_c, array_size_bytes);
+    q.enqueueTask(matmul_partition_kernel,NULL,&event);
+    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    q.finish();
+    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart);
+    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend);
+    auto matmul_partition_time = nstimeend-nstimestart;
+
     verify(gold, C);
 
-    clReleaseMemObject(buffer_a);
-    clReleaseMemObject(buffer_b);
-    clReleaseMemObject(buffer_c);
-    clReleaseKernel(matmul_kernel);
-    clReleaseKernel(matmul_partition_kernel);
-    clReleaseProgram(program);
-    xcl_release_world(world);
     printf("| %-23s | %23lu |\n", "matmul: partition", matmul_partition_time);
 
     printf("|-------------------------+-------------------------|\n");

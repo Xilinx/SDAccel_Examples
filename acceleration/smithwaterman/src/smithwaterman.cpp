@@ -202,8 +202,9 @@ SmithWatermanApp::SmithWatermanApp(const string& vendor_name,
 
 SmithWatermanApp::~SmithWatermanApp()
 {
-    // TODO Auto-generated destructor stub
-
+    clReleaseKernel(m_clKernelSmithWaterman);
+    clReleaseProgram(m_program);
+    xcl_release_world(m_world);
 }
 
 bool SmithWatermanApp::unit_test_kernel_cpu()

@@ -1,13 +1,36 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Array Partitioning",
+    "example": "Array Partitioning (CL)",
     "overview": [
         "This example shows how to use array partitioning to improve performance of a kernel"
     ],
     "key_concepts": [ "Kernel Optimization", "Array Partitioning"],
     "keywords": [ "xcl_array_partition", "complete"],
+    "nboard": ["xilinx:xil-accel-rd-vu9p:4ddr-xpr"],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl2"
+    ],
     "em_cmd": "./array_partition",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./array_partition",
+    "containers": [
+        {
+            "name": "matmul",
+            "accelerators": [
+                {
+                    "name": "matmul", 
+                    "location": "src/matmul.cl"
+                },
+                {
+        
+                    "name": "matmul_partition", 
+                    "location": "src/matmul.cl"
+                }
+            ]
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

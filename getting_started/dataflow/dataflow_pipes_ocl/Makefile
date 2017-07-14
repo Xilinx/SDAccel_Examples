@@ -7,7 +7,7 @@ include $(COMMON_REPO)/libs/oclHelper/oclHelper.mk
 
 # Host Application
 host_SRCS=./src/host.cpp $(xcl_SRCS) $(oclHelper_SRCS)
-host_HDRS=$(xcl_HDRS)
+host_HDRS=$(xcl_HDRS) $(oclHelper_HDRS)
 host_CXXFLAGS=-I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS) $(oclHelper_CXXFLAGS)
 host_LDFLAGS=$(opencl_LDFLAGS)
 

@@ -9,6 +9,14 @@
         "observation belongs to the cluster with the nearest mean, serving as",
         "a prototype of the cluster.",
         "",
+        "The application sets two compute units by default so that it will fit ",
+        "all Xilinx Devices. For bigger Xilinx Devices, user can increase the ",
+        "number of Compute units in Makefile and can get better performance.",
+        "It is tested upto 6 compute units for ku115 device and got ",
+        "approximately 6x improvement with respect to single compute units, which ",
+        "shows that application is more compute bound (not memory bound) and ",
+        "performance is directly proportional to number of compute units.",
+        "",
         "__Note__: This application is ported from Rodinia",
         "",
         "(https://www.cs.virginia.edu/~skadron/wiki/rodinia/)",
@@ -23,7 +31,6 @@
         "\t -b               : input file is in binary format",
         "\t -o               : output cluster center coordinates [default=off]"
     ],
-    "nboards": ["xilinx:xil-accel-rd-ku115"],
     "cmd_args": "-i PROJECT/data/100 -c PROJECT/data/100.gold_c5 -m 5 -n 5 -g 2",
     "em_cmd": "./host_kmeans -i ./data/100 -c ./data/100.gold_c5 -m 5 -n 5 -g 2",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host_kmeans -i ./data/100 -c ./data/100.gold_c100 -m 100 -n 100 -g 2",
@@ -33,10 +40,24 @@
         "cmdparser", 
         "xcl"
     ], 
-    "accelerators": [
+    "compiler" : {
+        "symbols" : [
+            "RECORD_OVERALL_TIME",
+            "USE_DATA_TYPE=1",
+            "PARALLEL_POINTS=4"
+        ]
+    },
+    "containers": [
         {
             "name": "kmeans", 
-            "location": "src/kmeans.cl"
+            "accelerators": [
+                {
+                    "name": "kmeans", 
+                    "num_compute_units" : "2",
+                    "clflags" : "-D PARALLEL_POINTS=4 -D PARALLEL_FEATURES=2 -D USE_DATA_TYPE=1", 
+                    "location": "src/kmeans.cl"
+                }
+            ]
         }
     ],
     "contributors" : [

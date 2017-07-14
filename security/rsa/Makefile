@@ -18,13 +18,13 @@ EXES=rsa
 # RSA Kernel
 krnl_rsa_SRCS=./src/krnl_rsa.cpp
 krnl_rsa_CLFLAGS=--kernel rsa
-krnl_rsa_NDEVICES=xilinx:adm-pcie-ku3:2ddr-xpr:3.3 xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3
+krnl_rsa_NDEVICES=xilinx:adm-pcie-ku3:2ddr-xpr xilinx:xil-accel-rd-ku115:4ddr-xpr
 
 XOS=krnl_rsa
 
 # RSA xclbin
 krnl_rsa_XOS=krnl_rsa
-krnl_rsa_NDEVICES=xilinx:adm-pcie-ku3:2ddr-xpr:3.3 xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3
+krnl_rsa_NDEVICES=xilinx:adm-pcie-ku3:2ddr-xpr xilinx:xil-accel-rd-ku115:4ddr-xpr
 
 XCLBINS=krnl_rsa
 
@@ -36,7 +36,7 @@ check_NDEVICES=$(krnl_rsa_NDEVICES)
 
 CHECKS=check
 
-DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
+DEVICES=xilinx:adm-pcie-7v3:1ddr
 
 include $(COMMON_REPO)/utility/rules.mk
 

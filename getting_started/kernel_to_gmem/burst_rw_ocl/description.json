@@ -1,13 +1,25 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Burst Read/Write",
+    "example": "Burst Read/Write (CL)",
     "overview": [
         "This is simple example of using AXI4-master interface for burst read and write"
     ],
     "key_concepts": [ "burst access"],
-    "keywords": ["NA"],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl2","bitmap"
+    ],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
+    "accelerators": [
+        {
+            "container": "vadd", 
+            "name": "vadd", 
+            "location": "src/vadd.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

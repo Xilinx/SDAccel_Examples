@@ -46,7 +46,6 @@ EXES=host_kmeans
 #Kmeans Kernel
 kmeans_SRCS=./src/kmeans.cl
 kmeans_CLFLAGS=-D PARALLEL_POINTS=$(PARALLEL_POINTS) -D PARALLEL_FEATURES=$(PARALLEL_FEATURES) -D USE_DATA_TYPE=$(DATATYPE_ID)
-kmeans_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3
 
 XOS=kmeans
 
@@ -62,10 +61,8 @@ EXTRA_CLEAN=membership.out
 check_EXE=$(EXES)
 check_XCLBINS=$(XCLBINS)
 check_ARGS= -i $(TEST_FILE) -m $(NCLUSTERS) -n $(NCLUSTERS) -c $(GOLD_FILE) -g $(COMPUTE_UNITS) 
-check_NDEVICES=$(kmeans_NDEVICES)
 
 CHECKS=check
 
-DEVICES:=xilinx:adm-pcie-ku3:2ddr-xpr:3.3
 include $(COMMON_REPO)/utility/rules.mk
 

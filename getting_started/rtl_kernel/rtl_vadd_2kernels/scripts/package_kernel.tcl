@@ -47,9 +47,6 @@ set_property core_revision 2 [ipx::current_core]
 foreach up [ipx::get_user_parameters] {
   ipx::remove_user_parameter [get_property NAME $up] [ipx::current_core]
 }
-#foreach up [ipx::get_hdl_parameters] {
-#  ipx::remove_hdl_parameter [get_property NAME $up] [ipx::current_core]
-#}
 ipx::create_xgui_files [ipx::current_core]
 ipx::associate_bus_interfaces -busif m_axi_gmem -clock ap_clk [ipx::current_core]
 ipx::associate_bus_interfaces -busif s_axi_control -clock ap_clk [ipx::current_core]

@@ -1,6 +1,6 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Global Memory Two Banks",
+    "example": "Global Memory Two Banks (CL)",
     "overview": [
         "This example of 2ddr to demonstrate on how to use 2ddr DSA. How to create buffers in each DDR."
     ],
@@ -8,9 +8,31 @@
     "keywords": [ "max_memory_ports", "misc:map_connect",
             "cl_mem_ext_ptr_t", "XCL_MEM_DDR_BANK0", "XCL_MEM_DDR_BANK1", "XCL_MEM_DDR_BANKx",
             "CL_MEM_EXT_PTR_XILINX"],
-    "nboards": ["xilinx:adm-pcie-7v3:1ddr"],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl2","bitmap"
+    ],
+    "cmd_args" : "PROJECT/data/input.bmp PROJECT/data/golden.bmp",
     "em_cmd": "./host ./data/input.bmp ./data/golden.bmp",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host ./data/input.bmp ./data/golden.bmp",
+    "nboard": [
+        "xilinx:adm-pcie-7v3:1ddr"
+    ],
+    "containers": [
+        {
+            "name": "apply_watermark", 
+            "ldclflags" : "--xp misc:map_connect=add.kernel.apply_watermark_1.M_AXI_GMEM0.core.OCL_REGION_0.M00_AXI --xp misc:map_connect=add.kernel.apply_watermark_1.M_AXI_GMEM1.core.OCL_REGION_0.M01_AXI",
+            "accelerators": [
+                {
+                    "name": "apply_watermark",
+                    "clflags" : "--max_memory_ports apply_watermark", 
+                    "location": "src/apply_watermark.cl"
+                }
+            ]
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

@@ -35,15 +35,15 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
    NOTE: See the fir.cl file for additional information.
   */
-
-#include "CL/cl.h"
-#include "xcl.h"
+#include "xcl2.hpp"
 
 #include <algorithm>
 #include <random>
 #include <string>
 #include <vector>
-#include <iostream>
+
+#define SIGNAL_SIZE (1024 * 1024)
+#define SIGNAL_SIZE_IN_EMU 1024 
 
 using std::default_random_engine;
 using std::inner_product;
@@ -51,9 +51,105 @@ using std::string;
 using std::uniform_int_distribution;
 using std::vector;
 
+//helping functions
+void fir_sw(      vector<int,aligned_allocator<int>> &output, 
+            const vector<int,aligned_allocator<int>> &signal,
+            const vector<int,aligned_allocator<int>> &coeff);
+
+void verify( const vector<int,aligned_allocator<int>> &gold, 
+             const vector<int,aligned_allocator<int>> &out);
+uint64_t get_duration_ns (const cl::Event &event);
+void print_summary(std::string k1, std::string k2, uint64_t t1, uint64_t t2, int iterations );
+int gen_random();
+
+int main(int argc, char **argv) {
+    size_t signal_size = xcl::is_emulation() ? SIGNAL_SIZE_IN_EMU : SIGNAL_SIZE; 
+    vector<int,aligned_allocator<int>> signal(signal_size);
+    vector<int,aligned_allocator<int>> out(signal_size);
+    vector<int,aligned_allocator<int>> coeff = {{53, 0, -91, 0, 313, 500, 313, 0, -91, 0, 53}};
+    vector<int,aligned_allocator<int>> gold(signal_size, 0);
+    generate(begin(signal), end(signal), gen_random);
+
+    fir_sw(gold, signal, coeff);
+
+    size_t size_in_bytes = signal_size * sizeof(int);
+    size_t coeff_size_in_bytes = coeff.size() * sizeof(int);
+
+    // Initialize OpenCL context and load xclbin binary
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
+
+    cl::Context context(device);
+    cl::CommandQueue q(context,device,CL_QUEUE_PROFILING_ENABLE);
+    std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+
+    //Create Program 
+    std::string binaryFile = xcl::find_binary_file(device_name,"fir");
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    devices.resize(1);
+    cl::Program program(context, devices, bins);
+
+    //Allocate Buffer in Global Memory
+    cl::Buffer buffer_signal(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            size_in_bytes, signal.data());
+    cl::Buffer buffer_coeff (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            coeff_size_in_bytes, coeff.data());
+    cl::Buffer buffer_output(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+            size_in_bytes, out.data());
+    std::vector<cl::Memory> inBufVec, outBufVec;
+    inBufVec.push_back(buffer_signal);
+    inBufVec.push_back(buffer_coeff);
+    outBufVec.push_back(buffer_output);
+
+    //Copy input data to device global memory
+    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
+
+    //Creating Naive Kernel Object and setting args
+    cl::Kernel fir_naive_kernel(program, "fir_naive");
+    fir_naive_kernel.setArg(0,buffer_output);
+    fir_naive_kernel.setArg(1,buffer_signal);
+    fir_naive_kernel.setArg(2,buffer_coeff);
+    fir_naive_kernel.setArg(3,signal_size);
+
+    cl::Event event;
+    int iterations = xcl::is_emulation() ? 2 : 100;
+    uint64_t fir_naive_time = 0;
+    //Running naive kernel iterations times
+    for (int i = 0 ; i < iterations ; i++){
+        q.enqueueTask(fir_naive_kernel,NULL,&event);
+        q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+        q.finish();
+        fir_naive_time += get_duration_ns(event);
+        verify(gold, out);
+    }
+
+    //Creating FIR Shift Register Kernel object and setting args
+    cl::Kernel fir_sr_kernel(program, "fir_shift_register");
+    fir_sr_kernel.setArg(0,buffer_output);
+    fir_sr_kernel.setArg(1,buffer_signal);
+    fir_sr_kernel.setArg(2,buffer_coeff);
+    fir_sr_kernel.setArg(3,signal_size);
+
+    uint64_t fir_sr_time = 0;
+    //Running Shift Register FIR iterations times
+    for (int i = 0 ; i < iterations ; i++){
+        q.enqueueTask(fir_sr_kernel,NULL,&event);
+        q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+        q.finish();
+        fir_sr_time += get_duration_ns(event);
+        verify(gold, out);
+    }
+    printf("Example Testdata Signal_Length=%lu for %d iteration\n",
+            signal_size, iterations);
+    print_summary("fir_naive", "fir_shift_register", fir_naive_time, fir_sr_time,iterations);
+    printf("TEST PASSED\n");
+    return EXIT_SUCCESS;
+}
+
 // Finite Impulse Response Filter
-void fir(vector<int> &output, const vector<int> &signal,
-         const vector<int> &coeff) {
+void fir_sw(      vector<int,aligned_allocator<int>> &output, 
+            const vector<int,aligned_allocator<int>> &signal,
+            const vector<int,aligned_allocator<int>> &coeff){
     auto out_iter = begin(output);
     auto rsignal_iter = signal.rend() - 1;
 
@@ -72,15 +168,9 @@ int gen_random() {
     return dist(e);
 }
 
-void print_signal(vector<int> &device_output) {
-    for (auto val : device_output) {
-        printf("%d ", val);
-    }
-    printf("\n");
-}
-
 // Verifies the gold and the out data are equal
-void verify(const vector<int> &gold, const vector<int> &out) {
+void verify( const vector<int,aligned_allocator<int>> &gold, 
+             const vector<int,aligned_allocator<int>> &out){
     bool match = equal(begin(gold), end(gold), begin(out));
     if (!match) {
         printf("TEST FAILED\n");
@@ -88,87 +178,28 @@ void verify(const vector<int> &gold, const vector<int> &out) {
     }
 }
 
-// Launches the Finite Impulse Response(FIR) kernel and prints the execution time
-vector<int> test_fir(xcl_world world, vector<int> signal, vector<int> coeff, int signal_size, 
-int coeff_size_in_bytes, int size_in_bytes, bool good) {
-    cl_program program = xcl_import_binary(world, good ? "fir_GOOD" : "fir_BAD");
-    cl_kernel krnl_fir = xcl_get_kernel(program, "fir_shift_register");
-    std::cout << "\n" << std::endl;
-    std::cout << "Starting" << (good ? " GOOD" : " BAD") << " Kernel" << std::endl;
-
-    // Allocate Buffer in Global Memory
-    cl_mem buffer_signal = xcl_malloc(world, CL_MEM_READ_ONLY, size_in_bytes);
-    cl_mem buffer_coeff = xcl_malloc(world, CL_MEM_READ_ONLY, coeff_size_in_bytes);
-    cl_mem buffer_output = xcl_malloc(world, CL_MEM_WRITE_ONLY, size_in_bytes);
-
-    // Copy input data to device global memory
-    xcl_memcpy_to_device(world, buffer_signal, signal.data(), size_in_bytes);
-    xcl_memcpy_to_device(world, buffer_coeff, coeff.data(), coeff_size_in_bytes);
-
-    vector<int> device_output(signal_size, 0);
-
-    xcl_set_kernel_arg(krnl_fir, 0, sizeof(cl_mem), &buffer_output);
-    xcl_set_kernel_arg(krnl_fir, 1, sizeof(cl_mem), &buffer_signal);
-    xcl_set_kernel_arg(krnl_fir, 2, sizeof(cl_mem), &buffer_coeff);
-    xcl_set_kernel_arg(krnl_fir, 3, sizeof(int), &signal_size);
-
-    
-    auto kernel_time = xcl_run_kernel3d(world, krnl_fir, 1, 1, 1);
-
-    if(good == true){
-        std::cout << "|-------------------------------------+-------------------------|\n";
-        printf("| %-35s | %23lu |\n", "fir_optimized", kernel_time);
-        std::cout << "|-------------------------------------+-------------------------|\n";
-    }
-    else {
-        std::cout << "|-------------------------------------+-------------------------|\n";
-        printf("| %-35s | %23lu |\n", "fir_naive", kernel_time);
-        std::cout << "|-------------------------------------+-------------------------|\n";
-    }
-
-    xcl_memcpy_from_device(world, device_output.data(), buffer_output,
-                           signal_size * sizeof(int));
-
-    std::cout << "Finished " << (good ? " GOOD" : " BAD") << " Kernel" << std::endl;
-
-    // Release Device Memories and Kernels
-    clReleaseMemObject(buffer_signal);
-    clReleaseMemObject(buffer_coeff);
-    clReleaseMemObject(buffer_output);
-    clReleaseKernel(krnl_fir);
-    return device_output;
+uint64_t get_duration_ns (const cl::Event &event) {
+    uint64_t nstimestart, nstimeend;
+    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart);
+    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend);
+    return(nstimeend-nstimestart);
 }
+void print_summary(std::string k1, std::string k2, uint64_t t1, uint64_t t2, int iterations ) {
+    int percentage_improvement = ((t1-t2)*100) / t1;
+    printf("|-------------------------+-------------------------|\n"
+           "| Kernel(%3d iterations)  |    Wall-Clock Time (ns) |\n"
+           "|-------------------------+-------------------------|\n",iterations);
+    printf("| %-23s | %23lu |\n", k1.c_str(), t1);
+    printf("| %-23s | %23lu |\n", k2.c_str(), t2);
+    printf("|-------------------------+-------------------------|\n");
+    printf("| Percentage improvement: | %23d |\n",percentage_improvement);
+    printf("|-------------------------+-------------------------|\n");
+    printf("Note: Wall Clock Time is meaningful for real hardware execution only, not for emulation.\n");
+    printf("Please refer to profile summary for kernel execution time for hardware emulation.\n");
 
-int main(int argc, char **argv) {
-    size_t signal_size = 32;
-    vector<int> signal(signal_size);
-    generate(begin(signal), end(signal), gen_random);
-    vector<int> coeff = {{53, 0, -91, 0, 313, 500, 313, 0, -91, 0, 53}};
-    vector<int> gold(signal_size, 0);
-
-    fir(gold, signal, coeff);
-
-    size_t size_in_bytes = signal_size * sizeof(int);
-    size_t coeff_size_in_bytes = coeff.size() * sizeof(int);
-
-    // Initialize OpenCL context and load xclbin binary
-    xcl_world world = xcl_world_single();
-    
-    auto device_output =
-        test_fir(world, signal, coeff, signal_size, coeff_size_in_bytes, size_in_bytes, true);
-    verify(gold, device_output);
-    
-    device_output =
-        test_fir(world, signal, coeff, signal_size, coeff_size_in_bytes, size_in_bytes, false);
-    verify(gold, device_output);
-     
-    std::cout << "\n--------------------------------------+--------------------------\n";
-    std::cout << "Note: Wall Clock Time is meaningful for real hardware execution only, not for emulation.\n";
-    std::cout << "Please refer to profile summary for kernel execution time for hardware emulation.\n\n";
-
-    xcl_release_world(world);
-
-    print_signal(device_output);
-    std::cout << "TEST PASSED\n";
-    return EXIT_SUCCESS;
+    //Performance check for real hardware. t2 must be less than t1.
+    if (!xcl::is_emulation() && (t1 < t2)){
+        printf("ERROR: Unexpected Performance is observed\n");
+        exit(EXIT_FAILURE);
+    }
 }

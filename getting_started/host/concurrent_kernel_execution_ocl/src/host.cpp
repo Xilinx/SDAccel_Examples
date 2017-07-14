@@ -387,7 +387,6 @@ int main(int argc, char **argv) {
 
   const size_t array_size = MAT_DIM0 * MAT_DIM1;
   const size_t size_in_bytes = array_size * sizeof(int);
-  cl_int err;
 
   // allocate memory on host for input and output matrices
   vector<int> A(array_size, 1);

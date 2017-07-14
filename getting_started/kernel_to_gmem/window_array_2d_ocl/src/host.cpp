@@ -26,13 +26,9 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
-
-#include <iostream>
-#include <cstring>
-#include <stdio.h>
-
 //OpenCL utility layer include
-#include "xcl.h"
+#include "xcl2.hpp"
+#include <vector>
 #include "host.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -40,9 +36,9 @@ int main(int argc, char** argv)
 {
     //Allocate Memory in Host Memory
     size_t vector_size_bytes = sizeof(int) * BLOCK_SIZE;
-    int* a = (int*)malloc(vector_size_bytes);// original data set given to device
-    int* c = (int*)malloc(vector_size_bytes);// results returned from device
-    int* sw_c = (int*)malloc(vector_size_bytes);// results returned from software
+    std::vector<int,aligned_allocator<int>> a   (BLOCK_SIZE);// original data set given to device
+    std::vector<int,aligned_allocator<int>> c   (BLOCK_SIZE);// results returned from device
+    std::vector<int,aligned_allocator<int>> sw_c(BLOCK_SIZE);// results returned from software
  
     // Create the test data and Software Result 
     int alpha = 3;
@@ -53,62 +49,53 @@ int main(int argc, char** argv)
     }
 
 //OPENCL HOST CODE AREA START
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
+
+    cl::Context context(device);
+    // For this example, command queue with out of order is needed to run kernel
+    // concurrently.
+    cl::CommandQueue q(context, device,
+            CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE | CL_QUEUE_PROFILING_ENABLE);
+    std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+
     //Create Program and Kernel
-    xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "window_array_2d");
-    cl_kernel krnl_read_data  = xcl_get_kernel(program, "read_data");
-    cl_kernel krnl_write_data = xcl_get_kernel(program, "write_data");
-    cl_kernel krnl_compute    = xcl_get_kernel(program, "compute");
-
-
-    // By-default xcl_world_single create command queues with sequential command.
-    // For this example, user to replace command queue with out of order command queue
-    clReleaseCommandQueue(world.command_queue);
-    int err;
-    world.command_queue = clCreateCommandQueue(world.context, world.device_id,
-            CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE | CL_QUEUE_PROFILING_ENABLE,
-            &err);
-    if (err != CL_SUCCESS){
-        std::cout << "Error: Failed to create a command queue!" << std::endl;
-        std::cout << "Test failed" << std::endl;
-        exit(EXIT_FAILURE);
-    }
+    std::string binaryFile = xcl::find_binary_file(device_name,"window_array_2d");
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    devices.resize(1);
+    cl::Program program(context, devices, bins);
+    cl::Kernel krnl_read_data (program,"read_data");
+    cl::Kernel krnl_write_data(program, "write_data");
+    cl::Kernel krnl_compute   (program, "compute");
 
     //Allocate Buffer in Global Memory
-    cl_mem buffer_a = xcl_malloc(world, CL_MEM_READ_ONLY, vector_size_bytes);
-    cl_mem buffer_c = xcl_malloc(world, CL_MEM_WRITE_ONLY, vector_size_bytes);
+    cl::Buffer buffer_a(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
+            vector_size_bytes, a.data());
+    cl::Buffer buffer_c(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
+            vector_size_bytes, c.data());
+    std::vector<cl::Memory> inBufVec, outBufVec;
+    inBufVec.push_back(buffer_a);
+    outBufVec.push_back(buffer_c);
 
     //Copy input data to device global memory
-    xcl_memcpy_to_device(world,buffer_a,a,vector_size_bytes);
-
-    //Wait
-    clFinish(world.command_queue);
+    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
 
     //Set the Kernel Arguments
-    xcl_set_kernel_arg(krnl_read_data,0,sizeof(cl_mem),&buffer_a);
-    xcl_set_kernel_arg(krnl_compute,0,sizeof(int),&alpha);
-    xcl_set_kernel_arg(krnl_write_data,0,sizeof(cl_mem),&buffer_c);
+    krnl_read_data.setArg(0,buffer_a);
+    krnl_compute.setArg(0,alpha);
+    krnl_write_data.setArg(0,buffer_c);
 
     //Launch the Kernel
-    xcl_run_kernel3d_nb(world,krnl_read_data);
-    xcl_run_kernel3d_nb(world,krnl_compute);
-    xcl_run_kernel3d_nb(world,krnl_write_data);
+    q.enqueueTask(krnl_read_data);
+    q.enqueueTask(krnl_compute);
+    q.enqueueTask(krnl_write_data);
 
     //wait for all kernels to finish their operations
-    clFinish(world.command_queue);
+    q.finish();
 
     //Copy Result from Device Global Memory to Host Local Memory
-    xcl_memcpy_from_device(world, c, buffer_c ,vector_size_bytes);
-    clFinish(world.command_queue);
-
-    //Release Device Memories and Kernels
-    clReleaseMemObject(buffer_a);
-    clReleaseMemObject(buffer_c);
-    clReleaseKernel(krnl_read_data);
-    clReleaseKernel(krnl_compute);
-    clReleaseKernel(krnl_write_data);
-    clReleaseProgram(program);
-    xcl_release_world(world);
+    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    q.finish();
 //OPENCL HOST CODE AREA END
 
     // Validate
@@ -117,23 +104,15 @@ int main(int argc, char** argv)
       if(c[i] == sw_c[i]) {
         correct++; 
       } else { 
-        printf("\n wrong sw %d hw %d index %d \n", sw_c[i], c[i], i);
+          std::cout << std::endl << " wrong sw " << sw_c[i]
+              << " hw " << c[i] << " index " << i << std::endl;
       }
     }
     
     // Print a brief summary detailing the results
-    printf("Computed '%d/%d' correct values!\n", correct, BLOCK_SIZE);
+    std::cout << "Computed '" << correct << "/" 
+        << BLOCK_SIZE << "' correct values!" << std::endl;
 
-    free(a);
-    free(c);
-    free(sw_c);
-    
-    if(correct == BLOCK_SIZE){
-        std::cout << "TEST PASSED." << std::endl; 
-        return EXIT_SUCCESS;
-    }
-    else{
-        std::cout << "TEST FAILED." << std::endl; 
-        return EXIT_FAILURE;
-    }
+    std::cout << "TEST " << (correct!=BLOCK_SIZE? "FAILED" : "PASSED") << std::endl; 
+    return (correct!=BLOCK_SIZE? EXIT_FAILURE :  EXIT_SUCCESS);
 }

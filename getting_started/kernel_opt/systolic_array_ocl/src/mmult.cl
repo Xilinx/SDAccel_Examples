@@ -82,7 +82,6 @@ void mmult(
     int c_col = b_col;
     
     // Local memory to store input and output matrices
-    // Local memory is implemented as BRAM memory blocks
     
     int localA[MAX_SIZE][MAX_SIZE]  __attribute__((xcl_array_partition(complete, 1)));;
     int localB[MAX_SIZE][MAX_SIZE]  __attribute__((xcl_array_partition(complete, 2)));;

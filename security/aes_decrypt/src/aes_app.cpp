@@ -95,6 +95,7 @@ AesApp::~AesApp() {
 void AesApp::cleanup() {
 
 	clReleaseKernel(m_clKernelAesDecrypt);
+	clReleaseProgram(m_program);
 	xcl_release_world(m_world);
 }
 
