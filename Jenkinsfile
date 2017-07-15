@@ -60,7 +60,7 @@ def buildExample(target, dir, device, workdir) {
 			cores = 8
 			mem = 32000
 			queue = "long"
-			mins = 8*60
+			mins = 12*60
 		}
 
 	retry(3) {
