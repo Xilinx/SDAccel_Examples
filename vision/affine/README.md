@@ -36,6 +36,7 @@ where examples is the name of the directory where the repository will be stored 
 ## 3. SOFTWARE AND SYSTEM REQUIREMENTS
 Board | Device Name | Software Version
 ------|-------------|-----------------
+Xilinx KU115|xilinx:xil-accel-rd-ku115:4ddr-xpr|SDAccel 2017.1
 
 
 *NOTE:* The board/device used for compilation can be changed by adding the DEVICES variable to the make command as shown below
@@ -101,12 +102,12 @@ An emulated application can also be executed directly from the command line with
 To manually configure the environment to run the application, set the following
 ```
 export LD_LIBRARY_PATH=$XILINX_SDX/runtime/lib/x86_64/:$LD_LIBRARY_PATH
-export XCL_EMULATION_MODE=true
+export XCL_EMULATION_MODE=<sw_emu|hw_emu>
 emconfigutil --xdevice 'xilinx:xil-accel-rd-ku115:4ddr-xpr' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./affine ./data/CT-MONO2-16-brain.raw ./xclbin/krnl_affine.<emulation mode>.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin
+./affine ./data/CT-MONO2-16-brain.raw
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card
