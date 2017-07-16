@@ -16,13 +16,13 @@ EXES=array_partition
 
 # Kernel
 matmul_SRCS=./src/matmul.cl
-matmul_NDEVICES=xilinx:adm-pcie-7v3:1ddr
+matmul_NDEVICES=xilinx:adm-pcie-7v3:1ddr xilinx:xil-accel-rd-vu9p:4ddr-xpr
 
 XOS=matmul
 
 # xclbin
 matmul_XOS=matmul
-matmul_NDEVICES=xilinx:adm-pcie-7v3:1ddr
+matmul_NDEVICES=xilinx:adm-pcie-7v3:1ddr xilinx:xil-accel-rd-vu9p:4ddr-xpr
 
 XCLBINS=matmul
 
@@ -31,7 +31,7 @@ EXTRA_CLEAN=./output.png
 # check
 check_EXE=array_partition
 check_XCLBINS=matmul
-check_NDEVICES=xilinx:adm-pcie-7v3:1ddr
+check_NDEVICES=xilinx:adm-pcie-7v3:1ddr xilinx:xil-accel-rd-vu9p:4ddr-xpr
 
 CHECKS=check
 
