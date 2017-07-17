@@ -11,6 +11,7 @@
     "libs": [
         "xcl2"
     ],
+    "nboard": ["xilinx:xil-accel-rd-vu9p:4ddr-xpr", "xilinx:xil-accel-rd-ku115:4ddr-xpr", "xilinx:adm-pcie-ku3:2ddr-xpr"],
     "em_cmd" : "./vmulvadd",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./vmulvadd",
     "board" : [
