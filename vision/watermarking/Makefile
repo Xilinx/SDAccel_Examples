@@ -17,7 +17,7 @@ EXES=watermark
 
 # Kernel
 apply_watermark_SRCS=./src/krnl_watermarking.cl
-apply_watermark_CLFLAGS=-s -I./src --max_memory_ports apply_watermark
+apply_watermark_CLFLAGS= -I./src --max_memory_ports apply_watermark
 apply_watermark_NDEVICES=xilinx:adm-pcie-7v3:1ddr
 
 XOS=apply_watermark
