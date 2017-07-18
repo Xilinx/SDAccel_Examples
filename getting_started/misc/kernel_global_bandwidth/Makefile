@@ -15,6 +15,7 @@ EXES=kernel_global
 
 krnl_kernel_global_SRCS=./src/kernel.cl
 krnl_kernel_global_CLFLAGS=--max_memory_ports bandwidth
+krnl_kernel_global_NDEVICES=xilinx:xil-accel-rd-vu9p:4ddr-xp
 
 SPACE :=
 SPACE +=
@@ -47,12 +48,14 @@ $(foreach device,$(DEVICES),$(eval $(call ddr_check,$(device))))
 XOS=krnl_kernel_global
 
 krnl_kernel_global_XOS=krnl_kernel_global
+krnl_kernel_global_NDEVICES=xilinx:xil-accel-rd-vu9p:4ddr-xpr
 
 XCLBINS=krnl_kernel_global
 
 # check
 check_EXE=kernel_global
 check_XCLBINS=krnl_kernel_global
+check_NDEVICES=xilinx:xil-accel-rd-vu9p:4ddr-xpr
 
 CHECKS=check
 
