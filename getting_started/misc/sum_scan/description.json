@@ -7,7 +7,7 @@
     "os": [
         "Linux"
     ],
-    "nboard" : ["xilinx:xil-accel-rd-ku115:4ddr-xpr"],
+    "nboard" : ["xilinx:xil-accel-rd-ku115:4ddr-xpr","xilinx:xil-accel-rd-vu9p:4ddr-xpr"],
     "em_cmd" : "./sum_scan",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./sum_scan",
     "libs": [
