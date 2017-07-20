@@ -19,23 +19,25 @@ XOS=nearest_GOOD nearest_BAD
 
 # nearest kernels
 nearest_GOOD_SRCS=./src/nearest_good.cl
-nearest_GOOD_CLFLAGS=-k nearest
+nearest_GOOD_CLFLAGS=-k nearest_good -I./src
+nearest_GOOD_NDEVICES=xilinx:xil-accel-rd-vu9p:4ddr
 
 nearest_BAD_SRCS=./src/nearest_bad.cl
-nearest_BAD_CLFLAGS=-k nearest
-
-nearest_CLFLAGS=-k nearest
+nearest_BAD_CLFLAGS=-k nearest_bad -I./src
+nearest_BAD_NDEVICES=xilinx:xil-accel-rd-vu9p:4ddr
 
 # nearest xclbin
-nearest_GOOD_XOS=nearest_GOOD
+nearest_XOS=nearest_GOOD nearest_BAD
 
-nearest_BAD_XOS=nearest_BAD
+nearest_GOOD_NDEVICES=xilinx:xil-accel-rd-vu9p:4ddr
+nearest_BAD_NDEVICES=xilinx:xil-accel-rd-vu9p:4ddr
 
-XCLBINS=nearest_GOOD nearest_BAD
+XCLBINS=nearest
 
 # check
 check_EXE=host
-check_XCLBINS=nearest_GOOD nearest_BAD
+check_XCLBINS=nearest
+check_NDEVICES=xilinx:xil-accel-rd-vu9p:4ddr
 
 CHECKS=check
 

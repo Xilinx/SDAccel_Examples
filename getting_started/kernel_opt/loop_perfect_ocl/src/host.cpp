@@ -37,8 +37,12 @@ Description:
 *******************************************************************************/
 //OpenCL utility layer include
 #include "xcl2.hpp"
+
+#include <algorithm>
+#include <string>
 #include <vector>
 #include <limits.h>
+
 
 // Maximum possible distance between two points
 #define INFINITY ULONG_MAX
@@ -55,6 +59,16 @@ Description:
 #define DATA_DIM 16
 #define DATA_SIZE 16384
 
+// Emulation sizes
+#define DATA_DIM_EMU 4
+#define DATA_SIZE_EMU 4096
+
+uint64_t get_duration_ns (const cl::Event &event);
+void print_summary(std::string k1, std::string k2, uint64_t t1, uint64_t t2, int iterations );
+void verify(std::vector<int, aligned_allocator<int>> &source_sw_result,
+            std::vector<int, aligned_allocator<int>> &source_hw_result,
+            std::vector<int, aligned_allocator<int>> &source_point,
+            int dim);
 // Software implementation for finding nearest neighbor
 void nearest_sw(
     int *in,   // Input Points Array - represented as integer
@@ -88,29 +102,33 @@ void nearest_sw(
 
 int main(int argc, char** argv)
 {
-    if (DATA_DIM > MAX_DIM) {
-        std::cout << DATA_DIM << "greater than " << MAX_DIM 
+
+    int data_size = xcl::is_emulation() ? DATA_SIZE_EMU : DATA_SIZE;    
+    int data_dim  = xcl::is_emulation() ? DATA_DIM_EMU : DATA_DIM;
+
+    if (data_dim > MAX_DIM) {
+        std::cout << data_dim << "greater than " << MAX_DIM 
             << "!" << " Please use a smaller DATA_DIM" << std::endl;
         return EXIT_FAILURE;
     }
     
-    if (DATA_SIZE > MAX_SIZE) {
-        std::cout << DATA_SIZE << "greater than " << MAX_SIZE 
+    if (data_size > MAX_SIZE) {
+        std::cout << data_size << "greater than " << MAX_SIZE 
             << "!" << " Please use a smaller DATA_SIZE" << std::endl;
         return EXIT_FAILURE;
     }
     
     //Allocate Memory in Host Memory
-    size_t vector_size_bytes = sizeof(int) * DATA_SIZE * DATA_DIM;
+    size_t vector_size_bytes = sizeof(int) * data_size * data_dim;
     std::vector<int,aligned_allocator<int>> source_in(vector_size_bytes);
-    std::vector<int,aligned_allocator<int>> source_point(sizeof(int)*DATA_DIM);
-    std::vector<int,aligned_allocator<int>> source_hw_result(sizeof(int)*DATA_DIM);
-    std::vector<int,aligned_allocator<int>> source_sw_result(sizeof(int)*DATA_DIM);
+    std::vector<int,aligned_allocator<int>> source_point(sizeof(int)* data_dim);
+    std::vector<int,aligned_allocator<int>> source_hw_result(sizeof(int)* data_dim);
+    std::vector<int,aligned_allocator<int>> source_sw_result(sizeof(int)* data_dim);
     
     srand(time(nullptr));
 
     // Create the test data
-    for(int i = 0 ; i < DATA_SIZE*DATA_DIM; i++){
+    for(int i = 0 ; i < data_size * data_dim; i++){
         source_in[i] = rand()%100;
     }
     
@@ -118,9 +136,13 @@ int main(int argc, char** argv)
         source_point[i] = rand()%100;
     }
     
-    int size = DATA_SIZE;
-    int dim = DATA_DIM;
+    int size = data_size;
+    int dim = data_dim;
     
+    // Compute Software Results
+    nearest_sw(source_in.data(), source_point.data(), 
+            source_sw_result.data(), size, dim);
+
 //OPENCL HOST CODE AREA START
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
@@ -129,11 +151,10 @@ int main(int argc, char** argv)
     cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
     std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
 
-    std::string binaryFile = xcl::find_binary_file(device_name,"nearest_GOOD");
+    std::string binaryFile = xcl::find_binary_file(device_name,"nearest");
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
     cl::Program program(context, devices, bins);
-    cl::Kernel kernel(program,"nearest");
 
     //Allocate Buffer in Global Memory
     cl::Buffer buffer_in   (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
@@ -150,25 +171,68 @@ int main(int argc, char** argv)
     //Copy input data to device global memory
     q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
 
-    auto krnl_nearest= cl::KernelFunctor<cl::Buffer&, cl::Buffer&,
-         cl::Buffer&, int, int>(kernel);
+    // Creating bad kernel Object and setting args
+    int narg = 0;
+    cl::Kernel nearest_bad_kernel(program, "nearest_bad");
+    nearest_bad_kernel.setArg(narg++,buffer_in);
+    nearest_bad_kernel.setArg(narg++,buffer_point);
+    nearest_bad_kernel.setArg(narg++,buffer_out);
+    nearest_bad_kernel.setArg(narg++,size);
+    nearest_bad_kernel.setArg(narg++,dim);
 
-    //Launch the Kernel
-    krnl_nearest(cl::EnqueueArgs(q,cl::NDRange(1,1,1), cl::NDRange(1,1,1)), 
-            buffer_in, buffer_point, buffer_out, size, dim);
-
-    //Copy Result from Device Global Memory to Host Local Memory
-    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
-    q.finish();
-//OPENCL HOST CODE AREA END
+    cl::Event event;
+    int iterations = xcl::is_emulation() ? 2 : 100 ;
+    uint64_t nearest_bad_time = 0;
     
-    // Compute Software Results
-    nearest_sw(source_in.data(), source_point.data(), 
-            source_sw_result.data(), size, dim);
+    // Running bad kernel 
+    for(int i = 0; i < iterations; ++i){
+        q.enqueueTask(nearest_bad_kernel, NULL, &event);
+        q.enqueueMigrateMemObjects(outBufVec, CL_MIGRATE_MEM_OBJECT_HOST);
+        q.finish();
+        nearest_bad_time += get_duration_ns(event);
+        verify(source_sw_result, source_hw_result, source_point, dim);
+
+    }
+    printf("Bad example executed #%d iterations ... \n", iterations);
+    
+    // Creating good kernel Object and setting args
+    narg = 0;
+    cl::Kernel nearest_good_kernel(program, "nearest_good");
+    nearest_good_kernel.setArg(narg++,buffer_in);
+    nearest_good_kernel.setArg(narg++,buffer_point);
+    nearest_good_kernel.setArg(narg++,buffer_out);
+    nearest_good_kernel.setArg(narg++,size);
+    nearest_good_kernel.setArg(narg++,dim);
+
+    uint64_t nearest_good_time = 0;
+    
+    // Running bad kernel 
+    for(int i = 0; i < iterations; ++i){
+        q.enqueueTask(nearest_good_kernel, NULL, &event);
+        q.enqueueMigrateMemObjects(outBufVec, CL_MIGRATE_MEM_OBJECT_HOST);
+        q.finish();
+        nearest_good_time += get_duration_ns(event);
+        verify(source_sw_result, source_hw_result, source_point, dim);
+
+    }
+    printf("Good example executed #%d iterations ... \n", iterations);
+    
+//OPENCL HOST CODE AREA END
+    print_summary("nearest_bad", "nearest_good", nearest_bad_time, 
+                                        nearest_good_time, iterations);
+    
+    std::cout << "TEST PASSED." << std::endl;
+    return EXIT_SUCCESS;
+}
+
+void verify(std::vector<int, aligned_allocator<int>> &source_sw_result,
+            std::vector<int, aligned_allocator<int>> &source_hw_result,
+            std::vector<int, aligned_allocator<int>> &source_point,
+            int dim){
     
     // Compare the nearset distances between software and hardware
     unsigned long dist_sw = 0, dist_hw = 0;
-    for(int i = 0; i < dim; i++) {
+    for(int i = 0; i < dim; ++i) {
         dist_sw += SQUARE(source_sw_result[i] - source_point[i]);
         dist_hw += SQUARE(source_hw_result[i] - source_point[i]);
     }
@@ -177,9 +241,34 @@ int main(int argc, char** argv)
         std::cout << "TEST FAILED." << std::endl; 
         std::cout << "\tSoftware Min Dist = " << dist_sw << std::endl;
         std::cout << "\tHardware Min Dist = " << dist_hw << std::endl;
-        return EXIT_FAILURE;
-    }
- 
-    std::cout << "TEST PASSED." << std::endl;
-    return EXIT_SUCCESS;
+        exit(EXIT_FAILURE);
+    } // end
 }
+uint64_t get_duration_ns (const cl::Event &event) {
+    uint64_t nstimestart, nstimeend;
+    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart);
+    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend);
+    return(nstimeend-nstimestart);
+}
+void print_summary(std::string k1, std::string k2, uint64_t t1, uint64_t t2,
+                   int iterations ) {
+ 
+    int percentage_improvement = ((t1-t2)*100) / t1;
+    printf("|-------------------------+-------------------------|\n"
+           "| Kernel(%3d iterations)  |    Wall-Clock Time (ns) |\n"
+           "|-------------------------+-------------------------|\n",iterations);
+    printf("| %-23s | %23lu |\n", k1.c_str(), t1);
+    printf("| %-23s | %23lu |\n", k2.c_str(), t2);
+    printf("|-------------------------+-------------------------|\n");
+    printf("| Percentage improvement: | %23d |\n",percentage_improvement);
+    printf("|-------------------------+-------------------------|\n");
+    printf("Note: Wall Clock Time is meaningful for real hardware execution only, not for emulation.\n");
+    printf("Please refer to profile summary for kernel execution time for hardware emulation.\n");
+
+    //Performance check for real hardware. t2 must be less than t1.
+    if (!xcl::is_emulation() && (t1 < t2)){
+        printf("ERROR: Unexpected Performance is observed\n");
+        exit(EXIT_FAILURE);
+    }
+}
+

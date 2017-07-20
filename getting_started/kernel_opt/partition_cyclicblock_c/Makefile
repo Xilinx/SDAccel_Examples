@@ -17,13 +17,17 @@ EXES=array_partition
 # Kernel
 matmul_naive_SRCS=./src/matmul.cpp
 matmul_naive_CLFLAGS= -k matmul_naive
+matmul_naive_NDEVICES=xilinx:adm-pcie-7v3:1ddr
+
 matmul_partition_SRCS=./src/matmul_partition.cpp
 matmul_partition_CLFLAGS=-k matmul_partition
+matmul_partition_NDEVICES=xilinx:adm-pcie-7v3:1ddr
 
 XOS=matmul_naive matmul_partition
 
 # xclbin
 matmul_XOS=matmul_naive matmul_partition
+matmul_NDEVICES=xilinx:adm-pcie-7v3:1ddr
 
 XCLBINS=matmul
 
@@ -32,6 +36,7 @@ EXTRA_CLEAN=./output.png
 # check
 check_EXE=array_partition
 check_XCLBINS=matmul
+check_NDEVICES=xilinx:adm-pcie-7v3:1ddr
 
 CHECKS=check
 

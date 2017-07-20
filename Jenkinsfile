@@ -1,9 +1,6 @@
 #!/usr/bin/env groovy
 
 properties([
-buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '30', numToKeepStr: '5')), 
-[$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://gitenterprise.xilinx.com/SDx-Hub/apps/'], 
-pipelineTriggers([[$class: 'GitHubPushTrigger']]),
 disableConcurrentBuilds()
 ])
 
@@ -14,9 +11,13 @@ devices = []
 devices += ['xilinx:adm-pcie-7v3:1ddr']
 devices += ['xilinx:xil-accel-rd-ku115:4ddr-xpr']
 devices += ['xilinx:adm-pcie-ku3:2ddr-xpr']
-devices += ['xilinx:xil-accel-rd-vu9p:4ddr-xpr']
+devices += ['\$XILINX_SDX/../../../../internal_platforms/xilinx_xil-accel-rd-vu9p_4ddr-xpr_4_1/xilinx_xil-accel-rd-vu9p_4ddr-xpr_4_1.xpfm']
 
 version = '2017.1'
+
+precheck_status = 'FAILURE'
+sw_status = 'FAILURE'
+hw_status = 'FAILURE'
 
 def setupExample(dir, workdir) {
 	return { ->
@@ -27,9 +28,9 @@ cd ${workdir}
 . /tools/local/bin/modinit.sh > /dev/null 2>&1
 module use.own /proj/picasso/modulefiles
 
-module add vivado/${version}_daily
-module add vivado_hls/${version}_daily
-module add sdaccel/${version}_daily
+module add vivado/${version}_rel
+module add vivado_hls/${version}_rel
+module add sdaccel/${version}_rel
 module add opencv/sdaccel
 
 cd ${dir}
@@ -54,12 +55,15 @@ def buildExample(target, dir, device, workdir) {
 			cores = 1
 			mem = 4000
 			queue = "medium"
+			mins = 5
 		} else {
 			cores = 8
 			mem = 32000
 			queue = "long"
+			mins = 4*60
 		}
 
+	retry(3) {
 		sh """#!/bin/bash -e
 
 cd ${workdir}
@@ -67,10 +71,11 @@ cd ${workdir}
 . /tools/local/bin/modinit.sh > /dev/null 2>&1
 module use.own /proj/picasso/modulefiles
 
-module add vivado/${version}_daily
-module add vivado_hls/${version}_daily
-module add sdaccel/${version}_daily
+module add vivado/${version}_rel
+module add vivado_hls/${version}_rel
+module add sdaccel/${version}_rel
 module add opencv/vivado_hls
+
 module add lsf
 
 cd ${dir}
@@ -88,17 +93,20 @@ make -q TARGETS=${target} DEVICES=\"${device}\" all
 rc=\$?
 set -e
 
+export TMPDIR=\$(mktemp -d -p \$(pwd))
+
 # if rebuild required then use LSF
 if [[ \$rc != 0 ]]; then
-bsub -I -q ${queue} -R "osdistro=rhel && osver==ws6" -n ${cores} -R "rusage[mem=${mem}] span[ptile=${cores}]" -J "\$(basename ${dir})-${target}" <<EOF
+bsub -W ${mins} -I -q ${queue} -R "osdistro=rhel && osver==ws6" -n ${cores} -R "rusage[mem=${mem}] span[ptile=${cores}]" -J "\$(basename ${dir})-${target}" <<EOF
 #!/bin/bash -ex
-export TEMPDIR=\$(mktemp -d -p ${dir})
-make TARGETS=${target} DEVICES=\"${device}\" all
-rm -rf \$TEMPDIR
+export TMPDIR=\$TMPDIR
+make -j TARGETS=${target} DEVICES=\"${device}\" all
+rm -rf \$TMPDIR
 EOF
 fi
 set +x
 """
+		}
 	}
 }
 
@@ -109,32 +117,36 @@ def dirsafe(device) {
 def runExample(target, dir, device, workdir) {
 	return { ->
 		if ( target == "sw_emu" ) {
-			mins = 5
+			cores = 4
+			mem = 32000
+			queue = "medium"
+			mins = 15
 		} else {
-			mins = 150
+			cores = 1
+			mem = 4000
+			queue = "long"
+			mins = 8*60
 		}
 
 		devdir = dirsafe(device)
+
 		retry(3) {
-			lock("${dir}") {
-				/* Node is here to prevent too much strain on Nimbix by rate limiting
-				 * to the number of job slots */
-				node("rhel6 && xsjrdevl && !xsjrdevl110") {
-					timeout(mins) {
-						sh """#!/bin/bash -e
+		//	lock("${dir}") {
+				sh """#!/bin/bash -e
 
 cd ${workdir}
 
 . /tools/local/bin/modinit.sh > /dev/null 2>&1
 module use.own /proj/picasso/modulefiles
 
-module add vivado/${version}_daily
-module add vivado_hls/${version}_daily
-module add sdaccel/${version}_daily
+module add vivado/${version}_rel
+module add vivado_hls/${version}_rel
+module add sdaccel/${version}_rel
 module add opencv/sdaccel
 
 module add proxy
 module add lftp
+module add lsf
 
 cd ${dir}
 
@@ -146,16 +158,34 @@ echo
 
 export PYTHONUNBUFFERED=true
 
+export TMPDIR=\$(mktemp -d -p \$(pwd))
+
 rm -rf \"out/${target}_${devdir}\" && mkdir -p out
 
-make TARGETS=${target} DEVICES=\"${device}\" NIMBIXFLAGS=\"--out out/${target}_${devdir} --queue_timeout=480\" check
+bsub -W ${mins} -I -q ${queue} -R "osdistro=rhel && osver==ws6" -n ${cores} -R "rusage[mem=${mem}] span[ptile=${cores}]" -J "\$(basename ${dir})-${target}-run" <<EOF
+#!/bin/bash -ex
+export TMPDIR=\$TMPDIR
+make TARGETS=${target} DEVICES=\"${device}\" NIMBIXFLAGS=\"--out out/${target}_${devdir} --queue_timeout=${mins}\" check
+rm -rf \$TMPDIR
+EOF
 
 """
-					}
-				}
-			}
+//			}
 		}
 	}
+}
+
+def buildStatus(context, message, state) {
+		step([$class: 'GitHubCommitStatusSetter',
+		     contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: context],
+		     statusResultSource: [$class: 'ConditionalStatusResultSource',
+		                          results: [[$class: 'AnyBuildResult', message: message,
+		                                   state: state 
+		                          ]]
+		     ]
+		])
+
+		return state
 }
 
 timestamps {
@@ -167,6 +197,10 @@ try {
 		checkout scm
 	}
 
+	precheck_status = buildStatus('ci-precheck', 'pre-build checks pending', 'PENDING')
+	sw_emu_status = buildStatus('ci-sw_emu', 'sw_emu checks pending', 'PENDING')
+	hw_status = buildStatus('ci-hw', 'hw checks pending', 'PENDING')
+	
 	stage("clean") {
 		try {
 			lastclean = readFile('lastclean.dat')
@@ -193,9 +227,9 @@ try {
 . /tools/local/bin/modinit.sh > /dev/null 2>&1
 module use.own /proj/picasso/modulefiles
 
-module add vivado/${version}_daily
-module add vivado_hls/${version}_daily
-module add sdaccel/${version}_daily
+module add vivado/${version}_rel
+module add vivado_hls/${version}_rel
+module add sdaccel/${version}_rel
 module add opencv/sdaccel
 
 module add proxy
@@ -205,12 +239,14 @@ module add proxy
 """
 	}
 
+	precheck_status = buildStatus('ci-precheck', 'pre-build checks passed', 'SUCCESS')
+
 	workdir = pwd()
 
 	def examples = []
 
 	stage('configure') {
-		sh 'git ls-files | grep description.json | sed -e \'s/\\.\\///\' -e \'s/\\/description.json//\' > examples.dat'
+		sh 'utility/build_what.sh'
 		examplesFile = readFile 'examples.dat'
 		examples = examplesFile.split('\\n')
 
@@ -224,55 +260,89 @@ module add proxy
 		parallel exSteps
 	}
 
-	def swEmuSteps = [:]
-	def swEmuRunSteps = [:]
+	def swBatches = devices.size() * 2
+	def swEmuSteps = []
+	def swEmuRunSteps = []
+
+	for(int i = 0; i < swBatches; i++) {
+		swEmuSteps[i] = [:]
+		swEmuRunSteps[i] = [:]
+	}
+
+	for(int i = 0; i < examples.size(); i++) {
+		for(int j = 0; j < devices.size(); j++) {
+			batch = (j * examples.size() + i) % swBatches
+			name = "${examples[i]}-${devices[j]}-sw_emu"
+			swEmuSteps[batch]["${name}-build"]  = buildExample('sw_emu', examples[i], devices[j], workdir)
+			swEmuRunSteps[batch]["${name}-run"] = runExample(  'sw_emu', examples[i], devices[j], workdir)
+		}
+	}
 
 	stage('sw_emu build') {
-		for(int i = 0; i < examples.size(); i++) {
-			for(int j = 0; j < devices.size(); j++) {
-				name = "${examples[i]}-${devices[j]}-sw_emu"
-				swEmuSteps["${name}-build"]  = buildExample('sw_emu', examples[i], devices[j], workdir)
-				swEmuRunSteps["${name}-run"] = runExample(  'sw_emu', examples[i], devices[j], workdir)
-			}
+		for(int i = 0; i < swBatches; i++) {
+			parallel swEmuSteps[i]
 		}
-
-		parallel swEmuSteps
 	}
 
 	stage('sw_emu run') {
 		lock("only_one_run_stage_at_a_time") {
-			parallel swEmuRunSteps
-		}
-	}
-
-	def hwSteps = [:]
-	def hwRunSteps = [:]
-
-	stage('hw build') {
-		for(int i = 0; i < examples.size(); i++) {
-			for(int j = 0; j < devices.size(); j++) {
-				name = "${examples[i]}-${devices[j]}-hw"
-				hwSteps["${name}-build"]  = buildExample('hw', examples[i], devices[j], workdir)
-				hwRunSteps["${name}-run"] = runExample(  'hw', examples[i], devices[j], workdir)
+			for(int i = 0; i < swBatches; i++) {
+				parallel swEmuRunSteps[i]
 			}
 		}
-
-		parallel hwSteps
 	}
-/*
-	stage('hw run') {
-		lock("only_one_run_stage_at_a_time") {
-			parallel hwRunSteps
+
+	sw_emu_status = buildStatus('ci-sw_emu', 'sw_emu checks passed', 'SUCCESS')
+
+	def hwBatches = devices.size() * 2
+	def hwSteps = []
+	def hwRunSteps = []
+
+	for(int i = 0; i < hwBatches; i++) {
+		hwSteps[i] = [:]
+		hwRunSteps[i] = [:]
+	}
+
+	for(int i = 0; i < examples.size(); i++) {
+		for(int j = 0; j < devices.size(); j++) {
+			batch = (j * examples.size() + i) % hwBatches
+			name = "${examples[i]}-${devices[j]}-hw"
+			hwSteps[batch]["${name}-build"]  = buildExample('hw', examples[i], devices[j], workdir)
+			hwRunSteps[batch]["${name}-run"] = runExample(  'hw', examples[i], devices[j], workdir)
 		}
 	}
-*/
+
+	stage('hw build') {
+		for(int i = 0; i < hwBatches; i++) {
+			parallel hwSteps[i]
+		}
+	}
+
+	stage('hw run') {
+		lock("only_one_run_stage_at_a_time") {
+			for(int i = 0; i < hwBatches; i++) {
+				parallel hwRunSteps[i]
+			}
+		}
+	}
+
+	hw_status = buildStatus('ci-hw', 'hw checks passed', 'SUCCESS')
 
 } catch (e) {
+	if ( precheck_status == 'PENDING' ) {
+		precheck_status = buildStatus('ci-precheck', 'prechecks passed', 'FAILURE')
+	}
+	if ( sw_emu_status == 'PENDING' ) {
+		sw_emu_status = buildStatus('ci-sw_emu', 'sw_emu checks passed', 'FAILURE')
+	}
+	if ( hw_status == 'PENDING' ) {
+		hw_status = buildStatus('ci-hw', 'hw checks passed', 'FAILURE')
+	}
+	
 	currentBuild.result = "FAILED"
 	throw e
 } finally {
 	stage('post-check') {
-		step([$class: 'GitHubCommitStatusSetter'])
 		step([$class: 'Mailer', notifyEveryUnstableBuild: true, recipients: 'spenserg@xilinx.com', sendToIndividuals: false])
 	}
 	stage('cleanup') {

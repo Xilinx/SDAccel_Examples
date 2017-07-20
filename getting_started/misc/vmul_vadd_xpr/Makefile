@@ -16,17 +16,21 @@ EXES=vmulvadd
 
 # vmul Kernel
 krnl_vmul_SRCS=./src/krnl_vmul.cl
+krnl_vmul_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr
 
 # vadd Kernel
 krnl_vadd_SRCS=./src/krnl_vadd.cl
+krnl_vadd_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr
 
 XOS=krnl_vmul krnl_vadd
 
 # vmul Kernel
 krnl_vmul_XOS=krnl_vmul
+krnl_vmul_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr
 
 # vadd Kernel
 krnl_vadd_XOS=krnl_vadd
+krnl_vadd_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr
 
 XCLBINS=krnl_vmul krnl_vadd
 
@@ -34,8 +38,11 @@ XCLBINS=krnl_vmul krnl_vadd
 # check
 check_EXE=vmulvadd
 check_XCLBINS=krnl_vmul krnl_vadd
+check_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr
 
 CHECKS=check
+
+DEVICES=xilinx:adm-pcie-ku3:2ddr-xpr
 
 include $(COMMON_REPO)/utility/rules.mk
 

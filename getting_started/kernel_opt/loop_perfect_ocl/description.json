@@ -4,6 +4,7 @@
     "overview": [
         "This nearest neighbor example is to demonstrate how to achieve better performance using loop perfect."
     ],
+    "nboard": ["xilinx:xil-accel-rd-vu9p:4ddr-xpr"],
     "Key Concepts": [ "Loop perfect"],
     "Keywords": ["xcl_pipeline_loop", "xcl_array_partition"],
     "os": [
@@ -14,12 +15,22 @@
     ],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
-    "accelerators": [
+    "containers": [
         {
-            "name": "nearest", 
-            "location": "src/nearest_bad.cl"
+            "name": "nearest",
+            "accelerators": [
+                {
+                    "name": "nearest_good",
+                    "location": "src/nearest_good.cl"
+                },
+                {
+                    "name": "nearest_bad",
+                    "location": "src/nearest_bad.cl"
+                }
+            ]
         }
     ],
+
     "contributors" : [
         {
             "group": "Xilinx",
