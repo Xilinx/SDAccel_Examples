@@ -6,6 +6,7 @@
     ],
     "key_concepts": [ "Kernel Optimization", "Array Partitioning"],
     "keywords": [ "xcl_array_partition", "complete"],
+    "nboard": ["xilinx:xil-accel-rd-vu9p:4ddr-xpr"],
     "os": [
         "Linux"
     ],

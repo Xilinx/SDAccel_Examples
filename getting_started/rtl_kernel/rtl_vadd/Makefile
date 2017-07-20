@@ -13,7 +13,6 @@ host_LDFLAGS=$(opencl_LDFLAGS)
 EXES=host
 
 vadd_KERNEL := krnl_vadd_rtl
-vadd_CU		:= 1
 
 # RTL Kernel Sources
 vadd_HDLSRCS=src/kernel.xml\
@@ -27,7 +26,6 @@ RTLXOS=vadd
 
 # Kernel
 vadd_XOS=vadd
-vadd_LDCLFLAGS=-k $(vadd_KERNEL) --nk $(vadd_KERNEL):$(vadd_CU)
 vadd_NTARGETS=sw_emu
 
 XCLBINS=vadd

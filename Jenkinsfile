@@ -11,7 +11,7 @@ devices = []
 devices += ['xilinx:adm-pcie-7v3:1ddr']
 devices += ['xilinx:xil-accel-rd-ku115:4ddr-xpr']
 devices += ['xilinx:adm-pcie-ku3:2ddr-xpr']
-devices += ['\$XILINX_SDX/../../../../internal_platforms/xilinx_xil-accel-rd-vu9p_4ddr-xpr_4_1/xilinx_xil-accel-rd-vu9p_4ddr-xpr_4_1.xpfm']
+devices += ['xilinx:xil-accel-rd-vu9p:4ddr-xpr']
 
 version = '2017.1'
 
@@ -60,7 +60,7 @@ def buildExample(target, dir, device, workdir) {
 			cores = 8
 			mem = 32000
 			queue = "long"
-			mins = 4*60
+			mins = 12*60
 		}
 
 	retry(3) {
@@ -314,29 +314,45 @@ module add proxy
 
 	stage('hw build') {
 		for(int i = 0; i < hwBatches; i++) {
-			parallel hwSteps[i]
+			try {
+				parallel hwSteps[i]
+			} catch(e) {
+				hw_status = buildStatus('ci-hw', 'hw checks failed', 'FAILURE')
+			}
 		}
+	}
+
+	if(hw_status == "FAILURE") {
+		throw RuntimeException("Failed to Build all Hardware Binaries");
 	}
 
 	stage('hw run') {
 		lock("only_one_run_stage_at_a_time") {
 			for(int i = 0; i < hwBatches; i++) {
-				parallel hwRunSteps[i]
+				try {
+					parallel hwRunSteps[i]
+				} catch(e) {
+					hw_status = buildStatus('ci-hw', 'hw checks failed', 'FAILURE')
+				}
 			}
 		}
+	}
+
+	if(hw_status == "FAILURE") {
+		throw RuntimeException("Failed to all examples in hw");
 	}
 
 	hw_status = buildStatus('ci-hw', 'hw checks passed', 'SUCCESS')
 
 } catch (e) {
 	if ( precheck_status == 'PENDING' ) {
-		precheck_status = buildStatus('ci-precheck', 'prechecks passed', 'FAILURE')
+		precheck_status = buildStatus('ci-precheck', 'prechecks failed', 'FAILURE')
 	}
 	if ( sw_emu_status == 'PENDING' ) {
-		sw_emu_status = buildStatus('ci-sw_emu', 'sw_emu checks passed', 'FAILURE')
+		sw_emu_status = buildStatus('ci-sw_emu', 'sw_emu checks failed', 'FAILURE')
 	}
 	if ( hw_status == 'PENDING' ) {
-		hw_status = buildStatus('ci-hw', 'hw checks passed', 'FAILURE')
+		hw_status = buildStatus('ci-hw', 'hw checks failed', 'FAILURE')
 	}
 	
 	currentBuild.result = "FAILED"

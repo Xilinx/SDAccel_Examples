@@ -35,168 +35,92 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cstring>
 #include <iostream>
 #include <CL/cl.h>
+#include <vector>
 #include "bitmap.h"
-#include "oclHelper.h"
+#include "xcl2.hpp"
 
-#define X_SIZE  512
+#define X_SIZE 512
 #define Y_SIZE 512
 
-void checkErrorStatus(cl_int error, const char* message)
-{
-  if (error != CL_SUCCESS)
-  {
-    printf("%s\n", message) ;
-    printf("%s\n", oclErrorCode(error)) ;
-    exit(1) ;
-  }
-}
 
 int main(int argc, char** argv)
 {
 
-if (argc != 3)
-  {
-    printf("Usage: %s <image> <xclbin>\n", argv[0]) ;
-    return -1 ;
-}
+	if (argc != 2)
+	{
+		printf("Usage: %s <image> \n", argv[0]) ;
+		return -1 ;
+	}
    
-   FILE *input_file;
-   unsigned short    input_image[Y_SIZE][X_SIZE];
+	FILE *input_file;
+	FILE *output_file;
 
-   FILE             *output_file;
+	size_t vector_size_bytes = sizeof(unsigned short) * Y_SIZE*X_SIZE;
+	std::vector<unsigned short,aligned_allocator<unsigned short>>
+	input_image(Y_SIZE*X_SIZE);
 
-   unsigned short    output_image[Y_SIZE][X_SIZE];
+	std::vector<unsigned short,aligned_allocator<unsigned short>> output_image(Y_SIZE*X_SIZE);
 
- // Read the bit map file into memory and allocate memory for the
-  //  final image
-  std::cout << "Reading input image...\n";
+// Read the bit map file into memory and allocate memory for the final image
+	std::cout << "Reading input image...\n";
+// Load the input image
+	const char *imageFilename = argv[1];
+	input_file = fopen(imageFilename, "rb");
+	if (!input_file)
+	{
+		printf("Error: Unable to open input image file %s!\n",
+		imageFilename);
+		return 1;
+	 }	
+	printf("\n");
+	printf("   Reading RAW Image\n");
+	size_t items_read = fread(input_image.data(), vector_size_bytes,1,input_file);
+	printf("   Bytes read = %d\n\n", (int)(items_read* sizeof input_image));
 
- // Load the input image
-   const char *imageFilename = argv[1];
-   input_file = fopen(imageFilename, "rb");
-   if (!input_file)
-   {
-      printf("Error: Unable to open input image file %s!\n", imageFilename);
-      return 1;
-   }
-   
-   printf("\n");
-   printf("   Reading RAW Image\n");
-   size_t items_read = fread(input_image, sizeof input_image, 1, input_file);
-   printf("   Bytes read = %d\n\n", (int)(items_read * sizeof input_image));
+	std::vector<cl::Device> devices = xcl::get_xil_devices();
+	cl::Device device = devices[0];
+	cl::Context context(device);
+  
+	cl::CommandQueue q(context, device,CL_QUEUE_PROFILING_ENABLE);
 
-  // Set up OpenCL hardware and software constructs
-  std::cout << "Setting up OpenCL hardware and software...\n";
-  cl_int err = 0 ;
-  const char* xclbinFilename = argv[2] ;
+	std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+	std::string binaryFile = xcl::find_binary_file(device_name,"krnl_affine");
+	cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+	devices.resize(1);
+	cl::Program program(context, devices, bins);
+	cl::Kernel krnl(program,"affine_kernel");
 
-  oclHardware hardware = getOclHardware(CL_DEVICE_TYPE_ACCELERATOR) ;
-  oclSoftware software ;
+	std::vector<cl::Memory> inBufVec, outBufVec;
+	cl::Buffer imageToDevice(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, vector_size_bytes, input_image.data());
+	cl::Buffer imageFromDevice(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,vector_size_bytes, output_image.data());
 
-  memset(&software, 0, sizeof(oclSoftware)) ;
-  strcpy(software.mKernelName, "affine_kernel") ;
-  strcpy(software.mFileName, xclbinFilename) ;
-  strcpy(software.mCompileOptions, "-g -Wall") ;
+	inBufVec.push_back(imageToDevice);
+	outBufVec.push_back(imageFromDevice);
 
-  getOclSoftware(software, hardware) ;
+	/* Copy input vectors to memory */
+	q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
 
-  software.mKernel = clCreateKernel(software.mProgram,
-				    software.mKernelName,
-				    &err) ;
-checkErrorStatus(err, "Unable to create kernel!") ;
+// Set the kernel arguments
+	krnl.setArg(0, imageToDevice);
+	krnl.setArg(1, imageFromDevice);
+// Launch the kernel 
+	q.enqueueTask(krnl);
 
-// Initialize OpenCL buffers with pointers to allocated memory
-  cl_mem imageToDevice ;
-  cl_mem imageFromDevice ;
+// Read back the image from the kernel
+	std::cout << "Reading output image and writing to file...\n";
+	output_file = fopen("transformed_image.raw", "wb");
+	if (!output_file)
+	{
+		printf("Error: Unable to open output image file!\n");
+		return 1;
+	}
 
-  imageToDevice = clCreateBuffer(hardware.mContext,
-				 CL_MEM_READ_ONLY, 
-				 sizeof(input_image), 
-				 NULL,
-				 &err) ;
-  checkErrorStatus(err, "Unable to create read buffer") ;
+	q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+	q.finish();
 
-  imageFromDevice = clCreateBuffer(hardware.mContext,
-				   CL_MEM_WRITE_ONLY, 
-				   sizeof(output_image), 
-				   NULL,
-				   &err) ;
-  checkErrorStatus(err, "Unable to create write buffer") ;
+	printf("   Writing RAW Image\n");
+	size_t items_written = fwrite(output_image.data(), vector_size_bytes, 1, output_file);
+	printf("   Bytes written = %d\n\n", (int)(items_written * sizeof output_image));
 
-  // Send the image to the hardware
-  std::cout << "Writing input image to buffer...\n";
-  err = clEnqueueWriteBuffer(hardware.mQueue,
-			     imageToDevice,
-			     CL_TRUE,
-			     0,
-			     sizeof input_image, 
-			     (void *)(&input_image),
-			     0,
-			     NULL,
-			     NULL) ;
-
-  checkErrorStatus(err, "Unable to enqueue write buffer") ;
-
-  // Pass the arguments to the kernel
-  std::cout << "Setting arguments and enqueueing kernel...\n";
-  err = clSetKernelArg(software.mKernel, 0, sizeof(cl_mem), &imageToDevice) ;
-  checkErrorStatus(err, "Unable to set argument 0") ;
-  err = clSetKernelArg(software.mKernel, 1, sizeof(cl_mem), &imageFromDevice) ;
-  checkErrorStatus(err, "Unable to set argument 1") ;
-  //err = clSetKernelArg(software.mKernel, 2, sizeof(int), &width) ;
-  //checkErrorStatus(err, "Unable to set argument 2") ;
- // err = clSetKernelArg(software.mKernel, 3, sizeof(int), &height) ;
- // checkErrorStatus(err, "Unable to set argument 3") ;
-
-  // Define iteration space 
-  size_t globalSize[3] = { 1, 1, 1 } ;
-  size_t localSize[3] = { 1, 1, 1} ;
-  cl_event seq_complete ;
-
-  // Actually start the kernels on the hardware
-  err = clEnqueueNDRangeKernel(hardware.mQueue,
-			       software.mKernel,
-			       1,
-			       NULL,
-			       globalSize,
-			       localSize,
-			       0,
-			       NULL,
-			       &seq_complete) ;
-
-  checkErrorStatus(err, "Unable to enqueue NDRange") ;
-
-  // Wait for kernel to finish
-  clWaitForEvents(1, &seq_complete) ;
-
-  // Read back the image from the kernel
-  std::cout << "Reading output image and writing to file...\n";
-  err = clEnqueueReadBuffer(hardware.mQueue,
-			    imageFromDevice,
-			    CL_TRUE,
-			    0,
-			    sizeof output_image, 
-			    (void *)(&output_image),
-			    0,
-			    NULL,
-			    &seq_complete) ;
-
-  checkErrorStatus(err, "Unable to enqueue read buffer") ;
-
-  clWaitForEvents(1, &seq_complete) ;
-
-  output_file = fopen("transformed_image.raw", "wb");
-  if (!output_file)
-   {
-      printf("Error: Unable to open output image file!\n");
-      return 1;
-   }
-
-   printf("   Writing RAW Image\n");
-   size_t items_written = fwrite(output_image, sizeof output_image, 1, output_file);
-   printf("   Bytes written = %d\n\n", (int)(items_written * sizeof output_image));
-
-  release(software) ;
-  release(hardware) ;
-  return 0 ;
+	return 0 ;
 }

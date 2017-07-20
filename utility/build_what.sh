@@ -47,7 +47,7 @@ echo NUM_CHANGES = $NUM_CHANGES
 # if we know that we only changed something inside a single example then do a rebuild
 # of that example only else rebuild all examples.
 cat /dev/null > examples.dat
-if [[ "$NUM_CHANGES" == "0" ]]; then
+if [[ "$NUM_CHANGES" == "0" && "$UNIQ_REBUILDS" != "" ]]; then
 	for rebuild in $UNIQ_REBUILDS; do
 		echo $rebuild >> examples.dat
 	done

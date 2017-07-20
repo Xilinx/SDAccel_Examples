@@ -17,7 +17,7 @@ EXES=host
 
 # Kernel
 apply_watermark_SRCS=./src/apply_watermark.cpp
-apply_watermark_CLFLAGS=-k apply_watermark -s -I./src --max_memory_ports apply_watermark
+apply_watermark_CLFLAGS=-k apply_watermark -I./src --max_memory_ports apply_watermark
 
 XOS=apply_watermark
 

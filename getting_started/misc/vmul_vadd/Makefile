@@ -16,21 +16,21 @@ EXES=vmulvadd
 
 # vmul Kernel
 krnl_vmul_SRCS=./src/krnl_vmul.cl
-krnl_vmul_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr xilinx:adm-pcie-ku3:2ddr-xpr
+krnl_vmul_NDEVICES=xilinx:xil-accel-rd-vu9p:4ddr-xpr xilinx:xil-accel-rd-ku115:4ddr-xpr xilinx:adm-pcie-ku3:2ddr-xpr
 
 # vadd Kernel
 krnl_vadd_SRCS=./src/krnl_vadd.cl
-krnl_vadd_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr xilinx:adm-pcie-ku3:2ddr-xpr
+krnl_vadd_NDEVICES=xilinx:xil-accel-rd-vu9p:4ddr-xpr xilinx:xil-accel-rd-ku115:4ddr-xpr xilinx:adm-pcie-ku3:2ddr-xpr
 
 XOS=krnl_vmul krnl_vadd
 
 # vmul xclbin
 krnl_vmul_XOS=krnl_vmul
-krnl_vmul_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr xilinx:adm-pcie-ku3:2ddr-xpr
+krnl_vmul_NDEVICES=xilinx:xil-accel-rd-vu9p:4ddr-xpr xilinx:xil-accel-rd-ku115:4ddr-xpr xilinx:adm-pcie-ku3:2ddr-xpr
 
 # vadd xclbin
 krnl_vadd_XOS=krnl_vadd
-krnl_vadd_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr xilinx:adm-pcie-ku3:2ddr-xpr
+krnl_vadd_NDEVICES=xilinx:xil-accel-rd-vu9p:4ddr-xpr xilinx:xil-accel-rd-ku115:4ddr-xpr xilinx:adm-pcie-ku3:2ddr-xpr
 
 XCLBINS=krnl_vmul krnl_vadd
 

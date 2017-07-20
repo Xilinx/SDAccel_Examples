@@ -31,10 +31,6 @@ RTLXOS=vadd0 vadd1
 
 # Kernel
 vadd_XOS=vadd0 vadd1
-vadd_LDCLFLAGS= \
-	   -k krnl_vadd_rtl_0 --nk krnl_vadd_rtl_0:1:krnl_vadd_rtl_0 \
-	   -k krnl_vadd_rtl_1 --nk krnl_vadd_rtl_0:1:krnl_vadd_rtl_1
-
 vadd_NTARGETS=sw_emu
 
 XCLBINS=vadd
