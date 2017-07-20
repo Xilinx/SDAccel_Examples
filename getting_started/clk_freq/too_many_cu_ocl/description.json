@@ -10,17 +10,31 @@
         "Linux"
     ],
     "libs": [
-        "xcl"
+        "xcl2"
     ],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
-    "accelerators": [
+    "containers": [
         {
-            "container": "vadd_GOOD", 
-            "name": "vadd", 
-            "location": "src/vadd.cl"
+            "name": "vadd_GOOD",
+            "accelerators" : [
+                {
+                   "name": "vadd",
+                   "location": "src/vadd.cl"
+                }
+           ]
+        },
+        {
+            "name": "vadd_BAD",
+            "accelerators" : [
+                {
+                   "name": "vadd",
+                   "location": "src/vadd_bad.cl"
+                }
+           ]
         }
     ],
+
     "contributors" : [
         {
             "group": "Xilinx",

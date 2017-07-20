@@ -2,13 +2,13 @@ COMMON_REPO := ../../../
 
 # wide Memory Access Application
 include $(COMMON_REPO)/utility/boards.mk
-include $(COMMON_REPO)/libs/xcl/xcl.mk
+include $(COMMON_REPO)/libs/xcl2/xcl2.mk
 include $(COMMON_REPO)/libs/opencl/opencl.mk
 
 # vadd Host Application
-host_SRCS=./src/host.cpp $(xcl_SRCS)
-host_HDRS=$(xcl_HDRS)
-host_CXXFLAGS=-I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS)
+host_SRCS=./src/host.cpp $(xcl2_SRCS)
+host_HDRS=$(xcl2_HDRS)
+host_CXXFLAGS=-I./src/ $(xcl2_CXXFLAGS) $(opencl_CXXFLAGS)
 host_LDFLAGS=$(opencl_LDFLAGS)
 
 EXES=host
@@ -35,7 +35,7 @@ XCLBINS=vadd_GOOD vadd_BAD
 
 # check
 check_EXE=host
-check_XCLBINS=vadd_GOOD
+check_XCLBINS=vadd_GOOD vadd_BAD
 
 DEVICES=xilinx:adm-pcie-ku3:2ddr-xpr
 CHECKS=check
