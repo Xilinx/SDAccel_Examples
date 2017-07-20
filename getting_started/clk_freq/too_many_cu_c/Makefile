@@ -33,7 +33,7 @@ XCLBINS=vadd_GOOD vadd_BAD
 
 # check
 check_EXE=host
-check_XCLBINS=vadd_GOOD vadd_BAD
+check_XCLBINS=vadd_GOOD
 
 CHECKS=check
 
