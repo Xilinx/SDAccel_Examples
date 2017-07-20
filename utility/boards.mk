@@ -33,11 +33,11 @@ EMCONFIGUTIL := $(XILINX_SDACCEL)/bin/emconfigutil
 ARCH:=X86
 
 ifeq ($(ARCH),POWER)
-DEVICES:= xilinx:adm-pcie-7v3:1ddr-ppc64le:2.1
+DEVICES:= xilinx:adm-pcie-7v3:1ddr-ppc64le
 CXX:=$(XILINX_SDACCEL)/gnu/ppc64le/4.9.3/lnx64/bin/powerpc64le-linux-gnu-g++
 else
-DEVICES:= xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3
-CXX:=$(XILINX_SDACCEL)/Vivado_HLS/lnx64/tools/gcc/bin/g++
+DEVICES:= xilinx:xil-accel-rd-ku115:4ddr-xpr
+CXX:=$(XILINX_SDACCEL)/bin/xcpp
 endif
 
 #if COMMON_REPO is not defined use the default value support existing Designs

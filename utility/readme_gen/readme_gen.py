@@ -4,8 +4,8 @@ import json
 import os
 import subprocess
 
-DSA = 'xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3'
-VERSION = 'SDAccel 2016.4'
+DSA = 'xilinx:xil-accel-rd-ku115:4ddr-xpr'
+VERSION = 'SDAccel 2017.1'
 DEVICES = {
     'xilinx:adm-pcie-7v3:1ddr': {
        'version': '3.0',
@@ -13,14 +13,19 @@ DEVICES = {
        'nae':  'nx2'
     },
     'xilinx:adm-pcie-ku3:2ddr-xpr': {
-       'version': '3.3',
+       'version': '4.1',
        'name': 'Alpha Data ADM-PCIE-KU3',
        'nae': 'nx1',
     },
     'xilinx:xil-accel-rd-ku115:4ddr-xpr': {
-       'version': '3.3',
+       'version': '4.1',
        'name': 'Xilinx KU115',
        'nae': 'nx3',
+    },
+    'xilinx:xil-accel-rd-vu9p:4ddr-xpr': {
+       'version': '4.1',
+       'name': 'Xilinx VU9P',
+       'nae': 'nx4',
     }
 }
 
@@ -96,11 +101,11 @@ def requirements(target,data):
     target.write("Board | Device Name | Software Version\n")
     target.write("------|-------------|-----------------\n")
 
-    nboards = []
-    if 'nboards' in data:
-        nboards = data['nboards']
+    nboard = []
+    if 'nboard' in data:
+        nboard = data['nboard']
 
-    boards = [word for word in DEVICES if word not in nboards]
+    boards = [word for word in DEVICES if word not in nboard]
 
     for board in boards:
         target.write(DEVICES[board]['name'])

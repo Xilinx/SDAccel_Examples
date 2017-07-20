@@ -4,8 +4,21 @@
     "overview" : [
         "Host to global memory bandwidth test"
     ],
+    "os": [
+        "Linux"
+    ],
     "em_cmd" : "./host_global",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./host_global",
+    "libs": [
+        "xcl"
+    ], 
+    "accelerators": [
+        {
+            "container": "krnl_host_global", 
+            "name": "bandwidth", 
+            "location": "src/kernel.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

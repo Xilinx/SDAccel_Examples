@@ -12,7 +12,7 @@
             "metric": "333"
         }
     ],
-    "nboards": ["xilinx:xil-accel-rd-ku115:4ddr-xpr"],
+    "nboard": ["xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "xcl": false,
     "opencv": true,
     "cmd_args": "PROJECT/data/race_2k.bmp",

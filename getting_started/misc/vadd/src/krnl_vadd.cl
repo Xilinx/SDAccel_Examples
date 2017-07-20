@@ -26,6 +26,9 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
+
+#define N 128
+
 __kernel void __attribute__ ((reqd_work_group_size(1, 1, 1)))
 krnl_vadd(
      __global int* a,
@@ -33,9 +36,22 @@ krnl_vadd(
      __global int* c,
      const int length) {
 
-  for(int i = 0; i < length; i++){
-    c[i] = a[i] + b[i];
-  }
+  // optimized kernel code
+  int result[N];
+  int iterations = length/N;
+  for(int i=0; i < iterations; i++)
+    {
+      int j;
+      read_a:
+          __attribute__((xcl_pipeline_loop))
+          for(j=0; j < N; j++)
+            result[j] = a[i*N+j];
 
+      read_b_write_c:	// simultaneously both read and write are supported
+            __attribute__((xcl_pipeline_loop))
+            for(j=0; j < N; j++)
+              c[i*N+j] = result[j] + b[i*N+j];
+    }
+     
   return;
 }

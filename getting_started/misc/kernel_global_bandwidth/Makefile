@@ -5,8 +5,8 @@ include $(COMMON_REPO)/utility/boards.mk
 include $(COMMON_REPO)/libs/xcl/xcl.mk
 include $(COMMON_REPO)/libs/opencl/opencl.mk
 
-# hello Host Application
-kernel_global_SRCS=./src/kernel_global_bandwidth.c $(xcl_SRCS)
+# kernel_global Host Application
+kernel_global_SRCS=./src/kernel_global_bandwidth.cpp $(xcl_SRCS)
 kernel_global_HDRS=$(xcl_HDRS)
 kernel_global_CXXFLAGS=$(xcl_CXXFLAGS) $(opencl_CXXFLAGS)
 kernel_global_LDFLAGS=$(opencl_LDFLAGS)
@@ -15,6 +15,7 @@ EXES=kernel_global
 
 krnl_kernel_global_SRCS=./src/kernel.cl
 krnl_kernel_global_CLFLAGS=--max_memory_ports bandwidth
+krnl_kernel_global_NDEVICES=xilinx:xil-accel-rd-vu9p:4ddr-xp
 
 SPACE :=
 SPACE +=
@@ -47,12 +48,14 @@ $(foreach device,$(DEVICES),$(eval $(call ddr_check,$(device))))
 XOS=krnl_kernel_global
 
 krnl_kernel_global_XOS=krnl_kernel_global
+krnl_kernel_global_NDEVICES=xilinx:xil-accel-rd-vu9p:4ddr-xpr
 
 XCLBINS=krnl_kernel_global
 
 # check
 check_EXE=kernel_global
 check_XCLBINS=krnl_kernel_global
+check_NDEVICES=xilinx:xil-accel-rd-vu9p:4ddr-xpr
 
 CHECKS=check
 

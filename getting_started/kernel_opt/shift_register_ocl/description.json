@@ -1,13 +1,32 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Shift Register",
+    "example": "Shift Register (CL)",
     "overview": [
         "This example demonstrates how to shift values in registers in each clock cycle"
     ],
     "key_concepts": [ "Kernel Optimization", "Shift Register", "FIR"],
     "keywords": [ "xcl_array_partition" ],
+    "nboard": ["xilinx:xil-accel-rd-vu9p:4ddr-xpr"],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl2"
+    ],
     "em_cmd": "./shift_register",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./shift_register",
+    "accelerators": [
+        {
+            "container": "fir", 
+            "name": "fir_naive", 
+            "location": "src/fir.cl"
+        },
+        {
+            "container": "fir", 
+            "name": "fir_shift_register", 
+            "location": "src/fir.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

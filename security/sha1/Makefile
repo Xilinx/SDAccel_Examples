@@ -18,14 +18,14 @@ EXES=sha1
 krnl_sha1_SRCS=./src/krnl_clSha1.cl
 krnl_sha1_HDRS=./src/clSha1.h
 krnl_sha1_CLFLAGS=-I./src/
-krnl_sha1_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3 xilinx:adm-pcie-ku3:2ddr-xpr:3.3
+krnl_sha1_NDEVICES=xilinx:xil-accel-rd-vu9p xilinx:xil-accel-rd-ku115:4ddr-xpr xilinx:adm-pcie-ku3:2ddr-xpr xilinx:adm-pcie-7v3:1ddr
 
 XOS=krnl_sha1
 
 # SHA1 xclbin
 krnl_sha1_XOS=krnl_sha1
 krnl_sha1_LDCLFLAGS=--nk dev_sha1_update:2
-krnl_sha1_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr:3.3 xilinx:adm-pcie-ku3:2ddr-xpr:3.3
+krnl_sha1_NDEVICES=xilinx:xil-accel-rd-vu9p:4ddr-xpr xilinx:xil-accel-rd-ku115:4ddr-xpr xilinx:adm-pcie-ku3:2ddr-xpr xilinx:adm-pcie-7v3:1ddr
 
 XCLBINS=krnl_sha1
 
@@ -39,11 +39,11 @@ define mk_args
 check_$(1)_$(call sanitize_dsa,$(2))_ARGS = -t 20 -p Xilinx -d $(2) -k ./xclbin/krnl_sha1.$(1).$(call sanitize_dsa,$(2)).xclbin
 endef
 
+DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
+
 $(foreach target,$(TARGETS),$(foreach device,$(DEVICES),$(eval $(call mk_args,$(target),$(device)))))
 
 CHECKS=check
-
-DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
 
 include $(COMMON_REPO)/utility/rules.mk
 

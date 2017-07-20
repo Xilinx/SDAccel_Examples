@@ -2,13 +2,13 @@
 
 COMMON_REPO:=../../../
 include $(COMMON_REPO)/utility/boards.mk
-include $(COMMON_REPO)/libs/xcl/xcl.mk
+include $(COMMON_REPO)/libs/xcl2/xcl2.mk
 include $(COMMON_REPO)/libs/opencl/opencl.mk
 
 # vadd Host Application
-vadd_SRCS=./src/vadd.cpp $(xcl_SRCS)
-vadd_HDRS=$(xcl_HDRS)
-vadd_CXXFLAGS=-I./src/ $(xcl_CXXFLAGS) $(opencl_CXXFLAGS)
+vadd_SRCS=./src/host.cpp $(xcl2_SRCS)
+vadd_HDRS=$(xcl2_HDRS)
+vadd_CXXFLAGS=-I./src/ $(xcl2_CXXFLAGS) $(opencl_CXXFLAGS)
 vadd_LDFLAGS=$(opencl_LDFLAGS)
 
 EXES=vadd

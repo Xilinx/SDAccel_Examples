@@ -1,13 +1,41 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Clock Frequency ~ Large Loop Count (Multiple Compute Units) ",
+    "example": "Clock Frequency ~ Large Loop Count (CL) ",
     "overview": [
         "This is a CNN (Convolutional Neural Network) based example which mainly focuses on Convolution operation of a CNN network. The goal of this example is to demonstrate a method to overcome kernel design timing failure issue. It also presents the effectiveness of using multiple compute units to improve performance."
     ],
     "key_concepts": [ "Clock Frequency" , "Multiple Compute Units", "Convolutional Neural Networks"],
     "keywords": [ "xcl_array_partition", "xcl_pipeline_loop", "always_inline" ],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl"
+    ],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
+    "containers" : [
+        {
+            "name": "cnn_GOOD", 
+            "accelerators": [
+                {
+                    "name": "cnn", 
+                    "num_compute_units" : "4",
+                    "location": "src/cnn_convolution.cl"
+                }
+            ]
+        },
+        {
+            "name": "cnn_BAD", 
+            "accelerators": [
+                {
+                    "name": "cnn", 
+                    "location": "src/cnn_convolution_bad.cl"
+                }
+            ]
+        }
+    ],
+
     "contributors" : [
         {
             "group": "Xilinx",

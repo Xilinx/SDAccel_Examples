@@ -1,13 +1,26 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Two Parallel Read/Write on Local Memory",
+    "example": "Two Parallel Read/Write on Local Memory (C)",
     "overview": [
         "This is simple example of vector addition to demonstrate how to utilized both ports of Local Memory memory."
     ], 
     "key_concepts": [ "Kernel Optimization", "2port BRAM Utilization", "two read/write Local Memory"],
     "keywords": ["#pragma HLS UNROLL FACTOR=2"],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl2"
+    ],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
+    "accelerators": [
+        {
+            "container": "vadd", 
+            "name": "vadd", 
+            "location": "src/vadd.cpp"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

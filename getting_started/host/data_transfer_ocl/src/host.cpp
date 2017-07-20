@@ -36,6 +36,25 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <vector>
 
+
+//Allocator template to align buffer to Page boundary for better data transfer
+template <typename T>
+struct aligned_allocator
+{
+  using value_type = T;
+  T* allocate(std::size_t num)
+  {
+    void* ptr = nullptr;
+    if (posix_memalign(&ptr,4096,num*sizeof(T)))
+      throw std::bad_alloc();
+    return reinterpret_cast<T*>(ptr);
+  }
+  void deallocate(T* p, std::size_t num)
+  {
+    free(p);
+  }
+};
+
 using std::vector;
 using std::find;
 
@@ -62,8 +81,8 @@ void verify(const xcl_world &world, const cl_mem mem, const int value) {
 // This example illustrates how to transfer data back and forth
 // between host and device
 int main(int argc, char **argv) {
-  vector<int> host_memory(elements, 42);
-  vector<int> host_memory2(elements, 15);
+  vector<int,aligned_allocator<int>> host_memory(elements, 42);
+  vector<int,aligned_allocator<int>> host_memory2(elements, 15);
 
   size_t size_in_bytes = host_memory.size() * sizeof(int);
   cl_int err;

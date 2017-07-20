@@ -3,13 +3,13 @@ COMMON_REPO := ../../..
 
 # Including Common Makefile
 include $(COMMON_REPO)/utility/boards.mk
-include $(COMMON_REPO)/libs/xcl/xcl.mk
+include $(COMMON_REPO)/libs/xcl2/xcl2.mk
 include $(COMMON_REPO)/libs/opencl/opencl.mk
 
 # Host Application
-host_SRCS=./src/host.cpp $(xcl_SRCS)
-host_HDRS=$(xcl_HDRS)
-host_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS)
+host_SRCS=./src/host.cpp $(xcl2_SRCS)
+host_HDRS=$(xcl2_HDRS)
+host_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl2_CXXFLAGS)
 host_LDFLAGS=$(opencl_LDFLAGS)
 
 EXES=host
@@ -38,20 +38,8 @@ output_TCL=scripts/gen_output_xo.tcl
 
 RTLXOS=input adder output
 
-# Host Application
-host_SRCS=./src/host.cpp $(xcl_SRCS)
-host_HDRS=$(xcl_HDRS)
-host_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS) 
-host_LDFLAGS=$(opencl_LDFLAGS)
-
-EXES=host
-
 # Kernel
 adder_XOS=input adder output
-adder_LDCLFLAGS= \
-	   -k krnl_input_stage_rtl  --nk krnl_input_stage_rtl:1:krnl_input_stage_rtl_cu0 \
-	   -k krnl_adder_stage_rtl  --nk krnl_adder_stage_rtl:1:krnl_adder_stage_rtl_cu0 \
-	   -k krnl_output_stage_rtl --nk krnl_output_stage_rtl:1:krnl_output_stage_rtl_cu0
 adder_NTARGETS=sw_emu
 
 XCLBINS=adder

@@ -4,8 +4,21 @@
     "overview" : [
         "Simple example of vector dot-product."
     ],
+    "os": [
+        "Linux"
+    ],
     "em_cmd" : "./vdotprod",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./vdotprod",
+    "libs": [
+        "xcl2"
+    ], 
+    "accelerators": [
+        {
+            "container": "krnl_vdotprod", 
+            "name": "krnl_vdotprod", 
+            "location": "src/krnl_vdotprod.cl"
+        }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

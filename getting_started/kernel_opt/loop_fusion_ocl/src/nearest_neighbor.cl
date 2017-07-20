@@ -53,15 +53,15 @@ nearest_neighbor(global int *out, global const int *points,
         s_point[d] = search_point[d];
     }
 
-    __attribute__((xcl_pipeline_loop))
     find_best:
     for (int p = 0; p < len; ++p) {
         int dist = 0;
 
         // Calculate the distance in a n-dimensional space
+        __attribute__((xcl_pipeline_loop))
         dist_calc:
         for (int c = 0; c < dim; ++c) {
-            int dx = abs(points[dim * p + c] - s_point[c]);
+            int dx = points[dim * p + c] - s_point[c];
             dist += dx * dx;
         }
 
@@ -103,7 +103,7 @@ nearest_neighbor_loop_fusion(global int *out, global const int *points,
     __attribute__((xcl_pipeline_loop))
     find_best:
     for (int p = 0, c = 0, itr = 0; itr < iterations; itr++) {
-        int dx = abs(points[dim * p + c] - s_point[c]);
+        int dx = points[dim * p + c] - s_point[c];
         dist += dx * dx;
         // Defines the end of the dimension calculation(The inner loop in the
         // previous example)

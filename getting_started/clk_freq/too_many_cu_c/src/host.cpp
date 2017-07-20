@@ -158,10 +158,6 @@ int main(int argc, char** argv)
     free(source_hw_results);
     free(source_sw_results);
 
-    if (match){
-        std::cout << "TEST FAILED." << std::endl; 
-        return -1;
-    }
-    std::cout << "TEST PASSED." << std::endl;
-    return 0;
+    std::cout << "TEST " << (match ? "FAILED" : "PASSED") << std::endl; 
+    return (match ? EXIT_FAILURE :  EXIT_SUCCESS);
 }
