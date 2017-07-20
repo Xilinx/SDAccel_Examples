@@ -78,7 +78,7 @@ Kernel Description : [Good case]
 #define MAX_SIZE 16384
 
 __kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
-void nearest(
+void nearest_good(
 			    const __global int *in,     // Input Points Array
 			    const __global int *point,  // Current Point
 			    __global int *out,          // Output Point
