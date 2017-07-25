@@ -113,6 +113,7 @@ extern "C" {
         my_data_fifo inFifo;
 #pragma HLS stream variable=inFifo depth=32
         my_data_fifo outFifo;
+#pragma HLS stream variable=outFifo depth=32
 
 // Enables task level pipelining, allowing functions and loops to execute concurrently. Used to minimize interval. More details please refer to UG902.
 #pragma HLS DATAFLOW
