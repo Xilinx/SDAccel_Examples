@@ -32,6 +32,7 @@ EXTRA_CLEAN=./output.bmp
 check_EXE=host
 check_XCLBINS=rgb_to_hsv
 check_ARGS=./data/input.bmp
+check_NDEVICES=xilinx:xil-accel-rd-vu9p:4ddr-xpr
 
 CHECKS=check
 
