@@ -44,7 +44,7 @@ where the *DEVICES* variable accepts either 1 device from the table above or a c
 This application requires OpenCV runtime libraries. If the host does not have OpenCV installed use the Xilinx included libraries with the following command:
 
 ```
-export LD_LIBRARY_PATH=$XILINX_SDX/Vivado_HLS/lnx64/tools/opencv/:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$XILINX_SDX/lnx64/tools/opencv/:$LD_LIBRARY_PATH
 ```
 ## 4. DESIGN FILE HIERARCHY
 Application code is located in the src directory. Accelerator binary files will be compiled to the xclbin directory. The xclbin directory is required by the Makefile and its contents will be filled during compilation. A listing of all the files in this example is shown below
