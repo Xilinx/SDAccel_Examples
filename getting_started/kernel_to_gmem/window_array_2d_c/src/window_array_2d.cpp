@@ -111,10 +111,10 @@ extern "C" {
 #pragma HLS INTERFACE s_axilite port=return bundle=control
 
         my_data_fifo inFifo;
-#pragma HLS stream variable=inFifo depth=4096
-// User can change the FIFO depth if array size is not 64*64, but currently we have limitation here due to some issues in tool.
-// The FIFO depth can NOT be smaller than the full array size, namely BLOCK_SIZE defined in header file "host.h"
+#pragma HLS stream variable=inFifo depth=32
+
         my_data_fifo outFifo;
+#pragma HLS stream variable=outFifo depth=32
 
 // Enables task level pipelining, allowing functions and loops to execute concurrently. Used to minimize interval. More details please refer to UG902.
 #pragma HLS DATAFLOW
