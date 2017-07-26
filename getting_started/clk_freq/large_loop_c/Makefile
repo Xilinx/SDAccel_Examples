@@ -29,13 +29,12 @@ cnn_GOOD_XOS=cnn_GOOD
 cnn_GOOD_LDCLFLAGS=--nk cnn:4
 
 cnn_BAD_XOS=cnn_BAD
-cnn_BAD_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr
 
-XCLBINS=cnn_GOOD
+XCLBINS=cnn_GOOD cnn_BAD
 
 # check
 check_EXE=host
-check_XCLBINS=cnn_GOOD
+check_XCLBINS=cnn_GOOD cnn_BAD
 
 CHECKS=check
 
