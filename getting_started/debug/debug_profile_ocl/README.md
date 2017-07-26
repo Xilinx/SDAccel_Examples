@@ -20,8 +20,6 @@ This is simple example of vector addition and printing profile data (wall clock 
 
 ***KEY CONCEPTS:*** Use of Profile API, Waveform Dumping and loading
 
-***KEYWORDS:*** xcl_get_event_duration()
-
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
 ```
