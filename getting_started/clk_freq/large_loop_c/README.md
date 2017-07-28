@@ -20,7 +20,7 @@ This is a CNN (Convolutional Neural Network) based example which mainly focuses 
 
 ***KEY CONCEPTS:*** Clock Frequency, Multiple Compute Units, Convolutional Neural Networks
 
-***KEYWORDS:*** #pragma HLS ARRAY_PARTITION, #pragma HLS PIPELINE
+***KEYWORDS:*** #pragma HLS ARRAY_PARTITION, #pragma HLS PIPELINE, #pragma HLS INLINE
 
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
