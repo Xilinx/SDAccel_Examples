@@ -24,6 +24,15 @@
                     "location": "src/cnn_convolution.cpp"
                 }
             ]
+        },
+        {
+            "name": "cnn_BAD", 
+            "accelerators": [
+                {
+                    "name": "cnn", 
+                    "location": "src/cnn_convolution_bad.cpp"
+                }
+            ]
         }
     ],
     "contributors" : [
