@@ -112,6 +112,7 @@ extern "C" {
 
         my_data_fifo inFifo;
 #pragma HLS stream variable=inFifo depth=32
+
         my_data_fifo outFifo;
 #pragma HLS stream variable=outFifo depth=32
 

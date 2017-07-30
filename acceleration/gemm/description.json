@@ -17,12 +17,6 @@
     "libs" : [
         "xcl"
     ],
-    "accelerators": [
-        {
-            "name": "dma", 
-            "location": "src/main.cpp"
-        }
-    ],
     "perf_fields" : ["Board", "Total Number of Samples", "Kernel Duration"],
     "performance" : [
         {

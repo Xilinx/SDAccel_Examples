@@ -129,7 +129,7 @@ def requirements(target,data):
                 target.write("***OpenCV for Example Applications***\n\n")
                 target.write("This application requires OpenCV runtime libraries. If the host does not have OpenCV installed use the Xilinx included libraries with the following command:\n\n")
                 target.write("```\n")
-                target.write("export LD_LIBRARY_PATH=$XILINX_SDX/Vivado_HLS/lnx64/tools/opencv/:$LD_LIBRARY_PATH\n")
+                target.write("export LD_LIBRARY_PATH=$XILINX_SDX/lnx64/tools/opencv/:$LD_LIBRARY_PATH\n")
                 target.write("```\n")
     except:
       pass
