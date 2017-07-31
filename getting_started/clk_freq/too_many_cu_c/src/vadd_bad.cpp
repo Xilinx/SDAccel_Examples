@@ -84,8 +84,7 @@ extern "C"
             int *out,       // Output Result
             int size,       // Size of Vector Data
             
-            int global_id,  // Global ID
-            int global_size
+            int global_id  // Global ID
     )
     {
     #pragma HLS INTERFACE m_axi port=in1 offset=slave bundle=gmem
@@ -97,7 +96,6 @@ extern "C"
     #pragma HLS INTERFACE s_axilite port=out bundle=control
     #pragma HLS INTERFACE s_axilite port=size bundle=control
     #pragma HLS INTERFACE s_axilite port=global_id bundle=control
-    #pragma HLS INTERFACE s_axilite port=global_size bundle=control
     #pragma HLS INTERFACE s_axilite port=return bundle=control
         
         // Local memory to store input and output vectors
@@ -108,7 +106,8 @@ extern "C"
         int in1_lcl[BUFFER_SIZE];
         int in2_lcl[BUFFER_SIZE];
         int out_lcl[BUFFER_SIZE];
-        
+       
+        int global_size = WORK_GROUP;
          // Computes vector addition operation iteratively over entire data set
         for(int offset = 0; offset < size; offset += BUFFER_SIZE*global_size){
         #pragma HLS LOOP_TRIPCOUNT min=2 max=2

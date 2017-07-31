@@ -15,12 +15,22 @@
     ],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
-    "accelerators": [
+    "containers": [
         {
-            "name": "nearest", 
-            "location": "src/nearest_bad.cl"
+            "name": "nearest",
+            "accelerators": [
+                {
+                    "name": "nearest_good",
+                    "location": "src/nearest_good.cl"
+                },
+                {
+                    "name": "nearest_bad",
+                    "location": "src/nearest_bad.cl"
+                }
+            ]
         }
     ],
+
     "contributors" : [
         {
             "group": "Xilinx",
