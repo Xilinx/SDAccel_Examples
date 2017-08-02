@@ -37,5 +37,6 @@
             "version": "1.0",
             "description": "Initial Xilinx Release"
         }
-    ]
+    ],
+    "sdx_gui": false
 }
