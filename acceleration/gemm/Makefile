@@ -15,7 +15,7 @@ EXES=gemm
 # General Matrix Multiply xclbin
 gemm0_XOS=gemm0
 gemm0_LDCLFLAGS= -I./src/ --xp misc:map_connect=add.kernel.krnl_0.m00_axi.core.OCL_REGION_0.M00_AXI  --xp misc:map_connect=add.kernel.krnl_0.m01_axi.core.OCL_REGION_0.M01_AXI --xp vivado_prop:run.dr_krnl_0_0_synth_1.STEPS.SYNTH_DESIGN.TCL.PRE=$(PWD)/src/presynth.tcl --xp vivado_prop:run.impl_1.STEPS.OPT_DESIGN.TCL.PRE=$(PWD)/src/ku115-constraints-pblock-1kernel.tcl --xp vivado_prop:run.impl_1.STEPS.OPT_DESIGN.ARGS.DIRECTIVE=Explore --xp vivado_prop:run.impl_1.STEPS.PLACE_DESIGN.ARGS.DIRECTIVE=Explore --xp vivado_prop:run.impl_1.STEPS.PHYS_OPT_DESIGN.IS_ENABLED=true --xp vivado_prop:run.impl_1.STEPS.PHYS_OPT_DESIGN.ARGS.DIRECTIVE=AggressiveExplore --xp vivado_prop:run.impl_1.STEPS.ROUTE_DESIGN.ARGS.DIRECTIVE=Explore --nk kernelSgemm_0:1:krnl_0 
-gemm0_NDEVICES=xilinx:xil-accel-rd-vu9p:4ddr-xpr xilinx:adm-pcie-ku3:2ddr-xpr xilinx:adm-pcie-7v3:1ddr
+gemm0_DEVICES=xilinx_xil-accel-rd-ku115_4ddr-xpr_4_0
 gemm0_NTARGETS=sw_emu
 
 XCLBINS=gemm0
@@ -24,7 +24,7 @@ XCLBINS=gemm0
 check_EXE=gemm
 check_XCLBINS=gemm0
 check_ARGS=64 64 64
-check_NDEVICES=$(gemm0_NDEVICES)
+check_DEVICES=$(gemm0_DEVICES)
 check_NTARGETS=sw_emu
 
 CHECKS=check
@@ -34,13 +34,13 @@ ifneq (,$(findstring sw_emu,$(TARGETS)))
 $(warning WARNING:RTL Kernels do not support sw_emu TARGETS. Please use hw_emu for running RTL kernel Emulation)
 endif
 
+define mk_target
+xclbin/gemm0.$(1).$(call sanitize_dsa, $(2)).xo: src/kernelSgemm_0.xo
+	mkdir -p xclbin
+	cp src/kernelSgemm_0.xo xclbin/gemm0.$(1).$(call sanitize_dsa,$(2)).xo
+endef
+
+$(foreach target,$(TARGETS),$(foreach device,$(DEVICES),$(eval $(call mk_target,$(target),$(device)))))
+
 include $(COMMON_REPO)/utility/rules.mk
-
-xclbin/gemm0.hw.xilinx_xil-accel-rd-ku115_4ddr-xpr.xo: src/kernelSgemm_0.xo
-	mkdir xclbin 2>/dev/null || true
-	cp src/kernelSgemm_0.xo xclbin/gemm0.hw.xilinx_xil-accel-rd-ku115_4ddr-xpr.xo
-
-xclbin/gemm0.hw_emu.xilinx_xil-accel-rd-ku115_4ddr-xpr.xo: src/kernelSgemm_0.xo
-	mkdir xclbin 2>/dev/null || true
-	cp src/kernelSgemm_0.xo xclbin/gemm0.hw_emu.xilinx_xil-accel-rd-ku115_4ddr-xpr.xo
 
