@@ -34,13 +34,13 @@ ifneq (,$(findstring sw_emu,$(TARGETS)))
 $(warning WARNING:RTL Kernels do not support sw_emu TARGETS. Please use hw_emu for running RTL kernel Emulation)
 endif
 
+define mk_target
+xclbin/gemm0.$(1).$(call sanitize_dsa, $(2)).xo: src/kernelSgemm_0.xo
+	mkdir -p xclbin
+	cp src/kernelSgemm_0.xo xclbin/gemm0.$(1).$(call sanitize_dsa,$(2)).xo
+endef
+
+$(foreach target,$(TARGETS),$(foreach device,$(DEVICES),$(eval $(call mk_target,$(target),$(device)))))
+
 include $(COMMON_REPO)/utility/rules.mk
-
-xclbin/gemm0.hw.xilinx_xil-accel-rd-ku115_4ddr-xpr.xo: src/kernelSgemm_0.xo
-	mkdir xclbin 2>/dev/null || true
-	cp src/kernelSgemm_0.xo xclbin/gemm0.hw.xilinx_xil-accel-rd-ku115_4ddr-xpr.xo
-
-xclbin/gemm0.hw_emu.xilinx_xil-accel-rd-ku115_4ddr-xpr.xo: src/kernelSgemm_0.xo
-	mkdir xclbin 2>/dev/null || true
-	cp src/kernelSgemm_0.xo xclbin/gemm0.hw_emu.xilinx_xil-accel-rd-ku115_4ddr-xpr.xo
 
