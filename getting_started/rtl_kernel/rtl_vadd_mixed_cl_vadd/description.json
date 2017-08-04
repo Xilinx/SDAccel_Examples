@@ -1,0 +1,32 @@
+{
+    "example": "Mixed Kernels (RTL & CL)",
+    "overview": [
+        "This example has one RTL kernel and one CL kernel. Both RTL kernel and CL kernel perform vector addition. The CL kernel reads the output from RTL kernel as one of two inputs."
+    ],
+    "key_concepts": [ "Mixed Kernels"],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl2"
+    ],
+    "runtime": ["OpenCL"],
+    "em_cmd": "./host",
+    "targets": ["hw", "hw_emu"],
+    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ],
+    "revision" : [
+        {
+            "date" : "July2017",
+            "version": "1.0",
+            "description": "Initial Xilinx Release"
+        }
+    ],
+    "match_makefile": "false",
+    "sdx_gui": "false"
+}
