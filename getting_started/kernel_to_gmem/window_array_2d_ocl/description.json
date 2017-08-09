@@ -17,7 +17,17 @@
     "accelerators": [
         {
             "container": "window_array_2d", 
-            "name": "window_array_2d", 
+            "name": "read_data", 
+            "location": "src/window_array_2d.cl"
+        },
+        {
+            "container": "window_array_2d", 
+            "name": "compute", 
+            "location": "src/window_array_2d.cl"
+        },
+        {
+            "container": "window_array_2d", 
+            "name": "write_data", 
             "location": "src/window_array_2d.cl"
         }
     ],
