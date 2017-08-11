@@ -149,15 +149,23 @@ find_binary_file(const std::string& _device_name, const std::string& xclbin_name
     }
 
     unsigned short colons = 0;
+    bool colon_exist = false;
     for (char *c = device_name_versionless; *c != 0; c++) {
         if (*c == ':') {
             colons++;
             *c = '_';
+            colon_exist = true;
         }
         /* Zero out version area */
         if (colons == 3) {
             *c = '\0';
         }
+    }
+
+    // versionless support if colon doesn't exist in device name
+    if(!colon_exist) {
+        int len = strlen(device_name_versionless);
+        device_name_versionless[len - 4] = '\0';
     }
 
     const char *file_patterns[] = {
