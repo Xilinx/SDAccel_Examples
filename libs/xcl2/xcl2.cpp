@@ -162,11 +162,13 @@ find_binary_file(const std::string& _device_name, const std::string& xclbin_name
         }
     }
 
-    // versionless support if colon doesn't exist in device name
-    if(!colon_exist) {
-        int len = strlen(device_name_versionless);
-        device_name_versionless[len - 4] = '\0';
-    }
+    const char *aws_file_patterns[] = {
+        "%1$s/%2$s.%3$s.%4$s.awsxclbin",     // <kernel>.<target>.<device>.awsxclbin
+        "%1$s/%2$s.%3$s.%5$s.awsxclbin",     // <kernel>.<target>.<device_versionless>.awsxclbin
+        "%1$s/binary_container_1.awsxclbin", // default for gui projects
+        "%1$s/%2$s.xclbin",               // <kernel>.awsxclbin
+        NULL
+    };
 
     const char *file_patterns[] = {
         "%1$s/%2$s.%3$s.%4$s.xclbin",     // <kernel>.<target>.<device>.xclbin
@@ -177,11 +179,11 @@ find_binary_file(const std::string& _device_name, const std::string& xclbin_name
     };
     char xclbin_file_name[PATH_MAX];
     memset(xclbin_file_name, 0, PATH_MAX);
-    ino_t ino = 0; // used to avoid errors if an xclbin found via multiple/repeated paths
+    ino_t aws_ino = 0; // used to avoid errors if an xclbin found via multiple/repeated paths
     for (const char **dir = search_dirs; *dir != NULL; dir++) {
         struct stat sb;
         if (stat(*dir, &sb) == 0 && S_ISDIR(sb.st_mode)) {
-            for (const char **pattern = file_patterns; *pattern != NULL; pattern++) {
+            for (const char **pattern = aws_file_patterns; *pattern != NULL; pattern++) {
                 char file_name[PATH_MAX];
                 memset(file_name, 0, PATH_MAX);
                 snprintf(file_name, PATH_MAX, *pattern, *dir, xclbin_name.c_str(), mode.c_str(), device_name, device_name_versionless);
@@ -191,12 +193,39 @@ find_binary_file(const std::string& _device_name, const std::string& xclbin_name
                         printf("Error: Out of Memory\n");
                         exit(EXIT_FAILURE);
                     }
-                    if (*xclbin_file_name && sb.st_ino != ino) {
+                    if (*xclbin_file_name && sb.st_ino != aws_ino) {
                     	printf("Error: multiple xclbin files discovered:\n %s\n %s\n", file_name, xclbin_file_name);
                     	exit(EXIT_FAILURE);
                     }
-                    ino = sb.st_ino;
+                    aws_ino = sb.st_ino;
                     strncpy(xclbin_file_name, file_name, PATH_MAX);
+                }
+            }
+        }
+    }
+    ino_t ino = 0; // used to avoid errors if an xclbin found via multiple/repeated paths
+    // if no awsxclbin found, check for xclbin
+    if (*xclbin_file_name == '\0') {
+        for (const char **dir = search_dirs; *dir != NULL; dir++) {
+            struct stat sb;
+            if (stat(*dir, &sb) == 0 && S_ISDIR(sb.st_mode)) {
+                for (const char **pattern = file_patterns; *pattern != NULL; pattern++) {
+                    char file_name[PATH_MAX];
+                    memset(file_name, 0, PATH_MAX);
+                    snprintf(file_name, PATH_MAX, *pattern, *dir, xclbin_name.c_str(), mode.c_str(), device_name, device_name_versionless);
+                    if (stat(file_name, &sb) == 0 && S_ISREG(sb.st_mode)) {
+                        char* bindir = strdup(*dir);
+                        if (bindir == NULL) {
+                            printf("Error: Out of Memory\n");
+                            exit(EXIT_FAILURE);
+                        }
+                        if (*xclbin_file_name && sb.st_ino != ino) {
+                    	    printf("Error: multiple xclbin files discovered:\n %s\n %s\n", file_name, xclbin_file_name);
+                    	    exit(EXIT_FAILURE);
+                        }
+                        ino = sb.st_ino;
+                        strncpy(xclbin_file_name, file_name, PATH_MAX);
+                    }
                 }
             }
         }
@@ -205,7 +234,6 @@ find_binary_file(const std::string& _device_name, const std::string& xclbin_name
     if (*xclbin_file_name == '\0') {
         snprintf(xclbin_file_name, PATH_MAX, file_patterns[0], *search_dirs, xclbin_name.c_str(), mode.c_str(), device_name);
     }
-
     free(device_name);
     return (xclbin_file_name);
 }
