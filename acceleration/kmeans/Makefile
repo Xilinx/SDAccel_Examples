@@ -51,7 +51,7 @@ XOS=kmeans
 
 # Kmeans xclbin
 kmeans_XOS=kmeans
-kmeans_CLFLAGS=--nk kmeans:$(COMPUTE_UNITS)
+kmeans_LDCLFLAGS=--nk kmeans:$(COMPUTE_UNITS)
 
 XCLBINS=kmeans
 
