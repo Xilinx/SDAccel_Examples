@@ -285,10 +285,8 @@ module add proxy
 	}
 
 	stage('sw_emu run') {
-		lock("only_one_run_stage_at_a_time") {
-			for(int i = 0; i < swBatches; i++) {
-				parallel swEmuRunSteps[i]
-			}
+		for(int i = 0; i < swBatches; i++) {
+			swEmuRunSteps[i]
 		}
 	}
 
