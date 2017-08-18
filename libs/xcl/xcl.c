@@ -346,6 +346,12 @@ char *xcl_get_xclbin_name(xcl_world world,
 		}
 	}
 
+    // versionless support if colon doesn't exist in device_name
+    if(!colon_exist) {
+        int len = strlen(device_name_versionless);
+        device_name_versionless[len - 4] = '\0';
+    }
+
 	const char *aws_file_patterns[] = {
 		"%1$s/%2$s.%3$s.%4$s.awsxclbin",     // <kernel>.<target>.<device>.awsxclbin
 		"%1$s/%2$s.%3$s.%5$s.awsxclbin",     // <kernel>.<target>.<device_versionless>.awsxclbin
