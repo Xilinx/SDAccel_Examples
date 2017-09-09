@@ -104,5 +104,6 @@ std::string find_binary_file(const std::string& _device_name, const std::string&
 cl::Program::Binaries import_binary_file(std::string xclbin_file_name); 
 bool is_emulation () ;
 bool is_hw_emulation () ;
+bool is_xpr_device (const char *device_name);
 
 }

@@ -264,5 +264,16 @@ bool is_hw_emulation()
     return ret;
 }
 
+bool is_xpr_device(const char *device_name) {
+    const char *output = strstr(device_name,"xpr");
+
+    if(output==NULL) {
+        return false;
+    }
+    else {
+        return true;
+    }
+}
+
 
 };
