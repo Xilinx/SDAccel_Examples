@@ -7,7 +7,7 @@ NIMBIX_DSA_xilinx_xil-accel-rd-vu9p_4ddr-xpr = nx4
 
 dsa2type = $(NIMBIX_DSA_$(call sanitize_dsa,$(1)))
 
-hw_RUNNER = $(COMMON_REPO)/utility/nimbix/nimbix-run.py $(NIMBIXFLAGS) --type $(call dsa2type,$(1)) --
+nimbix_RUNNER = $(COMMON_REPO)/utility/nimbix/nimbix-run.py $(NIMBIXFLAGS) --type $(call dsa2type,$(1)) --
 sw_emu_RUNNER = XCL_EMULATION_MODE=sw_emu
 hw_emu_RUNNER = XCL_EMULATION_MODE=hw_emu
 
