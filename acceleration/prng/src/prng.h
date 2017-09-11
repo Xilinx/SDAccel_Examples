@@ -60,7 +60,7 @@ T makeOne ( void ) {
 #pragma HLS inline
 
 #pragma HLS RESOURCE   variable=Q core = RAM_T2P_BRAM
-#pragma HLS dependence variable=Q inter false
+//#pragma HLS dependence variable=Q inter false
 
 	const  uint64_t a = 18782;
 	const  uint32_t m = 0xfffffffe;
