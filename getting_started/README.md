@@ -86,8 +86,6 @@ Example        | Description           | Key Concepts / Keywords
 [misc/sum_scan/][]|Example of parallel prefix sum|
 [misc/vadd/][]|Simple example of vector addition.|
 [misc/vdotprod/][]|Simple example of vector dot-product.|
-[misc/vmul_vadd/][]|This example shows how data stored in global memory can be shared between kernels in different binary containers. This functionality is available only for non-XPR Devices.|__Key__ __Concepts__<br> - Multiple Kernel Binaries<br> - Buffer sharing across Multiple binaries<br> - Multiple Kernels in different Binaries<br>
-[misc/vmul_vadd_xpr/][]|This example shows how data stored in global memory should be migrated from device to host and later from host to device to share between kernels in different binary containers. This buffer migration is only needed for XPR(Extended Partial Reconfiguration) Specific Devices. As XPR devices do not persist data when user reload another binary container.|__Key__ __Concepts__<br> - Handling Buffer sharing across multiple binaries for XPR Platform<br> - Multiple Kernel Binaries<br> - Buffer sharing across Multiple binaries<br>__Keywords__<br> - clEnqueueMigrateMemObjects()<br> - CL_MIGRATE_MEM_OBJECT_HOST
 
 [host]:host
 [host/concurrent_kernel_execution_ocl/]:host/concurrent_kernel_execution_ocl/
@@ -161,5 +159,3 @@ Example        | Description           | Key Concepts / Keywords
 [misc/sum_scan/]:misc/sum_scan/
 [misc/vadd/]:misc/vadd/
 [misc/vdotprod/]:misc/vdotprod/
-[misc/vmul_vadd/]:misc/vmul_vadd/
-[misc/vmul_vadd_xpr/]:misc/vmul_vadd_xpr/
