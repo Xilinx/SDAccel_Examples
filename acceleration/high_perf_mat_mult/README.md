@@ -1,4 +1,4 @@
-general matrix multiplication
+High Performance Matrix Multiplication
 ======================
 
 This README file contains the following sections:
@@ -16,17 +16,48 @@ This README file contains the following sections:
 
 
 ## 1. OVERVIEW
-This is the General Matrix Multiply (GEMM) kernel performs matrix multiplication on two input matrices, A and B, to produce an output Matrix C.
-The int16 GEMM kernel processes matrices of type int16 and produces int16 results. The GEMM SDAccel design consists of two parallel GEMM kernels,
-placed on each Super Logic Region (SLR) component of the targeted KU115 device. The two kernels can be deployed simultaneously on disjoint input matrices.
-Each kernel has a systolic array of 2048 DSP units and is attached to two DDR banks. The DSP array runs at 400 MHz whereas the logic around the array runs at 300 MHz.
-A variation of the GEMM kernel operates on int8 data points, performing twice as many multiplication and accumulation per cycle, effectively doubling the number of operations and throughput. 
-The design is targeting exection on an SDAccel support FPGA acceleration card
+This example implements a high performance matrix multiplication of two input matrices (A*B=C). The matrix multiplication kernel operates on matrices of type int16 and produces int16 results. Internally, the kernel has a systolic array of 2048 DSP units and is attached to two DDR banks. The DSP array runs at 400 MHz whereas the logic around the array runs at 300 MHz.
+ 
+The design is targeting execution on an SDAccel supported FPGA acceleration card. The hostcode is compiled into the high_perf_mat_mult executable. The executable takes 3 arguments, namely number of rows of matrix A, number of columns of matrix B, and the common dimension representing number of columns in matrix A and number of rows in matrix B.
+```
+high_perf_mat_mult <rowsA> <colsB> <commonDim>
+```
+The testbench of the example reports the kernel execution time, the total number of operations (sum of matrix element multiplications and additions), as well as the efficiency expressed by number of operations per second. Please note, the testbench also compares the kernel results with a pure software matrix multiplication and reports potential differences.
+ 
+The test is based on an encrypted RTL kernel. This kernel can also be configured to run with int8 data values, which effectively doubles the number of operations and throughput.
+ 
+Before explaining the details about the structure of the example and it's compilation, here is a brief step by step instruction on how to run it on the AWS-F1 platform:
+* Building the executable in the example directory (high_perf_mat_mult) by calling:
+```
+make all DEVICES=$AWS_PLATFORM
+```
+* Creating and registering the AFI
+ 
+Please note, the angle bracket directories need to be replaced according to the user setup.
+```
+mkdir pack
+cd pack
+cp ../xclbin/high_perf_mat_mult0.hw.xilinx_aws-vu9p-f1_4ddr-xpr-2pr_4_0.xclbin .
+$SDACCEL_DIR/tools/create_sdaccel_afi.sh -xclbin=high_perf_mat_mult0.hw.xilinx_aws-vu9p-f1_4ddr-xpr-2pr_4_0.xclbin -o=high_perf_mat_mult0.hw.xilinx_aws-vu9p-f1_4ddr-xpr-2pr_4_0 -s3_bucket=<bucket> -s3_dcp_key=<f1-dcp-folder> -s3_logs_key=<f1-logs>
+```
+* Check AFI registration
+```
+more *afi_id.txt
+aws ec2 describe-fpga-images --fpga-image-ids <afi-id from file>
+```
+* Setup and execute
+```
+cd ..
+mkdir run
+cd run
+cp ../pack/high_perf_mat_mult0.hw.xilinx_aws-vu9p-f1_4ddr-xpr-2pr_4_0.awsxclbin high_perf_mat_mult0.hw.xilinx_aws-vu9p-f1_4ddr-xpr-2pr_4_0.xclbin
+cp ../high_perf_mat_mult .
+sudo sh
+source /opt/Xilinx/SDx/2017.1.rte/setup.sh
+./high_perf_mat_mult 500 500 500
+exit
+```
 
-### PERFORMANCE
-Board|Total Number of Samples|Kernel Duration
-----|-----|-----
-xilinx:xil-accel-rd-ku115:4ddr-xpr:4.0|16777216|59.1ms
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
 ```
@@ -37,6 +68,7 @@ where examples is the name of the directory where the repository will be stored 
 ## 3. SOFTWARE AND SYSTEM REQUIREMENTS
 Board | Device Name | Software Version
 ------|-------------|-----------------
+AWS VU9P F1|xilinx:aws-vu9p-f1:4ddr-xpr-2pr|SDAccel 2017.1
 Xilinx KU115|xilinx:xil-accel-rd-ku115:4ddr-xpr|SDAccel 2017.1
 
 
@@ -54,10 +86,13 @@ Application code is located in the src directory. Accelerator binary files will 
 Makefile
 README.md
 description.json
-src/gemm.cpp
-src/kernelSgemm_0.xo
-src/ku115-constraints-pblock-1kernel.tcl
-src/presynth.tcl
+src/high_perf_mat_mult.cpp
+src/kernelShigh_perf_mat_mult_0.xo
+src/ku115/ku115-constraints-pblock-1kernel.tcl
+src/ku115/presynth.tcl
+src/xilinx_aws-vu9p-f1/f1-constraints-pblock-1kernel.tcl
+src/xilinx_aws-vu9p-f1/postopt.tcl
+src/xilinx_aws-vu9p-f1/presynth.tcl
 ```
 
 ## 5. COMPILATION AND EXECUTION
@@ -102,7 +137,7 @@ emconfigutil --xdevice 'xilinx:xil-accel-rd-ku115:4ddr-xpr' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./gemm
+./high_perf_mat_mult 32 64 64
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card
@@ -141,7 +176,7 @@ This example is written by developers at
 ## 10. REVISION HISTORY
 Date | README Version | Description
 -----|----------------|------------
-JUne2017|1.0|Initial Xilinx Release
+Sept2017|1.0|Initial Xilinx Release
 
 [3-Clause BSD License]: ../../LICENSE.txt
 [SDAccel Forums]: https://forums.xilinx.com/t5/SDAccel/bd-p/SDx

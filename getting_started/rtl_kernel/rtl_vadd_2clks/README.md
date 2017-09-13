@@ -33,6 +33,7 @@ where examples is the name of the directory where the repository will be stored 
 Board | Device Name | Software Version
 ------|-------------|-----------------
 Xilinx VU9P|xilinx:xil-accel-rd-vu9p:4ddr-xpr|SDAccel 2017.1
+AWS VU9P F1|xilinx:aws-vu9p-f1:4ddr-xpr-2pr|SDAccel 2017.1
 Xilinx KU115|xilinx:xil-accel-rd-ku115:4ddr-xpr|SDAccel 2017.1
 
 

@@ -99,14 +99,8 @@ int main(int argc, char** argv)
 
     std::cout << "Creating context..." << std::endl;
     xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "gemm0");    // compute programs
+    cl_program program = xcl_import_binary(world, "high_perf_mat_mult0");    // compute programs
     cl_kernel kernelSgemm_0 = xcl_get_kernel(program, "kernelSgemm_0");    // compute kernel
-
-#if (TWO_KERN)
-    short *h_c1;
-    cl_kernel kernelSgemm_1;
-
-#endif
 
     if (argc != 4) {
         printf("Usage: %s #row, #col, #depth\n", argv[0]);
@@ -135,9 +129,7 @@ int main(int argc, char** argv)
     h_b = (short *) malloc((num_of_cols/2)*depth*sizeof(short));
     h_d = (short *) malloc((num_of_cols/2)*depth*sizeof(short));
     h_c = (short *) malloc(num_of_rows*num_of_cols*sizeof(short));
-#if (TWO_KERN)
-    h_c1 = (short *) malloc(num_of_rows*num_of_cols*sizeof(short));
-#endif
+
     tb_a = (short *) malloc(num_of_rows*depth*sizeof(short));
     tb_b = (short *) malloc(num_of_cols*depth*sizeof(short));
     tb_c = (short *) malloc(num_of_rows*num_of_cols*sizeof(short));
@@ -195,19 +187,35 @@ int main(int argc, char** argv)
     cl_mem_ext_ptr_t d_d_ext;
     cl_mem_ext_ptr_t d_c_ext;
 
+#ifdef VU9P
+    d_a_ext.flags = XCL_MEM_DDR_BANK2; //A --> bank2
+#else
     d_a_ext.flags = XCL_MEM_DDR_BANK0; //A --> bank0
+#endif
     d_a_ext.obj = NULL;// h_a;
     d_a_ext.param = 0;
 
+#ifdef VU9P
+    d_b_ext.flags = XCL_MEM_DDR_BANK2; //B0 --> bank2
+#else
     d_b_ext.flags = XCL_MEM_DDR_BANK0; //B0 --> bank0
+#endif
     d_b_ext.obj = NULL; //h_b;
     d_b_ext.param = 0;
 
+#ifdef VU9P
+    d_d_ext.flags = XCL_MEM_DDR_BANK3; //B1 --> bank3
+#else
     d_d_ext.flags = XCL_MEM_DDR_BANK1; //B1 --> bank1
+#endif
     d_d_ext.obj = NULL; //h_d;
     d_d_ext.param = 0;
 
+#ifdef VU9P
+    d_c_ext.flags = XCL_MEM_DDR_BANK3; //C --> bank3
+#else
     d_c_ext.flags = XCL_MEM_DDR_BANK1; //C --> bank1
+#endif
     d_c_ext.obj = NULL; //h_c;
     d_c_ext.param = 0;
 
@@ -217,12 +225,6 @@ int main(int argc, char** argv)
     cl_mem d_d;                         // device memory used for b vector
     cl_mem d_c;                         // device memory used for c vector
 
-#if (TWO_KERN)
-    cl_mem d_a1;                         // device memory used for a vector
-    cl_mem d_b1;                         // device memory used for b vector
-    cl_mem d_d1;                         // device memory used for b vector
-    cl_mem d_c1;                         // device memory used for c vector
-#endif
     d_a = clCreateBuffer(world.context, CL_MEM_READ_ONLY |  CL_MEM_EXT_PTR_XILINX, sizeof(short) * num_of_rows * depth, &d_a_ext, &err);
     assert(err == CL_SUCCESS);
     d_b = clCreateBuffer(world.context, CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX,  sizeof(short) * (num_of_cols/2) * depth , &d_b_ext, &err);
@@ -246,113 +248,6 @@ int main(int argc, char** argv)
     err |= clSetKernelArg(kernelSgemm_0, 5, sizeof(cl_mem), &d_d);
     err |= clSetKernelArg(kernelSgemm_0, 6, sizeof(cl_mem), &d_c);
 
-#if(TWO_KERN)
-    // CREATE COMPUTE KERNEL FOR THE SECOND KERNEL
-    kernelSgemm_1 = clCreateKernel(program, "kernelSgemm_1", &err);
-    if (!kernelSgemm_1 || err != CL_SUCCESS) {
-        printf("Error: Failed to create compute kernelSgemm_1!\n");
-        printf("Test failed\n");
-        return EXIT_FAILURE;
-    }
-
-    cl_mem_ext_ptr_t d_a1_ext;
-    cl_mem_ext_ptr_t d_b1_ext;
-    cl_mem_ext_ptr_t d_d1_ext;
-    cl_mem_ext_ptr_t d_c1_ext;
-
-
-    // PORT CONNECTIONS FOR KERNELSGEMM_1
-    d_a1_ext.flags = XCL_MEM_DDR_BANK2; //A --> bank2
-    d_a1_ext.obj = NULL;// h_a;
-    d_a1_ext.param = 0;
-
-    d_b1_ext.flags = XCL_MEM_DDR_BANK2; //B0 --> bank2
-    d_b1_ext.obj = NULL; //h_b;
-    d_b1_ext.param = 0;
-
-    d_d1_ext.flags = XCL_MEM_DDR_BANK3; //B1 --> bank3
-    d_d1_ext.obj = NULL; //h_d;
-    d_d1_ext.param = 0;
-
-    d_c1_ext.flags = XCL_MEM_DDR_BANK3; //C --> bank3
-    d_c1_ext.obj = NULL; //h_c;
-    d_c1_ext.param = 0;
-
-    d_a1 = clCreateBuffer(context,
-                          CL_MEM_READ_ONLY |  CL_MEM_EXT_PTR_XILINX,
-                          sizeof(short) * num_of_rows * depth,
-                          &d_a1_ext,
-                          &err);
-    assert(err == CL_SUCCESS);
-
-    d_b1 = clCreateBuffer(context,
-                          CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX,
-                          sizeof(short) * (num_of_cols/2) * depth ,
-                          &d_b1_ext,
-                          &err);
-    assert(err == CL_SUCCESS);
-
-    d_d1 = clCreateBuffer(context,
-                          CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX,
-                          sizeof(short) * (num_of_cols/2) * depth ,
-                          &d_d1_ext,
-                          &err);
-    assert(err == CL_SUCCESS);
-
-    d_c1 = clCreateBuffer(context,
-                          CL_MEM_WRITE_ONLY | CL_MEM_EXT_PTR_XILINX,
-                          sizeof(short) * num_of_rows * num_of_cols, // JULY/14
-                          &d_c1_ext,
-                          &err);
-    assert(err == CL_SUCCESS);
-
-    if (!d_a1 || !d_b1 || !d_c1 || !d_d1) {
-        printf("Error: Failed to allocate device memory!\n");
-        printf("Test failed\n");
-        return EXIT_FAILURE;
-    }
-
-    // WRITE OUR DATA SET INTO THE INPUT ARRAY IN DEVICE MEMORY
-    err = clEnqueueWriteBuffer(commands, d_a1, CL_TRUE, 0, sizeof(short) * num_of_rows * depth, h_a, 0, NULL, NULL);
-    if (err != CL_SUCCESS) {
-        printf("Error: Failed to write to source array kernelSgemm_1!\n");
-        printf("Test failed\n");
-        return EXIT_FAILURE;
-    }
-
-    // WRITE OUR DATA SET INTO THE INPUT ARRAY IN DEVICE MEMORY
-    err = clEnqueueWriteBuffer(commands, d_b1, CL_TRUE, 0, sizeof(short) * (num_of_cols/2) * depth, h_b, 0, NULL, NULL);
-    if (err != CL_SUCCESS) {
-        printf("Error: Failed to write to source array kernelSgemm_1 !\n");
-        printf("Test failed\n");
-        return EXIT_FAILURE;
-    }
-
-
-    err = clEnqueueWriteBuffer(commands, d_d1, CL_TRUE, 0, sizeof(short) * (num_of_cols/2) * depth, h_d, 0, NULL, NULL);
-    if (err != CL_SUCCESS) {
-        printf("Error: Failed to write B1 to source array kernelSgemm_1!\n");
-        printf("Test failed\n");
-        return EXIT_FAILURE;
-    }
-
-    // SET THE ARGUMENTS TO KERNELSGEMM_1
-    err |= clSetKernelArg(kernelSgemm_1, 0, sizeof(int), &row);
-    err |= clSetKernelArg(kernelSgemm_1, 1, sizeof(int), &col);
-    err |= clSetKernelArg(kernelSgemm_1, 2, sizeof(int), &depth);
-    err |= clSetKernelArg(kernelSgemm_1, 3, sizeof(cl_mem), &d_a1);
-    err |= clSetKernelArg(kernelSgemm_1, 4, sizeof(cl_mem), &d_b1);
-    err |= clSetKernelArg(kernelSgemm_1, 5, sizeof(cl_mem), &d_d1);
-    err |= clSetKernelArg(kernelSgemm_1, 6, sizeof(cl_mem), &d_c1);
-
-    if (err != CL_SUCCESS) {
-        printf("Error: Failed to set kernelSgemm_1 arguments! %d\n", err);
-        printf("Test failed\n");
-        return EXIT_FAILURE;
-    }
-
-#endif
-
     // EXECUTE THE KERNEL OVER THE INPUT DATA SET
     cl_event ks_0_event;
     err = clEnqueueTask(world.command_queue, kernelSgemm_0, 0, NULL, &ks_0_event);
@@ -362,26 +257,12 @@ int main(int argc, char** argv)
             return EXIT_FAILURE;
         }
 
-#if(TWO_KERN)
-    cl_event ks_1_event;
-    err = clEnqueueTask(world.command_queue, kernelSgemm_1, 0, NULL, &ks_1_event);
-    if (err) {
-            printf("Error: Failed to execute kernelSgemm_1! %d\n", err);
-            printf("Test failed\n");
-            return EXIT_FAILURE;
-        }
-#endif
-
     err = clFinish(world.command_queue);
     assert(err == CL_SUCCESS);
 
     std::cout << "Copying results to host...." << std::endl;
     // READ BACK THE RESULTS FROM THE DEVICE TO VERIFY THE OUTPUT
     xcl_memcpy_from_device(world, h_c, d_c, sizeof(short) * num_of_rows * num_of_cols);
-
-#if(TWO_KERN)
-    xcl_memcpy_from_device(world, h_c1, d_c1,sizeof(short) * num_of_rows * num_of_cols);
-#endif
 
     printf ("INFO: Execution done\n");
 
@@ -393,19 +274,13 @@ int main(int argc, char** argv)
         for ( int k = 0 ; k < PARALLEL_ROWS; k++){
           for ( int h = 0; h < 64; h++){
             int index = ((i*PARALLEL_ROWS) + k )*num_of_cols + (j*64) + h;
-#if (TWO_KERN)
-            if (tb_c[index] != h_c[count] || tb_c[index] != h_c1[count] ) {
-              printf("ERROR in - %d - actual_0=%d, actual_1=%d expected=%d\n", count, h_c[count], h_c1[count], tb_c[index]);
-              check_status = 1;
-              goto DONE;
-            }
-#else
+
             if (tb_c[index] != h_c[count]) {
               printf("ERROR in - %d - actual=%d, expected=%d\n", count, h_c[count], tb_c[index]);
               check_status = 1;
               goto DONE; 
             }
-#endif
+
             count++;
          }
        }
@@ -423,24 +298,8 @@ DONE:
    clGetEventProfilingInfo(ks_0_event, CL_PROFILING_COMMAND_END,
                            sizeof(ks_0_end), &ks_0_end, NULL);
 
-#if (TWO_KERN)
-   clGetEventProfilingInfo(ks_1_event, CL_PROFILING_COMMAND_SUBMIT,
-                           sizeof(ks_1_start), &ks_1_start, NULL);
-   clGetEventProfilingInfo(ks_1_event, CL_PROFILING_COMMAND_END,
-                           sizeof(ks_1_end), &ks_1_end, NULL);
-   if (ks_0_start < ks_1_start)
-     time_start = ks_0_start;
-   else
-     time_start = ks_1_start;
-
-   if (ks_0_end > ks_1_end)
-     time_end = ks_0_end;
-   else
-     time_end = ks_1_end;
-#else
    time_start = ks_0_start;
    time_end   = ks_0_end;
-#endif
 
    double numOps     = num_of_rows*num_of_cols*depth*2;
    double total_time = (time_end - time_start)/1000000000.0;
@@ -452,14 +311,6 @@ DONE:
    clReleaseMemObject(d_d);
    clReleaseMemObject(d_c);
    clReleaseProgram(program);
-#if (TWO_KERN)
-   clReleaseMemObject(d_a1);
-   clReleaseMemObject(d_b1);
-   clReleaseMemObject(d_d1);
-   clReleaseMemObject(d_c1);
-   clReleaseKernel(kernelSgemm_1);
-   free(h_c1);
-#endif
    clReleaseKernel(kernelSgemm_0);
    xcl_release_world(world);
 

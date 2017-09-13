@@ -26,6 +26,10 @@ DEVICES = {
        'version': '4.1',
        'name': 'Xilinx VU9P',
        'nae': 'nx4',
+    },
+    'xilinx:aws-vu9p-f1:4ddr-xpr-2pr': {
+       'version': '4.0',
+       'name': 'AWS VU9P F1'
     }
 }
 
