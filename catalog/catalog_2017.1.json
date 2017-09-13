@@ -11,7 +11,7 @@
             "examples": [
                 {
                     "name": "kmeans", 
-                    "commit_id": "fe1e6b248fc5fe8b5876c678b180da2bf3771908", 
+                    "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                     "description": [
                         "This is OpenCL Based K-Means clustering Implementation for Xilinx FPGA ", 
                         "Devices. K-means clustering is a method of vector quantization, that ", 
@@ -48,7 +48,7 @@
                 }, 
                 {
                     "name": "nearest_neighbor_linear_search", 
-                    "commit_id": "80b5109964cc15ac3d009397101cf28b3aad19dc", 
+                    "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                     "description": [
                         "This is an optimized implementation of a nearest neighbor linear search algorithm targeting execution on a SDAccel supported FPGA acceleration card."
                     ], 
@@ -58,7 +58,7 @@
                 }, 
                 {
                     "name": "prng", 
-                    "commit_id": "ff1506c9ec782a15d38a2796c293a6c0ad284fe7", 
+                    "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                     "description": [
                         "This is an optimized implementation of the pseudo random number generator algorithm", 
                         "The method used to generate a random number sequence is called complementary multiply with carry (CMWC)", 
@@ -70,7 +70,7 @@
                 }, 
                 {
                     "name": "smithwaterman", 
-                    "commit_id": "80b5109964cc15ac3d009397101cf28b3aad19dc", 
+                    "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                     "description": [
                         "This is an optimized implementation of the smithwaterman algorithm targeting exection on an SDAccel support FPGA acceleration card.", 
                         "", 
@@ -111,7 +111,7 @@
                     "examples": [
                         {
                             "name": "critical_path_ocl", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This example shows a normal coding style which could lead to critical path issue and design will give degraded timing.  Example also contains better coding style which can improve design timing."
                             ], 
@@ -125,14 +125,15 @@
                         }, 
                         {
                             "name": "large_loop_c", 
-                            "commit_id": "3d2ce92c2a429a98092eaf5edad09cbdd0b4c4ac", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This is a CNN (Convolutional Neural Network) based example which mainly focuses on Convolution operation of a CNN network. The goal of this example is to demonstrate a method to overcome kernel design timing failure issue. It also presents the effectiveness of using multiple compute units to improve performance."
                             ], 
                             "displayName": "Clock Frequency ~ Large Loop Count (C)", 
                             "keywords": [
                                 "#pragma HLS ARRAY_PARTITION", 
-                                "#pragma HLS PIPELINE"
+                                "#pragma HLS PIPELINE", 
+                                "#pragma HLS INLINE"
                             ], 
                             "key_concepts": [
                                 "Clock Frequency", 
@@ -144,14 +145,15 @@
                         }, 
                         {
                             "name": "large_loop_ocl", 
-                            "commit_id": "5b5cb2c92c6ba9067062f233f29d037159e1470f", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This is a CNN (Convolutional Neural Network) based example which mainly focuses on Convolution operation of a CNN network. The goal of this example is to demonstrate a method to overcome kernel design timing failure issue. It also presents the effectiveness of using multiple compute units to improve performance."
                             ], 
                             "displayName": "Clock Frequency ~ Large Loop Count (CL) ", 
                             "keywords": [
                                 "xcl_array_partition", 
-                                "xcl_pipeline_loop"
+                                "xcl_pipeline_loop", 
+                                "always_inline"
                             ], 
                             "key_concepts": [
                                 "Clock Frequency", 
@@ -163,7 +165,7 @@
                         }, 
                         {
                             "name": "split_kernel_c", 
-                            "commit_id": "2693d7704ad4b780a1a41c96506dbdf40f802724", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This is a multi-filter image processing application to showcase effectiveness of Dataflow/Streams usage. This examples is intended to help developers to break down the complex kernels into multiple sub-functions using HLS Dataflow/Streams. It presents a way to concurrently execute multiple functions with better area utilization compared to a complex single kernel implementation. The main objective of this example is to showcase a way to build a optimal FPGA design which achieves maximum frequency with optimal resource utilization and achieves better performance compared to single complex kernel implementations."
                             ], 
@@ -184,7 +186,7 @@
                         }, 
                         {
                             "name": "split_kernel_ocl", 
-                            "commit_id": "b95e9f974baa410e5677b766523c2f947ad206d2", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This is a multi-filter image processing application to showcase effectiveness of Dataflow/Streams usage. This examples is intended to help developers to break down the complex kernel into multiple sub-functions using OpenCL Dataflow. It presents a way to concurrently execute multiple functions with better area utilization compared to a complex single kernel implementation. The main objective of this example is to showcase a way to build a optimal FPGA design which achieves maximum frequency with optimal resource utilization and achieves better performance compared to single kernel implementations."
                             ], 
@@ -203,7 +205,7 @@
                         }, 
                         {
                             "name": "too_many_cu_c", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This is simple example of vector addition to demonstrate effectiveness of using single compute unit with heavy work load to achieve better performance. Bad example uses multiple compute units to achieve good performance but it results in heavy usage of FPGA resources and area due to which design fails timing. Good example uses single compute unit to compute with heavier work load, it helps in less resource utilization and also helps in kernel scalability. To switch between Good/Bad cases use the flag provided in makefile."
                             ], 
@@ -222,7 +224,7 @@
                         }, 
                         {
                             "name": "too_many_cu_ocl", 
-                            "commit_id": "7ab429bc6e5582fa7c8979796584da5d7f3318e1", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This is simple example of vector addition to demonstrate effectiveness of using single compute unit with heavy work load to achieve better performance. Bad example uses multiple compute units to achieve good performance but it results in heavy usage of FPGA resources and area due to which design fails timing. Good example uses single compute unit to compute with heavier work load, it helps in less resource utilization and also helps in kernel scalability. To switch between Good/Bad cases use the flag provided in makefile."
                             ], 
@@ -253,7 +255,7 @@
                     "examples": [
                         {
                             "name": "dataflow_func_ocl", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This is simple example of vector addition to demonstrate Dataflow functionality in OpenCL Kernel. OpenCL Dataflow allows user to run multiple functions together to achieve higher throughput."
                             ], 
@@ -270,7 +272,7 @@
                         }, 
                         {
                             "name": "dataflow_loop_c", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This is simple example of vector addition to demonstrate Loops Dataflow functionality of HLS. HLS Dataflow allows user to schedule multiple sequential loops concurrently to achieve higher throughput."
                             ], 
@@ -287,7 +289,7 @@
                         }, 
                         {
                             "name": "dataflow_pipes_ocl", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This is simple example of vector addition to demonstrate OpenCL Pipe Memory usage. OpenCL PIPE memory functionality allows user to achieve kernel-to-kernel data transfer without using global memory."
                             ], 
@@ -307,7 +309,7 @@
                         }, 
                         {
                             "name": "dataflow_stream_array_c", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This is simple example of Multiple Stages Vector Addition to demonstrate Array of Stream usage in HLS C Kernel Code."
                             ], 
@@ -324,7 +326,7 @@
                         }, 
                         {
                             "name": "dataflow_stream_c", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This is simple example of vector addition to demonstrate Dataflow functionality of HLS. HLS Dataflow allows user to schedule multiple task together to achieve higher throughput."
                             ], 
@@ -353,7 +355,7 @@
                     "examples": [
                         {
                             "name": "debug_printf_ocl", 
-                            "commit_id": "68dc3588471bf62f96a59de6badc497491466302", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This is simple example of vector addition and printing of data that is computational result (addition). It is based on vectored addition that demonstrates printing of work item data (integer product in this case)"
                             ], 
@@ -370,14 +372,11 @@
                         }, 
                         {
                             "name": "debug_profile_ocl", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This is simple example of vector addition and printing profile data (wall clock time taken between start and stop). It also dump a waveform file which can be reloaded to vivado to see the waveform. Run command 'vivado -source ./scripts/open_waveform.tcl -tclargs <device_name>-<kernel_name>.<target>.<device_name>.wdb' to launch waveform viewer. User can also update batch to gui in sdaccel.ini file to see the live waveform while running application."
                             ], 
                             "displayName": " Printing Profile Data and Dumping Waveform file (CL)", 
-                            "keywords": [
-                                "xcl_get_event_duration()"
-                            ], 
                             "key_concepts": [
                                 "Use of Profile API", 
                                 "Waveform Dumping and loading"
@@ -399,7 +398,7 @@
                     "examples": [
                         {
                             "name": "concurrent_kernel_execution_ocl", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This example will demonstrate how to use multiple and out of order command queues to simultaneously execute multiple kernels on an FPGA."
                             ], 
@@ -418,7 +417,7 @@
                         }, 
                         {
                             "name": "copy_buffer_ocl", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This Copy Buffer example demonstrate how one buffer can be copied from another buffer."
                             ], 
@@ -434,7 +433,7 @@
                         }, 
                         {
                             "name": "data_transfer_ocl", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This example illustrates several ways to use the OpenCL API to transfer data to and from the FPGA"
                             ], 
@@ -458,7 +457,7 @@
                         }, 
                         {
                             "name": "device_query_ocl", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This example prints the OpenCL properties of the platform and its devices. It also displays the limits and capabilities of the hardware."
                             ], 
@@ -478,7 +477,7 @@
                         }, 
                         {
                             "name": "errors_ocl", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This example discuss the different reasons for errors in OpenCL and how to handle them at runtime."
                             ], 
@@ -497,7 +496,7 @@
                         }, 
                         {
                             "name": "helloworld_ocl", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This example is a simple OpenCL application. It will highlight the basic flow of an OpenCL application."
                             ], 
@@ -509,8 +508,27 @@
                             "author": "Xilinx"
                         }, 
                         {
+                            "name": "kernel_swap_ocl", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
+                            "description": [
+                                "This example shows how host can swap the kernels and share same buffer between two kernels exist in separate binary containers. For Non-XPR(Extended Partial Reconfiguration) Specific Devices, device memory can persist buffer data so both kernels can share data directly. Whereas in XPR devices, device memory does not persist the buffer data so host has to migrate data from device to host memory before swapping the next kernel. After kernel swap, host has to migrate the buffer back to device."
+                            ], 
+                            "displayName": "Vector Add - Vector Multiplication for XPR-NON_XPR Devices", 
+                            "keywords": [
+                                "clEnqueueMigrateMemObjects()", 
+                                "CL_MIGRATE_MEM_OBJECT_HOST"
+                            ], 
+                            "key_concepts": [
+                                "Handling Buffer sharing across multiple binaries for XPR-NON_XPR Platform", 
+                                "Multiple Kernel Binaries", 
+                                "Buffer sharing across Multiple binaries"
+                            ], 
+                            "version": "1.0", 
+                            "author": "Xilinx"
+                        }, 
+                        {
                             "name": "multiple_devices_ocl", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This example show how to take advantage of multiple FPGAs on a system. It will show how to initialized an OpenCL context, allocate memory on the two devices and execute a kernel on each FPGA."
                             ], 
@@ -529,7 +547,7 @@
                         }, 
                         {
                             "name": "overlap_ocl", 
-                            "commit_id": "9fecf4bec654f9b82bb2c26b76bff2fb15222435", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This examples demonstrates techniques that allow user to overlap Host(CPU) and FPGA computation in an application. It will cover asynchronous operations and event object."
                             ], 
@@ -564,7 +582,7 @@
                     "examples": [
                         {
                             "name": "aos_vs_soa_ocl", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This example demonstrates how data layout can impact the performance of certain kernels. The example we will demonstrate how using the Structure of Array data layout can impact certain data parallel problems."
                             ], 
@@ -578,7 +596,7 @@
                         }, 
                         {
                             "name": "array_partition_ocl", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This example shows how to use array partitioning to improve performance of a kernel"
                             ], 
@@ -596,7 +614,7 @@
                         }, 
                         {
                             "name": "dependence_inter_c", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This Example to demonstrate HLS pragma 'DEPENDENCE'. Using 'DEPENDENCE' pragma, user can provide additional dependency details to compiler which allow compiler to perform unrolling/pipelining to get better performance."
                             ], 
@@ -613,7 +631,7 @@
                         }, 
                         {
                             "name": "lmem_2rw_c", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This is simple example of vector addition to demonstrate how to utilized both ports of Local Memory memory."
                             ], 
@@ -631,7 +649,7 @@
                         }, 
                         {
                             "name": "lmem_2rw_ocl", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This is simple example of vector addition to demonstrate how to utilized both ports of Local Memory."
                             ], 
@@ -649,7 +667,7 @@
                         }, 
                         {
                             "name": "loop_fusion_c", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This example will demonstrate how to fuse two loops into one to improve the performance of an OpenCL  C/C++ Kernel."
                             ], 
@@ -667,7 +685,7 @@
                         }, 
                         {
                             "name": "loop_fusion_ocl", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This example will demonstrate how to fuse two loops into one to improve the performance of an OpenCL kernel."
                             ], 
@@ -685,7 +703,7 @@
                         }, 
                         {
                             "name": "loop_perfect_c", 
-                            "commit_id": "739b1f27504bae31bf65fdd531aef54815a539bf", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This nearest neighbor example is to demonstrate how to achieve better performance using perfect loop."
                             ], 
@@ -695,7 +713,7 @@
                         }, 
                         {
                             "name": "loop_perfect_ocl", 
-                            "commit_id": "7ab429bc6e5582fa7c8979796584da5d7f3318e1", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This nearest neighbor example is to demonstrate how to achieve better performance using loop perfect."
                             ], 
@@ -705,7 +723,7 @@
                         }, 
                         {
                             "name": "loop_pipeline_ocl", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This example demonstrates how loop pipelining can be used to improve the performance of a kernel."
                             ], 
@@ -722,7 +740,7 @@
                         }, 
                         {
                             "name": "loop_reorder_c", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This is a simple example of matrix multiplication (Row x Col) to demonstrate how to achieve better pipeline II factor by loop reordering."
                             ], 
@@ -740,7 +758,7 @@
                         }, 
                         {
                             "name": "loop_reorder_ocl", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This is a simple example of matrix multiplication (Row x Col) to demonstrate how to achieve better pipeline II factor by loop reordering."
                             ], 
@@ -758,7 +776,7 @@
                         }, 
                         {
                             "name": "partition_cyclicblock_c", 
-                            "commit_id": "7ab429bc6e5582fa7c8979796584da5d7f3318e1", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This example shows how to use array block and cyclic partitioning to improve performance of a kernel"
                             ], 
@@ -781,7 +799,7 @@
                         }, 
                         {
                             "name": "partition_cyclicblock_ocl", 
-                            "commit_id": "7ab429bc6e5582fa7c8979796584da5d7f3318e1", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This example shows how to use array block and cyclic partitioning to improve performance of a kernel"
                             ], 
@@ -802,7 +820,7 @@
                         }, 
                         {
                             "name": "shift_register_c", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This example demonstrates how to shift values in registers in each clock cycle"
                             ], 
@@ -820,7 +838,7 @@
                         }, 
                         {
                             "name": "shift_register_ocl", 
-                            "commit_id": "7ab429bc6e5582fa7c8979796584da5d7f3318e1", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This example demonstrates how to shift values in registers in each clock cycle"
                             ], 
@@ -838,7 +856,7 @@
                         }, 
                         {
                             "name": "systolic_array_c", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This is a simple example of matrix multiplication (Row x Col) to help developers learn systolic array based algorithm design. Note : Systolic array based algorithm design is well suited for FPGA."
                             ], 
@@ -848,7 +866,7 @@
                         }, 
                         {
                             "name": "systolic_array_ocl", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This is a simple example of matrix multiplication (Row x Col) to help developers learn systolic array based algorithm design. Note: Systolic array based algorithm design is well suited for FPGA."
                             ], 
@@ -870,7 +888,7 @@
                     "examples": [
                         {
                             "name": "burst_rw_c", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This is simple example of using AXI4-master interface for burst read and write"
                             ], 
@@ -886,7 +904,7 @@
                         }, 
                         {
                             "name": "burst_rw_ocl", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This is simple example of using AXI4-master interface for burst read and write"
                             ], 
@@ -899,7 +917,7 @@
                         }, 
                         {
                             "name": "custom_datatype_c", 
-                            "commit_id": "80b5109964cc15ac3d009397101cf28b3aad19dc", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This is simple example of RGB to HSV conversion to demonstrate Custom DATA Type usages in C Based Kernel. Xilinx HLS Compiler Supports Custom Data Type to use for operation as well as Memory Interface between Kernel and Global Memory."
                             ], 
@@ -917,7 +935,7 @@
                         }, 
                         {
                             "name": "custom_datatype_ocl", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This is simple example of RGB to HSV conversion to demonstrate Custom DATA Type usages in OpenCL Based Kernel. Xilinx HLS Compiler Supports Custom Data Type to use for operation as well as Memory Interface between Kernel and Global Memory."
                             ], 
@@ -934,7 +952,7 @@
                         }, 
                         {
                             "name": "full_array_2d_c", 
-                            "commit_id": "602ce10157ac71a620d3d06f89822e0c10f0aefb", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This is a simple example of accessing full data from 2d array"
                             ], 
@@ -947,7 +965,7 @@
                         }, 
                         {
                             "name": "full_array_2d_ocl", 
-                            "commit_id": "602ce10157ac71a620d3d06f89822e0c10f0aefb", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This is a simple example of accessing full data from 2d array"
                             ], 
@@ -960,7 +978,7 @@
                         }, 
                         {
                             "name": "gmem_2banks_c", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This example of 2ddr to demonstrate on how to use 2ddr DSA. How to create buffers in each DDR."
                             ], 
@@ -983,7 +1001,7 @@
                         }, 
                         {
                             "name": "gmem_2banks_ocl", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This example of 2ddr to demonstrate on how to use 2ddr DSA. How to create buffers in each DDR."
                             ], 
@@ -1005,7 +1023,7 @@
                         }, 
                         {
                             "name": "memcoalesce_hang_c", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This example shows Memory Coalesce Deadlock/Hand situation and how to handle it. User can switch between BAD and GOOD case using makefile variable KFLOW."
                             ], 
@@ -1025,7 +1043,7 @@
                         }, 
                         {
                             "name": "row_array_2d_c", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This is a simple example of accessing each row of data from 2d array"
                             ], 
@@ -1041,7 +1059,7 @@
                         }, 
                         {
                             "name": "row_array_2d_ocl", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This is a simple example of accessing each row of data from 2d array"
                             ], 
@@ -1058,7 +1076,7 @@
                         }, 
                         {
                             "name": "wide_mem_rw_c", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This is simple example of vector addition to demonstrate Wide Memory Access using ap_uint<512> data type. Based on input argument type, xocc compiler will figure our the memory datawidth between Global Memory and Kernel. For this example, ap_uint<512> datatype is used, so Memory datawidth will be 16 x (integer bit size) = 16 x 32 = 512 bit."
                             ], 
@@ -1077,7 +1095,7 @@
                         }, 
                         {
                             "name": "wide_mem_rw_ocl", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This is simple example of vector addition to demonstrate Wide Memory Access using uint16 data type. Based on input argument type, xocc compiler will figure our the memory datawidth between Global Memory and Kernel. For this example, uint16 datatype is used, so Memory datawidth will be 16 x (integer bit size) = 16 x 32 = 512 bit."
                             ], 
@@ -1096,7 +1114,7 @@
                         }, 
                         {
                             "name": "window_array_2d_c", 
-                            "commit_id": "810ac15e2484d267984b42b3bbb6efecd4a6b362", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This is a simple example of accessing each window of data from 2d array"
                             ], 
@@ -1114,7 +1132,7 @@
                         }, 
                         {
                             "name": "window_array_2d_ocl", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "This is a simple example of accessing each window of data from 2d array"
                             ], 
@@ -1144,7 +1162,7 @@
                     "examples": [
                         {
                             "name": "host_global_bandwidth", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "Host to global memory bandwidth test"
                             ], 
@@ -1154,7 +1172,7 @@
                         }, 
                         {
                             "name": "kernel_global_bandwidth", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "Bandwidth test of global to local memory."
                             ], 
@@ -1164,7 +1182,7 @@
                         }, 
                         {
                             "name": "sum_scan", 
-                            "commit_id": "d523831af56cc6d07af71dce4e77a5b701f90cb8", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "Example of parallel prefix sum"
                             ], 
@@ -1174,7 +1192,7 @@
                         }, 
                         {
                             "name": "vadd", 
-                            "commit_id": "f3c216dc46efd93c0e6f8866bb7e935b5d326b9d", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "Simple example of vector addition."
                             ], 
@@ -1184,45 +1202,11 @@
                         }, 
                         {
                             "name": "vdotprod", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                             "description": [
                                 "Simple example of vector dot-product."
                             ], 
                             "displayName": "Vector Dot-Product", 
-                            "version": "3.0", 
-                            "author": "Xilinx"
-                        }, 
-                        {
-                            "name": "vmul_vadd", 
-                            "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
-                            "description": [
-                                "This example shows how data stored in global memory can be shared between kernels in different binary containers. This functionality is available only for non-XPR Devices."
-                            ], 
-                            "displayName": "Vector Add - Vector Multiplication", 
-                            "key_concepts": [
-                                "Multiple Kernel Binaries", 
-                                "Buffer sharing across Multiple binaries", 
-                                "Multiple Kernels in different Binaries"
-                            ], 
-                            "version": "3.0", 
-                            "author": "Xilinx"
-                        }, 
-                        {
-                            "name": "vmul_vadd_xpr", 
-                            "commit_id": "5424bbb3939e9cdf4d370716a5578d6d9c0ffa63", 
-                            "description": [
-                                "This example shows how data stored in global memory should be migrated from device to host and later from host to device to share between kernels in different binary containers. This buffer migration is only needed for XPR(Extended Partial Reconfiguration) Specific Devices. As XPR devices do not persist data when user reload another binary container."
-                            ], 
-                            "displayName": "Vector Add - Vector Multiplication for XPR Devices", 
-                            "keywords": [
-                                "clEnqueueMigrateMemObjects()", 
-                                "CL_MIGRATE_MEM_OBJECT_HOST"
-                            ], 
-                            "key_concepts": [
-                                "Handling Buffer sharing across multiple binaries for XPR Platform", 
-                                "Multiple Kernel Binaries", 
-                                "Buffer sharing across Multiple binaries"
-                            ], 
                             "version": "3.0", 
                             "author": "Xilinx"
                         }
@@ -1239,7 +1223,7 @@
             "examples": [
                 {
                     "name": "aes_decrypt", 
-                    "commit_id": "80b5109964cc15ac3d009397101cf28b3aad19dc", 
+                    "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                     "description": [
                         "Implementation of an AES-128 ECB Encrypt in software, followed by decryption written in OpenCL and targeting execution on an SDAccel supported FPGA acceleration card."
                     ], 
@@ -1249,7 +1233,7 @@
                 }, 
                 {
                     "name": "rsa", 
-                    "commit_id": "80b5109964cc15ac3d009397101cf28b3aad19dc", 
+                    "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                     "description": [
                         "This is an implementation of a RSA Decryption algorithm targeting execution on an SDAccel supported FPGA acceleration card."
                     ], 
@@ -1259,7 +1243,7 @@
                 }, 
                 {
                     "name": "sha1", 
-                    "commit_id": "80b5109964cc15ac3d009397101cf28b3aad19dc", 
+                    "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                     "description": [
                         "This is an optimized implementation of SHA1 secure hash algorithm targeting execution on an SDAccel supported FPGA acceleration card."
                     ], 
@@ -1269,7 +1253,7 @@
                 }, 
                 {
                     "name": "tiny_encryption", 
-                    "commit_id": "c8fe1df092587987319ec33b2af0cf87f101662b", 
+                    "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                     "description": [
                         "implementation of the tiny encryption algorithm."
                     ], 
@@ -1287,7 +1271,7 @@
             "examples": [
                 {
                     "name": "affine", 
-                    "commit_id": "80b5109964cc15ac3d009397101cf28b3aad19dc", 
+                    "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                     "description": [
                         "Affine transformation is a linear mapping method that preserves points, straight lines, and planes. Sets of parallel lines remain parallel after an affine transformation. The affine transformation technique is typically used to correct for geometric distortions or deformations that occur with non-ideal camera angles. The demo performs a 30 degree X rotation and a 50% X and Y scaling on a 512 by 512, 16 bits per pixels grayscale, raw MRI image."
                     ], 
@@ -1297,7 +1281,7 @@
                 }, 
                 {
                     "name": "convolve", 
-                    "commit_id": "80b5109964cc15ac3d009397101cf28b3aad19dc", 
+                    "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                     "description": [
                         "The convolve example is a performant design which showcases convolutional image filtering. The example processes the image 8 pixels at a time."
                     ], 
@@ -1307,7 +1291,7 @@
                 }, 
                 {
                     "name": "edge_detection", 
-                    "commit_id": "80b5109964cc15ac3d009397101cf28b3aad19dc", 
+                    "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                     "description": [
                         "Implementation of a Sobel Filter for edge detection."
                     ], 
@@ -1317,7 +1301,7 @@
                 }, 
                 {
                     "name": "histogram_eq", 
-                    "commit_id": "80b5109964cc15ac3d009397101cf28b3aad19dc", 
+                    "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                     "description": [
                         "This is an optimized implementation of a 12-bit histogram equalizer targeting execution on an SDAccel supported FPGA acceleration card."
                     ], 
@@ -1327,7 +1311,7 @@
                 }, 
                 {
                     "name": "huffman_codec", 
-                    "commit_id": "90e0c6824966d2cf380b9db8a5b6a25fb3750c0f", 
+                    "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                     "description": [
                         "This is an implementation of a huffman encoding/decoding algorithm targeting execution on an SDAccel supported FPGA acceleration card."
                     ], 
@@ -1337,7 +1321,7 @@
                 }, 
                 {
                     "name": "idct", 
-                    "commit_id": "6357289c467f838bc7c90771ae6be7e2356fa863", 
+                    "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                     "description": [
                         "Example of processing Inverse Discrete Cosine Transfom on multiple blocks of data."
                     ], 
@@ -1347,7 +1331,7 @@
                 }, 
                 {
                     "name": "median_filter", 
-                    "commit_id": "80b5109964cc15ac3d009397101cf28b3aad19dc", 
+                    "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                     "description": [
                         "This is an optimized implementation of a median filter being used to remove noise in images targeting execution on an SDAccel supported FPGA acceleration card."
                     ], 
@@ -1357,7 +1341,7 @@
                 }, 
                 {
                     "name": "watermarking", 
-                    "commit_id": "80b5109964cc15ac3d009397101cf28b3aad19dc", 
+                    "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
                     "description": [
                         "This is an optimized implementation of a watermarking application to add watermarking to images targeting execution on an SDAccel supported FPGA acceleration card."
                     ], 
@@ -1369,5 +1353,5 @@
         }
     ], 
     "examples": [], 
-    "branch": "master"
+    "branch": "update_gui"
 }
