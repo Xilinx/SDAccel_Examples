@@ -115,7 +115,7 @@ It is typical for hardware compile times to range from 30 minutes to a couple of
 
 ## 6. Execution in Cloud Environments
 FPGA acceleration boards have been deployed to the cloud. For information on how to execute the example within a specific cloud, take a look at the following guides.
-* [AWS F1 Application Execution on Xilinx Virtex UltraScale Devices] (Coming Soon)
+* [AWS F1 Application Execution on Xilinx Virtex UltraScale Devices]
 * [Nimbix Application Execution on Xilinx Kintex UltraScale Devices]
 * [IBM SuperVessel Research Cloud on Xilinx Virtex Devices]
 
@@ -150,6 +150,6 @@ DEC2016|1.0|Initial Xilinx Release
 [Nimbix Application Submission README]: ../../../utility/nimbix/README.md
 [Repository Contribution README]: ../../../CONTRIBUTING.md
 [SDaccel GUI README]: ../../../GUIREADME.md
-[AWS F1 Application Execution on Xilinx Virtex UltraScale Devices]: ../../../README.md
+[AWS F1 Application Execution on Xilinx Virtex UltraScale Devices]: https://github.com/aws/aws-fpga/blob/master/SDAccel/README.md
 [Nimbix Application Execution on Xilinx Kintex UltraScale Devices]: ../../../utility/nimbix/README.md
 [IBM SuperVessel Research Cloud on Xilinx Virtex Devices]: http://bcove.me/6pp0o482

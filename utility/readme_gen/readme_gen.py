@@ -220,7 +220,7 @@ def compilation(target,data):
 def execution(target):
     target.write("## 6. Execution in Cloud Environments\n")
     target.write("FPGA acceleration boards have been deployed to the cloud. For information on how to execute the example within a specific cloud, take a look at the following guides.\n");
-    target.write("* [AWS F1 Application Execution on Xilinx Virtex UltraScale Devices] (Coming Soon)\n")
+    target.write("* [AWS F1 Application Execution on Xilinx Virtex UltraScale Devices]\n")
     target.write("* [Nimbix Application Execution on Xilinx Kintex UltraScale Devices]\n")
     target.write("* [IBM SuperVessel Research Cloud on Xilinx Virtex Devices]\n")
     target.write("\n")
@@ -338,7 +338,7 @@ def footer(target):
     target.write("[Nimbix Application Submission README]: " + root + "utility/nimbix/README.md\n")
     target.write("[Repository Contribution README]: " + root + "CONTRIBUTING.md\n")
     target.write("[SDaccel GUI README]: " + root + "GUIREADME.md\n")
-    target.write("[AWS F1 Application Execution on Xilinx Virtex UltraScale Devices]: " + root + "README.md\n")
+    target.write("[AWS F1 Application Execution on Xilinx Virtex UltraScale Devices]: https://github.com/aws/aws-fpga/blob/master/SDAccel/README.md\n")
     target.write("[Nimbix Application Execution on Xilinx Kintex UltraScale Devices]: " + root + "utility/nimbix/README.md\n")
     target.write("[IBM SuperVessel Research Cloud on Xilinx Virtex Devices]: http://bcove.me/6pp0o482\n")
     return
