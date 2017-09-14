@@ -33,10 +33,9 @@ C Kernel Example using AXI4-master interface to access row of data from 2D array
 *******************************************************************************/
       
 //Includes 
-#include <stdio.h>
-#include <string.h>
-#include "assert.h"
 #include "host.h"
+#include <hls_stream.h>
+typedef hls::stream<DTYPE> my_data_fifo;
 
 // Read data function : Read Data from Global Memory
 void read_data(DTYPE *inx, my_data_fifo &inFifo) {

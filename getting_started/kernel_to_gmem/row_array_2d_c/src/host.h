@@ -27,7 +27,6 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 
-#include <hls_stream.h>
 //Parameters Description:
 //         NUM_ROWS:            matrix height
 //         WORD_PER_ROW:        number of words in a row
@@ -39,4 +38,3 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // default datatype is integer
 typedef int DTYPE;
 // use HLS stream library for easy use of AXI-stream interface
-typedef hls::stream<DTYPE> my_data_fifo;

@@ -7,7 +7,7 @@ include $(COMMON_REPO)/libs/opencl/opencl.mk
 # Host Application
 host_SRCS=./src/host.cpp $(xcl2_SRCS)
 host_HDRS=$(xcl2_HDRS)
-host_CXXFLAGS=-I./src/ $(xcl2_CXXFLAGS) $(opencl_CXXFLAGS) -I$(XILINX_SDACCEL)/Vivado_HLS/include
+host_CXXFLAGS=-I./src/ $(xcl2_CXXFLAGS) $(opencl_CXXFLAGS)
 host_LDFLAGS=$(opencl_LDFLAGS)
 
 EXES=host

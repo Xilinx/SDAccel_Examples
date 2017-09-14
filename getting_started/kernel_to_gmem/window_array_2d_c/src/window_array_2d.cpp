@@ -33,10 +33,11 @@ C Kernel Example using AXI4-master interface to access window of data from 2D ar
 *******************************************************************************/
 
 //Includes 
-#include <stdio.h>
-#include <string.h>
-#include "assert.h"
 #include "host.h"
+#include <hls_stream.h>
+
+// use HLS stream library for easy use of AXI-stream interface
+typedef hls::stream<DTYPE> my_data_fifo;
 
 // Read data function : Read tile/window of Data from Global Memory
 void read_data(DTYPE *inx, my_data_fifo &inFifo) {
