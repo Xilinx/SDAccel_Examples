@@ -32,7 +32,6 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string.h>
 #include <math.h>
 
-#include <ap_fixed.h>
 #include <xcl.h>
 
 #include "linear_search.h"
