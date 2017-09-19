@@ -32,7 +32,7 @@ ifeq ($(findstring ku115,$(call spaced_dsa,$(1))),ku115)
 	--xp vivado_prop:run.impl_1.STEPS.PHYS_OPT_DESIGN.ARGS.DIRECTIVE=AggressiveExplore \
 	--xp vivado_prop:run.impl_1.STEPS.ROUTE_DESIGN.ARGS.DIRECTIVE=Explore \
 	--nk kernelSgemm_0:1:krnl_0 
-	high_perf_mat_mult_CXXFLAGS=-Wall -I./src/ -I$(XILINX_SDACCEL)/Vivado_HLS/include/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS)
+	high_perf_mat_mult_CXXFLAGS=-Wall -I./src/ -I$(XILINX_SDACCEL)/Vivado_HLS/include/ -I$(XILINX_SDACCEL)/include $(opencl_CXXFLAGS) $(xcl_CXXFLAGS)
 endif
 
 ifeq ($(findstring vu9p,$(call spaced_dsa,$(1))),vu9p) 
@@ -52,7 +52,7 @@ ifeq ($(findstring vu9p,$(call spaced_dsa,$(1))),vu9p)
 	--xp vivado_prop:run.impl_1.STEPS.ROUTE_DESIGN.ARGS.DIRECTIVE=Explore \
 	--nk kernelSgemm_0:1:krnl_0 \
 	--kernel_frequency "0:300|1:400" 
-	high_perf_mat_mult_CXXFLAGS=-Wall -I./src/ -DVU9P -I$(XILINX_SDACCEL)/Vivado_HLS/include/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS)
+	high_perf_mat_mult_CXXFLAGS=-Wall -I./src/ -DVU9P -I$(XILINX_SDACCEL)/Vivado_HLS/include/  -I$(XILINX_SDACCEL)/include $(opencl_CXXFLAGS) $(xcl_CXXFLAGS)
 endif
 
 
