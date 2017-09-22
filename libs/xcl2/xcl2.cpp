@@ -172,7 +172,7 @@ find_binary_file(const std::string& _device_name, const std::string& xclbin_name
         "%1$s/%2$s.%3$s.%4$s.awsxclbin",     // <kernel>.<target>.<device>.awsxclbin
         "%1$s/%2$s.%3$s.%5$s.awsxclbin",     // <kernel>.<target>.<device_versionless>.awsxclbin
         "%1$s/binary_container_1.awsxclbin", // default for gui projects
-        "%1$s/%2$s.xclbin",               // <kernel>.awsxclbin
+        "%1$s/%2$s.awsxclbin",               // <kernel>.awsxclbin
         NULL
     };
 
