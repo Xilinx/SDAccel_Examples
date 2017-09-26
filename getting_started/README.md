@@ -32,6 +32,7 @@ Example        | Description           | Key Concepts / Keywords
 [host/helloworld_ocl/][]|This example is a simple OpenCL application. It will highlight the basic flow of an OpenCL application.|__Key__ __Concepts__<br> - OpenCL API<br>
 [host/multiple_devices_ocl/][]|This example show how to take advantage of multiple FPGAs on a system. It will show how to initialized an OpenCL context, allocate memory on the two devices and execute a kernel on each FPGA.|__Key__ __Concepts__<br> - OpenCL API<br> - Multi-FPGA Execution<br> - Event Handling<br>__Keywords__<br> - cl_device_id<br> - clGetDeviceIDs()
 [host/overlap_ocl/][]|This examples demonstrates techniques that allow user to overlap Host(CPU) and FPGA computation in an application. It will cover asynchronous operations and event object.|__Key__ __Concepts__<br> - OpenCL API<br> - Synchronize Host and FPGA<br> - Asynchronous Processing<br> - Events<br> - Asynchronous memcpy<br>__Keywords__<br> - cl_event<br> - clCreateCommandQueue<br> - CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE<br> - clEnqueueMigrateMemObjects
+[host/stream_access_ocl/][]|This is a simple example that demonstrates on how to process an input stream of data for computation in an application. It shows how to perform asynchronous operations and event handling.|__Key__ __Concepts__<br> - OpenCL API<br> - Synchronize Host and FPGA<br> - Asynchronous Processing<br> - Events<br> - Asynchronous Data Transfer<br>__Keywords__<br> - cl_event<br> - CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE
 [kernel_to_gmem/burst_rw_c/][]|This is simple example of using AXI4-master interface for burst read and write|__Key__ __Concepts__<br> - burst access<br>__Keywords__<br> - memcpy
 [kernel_to_gmem/burst_rw_ocl/][]|This is simple example of using AXI4-master interface for burst read and write|__Key__ __Concepts__<br> - burst access<br>
 [kernel_to_gmem/custom_datatype_c/][]|This is simple example of RGB to HSV conversion to demonstrate Custom DATA Type usages in C Based Kernel. Xilinx HLS Compiler Supports Custom Data Type to use for operation as well as Memory Interface between Kernel and Global Memory.|__Key__ __Concepts__<br> - Custom Datatype<br>__Keywords__<br> - struct<br> - #pragma HLS data_pack<br> - #pragma HLS LOOP_TRIPCOUNT
@@ -103,6 +104,7 @@ Example        | Description           | Key Concepts / Keywords
 [host/helloworld_ocl/]:host/helloworld_ocl/
 [host/multiple_devices_ocl/]:host/multiple_devices_ocl/
 [host/overlap_ocl/]:host/overlap_ocl/
+[host/stream_access_ocl/]:host/stream_access_ocl/
 [kernel_to_gmem]:kernel_to_gmem
 [kernel_to_gmem/burst_rw_c/]:kernel_to_gmem/burst_rw_c/
 [kernel_to_gmem/burst_rw_ocl/]:kernel_to_gmem/burst_rw_ocl/

@@ -16,6 +16,7 @@ Example        | Description           | Key Concepts / Keywords
 [multiple_devices_ocl/][]|This example show how to take advantage of multiple FPGAs on a system. It will show how to initialized an OpenCL context, allocate memory on the two devices and execute a kernel on each FPGA.|__Key__ __Concepts__<br> - OpenCL API<br> - Multi-FPGA Execution<br> - Event Handling<br>__Keywords__<br> - cl_device_id<br> - clGetDeviceIDs()
 [overlap_ocl/][]|This examples demonstrates techniques that allow user to overlap Host(CPU) and FPGA computation in an application. It will cover asynchronous operations and event object.|__Key__ __Concepts__<br> - OpenCL API<br> - Synchronize Host and FPGA<br> - Asynchronous Processing<br> - Events<br> - Asynchronous memcpy<br>__Keywords__<br> - cl_event<br> - clCreateCommandQueue<br> - CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE<br> - clEnqueueMigrateMemObjects
 
+[stream_access_ocl/][]|This is a simple example that demonstrates on how to process an input stream of data for computation in an application. It shows how to perform asynchronous operations and event handling.|__Key__ __Concepts__<br> - OpenCL API<br> - Synchronize Host and FPGA<br> - Asynchronous Processing<br> - Events<br> - Asynchronous Data Transfer<br>__Keywords__<br> - cl_event<br> - CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE
 [.]:.
 [concurrent_kernel_execution_ocl/]:concurrent_kernel_execution_ocl/
 [copy_buffer_ocl/]:copy_buffer_ocl/
@@ -26,3 +27,4 @@ Example        | Description           | Key Concepts / Keywords
 [kernel_swap_ocl/]:kernel_swap_ocl/
 [multiple_devices_ocl/]:multiple_devices_ocl/
 [overlap_ocl/]:overlap_ocl/
+[stream_access_ocl/]:stream_access_ocl/
