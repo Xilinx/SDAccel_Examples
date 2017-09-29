@@ -13,7 +13,7 @@ devices += ['xilinx:xil-accel-rd-ku115:4ddr-xpr']
 devices += ['xilinx:adm-pcie-ku3:2ddr-xpr']
 devices += ['xilinx:xil-accel-rd-vu9p:4ddr-xpr']
 
-version = '2017.1'
+version = '2017.2'
 
 precheck_status = 'FAILURE'
 sw_status = 'FAILURE'
