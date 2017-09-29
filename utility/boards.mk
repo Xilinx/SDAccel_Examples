@@ -21,8 +21,7 @@ ifndef XILINX_SDACCEL
 $(error XILINX_SDX or XILINX_SDACCEL is not set. Please source the SDx settings64.{csh,sh} script before attempting to run examples)
 endif
 
-VIVADO=$(XILINX_SDX)/Vivado/bin/vivado
-
+VIVADO=$(XILINX_VIVADO)/bin/vivado
 
 # Use the Xilinx OpenCL compiler
 CLC:=$(XILINX_SDACCEL)/bin/xocc
