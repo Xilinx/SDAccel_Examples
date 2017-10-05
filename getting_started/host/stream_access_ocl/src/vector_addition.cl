@@ -39,17 +39,21 @@ kernel __attribute__((reqd_work_group_size(1, 1, 1)))
 void vec_add(global int* c,
           global const int* a,
           global const int* b,
+          global int* result_size,
           const int elements
           ) {
-    int arrayA[BUFFER_SIZE];
+    int arrayA[BUFFER_SIZE], arrayB[BUFFER_SIZE];
+    int k = 0;
     for (int i = 0 ; i < elements ; i += BUFFER_SIZE)
     {
         int size = BUFFER_SIZE;
         if (i + size > elements) size = elements - i;
-        readA: 
-            for (int j = 0 ; j < size ; j++) arrayA[j] = a[i+j];
-            // Parallel read and write happens
-        readB_writeC: 
-            for (int j = 0 ; j < size ; j++) c[i + j] = arrayA[j] + b[i+j];
+
+        readA: for (int j = 0 ; j < size ; j++) arrayA[j] = a[i+j];
+        readB: for (int j = 0 ; j < size ; j++) arrayB[j] = b[i+j];
+
+        writeC: for (int j = 0 ; j < (size-1)/2 + 1 ; j++) c[k+j] = arrayA[2*j] + arrayB[2*j];
+        k = k + (size-1)/2 + 1;
     }
+    result_size[0] = k;
 }

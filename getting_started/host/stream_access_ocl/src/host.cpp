@@ -84,7 +84,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include<cstdio>
 
-#define CHUNK_SIZE 1024 
+#define CHUNK_SIZE 1024
+#define LENGTH_BUFFER 4
 
 using std::array;
 using std::vector;
@@ -121,18 +122,20 @@ struct aligned_allocator
 //Compare the CPU and FPGA results
 bool verify( int *in1,
              int *in2,
-             int *out
+             int *out,
+             int *result_size
 )
 {
     bool match = true;
+    int iter_length = result_size[0];
     //verify the results
-    for (int i = 0; i < CHUNK_SIZE; i++) {
+    for (int i = 0, j=0; i < iter_length; i+=2, j++) {
         int host_result = in1[i] + in2[i];
-        if (out[i] != host_result) {
+        if (out[j] != host_result) {
             std::cout << "Error: Result mismatch" << std::endl;
             std::cout << "i = " << i << "In1 = " << in1[i] << "In2 = "
                         << in2[i] << " CPU result = " << host_result 
-                        << " Hardware result = " << out[i] << std::endl;
+                        << " Hardware result = " << out[j] << std::endl;
             match = false;
             break;
         }
@@ -164,7 +167,9 @@ int main(int argc, char **argv) {
     // will perform computation on a subset of the entire data-set. Each iteration
     // is based on the outermost while loop.
     size_t elements_per_iteration = CHUNK_SIZE;
+    size_t length_buffer = LENGTH_BUFFER;          // size of the data to read back 
     size_t bytes_per_iteration = elements_per_iteration * sizeof(int);
+    size_t bytes_length_buffer = length_buffer * sizeof(int);
 
     bool match = true;
 
@@ -182,19 +187,23 @@ int main(int argc, char **argv) {
     array<vector<int,aligned_allocator<int>>, 2> A;
     array<vector<int,aligned_allocator<int>>, 2> B;
     array<vector<int,aligned_allocator<int>>, 2> device_result;
+    array<vector<int,aligned_allocator<int>>, 2> result_size;
 
     // Create buffers with the vector size data
-    cl_mem buffer_a[2], buffer_b[2], buffer_c[2];
+    cl_mem buffer_a[2], buffer_b[2], buffer_c[2], buffer_size[2];
     for (int i = 0 ; i < 2 ; i++){
         A[i].resize(bytes_per_iteration);
         B[i].resize(bytes_per_iteration);
         device_result[i].resize(bytes_per_iteration);
+        result_size[i].resize(bytes_length_buffer);
         buffer_a[i] = clCreateBuffer(world.context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
                         bytes_per_iteration, A[i].data(), NULL);
         buffer_b[i] = clCreateBuffer(world.context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
                         bytes_per_iteration, B[i].data(), NULL);
         buffer_c[i] = clCreateBuffer(world.context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
                     bytes_per_iteration, device_result[i].data(), NULL);
+        buffer_size[i] = clCreateBuffer(world.context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
+                    bytes_length_buffer, result_size[i].data(), NULL);
     }
 
     int in1_buffer_counter, in2_buffer_counter, flag;
@@ -223,9 +232,9 @@ int main(int argc, char **argv) {
             OCL_CHECK(clReleaseEvent(kernel_events[flag]));
             OCL_CHECK(clReleaseEvent(read_events[flag]));
             // Verify results and out stream the data to a file
-            match = verify(A[flag].data(), B[flag].data(), device_result[flag].data());
+            match = verify(A[flag].data(), B[flag].data(), device_result[flag].data(), result_size[flag].data());
             if(match){
-                for(size_t i = 0; i < elements_per_iteration; i++){
+                for(int i = 0; i < result_size[flag][0]; i++){
                     out_stream << std::to_string(device_result[flag][i]);
                     out_stream << "\n";
                 }
@@ -256,11 +265,11 @@ int main(int argc, char **argv) {
         // To take care of the last iteration elements (which can be less than a KB)
         if(in1_buffer_counter < CHUNK_SIZE){
             elements_per_iteration = in1_buffer_counter;
+            bytes_per_iteration = elements_per_iteration * sizeof(int);
         }
 
         size_t global = 1, local = 1;
        
-        std::cout <<"Enqueueing Migrate Mem Object (Host to Device) calls" << std::endl;
         // These calls are asynchronous with respect to the main thread
         OCL_CHECK(clEnqueueMigrateMemObjects(
                 world.command_queue, 1, &buffer_a[flag],
@@ -277,9 +286,9 @@ int main(int argc, char **argv) {
         xcl_set_kernel_arg(kernel, 0, sizeof(cl_mem), &buffer_c[flag]);
         xcl_set_kernel_arg(kernel, 1, sizeof(cl_mem), &buffer_a[flag]);
         xcl_set_kernel_arg(kernel, 2, sizeof(cl_mem), &buffer_b[flag]);
-        xcl_set_kernel_arg(kernel, 3, sizeof(int), &elements_per_iteration);
+        xcl_set_kernel_arg(kernel, 3, sizeof(cl_mem), &buffer_size[flag]);
+        xcl_set_kernel_arg(kernel, 4, sizeof(int), &elements_per_iteration);
 
-        std::cout << "Enqueueing NDRange kernel." << std::endl;
         // This event needs to wait for the write buffer operations to complete
         // before executing. We are sending the write_events into its wait list to
         // ensure that the order of operations is correct.
@@ -287,18 +296,20 @@ int main(int argc, char **argv) {
                     &global, &local, 2 , write_events[flag].data(),
                     &kernel_events[flag]));
 
-        std::cout << "Enqueueing Migrate Mem Object (Device to Host) calls" << std::endl;
         // This operation only needs to wait for the kernel call. This call will
         // potentially overlap the next kernel call as well as the next read
         // operations
         OCL_CHECK(clEnqueueMigrateMemObjects(world.command_queue, 1, &buffer_c[flag], 
                     CL_MIGRATE_MEM_OBJECT_HOST, 1, &kernel_events[flag], &read_events[flag]));
+        OCL_CHECK(clEnqueueMigrateMemObjects(world.command_queue, 1, &buffer_size[flag], 
+                    CL_MIGRATE_MEM_OBJECT_HOST, 1, &kernel_events[flag], &read_events[flag]));
 
         clEnqueueMapBuffer(world.command_queue, buffer_c[flag], CL_FALSE, CL_MAP_READ, 0, 
                     bytes_per_iteration, 1, &read_events[flag], &map_events[flag], 0);
+        clEnqueueMapBuffer(world.command_queue, buffer_size[flag], CL_FALSE, CL_MAP_READ, 0, 
+                    bytes_length_buffer, 1, &read_events[flag], &map_events[flag], 0);
     }
     // Wait for all of the OpenCL operations to complete
-    std::cout << "Waiting..." << std::endl;
     clFlush(world.command_queue);
     clFinish(world.command_queue);
 
@@ -324,9 +335,9 @@ int main(int argc, char **argv) {
             elements_per_iteration = elements_last_iteration;
         }
         // Verify results and out stream the data to file
-        match = verify(A[flag].data(), B[flag].data(), device_result[flag].data());
+        match = verify(A[flag].data(), B[flag].data(), device_result[flag].data(), result_size[flag].data());
         if(match){
-            for(size_t j = 0; j < elements_per_iteration; j++){
+            for(int j = 0; j < result_size[flag][0]; j++){
                 out_stream << std::to_string(device_result[flag][j]);
                 out_stream << "\n";
             }
