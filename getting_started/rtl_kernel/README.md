@@ -11,7 +11,6 @@ Example        | Description           | Key Concepts / Keywords
 [rtl_vadd_2clks/][]|This example shows vector addition with 2 kernel clocks using RTL Kernel.|__Key__ __Concepts__<br> - RTL Kernel<br> - Multiple Kernel Clocks<br>__Keywords__<br> - --kernel_frequency
 [rtl_vadd_2kernels/][]|This example has two RTL Kernels. Both Kernel_0 and Kernel_1 perform vector addition. The Kernel_1 reads the output from Kernel_0 as one of two inputs.|__Key__ __Concepts__<br> - Multiple RTL Kernels<br>
 [rtl_vadd_mixed_cl_vadd/][]|This example has one RTL kernel and one CL kernel. Both RTL kernel and CL kernel perform vector addition. The CL kernel reads the output from RTL kernel as one of two inputs.|__Key__ __Concepts__<br> - Mixed Kernels<br>
-[rtl_vadd_hw_debug/][]|Simple example of Debugging Vector Addition using RTL Kernel in Hardware|__Key__ __Concepts__<br> - RTL Kernel<br>
 
 [.]:.
 [rtl_adder_pipes/]:rtl_adder_pipes/
@@ -19,4 +18,3 @@ Example        | Description           | Key Concepts / Keywords
 [rtl_vadd_2clks/]:rtl_vadd_2clks/
 [rtl_vadd_2kernels/]:rtl_vadd_2kernels/
 [rtl_vadd_mixed_cl_vadd/]:rtl_vadd_mixed_cl_vadd/
-[rtl_vadd_hw_debug/]:rtl_vadd_hw_debug/
