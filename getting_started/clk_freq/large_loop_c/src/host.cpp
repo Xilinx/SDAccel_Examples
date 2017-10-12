@@ -40,9 +40,10 @@ Description:
 #include <cstring>
 #include <cstdio>
 #include <cassert>
+#include <unistd.h>
 
 //OpenCL utility layer include
-#include "xcl.h"
+#include "xcl2.hpp"
 #include "defns.h"
 
 #define WORK_GROUP 4 
@@ -50,8 +51,21 @@ Description:
 
 #define DATA_SIZE OChan * OSize * OSize
 
+uint64_t get_duration_ns (const cl::Event &event) {
+    uint64_t nstimestart, nstimeend;
+    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart);
+    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend);
+    return(nstimeend-nstimestart);
+}
+
 // Software solution
-void convGolden(int *weight, int *image, int *out, int i_chan, int o_chan)
+void convGolden(
+    int *weight,
+    int *image,
+    int *out,
+    int i_chan, 
+    int o_chan
+)
 {
     // Runs over output filters
     for(int output = 0; output < o_chan; output++){
@@ -85,34 +99,36 @@ void convGolden(int *weight, int *image, int *out, int i_chan, int o_chan)
     }
 }
 
-unsigned long run_opencl_cnn(
-    xcl_world world,
+uint64_t run_opencl_cnn(
+    std::vector<cl::Device> &devices,
+    cl::CommandQueue &q,
+    cl::Context &context,
+    std::string &device_name,
     bool good,
     int size,
-    int* weight,
-    int* image,
-    int* output,
+    std::vector<int, aligned_allocator<int>> &weight,
+    std::vector<int, aligned_allocator<int>> &image,
+    std::vector<int, aligned_allocator<int>> &output,
     int i_chan,
     int o_chan
 ) {
-    cl_program program;
+    std::string binaryFile;
 
     if (good) {
-        program = xcl_import_binary(world, "cnn_GOOD");
-    } else {
-        char* xclbin_file_name = xcl_get_xclbin_name(world, "cnn_BAD");
-        program = xcl_import_binary_file(world, xclbin_file_name);
-
-        if(program == NULL) {
-            std::cout << "WARNING: cnn_BAD xclbin not built" << std::endl;
-            free(xclbin_file_name);
-            return 0;
+        binaryFile = xcl::find_binary_file(device_name, "cnn_GOOD");
+    } 
+    else {
+        binaryFile = xcl::find_binary_file(device_name,"cnn_BAD");
+        if(access(binaryFile.c_str(), R_OK) != 0) {
+            std::cout << "WARNING: vadd_BAD xclbin not built" << std::endl;
+            return false;
         }
-
-        free(xclbin_file_name);
     }
 
-    cl_kernel krnl_cnn_conv = xcl_get_kernel(program, "cnn");
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    devices.resize(1);
+    cl::Program program(context, devices, bins);
+    cl::Kernel krnl_cnn_conv(program,"cnn");
 
     std::cout << "Starting " << (good ? "GOOD" : "BAD") << " Kernel" << std::endl;
 
@@ -121,26 +137,32 @@ unsigned long run_opencl_cnn(
     size_t output_size_bytes = sizeof(int) * o_chan * OSize * OSize;
 
     // Allocate Buffer in Global Memory
-    cl_mem buffer_image    = xcl_malloc(world, CL_MEM_READ_ONLY, image_size_bytes);
-    cl_mem buffer_weight   = xcl_malloc(world, CL_MEM_READ_ONLY, weight_size_bytes);
-    cl_mem buffer_output   = xcl_malloc(world, CL_MEM_WRITE_ONLY, output_size_bytes);
+    std::vector<cl::Memory> inBufVec, outBufVec;
+    cl::Buffer buffer_image (context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                            image_size_bytes, image.data());
+    cl::Buffer buffer_weight(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                            weight_size_bytes, weight.data());
+    cl::Buffer buffer_output(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                                output_size_bytes, output.data());
 
-    //Copy input data to device global memory
-    xcl_memcpy_to_device(world, buffer_image, image, image_size_bytes);
-    xcl_memcpy_to_device(world,buffer_weight,weight, weight_size_bytes);
+    inBufVec.push_back(buffer_image);
+    inBufVec.push_back(buffer_weight);
+    outBufVec.push_back(buffer_output);
+
+    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
 
     //Set the Kernel Arguments
     int narg = 0;
-    xcl_set_kernel_arg(krnl_cnn_conv, narg++, sizeof(cl_mem), &buffer_image);
-    xcl_set_kernel_arg(krnl_cnn_conv, narg++, sizeof(cl_mem), &buffer_weight);
-    xcl_set_kernel_arg(krnl_cnn_conv, narg++, sizeof(cl_mem), &buffer_output);
-    xcl_set_kernel_arg(krnl_cnn_conv, narg++, sizeof(int), &size);
-    xcl_set_kernel_arg(krnl_cnn_conv, narg++, sizeof(int), &i_chan);
-    xcl_set_kernel_arg(krnl_cnn_conv, narg++, sizeof(int), &o_chan);
+    krnl_cnn_conv.setArg(narg++, buffer_image);
+    krnl_cnn_conv.setArg(narg++, buffer_weight);
+    krnl_cnn_conv.setArg(narg++, buffer_output);
+    krnl_cnn_conv.setArg(narg++, size);
+    krnl_cnn_conv.setArg(narg++, i_chan);
+    krnl_cnn_conv.setArg(narg++, o_chan);
 
     std::cout << "Begin " << (good ? "GOOD" : "BAD") << " Kernel" << std::endl;
 
-    unsigned long duration;
+    uint64_t duration = 0;
 
     if(good) {
         int work_group = WORK_GROUP;
@@ -150,49 +172,35 @@ unsigned long run_opencl_cnn(
             work_group = 1;
         }
 
-        cl_event events[work_group];
+        cl::Event events[work_group];
 
         for(int i = 0; i < work_group; i++) {
-            xcl_set_kernel_arg(krnl_cnn_conv, 6, sizeof(int), &i);
-            xcl_set_kernel_arg(krnl_cnn_conv, 7, sizeof(int), &work_group);
+            krnl_cnn_conv.setArg(narg+0, i);
+            krnl_cnn_conv.setArg(narg+1, work_group);
 
-            size_t dims[] = {1};
-
-            int err = clEnqueueNDRangeKernel(world.command_queue, krnl_cnn_conv, 1, NULL, dims, dims, 0, NULL, &events[i]);
-            if(err != CL_SUCCESS){
-                printf("Error: failed to execute kernel! %d\n", err);
-                printf("Test failed\n");
-                exit(EXIT_FAILURE);
-            }
+            q.enqueueTask(krnl_cnn_conv, NULL, &events[i]);
         }
-        clFinish(world.command_queue);
+        q.finish();
 
-        unsigned long start, stop;
-
-        clGetEventProfilingInfo(events[0], CL_PROFILING_COMMAND_START,
-                     sizeof(unsigned long), &start, NULL);
-        clGetEventProfilingInfo(events[work_group-1], CL_PROFILING_COMMAND_END,
-                      sizeof(unsigned long), &stop, NULL);
+        uint64_t start = get_duration_ns(events[0]);
+        uint64_t stop = get_duration_ns(events[work_group-1]);
 
         duration = stop - start;
-    } else {
-        // Launch a single thread to perform the same computation
-        // The kernel takes care of running over the whole data set
-        duration = xcl_run_kernel3d(world, krnl_cnn_conv, 1, 1, 1);
+    } 
+    else {
+        cl::Event event;
+
+        q.enqueueTask(krnl_cnn_conv, NULL, &event);
+        q.finish();
+
+        duration = get_duration_ns(event);
     }
 
     //Copy Result from Device Global Memory to Host Local Memory
-    xcl_memcpy_from_device(world, output, buffer_output, output_size_bytes);
+    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    q.finish();
 
     std::cout << "Finished " << (good ? "GOOD" : "BAD") << " Kernel" << std::endl;
-
-    //Release Device Memories and Kernels
-    clReleaseMemObject(buffer_image);
-    clReleaseMemObject(buffer_weight);
-    clReleaseMemObject(buffer_output);
-    clReleaseKernel(krnl_cnn_conv);
-    clReleaseProgram(program);
-
     return duration;
 }
 
@@ -220,11 +228,11 @@ int main(int argc, char** argv)
     size_t weight_size_bytes = sizeof(int) * o_chan * WInChan * WSize * WSize;
     size_t output_size_bytes = sizeof(int) * o_chan * OSize * OSize;
 
-    int *image                  = (int *) malloc(image_size_bytes);  assert(image);
-    int *weight                 = (int *) malloc(weight_size_bytes); assert(weight);
-    int *source_good_hw_results = (int *) malloc(output_size_bytes); assert(source_good_hw_results);
-    int *source_bad_hw_results  = (int *) malloc(output_size_bytes); assert(source_bad_hw_results);
-    int *source_sw_results      = (int *) malloc(output_size_bytes); assert(source_sw_results);
+    std::vector<int,aligned_allocator<int>> image(image_size_bytes);
+    std::vector<int,aligned_allocator<int>> weight(weight_size_bytes);
+    std::vector<int,aligned_allocator<int>> source_good_hw_results(output_size_bytes);
+    std::vector<int,aligned_allocator<int>> source_bad_hw_results(output_size_bytes);
+    std::vector<int,aligned_allocator<int>> source_sw_results(output_size_bytes);
 
     // Initialize Image, Weights & Output Host Buffers
     for(int i = 0; i < i_chan*ISize*ISize; i++)
@@ -236,28 +244,27 @@ int main(int argc, char** argv)
     for(int i = 0; i < o_chan*OSize*OSize; i++)
         source_sw_results[i] = source_good_hw_results[i] = source_bad_hw_results[i] = 0;
 
-    convGolden(weight, image, source_sw_results, i_chan, o_chan);
+    convGolden(weight.data(), image.data(), source_sw_results.data(), i_chan, o_chan);
 
-    xcl_world world = xcl_world_single();
+//OPENCL HOST CODE AREA START
+    //Create Program and Kernels
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
+    
+    cl::Context context(device);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+    std::string device_name = device.getInfo<CL_DEVICE_NAME>();
 
-    unsigned long good_duration = run_opencl_cnn(world, true, size,
-        weight, image, source_good_hw_results, i_chan, o_chan);
+    uint64_t bad_duration = run_opencl_cnn(devices, q, context, device_name,
+            false, size, weight, image, source_bad_hw_results, i_chan, o_chan);
 
-    unsigned long bad_duration = run_opencl_cnn(world, false, size,
-        weight, image, source_bad_hw_results, i_chan, o_chan);
-
-    xcl_release_world(world);
+    uint64_t good_duration = run_opencl_cnn(devices, q, context, device_name, 
+            true, size, weight, image, source_good_hw_results, i_chan, o_chan);
+//OPENCL HOST CODE AREA END
 
     // Compare the results of the Device to the simulation
-    int match = 0;
+    bool match = true;
     for (int i = 0 ; i < size; i++){
-        if (source_good_hw_results[i] != source_sw_results[i]){
-            std::cout << "Error: Result mismatch in good kernel" << std::endl;
-            std::cout << "i = " << i << " CPU result = " << source_sw_results[i]
-                << " Device result = " << source_good_hw_results[i] << std::endl;
-            match = 1;
-            break;
-        }
         /* if bad_duration is 0 then the kernel was unable to be produced for
          * the hardware thus there's no reason to check the results */
         if (bad_duration != 0) {
@@ -265,25 +272,24 @@ int main(int argc, char** argv)
                 std::cout << "Error: Result mismatch in bad kernel" << std::endl;
                 std::cout << "i = " << i << " CPU result = " << source_sw_results[i]
                           << " Device result = " << source_bad_hw_results[i] << std::endl;
-                match = 1;
+                match = false;
                 break;
             }
         }
- 
+        if (source_good_hw_results[i] != source_sw_results[i]){
+            std::cout << "Error: Result mismatch in good kernel" << std::endl;
+            std::cout << "i = " << i << " CPU result = " << source_sw_results[i]
+                << " Device result = " << source_good_hw_results[i] << std::endl;
+            match = false;
+            break;
+        }
     }
 
-    /* Release Memory from Host Memory*/
-    free(image);
-    free(weight);
-    free(source_good_hw_results);
-    free(source_bad_hw_results);
-    free(source_sw_results);
-
-    std::cout << "GOOD duration = " << good_duration << " ns" << std::endl;
     if (bad_duration != 0) {
         std::cout << "BAD duration = "  << bad_duration  << " ns" << std::endl;
     }
+    std::cout << "GOOD duration = " << good_duration << " ns" << std::endl;
 
-    std::cout << "TEST " << (match ? "FAILED" : "PASSED") << std::endl; 
-    return (match ? EXIT_FAILURE :  EXIT_SUCCESS);
+    std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl; 
+    return (match ? EXIT_SUCCESS :  EXIT_FAILURE);
 }

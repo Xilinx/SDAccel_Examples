@@ -10,7 +10,7 @@
         "Linux"
     ],
     "libs": [
-        "xcl"
+        "xcl2"
     ],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
