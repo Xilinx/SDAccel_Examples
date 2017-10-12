@@ -263,10 +263,9 @@ int main(int argc, char **argv) {
            bytes_per_iteration, &device_result[iteration_idx * elements_per_iteration], NULL);
     array<cl_event, 2> write_events;
     printf("Enqueueing Migrate Mem Object (Host to Device) calls\n");
-    // These calls are asynchronous with respect to the main thread because we
-    // are passing the CL_FALSE as the third parameter. Because we are passing
-    // the events from the previous kernel call into the wait list, it will wait
-    // for the previous operations to complete before continuing
+    // Because we are passing the write_event, it returns an event object
+    // that identifies this particular command and can be used to query 
+    // or queue a wait for this particular command to complete.
     OCL_CHECK(clEnqueueMigrateMemObjects(
         world.command_queue, 1, &buffer_a[flag],
         0 /* flags, 0 means from host */,
