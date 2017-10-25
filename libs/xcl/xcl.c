@@ -393,6 +393,67 @@ char *xcl_get_xclbin_name(xcl_world world,
 			}
 		}
 	}
+
+    ino_t aws4ddr_debug_ino = 0; // used to avoid errors if an xclbin found via multiple/repeated paths
+    // if no 4ddr_awsxclbin found, check for 4ddr_debug_awsxclbin
+    if (*xclbin_file_name == '\0') {
+        const char *awsdebug_device_name = "xilinx_aws-vu9p-f1_4ddr-xpr-2pr-debug_4_0";
+        const char *awsdebug_device_name_versionless = "xilinx_aws-vu9p-f1_4ddr-xpr-2pr-debug";
+        for (const char **dir = search_dirs; *dir != NULL; dir++) {
+            struct stat sb;
+            if (stat(*dir, &sb) == 0 && S_ISDIR(sb.st_mode)) {
+                for (const char **pattern = file_patterns; *pattern != NULL; pattern++) {
+                    char file_name[PATH_MAX];
+                    memset(file_name, 0, PATH_MAX);
+                    snprintf(file_name, PATH_MAX, *pattern, *dir, xclbin_name, world.mode, awsdebug_device_name, awsdebug_device_name_versionless);
+                    if (stat(file_name, &sb) == 0 && S_ISREG(sb.st_mode)) {
+                        world.bindir = strdup(*dir);
+                        if (world.bindir == NULL) {
+                            printf("Error: Out of Memory\n");
+                            exit(EXIT_FAILURE);
+                        }
+                        if (*xclbin_file_name && sb.st_ino != aws4ddr_debug_ino) {
+                    	    printf("Error: multiple xclbin files discovered:\n %s\n %s\n", file_name, xclbin_file_name);
+                    	    exit(EXIT_FAILURE);
+                        }
+                        aws4ddr_debug_ino = sb.st_ino;
+                        strncpy(xclbin_file_name, file_name, PATH_MAX);
+                    }
+                }
+            }
+        }
+    }
+
+    ino_t aws1ddr_ino = 0; // used to avoid errors if an xclbin found via multiple/repeated paths
+    // if no 4ddr_awsxclbin found, check for 1ddr_awsxclbin
+    if (*xclbin_file_name == '\0') {
+        const char *aws_device_name = "xilinx_aws-vu9p-f1_1ddr-xpr-2pr_4_0";
+        const char *aws_device_name_versionless = "xilinx_aws-vu9p-f1_1ddr-xpr-2pr";
+        for (const char **dir = search_dirs; *dir != NULL; dir++) {
+            struct stat sb;
+            if (stat(*dir, &sb) == 0 && S_ISDIR(sb.st_mode)) {
+                for (const char **pattern = file_patterns; *pattern != NULL; pattern++) {
+                    char file_name[PATH_MAX];
+                    memset(file_name, 0, PATH_MAX);
+                    snprintf(file_name, PATH_MAX, *pattern, *dir, xclbin_name, world.mode, aws_device_name, aws_device_name_versionless);
+                    if (stat(file_name, &sb) == 0 && S_ISREG(sb.st_mode)) {
+                        world.bindir = strdup(*dir);
+                        if (world.bindir == NULL) {
+                            printf("Error: Out of Memory\n");
+                            exit(EXIT_FAILURE);
+                        }
+                        if (*xclbin_file_name && sb.st_ino != aws1ddr_ino) {
+                    	    printf("Error: multiple xclbin files discovered:\n %s\n %s\n", file_name, xclbin_file_name);
+                    	    exit(EXIT_FAILURE);
+                        }
+                        aws1ddr_ino = sb.st_ino;
+                        strncpy(xclbin_file_name, file_name, PATH_MAX);
+                    }
+                }
+            }
+        }
+    }
+
 	ino_t ino = 0; // used to avoid errors if an xclbin found via multiple/repeated paths
 	// if no awsxclbin found, check for xclbin
 	if (*xclbin_file_name == '\0') {
