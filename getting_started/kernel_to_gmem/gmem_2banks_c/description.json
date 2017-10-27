@@ -27,7 +27,7 @@
             "accelerators": [
                 {
                     "name": "apply_watermark",
-                    "clflags" : "--max_memory_ports apply_watermark", 
+                    "max_memory_ports": "true", 
                     "location": "src/apply_watermark.cpp"
                 }
             ]

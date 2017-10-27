@@ -18,7 +18,8 @@
             "name": "krnl_kernel_global", 
             "accelerators": [
                 {
-                    "name": "bandwidth", 
+                    "name": "bandwidth",
+                    "max_memory_ports": "true", 
                     "location": "src/kernel.cl"
                 }
             ]
