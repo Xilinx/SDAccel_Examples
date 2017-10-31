@@ -7,23 +7,23 @@ include $(COMMON_REPO)/libs/opencl/opencl.mk
 # Host Application
 host_SRCS=./src/host.cpp $(bitmap_SRCS) $(oclHelper_SRCS) $(xcl2_SRCS)
 host_HDRS=$(xcl2_HDRS) $(bitmap_HDRS)
-host_CXXFLAGS= -I./src/ $(xcl2_CXXFLAGS) $(opencl_CXXFLAGS) $(bitmap_CXXFLAGS) $(oclHelper_CXXFLAGS) 
+host_CXXFLAGS= -I./src/ $(xcl2_CXXFLAGS) $(opencl_CXXFLAGS) $(bitmap_CXXFLAGS) $(oclHelper_CXXFLAGS)
 host_LDFLAGS=$(opencl_LDFLAGS)
 
 # Kernel
-mean_value_SRCS=./src/mean_value.cpp
-mean_value_CLFLAGS=-k mean_value
+vconv_SRCS=./src/vconv.cpp
+vconv_CLFLAGS=-k vconv -I./src/
 
-XOS=mean_value
+XOS=vconv
 
-mean_value_XOS=mean_value
+vconv_XOS=vconv
 
 EXES=host
-XCLBINS=mean_value
+XCLBINS=vconv
 
 # check
 check_EXE=host
-check_XCLBINS=mean_value
+check_XCLBINS=vconv
 
 CHECKS=check
 
