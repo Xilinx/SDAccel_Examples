@@ -82,21 +82,13 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "xcl.h"
 #include <CL/cl_ext.h>
 
-uint8_t get_ddr_banks(xcl_world world) {
-    char* ddr_loc = strstr(world.device_name, "ddr");
-
-    /* if the ddr identifier is at the front of the string or NULL is returned
-     * then reading the previous char is dangerous so just assume 1 bank */
-    if(ddr_loc == NULL || ddr_loc == world.device_name) {
-        return 1;
-    }
-
-    /* The letter before contains the number of banks */
-    ddr_loc--;
-
-    /* Subtract from '0' to find the number of banks in uint8_t */
-    return (uint8_t) *ddr_loc - (uint8_t) '0';
-}
+#ifdef USE_4DDR
+    #define DDR_BANKS 4
+#elif USE_2DDR
+    #define DDR_BANKS 2
+#else
+    #define DDR_BANKS 1
+#endif
 
 int main(int argc, char** argv) {
 
@@ -130,7 +122,7 @@ int main(int argc, char** argv) {
         input_host[i] = i % 256;
     }
 
-    short ddr_banks = get_ddr_banks(world);
+    short ddr_banks = DDR_BANKS; 
 
     /* Index for the ddr pointer array: 4=4, 2=2, 1=2 */
     char num_buffers = ddr_banks + (ddr_banks % 2);
@@ -143,7 +135,7 @@ int main(int argc, char** argv) {
 
     cl_mem_ext_ptr_t ext_buffer[num_buffers];
 
-    if (ddr_banks >= 2) {
+    #if defined(USE_2DDR) || defined(USE_4DDR)
         unsigned xcl_bank[4] = {
             XCL_MEM_DDR_BANK0,
             XCL_MEM_DDR_BANK1,
@@ -166,7 +158,7 @@ int main(int argc, char** argv) {
                 return EXIT_FAILURE;
             }
         } /* End for (i < ddr_banks) */
-    } else { /* End if (ddr_banks >= 2) */
+    #else   
         buffer[0] = clCreateBuffer(world.context,
                                    CL_MEM_READ_WRITE,
                                    globalbuffersize,
@@ -183,7 +175,7 @@ int main(int argc, char** argv) {
             printf("Error: Failed to allocate input/output_buffer0 in BANK0 of size %zu\n", globalbuffersize);
             return EXIT_FAILURE;
          }
-    } /* End else */
+    #endif
 
     cl_ulong num_blocks = globalbuffersize/64;
     double dbytes = globalbuffersize;
@@ -228,7 +220,7 @@ int main(int argc, char** argv) {
     }
     clFinish(world.command_queue);
 
-    if (ddr_banks == 4) {
+    #ifdef USE_4DDR
         unsigned char *map_input_buffer1;
         map_input_buffer1 = (unsigned char *) clEnqueueMapBuffer(world.command_queue,
                                                                  buffer[2],
@@ -264,8 +256,7 @@ int main(int argc, char** argv) {
             return EXIT_FAILURE;
         }
         clFinish(world.command_queue);
-    } /* End if (ddr_banks == 4) */
-
+    #endif
 
     /* Execute kernel */
     int arg_index = 0;
@@ -273,10 +264,11 @@ int main(int argc, char** argv) {
 
     xcl_set_kernel_arg(krnl, arg_index++, sizeof(cl_mem), &buffer[buffer_index++]);
     xcl_set_kernel_arg(krnl, arg_index++, sizeof(cl_mem), &buffer[buffer_index++]);
-    if (ddr_banks == 4) {
+
+    #ifdef USE_4DDR
         xcl_set_kernel_arg(krnl, arg_index++, sizeof(cl_mem), &buffer[buffer_index++]);
         xcl_set_kernel_arg(krnl, arg_index++, sizeof(cl_mem), &buffer[buffer_index++]);
-    }
+    #endif
     xcl_set_kernel_arg(krnl, arg_index++, sizeof(cl_ulong), &num_blocks);
 
     unsigned long nsduration = xcl_run_kernel3d(world, krnl, 1, 1, 1);
@@ -307,7 +299,7 @@ int main(int argc, char** argv) {
             return EXIT_FAILURE;
         }
     }
-    if (ddr_banks == 4) {
+    #ifdef USE_4DDR
         unsigned char *map_output_buffer1;
         map_output_buffer1 = (unsigned char *)clEnqueueMapBuffer(world.command_queue,
                                                                  buffer[3],
@@ -334,7 +326,7 @@ int main(int argc, char** argv) {
                 return EXIT_FAILURE;
             }
         }
-    } /* End if (ddr_banks == 4) */
+    #endif
 
     /* Profiling information */
     double dnsduration = ((double)nsduration);
