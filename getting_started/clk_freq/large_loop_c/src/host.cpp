@@ -41,6 +41,7 @@ Description:
 #include <cstdio>
 #include <cassert>
 #include <unistd.h>
+#include <chrono>
 
 //OpenCL utility layer include
 #include "xcl2.hpp"
@@ -50,13 +51,6 @@ Description:
 #define WORK_ITEM_PER_GROUP 1
 
 #define DATA_SIZE OChan * OSize * OSize
-
-uint64_t get_duration_ns (const cl::Event &event) {
-    uint64_t nstimestart, nstimeend;
-    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart);
-    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend);
-    return(nstimeend-nstimestart);
-}
 
 // Software solution
 void convGolden(
@@ -167,13 +161,9 @@ uint64_t run_opencl_cnn(
     if(good) {
         int work_group = WORK_GROUP;
 
-        const char *xcl_emu = getenv("XCL_EMULATION_MODE");
-        if(xcl_emu && !strcmp(xcl_emu, "hw_emu")) {
-            work_group = 1;
-        }
-
         cl::Event events[work_group];
 
+        auto kernel_start = std::chrono::high_resolution_clock::now(); 
         for(int i = 0; i < work_group; i++) {
             krnl_cnn_conv.setArg(narg+0, i);
             krnl_cnn_conv.setArg(narg+1, work_group);
@@ -181,19 +171,19 @@ uint64_t run_opencl_cnn(
             q.enqueueTask(krnl_cnn_conv, NULL, &events[i]);
         }
         q.finish();
-
-        uint64_t start = get_duration_ns(events[0]);
-        uint64_t stop = get_duration_ns(events[work_group-1]);
-
-        duration = stop - start;
+        auto kernel_end = std::chrono::high_resolution_clock::now();
+        auto kernel_time = std::chrono::duration<uint64_t, std::nano>(kernel_end - kernel_start);
+        duration =  kernel_time.count();
     } 
     else {
         cl::Event event;
 
+        auto kernel_start = std::chrono::high_resolution_clock::now(); 
         q.enqueueTask(krnl_cnn_conv, NULL, &event);
         q.finish();
-
-        duration = get_duration_ns(event);
+        auto kernel_end = std::chrono::high_resolution_clock::now();
+        auto kernel_time = std::chrono::duration<uint64_t, std::nano>(kernel_end - kernel_start);
+        duration =  kernel_time.count();
     }
 
     //Copy Result from Device Global Memory to Host Local Memory
@@ -252,7 +242,7 @@ int main(int argc, char** argv)
     cl::Device device = devices[0];
     
     cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+    cl::CommandQueue q(context, device, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE | CL_QUEUE_PROFILING_ENABLE);
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
 
     uint64_t bad_duration = run_opencl_cnn(devices, q, context, device_name,
