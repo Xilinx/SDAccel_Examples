@@ -27,17 +27,19 @@ spaced_dsa = $(strip $(subst $(PERIOD),$(SPACE),$(subst $(COLON),$(SPACE),$(subs
 define ddr_check
 
 ifeq ($(findstring 4ddr,$(call spaced_dsa,$(1))),4ddr)
-    krnl_kernel_global_$(call sanitize_dsa,$(1))_CLFLAGS+=-DNUM_BANKS_4
+    krnl_kernel_global_$(call sanitize_dsa,$(1))_CLFLAGS+=-DUSE_4DDR
+	kernel_global_CXXFLAGS+=-DUSE_4DDR
     krnl_kernel_global_$(call sanitize_dsa,$(1))_LDCLFLAGS+= \
-	--xp misc:map_connect=add.kernel.bandwidth_1.M_AXI_GMEM0.core.OCL_REGION_0.M00_AXI \
-	--xp misc:map_connect=add.kernel.bandwidth_1.M_AXI_GMEM1.core.OCL_REGION_0.M01_AXI \
-	--xp misc:map_connect=add.kernel.bandwidth_1.M_AXI_GMEM2.core.OCL_REGION_0.M02_AXI \
-	--xp misc:map_connect=add.kernel.bandwidth_1.M_AXI_GMEM3.core.OCL_REGION_0.M03_AXI
+	--sp bandwidth_1.m_axi_gmem0:bank0 \
+	--sp bandwidth_1.m_axi_gmem1:bank1 \
+	--sp bandwidth_1.m_axi_gmem2:bank2 \
+	--sp bandwidth_1.m_axi_gmem3:bank3
 endif
 ifeq ($(findstring 2ddr,$(call spaced_dsa,$(1))),2ddr)
+	kernel_global_CXXFLAGS+=-DUSE_2DDR
     krnl_kernel_global_$(call sanitize_dsa,$(1))_LDCLFLAGS+= \
-	--xp misc:map_connect=add.kernel.bandwidth_1.M_AXI_GMEM0.core.OCL_REGION_0.M00_AXI \
-	--xp misc:map_connect=add.kernel.bandwidth_1.M_AXI_GMEM1.core.OCL_REGION_0.M01_AXI
+	--sp bandwidth_1.m_axi_gmem0:bank0 \
+	--sp bandwidth_1.m_axi_gmem1:bank1 
 endif
 
 
