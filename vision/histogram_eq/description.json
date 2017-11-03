@@ -25,7 +25,8 @@
     "accelerators": [
         {
             "name": "krnl_equalizer", 
-            "location": "src/krnl_equalizer.cl"
+            "location": "src/krnl_equalizer.cl",
+            "clflags"   : "--xp param:compiler.version=31"
         }
     ],
     "contributors": [
