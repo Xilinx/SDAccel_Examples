@@ -23,7 +23,7 @@
     "containers": [
         {
             "name": "apply_watermark", 
-            "ldclflags" : "--sp bandwidth_1.m_axi_gmem0:bank0 --sp bandwidth_1.m_axi_gmem1:bank1",
+            "ldclflags" : "--sp apply_watermark.m_axi_gmem0:bank0 --sp apply_watermark.m_axi_gmem1:bank1",
             "accelerators": [
                 {
                     "name": "apply_watermark",
