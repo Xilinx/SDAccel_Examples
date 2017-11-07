@@ -52,7 +52,8 @@ README.md
 description.json
 scripts/gen_vadd0_xo.tcl
 scripts/gen_vadd1_xo.tcl
-scripts/package_kernel.tcl
+scripts/package_kernel_0.tcl
+scripts/package_kernel_1.tcl
 src/host.cpp
 src/ip_0/hdl/krnl_vadd_rtl_0.v
 src/ip_0/hdl/krnl_vadd_rtl_adder.sv
