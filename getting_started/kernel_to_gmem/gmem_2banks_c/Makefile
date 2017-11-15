@@ -23,7 +23,7 @@ XOS=apply_watermark
 
 # xclbin
 apply_watermark_XOS=apply_watermark
-apply_watermark_LDCLFLAGS=--sp apply_watermark_1.m_axi_GMEM0:bank0 --sp apply_watermark_1.m_axi_GMEM1:bank1
+apply_watermark_LDCLFLAGS=--sp apply_watermark_1.m_axi_gmem0:bank0 --sp apply_watermark_1.m_axi_gmem1:bank1
 apply_watermark_NDEVICES=xilinx:adm-pcie-7v3:1ddr
 
 XCLBINS=apply_watermark

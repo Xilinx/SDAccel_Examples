@@ -66,8 +66,8 @@ void apply_watermark(TYPE *input, TYPE *output, int width, int height) {
 // Using Separate interface bundle gmem0 and gmem1 for both argument
 // input and output. It will allow user to create two separate interfaces
 // and as a result allow kernel to access both interfaces simultaneous. 
-#pragma HLS INTERFACE m_axi port=input  offset=slave bundle=GMEM0
-#pragma HLS INTERFACE m_axi port=output offset=slave bundle=GMEM1
+#pragma HLS INTERFACE m_axi port=input  offset=slave bundle=gmem0
+#pragma HLS INTERFACE m_axi port=output offset=slave bundle=gmem1
 #pragma HLS INTERFACE s_axilite port=input  bundle=control
 #pragma HLS INTERFACE s_axilite port=output bundle=control
 #pragma HLS INTERFACE s_axilite port=width  bundle=control
