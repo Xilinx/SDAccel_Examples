@@ -36,8 +36,8 @@ OpenCL Kernel Example using AXI4-master interface to access window of data from 
 #include "host.h"
 
 //Declaring PIPE memory with Depth 16
-pipe int inFifo __attribute__((xcl_reqd_pipe_depth(16)));
-pipe int outFifo __attribute__((xcl_reqd_pipe_depth(16)));
+pipe int infifo __attribute__((xcl_reqd_pipe_depth(16)));
+pipe int outfifo __attribute__((xcl_reqd_pipe_depth(16)));
 
 // Read data Kernel : Read tile/window of Data from Global Memory
 kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
@@ -55,7 +55,7 @@ void read_data(__global int *inx) {
             rd_loop_m: for (int m = 0; m < TILE_HEIGHT; ++m) {
                 __attribute__((xcl_pipeline_loop))
                 rd_loop_n: for (int n = 0; n < TILE_WIDTH; ++n) {
-                    write_pipe_block(inFifo, &tile[m][n]);
+                    write_pipe_block(infifo, &tile[m][n]);
                 }
             }
         }
@@ -72,7 +72,7 @@ void write_data(__global int *outx) {
                 __attribute__((xcl_pipeline_loop))
                 wr_buf_loop_n: for (int n = 0; n < TILE_WIDTH; ++n) {
                     // should burst TILE_WIDTH in WORD beat
-                    read_pipe_block(outFifo, &tile[m][n]);
+                    read_pipe_block(outfifo, &tile[m][n]);
                 }
             }
             wr_loop_m: for (int m = 0; m < TILE_HEIGHT; ++m) {
@@ -93,9 +93,9 @@ void compute(int alpha) {
             __attribute__((xcl_pipeline_loop))
             for (int m = 0; m < TILE_WIDTH; ++m) {
                 int inTmp;
-                read_pipe_block(inFifo, &inTmp);
+                read_pipe_block(infifo, &inTmp);
                 int outTmp = inTmp * alpha;
-                write_pipe_block(outFifo, &outTmp);
+                write_pipe_block(outfifo, &outTmp);
             }
         }
     }
