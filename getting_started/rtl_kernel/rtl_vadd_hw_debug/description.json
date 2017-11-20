@@ -1,0 +1,37 @@
+{
+    "runtime": ["OpenCL"],
+    "example": "Hardware Debug of Vector Addition With RTL Kernel (RTL)",
+    "overview": [
+        "This is an example that showcases the Hardware Debug of Vector Addition RTL Kernel in Hardware.",
+        " ",
+        "**For more information on the steps involved in debugging SDAccel RTL Kernel Designs check the links below**",
+        " ",
+        "[Debug Core setup in the RTL kernel design and host design modifications to allow setup of debug triggers prior to running the kernel](https://github.com/Xilinx/SDAccel_Examples/wiki/Sdx_rtl_kernel_debug)"
+    ],
+    "key_concepts": [ "RTL Kernel Debug"],
+    "os": [
+        "Linux"
+    ],
+    "boards":["xilinx_kcu1500_dynamic_5_0", "xilinx_vcu1525_dynamic_5_0"],
+    "targets": ["hw", "hw_emu"],
+    "xcl": true,
+    "em_cmd" : "./host",
+    "hw_cmd" : "./host",
+    "libs" : [
+        "xcl"
+    ],
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ],
+    "revision" : [
+        {
+            "date" : "Oct2017",
+            "version": "1.0",
+            "description": "SDx 2017.4 Xilinx Release"
+        }
+    ],
+    "sdx_gui": false
+}
