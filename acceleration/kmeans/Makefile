@@ -52,6 +52,7 @@ XOS=kmeans
 # Kmeans xclbin
 kmeans_XOS=kmeans
 kmeans_LDCLFLAGS=--nk kmeans:$(COMPUTE_UNITS)
+kmeans_NDEVICES=xilinx:kcu1500:4ddr-xpr
 
 XCLBINS=kmeans
 

@@ -1,0 +1,25 @@
+{
+    "runtime": ["OpenCL"],
+    "example": "Matrix Multiplication",
+    "overview": [
+        "This is a simple example of matrix multiplication (Row x Col)."
+    ],
+    "os": [
+        "Linux"
+    ],
+    "targets": ["sw_emu"],
+    "em_cmd": "./host",
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ],
+    "revision" : [
+        {
+            "date" : "SEPT2017",
+            "version": "1.0",
+            "description": "Initial Xilinx Release"
+        }
+    ]
+}

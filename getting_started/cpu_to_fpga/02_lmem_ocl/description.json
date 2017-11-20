@@ -1,0 +1,37 @@
+{
+    "runtime": ["OpenCL"],
+    "example": "Matrix Multiplication with Local Memory",
+    "overview": [
+        "This is a simple example of matrix multiplication (Row x Col) to demonstrate how to reduce number of memory accesses using local memory."
+    ],
+    "key_concepts": [ "Kernel Optimization", "Local Memory"],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl2"
+    ],
+    "nboard": ["xilinx:xil-accel-rd-ku115:4ddr-xpr"],
+    "em_cmd": "./host",
+    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
+    "accelerators": [
+        {
+            "container": "mmult", 
+            "name": "mmult", 
+            "location": "src/mmult.cl"
+        }
+    ],
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ],
+    "revision" : [
+        {
+            "date" : "SEPT2017",
+            "version": "1.0",
+            "description": "Initial Xilinx Release"
+        }
+    ]
+}

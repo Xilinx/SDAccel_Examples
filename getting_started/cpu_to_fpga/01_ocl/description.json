@@ -1,0 +1,36 @@
+{
+    "runtime": ["OpenCL"],
+    "example": "Matrix Multiplication with OpenCL Kernel",
+    "overview": [
+        "This is a simple example of OpenCL matrix multiplication (Row x Col)."
+    ],
+    "key_concepts": ["OpenCL APIs"],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl2"
+    ],
+    "em_cmd": "./host",
+    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
+    "accelerators": [
+        {
+            "container": "mmult", 
+            "name": "mmult", 
+            "location": "src/mmult.cl"
+        }
+    ],
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ],
+    "revision" : [
+        {
+            "date" : "SEPT2017",
+            "version": "1.0",
+            "description": "Initial Xilinx Release"
+        }
+    ]
+}
