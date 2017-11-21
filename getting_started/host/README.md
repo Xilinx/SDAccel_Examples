@@ -12,6 +12,7 @@ Example        | Description           | Key Concepts / Keywords
 [device_query_ocl/][]|This example prints the OpenCL properties of the platform and its devices. It also displays the limits and capabilities of the hardware.|__Key__ __Concepts__<br> - OpenCL API<br> - Querying device properties<br>__Keywords__<br> - clGetPlatformIDs()<br> - clGetPlatformInfo()<br> - clGetDeviceIDs()<br> - clGetDeviceInfo()
 [errors_ocl/][]|This example discuss the different reasons for errors in OpenCL and how to handle them at runtime.|__Key__ __Concepts__<br> - OpenCL API<br> - Error handling<br>__Keywords__<br> - CL_SUCCESS<br> - CL_DEVICE_NOT_FOUND<br> - CL_DEVICE_NOT_AVAILABLE
 [helloworld_ocl/][]|This example is a simple OpenCL application. It will highlight the basic flow of an OpenCL application.|__Key__ __Concepts__<br> - OpenCL API<br>
+[host_global_bandwidth/][]|Host to global memory bandwidth test|
 [kernel_swap_ocl/][]|This example shows how host can swap the kernels and share same buffer between two kernels exist in separate binary containers. For Non-XPR(Extended Partial Reconfiguration) Specific Devices, device memory can persist buffer data so both kernels can share data directly. Whereas in XPR devices, device memory does not persist the buffer data so host has to migrate data from device to host memory before swapping the next kernel. After kernel swap, host has to migrate the buffer back to device.|__Key__ __Concepts__<br> - Handling Buffer sharing across multiple binaries for XPR-NON_XPR Platform<br> - Multiple Kernel Binaries<br> __Keywords__<br> - clEnqueueMigrateMemObjects()<br> - CL_MIGRATE_MEM_OBJECT_HOST
 [multiple_devices_ocl/][]|This example show how to take advantage of multiple FPGAs on a system. It will show how to initialized an OpenCL context, allocate memory on the two devices and execute a kernel on each FPGA.|__Key__ __Concepts__<br> - OpenCL API<br> - Multi-FPGA Execution<br> - Event Handling<br>__Keywords__<br> - cl_device_id<br> - clGetDeviceIDs()
 [overlap_ocl/][]|This examples demonstrates techniques that allow user to overlap Host(CPU) and FPGA computation in an application. It will cover asynchronous operations and event object.|__Key__ __Concepts__<br> - OpenCL API<br> - Synchronize Host and FPGA<br> - Asynchronous Processing<br> - Events<br> - Asynchronous memcpy<br>__Keywords__<br> - cl_event<br> - clCreateCommandQueue<br> - CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE<br> - clEnqueueMigrateMemObjects
@@ -24,6 +25,7 @@ Example        | Description           | Key Concepts / Keywords
 [device_query_ocl/]:device_query_ocl/
 [errors_ocl/]:errors_ocl/
 [helloworld_ocl/]:helloworld_ocl/
+[host_global_bandwidth/]:host_global_bandwidth/
 [kernel_swap_ocl/]:kernel_swap_ocl/
 [multiple_devices_ocl/]:multiple_devices_ocl/
 [overlap_ocl/]:overlap_ocl/

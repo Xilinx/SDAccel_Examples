@@ -30,6 +30,7 @@ Example        | Description           | Key Concepts / Keywords
 [host/device_query_ocl/][]|This example prints the OpenCL properties of the platform and its devices. It also displays the limits and capabilities of the hardware.|__Key__ __Concepts__<br> - OpenCL API<br> - Querying device properties<br>__Keywords__<br> - clGetPlatformIDs()<br> - clGetPlatformInfo()<br> - clGetDeviceIDs()<br> - clGetDeviceInfo()
 [host/errors_ocl/][]|This example discuss the different reasons for errors in OpenCL and how to handle them at runtime.|__Key__ __Concepts__<br> - OpenCL API<br> - Error handling<br>__Keywords__<br> - CL_SUCCESS<br> - CL_DEVICE_NOT_FOUND<br> - CL_DEVICE_NOT_AVAILABLE
 [host/helloworld_ocl/][]|This example is a simple OpenCL application. It will highlight the basic flow of an OpenCL application.|__Key__ __Concepts__<br> - OpenCL API<br>
+[host/host_global_bandwidth/][]|Host to global memory bandwidth test|
 [host/multiple_devices_ocl/][]|This example show how to take advantage of multiple FPGAs on a system. It will show how to initialized an OpenCL context, allocate memory on the two devices and execute a kernel on each FPGA.|__Key__ __Concepts__<br> - OpenCL API<br> - Multi-FPGA Execution<br> - Event Handling<br>__Keywords__<br> - cl_device_id<br> - clGetDeviceIDs()
 [host/overlap_ocl/][]|This examples demonstrates techniques that allow user to overlap Host(CPU) and FPGA computation in an application. It will cover asynchronous operations and event object.|__Key__ __Concepts__<br> - OpenCL API<br> - Synchronize Host and FPGA<br> - Asynchronous Processing<br> - Events<br> - Asynchronous memcpy<br>__Keywords__<br> - cl_event<br> - clCreateCommandQueue<br> - CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE<br> - clEnqueueMigrateMemObjects
 [host/stream_access_ocl/][]|This is a simple example that demonstrates on how to process an input stream of data for computation in an application. It shows how to perform asynchronous operations and event handling.|__Key__ __Concepts__<br> - OpenCL API<br> - Synchronize Host and FPGA<br> - Asynchronous Processing<br> - Events<br> - Asynchronous Data Transfer<br>__Keywords__<br> - cl_event<br> - CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE
@@ -41,6 +42,7 @@ Example        | Description           | Key Concepts / Keywords
 [kernel_to_gmem/full_array_2d_ocl/][]|This is a simple example of accessing full data from 2d array|__Key__ __Concepts__<br> - 2D data full array Access<br>
 [kernel_to_gmem/gmem_2banks_c/][]|This example of 2ddr to demonstrate on how to use 2ddr DSA. How to create buffers in each DDR.|__Key__ __Concepts__<br> - Multiple Banks<br>__Keywords__<br> - max_memory_ports<br> - misc:map_connect<br> - cl_mem_ext_ptr_t<br> - XCL_MEM_DDR_BANK0<br> - XCL_MEM_DDR_BANK1<br> - XCL_MEM_DDR_BANKx<br> - CL_MEM_EXT_PTR_XILINX<br> - HLS Interface m_axi bundle
 [kernel_to_gmem/gmem_2banks_ocl/][]|This example of 2ddr to demonstrate on how to use 2ddr DSA. How to create buffers in each DDR.|__Key__ __Concepts__<br> - Multiple Banks<br>__Keywords__<br> - max_memory_ports<br> - misc:map_connect<br> - cl_mem_ext_ptr_t<br> - XCL_MEM_DDR_BANK0<br> - XCL_MEM_DDR_BANK1<br> - XCL_MEM_DDR_BANKx<br> - CL_MEM_EXT_PTR_XILINX
+[kernel_to_gmem/kernel_global_bandwidth/][]|Bandwidth test of global to local memory.|
 [kernel_to_gmem/memcoalesce_hang_c/][]|This example shows Memory Coalesce Deadlock/Hand situation and how to handle it. User can switch between BAD and GOOD case using makefile variable KFLOW.|__Key__ __Concepts__<br> - Memory Coalesce<br> - Memory Deadlock/Hang<br> - Multiple Interfaces<br>__Keywords__<br> - HLS INTERFACE<br> - bundle<br> - m_axi
 [kernel_to_gmem/row_array_2d_c/][]|This is a simple example of accessing each row of data from 2d array|__Key__ __Concepts__<br> - Row of 2D data array access<br>__Keywords__<br> - hls::stream
 [kernel_to_gmem/row_array_2d_ocl/][]|This is a simple example of accessing each row of data from 2d array|__Key__ __Concepts__<br> - Row of 2D data array access<br>__Keywords__<br> - xcl_dataflow<br> - xcl_pipeline_loop
@@ -84,8 +86,6 @@ Example        | Description           | Key Concepts / Keywords
 [rtl_kernel/rtl_vadd/][]|Simple example of vector addition using RTL Kernel|__Key__ __Concepts__<br> - RTL Kernel<br>
 [rtl_kernel/rtl_vadd_2clks/][]|This example shows vector addition with 2 kernel clocks using RTL Kernel.|__Key__ __Concepts__<br> - RTL Kernel<br> - Multiple Kernel Clocks<br>__Keywords__<br> - --kernel_frequency
 [rtl_kernel/rtl_vadd_2kernels/][]|This example has two RTL Kernels. Both Kernel_0 and Kernel_1 perform vector addition. The Kernel_1 reads the output from Kernel_0 as one of two inputs.|__Key__ __Concepts__<br> - Multiple RTL Kernels<br>
-[misc/host_global_bandwidth/][]|Host to global memory bandwidth test|
-[misc/kernel_global_bandwidth/][]|Bandwidth test of global to local memory.|
 [misc/sum_scan/][]|Example of parallel prefix sum|
 [misc/vadd/][]|Simple example of vector addition.|
 [misc/vdotprod/][]|Simple example of vector dot-product.|
@@ -102,6 +102,7 @@ Example        | Description           | Key Concepts / Keywords
 [host/device_query_ocl/]:host/device_query_ocl/
 [host/errors_ocl/]:host/errors_ocl/
 [host/helloworld_ocl/]:host/helloworld_ocl/
+[host/host_global_bandwidth/]:host/host_global_bandwidth/
 [host/multiple_devices_ocl/]:host/multiple_devices_ocl/
 [host/overlap_ocl/]:host/overlap_ocl/
 [host/stream_access_ocl/]:host/stream_access_ocl/
@@ -114,6 +115,7 @@ Example        | Description           | Key Concepts / Keywords
 [kernel_to_gmem/full_array_2d_ocl/]:kernel_to_gmem/full_array_2d_ocl/
 [kernel_to_gmem/gmem_2banks_c/]:kernel_to_gmem/gmem_2banks_c/
 [kernel_to_gmem/gmem_2banks_ocl/]:kernel_to_gmem/gmem_2banks_ocl/
+[kernel_to_gmem/kernel_global_bandwidth/]:kernel_to_gmem/kernel_global_bandwidth/
 [kernel_to_gmem/memcoalesce_hang_c/]:kernel_to_gmem/memcoalesce_hang_c/
 [kernel_to_gmem/row_array_2d_c/]:kernel_to_gmem/row_array_2d_c/
 [kernel_to_gmem/row_array_2d_ocl/]:kernel_to_gmem/row_array_2d_ocl/
@@ -163,8 +165,6 @@ Example        | Description           | Key Concepts / Keywords
 [rtl_kernel/rtl_vadd_2clks/]:rtl_kernel/rtl_vadd_2clks/
 [rtl_kernel/rtl_vadd_2kernels/]:rtl_kernel/rtl_vadd_2kernels/
 [misc]:misc
-[misc/host_global_bandwidth/]:misc/host_global_bandwidth/
-[misc/kernel_global_bandwidth/]:misc/kernel_global_bandwidth/
 [misc/sum_scan/]:misc/sum_scan/
 [misc/vadd/]:misc/vadd/
 [misc/vdotprod/]:misc/vdotprod/
