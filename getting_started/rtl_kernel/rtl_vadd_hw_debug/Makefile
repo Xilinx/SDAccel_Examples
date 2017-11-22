@@ -1,23 +1,9 @@
 COMMON_REPO := ../../..
 
-#AWS_DEBUG_SCRIPTS_DIR:=${AWS_DEBUG_SCRIPTS_DIR}
-
 #Common Includes
 include $(COMMON_REPO)/utility/boards.mk
 include $(COMMON_REPO)/libs/xcl2/xcl2.mk
 include $(COMMON_REPO)/libs/opencl/opencl.mk
-
-
-export DEBUG_LTX_DIR:=$(PWD)/xclbin
-
-ifdef AWS_DEBUG_PLATFORM
-ifdef SDACCEL_DIR
-export AWS_DEBUG_SCRIPTS_DIR:=$(SDACCEL_DIR)/aws_platform/xilinx_aws-vu9p-f1_4ddr-xpr-2pr-debug_4_0/hw/constraints
-endif
-endif
-
-D_FLAGS := --xp "vivado_prop:run.impl_1.STEPS.OPT_DESIGN.TCL.POST={$(AWS_DEBUG_SCRIPTS_DIR)/debug_constraints.tcl}" --xp "vivado_prop:run.impl_1.STEPS.ROUTE_DESIGN.TCL.POST={$(AWS_DEBUG_SCRIPTS_DIR)/generate_ltx.tcl}"
-LDCLFLAGS +=$(D_FLAGS)
 
 
 # Host Application
