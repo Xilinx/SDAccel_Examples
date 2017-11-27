@@ -4,7 +4,7 @@
 REPORT:=none
 
 # Default C++ Compiler Flags and xocc compiler flags
-CXXFLAGS:=-Wall -O0 -g
+CXXFLAGS:=-Wall -O0 -g -std=c++14
 CLFLAGS:= --xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generateExtraRunData=true" -s
 
 ifneq ($(REPORT),none)

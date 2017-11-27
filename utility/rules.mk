@@ -34,7 +34,7 @@ device_blacklist = $(if $($(1)_NDEVICES), $($(1)_NDEVICES),)
 define mk_exe
 
 $(1): $($(1)_SRCS) $($(1)_HDRS)
-	$(CXX) $(CXXFLAGS) $($(1)_CXXFLAGS) -o $$@ $($(1)_SRCS) $($(1)_LDFLAGS) $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $($(1)_CXXFLAGS) $($(1)_SRCS) -o $$@ $($(1)_LDFLAGS) $(LDFLAGS)
 
 EXE_GOALS+= $(1)
 
