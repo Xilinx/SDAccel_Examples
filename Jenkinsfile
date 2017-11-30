@@ -11,7 +11,7 @@ devices = []
 devices += ['xilinx:adm-pcie-7v3:1ddr']
 devices += ['xilinx:xil-accel-rd-ku115:4ddr-xpr']
 devices += ['xilinx:adm-pcie-ku3:2ddr-xpr']
-devices += ['xilinx:xil-accel-rd-vu9p:4ddr-xpr']
+devices += ['$XILINX_XIL_ACCEL_RD_VU9P_4DDR_XPR_4_2']
 
 version = '2017.2'
 
@@ -28,8 +28,6 @@ cd ${workdir}
 . /tools/local/bin/modinit.sh > /dev/null 2>&1
 module use.own /proj/picasso/modulefiles
 
-module add vivado/${version}_rel
-module add vivado_hls/${version}_rel
 module add sdaccel/${version}_rel
 module add opencv/sdaccel
 
