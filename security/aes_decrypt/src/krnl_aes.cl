@@ -51,7 +51,7 @@ __constant uchar rsbox[256] = { 0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 
     , 0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d};
 
 
-__attribute__((always_inline)) inline uchar16 SubBytesRSBox(uchar16 input){
+__attribute__((always_inline)) uchar16 SubBytesRSBox(uchar16 input){
   uchar16 output;
   output.s0=rsbox[input.s0];
   output.s1=rsbox[input.s1];
@@ -73,7 +73,7 @@ __attribute__((always_inline)) inline uchar16 SubBytesRSBox(uchar16 input){
 }
 
 
-uchar16 ShiftRowsInv(uchar16 value)
+__attribute__((always_inline)) uchar16 ShiftRowsInv(uchar16 value)
 {
   unsigned int i;
   uchar16 tempValue;
@@ -89,7 +89,7 @@ uchar16 ShiftRowsInv(uchar16 value)
 //b = 14, 9, 13, 11
 
 //14 = 1110b
-__attribute__((always_inline)) inline uchar GALOISMULTIPLICATION_14(aparam) {
+__attribute__((always_inline)) uchar GALOISMULTIPLICATION_14(aparam) {
   uchar a=aparam;
   uchar p = 0;
   uchar res;
@@ -117,7 +117,7 @@ __attribute__((always_inline)) inline uchar GALOISMULTIPLICATION_14(aparam) {
 }
 
 //9 = 1001b
-__attribute__((always_inline)) inline uchar GALOISMULTIPLICATION_09(aparam) {
+__attribute__((always_inline)) uchar GALOISMULTIPLICATION_09(aparam) {
   uchar a=aparam;
   uchar p = 0;
   uchar res;
@@ -144,7 +144,7 @@ __attribute__((always_inline)) inline uchar GALOISMULTIPLICATION_09(aparam) {
 }
 
 //13 = 1101b
-__attribute__((always_inline)) inline uchar GALOISMULTIPLICATION_13(aparam) {
+__attribute__((always_inline)) uchar GALOISMULTIPLICATION_13(aparam) {
   unsigned char a=aparam;
   unsigned char p = 0;
   uchar res;
@@ -172,7 +172,7 @@ __attribute__((always_inline)) inline uchar GALOISMULTIPLICATION_13(aparam) {
 }
 
 //11 = 1011b
-__attribute__((always_inline)) inline uchar GALOISMULTIPLICATION_11(aparam) {
+__attribute__((always_inline)) uchar GALOISMULTIPLICATION_11(aparam) {
   unsigned char a=aparam;
   unsigned char p = 0;
   uchar res;
@@ -200,7 +200,7 @@ __attribute__((always_inline)) inline uchar GALOISMULTIPLICATION_11(aparam) {
 }
 
 
-__attribute__((always_inline)) inline uchar16 mixColumns16inv(uchar16 block)
+__attribute__((always_inline)) uchar16 mixColumns16inv(uchar16 block)
 {
 
   uchar16 r0,r1,r2,r3,returnval;
@@ -323,7 +323,7 @@ __attribute__((always_inline)) inline uchar16 mixColumns16inv(uchar16 block)
   return(returnval);
 }
 
-uchar16 AddRoundKey(uchar16 block,unsigned int round,local uchar16 *roundkey){
+__attribute__((always_inline)) uchar16 AddRoundKey(uchar16 block,unsigned int round,local uchar16 *roundkey){
   uchar16 output = block ^ roundkey[round];
   return(output);
 }
@@ -348,7 +348,7 @@ void krnl_aes_decrypt(__global uchar16  *output,__global uchar16  *input,
   unsigned int blockindex;
 
   #ifdef __xilinx__
-  __attribute__((xcl_pipeline_loop))
+    __attribute__((xcl_pipeline_loop))
   #endif
   for(blockindex=0;blockindex<blocks;blockindex++){
     uchar16 block0;
