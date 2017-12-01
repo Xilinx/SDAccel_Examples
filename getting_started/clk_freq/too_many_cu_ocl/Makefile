@@ -23,18 +23,18 @@ vadd_GOOD_CLFLAGS=-k vadd
 vadd_BAD_SRCS=./src/vadd_bad.cl
 vadd_BAD_CLFLAGS=-k vadd
 
-XOS=vadd_GOOD vadd_BAD
+XOS=vadd_BAD vadd_GOOD
 
 vadd_GOOD_XOS=vadd_GOOD
 
 vadd_BAD_XOS=vadd_BAD
 vadd_BAD_LDCLFLAGS=--nk vadd:8
 
-XCLBINS=vadd_GOOD vadd_BAD
+XCLBINS=vadd_BAD vadd_GOOD
 
 # check
 check_EXE=host
-check_XCLBINS=vadd_GOOD vadd_BAD
+check_XCLBINS=vadd_BAD vadd_GOOD
 
 DEVICES=xilinx:adm-pcie-ku3:2ddr-xpr
 CHECKS=check

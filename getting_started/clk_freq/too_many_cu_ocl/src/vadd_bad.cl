@@ -86,22 +86,28 @@ void vadd(
     int in2_lcl[BUFFER_SIZE];
     int out_lcl[BUFFER_SIZE];
     
+    int chunk_size = BUFFER_SIZE;
+
     // Computes vector addition operation iteratively over entire data set
-    for(int offset = 0; offset < size; offset += BUFFER_SIZE*global_size){
+    for(int offset = 0; offset < size; offset += chunk_size*global_size){
         
         // Enables burst reads on input vectors from global memory
         // Each Work_Item asynchronously moves its work load from global memory
         // to local memory (in1_lcl, in2_lcl) associated per each Work_Group
+
+        //boundary checks
+        if ((offset + chunk_size) > size) 
+            chunk_size = size - offset;
         
         // Burst read for in1_lcl
         __attribute__((xcl_pipeline_loop))
-        readIn1: for(int j = 0 ; j < BUFFER_SIZE; j++){
+        readIn1: for(int j = 0 ; j < chunk_size; j++){
             in1_lcl[j] = in1[global_id*BUFFER_SIZE + offset + j]; 
         }
         
         // Burst read for in2_lcl
         __attribute__((xcl_pipeline_loop))
-        readIn2: for(int j = 0 ; j < BUFFER_SIZE; j++){
+        readIn2: for(int j = 0 ; j < chunk_size; j++){
             in2_lcl[j] = in2[global_id*BUFFER_SIZE + offset + j]; 
         }
         
@@ -127,7 +133,7 @@ void vadd(
         
         // Burst write from out_lcl
         __attribute__((xcl_pipeline_loop))
-        writeOut: for(int j = 0 ; j < BUFFER_SIZE; j++){
+        writeOut: for(int j = 0 ; j < chunk_size; j++){
             out[global_id*BUFFER_SIZE + offset + j] = out_lcl[j];
         }
     }

@@ -88,23 +88,28 @@ void vadd(
     int in2_lcl[NUM_CU][BUFFER_SIZE] __attribute__((xcl_array_partition(complete, 1)));
     int out_lcl[NUM_CU][BUFFER_SIZE] __attribute__((xcl_array_partition(complete, 1)));
  
+    int chunk_size = NUM_CU*BUFFER_SIZE;
     // Computes vector addition operation iteratively over entire data set of the work item
-    for(int offset = 0; offset < size; offset += NUM_CU*BUFFER_SIZE*global_size){
+    for(int offset = 0; offset < size; offset += chunk_size*global_size){
         
         // Enables burst reads on input vectors from global memory
         // Each Work_Item asynchronously moves its work load from global memory
         // to local memory (in1_lcl, in2_lcl) associated per each Work_Group
         
+        //boundary checks
+        if ((offset + chunk_size) > size) 
+            chunk_size = size - offset;
+
         // Burst read for in1_lcl
         __attribute__((xcl_pipeline_loop))
-        readIn1: for(int itr = 0 , i = 0 , j =0; itr < NUM_CU*BUFFER_SIZE; itr++, j++){
+        readIn1: for(int itr = 0 , i = 0 , j =0; itr < chunk_size; itr++, j++){
             if(j == BUFFER_SIZE) { j = 0 ; i++; }
             in1_lcl[i][j] = in1[global_id*BUFFER_SIZE + offset + itr];
         }
         
         // Burst read for in2_lcl
         __attribute__((xcl_pipeline_loop))
-        readIn2: for(int itr = 0 , i = 0 , j =0; itr < NUM_CU*BUFFER_SIZE; itr++, j++){
+        readIn2: for(int itr = 0 , i = 0 , j =0; itr < chunk_size; itr++, j++){
             if(j == BUFFER_SIZE) { j = 0 ; i++; }
             in2_lcl[i][j] = in2[global_id*BUFFER_SIZE + offset + itr];
         }
@@ -138,7 +143,7 @@ void vadd(
         
         // Burst write from out_lcl
         __attribute__((xcl_pipeline_loop))
-        writeOut: for(int itr = 0 , i = 0 , j =0; itr < NUM_CU*BUFFER_SIZE; itr++, j++){
+        writeOut: for(int itr = 0 , i = 0 , j =0; itr < chunk_size; itr++, j++){
             if(j == BUFFER_SIZE) { j = 0 ; i++; }
             out[global_id*BUFFER_SIZE + offset + itr] = out_lcl[i][j];
         }
