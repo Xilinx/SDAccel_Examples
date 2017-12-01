@@ -65,7 +65,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
   You can make sure an operation has completed by querying events returned by
   these commands. Events are OpenCL objects that track the status of operations.
-  Event objects are created by kernel execution commands, read, write, map, copy
+  Event objects are created by kernel execution commands, read, write, copy
   commands on memory objects or user events created using clCreateUserEvent.
 
   Events can be used to synchronize operations between the host thread and the
@@ -237,14 +237,13 @@ int main(int argc, char **argv) {
   // set of elements will be written into the buffer.
   array<cl_event, 2> kernel_events;
   array<cl_event, 2> read_events;
-  array<cl_event, 2> map_events;
   cl_mem buffer_a[2], buffer_b[2], buffer_c[2];
   size_t global = 1, local = 1;
   for (size_t iteration_idx = 0; iteration_idx < num_iterations; iteration_idx++) {
     int flag = iteration_idx % 2;
 
     if (iteration_idx >= 2) {
-        clWaitForEvents(1, &map_events[flag]);
+        clWaitForEvents(1, &read_events[flag]);
         OCL_CHECK(clReleaseMemObject(buffer_a[flag]));
         OCL_CHECK(clReleaseMemObject(buffer_b[flag]));
         OCL_CHECK(clReleaseMemObject(buffer_c[flag]));
@@ -302,9 +301,6 @@ int main(int argc, char **argv) {
                 CL_MIGRATE_MEM_OBJECT_HOST, 1, &kernel_events[flag], &read_events[flag]));
 
     set_callback(read_events[flag], "ooo_queue");
-    clEnqueueMapBuffer(world.command_queue, buffer_c[flag], CL_FALSE, CL_MAP_READ, 0, 
-            bytes_per_iteration, 1, &read_events[flag], &map_events[flag], 0);
-    set_callback(map_events[flag], "ooo_queue");
 
     OCL_CHECK(clReleaseEvent(write_events[0]));
     OCL_CHECK(clReleaseEvent(write_events[1]));
@@ -316,7 +312,7 @@ int main(int argc, char **argv) {
 
   //Releasing mem objects and events
   for(int i = 0 ; i < 2 ; i++){
-    OCL_CHECK(clWaitForEvents(1, &map_events[i]));
+    OCL_CHECK(clWaitForEvents(1, &read_events[i]));
     OCL_CHECK(clReleaseMemObject(buffer_a[i]));
     OCL_CHECK(clReleaseMemObject(buffer_b[i]));
     OCL_CHECK(clReleaseMemObject(buffer_c[i]));
