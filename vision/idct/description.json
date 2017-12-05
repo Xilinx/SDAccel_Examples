@@ -2,7 +2,7 @@
     "runtime": ["OpenCL"],
     "example" : "Inverse Discrete Cosine Transform",
     "overview" : [
-        "Example of processing Inverse Discrete Cosine Transfom on multiple blocks of data."
+        "Example shows an optimized Inverse Discrete Cosine Transfom. Optimizations are applied to the kernel as well as the host code."
     ],
     "os": [
         "Linux"
@@ -11,7 +11,10 @@
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./idct",
     "libs": [
         "xcl2"
-    ], 
+    ],
+    "nboard": [
+        "xilinx:adm-pcie-7v3:1ddr"
+    ],
     "accelerators": [
         {
             "container": "krnl_idct", 
