@@ -34,8 +34,6 @@ Board | Device Name | Software Version
 ------|-------------|-----------------
 Xilinx VU9P|xilinx:xil-accel-rd-vu9p:4ddr-xpr|SDAccel 2017.1
 AWS VU9P F1|xilinx:aws-vu9p-f1:4ddr-xpr-2pr|SDAccel 2017.1
-Xilinx KU115|xilinx:xil-accel-rd-ku115:4ddr-xpr|SDAccel 2017.1
-Alpha Data ADM-PCIE-KU3|xilinx:adm-pcie-ku3:2ddr-xpr|SDAccel 2017.1
 
 
 *NOTE:* The board/device used for compilation can be changed by adding the DEVICES variable to the make command as shown below

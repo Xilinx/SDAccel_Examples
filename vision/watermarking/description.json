@@ -4,7 +4,7 @@
     "overview": [
         "This is an optimized implementation of a watermarking application to add watermarking to images targeting execution on an SDAccel supported FPGA acceleration card."
     ],
-    "nboard": ["xilinx:adm-pcie-7v3:1ddr"],
+    "nboard": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr", "xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "cmd_args": "PROJECT/data/inputImage.bmp PROJECT/data/golden.bmp",
     "em_cmd": "./watermark data/inputImage.bmp ./data/golden.bmp",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./watermark data/inputImage.bmp ./data/golden.bmp",

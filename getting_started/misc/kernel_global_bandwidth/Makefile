@@ -24,14 +24,14 @@ krnl_kernel_global_LDCLFLAGS+= --sp bandwidth_1.m_axi_gmem0:bank0 --sp bandwidth
 XOS=krnl_kernel_global
 
 krnl_kernel_global_XOS=krnl_kernel_global
-krnl_kernel_global_NDEVICES=xilinx:xil-accel-rd-vu9p:4ddr-xpr xilinx:adm-pcie-7v3:1ddr xilinx:adm-pcie-ku3:2ddr-xpr 
+krnl_kernel_global_NDEVICES=xilinx:xil-accel-rd-vu9p:4ddr-xpr xilinx:adm-pcie-7v3:1ddr xilinx:adm-pcie-ku3:2ddr-xpr xilinx:xil-accel-rd-ku115:4ddr-xpr 
 
 XCLBINS=krnl_kernel_global
 
 # check
 check_EXE=kernel_global
 check_XCLBINS=krnl_kernel_global
-check_NDEVICES=xilinx:xil-accel-rd-vu9p:4ddr-xpr
+check_NDEVICES=$(krnl_kernel_global_NDEVICES)
 
 CHECKS=check
 

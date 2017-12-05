@@ -18,7 +18,7 @@
     "em_cmd": "./host ./data/input.bmp ./data/golden.bmp",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host ./data/input.bmp ./data/golden.bmp",
     "nboard" : [
-        "xilinx:adm-pcie-7v3:1ddr"
+        "xilinx:adm-pcie-7v3:1ddr", "xilinx:adm-pcie-ku3:2ddr-xpr", "xilinx:xil-accel-rd-ku115:4ddr-xpr"
     ],
     "containers": [
         {
