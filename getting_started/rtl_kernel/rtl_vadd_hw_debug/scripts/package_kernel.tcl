@@ -49,6 +49,8 @@ ipx::package_project -root_dir $path_to_packaged -vendor xilinx.com -library RTL
 ipx::unload_core $path_to_packaged/component.xml
 ipx::edit_ip_in_project -upgrade true -name tmp_edit_project -directory $path_to_packaged $path_to_packaged/component.xml
 set_property core_revision 2 [ipx::current_core]
+set_property sdx_kernel true [ipx::current_core]
+set_property sdx_kernel_type rtl [ipx::current_core]
 ipx::create_xgui_files [ipx::current_core]
 ipx::associate_bus_interfaces -busif m_axi_gmem -clock ap_clk [ipx::current_core]
 ipx::associate_bus_interfaces -busif s_axi_control -clock ap_clk [ipx::current_core]
