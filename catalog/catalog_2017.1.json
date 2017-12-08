@@ -11,7 +11,7 @@
             "examples": [
                 {
                     "name": "kmeans", 
-                    "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
+                    "commit_id": "76f75048dd359ef028b528a7c4b405bd77831e4e", 
                     "description": [
                         "This is OpenCL Based K-Means clustering Implementation for Xilinx FPGA ", 
                         "Devices. K-means clustering is a method of vector quantization, that ", 
@@ -237,6 +237,88 @@
                                 "Clock Frequency", 
                                 "Data Level Parallelism", 
                                 "Multiple Compute Units"
+                            ], 
+                            "version": "1.0", 
+                            "author": "Xilinx"
+                        }
+                    ]
+                }, 
+                {
+                    "name": "cpu_to_fpga", 
+                    "displayName": [
+                        "CPU_to_FPGA Examples"
+                    ], 
+                    "description": [
+                        "Labs to showcase the cpu to fpga conversion with kernel optimizations."
+                    ], 
+                    "categories": [], 
+                    "examples": [
+                        {
+                            "name": "00_cpu", 
+                            "commit_id": "76f75048dd359ef028b528a7c4b405bd77831e4e", 
+                            "description": [
+                                "This is a simple example of matrix multiplication (Row x Col)."
+                            ], 
+                            "displayName": "Matrix Multiplication", 
+                            "version": "1.0", 
+                            "author": "Xilinx"
+                        }, 
+                        {
+                            "name": "01_ocl", 
+                            "commit_id": "76f75048dd359ef028b528a7c4b405bd77831e4e", 
+                            "description": [
+                                "This is a simple example of OpenCL matrix multiplication (Row x Col)."
+                            ], 
+                            "displayName": "Matrix Multiplication with OpenCL Kernel", 
+                            "key_concepts": [
+                                "OpenCL APIs"
+                            ], 
+                            "version": "1.0", 
+                            "author": "Xilinx"
+                        }, 
+                        {
+                            "name": "02_lmem_ocl", 
+                            "commit_id": "76f75048dd359ef028b528a7c4b405bd77831e4e", 
+                            "description": [
+                                "This is a simple example of matrix multiplication (Row x Col) to demonstrate how to reduce number of memory accesses using local memory."
+                            ], 
+                            "displayName": "Matrix Multiplication with Local Memory", 
+                            "key_concepts": [
+                                "Kernel Optimization", 
+                                "Local Memory"
+                            ], 
+                            "version": "1.0", 
+                            "author": "Xilinx"
+                        }, 
+                        {
+                            "name": "03_burst_rw_ocl", 
+                            "commit_id": "76f75048dd359ef028b528a7c4b405bd77831e4e", 
+                            "description": [
+                                "This is a simple example of matrix multiplication (Row x Col) to demonstrate how to achieve better pipeline with burst read and write to/from local memory from/to DDR."
+                            ], 
+                            "displayName": "Matrix Multiplication Burst Read Write", 
+                            "key_concepts": [
+                                "Kernel Optimization", 
+                                "Burst Read/Write"
+                            ], 
+                            "version": "1.0", 
+                            "author": "Xilinx"
+                        }, 
+                        {
+                            "name": "04_partition_ocl", 
+                            "commit_id": "76f75048dd359ef028b528a7c4b405bd77831e4e", 
+                            "description": [
+                                "This is a simple example of matrix multiplication (Row x Col) to demonstrate how to achieve better performance by array partitioning and loop unrolling."
+                            ], 
+                            "displayName": "Matrix Multiplication Array Partition and Loop Unroll", 
+                            "keywords": [
+                                "xcl_pipeline_loop", 
+                                "xcl_array_partition(complete, dim)", 
+                                "opencl_unroll_hint"
+                            ], 
+                            "key_concepts": [
+                                "Array Partition", 
+                                "Loop Unroll"
                             ], 
                             "version": "1.0", 
                             "author": "Xilinx"
@@ -564,6 +646,27 @@
                                 "Asynchronous Processing", 
                                 "Events", 
                                 "Asynchronous memcpy"
+                            ], 
+                            "version": "1.0", 
+                            "author": "Xilinx"
+                        }, 
+                        {
+                            "name": "stream_access_ocl", 
+                            "commit_id": "a921ac7e938cdf68692ea4622332a2db0e2620aa", 
+                            "description": [
+                                "This is a simple example that demonstrates on how to process an input stream of data for computation in an application. It shows how to perform asynchronous operations and event handling."
+                            ], 
+                            "displayName": "Stream Access (CL)", 
+                            "keywords": [
+                                "cl_event", 
+                                "CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE"
+                            ], 
+                            "key_concepts": [
+                                "OpenCL API", 
+                                "Synchronize Host and FPGA", 
+                                "Asynchronous Processing", 
+                                "Events", 
+                                "Asynchronous Data Transfer"
                             ], 
                             "version": "1.0", 
                             "author": "Xilinx"
@@ -1172,7 +1275,7 @@
                         }, 
                         {
                             "name": "kernel_global_bandwidth", 
-                            "commit_id": "5d6b726d4a1735660e8bdef776dc7ab63f429174", 
+                            "commit_id": "e502a7e079b456f91effca52141fca89b62c619e", 
                             "description": [
                                 "Bandwidth test of global to local memory."
                             ], 
