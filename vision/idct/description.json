@@ -19,7 +19,7 @@
         {
             "container": "krnl_idct", 
             "name": "krnl_idct", 
-            "location": "src/krnl_idct.cl"
+            "location": "src/krnl_idct.cpp"
         }
     ],
     "contributors" : [
