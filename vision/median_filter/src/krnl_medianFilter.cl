@@ -26,25 +26,41 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
-//Define the size of the pixel neighbourhood for the median computation
-#define SIZE      9
-//Define the number of color channels to use during the computation
-#define CHANNELS  3
-
-// Define the max image width to be processed
-// This setting affects the size of the local memory created by the compiler
-// in the FPGA fabric
-#define MAX_WIDTH 512
+#define SIZE       9
+#define CHANNELS   3
+#define MAX_WIDTH  512
 
 #define imin(X, Y) (((X) < (Y)) ? (X) : (Y))
 #define imax(X, Y) (((X) > (Y)) ? (X) : (Y))
 
 //
-// Median value computation
+// Get value in vector
 //
+uint getValue(uint16 vec, int index) {
+  if (index == 0)  return vec.s0;
+  if (index == 1)  return vec.s1;
+  if (index == 2)  return vec.s2;
+  if (index == 3)  return vec.s3;
+  if (index == 4)  return vec.s4;
+  if (index == 5)  return vec.s5;
+  if (index == 6)  return vec.s6;
+  if (index == 7)  return vec.s7;
+  if (index == 8)  return vec.s8;
+  if (index == 9)  return vec.s9;
+  if (index == 10) return vec.sa;
+  if (index == 11) return vec.sb;
+  if (index == 12) return vec.sc;
+  if (index == 13) return vec.sd;
+  if (index == 14) return vec.se;
+  if (index == 15) return vec.sf;
+}
+
+//
+// Get median value
+// 
 uint getMedian(int channel, uint* rgb) {
   uint mask = 0xFF << (8*channel);
-
+  
   // Extract next color channel
   uint c[SIZE];
   for (int p = 0; p < SIZE; p++) {
@@ -145,61 +161,80 @@ uint getMedian(int channel, uint* rgb) {
 }
 
 //
-// Median filter kernel
-// Kernel processes entire image frame per call to the accelerator
-//
+// Median filter
+// 
 __kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
-void median(__global const uint* input, __global uint* output, int width, int height) {
-  local uint linebuf0[MAX_WIDTH];
-  local uint linebuf1[MAX_WIDTH];
-  local uint linebuf2[MAX_WIDTH];
-  local uint lineres[MAX_WIDTH];
-
+void median(__global const uint16* input, __global uint16* output, int width, int height) {
+  local uint16 linebuf0[MAX_WIDTH/16];
+  local uint16 linebuf1[MAX_WIDTH/16];
+  local uint16 linebuf2[MAX_WIDTH/16];
+  local uint16 lineres[MAX_WIDTH/16];
+  int width16 = width >> 4;
+  
   for (int line = 0; line < height; line++) {
     // Fetch Lines
     if (line == 0) {
-      async_work_group_copy(linebuf0, input, width, 0);
-      async_work_group_copy(linebuf1, input, width, 0);
-      async_work_group_copy(linebuf2, input + width, width, 0);
+      async_work_group_copy(linebuf0, input, width16, 0);
+      async_work_group_copy(linebuf1, input, width16, 0);
+      async_work_group_copy(linebuf2, input + width16, width16, 0);
     }
     else if (line < height-1) {
       if (line % 3 == 0)
-        async_work_group_copy(linebuf0, input + (line+1)*width, width, 0);
+        async_work_group_copy(linebuf0, input + (line+1)*width16, width16, 0);
       else if (line % 3 == 1)
-        async_work_group_copy(linebuf1, input + (line+1)*width, width, 0);
+        async_work_group_copy(linebuf1, input + (line+1)*width16, width16, 0);
       else if (line % 3 == 2)
-        async_work_group_copy(linebuf2, input + (line+1)*width, width, 0);
+        async_work_group_copy(linebuf2, input + (line+1)*width16, width16, 0);
     }
     barrier(CLK_LOCAL_MEM_FENCE);
-
+  
     __attribute__((xcl_pipeline_loop))
-    for (int x=0; x < width; x++) {
-      // Get pixels within 3x3 aperture
-      uint rgb[SIZE];
-      rgb[0] = (x == 0) ? linebuf0[x] : linebuf0[x - 1];
-      rgb[1] = linebuf0[x];
-      rgb[2] = (x == width-1) ? linebuf0[x] : linebuf0[x + 1];
-
-      rgb[3] = (x == 0) ? linebuf1[x] : linebuf1[x - 1];
-      rgb[4] = linebuf1[x];
-      rgb[5] = (x == width-1) ? linebuf1[x] : linebuf1[x + 1];
-
-      rgb[6] = (x == 0) ? linebuf2[x] : linebuf2[x - 1];
-      rgb[7] = linebuf2[x];
-      rgb[8] = (x == width-1) ? linebuf2[x] : linebuf2[x + 1];
-
-      uint result = 0;
-
-      // Iterate over all color channels
-      for (int channel = 0; channel < CHANNELS; channel++) {
-        result |= getMedian(channel, rgb);
+    for (int x=0; x < width16; x++) {
+      __attribute__((opencl_unroll_hint))
+      for (int i=0; i < 16; i++) {
+        // Get pixels within 3x3 aperture
+        uint rgb[SIZE];
+        rgb[0] = (i == 0) ? getValue(linebuf0[x], i) : getValue(linebuf0[x], i-1);
+        rgb[1] = getValue(linebuf0[x], i);
+        rgb[2] = (i == 15) ? getValue(linebuf0[x+1], 0) : getValue(linebuf0[x], i+1);
+        
+        rgb[3] = (i == 0) ? getValue(linebuf1[x], i) : getValue(linebuf1[x], i-1);
+        rgb[4] = getValue(linebuf1[x], i);
+        rgb[5] = (i == 15) ? getValue(linebuf1[x+1], 0) : getValue(linebuf1[x], i+1);
+        
+        rgb[6] = (i == 0) ? getValue(linebuf2[x], i) : getValue(linebuf2[x], i-1);
+        rgb[7] = getValue(linebuf2[x], i);
+        rgb[8] = (i == 15) ? getValue(linebuf2[x+1], 0) : getValue(linebuf2[x], i+1);
+        
+        uint result = 0;
+  
+        // Iterate over all color channels
+        __attribute__((opencl_unroll_hint))
+        for (int channel = 0; channel < CHANNELS; channel++) {
+          result |= getMedian(channel, rgb);
+        }
+  
+        // Store result into memory
+        if (i == 0)  lineres[x].s0 = result;
+        if (i == 1)  lineres[x].s1 = result;
+        if (i == 2)  lineres[x].s2 = result;
+        if (i == 3)  lineres[x].s3 = result;
+        if (i == 4)  lineres[x].s4 = result;
+        if (i == 5)  lineres[x].s5 = result;
+        if (i == 6)  lineres[x].s6 = result;
+        if (i == 7)  lineres[x].s7 = result;
+        if (i == 8)  lineres[x].s8 = result;
+        if (i == 9)  lineres[x].s9 = result;
+        if (i == 10) lineres[x].sa = result;
+        if (i == 11) lineres[x].sb = result;
+        if (i == 12) lineres[x].sc = result;
+        if (i == 13) lineres[x].sd = result;
+        if (i == 14) lineres[x].se = result;
+        if (i == 15) lineres[x].sf = result;
       }
-
-      // Store result into memory
-      lineres[x] = result;
     }
-
-    async_work_group_copy(output + line*width, lineres, width, 0);
+    
+    async_work_group_copy(output + line*width16, lineres, width16, 0);
     barrier(CLK_LOCAL_MEM_FENCE);
   }
 }
