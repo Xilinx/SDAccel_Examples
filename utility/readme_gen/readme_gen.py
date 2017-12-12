@@ -5,7 +5,7 @@ import os
 import subprocess
 
 DSA = 'xilinx:xil-accel-rd-ku115:4ddr-xpr'
-VERSION = 'SDAccel 2017.1'
+VERSION = 'SDAccel 2017.2'
 DEVICES = {
     'xilinx:adm-pcie-7v3:1ddr': {
        'version': '3.0',
