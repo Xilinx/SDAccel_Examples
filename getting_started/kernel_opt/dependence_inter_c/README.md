@@ -54,7 +54,8 @@ Makefile
 README.md
 description.json
 src/host.cpp
-src/mean_value.cpp
+src/vconv.cpp
+src/vconv.h
 ```
 
 ## 5. COMPILATION AND EXECUTION

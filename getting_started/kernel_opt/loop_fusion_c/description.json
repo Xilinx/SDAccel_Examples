@@ -14,17 +14,20 @@
     ],
     "em_cmd": "./loop_fusion",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./loop_fusion",
-    "accelerators": [
+    "containers": [
         {
-            "container": "nn_good", 
-            "name": "nearest_neighbor_loop_fusion", 
-            "location": "src/nearest_neighbor.cpp"
-        },
-        {
-            "container": "nn_bad", 
-            "name": "nearest_neighbor", 
-            "location": "src/nearest_neighbor_bad.cpp"
-        }
+            "name": "nearest_neighbor",
+            "accelerators": [
+                {
+                    "name": "nearest_neighbor_loop_fusion", 
+                    "location": "src/nearest_neighbor.cpp"
+                },
+                {
+                    "name": "nearest_neighbor", 
+                    "location": "src/nearest_neighbor_bad.cpp"
+                }
+            ]
+        }    
     ],
     "contributors" : [
         {

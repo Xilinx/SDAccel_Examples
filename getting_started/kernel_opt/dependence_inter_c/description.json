@@ -16,9 +16,9 @@
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "accelerators": [
         {
-            "container": "mean_value", 
-            "name": "mean_value", 
-            "location": "src/mean_value.cpp"
+            "container": "vconv", 
+            "name": "vconv", 
+            "location": "src/vconv.cpp"
         }
     ],
     "contributors" : [

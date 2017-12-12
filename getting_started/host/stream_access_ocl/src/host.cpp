@@ -63,7 +63,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   that track the status of operations. 
   Most enqueuing commands return events by accepting a cl_event pointer as their
   last argument of the call. Event objects are created by kernel execution commands
-  read, write and map commands on memory objects. 
+  read and write commands on memory objects. 
 
   Many functions also accept event lists that can be used to enforce ordering in
   an OpenCL context. These events lists are especially important in the context
@@ -213,7 +213,6 @@ int main(int argc, char **argv) {
     // set of elements will be written into the buffer.
     array<cl_event, 2> kernel_events;
     array<cl_event, 2> read_events;
-    array<cl_event, 2> map_events;
 
     // Four write events are created because when the next write (WriteA2 & WriteB2) happens the 
     // current write events (WriteA1 & WriteB1) may not be released. So to avoid the overwrite
@@ -226,7 +225,7 @@ int main(int argc, char **argv) {
 
         // Release the events once the result is available
         if(num_iters >= 2){
-            clWaitForEvents(1, &map_events[flag]);
+            clWaitForEvents(1, &read_events[flag]);
             OCL_CHECK(clReleaseEvent(write_events[flag][0]));
             OCL_CHECK(clReleaseEvent(write_events[flag][1]));
             OCL_CHECK(clReleaseEvent(kernel_events[flag]));
@@ -303,11 +302,6 @@ int main(int argc, char **argv) {
                     CL_MIGRATE_MEM_OBJECT_HOST, 1, &kernel_events[flag], &read_events[flag]));
         OCL_CHECK(clEnqueueMigrateMemObjects(world.command_queue, 1, &buffer_size[flag], 
                     CL_MIGRATE_MEM_OBJECT_HOST, 1, &kernel_events[flag], &read_events[flag]));
-
-        clEnqueueMapBuffer(world.command_queue, buffer_c[flag], CL_FALSE, CL_MAP_READ, 0, 
-                    bytes_per_iteration, 1, &read_events[flag], &map_events[flag], 0);
-        clEnqueueMapBuffer(world.command_queue, buffer_size[flag], CL_FALSE, CL_MAP_READ, 0, 
-                    bytes_length_buffer, 1, &read_events[flag], &map_events[flag], 0);
     }
     // Wait for all of the OpenCL operations to complete
     clFlush(world.command_queue);
@@ -316,7 +310,7 @@ int main(int argc, char **argv) {
     size_t elements_last_iteration = elements_per_iteration;
     // Releasing mem objects and events
     for(int i = 0 ; i < 2 ; i++){
-        OCL_CHECK(clWaitForEvents(1, &map_events[i]));
+        OCL_CHECK(clWaitForEvents(1, &read_events[i]));
         OCL_CHECK(clReleaseEvent(read_events[i]));
         OCL_CHECK(clReleaseEvent(kernel_events[i]));
         OCL_CHECK(clReleaseMemObject(buffer_a[flag]));

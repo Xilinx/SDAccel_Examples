@@ -28,34 +28,52 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 #include "xcl2.hpp"
 #include <vector>
+#include "vconv.h"
 
-#define DATA_SIZE 256
-#define INCR_VALUE 10
-void mean_value(int *in, int *out, int n)
+#define TEST_WIDTH 256
+#define TEST_HEIGHT 256
+
+void vconv_sw(int *in, int *out, int height, int width)
 {
-    out[0] = ( in[0] + in[1] ) / 2;
-    for (int i = 1 ; i < n-1 ; i++)
-    {
-        out[i] = (in[i-1] + in[i] + in[i+1]) / 3;
+    int linebuf[K - 1][MAX_COLS];
+    int outIdx = 0;
+    for(int col = 0; col < height; ++col) {
+        for(int row = 0; row < width ; ++row) {
+            int in_val = in[col * width + row];
+            int out_val = 0;
+            for(int i = 0; i < K; i++) {
+                int vwin_val = i < K - 1 ? linebuf[i][row] : in_val;
+                out_val += vwin_val * vcoeff[i];
+                if (i > 0)
+                    linebuf[i - 1][row] = vwin_val;
+            }
+            if (col >= K - 1)
+                out[outIdx++]  =  out_val;
+        }
     }
-    out[n-1] = (in[n-1] + in [n -2] )/ 2;
 }
 
 int main(int argc, char** argv)
 {
+    int testWidth    = TEST_WIDTH;
+    int testHeight   = TEST_HEIGHT;
+    int testSize = testHeight * testWidth;
+
     //Allocate Memory in Host Memory
-    size_t vector_size_bytes = sizeof(int) * DATA_SIZE;
-    std::vector<int,aligned_allocator<int>> source_input(DATA_SIZE);
-    std::vector<int,aligned_allocator<int>> source_hw_results(DATA_SIZE);
-    std::vector<int,aligned_allocator<int>> source_sw_results(DATA_SIZE);
+    size_t test_size_bytes = sizeof(int) * testSize;
+    std::vector<int,aligned_allocator<int>> source_input(test_size_bytes);
+    std::vector<int,aligned_allocator<int>> source_hw_results(test_size_bytes);
+    std::vector<int,aligned_allocator<int>> source_sw_results(test_size_bytes);
 
     // Create the test data and Software Result 
-    for(int i = 0 ; i < DATA_SIZE ; i++){
-        source_input[i] = rand() % DATA_SIZE;
-        source_sw_results[i] = source_input[i];
+    for(int i = 0 ; i < testSize; i++){
+        source_input[i] = rand() % testSize;
+        source_sw_results[i] = 0;
         source_hw_results[i] = 0;
     }
-    mean_value(source_input.data(),source_sw_results.data(), DATA_SIZE);
+
+    //Running software vconv
+    vconv_sw(source_input.data(),source_sw_results.data(), testHeight, testWidth);
 
 //OPENCL HOST CODE AREA START
     std::vector<cl::Device> devices = xcl::get_xil_devices();
@@ -66,30 +84,30 @@ int main(int argc, char** argv)
     std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
-    std::string binaryFile = xcl::find_binary_file(device_name,"mean_value");
+    std::string binaryFile = xcl::find_binary_file(device_name,"vconv");
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
     cl::Program program(context, devices, bins);
-    cl::Kernel kernel(program,"mean_value");
+    cl::Kernel kernel(program,"vconv");
 
     //Allocate Buffer in Global Memory
     std::vector<cl::Memory> inBufVec, outBufVec;
     cl::Buffer buffer_input (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-            vector_size_bytes, source_input.data());
+            test_size_bytes, source_input.data());
     cl::Buffer buffer_output(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
-            vector_size_bytes, source_hw_results.data());
+            test_size_bytes, source_hw_results.data());
     inBufVec.push_back(buffer_input);
     outBufVec.push_back(buffer_output);
 
     //Copy input data to device global memory
     q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
 
-    int size = DATA_SIZE;
-    auto krnl_mean_value = cl::KernelFunctor<cl::Buffer&, cl::Buffer&, int>(kernel);
+    //int size = testSize;
+    auto krnl_vconv = cl::KernelFunctor<cl::Buffer&, cl::Buffer&, int, int>(kernel);
 
     //Launch the Kernel
-    krnl_mean_value(cl::EnqueueArgs(q,cl::NDRange(1,1,1), cl::NDRange(1,1,1)), 
-            buffer_input, buffer_output,size);
+    krnl_vconv(cl::EnqueueArgs(q,cl::NDRange(1,1,1), cl::NDRange(1,1,1)), 
+            buffer_input, buffer_output, testHeight, testWidth);
     q.finish();
 
     //Copy Result from Device Global Memory to Host Local Memory
@@ -99,21 +117,18 @@ int main(int argc, char** argv)
 //OPENCL HOST CODE AREA END
     
     // Compare the results of the Device to the simulation
-    int match = 0;
+    bool match = true;
     std::cout << "Result = " << std::endl;
-    for (int i = 0 ; i < DATA_SIZE ; i++){
+    for (int i = 0 ; i < testSize ; i++){
         if (source_hw_results[i] != source_sw_results[i]){
             std::cout << "Error: Result mismatch" << std::endl;
             std::cout << "i = " << i << " CPU result = " << source_sw_results[i]
                 << " Device result = " << source_hw_results[i] << std::endl;
-            match = 1;
+            match = false;
             break;
-        }else{
-            std::cout << source_hw_results[i] << " " ;
-            if ( ( (i+1) % 16) == 0) std::cout << std::endl;
         }
     }
 
-    std::cout << "TEST " << (match ? "FAILED" : "PASSED") << std::endl; 
-    return (match ? EXIT_FAILURE :  EXIT_SUCCESS);
+    std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl; 
+    return (match ? EXIT_SUCCESS :  EXIT_FAILURE);
 }
