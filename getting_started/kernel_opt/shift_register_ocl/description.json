@@ -6,7 +6,6 @@
     ],
     "key_concepts": [ "Kernel Optimization", "Shift Register", "FIR"],
     "keywords": [ "xcl_array_partition" ],
-    "nboard": ["xilinx:xil-accel-rd-vu9p:4ddr-xpr"],
     "os": [
         "Linux"
     ],

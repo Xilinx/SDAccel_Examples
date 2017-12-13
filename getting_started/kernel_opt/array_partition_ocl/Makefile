@@ -21,7 +21,6 @@ XOS=matmul
 
 # xclbin
 matmul_XOS=matmul
-matmul_NDEVICES=xilinx:xil-accel-rd-vu9p:4ddr-xpr
 
 XCLBINS=matmul
 
@@ -30,7 +29,6 @@ EXTRA_CLEAN=./output.png
 # check
 check_EXE=array_partition
 check_XCLBINS=matmul
-check_NDEVICES=xilinx:xil-accel-rd-vu9p:4ddr-xpr
 
 CHECKS=check
 

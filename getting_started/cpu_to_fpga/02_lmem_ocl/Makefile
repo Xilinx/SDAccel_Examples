@@ -19,12 +19,10 @@ EXES=host
 XCLBINS=mmult
 
 mmult_XOS=mmult
-mmult_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr
 
 #check
 check_EXE=host
 check_XCLBINS=mmult
-check_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr
 
 CHECKS=check
 

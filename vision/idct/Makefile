@@ -24,14 +24,12 @@ XOS=krnl_idct
 
 # idct xclbin
 krnl_idct_XOS=krnl_idct
-krnl_idct_NDEVICES=xilinx:adm-pcie-7v3:1ddr
 
 XCLBINS=krnl_idct
 
 # check
 check_EXE=idct
 check_XCLBINS=krnl_idct
-check_NDEVICES=xilinx:adm-pcie-7v3:1ddr
 
 CHECKS=check
 

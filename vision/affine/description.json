@@ -8,7 +8,6 @@
     "xcl": true,
     "opencv": true,
     "cmd_args": "PROJECT/data/CT-MONO2-16-brain.raw",
-    "nboard": ["xilinx:adm-pcie-7v3:1ddr","xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-vu9p:4ddr-xpr"],
     "em_cmd": "./affine ./data/CT-MONO2-16-brain.raw",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./affine ./data/CT-MONO2-16-brain.raw",
     "libs": [

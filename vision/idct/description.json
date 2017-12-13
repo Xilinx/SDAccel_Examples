@@ -12,9 +12,6 @@
     "libs": [
         "xcl2"
     ],
-    "nboard": [
-        "xilinx:adm-pcie-7v3:1ddr"
-    ],
     "accelerators": [
         {
             "container": "krnl_idct", 

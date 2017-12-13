@@ -4,7 +4,6 @@
     "overview": [
         "This is an implementation of a huffman encoding/decoding algorithm targeting execution on an SDAccel supported FPGA acceleration card."
     ],
-    "nboard": ["xilinx:adm-pcie-7v3:1ddr","xilinx:adm-pcie-ku3:2ddr-xpr","xilinx:xil-accel-rd-ku115:4ddr-xpr","xilinx:xil-accel-rd-vu9p:4ddr-xpr"],
     "targets": ["sw_emu", "hw"],
     "xcl": false,
     "opencv": true,

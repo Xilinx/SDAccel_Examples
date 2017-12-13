@@ -6,7 +6,6 @@
     ],
     "key_concepts": [ "Kernel Optimization", "Array Partitioning", "Block Partition", "Cyclic Partition"],
     "keywords": [ "xcl_array_partition", "cyclic", "block"],
-    "nboard": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:xil-accel-rd-vu9p:4ddr-xpr"],
     "os": [
         "Linux"
     ],

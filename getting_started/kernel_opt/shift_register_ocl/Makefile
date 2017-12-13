@@ -15,20 +15,17 @@ EXES=shift_register
 
 # Kernel
 fir_SRCS=./src/fir.cl
-fir_NDEVICES=xilinx:xil-accel-rd-vu9p:4ddr-xpr
 
 XOS=fir
 
 # xclbin
 fir_XOS=fir
-fir_NDEVICES=xilinx:xil-accel-rd-vu9p:4ddr-xpr
 
 XCLBINS=fir
 
 # check
 check_EXE=shift_register
 check_XCLBINS=fir
-check_NDEVICES=$(fir_NDEVICES)
 
 CHECKS=check
 
