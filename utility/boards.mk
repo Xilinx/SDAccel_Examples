@@ -2,6 +2,7 @@
 # 'estimate' for estimate report generation
 # 'system' for system report generation
 REPORT:=none
+PROFILE ?= no
 
 # Default C++ Compiler Flags and xocc compiler flags
 CXXFLAGS:=-Wall -O0 -g -std=c++14
@@ -10,6 +11,10 @@ CLFLAGS:= --xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generat
 ifneq ($(REPORT),none)
 CLFLAGS += --report $(REPORT)
 endif 
+
+ifeq ($(PROFILE),yes)
+CLFLAGS += --profile_kernel data:all:all:all
+endif
 
 LDCLFLAGS:=$(CLFLAGS)
 

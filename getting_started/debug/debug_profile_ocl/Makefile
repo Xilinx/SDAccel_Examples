@@ -1,5 +1,8 @@
 COMMON_REPO := ../../../
 
+# Kernel profile summary option
+PROFILE:=yes
+
 include $(COMMON_REPO)/utility/boards.mk
 include $(COMMON_REPO)/libs/xcl2/xcl2.mk
 include $(COMMON_REPO)/libs/opencl/opencl.mk
