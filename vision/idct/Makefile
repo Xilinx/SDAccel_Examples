@@ -15,10 +15,7 @@ EXES=idct
 # idct Kernel
 krnl_idct_SRCS=./src/krnl_idct.cpp
 krnl_idct_CLFLAGS=-k krnl_idct -I./src
-krnl_idct_LDCLFLAGS+= \
-      --xp misc:map_connect=add.kernel.krnl_idct_1.M_AXI_GMEM.core.OCL_REGION_0.M00_AXI \
-      --xp misc:map_connect=add.kernel.krnl_idct_1.M_AXI_GMEM1.core.OCL_REGION_0.M00_AXI \
-      --xp misc:map_connect=add.kernel.krnl_idct_1.M_AXI_GMEM2.core.OCL_REGION_0.M01_AXI 
+krnl_idct_LDCLFLAGS+= --sp krnl_idct_1.m_axi_gmem0:bank0 --sp krnl_idct_1.m_axi_gmem1:bank1 --sp krnl_idct_1.m_axi_gmem2:bank2 
 
 XOS=krnl_idct
 
