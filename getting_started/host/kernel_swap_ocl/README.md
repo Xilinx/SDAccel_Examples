@@ -12,9 +12,6 @@ This README file contains the following sections:
 7. SUPPORT
 8. LICENSE AND CONTRIBUTING TO THE REPOSITORY
 9. ACKNOWLEDGEMENTS
-10. REVISION HISTORY
-
-
 ## 1. OVERVIEW
 This example shows how host can swap the kernels and share same buffer between two kernels exist in separate binary containers. For Non-XPR(Extended Partial Reconfiguration) Specific Devices, device memory can persist buffer data so both kernels can share data directly. Whereas in XPR devices, device memory does not persist the buffer data so host has to migrate data from device to host memory before swapping the next kernel. After kernel swap, host has to migrate the buffer back to device.
 
@@ -131,12 +128,6 @@ To contribute to this project, follow the guidelines in the [Repository Contribu
 ## 9. ACKNOWLEDGEMENTS
 This example is written by developers at
 - [Xilinx](http://www.xilinx.com)
-
-## 10. REVISION HISTORY
-Date | README Version | Description
------|----------------|------------
-SEP2017|1.0|Initial Xilinx Release
-
 [3-Clause BSD License]: ../../../LICENSE.txt
 [SDAccel Forums]: https://forums.xilinx.com/t5/SDAccel/bd-p/SDx
 [SDAccel User Guides]: http://www.xilinx.com/support/documentation-navigation/development-tools/software-development/sdaccel.html?resultsTablePreSelect=documenttype:SeeAll#documentation

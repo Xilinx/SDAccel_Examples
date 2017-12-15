@@ -33,7 +33,7 @@ def header(target,data):
     target.write("7. SUPPORT\n")
     target.write("8. LICENSE AND CONTRIBUTING TO THE REPOSITORY\n")
     target.write("9. ACKNOWLEDGEMENTS\n")
-    target.write("10. REVISION HISTORY\n\n\n")
+    #target.write("10. REVISION HISTORY\n\n\n")
     return
 
 def download(target):
@@ -355,6 +355,6 @@ execution(target)
 support(target)
 license(target)
 ack(target,data)
-revision(target,data)
+#revision(target,data)
 footer(target)
 target.close
