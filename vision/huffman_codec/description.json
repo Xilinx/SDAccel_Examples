@@ -19,6 +19,7 @@
     "containers" : [
         {
             "name" : "krnl_huffman",
+            "clflags"   : "--xp param:compiler.version=31",
             "accelerators": [
                 {
                     "name": "encode", 

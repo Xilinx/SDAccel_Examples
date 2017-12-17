@@ -20,6 +20,7 @@ EXES=huffman
 
 # Huffman Codec Kernel
 krnl_huffman_SRCS=./src/krnl_huffman_singleptr.cl
+krnl_huffman_CLFLAGS=--xp "param:compiler.version=31"
 
 XOS=krnl_huffman
 
