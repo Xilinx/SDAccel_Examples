@@ -7,6 +7,7 @@
     "targets": ["sw_emu", "hw"],
     "xcl": true,
     "opencv": true,
+    "nboard":["xilinx:vcu1525:dynamic", "xilinx_vcu1525_dynamic_5_0"],
     "cmd_args": "PROJECT/data/CT-MONO2-16-brain.raw",
     "em_cmd": "./affine ./data/CT-MONO2-16-brain.raw",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./affine ./data/CT-MONO2-16-brain.raw",

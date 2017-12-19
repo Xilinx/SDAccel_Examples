@@ -25,7 +25,6 @@ where examples is the name of the directory where the repository will be stored 
 ## 3. SOFTWARE AND SYSTEM REQUIREMENTS
 Board | Device Name | Software Version
 ------|-------------|-----------------
-Xilinx Kintex UltraScale KCU1500|xilinx:kcu1500:dynamic|SDAccel 2017.4
 Xilinx Kintex UltraScalePlus VCU1525|xilinx:vcu1525:dynamic|SDAccel 2017.4
 
 

@@ -19,12 +19,14 @@ XOS=krnl_sum_scan
 
 # sum_scan xclbin
 krnl_sum_scan_XOS=krnl_sum_scan
+krnl_sum_scan_NDEVICES=xilinx:kcu1500:dynamic xilinx_kcu1500_dynamic_5_0
 
 XCLBINS=krnl_sum_scan
 
 # check
 check_EXE=sum_scan
 check_XCLBINS=krnl_sum_scan
+check_NDEVICES=$(krnl_sum_scan_NDEVICES)
 
 CHECKS=check
 

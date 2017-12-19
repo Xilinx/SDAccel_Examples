@@ -21,11 +21,13 @@ XOS=krnl_affine
 
 # Affine xclbin
 krnl_affine_XOS=krnl_affine
+krnl_affine_NDEVICES=xilinx:vcu1525:dynamic xilinx_vcu1525_dynamic_5_0
 XCLBINS=krnl_affine
 
 # check
 check_EXE=affine
 check_XCLBINS=krnl_affine
+check_NDEVICES=$(krnl_affine_NDEVICES)
 check_ARGS=./data/CT-MONO2-16-brain.raw
 
 CHECKS=check

@@ -22,12 +22,14 @@ XOS=adder
 
 # xclbin
 adder_XOS=adder
+adder_NDEVICES=xilinx:kcu1500:dynamic xilinx_kcu1500_dynamic_5_0
 
 XCLBINS=adder
 
 # check
 check_EXE=host
 check_XCLBINS=adder
+check_NDEVICES=$(adder_NDEVICES)
 
 CHECKS=check
 
