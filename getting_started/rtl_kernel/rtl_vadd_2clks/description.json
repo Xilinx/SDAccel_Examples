@@ -12,10 +12,6 @@
     "libs": [
         "xcl2"
     ],
-    "nboard" : [
-        "xilinx:adm-pcie-7v3:1ddr",
-        "xilinx:adm-pcie-ku3:2ddr-xpr"
-    ],
     "targets": ["hw", "hw_emu"],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",

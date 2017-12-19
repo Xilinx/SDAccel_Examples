@@ -50,7 +50,7 @@ typedef union {
 	float f[B];
 } bus_to_float_t;
 
-bus_t array_to_bus(float *in) {
+__attribute__((always_inline)) bus_t array_to_bus(float *in) {
 	bus_to_float_t out;
 
 	for(uint i = 0; i < B; i++) {
@@ -60,7 +60,7 @@ bus_t array_to_bus(float *in) {
 	return out.b;
 }
 
-void bus_to_array(bus_t g_in, float *out) {
+__attribute__((always_inline)) void bus_to_array(bus_t g_in, float *out) {
 	bus_to_float_t in;
 
 	in.b = g_in;
@@ -70,7 +70,7 @@ void bus_to_array(bus_t g_in, float *out) {
 	}
 }
 
-bus_t sum_scan(float *sum, bus_t g_in[HIST_LENGTH+1], uint i) {
+__attribute__((always_inline)) bus_t sum_scan(float *sum, bus_t g_in[HIST_LENGTH+1], uint i) {
 	float in[(HIST_LENGTH+1)*B] __attribute__((xcl_array_partition(complete, 0)));
 
 	for(uint j = 0; j < HIST_LENGTH+1; j++) {

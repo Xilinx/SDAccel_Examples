@@ -127,10 +127,13 @@ void cnn(
     readImg: for(int i = 0; i < i_chan * ISize * ISize; i++){
         img_lcl[i] = image[i];
     }
-    
+   
     // Burst Read Weights
     __attribute__((xcl_pipeline_loop))
-    readWt: for(int i = 0; i < o_chan * WInChan * WSize * WSize; i++){
+    readWt: 
+    // To avoid automatic loop unrolling
+    #pragma nounroll
+    for(int i = 0; i < o_chan * WInChan * WSize * WSize; i++){
         wgt_lcl[i] = weights[i];
     }
     

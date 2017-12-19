@@ -6,13 +6,13 @@
     ],
     "key_concepts": [ "Kernel Optimization", "Array Partitioning", "Block Partition", "Cyclic Partition"],
     "keywords": [ "#pragma HLS ARRAY_PARTITION", "cyclic", "block", "factor", "dim"],
-    "nboard": ["xilinx:adm-pcie-7v3:1ddr", "xilinx:xil-accel-rd-vu9p:4ddr-xpr"],
     "os": [
         "Linux"
     ],
     "libs": [
         "xcl2"
     ],
+    "nboard":["xilinx:kcu1500:dynamic", "xilinx:vcu1525:dynamic", "xilinx_kcu1500_dynamic_5_0", "xilinx_vcu1525_dynamic_5_0"],
     "em_cmd": "./array_partition",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./array_partition",
     "accelerators": [

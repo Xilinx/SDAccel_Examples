@@ -17,6 +17,7 @@ EXES=equalizer
 # Equalizer Kernel
 krnl_equalizer_SRCS=./src/krnl_equalizer.cl
 krnl_equalizer_CLFLAGS=-I./src/
+krnl_equalizer_CLFLAGS+=--xp "param:compiler.version=31"
 
 XOS=krnl_equalizer
 

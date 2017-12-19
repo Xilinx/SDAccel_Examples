@@ -4,32 +4,18 @@ import json
 import os
 import subprocess
 
-DSA = 'xilinx:xil-accel-rd-ku115:4ddr-xpr'
-VERSION = 'SDAccel 2017.2'
+DSA = 'xilinx:kcu1500:dynamic'
+VERSION = 'SDAccel 2017.4'
 DEVICES = {
-    'xilinx:adm-pcie-7v3:1ddr': {
-       'version': '3.0',
-       'name': 'Alpha Data ADM-PCIE-7V3',
-       'nae':  'nx2'
+    'xilinx:kcu1500:dynamic': {
+       'version': '5.0',
+       'name': 'Xilinx Kintex UltraScale KCU1500',
+       'nae':  'nx5'
     },
-    'xilinx:adm-pcie-ku3:2ddr-xpr': {
-       'version': '4.1',
-       'name': 'Alpha Data ADM-PCIE-KU3',
-       'nae': 'nx1',
-    },
-    'xilinx:xil-accel-rd-ku115:4ddr-xpr': {
-       'version': '4.1',
-       'name': 'Xilinx KU115',
-       'nae': 'nx3',
-    },
-    'xilinx:xil-accel-rd-vu9p:4ddr-xpr': {
-       'version': '4.1',
-       'name': 'Xilinx VU9P',
-       'nae': 'nx4',
-    },
-    'xilinx:aws-vu9p-f1:4ddr-xpr-2pr': {
-       'version': '4.0',
-       'name': 'AWS VU9P F1'
+    'xilinx:vcu1525:dynamic': {
+       'version': '5.0',
+       'name': 'Xilinx Kintex UltraScalePlus VCU1525',
+       'nae':  'nx6'
     }
 }
 
@@ -47,7 +33,6 @@ def header(target,data):
     target.write("7. SUPPORT\n")
     target.write("8. LICENSE AND CONTRIBUTING TO THE REPOSITORY\n")
     target.write("9. ACKNOWLEDGEMENTS\n")
-    target.write("10. REVISION HISTORY\n\n\n")
     return
 
 def download(target):
@@ -122,11 +107,8 @@ def requirements(target,data):
         target.write("|")
         for version in VERSION:
             target.write(version)
-#        target.write("|")
-#        target.write(DEVICES[board][1])
         target.write("\n")
     target.write("\n\n")
-#    target.write("Board targeted by default = ***%s***\n\n" %DSA)
     target.write("*NOTE:* The board/device used for compilation can be changed by adding the DEVICES variable to the make command as shown below\n")
     target.write("```\n")
     target.write("make DEVICES=<device name>\n")
@@ -296,20 +278,6 @@ def ack(target,data):
         target.write(")\n")
     return
 
-def revision(target,data):
-    target.write("\n## 10. REVISION HISTORY\n")
-    target.write("Date | README Version | Description\n")
-    target.write("-----|----------------|------------\n")
-    for rev in data["revision"]:
-        target.write(rev["date"])
-        target.write("|")
-        target.write(rev["version"])
-        target.write("|")
-        target.write(rev["description"])
-        target.write("\n")
-    target.write("\n")
-    return
-
 def dirTraversal(stop_file):
     stop_search = None
     level_count = 1
@@ -372,6 +340,5 @@ execution(target)
 support(target)
 license(target)
 ack(target,data)
-revision(target,data)
 footer(target)
 target.close

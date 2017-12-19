@@ -16,14 +16,13 @@ EXES=nearest
 # Nearest Neighbor Kernel
 krnl_nearest_SRCS=./src/krnl_linear_search.cpp
 krnl_nearest_CLFLAGS=--kernel krnl_linear_search -I./src/
-krnl_nearest_NDEVICES=xilinx:adm-pcie-7v3:1ddr
 
 XOS=krnl_nearest
 
 # Nearest Neighbor xclbin
 krnl_nearest_XOS=krnl_nearest
 krnl_nearest_LDCLFLAGS=--nk krnl_linear_search:2
-krnl_nearest_NDEVICES=xilinx:adm-pcie-7v3:1ddr
+krnl_nearest_NDEVICES=xilinx:kcu1500:dynamic xilinx_kcu1500_dynamic_5_0
 
 XCLBINS=krnl_nearest
 

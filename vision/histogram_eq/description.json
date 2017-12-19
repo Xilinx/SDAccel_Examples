@@ -12,7 +12,6 @@
             "metric": "333"
         }
     ],
-    "nboard": ["xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "xcl": false,
     "opencv": true,
     "cmd_args": "PROJECT/data/race_2k.bmp",
@@ -25,7 +24,8 @@
     "accelerators": [
         {
             "name": "krnl_equalizer", 
-            "location": "src/krnl_equalizer.cl"
+            "location": "src/krnl_equalizer.cl",
+            "clflags"   : "--xp param:compiler.version=31"
         }
     ],
     "contributors": [

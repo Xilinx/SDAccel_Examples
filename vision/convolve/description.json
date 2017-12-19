@@ -4,8 +4,8 @@
     "overview": [
         "The convolve example is a performant design which showcases convolutional image filtering. The example processes the image 8 pixels at a time."
     ],
-    "nboard": ["xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "opencv": true,
+    "nboard":["xilinx:kcu1500:dynamic", "xilinx_kcu1500_dynamic_5_0"],
     "cmd_args": "PROJECT/data/input_buffer_raw.txt PROJECT/data/filter_buffer_raw.txt PROJECT/data/output_buffer_raw.txt",
     "em_cmd": "./convolve data/input_buffer_raw.txt data/filter_buffer_raw.txt data/output_buffer_raw.txt",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./convolve data/input_buffer_raw.txt data/filter_buffer_raw.txt data/output_buffer_raw.txt",

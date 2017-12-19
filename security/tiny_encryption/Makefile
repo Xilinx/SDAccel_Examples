@@ -21,12 +21,14 @@ XOS=krnl_tiny
 
 # Tiny Encryption xclbin
 krnl_tiny_XOS=krnl_tiny
+krnl_tiny_NDEVICES=xilinx:vcu1525:dynamic xilinx_vcu1525_dynamic_5_0
 
 XCLBINS=krnl_tiny
 
 # check
 check_EXE=tiny
 check_XCLBINS=krnl_tiny
+check_NDEVICES=$(krnl_tiny_NDEVICES)
 
 # Pattern to allow cmdline to determine xclbin name
 define mk_args

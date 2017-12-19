@@ -12,9 +12,6 @@ This README file contains the following sections:
 7. SUPPORT
 8. LICENSE AND CONTRIBUTING TO THE REPOSITORY
 9. ACKNOWLEDGEMENTS
-10. REVISION HISTORY
-
-
 ## 1. OVERVIEW
 This example has two RTL Kernels. Both Kernel_0 and Kernel_1 perform vector addition. The Kernel_1 reads the output from Kernel_0 as one of two inputs.
 
@@ -30,11 +27,8 @@ where examples is the name of the directory where the repository will be stored 
 ## 3. SOFTWARE AND SYSTEM REQUIREMENTS
 Board | Device Name | Software Version
 ------|-------------|-----------------
-Alpha Data ADM-PCIE-7V3|xilinx:adm-pcie-7v3:1ddr|SDAccel 2017.2
-Xilinx VU9P|xilinx:xil-accel-rd-vu9p:4ddr-xpr|SDAccel 2017.2
-AWS VU9P F1|xilinx:aws-vu9p-f1:4ddr-xpr-2pr|SDAccel 2017.2
-Xilinx KU115|xilinx:xil-accel-rd-ku115:4ddr-xpr|SDAccel 2017.2
-Alpha Data ADM-PCIE-KU3|xilinx:adm-pcie-ku3:2ddr-xpr|SDAccel 2017.2
+Xilinx Kintex UltraScale KCU1500|xilinx:kcu1500:dynamic|SDAccel 2017.4
+Xilinx Kintex UltraScalePlus VCU1525|xilinx:vcu1525:dynamic|SDAccel 2017.4
 
 
 *NOTE:* The board/device used for compilation can be changed by adding the DEVICES variable to the make command as shown below
@@ -52,15 +46,23 @@ README.md
 description.json
 scripts/gen_vadd0_xo.tcl
 scripts/gen_vadd1_xo.tcl
-scripts/package_kernel.tcl
-src/hdl/krnl_vadd_rtl.v
-src/hdl/krnl_vadd_rtl_adder.sv
-src/hdl/krnl_vadd_rtl_axi_read_master.sv
-src/hdl/krnl_vadd_rtl_axi_write_master.sv
-src/hdl/krnl_vadd_rtl_control_s_axi.v
-src/hdl/krnl_vadd_rtl_counter.sv
-src/hdl/krnl_vadd_rtl_int.sv
+scripts/package_kernel_0.tcl
+scripts/package_kernel_1.tcl
 src/host.cpp
+src/ip_0/hdl/krnl_vadd_rtl_0.v
+src/ip_0/hdl/krnl_vadd_rtl_adder.sv
+src/ip_0/hdl/krnl_vadd_rtl_axi_read_master.sv
+src/ip_0/hdl/krnl_vadd_rtl_axi_write_master.sv
+src/ip_0/hdl/krnl_vadd_rtl_control_s_axi.v
+src/ip_0/hdl/krnl_vadd_rtl_counter.sv
+src/ip_0/hdl/krnl_vadd_rtl_int.sv
+src/ip_1/hdl/krnl_vadd_rtl_1.v
+src/ip_1/hdl/krnl_vadd_rtl_adder.sv
+src/ip_1/hdl/krnl_vadd_rtl_axi_read_master.sv
+src/ip_1/hdl/krnl_vadd_rtl_axi_write_master.sv
+src/ip_1/hdl/krnl_vadd_rtl_control_s_axi.v
+src/ip_1/hdl/krnl_vadd_rtl_counter.sv
+src/ip_1/hdl/krnl_vadd_rtl_int.sv
 src/kernel_0.xml
 src/kernel_1.xml
 ```
@@ -103,7 +105,7 @@ To manually configure the environment to run the application, set the following
 ```
 export LD_LIBRARY_PATH=$XILINX_SDX/runtime/lib/x86_64/:$LD_LIBRARY_PATH
 export XCL_EMULATION_MODE=<sw_emu|hw_emu>
-emconfigutil --xdevice 'xilinx:xil-accel-rd-ku115:4ddr-xpr' --nd 1
+emconfigutil --xdevice 'xilinx:kcu1500:dynamic' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
@@ -142,12 +144,6 @@ To contribute to this project, follow the guidelines in the [Repository Contribu
 ## 9. ACKNOWLEDGEMENTS
 This example is written by developers at
 - [Xilinx](http://www.xilinx.com)
-
-## 10. REVISION HISTORY
-Date | README Version | Description
------|----------------|------------
-May2017|1.0|Initial Xilinx Release
-
 [3-Clause BSD License]: ../../../LICENSE.txt
 [SDAccel Forums]: https://forums.xilinx.com/t5/SDAccel/bd-p/SDx
 [SDAccel User Guides]: http://www.xilinx.com/support/documentation-navigation/development-tools/software-development/sdaccel.html?resultsTablePreSelect=documenttype:SeeAll#documentation

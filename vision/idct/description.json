@@ -7,13 +7,11 @@
     "os": [
         "Linux"
     ],
+    "nboard":["xilinx:vcu1525:dynamic", "xilinx_vcu1525_dynamic_5_0"],
     "em_cmd" : "./idct",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./idct",
     "libs": [
         "xcl2"
-    ],
-    "nboard": [
-        "xilinx:adm-pcie-7v3:1ddr"
     ],
     "accelerators": [
         {

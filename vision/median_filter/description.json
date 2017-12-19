@@ -4,7 +4,6 @@
     "overview": [
         "This is an optimized implementation of a median filter being used to remove noise in images targeting execution on an SDAccel supported FPGA acceleration card."
     ],
-    "nboard": ["xilinx:xil-accel-rd-ku115:4ddr-xpr"],
     "xcl": false,
     "opencv": true,
     "cmd_args": "PROJECT/data/inputImage.bmp BUILD/default.xclbin",

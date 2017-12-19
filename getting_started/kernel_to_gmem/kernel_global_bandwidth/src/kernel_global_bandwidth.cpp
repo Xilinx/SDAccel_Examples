@@ -122,7 +122,7 @@ int main(int argc, char** argv) {
         input_host[i] = i % 256;
     }
 
-    short ddr_banks = DDR_BANKS; 
+    short ddr_banks = DDR_BANKS;
 
     /* Index for the ddr pointer array: 4=4, 2=2, 1=2 */
     char num_buffers = ddr_banks + (ddr_banks % 2);
@@ -158,7 +158,7 @@ int main(int argc, char** argv) {
                 return EXIT_FAILURE;
             }
         } /* End for (i < ddr_banks) */
-    #else   
+    #else
         buffer[0] = clCreateBuffer(world.context,
                                    CL_MEM_READ_WRITE,
                                    globalbuffersize,
@@ -264,7 +264,6 @@ int main(int argc, char** argv) {
 
     xcl_set_kernel_arg(krnl, arg_index++, sizeof(cl_mem), &buffer[buffer_index++]);
     xcl_set_kernel_arg(krnl, arg_index++, sizeof(cl_mem), &buffer[buffer_index++]);
-
     #ifdef USE_4DDR
         xcl_set_kernel_arg(krnl, arg_index++, sizeof(cl_mem), &buffer[buffer_index++]);
         xcl_set_kernel_arg(krnl, arg_index++, sizeof(cl_mem), &buffer[buffer_index++]);

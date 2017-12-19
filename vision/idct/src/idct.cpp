@@ -164,21 +164,6 @@ void getBinaryName(std::string &binaryName, char* device_name) {
   std::string target = device_name;
   std::replace(target.begin(), target.end(), ':', '_');
   std::replace(target.begin(), target.end(), '.', '_');
-  if(!isAwsFlow) {
-    // remove platform version
-    int _count = 0;
-    int count = 0;
-    for (char & c : target) {
-      if(c == '_') {
-	_count++;
-      }
-      if(_count == 3) {
-	break;
-      }
-      count++;
-    }
-    target = target.substr(0,count);
-  }
   binaryName += "." + target;
 
   if((isHwFlow==true) && (isAwsFlow==true)) {

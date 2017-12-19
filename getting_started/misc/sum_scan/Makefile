@@ -14,13 +14,12 @@ EXES=sum_scan
 
 # sum_scan Kernel
 krnl_sum_scan_SRCS=./src/krnl_sum_scan.cl
-krnl_sum_scan_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr xilinx:xil-accel-rd-vu9p:4ddr-xpr
 
 XOS=krnl_sum_scan
 
 # sum_scan xclbin
 krnl_sum_scan_XOS=krnl_sum_scan
-krnl_sum_scan_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr xilinx:xil-accel-rd-vu9p:4ddr-xpr
+krnl_sum_scan_NDEVICES=xilinx:kcu1500:dynamic xilinx_kcu1500_dynamic_5_0
 
 XCLBINS=krnl_sum_scan
 

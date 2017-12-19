@@ -347,7 +347,7 @@ void krnl_idct(const ap_int<512> *block,
 	       ap_int<512> *voutp, 
 	       int ignore_dc, 
 	       unsigned int blocks) {
-  #pragma HLS INTERFACE m_axi     port=block     offset=slave bundle=gmem
+  #pragma HLS INTERFACE m_axi     port=block     offset=slave bundle=gmem0
   #pragma HLS INTERFACE s_axilite port=block                  bundle=control
   #pragma HLS INTERFACE m_axi     port=q         offset=slave bundle=gmem1
   #pragma HLS INTERFACE s_axilite port=q                      bundle=control

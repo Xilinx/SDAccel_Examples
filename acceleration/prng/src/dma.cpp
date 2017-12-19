@@ -45,8 +45,8 @@ void initQ (data_t *Q, data_t* din, int j) {
 //______________________________________________________________________________
 void dma (dout_t *mem_out, data_t *mem_in, int nofBlock) {
 
-#pragma HLS INTERFACE m_axi port=mem_in   bundle=DIN  depth = CMWC_CYCLE   offset=slave
-#pragma HLS INTERFACE m_axi port=mem_out  bundle=DOUT depth = maxNofSample offset=slave
+#pragma HLS INTERFACE m_axi port=mem_in   bundle=din  depth = CMWC_CYCLE   offset=slave
+#pragma HLS INTERFACE m_axi port=mem_out  bundle=dout depth = maxNofSample offset=slave
 
 #pragma HLS INTERFACE s_axilite port=return      bundle=control
 #pragma HLS INTERFACE s_axilite port=mem_in     bundle=control

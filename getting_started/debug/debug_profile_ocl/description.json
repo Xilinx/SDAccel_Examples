@@ -17,7 +17,8 @@
         {
             "container": "vadd", 
             "name": "krnl_vadd", 
-            "location": "src/vadd.cl"
+            "location": "src/vadd.cl",
+            "clflags" : "--profile_kernel data:all:all:all"
         }
     ],
     "contributors" : [

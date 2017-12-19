@@ -17,7 +17,7 @@ mmult_CLFLAGS=-k mmult
 XOS=mmult
 
 mmult_XOS=mmult
-mmult_NDEVICES=xilinx:xil-accel-rd-vu9p:4ddr-xpr
+mmult_NDEVICES=xilinx:vcu1525:dynamic xilinx_vcu1525_dynamic_5_0
 
 XCLBINS=mmult
 EXES=host
@@ -25,7 +25,7 @@ EXES=host
 # check
 check_EXE=host
 check_XCLBINS=mmult
-check_NDEVICES=xilinx:xil-accel-rd-vu9p:4ddr-xpr
+check_NDEVICES=$(mmult_NDEVICES)
 
 CHECKS=check
 

@@ -4,7 +4,6 @@
     "overview": [
         "This is simple example of vector addition and printing of data that is computational result (addition). It is based on vectored addition that demonstrates printing of work item data (integer product in this case)"
     ],
-    "nboard": ["xilinx:xil-accel-rd-ku115:4ddr-xpr", "xilinx:xil-accel-rd-vu9p:4ddr-xpr", "xilinx:adm-pcie-ku3:2ddr-xpr", "xilinx:adm-pcie-7v3:1ddr"],
     "key_concepts": [ "Use of print statements for debugging"],
     "keywords": [ "printf", "param:compiler.enableAutoPipelining=false"],
     "os": [

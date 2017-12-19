@@ -28,7 +28,6 @@ XCLBINS=vadd
 # check
 check_EXE=host
 check_XCLBINS=vadd
-check_NDEVICES=xilinx:xil-accel-rd-ku115:4ddr-xpr xilinx:xil-accel-rd-vu9p:4ddr-xpr xilinx:adm-pcie-ku3:2ddr-xpr xilinx:adm-pcie-7v3:1ddr
 
 CHECKS=check
 

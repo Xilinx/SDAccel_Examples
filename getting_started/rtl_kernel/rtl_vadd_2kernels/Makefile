@@ -14,17 +14,17 @@ EXES=host
 
 # RTL Kernel Sources
 vadd0_HDLSRCS=src/kernel_0.xml\
-			 scripts/package_kernel.tcl\
+			 scripts/package_kernel_0.tcl\
 			 scripts/gen_vadd0_xo.tcl\
-			 src/hdl/*.sv\
-		   	 src/hdl/*.v
+			 src/ip_0/hdl/*.sv\
+		   	 src/ip_0/hdl/*.v
 vadd0_TCL=scripts/gen_vadd0_xo.tcl
 
 vadd1_HDLSRCS=src/kernel_1.xml\
-			 scripts/package_kernel.tcl\
+			 scripts/package_kernel_1.tcl\
 			 scripts/gen_vadd1_xo.tcl\
-			 src/hdl/*.sv\
-		   	 src/hdl/*.v
+			 src/ip_1/hdl/*.sv\
+		   	 src/ip_1/hdl/*.v
 vadd1_TCL=scripts/gen_vadd1_xo.tcl
 
 RTLXOS=vadd0 vadd1

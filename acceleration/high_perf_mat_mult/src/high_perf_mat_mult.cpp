@@ -187,35 +187,19 @@ int main(int argc, char** argv)
     cl_mem_ext_ptr_t d_d_ext;
     cl_mem_ext_ptr_t d_c_ext;
 
-#ifdef VU9P
-    d_a_ext.flags = XCL_MEM_DDR_BANK2; //A --> bank2
-#else
     d_a_ext.flags = XCL_MEM_DDR_BANK0; //A --> bank0
-#endif
     d_a_ext.obj = NULL;// h_a;
     d_a_ext.param = 0;
 
-#ifdef VU9P
-    d_b_ext.flags = XCL_MEM_DDR_BANK2; //B0 --> bank2
-#else
     d_b_ext.flags = XCL_MEM_DDR_BANK0; //B0 --> bank0
-#endif
     d_b_ext.obj = NULL; //h_b;
     d_b_ext.param = 0;
 
-#ifdef VU9P
-    d_d_ext.flags = XCL_MEM_DDR_BANK3; //B1 --> bank3
-#else
     d_d_ext.flags = XCL_MEM_DDR_BANK1; //B1 --> bank1
-#endif
     d_d_ext.obj = NULL; //h_d;
     d_d_ext.param = 0;
 
-#ifdef VU9P
-    d_c_ext.flags = XCL_MEM_DDR_BANK3; //C --> bank3
-#else
     d_c_ext.flags = XCL_MEM_DDR_BANK1; //C --> bank1
-#endif
     d_c_ext.obj = NULL; //h_c;
     d_c_ext.param = 0;
 

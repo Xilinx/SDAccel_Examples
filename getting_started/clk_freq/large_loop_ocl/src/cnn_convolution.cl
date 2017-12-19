@@ -109,7 +109,10 @@ void __attribute__((always_inline)) copy_weight(__global int *weight, int wgt_lc
     
     // Each work_item copies its weight data from DDR to local buffers
     __attribute__((xcl_pipeline_loop))
-    readWt: for(int itr = 0, i = 0, j = 0; itr < WInChan * WSize * WSize; itr++,j++) {
+    readWt: 
+    // To avoid automatic loop unrolling
+    #pragma nounroll
+    for(int itr = 0, i = 0, j = 0; itr < WInChan * WSize * WSize; itr++,j++) {
         if(j == WSize * WSize) {j = 0; i++;}
         wgt_lcl[i][j] = weight[stride + itr];
     }

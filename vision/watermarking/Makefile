@@ -18,14 +18,12 @@ EXES=watermark
 # Kernel
 apply_watermark_SRCS=./src/krnl_watermarking.cl
 apply_watermark_CLFLAGS= -I./src --max_memory_ports apply_watermark
-apply_watermark_NDEVICES=xilinx:adm-pcie-7v3:1ddr
 
 XOS=apply_watermark
 
 # xclbin
 apply_watermark_XOS=apply_watermark
-apply_watermark_LDCLFLAGS=--xp misc:map_connect=add.kernel.apply_watermark_1.M_AXI_GMEM0.core.OCL_REGION_0.M00_AXI --xp misc:map_connect=add.kernel.apply_watermark_1.M_AXI_GMEM1.core.OCL_REGION_0.M01_AXI
-apply_watermark_NDEVICES=xilinx:adm-pcie-7v3:1ddr
+apply_watermark_LDCLFLAGS=--sp apply_watermark_1.m_axi_gmem0:bank0 --sp apply_watermark_1.m_axi_gmem1:bank1
 
 XCLBINS=apply_watermark
 
@@ -35,7 +33,6 @@ EXTRA_CLEAN=./output.bmp
 check_EXE=watermark
 check_XCLBINS=apply_watermark
 check_ARGS=./data/inputImage.bmp ./data/golden.bmp
-check_NDEVICES=$(apply_watermark_NDEVICES)
 
 CHECKS=check
 

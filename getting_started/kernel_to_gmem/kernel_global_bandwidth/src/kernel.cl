@@ -30,7 +30,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 kernel __attribute__ ((reqd_work_group_size(1,1,1)))
 void bandwidth(__global uint16  * __restrict input0,
                __global uint16  * __restrict output0,
-#ifdef USE_4DDR 
+#ifdef USE_4DDR
                __global uint16  * __restrict input1,
                __global uint16  * __restrict output1,
 #endif
