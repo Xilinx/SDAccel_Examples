@@ -23,7 +23,7 @@ XILINX_SDACCEL=${XILINX_SDX}
 endif
 
 ifndef XILINX_SDACCEL
-$(error XILINX_SDX or XILINX_SDACCEL is not set. Please source the SDx settings64.{csh,sh} script before attempting to run examples)
+$(error XILINX_SDX variable is not set, please set correctly and rerun)
 endif
 
 VIVADO=$(XILINX_VIVADO)/bin/vivado
