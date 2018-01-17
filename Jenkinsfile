@@ -8,12 +8,10 @@ disableConcurrentBuilds()
 days = 10
 
 devices = []
-devices += ['xilinx:adm-pcie-7v3:1ddr']
-devices += ['xilinx:xil-accel-rd-ku115:4ddr-xpr']
-devices += ['xilinx:adm-pcie-ku3:2ddr-xpr']
-devices += ['$XILINX_XIL_ACCEL_RD_VU9P_4DDR_XPR_4_2']
+devices += ['xilinx_vcu1525_dynamic_5_0']
+devices += ['xilinx_kcu1500_dynamic_5_0']
 
-version = '2017.2'
+version = '2017.4'
 
 precheck_status = 'FAILURE'
 sw_status = 'FAILURE'
