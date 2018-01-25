@@ -68,9 +68,8 @@ cd ${workdir}
 module use.own /proj/picasso/modulefiles
 
 module add vivado/${version}_rel
-module add vivado_hls/${version}_rel
 module add sdaccel/${version}_rel
-module add opencv/vivado_hls
+module add opencv/sdaccel
 
 module add lsf
 
@@ -136,7 +135,6 @@ cd ${workdir}
 module use.own /proj/picasso/modulefiles
 
 module add vivado/${version}_rel
-module add vivado_hls/${version}_rel
 module add sdaccel/${version}_rel
 module add opencv/sdaccel
 
@@ -224,7 +222,6 @@ try {
 module use.own /proj/picasso/modulefiles
 
 module add vivado/${version}_rel
-module add vivado_hls/${version}_rel
 module add sdaccel/${version}_rel
 module add opencv/sdaccel
 
