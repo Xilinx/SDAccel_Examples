@@ -64,7 +64,7 @@ void vec_add(
 
     //With vectorization, from each of the in1 and in2 vectors 16 data read happens
     //to perform addition operation.
-    //Once the vector addition is happen, the result 16 data is burst written to out.
+    //Once the vector addition is complete, the result 16 data is burst written to out.
     //Please look at the profile summary report, the number of reads and writes will
     //be less with vectorization compared to without.
     //Work items in the work group access consecutive memory locations which 
