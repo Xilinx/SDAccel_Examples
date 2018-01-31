@@ -17,7 +17,7 @@ This is a simple example that demonstrates on how to process an input stream of 
 
 ***KEY CONCEPTS:*** OpenCL API, Synchronize Host and FPGA, Asynchronous Processing, Events, Asynchronous Data Transfer
 
-***KEYWORDS:*** cl_event, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE
+***KEYWORDS:*** cl::event, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE
 
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:

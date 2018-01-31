@@ -2,13 +2,13 @@ COMMON_REPO := ../../..
 
 #Common Includes
 include $(COMMON_REPO)/utility/boards.mk
-include $(COMMON_REPO)/libs/xcl/xcl.mk
+include $(COMMON_REPO)/libs/xcl2/xcl2.mk
 include $(COMMON_REPO)/libs/opencl/opencl.mk
 
 # Host Application
-stream_access_SRCS=./src/host.cpp $(xcl_SRCS)
-stream_access_HDRS=$(xcl_HDRS)
-stream_access_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS) -std=c++0x
+stream_access_SRCS=./src/host.cpp $(xcl2_SRCS)
+stream_access_HDRS=$(xcl2_HDRS)
+stream_access_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl2_CXXFLAGS)
 stream_access_LDFLAGS=$(opencl_LDFLAGS)
 
 EXES=stream_access

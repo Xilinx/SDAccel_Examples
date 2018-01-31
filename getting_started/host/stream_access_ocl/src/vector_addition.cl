@@ -40,7 +40,7 @@ void vec_add(global int* c,
           global const int* a,
           global const int* b,
           global int* result_size,
-          const int elements
+          size_t elements
           ) {
     int arrayA[BUFFER_SIZE], arrayB[BUFFER_SIZE];
     int k = 0;

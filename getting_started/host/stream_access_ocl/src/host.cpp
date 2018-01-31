@@ -73,51 +73,18 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   for additional details on how create an use these types of command queues.
  */
 
-#include "CL/cl.h"
-#include "xcl.h"
+#include "xcl2.hpp"
 
 #include<iostream>
 #include<fstream>
 #include<string>
 #include<sstream>
-#include <array>
 #include <vector>
+#include <array>
 #include<cstdio>
 
 #define CHUNK_SIZE 1024
 #define LENGTH_BUFFER 4
-
-using std::array;
-using std::vector;
-
-//Allocator template to align buffer to Page boundary for better data transfer
-template <typename T>
-struct aligned_allocator
-{
-  using value_type = T;
-  T* allocate(std::size_t num)
-  {
-    void* ptr = nullptr;
-    if (posix_memalign(&ptr,4096,num*sizeof(T)))
-      throw std::bad_alloc();
-    return reinterpret_cast<T*>(ptr);
-  }
-  void deallocate(T* p, std::size_t num)
-  {
-    free(p);
-  }
-};
-
-// Wrap any OpenCL API calls that return error code(cl_int) with the below macros
-// to quickly check for an error
-#define OCL_CHECK(call)                                                        \
-  do {                                                                         \
-    cl_int err = call;                                                         \
-    if (err != CL_SUCCESS) {                                                   \
-      printf("Error calling " #call ", error code is: %d\n", err);       \
-      exit(EXIT_FAILURE);                                                      \
-    }                                                                          \
-  } while (0);
 
 //Compare the CPU and FPGA results
 bool verify( int *in1,
@@ -158,11 +125,6 @@ int main(int argc, char **argv) {
     std::ifstream in2_stream(in2Filename);
     std::ofstream out_stream("output_vector.txt");
 
-    cl_int err;
-
-    xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "vector_addition");
-
     // We will break down our problem into multiple iterations. Each iteration
     // will perform computation on a subset of the entire data-set. Each iteration
     // is based on the outermost while loop.
@@ -171,39 +133,44 @@ int main(int argc, char **argv) {
     size_t bytes_per_iteration = elements_per_iteration * sizeof(int);
     size_t bytes_length_buffer = length_buffer * sizeof(int);
 
+    // Allocate memory on the host 
+    std::array<std::vector<int,aligned_allocator<int>>, 2> A;
+    std::array<std::vector<int,aligned_allocator<int>>, 2> B;
+    std::array<std::vector<int,aligned_allocator<int>>, 2> device_result;
+    std::array<std::vector<int,aligned_allocator<int>>, 2> result_size;
+
     bool match = true;
 
-    // This example will use an out of order command queue. The default command
-    // queue created by xcl_world_single is an inorder command queue. Here we will
-    // release the original queue and replace it with an out of order queue.
-    clReleaseCommandQueue(world.command_queue);
-    world.command_queue =
-        clCreateCommandQueue(world.context, world.device_id,
-                                CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err);
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
+    cl::Context context(device);
 
-    cl_kernel kernel = xcl_get_kernel(program, "vec_add");
+    // This example will use an out of order command queue.
+    cl::CommandQueue q(context, device, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    std::string device_name = device.getInfo<CL_DEVICE_NAME>();
 
-    // Allocate memory on the host 
-    array<vector<int,aligned_allocator<int>>, 2> A;
-    array<vector<int,aligned_allocator<int>>, 2> B;
-    array<vector<int,aligned_allocator<int>>, 2> device_result;
-    array<vector<int,aligned_allocator<int>>, 2> result_size;
+    std::string binaryFile = xcl::find_binary_file(device_name,"vector_addition");
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    devices.resize(1);
 
+    cl::Program program(context, devices, bins);
+    cl::Kernel kernel(program, "vec_add");
+    
     // Create buffers with the vector size data
-    cl_mem buffer_a[2], buffer_b[2], buffer_c[2], buffer_size[2];
+    cl::Buffer *buffer_a[2], *buffer_b[2], *buffer_c[2], *buffer_size[2];
     for (int i = 0 ; i < 2 ; i++){
         A[i].resize(bytes_per_iteration);
         B[i].resize(bytes_per_iteration);
         device_result[i].resize(bytes_per_iteration);
         result_size[i].resize(bytes_length_buffer);
-        buffer_a[i] = clCreateBuffer(world.context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
-                        bytes_per_iteration, A[i].data(), NULL);
-        buffer_b[i] = clCreateBuffer(world.context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
-                        bytes_per_iteration, B[i].data(), NULL);
-        buffer_c[i] = clCreateBuffer(world.context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
-                    bytes_per_iteration, device_result[i].data(), NULL);
-        buffer_size[i] = clCreateBuffer(world.context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
-                    bytes_length_buffer, result_size[i].data(), NULL);
+        buffer_a[i] = new cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
+                                        bytes_per_iteration, A[i].data(), NULL);
+        buffer_b[i] = new cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
+                                        bytes_per_iteration, B[i].data(), NULL);
+        buffer_c[i] = new cl::Buffer(context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
+                                        bytes_per_iteration, device_result[i].data(), NULL);
+        buffer_size[i] = new cl::Buffer(context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
+                                        bytes_length_buffer, result_size[i].data(), NULL);
     }
 
     int in1_buffer_counter, in2_buffer_counter, flag;
@@ -211,13 +178,18 @@ int main(int argc, char **argv) {
     // This pair of events will be used to track when a kernel is finished with
     // the input buffers. Once the kernel is finished processing the data, a new
     // set of elements will be written into the buffer.
-    array<cl_event, 2> kernel_events;
-    array<cl_event, 2> read_events;
+    std::vector<cl::Event> kernel_events(2);
+    std::vector<cl::Event> read_events(2);
 
     // Four write events are created because when the next write (WriteA2 & WriteB2) happens the 
     // current write events (WriteA1 & WriteB1) may not be released. So to avoid the overwrite
     // in the buffers, four write events are created.
-    array<array<cl_event, 2> , 2> write_events;
+    std::vector<std::vector<cl::Event >> write_events(2);
+    cl::Event new_event;
+    for (int i = 0  ; i < 2 ; i++){
+        (write_events[0]).push_back(new_event);
+        (write_events[1]).push_back(new_event);
+    }
 
     for(int num_iters = 0 ; !in1_stream.eof() && !in2_stream.eof(); num_iters++){
         flag = num_iters % 2;
@@ -225,11 +197,8 @@ int main(int argc, char **argv) {
 
         // Release the events once the result is available
         if(num_iters >= 2){
-            clWaitForEvents(1, &read_events[flag]);
-            OCL_CHECK(clReleaseEvent(write_events[flag][0]));
-            OCL_CHECK(clReleaseEvent(write_events[flag][1]));
-            OCL_CHECK(clReleaseEvent(kernel_events[flag]));
-            OCL_CHECK(clReleaseEvent(read_events[flag]));
+            read_events[flag].wait();
+
             // Verify results and out stream the data to a file
             match = verify(A[flag].data(), B[flag].data(), device_result[flag].data(), result_size[flag].data());
             if(match){
@@ -267,55 +236,45 @@ int main(int argc, char **argv) {
             bytes_per_iteration = elements_per_iteration * sizeof(int);
         }
 
-        size_t global = 1, local = 1;
-       
         // These calls are asynchronous with respect to the main thread
-        OCL_CHECK(clEnqueueMigrateMemObjects(
-                world.command_queue, 1, &buffer_a[flag],
-                0 /* flags, 0 means from host */,
-                0, NULL, 
-                &write_events[flag][0]));
+        q.enqueueMigrateMemObjects({*(buffer_a[flag])}, 0 /* flags, 0 means from host */,
+                                    NULL, &write_events[flag][0]);
 
-        OCL_CHECK(clEnqueueMigrateMemObjects(
-                world.command_queue, 1, &buffer_b[flag],
-                0 /* flags, 0 means from host */,
-                0, NULL, 
-                &write_events[flag][1]));
+        q.enqueueMigrateMemObjects({*(buffer_b[flag])}, 0 /* flags, 0 means from host */,
+                                    NULL, &write_events[flag][1]);
 
-        xcl_set_kernel_arg(kernel, 0, sizeof(cl_mem), &buffer_c[flag]);
-        xcl_set_kernel_arg(kernel, 1, sizeof(cl_mem), &buffer_a[flag]);
-        xcl_set_kernel_arg(kernel, 2, sizeof(cl_mem), &buffer_b[flag]);
-        xcl_set_kernel_arg(kernel, 3, sizeof(cl_mem), &buffer_size[flag]);
-        xcl_set_kernel_arg(kernel, 4, sizeof(int), &elements_per_iteration);
+        kernel.setArg(0, *(buffer_c[flag]));
+        kernel.setArg(1, *(buffer_a[flag]));
+        kernel.setArg(2, *(buffer_b[flag]));
+        kernel.setArg(3, *(buffer_size[flag]));
+        kernel.setArg(4, elements_per_iteration);
 
         // This event needs to wait for the write buffer operations to complete
         // before executing. We are sending the write_events into its wait list to
         // ensure that the order of operations is correct.
-        OCL_CHECK(clEnqueueNDRangeKernel(world.command_queue, kernel, 1, nullptr,
-                    &global, &local, 2 , write_events[flag].data(),
-                    &kernel_events[flag]));
+        q.enqueueTask(kernel, &write_events[flag], &kernel_events[flag]);
 
         // This operation only needs to wait for the kernel call. This call will
         // potentially overlap the next kernel call as well as the next read
         // operations
-        OCL_CHECK(clEnqueueMigrateMemObjects(world.command_queue, 1, &buffer_c[flag], 
-                    CL_MIGRATE_MEM_OBJECT_HOST, 1, &kernel_events[flag], &read_events[flag]));
-        OCL_CHECK(clEnqueueMigrateMemObjects(world.command_queue, 1, &buffer_size[flag], 
-                    CL_MIGRATE_MEM_OBJECT_HOST, 1, &kernel_events[flag], &read_events[flag]));
+        std::vector<cl::Event> eventList;
+        eventList.push_back(kernel_events[flag]);
+        q.enqueueMigrateMemObjects({*(buffer_c[flag])}, CL_MIGRATE_MEM_OBJECT_HOST,
+                                    &eventList, &read_events[flag]);
+        q.enqueueMigrateMemObjects({*(buffer_size[flag])}, CL_MIGRATE_MEM_OBJECT_HOST,
+                                    &eventList, &read_events[flag]);
     }
     // Wait for all of the OpenCL operations to complete
-    clFlush(world.command_queue);
-    clFinish(world.command_queue);
+    q.flush();
+    q.finish();
 
     size_t elements_last_iteration = elements_per_iteration;
     // Releasing mem objects and events
     for(int i = 0 ; i < 2 ; i++){
-        OCL_CHECK(clWaitForEvents(1, &read_events[i]));
-        OCL_CHECK(clReleaseEvent(read_events[i]));
-        OCL_CHECK(clReleaseEvent(kernel_events[i]));
-        OCL_CHECK(clReleaseMemObject(buffer_a[flag]));
-        OCL_CHECK(clReleaseMemObject(buffer_b[flag]));
-        OCL_CHECK(clReleaseMemObject(buffer_c[flag]));
+        read_events[i].wait();
+        delete(buffer_a[flag]);
+        delete(buffer_b[flag]);
+        delete(buffer_c[flag]);
 
         flag = !flag;
         // Need to verify and write the last two buffer data
@@ -340,10 +299,6 @@ int main(int argc, char **argv) {
     in1_stream.close();
     in2_stream.close();
     out_stream.close();
-
-    OCL_CHECK(clReleaseKernel(kernel));
-    OCL_CHECK(clReleaseProgram(program));
-    xcl_release_world(world);
 
     std::cout << "TEST " <<  ((match) ? "PASSED" : "FAILED") << std::endl;;
     return ((match) ? EXIT_SUCCESS :  EXIT_FAILURE);
