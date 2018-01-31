@@ -57,7 +57,6 @@ Example        | Description           | Key Concepts / Keywords
 [kernel_opt/lmem_2rw_ocl/][]|This is simple example of vector addition to demonstrate how to utilized both ports of Local Memory.|__Key__ __Concepts__<br> - Kernel Optimization<br> - 2port BRAM Utilization<br> - two read/write Local Memory<br>__Keywords__<br> - opencl_unroll_hint(2)
 [kernel_opt/loop_fusion_c/][]|This example will demonstrate how to fuse two loops into one to improve the performance of an OpenCL  C/C++ Kernel.|__Key__ __Concepts__<br> - Kernel Optimization<br> - Loop Fusion<br> - Loop Pipelining<br>__Keywords__<br> - #pragma HLS PIPELINE
 [kernel_opt/loop_fusion_ocl/][]|This example will demonstrate how to fuse two loops into one to improve the performance of an OpenCL kernel.|__Key__ __Concepts__<br> - Kernel Optimization<br> - Loop Fusion<br> - Loop Pipelining<br>__Keywords__<br> - xcl_pipeline_loop
-[kernel_opt/loop_perfect_c/][]|This nearest neighbor example is to demonstrate how to achieve better performance using perfect loop.|
 [kernel_opt/loop_pipeline_ocl/][]|This example demonstrates how loop pipelining can be used to improve the performance of a kernel.|__Key__ __Concepts__<br> - Kernel Optimization<br> - Loop Pipelining<br>__Keywords__<br> - xcl_pipeline_loop
 [kernel_opt/loop_reorder_c/][]|This is a simple example of matrix multiplication (Row x Col) to demonstrate how to achieve better pipeline II factor by loop reordering.|__Key__ __Concepts__<br> - Kernel Optimization<br> - Loop reorder to improve II<br>__Keywords__<br> - #pragma HLS PIPELINE<br> - #pragma HLS ARRAY_PARTITION
 [kernel_opt/loop_reorder_ocl/][]|This is a simple example of matrix multiplication (Row x Col) to demonstrate how to achieve better pipeline II factor by loop reordering.|__Key__ __Concepts__<br> - Kernel Optimization<br> - Loop reorder to improve II<br>__Keywords__<br> - xcl_pipeline_loop<br> - xcl_array_partition(complete, 2)
@@ -131,8 +130,6 @@ Example        | Description           | Key Concepts / Keywords
 [kernel_opt/lmem_2rw_ocl/]:kernel_opt/lmem_2rw_ocl/
 [kernel_opt/loop_fusion_c/]:kernel_opt/loop_fusion_c/
 [kernel_opt/loop_fusion_ocl/]:kernel_opt/loop_fusion_ocl/
-[kernel_opt/loop_perfect_c/]:kernel_opt/loop_perfect_c/
-[kernel_opt/loop_perfect_ocl/]:kernel_opt/loop_perfect_ocl/
 [kernel_opt/loop_pipeline_ocl/]:kernel_opt/loop_pipeline_ocl/
 [kernel_opt/loop_reorder_c/]:kernel_opt/loop_reorder_c/
 [kernel_opt/loop_reorder_ocl/]:kernel_opt/loop_reorder_ocl/
