@@ -36,7 +36,6 @@ XCLBINS=vadd_BAD vadd_GOOD
 check_EXE=host
 check_XCLBINS=vadd_BAD vadd_GOOD
 
-DEVICES=xilinx:adm-pcie-ku3:2ddr-xpr
 CHECKS=check
 
 include $(COMMON_REPO)/utility/rules.mk
