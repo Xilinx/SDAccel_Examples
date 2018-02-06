@@ -64,8 +64,8 @@ int main(int argc, char* argv[])
     int height = image.getHeight() ;
    
     //Allocate Memory in Host Memory 
-    int image_size = image.numPixels();
-    int image_size_bytes = image_size * sizeof(int); 
+    size_t image_size = image.numPixels();
+    size_t image_size_bytes = image_size * sizeof(int); 
     std::vector<int,aligned_allocator<int>> inputImage(image_size);
     std::vector<int,aligned_allocator<int>> outImage(image_size);
     
