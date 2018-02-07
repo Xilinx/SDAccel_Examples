@@ -29,7 +29,7 @@ XCLBINS=krnl_nearest
 # check
 check_EXE=nearest
 check_XCLBINS=krnl_nearest
-check_ARGS=data/queries.txt data/queries.txt
+check_ARGS=data/queries.txt data/targets.txt
 check_NDEVICES=$(krnl_nearest_NDEVICES)
 
 CHECKS=check

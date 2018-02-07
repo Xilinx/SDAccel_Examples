@@ -5,9 +5,9 @@
        "This is an optimized implementation of a nearest neighbor linear search algorithm targeting execution on a SDAccel supported FPGA acceleration card."
     ],
     "nboard": ["xilinx:kcu1500:dynamic", "xilinx_kcu1500_dynamic_5_0"],
-    "cmd_args" : "PROJECT/data/queries.txt PROJECT/data/queries.txt",
-    "em_cmd" : "./nearest data/queries.txt data/queries.txt",
-    "hw_cmd" : "../../utility/nimbix/nimbix-run.py -- ./nearest data/queries.txt data/queries.txt",
+    "cmd_args" : "PROJECT/data/queries.txt PROJECT/data/targets.txt",
+    "em_cmd" : "./nearest data/queries.txt data/targets.txt",
+    "hw_cmd" : "../../utility/nimbix/nimbix-run.py -- ./nearest data/queries.txt data/targets.txt",
     "libs": [
         "xcl"
     ], 

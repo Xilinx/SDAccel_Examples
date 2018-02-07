@@ -46,6 +46,7 @@ Application code is located in the src directory. Accelerator binary files will 
 Makefile
 README.md
 data/queries.txt
+data/targets.txt
 description.json
 src/krnl_linear_search.cpp
 src/linear_search.c
@@ -94,7 +95,7 @@ emconfigutil --xdevice 'xilinx:kcu1500:dynamic' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./nearest data/queries.txt data/queries.txt
+./nearest data/queries.txt data/targets.txt
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card
