@@ -69,6 +69,7 @@ Example        | Description           | Key Concepts / Keywords
 [kernel_opt/vectorization_memorycoalescing_ocl/][]|This example is a simple OpenCL application which highlights the vectorization concept. It provides a basis for calculating the bandwidth utilization when the compiler looking to vectorize.|__Key__ __Concepts__<br> - Vectorization <br> - Mmeory Coalescing <br>__Keywords__<br> - vec_type_hint
 [dataflow/dataflow_func_ocl/][]|This is simple example of vector addition to demonstrate Dataflow functionality in OpenCL Kernel. OpenCL Dataflow allows user to run multiple functions together to achieve higher throughput.|__Key__ __Concepts__<br> - Function/Task Level Parallelism<br>__Keywords__<br> - xcl_dataflow<br> - xclDataflowFifoDepth
 [dataflow/dataflow_loop_c/][]|This is simple example of vector addition to demonstrate Loops Dataflow functionality of HLS. HLS Dataflow allows user to schedule multiple sequential loops concurrently to achieve higher throughput.|__Key__ __Concepts__<br> - Loop Dataflow<br>__Keywords__<br> - dataflow<br> - hls::stream<>
+[dataflow_loop_ocl/][]|This is simple example of vector addition to demonstrate Loops Dataflow functionality. OpenCL Dataflow allows user to schedule multiple sequential loops to run concurrently to achieve higher throughput.|__Key__ __Concepts__<br> - Loop Dataflow<br>__Keywords__<br> - xcl_dataflow<br> - xclDataflowFifoDepth
 [dataflow/dataflow_pipes_ocl/][]|This is simple example of vector addition to demonstrate OpenCL Pipe Memory usage. OpenCL PIPE memory functionality allows user to achieve kernel-to-kernel data transfer without using global memory.|__Key__ __Concepts__<br> - Dataflow<br> - kernel to kernel pipes<br>__Keywords__<br> - pipe<br> - xcl_reqd_pipe_depth<br> - read_pipe_block()<br> - write_pipe_block()
 [dataflow/dataflow_stream_array_c/][]|This is simple example of Multiple Stages Vector Addition to demonstrate Array of Stream usage in HLS C Kernel Code.|__Key__ __Concepts__<br> - Array of Stream<br>__Keywords__<br> - dataflow<br> - hls::stream<>
 [dataflow/dataflow_stream_c/][]|This is simple example of vector addition to demonstrate Dataflow functionality of HLS. HLS Dataflow allows user to schedule multiple task together to achieve higher throughput.|__Key__ __Concepts__<br> - Task Level Parallelism<br>__Keywords__<br> - dataflow<br> - hls::stream<>
@@ -143,6 +144,7 @@ Example        | Description           | Key Concepts / Keywords
 [dataflow]:dataflow
 [dataflow/dataflow_func_ocl/]:dataflow/dataflow_func_ocl/
 [dataflow/dataflow_loop_c/]:dataflow/dataflow_loop_c/
+[dataflow/dataflow_loop_ocl/]:dataflow/dataflow_loop_ocl/
 [dataflow/dataflow_pipes_ocl/]:dataflow/dataflow_pipes_ocl/
 [dataflow/dataflow_stream_array_c/]:dataflow/dataflow_stream_array_c/
 [dataflow/dataflow_stream_c/]:dataflow/dataflow_stream_c/

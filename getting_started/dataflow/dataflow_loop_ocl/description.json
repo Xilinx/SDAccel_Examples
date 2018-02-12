@@ -1,0 +1,42 @@
+{
+    "runtime": ["OpenCL"],
+    "example": "Loop Dataflow Using OpenCL(CL)",
+    "overview": [
+        "This is simple example of vector addition to demonstrate Loops Dataflow functionality. OpenCL Dataflow allows user to schedule multiple sequential loops to run concurrently to achieve higher throughput."
+    ],
+    "key_concepts": [ "Loop Dataflow"],
+    "keywords": [ "xcl_dataflow", "xclDataflowFifoDepth"],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl2"
+    ],
+    "em_cmd": "./host",
+    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
+    "containers" : [
+        {
+            "name" : "adder",
+            "accelerators": [
+                {
+                    "name"      : "adder", 
+                    "location"  : "src/adder.cl",
+                    "clflags"   : "--xp param:compiler.xclDataflowFifoDepth=32"
+                }
+            ]
+        }
+    ],
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ],
+    "revision" : [
+        {
+            "date" : "FEB2018",
+            "version": "1.0",
+            "description": "Initial Xilinx Release"
+        }
+    ]
+}
