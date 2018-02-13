@@ -12,8 +12,8 @@
     "libs": [
         "xcl2"
     ],
-    "em_cmd": "./vectorization",
-    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./vectorization",
+    "em_cmd": "./host",
+    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "accelerators": [
         {
             "container": "vector_addition", 
