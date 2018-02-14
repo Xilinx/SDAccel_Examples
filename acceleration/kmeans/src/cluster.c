@@ -5,7 +5,7 @@ to this license.  If you do not agree to this license, do not download,
 install, copy or use the software.                                         
                                                                            
 Copyright (c) 2005 Northwestern University                                 
-Copyright (c) 2017, Xilinx, Inc.
+Copyright (c) 2018, Xilinx, Inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
