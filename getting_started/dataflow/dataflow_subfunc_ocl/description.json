@@ -1,0 +1,42 @@
+{
+    "runtime": ["OpenCL"],
+    "example": "Dataflow SubFunction OpenCL(CL)",
+    "overview": [
+        "This is simple example of vector addition to demonstrate how OpenCL Dataflow allows user to run multiple sub functions together to achieve higher throughput."
+    ],
+    "key_concepts": [ "SubFunction Level Parallelism"],
+    "keywords": [ "xcl_dataflow" , "xclDataflowFifoDepth"],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl2"
+    ],
+    "em_cmd": "./host",
+    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
+    "containers" : [
+        {
+            "name" : "adder",
+            "accelerators": [
+                {
+                    "name"      : "adder", 
+                    "location"  : "src/adder.cl",
+                    "clflags"   : "--xp param:compiler.xclDataflowFifoDepth=32"
+                }
+            ]
+        }
+    ],
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ],
+    "revision" : [
+        {
+            "date" : "FEB2018",
+            "version": "1.0",
+            "description": "Initial Xilinx Release"
+        }
+    ]
+}
