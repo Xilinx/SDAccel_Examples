@@ -14,6 +14,7 @@ This README file contains the following sections:
 9. ACKNOWLEDGEMENTS
 ## 1. OVERVIEW
 This is an example that showcases the Hardware Debug of Vector Addition RTL Kernel in Hardware.
+
  
 **For more information on the steps involved in debugging SDAccel RTL Kernel Designs check the links below**
  

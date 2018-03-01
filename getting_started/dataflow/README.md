@@ -21,4 +21,4 @@ Example        | Description           | Key Concepts / Keywords
 [dataflow_pipes_ocl/]:dataflow_pipes_ocl/
 [dataflow_stream_array_c/]:dataflow_stream_array_c/
 [dataflow_stream_c/]:dataflow_stream_c/
-[dataflow_subfunc_ocl/]:dataflow_subfunc_ocl
+[dataflow_subfunc_ocl/]:dataflow_subfunc_ocl/

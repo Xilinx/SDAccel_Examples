@@ -49,6 +49,9 @@ def overview(target,data):
     target.write("## 1. OVERVIEW\n")
     target.write(('\n').join(data["overview"]))
     target.write("\n\n")
+    if 'more_info' in data:
+        target.write(('\n').join(data["more_info"]))
+        target.write("\n\n")
     if 'perf_fields' in data:
         target.write("### PERFORMANCE\n")
         target.write(data["perf_fields"][0])

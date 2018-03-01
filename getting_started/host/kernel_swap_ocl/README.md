@@ -1,4 +1,4 @@
-Vector Add - Vector Multiplication for XPR-NON_XPR Devices
+Vector Add - Vector Multiplication for XPR Devices
 ======================
 
 This README file contains the following sections:
@@ -13,9 +13,9 @@ This README file contains the following sections:
 8. LICENSE AND CONTRIBUTING TO THE REPOSITORY
 9. ACKNOWLEDGEMENTS
 ## 1. OVERVIEW
-This example shows how host can swap the kernels and share same buffer between two kernels exist in separate binary containers. For Non-XPR(Extended Partial Reconfiguration) Specific Devices, device memory can persist buffer data so both kernels can share data directly. Whereas in XPR devices, device memory does not persist the buffer data so host has to migrate data from device to host memory before swapping the next kernel. After kernel swap, host has to migrate the buffer back to device.
+This example shows how host can swap the kernels and share same buffer between two kernels which are exist in separate binary containers. Dynamic platforms does not persist the buffer data so host has to migrate data from device to host memory before swapping the next kernel. After kernel swap, host has to migrate the buffer back to device.
 
-***KEY CONCEPTS:*** Handling Buffer sharing across multiple binaries for XPR-NON_XPR Platform, Multiple Kernel Binaries, Buffer sharing across Multiple binaries
+***KEY CONCEPTS:*** Handling Buffer sharing across multiple binaries, Multiple Kernel Binaries
 
 ***KEYWORDS:*** clEnqueueMigrateMemObjects(), CL_MIGRATE_MEM_OBJECT_HOST
 
