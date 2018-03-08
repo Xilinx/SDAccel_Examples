@@ -32,14 +32,13 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 int main(int argc, char* argv[])
 {
-    if (argc != 3)
+    if (argc < 2 || argc > 3)
     {
-        std::cout << "Usage: " << argv[0] << " <input bitmap> <golden bitmap>" << std::endl;
+        std::cout << "Usage: " << argv[0] << " <input bitmap> <golden bitmap(optional)>" << std::endl;
         return EXIT_FAILURE ;
     }
     std::string bitmapFilename = argv[1];
-    std::string goldenFilename = argv[2];
-  
+ 
     //Read the input bit map file into memory
     BitmapInterface image(bitmapFilename.data());
     bool result = image.readBitmapFile() ;
@@ -49,17 +48,6 @@ int main(int argc, char* argv[])
             << bitmapFilename.data() << std::endl;
         return EXIT_FAILURE ;
     }
-
-    //Read the golden bit map file into memory
-    BitmapInterface goldenImage(goldenFilename.data());
-    result = goldenImage.readBitmapFile() ;
-    if (!result)
-    {
-        std::cout << "ERROR:Unable to Read Golden Bitmap File "
-            << goldenFilename.data() << std::endl;
-        return EXIT_FAILURE ;
-    }
-
     int width = image.getWidth() ;
     int height = image.getHeight() ;
    
@@ -85,11 +73,10 @@ int main(int argc, char* argv[])
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
     cl::Program program(context, devices, bins);
-    cl::Kernel kernel(program,"apply_watermark");
+    cl::Kernel krnl_applyWatermark(program,"apply_watermark");
 
     // For Allocating Buffer to specific Global Memory Bank, user has to use cl_mem_ext_ptr_t
-    // and provide the Banks
-    //
+    // and provide the Banks 
     cl_mem_ext_ptr_t inExt, outExt;  // Declaring two extensions for both buffers
     inExt.flags  = XCL_MEM_DDR_BANK0; // Specify Bank0 Memory for input memory
     outExt.flags = XCL_MEM_DDR_BANK1; // Specify Bank1 Memory for output Memory
@@ -104,43 +91,51 @@ int main(int argc, char* argv[])
     cl::Buffer buffer_outImage(context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR | CL_MEM_EXT_PTR_XILINX,
             image_size_bytes, &outExt);
 
-    std::vector<cl::Memory> inBufVec, outBufVec;
-    inBufVec.push_back(buffer_inImage);
-    outBufVec.push_back(buffer_outImage);
-
     //Copy input Image to device global memory
-    q.enqueueMigrateMemObjects(inBufVec, 0 /* 0 means from host*/); 
+    q.enqueueMigrateMemObjects({buffer_inImage}, 0 /* 0 means from host*/); 
  
-    auto krnl_applyWatermark= cl::KernelFunctor<cl::Buffer&, cl::Buffer& ,int,int>(kernel);
-    
+    krnl_applyWatermark.setArg(0, buffer_inImage);
+    krnl_applyWatermark.setArg(1, buffer_outImage);
+    krnl_applyWatermark.setArg(2, width);
+    krnl_applyWatermark.setArg(3, height);
+
     //Launch the Kernel
-    krnl_applyWatermark(cl::EnqueueArgs(q,cl::NDRange(1,1,1), cl::NDRange(1,1,1)), 
-            buffer_inImage, buffer_outImage, width, height);
+    q.enqueueTask(krnl_applyWatermark);
 
     //Copy Result from Device Global Memory to Host Local Memory
-    q.enqueueMigrateMemObjects(outBufVec, CL_MIGRATE_MEM_OBJECT_HOST);
+    q.enqueueMigrateMemObjects({buffer_outImage}, CL_MIGRATE_MEM_OBJECT_HOST);
     q.finish();
 //OPENCL HOST CODE AREA END
 
     //Compare Golden Image with Output image
-    bool match = 0;
-    if ( image.getHeight() != goldenImage.getHeight() || image.getWidth() != goldenImage.getWidth()){
-        match = 1;
-    }else{
-        int* goldImgPtr = goldenImage.bitmap();
-        for (unsigned int i = 0 ; i < image.numPixels(); i++){
-            if (outImage[i] != goldImgPtr[i]){
-                match = 1;
-                printf ("Pixel %d Mismatch Output %x and Expected %x \n", i, outImage[i], goldImgPtr[i]);
-                break;
-            }
-        }
+    bool match = 1;
+    if(argc == 3)
+    { 
+        std::string goldenFilename = argv[2];
+    	//Read the golden bit map file into memory
+	BitmapInterface goldenImage(goldenFilename.data());
+    	result = goldenImage.readBitmapFile() ;
+    	if (!result)
+	 {
+           std::cout << "ERROR:Unable to Read Golden Bitmap File " << goldenFilename.data() << std::endl;
+           return EXIT_FAILURE ;
+    	 }
+    	if ( image.getHeight() != goldenImage.getHeight() || image.getWidth() != goldenImage.getWidth()){
+        	match = 0;
+    	}else{
+        	int* goldImgPtr = goldenImage.bitmap();
+        	for (unsigned int i = 0 ; i < image.numPixels(); i++){
+            	if (outImage[i] != goldImgPtr[i]){
+               		match = 0;
+	                printf ("Pixel %d Mismatch Output %x and Expected %x \n", i, outImage[i], goldImgPtr[i]);
+        	        break;
+               	   }	
+                }
+    	     }
     }
-    
     // Write the final image to disk
     image.writeBitmapFile(outImage.data());
     
-    std::cout << "TEST " << (match ? "FAILED" : "PASSED") << std::endl; 
-    return (match ? EXIT_FAILURE :  EXIT_SUCCESS);
-
+    std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl; 
+    return (match ? EXIT_SUCCESS : EXIT_FAILURE);
 }
