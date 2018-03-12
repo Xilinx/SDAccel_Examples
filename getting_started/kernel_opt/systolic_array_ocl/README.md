@@ -12,6 +12,8 @@ This README file contains the following sections:
 7. SUPPORT
 8. LICENSE AND CONTRIBUTING TO THE REPOSITORY
 9. ACKNOWLEDGEMENTS
+
+
 ## 1. OVERVIEW
 This is a simple example of matrix multiplication (Row x Col) to help developers learn systolic array based algorithm design. Note: Systolic array based algorithm design is well suited for FPGA.
 
@@ -123,6 +125,7 @@ To contribute to this project, follow the guidelines in the [Repository Contribu
 ## 9. ACKNOWLEDGEMENTS
 This example is written by developers at
 - [Xilinx](http://www.xilinx.com)
+
 [3-Clause BSD License]: ../../../LICENSE.txt
 [SDAccel Forums]: https://forums.xilinx.com/t5/SDAccel/bd-p/SDx
 [SDAccel User Guides]: http://www.xilinx.com/support/documentation-navigation/development-tools/software-development/sdaccel.html?resultsTablePreSelect=documenttype:SeeAll#documentation

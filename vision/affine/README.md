@@ -12,6 +12,8 @@ This README file contains the following sections:
 7. SUPPORT
 8. LICENSE AND CONTRIBUTING TO THE REPOSITORY
 9. ACKNOWLEDGEMENTS
+
+
 ## 1. OVERVIEW
 Affine transformation is a linear mapping method that preserves points, straight lines, and planes. Sets of parallel lines remain parallel after an affine transformation. The affine transformation technique is typically used to correct for geometric distortions or deformations that occur with non-ideal camera angles. The demo performs a 30 degree X rotation and a 50% X and Y scaling on a 512 by 512, 16 bits per pixels grayscale, raw MRI image.
 
@@ -140,6 +142,7 @@ To contribute to this project, follow the guidelines in the [Repository Contribu
 This example is written by developers at
 - [Xilinx](http://www.xilinx.com)
 - [Wakahara Project](http://cis.k.hosei.ac.jp/~wakahara)
+
 [3-Clause BSD License]: ../../LICENSE.txt
 [SDAccel Forums]: https://forums.xilinx.com/t5/SDAccel/bd-p/SDx
 [SDAccel User Guides]: http://www.xilinx.com/support/documentation-navigation/development-tools/software-development/sdaccel.html?resultsTablePreSelect=documenttype:SeeAll#documentation

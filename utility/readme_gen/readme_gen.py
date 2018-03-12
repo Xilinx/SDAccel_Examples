@@ -32,7 +32,7 @@ def header(target,data):
     target.write("6. EXECUTION IN CLOUD ENVIRONMENTS\n")
     target.write("7. SUPPORT\n")
     target.write("8. LICENSE AND CONTRIBUTING TO THE REPOSITORY\n")
-    target.write("9. ACKNOWLEDGEMENTS\n")
+    target.write("9. ACKNOWLEDGEMENTS\n\n\n")
     return
 
 def download(target):
@@ -279,6 +279,7 @@ def ack(target,data):
         target.write("](")
         target.write(contributor["url"])
         target.write(")\n")
+    target.write("\n")
     return
 
 def dirTraversal(stop_file):

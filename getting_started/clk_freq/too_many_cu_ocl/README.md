@@ -12,6 +12,8 @@ This README file contains the following sections:
 7. SUPPORT
 8. LICENSE AND CONTRIBUTING TO THE REPOSITORY
 9. ACKNOWLEDGEMENTS
+
+
 ## 1. OVERVIEW
 This is simple example of vector addition to demonstrate effectiveness of using single compute unit with heavy work load to achieve better performance. Bad example uses multiple compute units to achieve good performance but it results in heavy usage of FPGA resources and area due to which design fails timing. Good example uses single compute unit to compute with heavier work load, it helps in less resource utilization and also helps in kernel scalability. To switch between Good/Bad cases use the flag provided in makefile.
 
@@ -129,6 +131,7 @@ To contribute to this project, follow the guidelines in the [Repository Contribu
 ## 9. ACKNOWLEDGEMENTS
 This example is written by developers at
 - [Xilinx](http://www.xilinx.com)
+
 [3-Clause BSD License]: ../../../LICENSE.txt
 [SDAccel Forums]: https://forums.xilinx.com/t5/SDAccel/bd-p/SDx
 [SDAccel User Guides]: http://www.xilinx.com/support/documentation-navigation/development-tools/software-development/sdaccel.html?resultsTablePreSelect=documenttype:SeeAll#documentation

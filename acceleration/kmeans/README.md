@@ -12,6 +12,8 @@ This README file contains the following sections:
 7. SUPPORT
 8. LICENSE AND CONTRIBUTING TO THE REPOSITORY
 9. ACKNOWLEDGEMENTS
+
+
 ## 1. OVERVIEW
 This is OpenCL Based K-Means clustering Implementation for Xilinx FPGA 
 Devices. K-means clustering is a method of vector quantization, that 
@@ -162,6 +164,7 @@ To contribute to this project, follow the guidelines in the [Repository Contribu
 This example is written by developers at
 - [Northwestern University](https://www.cs.virginia.edu/~skadron/wiki/rodinia/index.php/Rodinia:Accelerating_Compute-Intensive_Applications_with_Accelerators)
 - [Xilinx](http://www.xilinx.com)
+
 [3-Clause BSD License]: ../../LICENSE.txt
 [SDAccel Forums]: https://forums.xilinx.com/t5/SDAccel/bd-p/SDx
 [SDAccel User Guides]: http://www.xilinx.com/support/documentation-navigation/development-tools/software-development/sdaccel.html?resultsTablePreSelect=documenttype:SeeAll#documentation
