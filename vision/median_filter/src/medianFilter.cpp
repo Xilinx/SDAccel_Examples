@@ -34,161 +34,149 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 #include <cstring>
 #include <iostream>
+#include <vector>
 
-#include <CL/cl.h>
+#include "xcl2.hpp"
 
 #include "bitmap.h"
-#include "oclHelper.h"
 
 void checkErrorStatus(cl_int error, const char* message)
 {
   if (error != CL_SUCCESS)
   {
     printf("%s\n", message) ;
-    printf("%s\n", oclErrorCode(error)) ;
     exit(1) ;
   }
 }
 
 int main(int argc, char* argv[])
 {
-  if (argc != 3)
+  if (argc < 3 || argc > 4 )
   {
-    printf("Usage: %s <input bitmap> <xclbin>\n", argv[0]) ;
+    printf("Usage: %s <xclbin> <input bitmap> <golden bitmap(optional)>\n", argv[0]) ;
     return -1 ;
   }
   
-  // Read the bit map file into memory and allocate memory for the
-  //  final image
+  // Read the input bit map file into memory
   std::cout << "Reading input image...\n";
-  const char* bitmapFilename = argv[1] ;
+  const char* bitmapFilename = argv[2] ;
+  const char* goldenFilename;
   int width = 128 ; // Default size
   int height = 128 ; // Default size
 
   BitmapInterface image(bitmapFilename) ;
-  
   bool result = image.readBitmapFile() ;
   if (!result)
   {
-    return -1 ;
+    return EXIT_FAILURE ;
+  }
+  std::vector<int,aligned_allocator<int>> inputImage(image.numPixels() * sizeof(int));
+  std::vector<int,aligned_allocator<int>> outImage(image.numPixels() * sizeof(int));
+  if(inputImage.empty() || outImage.empty())
+  {
+    fprintf(stderr, "Unable to allocate the host memory!\n") ;
+    return 0;
   }
 
   width = image.getWidth() ;
   height = image.getHeight() ;
 
-  int* outImage = (int*)(malloc(image.numPixels() * sizeof(int))) ;
-
-  if (outImage == NULL)
-  {
-    fprintf(stderr, "Unable to allocate host memory!\n") ;
-    return 0 ;
-  }
+  // Copy image host buffer
+  memcpy(inputImage.data(), image.bitmap(), image.numPixels() * sizeof(int));
 
   // Set up OpenCL hardware and software constructs
   std::cout << "Setting up OpenCL hardware and software...\n";
   cl_int err = 0 ;
-  const char* xclbinFilename = argv[2] ;
 
-  oclHardware hardware = getOclHardware(CL_DEVICE_TYPE_ACCELERATOR) ;
-  oclSoftware software ;
+  // The get_xil_devices will return vector of Xilinx Devices
+  std::vector<cl::Device> devices = xcl::get_xil_devices();
+  cl::Device device = devices[0];
 
-  memset(&software, 0, sizeof(oclSoftware)) ;
-  strcpy(software.mKernelName, "median") ;
-  strcpy(software.mFileName, xclbinFilename) ;
-  strcpy(software.mCompileOptions, "-g -Wall") ;
+  // Creating Context and Command Queue for selected Device
+  cl::Context context(device);
+  cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+  std::string device_name = device.getInfo<CL_DEVICE_NAME>();
+  std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
-  getOclSoftware(software, hardware) ;
+  // import_binary() command will find the OpenCL binary file created using the 
+  // xocc compiler load into OpenCL Binary and return as Binaries
+  std::string binaryFile = xcl::find_binary_file(device_name,"krnl_median");
+  cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+  devices.resize(1);
+  cl::Program program(context, devices, bins);
 
-  software.mKernel = clCreateKernel(software.mProgram,
-				    software.mKernelName,
-				    &err) ;
-  checkErrorStatus(err, "Unable to create kernel!") ;
+  // These commands will allocate memory on the FPGA. The cl::Buffer objects can
+  // be used to reference the memory locations on the device.
+  cl::Buffer buffer_input(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, image.numPixels() * sizeof(int), inputImage.data());
+  cl::Buffer buffer_output(context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, image.numPixels() * sizeof(int), outImage.data());
 
-  // Initialize OpenCL buffers with pointers to allocated memory
-  cl_mem imageToDevice ;
-  cl_mem imageFromDevice ;
+  cl::Event kernel_Event, read_Event, write_Event;
 
-  imageToDevice = clCreateBuffer(hardware.mContext,
-				 CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
-				 image.numPixels() * sizeof(int),
-				 image.bitmap(),
-				 &err) ;
-  checkErrorStatus(err, "Unable to create read buffer") ;
-
-  imageFromDevice = clCreateBuffer(hardware.mContext,
-				   CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
-				   image.numPixels() * sizeof(int),
-				   outImage,
-				   &err) ;
-  checkErrorStatus(err, "Unable to create write buffer") ;
-
-  // Send the image to the hardware
+  // These commands will load the input_image and output_image vectors from the host
+  // application into the buffer_input and buffer_output cl::Buffer objects.
   std::cout << "Writing input image to buffer...\n";
-  err = clEnqueueWriteBuffer(hardware.mQueue,
-			     imageToDevice,
-			     CL_TRUE,
-			     0,
-			     image.numPixels() * sizeof(int),
-			     image.bitmap(),
-			     0,
-			     NULL,
-			     NULL) ;
+  err = q.enqueueMigrateMemObjects({buffer_input},0/* 0 means from host*/, NULL, &write_Event);
 
   checkErrorStatus(err, "Unable to enqueue write buffer") ;
 
-  // Pass the arguments to the kernel
+  // This call will extract a kernel out of the program we loaded in the previous line
+  cl::Kernel krnl_medianFilter(program, "median");
+
+  // set the kernel Arguments
   std::cout << "Setting arguments and enqueueing kernel...\n";
-  err = clSetKernelArg(software.mKernel, 0, sizeof(cl_mem), &imageToDevice) ;
-  checkErrorStatus(err, "Unable to set argument 0") ;
-  err = clSetKernelArg(software.mKernel, 1, sizeof(cl_mem), &imageFromDevice) ;
-  checkErrorStatus(err, "Unable to set argument 1") ;
-  err = clSetKernelArg(software.mKernel, 2, sizeof(int), &width) ;
-  checkErrorStatus(err, "Unable to set argument 2") ;
-  err = clSetKernelArg(software.mKernel, 3, sizeof(int), &height) ;
-  checkErrorStatus(err, "Unable to set argument 3") ;
+  krnl_medianFilter.setArg(0, buffer_input);
+  krnl_medianFilter.setArg(1, buffer_output);
+  krnl_medianFilter.setArg(2, width);
+  krnl_medianFilter.setArg(3, height);
 
-  // Define iteration space 
-  size_t globalSize[3] = { 1, 1, 1 } ;
-  size_t localSize[3] = { 1, 1, 1} ;
-  cl_event seq_complete ;
+  std::vector<cl::Event> eventList;
+  eventList.push_back(write_Event);
 
-  // Actually start the kernels on the hardware
-  err = clEnqueueNDRangeKernel(hardware.mQueue,
-			       software.mKernel,
-			       1,
-			       NULL,
-			       globalSize,
-			       localSize,
-			       0,
-			       NULL,
-			       &seq_complete) ;
-
-  checkErrorStatus(err, "Unable to enqueue NDRange") ;
-
-  // Wait for kernel to finish
-  clWaitForEvents(1, &seq_complete) ;
+  // This function will execute the kernel on the FPGA
+  err = q.enqueueTask(krnl_medianFilter, &eventList, &kernel_Event);  
+  checkErrorStatus(err, "Unable to enqueue Task") ;
 
   // Read back the image from the kernel
   std::cout << "Reading output image and writing to file...\n";
-  err = clEnqueueReadBuffer(hardware.mQueue,
-			    imageFromDevice,
-			    CL_TRUE,
-			    0,
-			    image.numPixels() * sizeof(int),
-			    outImage,
-			    0,
-			    NULL,
-			    &seq_complete) ;
-
+  eventList.clear();
+  eventList.push_back(kernel_Event);
+  err = q.enqueueMigrateMemObjects({buffer_output}, CL_MIGRATE_MEM_OBJECT_HOST, &eventList, &read_Event);
   checkErrorStatus(err, "Unable to enqueue read buffer") ;
 
-  clWaitForEvents(1, &seq_complete) ;
+  q.flush();
+  q.finish();
+
+  bool match = true;
+  if (argc == 4){
+      goldenFilename = argv[3];
+      //Read the golden bit map file into memory
+      BitmapInterface goldenImage(goldenFilename);
+      result = goldenImage.readBitmapFile() ;
+      if (!result)
+      {
+          std::cout << "ERROR:Unable to Read Golden Bitmap File "<< goldenFilename << std::endl;
+          return EXIT_FAILURE ;
+      }
+      //Compare Golden Image with Output image
+      if ( image.getHeight() != goldenImage.getHeight() || image.getWidth() != goldenImage.getWidth()){
+          match = false;
+      }else{
+          int* goldImgPtr = goldenImage.bitmap();
+          for (unsigned int i = 0 ; i < image.numPixels(); i++){
+              if (outImage[i] != goldImgPtr[i]){
+                  match = false;
+                  printf ("Pixel %d Mismatch Output %x and Expected %x \n", i, outImage[i], goldImgPtr[i]);
+                  break;
+              }
+          }
+      }
+  }
 
   // Write the final image to disk
-  image.writeBitmapFile(outImage) ;
-  free(outImage) ;
+  printf("Writing RAW Image \n");
+  image.writeBitmapFile(outImage.data());
 
-  release(software) ;
-  release(hardware) ;
-  return 0 ;
+  std::cout << (match ? "TEST PASSED" : "TEST FAILED") << std::endl;
+  return (match ? EXIT_SUCCESS : EXIT_FAILURE) ;
+
 }

@@ -55,6 +55,7 @@ Application code is located in the src directory. Accelerator binary files will 
 .gitignore
 Makefile
 README.md
+data/goldenImage.bmp
 data/inputImage.bmp
 description.json
 src/krnl_medianFilter.cl
@@ -103,7 +104,7 @@ emconfigutil --xdevice 'xilinx:kcu1500:dynamic' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./median data/inputImage.bmp ./xclbin/krnl_median.<emulation type>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin
+./median ./xclbin/krnl_median.<emulation type>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin data/inputImage.bmp data/goldenImage.bmp
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card

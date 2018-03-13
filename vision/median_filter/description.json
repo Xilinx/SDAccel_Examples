@@ -6,11 +6,11 @@
     ],
     "xcl": false,
     "opencv": true,
-    "cmd_args": "PROJECT/data/inputImage.bmp BUILD/default.xclbin",
-    "em_cmd": "./median data/inputImage.bmp ./xclbin/krnl_median.<emulation type>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin",
-    "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./median data/inputImage.bmp ./xclbin/krnl_median.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin",
+    "cmd_args": "BUILD/default.xclbin PROJECT/data/inputImage.bmp PROJECT/data/goldenImage.bmp",
+    "em_cmd": "./median ./xclbin/krnl_median.<emulation type>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin data/inputImage.bmp data/goldenImage.bmp",
+    "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./median ./xclbin/krnl_median.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin data/inputImage data/goldenImage.bmp",
     "libs": [
-        "oclHelper", 
+        "xcl2", 
         "bitmap"
     ], 
     "accelerators": [
@@ -48,6 +48,11 @@
             "date":"DEC2016",
             "version": "3.0",
             "description": "Update for SDAccel 2016.3"
+        },
+        {
+            "date":"MAR2018",
+            "version": "4.0",
+            "description": "Update host to xcl2"
         }
     ]
 }
