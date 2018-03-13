@@ -19,7 +19,7 @@ This example illustrates several ways to use the OpenCL API to transfer data to 
 
 ***KEY CONCEPTS:*** OpenCL API, Data Transfer, Write Buffers, Read Buffers, Map Buffers, Async Memcpy
 
-***KEYWORDS:*** clEnqueueWriteBuffer(), clEnqueueReadBuffer(), clEnqueueMapBuffer(), clEnqueueUnmapMemObject()
+***KEYWORDS:*** enqueueWriteBuffer(), enqueueReadBuffer(), enqueueMapBuffer(), enqueueUnmapMemObject(), enqueueMigrateMemObjects()
 
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
@@ -49,6 +49,7 @@ Application code is located in the src directory. Accelerator binary files will 
 Makefile
 README.md
 description.json
+src/dummy_kernel.cl
 src/host.cpp
 ```
 
