@@ -2,13 +2,13 @@
 COMMON_REPO:=../../..
 
 include $(COMMON_REPO)/utility/boards.mk
-include $(COMMON_REPO)/libs/xcl/xcl.mk
+include $(COMMON_REPO)/libs/xcl2/xcl2.mk
 include $(COMMON_REPO)/libs/opencl/opencl.mk
 
 # kernel_global Host Application
-kernel_global_SRCS=./src/kernel_global_bandwidth.cpp $(xcl_SRCS)
-kernel_global_HDRS=$(xcl_HDRS)
-kernel_global_CXXFLAGS=$(xcl_CXXFLAGS) $(opencl_CXXFLAGS)
+kernel_global_SRCS=./src/kernel_global_bandwidth.cpp $(xcl2_SRCS)
+kernel_global_HDRS=$(xcl2_HDRS)
+kernel_global_CXXFLAGS=$(xcl2_CXXFLAGS) $(opencl_CXXFLAGS)
 kernel_global_LDFLAGS=$(opencl_LDFLAGS)
 
 EXES=kernel_global

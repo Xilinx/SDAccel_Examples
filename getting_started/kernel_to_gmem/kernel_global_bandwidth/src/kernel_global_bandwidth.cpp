@@ -78,9 +78,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-
-#include "xcl.h"
-#include <CL/cl_ext.h>
+#include <vector>
+#include "xcl2.hpp"
 
 #ifdef USE_4DDR
     #define DDR_BANKS 4
@@ -97,9 +96,18 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-    xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "krnl_kernel_global");
-    cl_kernel krnl = xcl_get_kernel(program, "bandwidth");
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
+
+    cl::Context context(device);
+    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+    std::string device_name = device.getInfo<CL_DEVICE_NAME>();
+    std::cout << "Found Device=" << device_name.c_str() << std::endl;
+
+    std::string binaryFile = xcl::find_binary_file(device_name, "krnl_kernel_global");
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    devices.resize(1);
+    cl::Program program(context, devices, bins);
 
     int err;
 
@@ -131,7 +139,7 @@ int main(int argc, char** argv) {
      * buffer[1] is output0
      * buffer[2] is input1
      * buffer[3] is output1 */
-    cl_mem buffer[num_buffers];
+    cl::Buffer *buffer[num_buffers];
 
     cl_mem_ext_ptr_t ext_buffer[num_buffers];
 
@@ -148,29 +156,27 @@ int main(int argc, char** argv) {
             ext_buffer[i].obj = NULL;
             ext_buffer[i].param = 0;
 
-            buffer[i] = clCreateBuffer(world.context,
-                                       CL_MEM_READ_WRITE | CL_MEM_EXT_PTR_XILINX,
-                                       globalbuffersize,
-                                       &ext_buffer[i],
-                                       &err);
+	    buffer[i] = new cl::Buffer(context, 
+				   CL_MEM_READ_WRITE | CL_MEM_EXT_PTR_XILINX, 
+				   globalbuffersize, 
+				   &ext_buffer[i], 
+				   &err);
             if(err != CL_SUCCESS) {
                 printf("Error: Failed to allocate buffer in DDR bank %zu\n", globalbuffersize);
                 return EXIT_FAILURE;
             }
         } /* End for (i < ddr_banks) */
     #else
-        buffer[0] = clCreateBuffer(world.context,
-                                   CL_MEM_READ_WRITE,
-                                   globalbuffersize,
-                                   NULL,
-                                   &err);
-
-        buffer[1] = clCreateBuffer(world.context,
-                                   CL_MEM_READ_WRITE,
-                                   globalbuffersize,
-                                   NULL,
-                                   &err);
-
+	 buffer[0] = new cl::Buffer(context, 
+ 				CL_MEM_READ_WRITE, 
+				globalbuffersize, 
+				NULL, 
+				&err);
+	 buffer[1] = new cl::Buffer(context, 
+				CL_MEM_READ_WRITE, 
+				globalbuffersize, 
+				NULL, 
+				&err); 
          if(err != CL_SUCCESS) {
             printf("Error: Failed to allocate input/output_buffer0 in BANK0 of size %zu\n", globalbuffersize);
             return EXIT_FAILURE;
@@ -185,111 +191,103 @@ int main(int argc, char** argv) {
     /* Write input buffer */
     /* Map input buffer for PCIe write */
     unsigned char *map_input_buffer0;
-    map_input_buffer0 = (unsigned char *) clEnqueueMapBuffer(world.command_queue,
-                                                             buffer[0],
-                                                             CL_FALSE,
-                                                             CL_MAP_WRITE_INVALIDATE_REGION,
-                                                             0,
-                                                             globalbuffersize,
-                                                             0,
-                                                             NULL,
-                                                             NULL,
-                                                             &err);
+    map_input_buffer0 = (unsigned char *) q.enqueueMapBuffer(*(buffer[0]), 
+							     CL_FALSE, 
+							     CL_MAP_WRITE_INVALIDATE_REGION, 
+							     0, 
+							     globalbuffersize, 
+							     NULL, 
+							     NULL, 
+							     &err);
     if (err != CL_SUCCESS) {
-            printf("Error: Failed to clEnqueueMapBuffer0 OpenCL buffer\n");
+            printf("Error: Failed to enqueueMapBuffer0 OpenCL buffer\n");
             printf("Error: Test failed\n");
             return EXIT_FAILURE;
     }
-    clFinish(world.command_queue);
+    q.finish();
 
     /* prepare data to be written to the device */
     for(size_t i = 0; i<globalbuffersize; i++) {
         map_input_buffer0[i] = input_host[i];
     }
-
-    err = clEnqueueUnmapMemObject(world.command_queue,
-                                  buffer[0],
-                                  map_input_buffer0,
-                                  0,
-                                  NULL,
-                                  NULL);
+    err = q.enqueueUnmapMemObject(*(buffer[0]), 
+				  map_input_buffer0);
     if (err != CL_SUCCESS) {
         printf("Error: Failed to copy input dataset to OpenCL buffer\n");
         printf("Error: Test failed\n");
         return EXIT_FAILURE;
     }
-    clFinish(world.command_queue);
+    q.finish();
 
     #ifdef USE_4DDR
         unsigned char *map_input_buffer1;
-        map_input_buffer1 = (unsigned char *) clEnqueueMapBuffer(world.command_queue,
-                                                                 buffer[2],
-                                                                 CL_FALSE,
-                                                                 CL_MAP_WRITE_INVALIDATE_REGION,
-                                                                 0,
-                                                                 globalbuffersize,
-                                                                 0,
-                                                                 NULL,
-                                                                 NULL,
-                                                                 &err);
+ 	map_input_buffer1 = (unsigned char *) q.enqueueMapBuffer(*(buffer[2]), 
+								 CL_FALSE, 
+								 CL_MAP_WRITE_INVALIDATE_REGION, 
+								 0, 
+								 globalbuffersize, 
+								 NULL, 
+								 NULL, 
+								 &err);
         if (err != CL_SUCCESS) {
-            printf("Error: Failed to clEnqueueMapBuffer1 OpenCL buffer\n");
+            printf("Error: Failed to enqueueMapBuffer1 OpenCL buffer\n");
             printf("Error: Test failed\n");
             return EXIT_FAILURE;
         }
-        clFinish(world.command_queue);
+	q.finish();
 
         /* Prepare data to be written to the device */
         for(size_t i = 0; i < globalbuffersize; i++) {
             map_input_buffer1[i] = input_host[i];
         }
 
-        err = clEnqueueUnmapMemObject(world.command_queue,
-                                      buffer[2],
-                                      map_input_buffer1,
-                                      0,
-                                      NULL,
-                                      NULL);
+	err = q.enqueueUnmapMemObject(*(buffer[2]), 
+				      map_input_buffer1);
         if (err != CL_SUCCESS) {
             printf("Error: Failed to copy input dataset to OpenCL buffer\n");
             printf("Error: Test failed\n");
             return EXIT_FAILURE;
         }
-        clFinish(world.command_queue);
+        q.finish();
     #endif
 
-    /* Execute kernel */
+    /* Set the kernel arguments */
+    cl::Kernel krnl_global_bandwidth(program, "bandwidth");
     int arg_index = 0;
     int buffer_index = 0;
 
-    xcl_set_kernel_arg(krnl, arg_index++, sizeof(cl_mem), &buffer[buffer_index++]);
-    xcl_set_kernel_arg(krnl, arg_index++, sizeof(cl_mem), &buffer[buffer_index++]);
+    krnl_global_bandwidth.setArg(arg_index++, *(buffer[buffer_index++]));
+    krnl_global_bandwidth.setArg(arg_index++, *(buffer[buffer_index++]));
     #ifdef USE_4DDR
-        xcl_set_kernel_arg(krnl, arg_index++, sizeof(cl_mem), &buffer[buffer_index++]);
-        xcl_set_kernel_arg(krnl, arg_index++, sizeof(cl_mem), &buffer[buffer_index++]);
+       krnl_global_bandwidth.setArg(arg_index++, *(buffer[buffer_index++]));
+       krnl_global_bandwidth.setArg(arg_index++, *(buffer[buffer_index++]));
     #endif
-    xcl_set_kernel_arg(krnl, arg_index++, sizeof(cl_ulong), &num_blocks);
+    krnl_global_bandwidth.setArg(arg_index++, num_blocks);
 
-    unsigned long nsduration = xcl_run_kernel3d(world, krnl, 1, 1, 1);
+    unsigned long nsduration;
+    cl::Event event;
+
+    /* Execute Kernel */
+    q.enqueueTask(krnl_global_bandwidth, NULL, &event);
+    event.wait();
+    nsduration = event.getProfilingInfo<CL_PROFILING_COMMAND_END>() - event.getProfilingInfo<CL_PROFILING_COMMAND_START>(); 
 
     /* Copy results back from OpenCL buffer */
     unsigned char *map_output_buffer0;
-    map_output_buffer0 = (unsigned char *)clEnqueueMapBuffer(world.command_queue,
-                                                             buffer[1],
-                                                             CL_FALSE,
-                                                             CL_MAP_READ,
-                                                             0,
-                                                             globalbuffersize,
-                                                             0,
-                                                             NULL,
-                                                             NULL,
-                                                             &err);
+    map_output_buffer0 = (unsigned char *) q.enqueueMapBuffer(*(buffer[1]), 
+							      CL_FALSE, 
+							      CL_MAP_READ, 
+							      0, 
+							      globalbuffersize, 
+							      NULL, 
+							      NULL, 
+							      &err);
     if (err != CL_SUCCESS) {
         printf("ERROR: Failed to read output size buffer %d\n", err);
         printf("ERROR: Test failed\n");
         return EXIT_FAILURE;
     }
-    clFinish(world.command_queue);
+    q.finish();
 
     /* Check the results of output0 */
     for (size_t i = 0; i < globalbuffersize; i++) {
@@ -300,23 +298,20 @@ int main(int argc, char** argv) {
     }
     #ifdef USE_4DDR
         unsigned char *map_output_buffer1;
-        map_output_buffer1 = (unsigned char *)clEnqueueMapBuffer(world.command_queue,
-                                                                 buffer[3],
-                                                                 CL_FALSE,
-                                                                 CL_MAP_READ,
-                                                                 0,
-                                                                 globalbuffersize,
-                                                                 0,
-                                                                 NULL,
-                                                                 NULL,
-                                                                 &err);
-
+  	map_output_buffer1 = (unsigned char *) q.enqueueMapBuffer(*(buffer[3]), 
+								  CL_FALSE, 
+								  CL_MAP_READ, 
+								  0, 
+								  globalbuffersize, 
+								  NULL, 
+								  NULL, 
+								  &err);
         if (err != CL_SUCCESS) {
             printf("ERROR: Failed to read output size buffer %d\n", err);
             printf("ERROR: Test failed\n");
             return EXIT_FAILURE;
         }
-        clFinish(world.command_queue);
+        q.finish();
 
         /* Check the results of output1 */
         for (size_t i = 0; i < globalbuffersize; i++) {
@@ -325,6 +320,16 @@ int main(int argc, char** argv) {
                 return EXIT_FAILURE;
             }
         }
+    #endif
+
+    #if defined(USE_2DDR) || defined(USE_4DDR)
+    for(int i = 0; i < ddr_banks; i++)
+     {
+	delete(buffer[i]);
+     }
+    #else
+	delete(buffer[0]);
+	delete(buffer[1]);
     #endif
 
     /* Profiling information */
@@ -337,10 +342,6 @@ int main(int argc, char** argv) {
     printf("Kernel completed read/write %.0lf MB bytes from/to global memory.\n", dmbytes);
     printf("Execution time = %f (sec) \n", dsduration);
     printf("Concurrent Read and Write Throughput = %f (MB/sec) \n", mbpersec);
-
-    clReleaseKernel(krnl);
-    clReleaseProgram(program);
-    xcl_release_world(world);
 
     printf("TEST PASSED\n");
     return EXIT_SUCCESS;

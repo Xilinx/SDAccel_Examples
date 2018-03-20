@@ -8,7 +8,7 @@
         "Linux"
     ],
     "libs": [
-        "xcl"
+        "xcl2"
     ],
     "em_cmd" : "./kernel_global",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./kernel_global",
@@ -50,6 +50,11 @@
             "date" : "FEB2017",
             "version": "3.0",
             "description": "Updated to support 4 DDR banks"
-        }
+        },
+	{
+	    "date" : "MAR2018",
+	    "version": "4.0",
+	    "description": "Updated host to xcl2"
+	}
     ]
 }
