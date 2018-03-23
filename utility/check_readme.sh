@@ -1,9 +1,6 @@
 #!/bin/bash
 
-# Check if all source files have the correct license
-
-LICENSE=$1
-TYPES="c cpp h cl"
+# Check if all examples have correct Readme 
 
 echo "-----------------------"
 echo "--  CHECKING READMEs --"
@@ -15,7 +12,7 @@ check_file() {
 	ignore=0
 
 	for i in $IGNORE; do
-		if [[ $1 =~ ^descirption.json ]]; then 
+		if [[ $1 =~ ^description.json ]]; then 
 			ignore=1
 		fi
 	done
