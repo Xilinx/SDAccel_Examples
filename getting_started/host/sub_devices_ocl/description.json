@@ -12,8 +12,8 @@
     "libs": [
         "xcl2"
     ],
-    "em_cmd": "./subdevices",
-    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./subdevices",
+    "em_cmd": "./sub_devices",
+    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./sub_devices",
     "containers": [
         {
             "name" : "krnl_vadd",

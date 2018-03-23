@@ -94,7 +94,7 @@ emconfigutil --xdevice 'xilinx:kcu1500:dynamic' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./subdevices
+./sub_devices
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card
