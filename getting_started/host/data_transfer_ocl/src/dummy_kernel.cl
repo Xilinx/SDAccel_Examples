@@ -29,8 +29,13 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 __kernel __attribute__ ((reqd_work_group_size(1,1,1)))
 
-void dummy_kernel(__global uint *buffer0, __global uint *buffer1)
+void dummy_kernel(__global uint *buffer0, __global uint *buffer1, uint size)
 {
     //Intentional empty kernel as this example doesn't require actual
     //kernel to work.
+
+    for(uint i = 0; i < size ; i++)
+     {
+       buffer0[0] = buffer1[0];
+     } 
 }
