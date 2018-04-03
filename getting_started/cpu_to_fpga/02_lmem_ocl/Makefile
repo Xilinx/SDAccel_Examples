@@ -30,8 +30,6 @@ CXXFLAGS := -Wall -O0 -g -std=c++14
 HOST_SRCS = src/host.cpp
 
 # Host compiler global settings
-CXXFLAGS = -I $(XILINX_SDX)/runtime/include/1_2/ -I/$(XILINX_SDX)/Vivado_HLS/include/ -O0 -g -Wall -fmessage-length=0 -std=c++14
-LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_SDX)/runtime/lib/x86_64
 
 # Kernel compiler global settings
 CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps 
@@ -63,8 +61,9 @@ ALL_KERNEL_OBJS += $(XCLBIN)/mmult.xo
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/xcl2/xcl2.mk
-CXXFLAGS += $(xcl2_CXXFLAGS)
-LDFLAGS += $(xcl2_LDFLAGS)
+include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
+CXXFLAGS += $(xcl2_CXXFLAGS) $(opencl_CXXFLAGS)
+LDFLAGS += $(xcl2_LDFLAGS) $(opencl_LDFLAGS)
 HOST_SRCS += $(xcl2_SRCS)
 
 CP = cp -rf
