@@ -36,6 +36,6 @@ void dummy_kernel(__global uint *buffer0, __global uint *buffer1, uint size)
 
     for(uint i = 0; i < size ; i++)
      {
-       buffer0[0] = buffer1[0];
+       buffer0[i] = buffer1[i];
      } 
 }

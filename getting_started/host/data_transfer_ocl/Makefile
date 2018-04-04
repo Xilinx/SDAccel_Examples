@@ -14,9 +14,11 @@ data_transfer_LDFLAGS=$(opencl_LDFLAGS)
 EXES=data_transfer
 
 dummy_kernel_SRCS=./src/dummy_kernel.cl
+dummy_kernel_CLFLAGS= --xp param:compiler.axiDeadLockFree=yes
 XOS=dummy_kernel
 
 dummy_kernel_XOS=dummy_kernel
+dummy_kernel_LDCLFLAGS= --xp param:compiler.axiDeadLockFree=yes
 XCLBINS=dummy_kernel
 
 # check

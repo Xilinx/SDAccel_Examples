@@ -17,9 +17,11 @@
     "containers": [
         {
             "name": "dummy_kernel",
+            "ldclflags" : "--xp param:compiler.axiDeadLockFree=yes",
             "accelerators": [
                 {
                     "name": "dummy_kernel",
+                    "clflags" : "--xp param:compiler.axiDeadLockFree=yes",
                     "location": "src/dummy_kernel.cl"
                 }    
             ]
@@ -29,13 +31,6 @@
         {
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
-        }
-    ],
-    "revision" : [
-        {
-            "date" : "DEC2016",
-            "version": "1.0",
-            "description": "Initial Xilinx Release"
         }
     ]
 }
