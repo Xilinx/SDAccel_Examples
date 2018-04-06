@@ -14,24 +14,23 @@
     ],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
-    "accelerators": [
+    "containers": [
         {
-            "container": "N_stage_Adders", 
-            "name": "N_stage_Adders", 
-            "location": "src/N_stage_adders.cpp"
+            "name": "N_stage_Adders",
+            "ldclflags": "--xp param:compiler.axiDeadLockFree=yes",
+            "accelerators": [
+               {
+                  "name": "N_stage_Adders",
+                  "clflags": "--xp param:compiler.axiDeadLockFree=yes",
+                  "location": "src/N_stage_adders.cpp"
+               }
+            ]
         }
-    ],
+     ],    
     "contributors" : [
         {
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
-        }
-    ],
-    "revision" : [
-        {
-            "date" : "DEC2016",
-            "version": "1.0",
-            "description": "Initial Xilinx Release"
         }
     ]
 }

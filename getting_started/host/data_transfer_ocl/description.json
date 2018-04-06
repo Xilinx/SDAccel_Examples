@@ -17,11 +17,9 @@
     "containers": [
         {
             "name": "dummy_kernel",
-            "ldclflags" : "--xp param:compiler.axiDeadLockFree=yes",
             "accelerators": [
                 {
                     "name": "dummy_kernel",
-                    "clflags" : "--xp param:compiler.axiDeadLockFree=yes",
                     "location": "src/dummy_kernel.cl"
                 }    
             ]
