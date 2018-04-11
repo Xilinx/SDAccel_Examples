@@ -42,7 +42,7 @@ Description:
 extern "C" {
 void vadd(int *a, int size, int inc_value){
     // Map pointer a to AXI4-master interface for global memory access
-    #pragma HLS INTERFACE m_axi port=a  offset=slave bundle=gmem
+    #pragma HLS INTERFACE m_axi port=a  offset=slave bundle=gmem max_read_burst_length=256 max_write_burst_length=256
     // We also need to map a and return to a bundled axilite slave interface
     #pragma HLS INTERFACE s_axilite port=a bundle=control
     #pragma HLS INTERFACE s_axilite port=size bundle=control
