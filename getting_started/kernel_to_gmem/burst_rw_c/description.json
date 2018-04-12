@@ -5,7 +5,7 @@
         "This is simple example of using AXI4-master interface for burst read and write"
     ],
     "key_concepts": [ "burst access"],
-    "keywords": ["memcpy"],
+    "keywords": ["memcpy", "max_read_burst_length", "max_write_burst_length"],
     "os": [
         "Linux"
     ],
@@ -25,13 +25,6 @@
         {
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
-        }
-    ],
-    "revision" : [
-        {
-            "date" : "DEC2016",
-            "version": "1.0",
-            "description": "Initial Xilinx Release"
         }
     ]
 }

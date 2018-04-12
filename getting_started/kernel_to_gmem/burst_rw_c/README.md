@@ -19,7 +19,7 @@ This is simple example of using AXI4-master interface for burst read and write
 
 ***KEY CONCEPTS:*** burst access
 
-***KEYWORDS:*** memcpy
+***KEYWORDS:*** memcpy, max_read_burst_length, max_write_burst_length
 
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
