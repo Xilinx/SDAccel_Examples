@@ -14,12 +14,13 @@ EXES=host
 
 # Kernel
 N_stage_Adders_SRCS=./src/N_stage_adders.cpp
-N_stage_Adders_CLFLAGS= -k N_stage_Adders
+N_stage_Adders_CLFLAGS= -k N_stage_Adders --xp param:compiler.axiDeadLockFree=yes
 
 XOS=N_stage_Adders
 
 # xclbin
 N_stage_Adders_XOS=N_stage_Adders
+N_stage_Adders_LDCLFLAGS= --xp param:compiler.axiDeadLockFree=yes
 
 XCLBINS=N_stage_Adders
 
