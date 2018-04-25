@@ -27,6 +27,41 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 
+/*
+ Memory Coalescing
+
+ Coalesced memory access allows the FPGA to reduce the number of global memory accesses
+ by processing multiple work items at once. This increase in throughput without
+ communication/latency cost. If the addresses to the global items are not aligned, 
+ or not completely sequential then each work item do a individual global access which 
+ result in bad throughput as access to DDR have high latency.
+
+ If thread i is reading from memory location n, then have thread i+1 read from location n+1,
+ then these reads are coalesced into one transaction. Merge requests to elements from the
+ same memory bank into a single request. This increase local storage and involve pseudo
+ vectorization, which might increase control complexity.
+
+ There are instances where this technique will have little to no effect. If the DDR accesses
+ are properly pipelined then this memory coalescing technique have no benefit. 
+ proper vectorization might actually improve computation/control ratio
+
+   Memory -  |___|___|___|___|___|___|___|___|___|
+               |   |   |   |   |   |   |   |   |
+               |   |   |   |   |   |   |   |   |
+   Thread -   |0| |1| |2| |3| |4| |5| |6| |7| |8|
+
+                (a) Coalesced
+                
+
+   Memory -  |___|___|___|___|___|___|___|___|___|___|
+                 \/      \/       /   /   /   /   /
+                 /\      /\      /   /   /   /   /
+   Thread -    |0| |1| |2| |3| |4| |5| |6| |7| |8|
+
+                (a) non-Coalesced
+                
+ */
+
 /*******************************************************************************
 Description: 
     Example to demonstrate how memory coalescing issue can be handled.
@@ -38,6 +73,7 @@ Description:
 extern "C" {
 void dummy_op(int *din1,int *din2,int *din3,int *dout)
 {
+
 #pragma HLS INTERFACE m_axi port=din1 offset=slave bundle=gmem
 #pragma HLS INTERFACE m_axi port=din2 offset=slave  bundle=gmem1
 
