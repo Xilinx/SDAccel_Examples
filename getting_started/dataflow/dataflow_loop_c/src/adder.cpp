@@ -92,8 +92,8 @@ void adder(unsigned int *in, unsigned int *out, int inc, int size)
 #pragma HLS INTERFACE s_axilite port=size bundle=control
 #pragma HLS INTERFACE s_axilite port=return bundle=control
 
-    hls::stream<unsigned int> inStream;
-    hls::stream<unsigned int> outStream;
+    hls::stream<unsigned int> inStream("input_stream");
+    hls::stream<unsigned int> outStream("output_stream");
 #pragma HLS STREAM variable=inStream  depth=32
 #pragma HLS STREAM variable=outStream depth=32
 //  HLS STREAM variable=<name> depta=<size> pragma is used to define the Stream 
