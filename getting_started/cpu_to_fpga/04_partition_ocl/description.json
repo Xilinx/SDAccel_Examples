@@ -1,6 +1,6 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Matrix Multiplication Array Partition and Loop Unroll",
+    "example": "04 Matrix Multiplication Array Partition and Loop Unroll",
     "overview": [
         "This is a simple example of matrix multiplication (Row x Col) to demonstrate how to achieve better performance by array partitioning and loop unrolling."
     ],

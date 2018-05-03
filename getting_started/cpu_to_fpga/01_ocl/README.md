@@ -1,4 +1,4 @@
-Matrix Multiplication with OpenCL Kernel
+01 Matrix Multiplication with OpenCL Kernel
 ======================
 
 This README file contains the following sections:

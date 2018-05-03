@@ -1,4 +1,4 @@
-Matrix Multiplication with Local Memory
+02 Matrix Multiplication with Local Memory
 ======================
 
 This README file contains the following sections:
