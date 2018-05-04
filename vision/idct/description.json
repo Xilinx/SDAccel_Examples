@@ -7,12 +7,9 @@
     "os": [
         "Linux"
     ],
-    "nboard":["xilinx:vcu1525:dynamic", "xilinx_vcu1525_dynamic_5_0"],
+    "cmd_args" : "BUILD/default.xclbin",
     "em_cmd" : "./idct",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./idct",
-    "libs": [
-        "xcl2"
-    ],
     "containers": [
         {
             "name": "krnl_idct", 

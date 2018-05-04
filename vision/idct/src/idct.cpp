@@ -130,50 +130,6 @@ static int load_file_to_memory(const char *filename, char **result) {
   return size;
 }
 
-/* *************************************************************************** 
-
-getBinaryName 
-
-The example makefile is designed to support many platforms and
-different modes of execution. This results in different naming of the
-final kernel executable code. 
-
-This function generates the name based on the environment setup and
-the provided platform name. The name is returned in the binaryName
-argument.
-
-*************************************************************************** */
-void getBinaryName(std::string &binaryName, char* device_name) {
-  char *xcl_mode = getenv("XCL_EMULATION_MODE");
-  bool isHwFlow = false;
-  bool isAwsFlow = !strcmp(device_name, "xilinx:aws-vu9p-f1:4ddr-xpr-2pr:4.0");
-  binaryName = "xclbin/krnl_idct";
-  
-  if(xcl_mode && !(strcmp(xcl_mode, "sw_emu"))) {
-    std::cout << "Running Software Emulation" << std::endl;
-    binaryName += ".sw_emu";
-  } else if(xcl_mode && !(strcmp(xcl_mode, "hw_emu"))) {
-    std::cout << "Running Hardware Emulation" << std::endl;
-    binaryName += ".hw_emu";
-  } else {
-    isHwFlow = true;
-    std::cout << "Running Hardware" << std::endl;
-    binaryName += ".hw";
-  }
-
-  std::string target = device_name;
-  std::replace(target.begin(), target.end(), ':', '_');
-  std::replace(target.begin(), target.end(), '.', '_');
-  binaryName += "." + target;
-
-  if((isHwFlow==true) && (isAwsFlow==true)) {
-    binaryName += ".awsxclbin";
-  } else {
-    binaryName += ".xclbin";
-  }
-}
-
-
 
 /* *************************************************************************** 
 
@@ -504,14 +460,14 @@ int main(int argc, char* argv[]) {
 
   char *xcl_mode = getenv("XCL_EMULATION_MODE");
 
-  int xclbin_argc = -1;
-  for(int i=0; i<argc; i++) {
-    std::string arg = argv[i];
-    std::string xclbinStr = "xclbin";
-    if(arg.find(xclbinStr) != std::string::npos) {
-      xclbin_argc = i;
-    }
+  if (argc != 2) {
+    printf("Usage: %s "
+	   "./xclbin/idct_kernel.<emulation_mode>.<dsa>.xclbin\n",
+	   argv[0]);
+    return EXIT_FAILURE;
   }
+
+  char* binaryName = argv[1];
 
 
   // *********** Allocate and initialize test vectors **********
@@ -611,17 +567,10 @@ int main(int argc, char* argv[]) {
 
   std::cout << "DEVICE: " << cl_device_name << std::endl;
 
-  std::string binaryName;
-  if(xclbin_argc != -1) {
-    binaryName = argv[xclbin_argc];
-  } else {
-    getBinaryName(binaryName, cl_device_name);
-  }
-
   std::cout << "Loading Bitstream: " << binaryName << std::endl; 
   char *krnl_bin;
   size_t krnl_size;
-  krnl_size = load_file_to_memory(binaryName.c_str(), &krnl_bin);
+  krnl_size = load_file_to_memory(binaryName, &krnl_bin);
 
   printf("INFO: Loaded file\n");
 
