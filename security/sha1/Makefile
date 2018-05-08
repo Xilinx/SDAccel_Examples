@@ -36,7 +36,7 @@ check_NDEVICES=$(krnl_sha1_NDEVICES)
 
 # Pattern to allow cmdline to determine xclbin name
 define mk_args
-check_$(1)_$(call sanitize_dsa,$(2))_ARGS = -t 20 -p Xilinx -d $(2) -k ./xclbin/krnl_sha1.$(1).$(call sanitize_dsa,$(2)).xclbin
+check_$(1)_$(call device2sandsa,$(2))_ARGS = -t 20 -p Xilinx -d $(2) -k ./xclbin/krnl_sha1.$(1).$(call device2sandsa,$(2)).xclbin
 endef
 
 DEVICES=xilinx:adm-pcie-7v3:1ddr:3.0
