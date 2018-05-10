@@ -186,7 +186,7 @@ def compilation(target,data):
     except:
         target.write('<sw_emu|hw_emu>')
     target.write('\n')
-    target.write("emconfigutil --xdevice '" + DSA + "' --nd 1\n")
+    target.write("emconfigutil --platform '" + DSA + "' --nd 1\n")
     target.write("```\n")
     target.write("Once the environment has been configured, the application can be executed by\n")
     target.write("```\n")
