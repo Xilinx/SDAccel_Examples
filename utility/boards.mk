@@ -3,6 +3,7 @@
 # 'system' for system report generation
 REPORT:=none
 PROFILE ?= no
+DEBUG ?=no
 
 # Default C++ Compiler Flags and xocc compiler flags
 CXXFLAGS:=-Wall -O0 -g -std=c++14
@@ -14,6 +15,10 @@ endif
 
 ifeq ($(PROFILE),yes)
 CLFLAGS += --profile_kernel data:all:all:all
+endif
+
+ifeq ($(DEBUG),yes)
+CLFLAGS += --dk protocol:all:all:all
 endif
 
 LDCLFLAGS:=$(CLFLAGS)
