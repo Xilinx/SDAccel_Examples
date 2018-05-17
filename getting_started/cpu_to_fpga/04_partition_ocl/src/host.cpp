@@ -36,6 +36,7 @@ arrays are partitioned and the innermost loop is unrolled in the kernel.
 
 //OpenCL utility layer include
 #include "xcl2.hpp"
+#include "stdlib.h"
 #include <vector>
 
 //Max Array Size
@@ -173,8 +174,8 @@ int main(int argc, char** argv)
 
     //Create the test data and Software Result 
     for(int i = 0 ; i < DATA_SIZE * DATA_SIZE ; i++){
-        source_in1[i] = i;
-        source_in2[i] = i * i;
+        source_in1[i] = rand() % size;
+        source_in2[i] = rand() % size;
         source_cpu_results[i] = 0;
         source_fpga_results[i] = 0;
     }

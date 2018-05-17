@@ -65,11 +65,10 @@ int main(int argc, char** argv)
 
     //Creates the data
     for(int index = 0; index < size * size; index++){
-        source_in1[index] = index;
-        source_in2[index] = index * index;
+        source_in1[index] = rand() % size;
+        source_in2[index] = rand() % size;
         source_cpu_results[index] = 0;
     }
-
 
     //Function call to perform matrix multiplication
     mmult_cpu(source_in1, source_in2, source_cpu_results, size);

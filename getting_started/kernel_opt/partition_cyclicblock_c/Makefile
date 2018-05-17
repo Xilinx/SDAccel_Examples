@@ -25,7 +25,6 @@ XOS=matmul_naive matmul_partition
 
 # xclbin
 matmul_XOS=matmul_naive matmul_partition
-matmul_NDEVICES=xilinx:kcu1500:dynamic xilinx:vcu1525:dynamic xilinx_kcu1500_dynamic_5_0 xilinx_vcu1525_dynamic_5_0
 
 XCLBINS=matmul
 
