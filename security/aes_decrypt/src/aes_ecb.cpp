@@ -84,7 +84,7 @@ static void rotate(unsigned char *in) {
 }
 
 void schedule_core(unsigned char *in, unsigned char i) {
-  char a;
+  unsigned char a;
   /* Rotate the input 8 bits to the left */
   rotate(in);
   /* Apply Rijndael's s-box on all 4 bytes */
@@ -202,15 +202,15 @@ void AddRoundKey(unsigned char *block,unsigned int round,unsigned char *roundkey
 //Return value 
 // 0    Success
 //-1    Inputsize is not a multiple of 128 bit AES block size
-int aesecb_encrypt(unsigned char *key, unsigned char *input, unsigned char *output, size_t inputsize,const int rounds){
+int aesecb_encrypt(unsigned char *key, unsigned char *input, unsigned char *output, size_t inputsize,const unsigned int rounds){
 
-  const int blocksize = 128/8;
+  const unsigned int blocksize = 128/8;
 
   //check input size is a multiple of 128 bit AES block size
   if((inputsize % blocksize) != 0 ) return -1;
 
   //KeyExpansion
-  int i;
+  unsigned int i;
   unsigned char roundkey[(10+1) * blocksize];
   for(i=0;i<blocksize;i++) roundkey[i]=key[i];
   KeyExpansion(roundkey);
@@ -246,7 +246,7 @@ int aesecb_encrypt(unsigned char *key, unsigned char *input, unsigned char *outp
 
     for(j=0;j<blocksize;j++) output[i*blocksize+j]=block[j];
   }
-
+   return 0;
 }
 
 
