@@ -108,7 +108,7 @@ extern "C"{
         // Read Input A
         readA: for(int loc = 0, i = 0, j = 0; loc < a_row*a_col; loc++, j++) {
         #pragma HLS LOOP_TRIPCOUNT min=21*21 max=21*21
-        #pragma HLS PIPELINE
+        #pragma HLS PIPELINE II=1
             if(j == a_col) { i++; j = 0;}
             localA[i][j] = a[loc];
         }
@@ -116,7 +116,7 @@ extern "C"{
         // Read Input B
         readB: for(int loc = 0, i = 0, j = 0; loc < b_row*b_col; loc++, j++) {
         #pragma HLS LOOP_TRIPCOUNT min=21*21 max=21*21
-        #pragma HLS PIPELINE
+        #pragma HLS PIPELINE II=1
             if(j == b_col) { i++; j = 0; }
             localB[i][j] = b[loc];
         }
@@ -162,7 +162,7 @@ extern "C"{
 
         systolic1: for(int k = 0; k < a_col; k++) {
         #pragma HLS LOOP_TRIPCOUNT min=16 max=16
-        #pragma HLS PIPELINE
+        #pragma HLS PIPELINE II=1
             systolic2: for(int i = 0; i < MAX_SIZE; i++) {
                 systolic3: for(int j = 0; j < MAX_SIZE; j++) {
                     
@@ -185,7 +185,7 @@ extern "C"{
         // Burst write from matrix C
         writeC: for(int loc = 0, i = 0, j = 0; loc < c_row*c_col; loc++, j++) {
         #pragma HLS LOOP_TRIPCOUNT min=256 max=256
-        #pragma HLS PIPELINE
+        #pragma HLS PIPELINE II=1
             if(j == c_col) { i++; j = 0; }
             c[loc] = localC[i][j];
         }

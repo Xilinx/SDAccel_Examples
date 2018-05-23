@@ -60,7 +60,7 @@ void matmul_partition(
     // Burst read for matrix A
     readA:
     for (int itr = 0, i = 0, j = 0; itr < dim * dim; itr++, j++) {
-    #pragma HLS PIPELINE
+    #pragma HLS PIPELINE II=1
     #pragma HLS LOOP_TRIPCOUNT min=256 max=256
         if (j == dim) { j = 0; i++; }
         A[i*MAX_DIM + j] = in1[itr];
@@ -69,7 +69,7 @@ void matmul_partition(
     // Burst read for matrix B
     readB:
     for (int itr = 0, i = 0, j = 0; itr < dim * dim; itr++, j++) {
-    #pragma HLS PIPELINE
+    #pragma HLS PIPELINE II=1
     #pragma HLS LOOP_TRIPCOUNT min=256 max=256
         if (j == dim) { j = 0; i++; }
         B[i * MAX_DIM + j] = in2[itr];
@@ -82,7 +82,7 @@ void matmul_partition(
         // at 2nd level loop and which will eventually unroll the lower loop
         lreorder2 :
         for (int j = 0; j < dim ; j++) {
-        #pragma HLS PIPELINE
+        #pragma HLS PIPELINE II=1
         #pragma HLS LOOP_TRIPCOUNT min=16 max=16
             int result = 0;
             lreorder3:
@@ -98,7 +98,7 @@ void matmul_partition(
     // Burst write from matrix C
     writeC:
     for (int itr = 0, i = 0, j = 0; itr < dim * dim; itr++, j++) {
-    #pragma HLS PIPELINE
+    #pragma HLS PIPELINE II=1
     #pragma HLS LOOP_TRIPCOUNT min=256 max=256
         if (j == dim) { j = 0; i++; }
         out[itr] = C[i * MAX_DIM + j];

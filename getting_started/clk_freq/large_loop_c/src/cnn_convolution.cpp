@@ -111,7 +111,7 @@ void copy_weight(int *weight, int wgt_lcl[WInChan][WSize * WSize], int output)
     
     // Each work_item copies weight matrix from DDR to local buffer
     readWt: for(int itr = 0, i = 0, j = 0; itr < WInChan * WSize * WSize; itr++,j++) {
-    #pragma HLS PIPELINE
+    #pragma HLS PIPELINE II=1
         if(j == WSize * WSize) {j = 0; i++;}
         wgt_lcl[i][j] = weight[stride + itr];
     }
@@ -125,7 +125,7 @@ void copy_output(int *out, int out_lcl[OSize * OSize], int output)
     
     // Work_item updates output filter/image in DDR
     writeOut: for(int itr = 0; itr < OSize * OSize; itr++) {
-    #pragma HLS PIPELINE
+    #pragma HLS PIPELINE II=1
         out[stride + itr] = out_lcl[itr];
     }
 }
@@ -146,7 +146,7 @@ void convolution_operation(int img_lcl[IChan][ISize * ISize], int wgt_lcl[WInCha
     convYaxis: for(int i = 0; i < WSize; i++,yVal++){
         // Runs over filter window
         convXaxis: for(int j = 0, xVal = xVal_base ; j < WSize; j++,xVal++){
-        #pragma HLS PIPELINE
+        #pragma HLS PIPELINE II=1
             // Runs over each of the input channels
             convInchan: for(int input = 0; input < IChan; input++){
                 
@@ -166,7 +166,7 @@ void convolution_operation(int img_lcl[IChan][ISize * ISize], int wgt_lcl[WInCha
     short sum = 0;
     accJ: for(int j = 0; j < WSize;j++)
         accK: for(int k = 0; k < WSize; k++)
-        #pragma HLS PIPELINE
+        #pragma HLS PIPELINE II=1
             accI: for(int i = 0; i < i_chan; i++)
             #pragma HLS LOOP_TRIPCOUNT min=96 max=96
                 sum += acc[i][j][k];
@@ -216,7 +216,7 @@ extern "C"
         // Burst Read Image
         readImg: for(int itr = 0, i = 0, j = 0; itr < i_chan * ISize * ISize; itr++, j++) {
         #pragma HLS LOOP_TRIPCOUNT min=96*27*27 max=96*27*27
-        #pragma HLS PIPELINE
+        #pragma HLS PIPELINE II=1
             if(j == ISize * ISize) {j = 0; i++;}
                 img_lcl[i][j] = image[itr];
         }
