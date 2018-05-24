@@ -8,10 +8,10 @@ disableConcurrentBuilds()
 days = 10
 
 devices = []
-devices += ['xilinx_vcu1525_dynamic_5_0']
+devices += ['xilinx_vcu1525_dynamic_5_1']
 devices += ['xilinx_kcu1500_dynamic_5_0']
 
-version = '2017.4'
+version = '2018.2'
 
 precheck_status = 'FAILURE'
 sw_status = 'FAILURE'
@@ -26,7 +26,7 @@ cd ${workdir}
 . /tools/local/bin/modinit.sh > /dev/null 2>&1
 module use.own /proj/picasso/modulefiles
 
-module add sdaccel/${version}_rel
+module add sdaccel/${version}_daily
 module add opencv/sdaccel
 
 cd ${dir}
@@ -67,8 +67,8 @@ cd ${workdir}
 . /tools/local/bin/modinit.sh > /dev/null 2>&1
 module use.own /proj/picasso/modulefiles
 
-module add vivado/${version}_rel
-module add sdaccel/${version}_rel
+module add vivado/${version}_daily
+module add sdaccel/${version}_daily
 module add opencv/sdaccel
 
 module add lsf
@@ -134,8 +134,8 @@ cd ${workdir}
 . /tools/local/bin/modinit.sh > /dev/null 2>&1
 module use.own /proj/picasso/modulefiles
 
-module add vivado/${version}_rel
-module add sdaccel/${version}_rel
+module add vivado/${version}_daily
+module add sdaccel/${version}_daily
 module add opencv/sdaccel
 
 module add proxy
@@ -221,8 +221,8 @@ try {
 . /tools/local/bin/modinit.sh > /dev/null 2>&1
 module use.own /proj/picasso/modulefiles
 
-module add vivado/${version}_rel
-module add sdaccel/${version}_rel
+module add vivado/${version}_daily
+module add sdaccel/${version}_daily
 module add opencv/sdaccel
 
 module add proxy

@@ -1,6 +1,6 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Matrix Multiplication with OpenCL Kernel",
+    "example": "01 Matrix Multiplication with OpenCL Kernel",
     "overview": [
         "This is a simple example of OpenCL matrix multiplication (Row x Col)."
     ],

@@ -1,6 +1,6 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Matrix Multiplication",
+    "example": "00 Matrix Multiplication",
     "overview": [
         "This is a simple example of matrix multiplication (Row x Col)."
     ],

@@ -286,12 +286,12 @@ extern "C"
     #pragma HLS INTERFACE s_axilite port=return bundle=control
     
         // Input Image Streams for Boost and Median Kernels
-        hls::stream<uint> boost_in, med_in;
+        hls::stream<uint> boost_in("boost_inputstream"), med_in("median_inputstream");
         #pragma HLS STREAM variable=boost_in depth=16
         #pragma HLS STREAM variable=med_in depth=16
 
         // Output Streams for Boost, Median and Sketch
-        hls::stream<uint> boost_out, med_out, sketch_out;
+        hls::stream<uint> boost_out("boost_outputstream"), med_out("median_outputstream"), sketch_out("sketch_outputstream");
         #pragma HLS STREAM variable=boost_out depth=16
         #pragma HLS STREAM variable=med_out depth=16
         #pragma HLS STREAM variable=sketch_out depth=16

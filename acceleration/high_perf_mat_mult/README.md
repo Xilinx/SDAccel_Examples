@@ -54,10 +54,16 @@ Makefile
 README.md
 description.json
 src/high_perf_mat_mult.cpp
+src/kcu1500/postopt.tcl
+src/kcu1500/presynth.tcl
+src/kcu1500/syslink-100kernel.tcl
 src/kernelShigh_perf_mat_mult_0.xo
-src/platform_5_0/postopt.tcl
-src/platform_5_0/presynth.tcl
-src/platform_5_0/syslink-100kernel.tcl
+src/vcu1525/postopt.tcl
+src/vcu1525/presynth.tcl
+src/vcu1525/syslink-100kernel.tcl
+src/vu9p/postopt.tcl
+src/vu9p/presynth.tcl
+src/vu9p/syslink-100kernel.tcl
 ```
 
 ## 5. COMPILATION AND EXECUTION

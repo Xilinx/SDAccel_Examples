@@ -30,7 +30,7 @@ check_XCLBINS=krnl_median
 
 # Pattern to allow cmdline to determine xclbin name
 define mk_args
-check_$(1)_$(call sanitize_dsa,$(2))_ARGS = ./xclbin/krnl_median.$(1).$(call sanitize_dsa,$(2)).xclbin data/inputImage.bmp data/goldenImage.bmp
+check_$(1)_$(call device2sandsa,$(2))_ARGS = ./xclbin/krnl_median.$(1).$(call device2sandsa,$(2)).xclbin data/inputImage.bmp data/goldenImage.bmp
 endef
 
 EXTRA_CLEAN=decoded.bmp

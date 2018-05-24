@@ -14,7 +14,7 @@ EXES=host
 
 # Kernel
 vadd_SRCS=./src/vadd.cl
-vadd_CLFLAGS=-k vadd
+vadd_CLFLAGS=-k vadd --xp param:compiler.interfaceWrBurstLen=256 --xp param:compiler.interfaceRdBurstLen=256
 
 XOS=vadd
 
