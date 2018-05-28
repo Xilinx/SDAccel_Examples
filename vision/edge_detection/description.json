@@ -8,6 +8,7 @@
     "cmd_args": "PROJECT/data/input/eiffel.bmp",
     "em_cmd": "./edge data/input/eiffel.bmp",
     "libs": [
+        "opencv",
         "xcl"
     ], 
     "containers" : [
