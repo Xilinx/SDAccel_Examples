@@ -25,7 +25,8 @@ XOCC := $(XILINX_SDX)/bin/xocc
 COMMON_REPO = ../../../
 ABS_COMMON_REPO = $(shell readlink -f $(COMMON_REPO))
 
-CXXFLAGS := -Wall -O0 -g -std=c++14
+CXXFLAGS := $(opencl_CXXFLAGS) -Wall -O0 -g -std=c++14
+LDFLAGS := $(opencl_LDFLAGS)
 
 HOST_SRCS = src/host.cpp
 
@@ -56,6 +57,7 @@ endif
 EXECUTABLE = host
 
 #Include Libraries
+include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
 
 
 CP = cp -rf
@@ -95,6 +97,7 @@ clean:
 
 cleanall: clean
 	-$(RMDIR) $(XCLBIN)
+	-$(RMDIR) ./_x
 
 ECHO:= @echo
 

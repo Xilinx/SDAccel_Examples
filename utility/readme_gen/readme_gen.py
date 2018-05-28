@@ -315,6 +315,11 @@ def footer(target):
     target.write("[IBM SuperVessel Research Cloud on Xilinx Virtex Devices]: http://bcove.me/6pp0o482\n")
     return
 
+def profile_report(target):
+    target.write("[Debug]\n")
+    target.write("profile=true\n")
+    return
+
 # Get the argument from the description
 script, desc_file = argv
 
@@ -345,4 +350,9 @@ support(target)
 license(target)
 ack(target,data)
 footer(target)
+target.close
+
+print "Generating sdaccel.ini file for %s" % data["example"]
+target = open("sdaccel.ini","w")
+profile_report(target)
 target.close

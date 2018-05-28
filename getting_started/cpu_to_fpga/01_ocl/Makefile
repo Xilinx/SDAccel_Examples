@@ -8,6 +8,7 @@
 #   sw_emu/hw_emu - Compile for software/hardware emulation
 # FPGA Board Platform (Default ~ ku115)
 
+include utils.mk
 REPORT := no
 PROFILE := no
 DEBUG := no
@@ -17,6 +18,7 @@ TARGET := $(TARGETS)
 DEVICES := xilinx_kcu1500_dynamic_5_0
 DEVICE := $(DEVICES)
 XCLBIN := ./xclbin
+DSA := $(call device2sandsa, $(DEVICE))
 
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
@@ -25,11 +27,14 @@ XOCC := $(XILINX_SDX)/bin/xocc
 COMMON_REPO = ../../../
 ABS_COMMON_REPO = $(shell readlink -f $(COMMON_REPO))
 
-CXXFLAGS := -Wall -O0 -g -std=c++14
+CXXFLAGS := $(opencl_CXXFLAGS) -Wall -O0 -g -std=c++14
+LDFLAGS := $(opencl_LDFLAGS)
 
 HOST_SRCS = src/host.cpp
 
 # Host compiler global settings
+CXXFLAGS = -I $(XILINX_SDX)/runtime/include/1_2/ -I/$(XILINX_SDX)/Vivado_HLS/include/ -O0 -g -Wall -fmessage-length=0 -std=c++14
+LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_SDX)/runtime/lib/x86_64
 
 # Kernel compiler global settings
 CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps 
@@ -55,15 +60,15 @@ endif
 
 EXECUTABLE = host
 
-BINARY_CONTAINERS += $(XCLBIN)/mmult.xclbin
-BINARY_CONTAINER_1_OBJS += $(XCLBIN)/mmult.xo
-ALL_KERNEL_OBJS += $(XCLBIN)/mmult.xo
+BINARY_CONTAINERS += $(XCLBIN)/mmult.$(TARGET).$(DSA).xclbin
+BINARY_CONTAINER_1_OBJS += $(XCLBIN)/mmult.$(TARGET).$(DSA).xo
+ALL_KERNEL_OBJS += $(XCLBIN)/mmult.$(TARGET).$(DSA).xo
 
 #Include Libraries
-include $(ABS_COMMON_REPO)/libs/xcl2/xcl2.mk
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
-CXXFLAGS += $(xcl2_CXXFLAGS) $(opencl_CXXFLAGS)
-LDFLAGS += $(xcl2_LDFLAGS) $(opencl_LDFLAGS)
+include $(ABS_COMMON_REPO)/libs/xcl2/xcl2.mk
+CXXFLAGS += $(xcl2_CXXFLAGS)
+LDFLAGS += $(xcl2_LDFLAGS)
 HOST_SRCS += $(xcl2_SRCS)
 
 CP = cp -rf
@@ -75,11 +80,11 @@ all: $(EXECUTABLE) $(BINARY_CONTAINERS)
 exe: $(EXECUTABLE)
 
 # Building kernel
-$(XCLBIN)/mmult.xo: ./src/mmult.cl
+$(XCLBIN)/mmult.$(TARGET).$(DSA).xo: ./src/mmult.cl
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) -c -k mmult -I'$(<D)' -o'$@' '$<'
 
-$(XCLBIN)/mmult.xclbin: $(BINARY_CONTAINER_1_OBJS)
+$(XCLBIN)/mmult.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_1_OBJS)
 	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk mmult:1 -o'$@' $(+)
 
 # Building Host
@@ -91,6 +96,7 @@ check: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	emconfigutil --platform $(DEVICE) --od .
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)
+	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 endif
 
 # Cleaning stuff
@@ -103,6 +109,7 @@ clean:
 
 cleanall: clean
 	-$(RMDIR) $(XCLBIN)
+	-$(RMDIR) ./_x
 
 ECHO:= @echo
 
