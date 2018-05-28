@@ -351,7 +351,7 @@ int main(int argc, char** argv) {
 	//parse commandline
 	sda::utils::CmdLineParser parser;
 	parser.addSwitch("--platform-name", "-p", "OpenCl platform vendor name", "Xilinx");
-	parser.addSwitch("--device-name", "-d", "OpenCl device name", "fpga0");
+	parser.addSwitch("--device-name", "-d", "OpenCl device name", "");
 	parser.addSwitch("--kernel-file", "-k", "OpenCl kernel file to use");
 	parser.addSwitch("--select-device", "-s", "Select from multiple matched devices [0-based index]", "0");
 	parser.addSwitch("--time-limit", "-t", "Time limit in seconds, -1 means run forever", "20");

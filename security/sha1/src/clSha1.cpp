@@ -322,6 +322,7 @@ void clSha1::getDeviceIdByName(std::string Device) {
     abort();
   }
 
+  bool deviceFound=false;
   for(unsigned i = 0; i < num_device_ids; i++) {
     size_t device_size;
     err = clGetDeviceInfo(device_ids[i], CL_DEVICE_NAME, 0, NULL, &device_size);
@@ -345,11 +346,19 @@ void clSha1::getDeviceIdByName(std::string Device) {
     std::cout << "Dev:   " << Device << std::endl;
     std::cout << "Match: " << std::string(device) << std::endl;
     if (Device == std::string(device)) {
+      deviceFound = true;
       mDeviceId = device_ids[i];
+    }else if (Device.empty()){
+      deviceFound = true;
+      mDeviceId = device_ids[i];
+      break;
     }
     free(device);
   }
-
+  if(deviceFound == false){
+    std::cout << "ERROR: No device found" << std::endl;
+    abort();
+  }
   free(device_ids);
 }
 
