@@ -4,10 +4,9 @@
     "overview" : [
         "Implementation of an AES-128 ECB Encrypt in software, followed by decryption written in OpenCL and targeting execution on an SDAccel supported FPGA acceleration card."
     ],
-    "cmd_args" : "-p Xilinx -d ${sdx:platform} -k BUILD/default.xclbin -b PROJECT/data/input.bmp",
-    "em_cmd" : "./aes -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:3.1' -k ./xclbin/krnl_aes.<emulation flow>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin -b  data/input.bmp",
+    "cmd_args" : "-b PROJECT/data/input.bmp",
+    "em_cmd" : "./aes -b  data/input.bmp",
     "xcl": false,
-    "hw_cmd" : "../../utility/nimbix/nimbix-run.py -- ./aes -p Xilinx -d 'xilinx:adm-pcie-ku3:2ddr:3.1' -k ./xclbin/krnl_aes.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin -b data/input.bmp",
     "libs": [
         "logger",
         "cmdparser",

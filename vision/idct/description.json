@@ -9,11 +9,10 @@
     ],
     "cmd_args" : "BUILD/default.xclbin",
     "em_cmd" : "./idct",
-    "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./idct",
     "containers": [
         {
             "name": "krnl_idct", 
-            "ldclflags": "  --sp krnl_idct_1.m_axi_gmem0:bank0 --sp krnl_idct_1.m_axi_gmem1:bank0 --sp krnl_idct_1.m_axi_gmem2:bank1",
+            "ldclflags": "  --sp krnl_idct_1.m_axi_gmem0:bank0 --sp krnl_idct_1.m_axi_gmem1:bank0 --sp krnl_idct_1.m_axi_gmem2:bank1 --kernel_frequency 250",
             "accelerators": [
                 { 
                     "name": "krnl_idct", 

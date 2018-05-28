@@ -6,7 +6,6 @@
     ],
     "cmd_args": "PROJECT/data/inputImage.bmp PROJECT/data/golden.bmp",
     "em_cmd": "./watermark data/inputImage.bmp ./data/golden.bmp",
-    "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./watermark data/inputImage.bmp ./data/golden.bmp",
     "libs": [
         "xcl", 
         "bitmap"

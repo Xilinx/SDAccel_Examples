@@ -108,7 +108,7 @@ emconfigutil --platform 'xilinx:kcu1500:dynamic' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./high_perf_mat_mult 32 64 64
+./high_perf_mat_mult 64 64 64
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card

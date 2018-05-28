@@ -7,9 +7,8 @@
     "targets": ["sw_emu", "hw"],
     "xcl": false,
     "opencv": true,
-    "cmd_args": "-p Xilinx -d ${sdx:platform} -k BUILD/default.xclbin -b PROJECT/data/rect_1024.bmp",
+    "cmd_args": "-b PROJECT/data/rect_1024.bmp",
     "em_cmd": "./huffman -b data/rect_1024.bmp",
-    "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./huffman -b data/rect_1024.bmp",
     "libs": [
         "logger", 
         "cmdparser", 

@@ -7,9 +7,7 @@
     "opencv": true,
     "cmd_args": "PROJECT/data/input/eiffel.bmp",
     "em_cmd": "./edge data/input/eiffel.bmp",
-    "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./edge data/input/eiffel.bmp",
     "libs": [
-        "opencv", 
         "xcl"
     ], 
     "containers" : [

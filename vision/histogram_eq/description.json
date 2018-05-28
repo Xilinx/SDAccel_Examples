@@ -16,7 +16,6 @@
     "opencv": true,
     "cmd_args": "PROJECT/data/race_2k.bmp",
     "em_cmd": "./equalizer data/race_2k.bmp",
-    "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./equalizer data/race_2k.bmp",
     "libs": [
         "opencv", 
         "xcl"
