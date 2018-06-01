@@ -179,16 +179,18 @@ int main(int argc, char **argv) {
     // the input buffers. Once the kernel is finished processing the data, a new
     // set of elements will be written into the buffer.
     std::vector<cl::Event> kernel_events(2);
-    std::vector<cl::Event> read_events(2);
 
     // Four write events are created because when the next write (WriteA2 & WriteB2) happens the 
     // current write events (WriteA1 & WriteB1) may not be released. So to avoid the overwrite
     // in the buffers, four write events are created.
     std::vector<std::vector<cl::Event >> write_events(2);
+    std::vector<std::vector<cl::Event >> read_events(2);
     cl::Event new_event;
     for (int i = 0  ; i < 2 ; i++){
         (write_events[0]).push_back(new_event);
         (write_events[1]).push_back(new_event);
+        (read_events[0]).push_back(new_event);
+        (read_events[1]).push_back(new_event);
     }
 
     for(int num_iters = 0 ; !in1_stream.eof() && !in2_stream.eof(); num_iters++){
@@ -197,7 +199,8 @@ int main(int argc, char **argv) {
 
         // Release the events once the result is available
         if(num_iters >= 2){
-            read_events[flag].wait();
+            read_events[flag][0].wait();
+            read_events[flag][1].wait();
 
             // Verify results and out stream the data to a file
             match = verify(A[flag].data(), B[flag].data(), device_result[flag].data(), result_size[flag].data());
@@ -260,9 +263,9 @@ int main(int argc, char **argv) {
         std::vector<cl::Event> eventList;
         eventList.push_back(kernel_events[flag]);
         q.enqueueMigrateMemObjects({*(buffer_c[flag])}, CL_MIGRATE_MEM_OBJECT_HOST,
-                                    &eventList, &read_events[flag]);
+                                    &eventList, &read_events[flag][0]);
         q.enqueueMigrateMemObjects({*(buffer_size[flag])}, CL_MIGRATE_MEM_OBJECT_HOST,
-                                    &eventList, &read_events[flag]);
+                                    &eventList, &read_events[flag][1]);
     }
     // Wait for all of the OpenCL operations to complete
     q.flush();
@@ -271,7 +274,7 @@ int main(int argc, char **argv) {
     size_t elements_last_iteration = elements_per_iteration;
     // Releasing mem objects and events
     for(int i = 0 ; i < 2 ; i++){
-        read_events[i].wait();
+        read_events[flag][i].wait();
         delete(buffer_a[flag]);
         delete(buffer_b[flag]);
         delete(buffer_c[flag]);
