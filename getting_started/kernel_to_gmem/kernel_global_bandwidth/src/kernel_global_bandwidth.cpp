@@ -42,8 +42,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *                  > Miscellaneous > Other flags
 *  2.In "Other flags" box enter following
 *     a. --max_memory_ports all 
-*     b. --xp misc:map_connect=add.kernel.bandwidth_1.M_AXI_GMEM0.core.OCL_REGION_0.M00_AXI
-*     c. --xp misc:map_connect=add.kernel.bandwidth_1.M_AXI_GMEM1.core.OCL_REGION_0.M01_AXI 
+*     b. --sp bandwidth_1.m_axi_gmem0:bank0
+*     c. --sp bandwidth_1.m_axi_gmem1:bank1 
 *  3.<SDx Project> > Properties > C/C++ Build > Settings > SDx XOCC Kernel Linker
 *                  > Miscellaneous > Other flags
 *  4.Repeat step 2 above
@@ -55,10 +55,10 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *                  > Miscellaneous > Other flags
 *  2.In "Other flags" box enter following
 *     a. --max_memory_ports all 
-*     b. --xp misc:map_connect=add.kernel.bandwidth_1.M_AXI_GMEM0.core.OCL_REGION_0.M00_AXI
-*     c. --xp misc:map_connect=add.kernel.bandwidth_1.M_AXI_GMEM1.core.OCL_REGION_0.M01_AXI 
-*     d. --xp misc:map_connect=add.kernel.bandwidth_1.M_AXI_GMEM2.core.OCL_REGION_0.M02_AXI 
-*     e. --xp misc:map_connect=add.kernel.bandwidth_1.M_AXI_GMEM3.core.OCL_REGION_0.M03_AXI 
+*     b. --sp bandwidth_1.m_axi_gmem0:bank0
+*     c. --sp bandwidth_1.m_axi_gmem1:bank1 
+*     d. --sp bandwidth_1.m_axi_gmem2:bank2
+*     e. --sp bandwidth_1.m_axi_gmem3:bank3 
 *  3.<SDx Project> > Properties > C/C++ Build > Settings > SDx XOCC Kernel Linker
 *                  > Miscellaneous > Other flags
 *  4.Repeat step 2 above
