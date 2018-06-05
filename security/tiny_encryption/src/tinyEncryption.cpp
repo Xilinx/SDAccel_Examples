@@ -63,9 +63,6 @@ int main(int argc, char* argv[])
   std::cout << "Reading input image...\n";
   const char* bitmapFilename = argv[1] ;
   const char* bitmapFilenameKeys = argv[2] ;
-  int width = 128 ; // Default size
-  int height = 128 ; // Default size
-  
 
   BitmapInterface image(bitmapFilename) ;
   BitmapInterface imageKeys(bitmapFilenameKeys) ;
@@ -83,8 +80,6 @@ int main(int argc, char* argv[])
     return -1 ;
   }
 
-  width = image.getWidth() ;
-  height = image.getHeight() ;
   int length=image.numPixels()/2;
 
   int* outImage = (int*)(malloc(image.numPixels() * sizeof(int))) ;
