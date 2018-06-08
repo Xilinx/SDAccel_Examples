@@ -146,7 +146,7 @@ argument.
 void getBinaryName(std::string &binaryName, char* device_name) {
   char *xcl_mode = getenv("XCL_EMULATION_MODE");
   bool isHwFlow = false;
-  bool isAwsFlow = !strcmp(device_name, "xilinx:aws-vu9p-f1:4ddr-xpr-2pr:4.0");
+  bool isAwsFlow = !strstr(device_name, "aws-vu9p-f1");
   binaryName = "xclbin/krnl_idct";
   
   if(xcl_mode && !(strcmp(xcl_mode, "sw_emu"))) {
