@@ -5,7 +5,7 @@
         "This example demonstrates how to shift values in registers in each clock cycle"
     ],
     "key_concepts": [ "Kernel Optimization", "Shift Register", "FIR"],
-    "keywords": [ "xcl_array_partition" ],
+    "keywords": [ "xcl_array_partition" , "getprofilingInfo()"],
     "os": [
         "Linux"
     ],

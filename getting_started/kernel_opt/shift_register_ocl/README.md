@@ -19,7 +19,7 @@ This example demonstrates how to shift values in registers in each clock cycle
 
 ***KEY CONCEPTS:*** Kernel Optimization, Shift Register, FIR
 
-***KEYWORDS:*** xcl_array_partition
+***KEYWORDS:*** xcl_array_partition, getprofilingInfo()
 
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
