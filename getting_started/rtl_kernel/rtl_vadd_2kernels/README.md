@@ -29,8 +29,8 @@ where examples is the name of the directory where the repository will be stored 
 ## 3. SOFTWARE AND SYSTEM REQUIREMENTS
 Board | Device Name | Software Version
 ------|-------------|-----------------
-Xilinx Kintex UltraScale KCU1500|xilinx:kcu1500:dynamic|SDAccel 2017.4
-Xilinx Kintex UltraScalePlus VCU1525|xilinx:vcu1525:dynamic|SDAccel 2017.4
+Xilinx Kintex UltraScale KCU1500|xilinx:kcu1500:dynamic|SDAccel 2017.4.op
+Xilinx Virtex UltraScale+ VCU1525|xilinx:vcu1525:dynamic|SDAccel 2017.4.op
 
 
 *NOTE:* The board/device used for compilation can be changed by adding the DEVICES variable to the make command as shown below
@@ -157,4 +157,3 @@ This example is written by developers at
 [SDaccel GUI README]: ../../../GUIREADME.md
 [AWS F1 Application Execution on Xilinx Virtex UltraScale Devices]: https://github.com/aws/aws-fpga/blob/master/SDAccel/README.md
 [Nimbix Application Execution on Xilinx Kintex UltraScale Devices]: ../../../utility/nimbix/README.md
-[IBM SuperVessel Research Cloud on Xilinx Virtex Devices]: http://bcove.me/6pp0o482

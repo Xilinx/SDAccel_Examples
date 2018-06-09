@@ -1,7 +1,7 @@
 SDAccel Example Repository
 ===========================
 
-Welcome to the SDAccel example repository. This repository contains the latest examples to get you started with application optimization targeting Xilinx PCIe FPGA acceleration boards. All examples are ready to be compiled and executed on boards hosted in the Nimbix and IBM SuperVessel clouds. The repository is organized as follows:
+Welcome to the SDAccel example repository. This repository contains the latest examples to get you started with application optimization targeting Xilinx PCIe FPGA acceleration boards. All examples are ready to be compiled and executed on SDAccel supported boards and accelerated cloud service partners. The repository is organized as follows:
 
 1. GETTINGS STARTED
 2. ACCELERATION
@@ -46,12 +46,6 @@ For more information check here:
 
 ## 8. SUPPORT
 For questions and to get help on this project or your own projects, visit the [SDAccel Forums][].
-
-## 9. REVISION HISTORY
-
-Date    | Readme Version | Revision Description
---------|----------------|-------------------------
-AUG2016 | 1.0            | Initial Xilinx release
 
 
 

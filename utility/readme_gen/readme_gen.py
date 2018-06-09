@@ -5,17 +5,17 @@ import os
 import subprocess
 
 DSA = 'xilinx:kcu1500:dynamic'
-VERSION = 'SDAccel 2017.4'
+VERSION = 'SDAccel 2017.4.op'
 DEVICES = {
     'xilinx:kcu1500:dynamic': {
        'version': '5.0',
        'name': 'Xilinx Kintex UltraScale KCU1500',
-       'nae':  'nx5'
+       'nae':  'nx4'
     },
     'xilinx:vcu1525:dynamic': {
        'version': '5.0',
-       'name': 'Xilinx Kintex UltraScalePlus VCU1525',
-       'nae':  'nx6'
+       'name': 'Xilinx Virtex UltraScale+ VCU1525',
+       'nae':  'nx5'
     }
 }
 
@@ -312,7 +312,6 @@ def footer(target):
     target.write("[SDaccel GUI README]: " + root + "GUIREADME.md\n")
     target.write("[AWS F1 Application Execution on Xilinx Virtex UltraScale Devices]: https://github.com/aws/aws-fpga/blob/master/SDAccel/README.md\n")
     target.write("[Nimbix Application Execution on Xilinx Kintex UltraScale Devices]: " + root + "utility/nimbix/README.md\n")
-    target.write("[IBM SuperVessel Research Cloud on Xilinx Virtex Devices]: http://bcove.me/6pp0o482\n")
     return
 
 def profile_report(target):
