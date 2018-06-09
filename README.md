@@ -11,7 +11,6 @@ Welcome to the SDAccel example repository. This repository contains the latest e
 6. UTILITY
 7. OTHER INFORMATION
 8. SUPPORT
-9. REVISION HISTORY
 
 
 ### 1. GETTING STARTED
