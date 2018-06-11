@@ -15,8 +15,7 @@
     "board": ["xilinx:kcu1500:dynamic", "xilinx:vcu1525:dynamic"],
     "targets": ["hw", "hw_emu"],
     "xcl": true,
-    "em_cmd" : "./high_perf_mat_mult 32 64 64",
-    "hw_cmd" : "./high_perf_mat_mult 500 500 500",
+    "em_cmd" : "./high_perf_mat_mult 64 64 64",
     "libs" : [
         "xcl"
     ],

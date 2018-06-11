@@ -52,10 +52,16 @@ Makefile
 README.md
 description.json
 src/high_perf_mat_mult.cpp
+src/kcu1500/postopt.tcl
+src/kcu1500/presynth.tcl
+src/kcu1500/syslink-100kernel.tcl
 src/kernelShigh_perf_mat_mult_0.xo
-src/platform_5_0/postopt.tcl
-src/platform_5_0/presynth.tcl
-src/platform_5_0/syslink-100kernel.tcl
+src/vcu1525/postopt.tcl
+src/vcu1525/presynth.tcl
+src/vcu1525/syslink-100kernel.tcl
+src/vu9p/postopt.tcl
+src/vu9p/presynth.tcl
+src/vu9p/syslink-100kernel.tcl
 ```
 
 ## 5. COMPILATION AND EXECUTION
@@ -100,7 +106,7 @@ emconfigutil --xdevice 'xilinx:kcu1500:dynamic' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./high_perf_mat_mult 32 64 64
+./high_perf_mat_mult 64 64 64
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card

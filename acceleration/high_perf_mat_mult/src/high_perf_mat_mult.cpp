@@ -187,14 +187,15 @@ int main(int argc, char** argv)
     cl_mem_ext_ptr_t d_d_ext;
     cl_mem_ext_ptr_t d_c_ext;
 
-    d_a_ext.flags = XCL_MEM_DDR_BANK0; //A --> bank0
+    d_a_ext.flags = XCL_MEM_DDR_BANK3; //A --> bank3
     d_a_ext.obj = NULL;// h_a;
     d_a_ext.param = 0;
 
-    d_b_ext.flags = XCL_MEM_DDR_BANK0; //B0 --> bank0
+    d_b_ext.flags = XCL_MEM_DDR_BANK3; //B0 --> bank3
     d_b_ext.obj = NULL; //h_b;
     d_b_ext.param = 0;
 
+#if defined(VU9P) || defined(VCU1525)    
     d_d_ext.flags = XCL_MEM_DDR_BANK1; //B1 --> bank1
     d_d_ext.obj = NULL; //h_d;
     d_d_ext.param = 0;
@@ -202,7 +203,16 @@ int main(int argc, char** argv)
     d_c_ext.flags = XCL_MEM_DDR_BANK1; //C --> bank1
     d_c_ext.obj = NULL; //h_c;
     d_c_ext.param = 0;
+#else
+    d_d_ext.flags = XCL_MEM_DDR_BANK2; //B1 --> bank2
+    d_d_ext.obj = NULL; //h_d;
+    d_d_ext.param = 0;
 
+    d_c_ext.flags = XCL_MEM_DDR_BANK2; //C --> bank2
+    d_c_ext.obj = NULL; //h_c;
+    d_c_ext.param = 0;
+#endif
+    
     std::cout << "Creating Buffers..." << std::endl;
     cl_mem d_a;                         // device memory used for a vector
     cl_mem d_b;                         // device memory used for b vector
