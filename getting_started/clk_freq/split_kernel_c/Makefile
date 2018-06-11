@@ -35,8 +35,6 @@ EXTRA_CLEAN=./output.bmp
 check_EXE=host
 check_XCLBINS=sketch_GOOD sketch_BAD
 check_ARGS=./data/car_128x128.bmp
-# Disable software emulation due to known issues
-check_NTARGETS=sw_emu
 
 CHECKS=check
 
