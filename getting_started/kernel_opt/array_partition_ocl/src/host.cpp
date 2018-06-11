@@ -84,8 +84,8 @@ void verify(vector<int,aligned_allocator<int>> &gold,
 // This example illustrates how to use array partitioning attributes in OpenCL
 // kernels for FPGA devices using matmul.
 int main(int argc, char **argv) {
-    static const int columns = 64;
-    static const int rows = 64;
+    static const int columns = 16;
+    static const int rows = 16;
 
     vector<int,aligned_allocator<int>> A(columns * rows);
     vector<int,aligned_allocator<int>> B(columns * rows);
