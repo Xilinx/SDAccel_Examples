@@ -587,8 +587,9 @@ unsigned long xcl_run_kernel3d(xcl_world world, cl_kernel krnl,
 	}
 
 	clFinish(world.command_queue);
-
-	return xcl_get_event_duration(event);
+    unsigned long exec_time =xcl_get_event_duration(event);
+    clReleaseEvent(event);
+	return exec_time;
 }
 
 void xcl_run_kernel3d_nb(xcl_world world, cl_kernel krnl,cl_event *event,
