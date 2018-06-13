@@ -27,8 +27,7 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 
-#ifndef __DEFNS_H__
-#define __DEFNS_H__
+#pragma once
 
 #define CHANNELS 3
 #define MAX_WIDTH 640
@@ -49,7 +48,6 @@ typedef unsigned int uint;
 #include "median_helper.h"
 #include "sketch_helper.h"
 
-#endif
 
 
 
