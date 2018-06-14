@@ -11,12 +11,18 @@
     "libs": [
         "oclHelper",
         "bitmap"
-    ], 
-    "accelerators": [
+    ],
+    "containers": [
+    {
+       "name": "tinyEncryption",
+       "ldclflags": "--kernel_frequency 200", 
+       "accelerators": [
         {
             "name": "tinyEncryption",
             "location": "src/krnl_tinyEncryption.cl"
         }
+      ]
+     }           
     ],
     "contributors" : [
         {
