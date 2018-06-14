@@ -24,12 +24,14 @@ XOS=nn_good nn_bad
 
 # xclbin
 nearest_neighbor_XOS=nn_good nn_bad
+nearest_neighbor_NDEVICES=xilinx:kcu1500:dynamic xilinx_kcu1500_dynamic_5_0
 
 XCLBINS=nearest_neighbor
 
 # check
 check_EXE=$(EXES)
 check_XCLBINS=$(XCLBINS)
+check_NDEVICES=$(nearest_neighbor_NDEVICES)
 
 CHECKS=check
 
