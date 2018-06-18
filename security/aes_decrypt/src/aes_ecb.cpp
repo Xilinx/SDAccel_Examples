@@ -1,5 +1,6 @@
 /**********
 Copyright (c) 2018, Xilinx, Inc.
+Copyright (c) 2018, Akamai Technologies, Inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -27,11 +28,12 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 
-//10 round AES ECB encrypt
-//Implementaiton derived from http://en.wikipedia.org/wiki/Advanced_Encryption_Standard  
+// 10 round AES-128-ECB encrypt
+// Implementaiton derived from http://en.wikipedia.org/wiki/Advanced_Encryption_Standard  
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <inttypes.h>
 
 const unsigned char sbox[256] = 
 {
@@ -75,16 +77,16 @@ unsigned char rcon(unsigned char in) {
 }
 
 static void rotate(unsigned char *in) {
-  unsigned char a,c;
+  unsigned char a, c;
   a = in[0];
-  for(c=0;c<3;c++) 
+  for(c = 0; c < 3; c++) 
     in[c] = in[c + 1];
   in[3] = a;
   return;
 }
 
 void schedule_core(unsigned char *in, unsigned char i) {
-  unsigned char a;
+  uint8_t a;
   /* Rotate the input 8 bits to the left */
   rotate(in);
   /* Apply Rijndael's s-box on all 4 bytes */
@@ -96,25 +98,25 @@ void schedule_core(unsigned char *in, unsigned char i) {
 
 void KeyExpansion(unsigned char *in) {
   unsigned char t[4];
-  /* c is 16 because the first sub-key is the user-supplied key */
-  unsigned char c = 16;
+  /* b is 16 because the first sub-key is the user-supplied key */
+  unsigned char b = 16;
   unsigned char i = 1;
   unsigned char a;
   /* We need 11 sets of sixteen bytes each for 128-bit mode */
-  while(c < 176) {
+  while(b < 176) {
     /* Copy the temporary variable over from the last 4-byte
      * block */
     for(a = 0; a < 4; a++) 
-      t[a] = in[a + c - 4];
+      t[a] = in[a + b - 4];
     /* Every four blocks (of four bytes), 
      * do a complex calculation */
-    if(c % 16 == 0) {
+    if(b % 16 == 0) {
       schedule_core(t,i);
       i++;
     }
     for(a = 0; a < 4; a++) {
-      in[c] = in[c - 16] ^ t[a];
-      c++;
+      in[b] = in[b - 16] ^ t[a];
+      b++;
     }
   }
 }
@@ -123,27 +125,29 @@ void KeyExpansion(unsigned char *in) {
 //ShiftRows
 void ShiftRows(unsigned char *block){
   unsigned char shiftout0, shiftout1, shiftout2;
-  //row 0 no shift
-  //row 1 shift left 1
-  shiftout0 = block[4];
-  block[4]=block[5];
-  block[5]=block[6];
-  block[6]=block[7];
-  block[7]=shiftout0;
-  //row 2 shift left 2
-  shiftout0 = block[8];
-  shiftout1 = block[9];
-  block[8] = block[10];
-  block[9] = block[11];
-  block[10] = shiftout0;
-  block[11] = shiftout1;
-  //row 3 shift left 3
-  shiftout0 = block[12];
-  shiftout1 = block[13];
-  shiftout2 = block[14];
-  block[12] = block[15];
+  // Account for the fact that the AES state matrix is in column-major order. 
+  // Since C arrays are in row-major order, instead of shifting rows here, we
+  // shift the columns instead.
+
+  shiftout0 = block[1];
+  block[1] = block[5];
+  block[5] = block[9];
+  block[9] = block[13];
   block[13] = shiftout0;
+
+  shiftout0 = block[2];
+  shiftout1 = block[6];
+  block[2] = block[10];
+  block[6] = block[14];
+  block[10] = shiftout0;
   block[14] = shiftout1;
+
+  shiftout0 = block[3];
+  shiftout1 = block[7];
+  shiftout2 = block[11];
+  block[3] = block[15];
+  block[7] = shiftout0;
+  block[11] = shiftout1;
   block[15] = shiftout2;
 }
 
@@ -172,81 +176,91 @@ void gmix_column(unsigned char *r) {
   r[3] = b[3] ^ a[2] ^ a[1] ^ b[0] ^ a[0]; /* 2 * a3 + a2 + a1 + 3 * a0 */
 }
 
-void MixColumns(unsigned char *block){
-  unsigned int j,i;
-  unsigned char column[4];
-  for(i=0;i<4;i++){
-    for(j=0;j<4;j++){
-      column[j]=block[j*4+i];
-    }
-    gmix_column(column);
-    for(j=0;j<4;j++){
-      block[j*4+i]=column[j];
-    }
+void MixColumns(unsigned char *block) {
+  // Account for the fact that the AES state matrix is in column-major order. 
+  // Since C arrays are in row-major order, instead of mixing the columns here,
+  // we mix the rows instead.
+  for(int i=0; i<4; i++) {
+    gmix_column(&(block[i*4]));
   }
 }
 
-
 /////////////////////////////////////////////////////////////////////////////////
 //AddRoundKey
-void AddRoundKey(unsigned char *block,unsigned int round,unsigned char *roundkey){
-  const int blocksize = 128/8;
+void AddRoundKey(unsigned char *block,unsigned int round,unsigned char *roundkey) {
+  const unsigned int blocksize = 128/8;
   unsigned int j;
-  for(j=0;j<blocksize;j++) block[j]=block[j] ^ roundkey[round*blocksize+j];
+  for(j = 0; j < blocksize; j++)
+      block[j] = block[j] ^ roundkey[round*blocksize+j];
 }
     
-
 /////////////////////////////////////////////////////////////////////////////////
 //Electronic Code Book AES encryption 
 //aes_encrypt
 //Return value 
 // 0    Success
 //-1    Inputsize is not a multiple of 128 bit AES block size
-int aesecb_encrypt(unsigned char *key, unsigned char *input, unsigned char *output, size_t inputsize,const unsigned int rounds){
+int aesecb_encrypt(unsigned char *key, unsigned char *input, unsigned char *output, size_t inputsize, const unsigned int rounds) {
 
   const unsigned int blocksize = 128/8;
 
   //check input size is a multiple of 128 bit AES block size
-  if((inputsize % blocksize) != 0 ) return -1;
+  if((inputsize % blocksize) != 0)
+    return -1;
 
   //KeyExpansion
   unsigned int i;
   unsigned char roundkey[(10+1) * blocksize];
-  for(i=0;i<blocksize;i++) roundkey[i]=key[i];
+  
+  for(i = 0; i < blocksize; i++)
+    roundkey[i] = key[i];
+
   KeyExpansion(roundkey);
 
   //block loop
-  size_t j,k;
+  size_t j, k;
   size_t blocks = inputsize / blocksize;
   unsigned char block[blocksize];
-  for(i=0;i<blocks;i++){
+  
+  for(i = 0; i < blocks; i++) {
 
-    for(j=0;j<blocksize;j++) block[j]=input[i*blocksize+j];
-
+    for(j = 0; j < blocksize; j++)
+      block[j] = input[i*blocksize+j];
+    
     //InitialRound
-    AddRoundKey(block,0,roundkey);
+    AddRoundKey(block, 0, roundkey);
+
     //Rounds 
-    for(j=0;j<rounds-1;j++){
+    for(j = 0; j < rounds-1; j++) {
       //SubBytes
-      for(k=0;k<blocksize;k++) block[k]=sbox[block[k]];
+      for(k = 0; k < blocksize; k++)
+          block[k] = sbox[block[k]];
+
       //ShiftRows
       ShiftRows(block);
+
       //MixColumns
       MixColumns(block);
+
       //AddRoundKey
-      AddRoundKey(block,j+1,roundkey);
+      AddRoundKey(block, j+1, roundkey);
     }
+
     //FinalRound
     //SubBytes
-    for(k=0;k<blocksize;k++) block[k]=sbox[block[k]];
+    for(k=0; k < blocksize; k++)
+      block[k]=sbox[block[k]];
+
     //ShiftRows
     ShiftRows(block);
+
     //AddRoundKey
     AddRoundKey(block,rounds,roundkey);
 
-    for(j=0;j<blocksize;j++) output[i*blocksize+j]=block[j];
+    for(j=0; j < blocksize; j++)
+      output[i*blocksize+j] = block[j];
   }
-   return 0;
+  return 0;
 }
 
 
