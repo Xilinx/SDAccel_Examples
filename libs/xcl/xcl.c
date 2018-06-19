@@ -119,13 +119,6 @@ xcl_world xcl_world_single_vendor(const char* vendor_name) {
 			 * XCL_EMULATION_MODE is set to */
 			world.mode = xcl_create_and_set(xcl_mode);
 		}
-
-		/* TODO: Remove once 2016.4 is released */
-		err = setenv("XCL_EMULATION_MODE", "true", 1);
-		if(err != 0) {
-			printf("Error: cannot set XCL_EMULATION_MODE\n");
-			exit(EXIT_FAILURE);
-		}
 	}
 
 	err = clGetPlatformIDs(0, NULL, &num_platforms);

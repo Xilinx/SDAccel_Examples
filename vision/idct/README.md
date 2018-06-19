@@ -44,6 +44,7 @@ Application code is located in the src directory. Accelerator binary files will 
 Makefile
 README.md
 description.json
+src/hls_config.tcl
 src/idct.cpp
 src/krnl_idct.cpp
 ```

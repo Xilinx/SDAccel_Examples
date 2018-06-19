@@ -52,6 +52,7 @@ void vec_add(global int* c,
         readA: for (int j = 0 ; j < size ; j++) arrayA[j] = a[i+j];
         readB: for (int j = 0 ; j < size ; j++) arrayB[j] = b[i+j];
 
+        __attribute__((xcl_pipeline_loop))
         writeC: for (int j = 0 ; j < (size-1)/2 + 1 ; j++) c[k+j] = arrayA[2*j] + arrayB[2*j];
         k = k + (size-1)/2 + 1;
     }

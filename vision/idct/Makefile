@@ -14,7 +14,7 @@ EXES=idct
 
 # idct Kernel
 krnl_idct_SRCS=./src/krnl_idct.cpp
-krnl_idct_CLFLAGS=-k krnl_idct -I./src
+krnl_idct_CLFLAGS=-k krnl_idct -I./src --xp prop:solution.hls_pre_tcl=./src/hls_config.tcl
 krnl_idct_LDCLFLAGS+= \
 	--sp krnl_idct_1.m_axi_gmem0:bank0 \
 	--sp krnl_idct_1.m_axi_gmem1:bank0 \

@@ -16,7 +16,8 @@
             "accelerators": [
                 { 
                     "name": "krnl_idct", 
-                    "location": "src/krnl_idct.cpp"
+                    "location": "src/krnl_idct.cpp",
+		    "clflags" : "--xp prop:solution.hls_pre_tcl=../src/hls_config.tcl"
                 }
             ]
         }
