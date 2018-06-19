@@ -21,14 +21,19 @@
         "logger", 
         "cmdparser", 
         "xcl"
-    ], 
-    "accelerators": [
+    ],
+    "containers": [
+    {
+      "name": "opencl_sw_maxscore",
+      "accelerators": [
         {
-            "name": "opencl_sw_maxscore", 
+            "name": "opencl_sw_maxscore",
+            "num_compute_units": "2", 
             "clflags": "--kernel_frequency 235",
-            "ldclflags": "--nk opencl_sw_maxscore:2",
             "location": "src/opencl_sw_maxscore_systolic.cpp"
         }
+      ]
+    }
     ],
     "contributors" : [
         {

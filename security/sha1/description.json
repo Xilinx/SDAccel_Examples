@@ -11,12 +11,18 @@
     "libs": [
         "logger",
         "cmdparser"
-    ], 
-    "accelerators": [
+    ],
+    "containers": [
+    {
+        "name": "dev_sha1_update",
+        "accelerators": [
         {
             "name": "dev_sha1_update",
+            "num_compute_units": "2",
             "location": "src/krnl_clSha1.cl"
         }
+       ]
+      }
     ],
     "contributors" : [
         {

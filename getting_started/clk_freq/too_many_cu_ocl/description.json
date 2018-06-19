@@ -29,6 +29,7 @@
             "accelerators" : [
                 {
                    "name": "vadd",
+                   "num_compute_units": "8",
                    "location": "src/vadd_bad.cl"
                 }
            ]

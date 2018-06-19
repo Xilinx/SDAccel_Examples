@@ -18,14 +18,15 @@
     "containers" : [
         {
             "name" : "krnl_huffman",
-            "clflags"   : "--xp param:compiler.version=31",
             "accelerators": [
                 {
                     "name": "encode", 
+                    "clflags"   : "--xp param:compiler.version=31",
                     "location": "src/krnl_huffman_singleptr.cl"
                 },
                 {
                     "name": "decode", 
+                    "clflags"   : "--xp param:compiler.version=31",
                     "location": "src/krnl_huffman_singleptr.cl"
                 }
             ]

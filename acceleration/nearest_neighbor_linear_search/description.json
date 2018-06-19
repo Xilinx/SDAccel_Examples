@@ -9,12 +9,18 @@
     "em_cmd" : "./nearest data/queries.txt data/targets.txt",
     "libs": [
         "xcl"
-    ], 
-    "accelerators": [
+    ],
+    "containers": [
+    {        
+        "name": "krnl_linear_search",
+        "accelerators": [
         {
             "name": "krnl_linear_search", 
+            "num_compute_units": "2",
             "location": "src/krnl_linear_search.cpp"
         }
+      ]
+     }      
     ],
     "perf_fields" : ["Board", "Measurements per Cycle", "Gigameasurements / Second"],
     "performance": [
