@@ -462,7 +462,7 @@ int main(int argc, char* argv[]) {
 
   if (argc != 2) {
     printf("Usage: %s "
-	   "./xclbin/idct_kernel.<emulation_mode>.<dsa>.xclbin\n",
+	   "./xclbin/krnl_idct.<emulation_mode>.<dsa>.xclbin\n",
 	   argv[0]);
     return EXIT_FAILURE;
   }

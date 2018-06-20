@@ -91,7 +91,7 @@ emconfigutil --platform 'xilinx:kcu1500:dynamic' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./idct
+./idct ./xclbin/krnl_idct.<emulation flow>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card
