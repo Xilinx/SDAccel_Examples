@@ -107,7 +107,7 @@ static bool unit_test_codec(ICodec* pHuffmanCodec, ICodec* pHuffmanCodecGold) {
 		string out_str;
 		string gold_str;
 
-		int gold = pHuffmanCodecGold->enc_str(msgs[i], gold_data);
+		pHuffmanCodecGold->enc_str(msgs[i], gold_data);
 		int res = pHuffmanCodec->enc_str(msgs[i], encoded_data);
 		res &= pHuffmanCodecGold->dec_str(encoded_data, out_str);
 
