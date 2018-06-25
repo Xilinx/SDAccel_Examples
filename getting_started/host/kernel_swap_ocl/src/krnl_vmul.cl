@@ -36,22 +36,14 @@ krnl_vmul(
      __global int* c,
      const int length) {
 
-  // optimized kernel code
-  int result[N];
-  int iterations = length/N;
-  for(int i=0; i < iterations; i++)
-    {
-      int j;
-      read_a:
-          __attribute__((xcl_pipeline_loop))
-          for(j=0; j < N; j++)
-            result[j] = a[i*N+j];
-
-      read_b_write_c:	// simultaneously both read and write are supported
-            __attribute__((xcl_pipeline_loop))
-            for(j=0; j < N; j++)
-              c[i*N+j] = result[j] * b[i*N+j];
-    }
-     
-  return;
+     int arrayA[N];
+     int arrayB[N];
+     for (int i = 0; i < length; i += N)
+       {
+            int size = N;
+            if (i + size > length) size = length -i;
+            readA: for (int j = 0; j < size; j++) arrayA[j] = a[i+j];
+            readB: for (int j = 0; j < size; j++) arrayB[j] = b[i+j];
+            vadd_writeC: for (int j = 0; j < size; j++) c[i+j] = arrayA[j] * arrayB[j];                            
+        }
 }
