@@ -49,6 +49,21 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *  4.Repeat step 2 above
 *
 * *****************************************************************************************
+*  DSA  (3DDR):
+*              
+*  1.<SDx Project> > Properties > C/C++ Build > Settings > SDx XOCC Kernel Compiler 
+*                  > Miscellaneous > Other flags
+*  2.In "Other flags" box enter following
+*     a. --max_memory_ports all 
+*     b. --sp bandwidth_1.m_axi_gmem0:bank0
+*     c. --sp bandwidth_1.m_axi_gmem1:bank1 
+*     d. --sp bandwidth_1.m_axi_gmem2:bank2
+*  3.<SDx Project> > Properties > C/C++ Build > Settings > SDx XOCC Kernel Linker
+*                  > Miscellaneous > Other flags
+*  4.Repeat step 2 above
+*  5.Define NDDR_BANKS 3 in kernel "#define NDDR_BANKS 3" at the top of kernel.cl 
+* 
+* *****************************************************************************************
 *  DSA  (4DDR):
 *              
 *  1.<SDx Project> > Properties > C/C++ Build > Settings > SDx XOCC Kernel Compiler 
@@ -62,7 +77,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *  3.<SDx Project> > Properties > C/C++ Build > Settings > SDx XOCC Kernel Linker
 *                  > Miscellaneous > Other flags
 *  4.Repeat step 2 above
-*  5.Define NUM_BANKS_4 macro in kernel "#define NUM_BANKS_4" at the top of kernel.cl 
+*  5.Define NDDR_BANKS 4 in kernel "#define NDDR_BANKS 4" at the top of kernel.cl 
 * 
 * *****************************************************************************************
 *
@@ -80,14 +95,6 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string.h>
 #include <vector>
 #include "xcl2.hpp"
-
-#ifdef USE_4DDR
-    #define DDR_BANKS 4
-#elif USE_2DDR
-    #define DDR_BANKS 2
-#else
-    #define DDR_BANKS 1
-#endif
 
 int main(int argc, char** argv) {
 
@@ -130,10 +137,12 @@ int main(int argc, char** argv) {
         input_host[i] = i % 256;
     }
 
-    short ddr_banks = DDR_BANKS;
+    short ddr_banks = NDDR_BANKS;
 
-    /* Index for the ddr pointer array: 4=4, 2=2, 1=2 */
-    char num_buffers = ddr_banks + (ddr_banks % 2);
+    /* Index for the ddr pointer array: 4=4, 3=3, 2=2, 1=2 */    
+    char num_buffers = ddr_banks; 
+    if(ddr_banks==1)
+        num_buffers = ddr_banks + (ddr_banks % 2);
 
     /* buffer[0] is input0
      * buffer[1] is output0
@@ -143,7 +152,7 @@ int main(int argc, char** argv) {
 
     cl_mem_ext_ptr_t ext_buffer[num_buffers];
 
-    #if defined(USE_2DDR) || defined(USE_4DDR)
+    #if NDDR_BANKS > 1
         unsigned xcl_bank[4] = {
             XCL_MEM_DDR_BANK0,
             XCL_MEM_DDR_BANK1,
@@ -156,27 +165,27 @@ int main(int argc, char** argv) {
             ext_buffer[i].obj = NULL;
             ext_buffer[i].param = 0;
 
-	    buffer[i] = new cl::Buffer(context, 
-				   CL_MEM_READ_WRITE | CL_MEM_EXT_PTR_XILINX, 
-				   globalbuffersize, 
-				   &ext_buffer[i], 
-				   &err);
+	        buffer[i] = new cl::Buffer(context, 
+		                           CL_MEM_READ_WRITE | CL_MEM_EXT_PTR_XILINX, 
+                    			   globalbuffersize, 
+            		    		   &ext_buffer[i], 
+			                	   &err);
             if(err != CL_SUCCESS) {
                 printf("Error: Failed to allocate buffer in DDR bank %zu\n", globalbuffersize);
                 return EXIT_FAILURE;
             }
         } /* End for (i < ddr_banks) */
     #else
-	 buffer[0] = new cl::Buffer(context, 
- 				CL_MEM_READ_WRITE, 
-				globalbuffersize, 
-				NULL, 
-				&err);
-	 buffer[1] = new cl::Buffer(context, 
-				CL_MEM_READ_WRITE, 
-				globalbuffersize, 
-				NULL, 
-				&err); 
+	     buffer[0] = new cl::Buffer(context, 
+         				            CL_MEM_READ_WRITE, 
+                    				globalbuffersize, 
+        			            	NULL, 
+                    				&err);
+    	 buffer[1] = new cl::Buffer(context, 
+        			            	CL_MEM_READ_WRITE, 
+                    				globalbuffersize, 
+        			            	NULL, 
+                    				&err);  
          if(err != CL_SUCCESS) {
             printf("Error: Failed to allocate input/output_buffer0 in BANK0 of size %zu\n", globalbuffersize);
             return EXIT_FAILURE;
@@ -192,13 +201,13 @@ int main(int argc, char** argv) {
     /* Map input buffer for PCIe write */
     unsigned char *map_input_buffer0;
     map_input_buffer0 = (unsigned char *) q.enqueueMapBuffer(*(buffer[0]), 
-							     CL_FALSE, 
-							     CL_MAP_WRITE_INVALIDATE_REGION, 
-							     0, 
-							     globalbuffersize, 
-							     NULL, 
-							     NULL, 
-							     &err);
+							                                 CL_FALSE, 
+                            							     CL_MAP_WRITE_INVALIDATE_REGION, 
+                            							     0, 
+                               							     globalbuffersize, 
+                            							     NULL, 
+							                                 NULL, 
+                            							     &err);
     if (err != CL_SUCCESS) {
             printf("Error: Failed to enqueueMapBuffer0 OpenCL buffer\n");
             printf("Error: Test failed\n");
@@ -211,7 +220,7 @@ int main(int argc, char** argv) {
         map_input_buffer0[i] = input_host[i];
     }
     err = q.enqueueUnmapMemObject(*(buffer[0]), 
-				  map_input_buffer0);
+                				  map_input_buffer0);
     if (err != CL_SUCCESS) {
         printf("Error: Failed to copy input dataset to OpenCL buffer\n");
         printf("Error: Test failed\n");
@@ -219,30 +228,30 @@ int main(int argc, char** argv) {
     }
     q.finish();
 
-    #ifdef USE_4DDR
+    #if NDDR_BANKS > 3
         unsigned char *map_input_buffer1;
- 	map_input_buffer1 = (unsigned char *) q.enqueueMapBuffer(*(buffer[2]), 
-								 CL_FALSE, 
-								 CL_MAP_WRITE_INVALIDATE_REGION, 
-								 0, 
-								 globalbuffersize, 
-								 NULL, 
-								 NULL, 
-								 &err);
+     	map_input_buffer1 = (unsigned char *) q.enqueueMapBuffer(*(buffer[2]), 
+	                                							 CL_FALSE, 
+                                								 CL_MAP_WRITE_INVALIDATE_REGION, 
+                                    							 0, 
+                                								 globalbuffersize, 
+                                								 NULL, 
+                                								 NULL, 
+                                								 &err);
         if (err != CL_SUCCESS) {
             printf("Error: Failed to enqueueMapBuffer1 OpenCL buffer\n");
             printf("Error: Test failed\n");
             return EXIT_FAILURE;
         }
-	q.finish();
+    	q.finish();
 
         /* Prepare data to be written to the device */
         for(size_t i = 0; i < globalbuffersize; i++) {
             map_input_buffer1[i] = input_host[i];
         }
 
-	err = q.enqueueUnmapMemObject(*(buffer[2]), 
-				      map_input_buffer1);
+	    err = q.enqueueUnmapMemObject(*(buffer[2]), 
+		                		      map_input_buffer1);
         if (err != CL_SUCCESS) {
             printf("Error: Failed to copy input dataset to OpenCL buffer\n");
             printf("Error: Test failed\n");
@@ -258,7 +267,9 @@ int main(int argc, char** argv) {
 
     krnl_global_bandwidth.setArg(arg_index++, *(buffer[buffer_index++]));
     krnl_global_bandwidth.setArg(arg_index++, *(buffer[buffer_index++]));
-    #ifdef USE_4DDR
+    #if NDDR_BANKS == 3        
+       krnl_global_bandwidth.setArg(arg_index++, *(buffer[buffer_index++]));
+    #elif NDDR_BANKS > 3
        krnl_global_bandwidth.setArg(arg_index++, *(buffer[buffer_index++]));
        krnl_global_bandwidth.setArg(arg_index++, *(buffer[buffer_index++]));
     #endif
@@ -275,13 +286,13 @@ int main(int argc, char** argv) {
     /* Copy results back from OpenCL buffer */
     unsigned char *map_output_buffer0;
     map_output_buffer0 = (unsigned char *) q.enqueueMapBuffer(*(buffer[1]), 
-							      CL_FALSE, 
-							      CL_MAP_READ, 
-							      0, 
-							      globalbuffersize, 
-							      NULL, 
-							      NULL, 
-							      &err);
+                            							      CL_FALSE, 
+                            							      CL_MAP_READ, 
+                            							      0, 
+                            							      globalbuffersize, 
+                            							      NULL, 
+                            							      NULL, 
+                            							      &err);
     if (err != CL_SUCCESS) {
         printf("ERROR: Failed to read output size buffer %d\n", err);
         printf("ERROR: Test failed\n");
@@ -292,20 +303,20 @@ int main(int argc, char** argv) {
     /* Check the results of output0 */
     for (size_t i = 0; i < globalbuffersize; i++) {
         if (map_output_buffer0[i] != input_host[i]) {
-            printf("ERROR : kernel failed to copy entry %zu input %i output %i\n",i,input_host[i], map_output_buffer0[i]);
+            printf("ERROR : kernel failed to copy entry %zu input %i output %i\n",i,input_host[i], map_output_buffer0[i]);            
             return EXIT_FAILURE;
         }
     }
-    #ifdef USE_4DDR
+    #if NDDR_BANKS == 3
         unsigned char *map_output_buffer1;
-  	map_output_buffer1 = (unsigned char *) q.enqueueMapBuffer(*(buffer[3]), 
-								  CL_FALSE, 
-								  CL_MAP_READ, 
-								  0, 
-								  globalbuffersize, 
-								  NULL, 
-								  NULL, 
-								  &err);
+  	    map_output_buffer1 = (unsigned char *) q.enqueueMapBuffer(*(buffer[2]), 
+								                                  CL_FALSE, 
+                                                				  CL_MAP_READ, 
+                                								  0, 
+                                								  globalbuffersize, 
+                                								  NULL, 
+                                								  NULL, 
+                                								  &err);
         if (err != CL_SUCCESS) {
             printf("ERROR: Failed to read output size buffer %d\n", err);
             printf("ERROR: Test failed\n");
@@ -322,7 +333,33 @@ int main(int argc, char** argv) {
         }
     #endif
 
-    #if defined(USE_2DDR) || defined(USE_4DDR)
+    #if NDDR_BANKS > 3
+        unsigned char *map_output_buffer1;
+  	    map_output_buffer1 = (unsigned char *) q.enqueueMapBuffer(*(buffer[3]), 
+                                								  CL_FALSE, 
+                                								  CL_MAP_READ, 
+                                								  0, 
+                                								  globalbuffersize, 
+                                								  NULL, 
+                                								  NULL, 
+                                								  &err);
+        if (err != CL_SUCCESS) {
+            printf("ERROR: Failed to read output size buffer %d\n", err);
+            printf("ERROR: Test failed\n");
+            return EXIT_FAILURE;
+        }
+        q.finish();
+
+        /* Check the results of output1 */
+        for (size_t i = 0; i < globalbuffersize; i++) {
+            if (map_output_buffer1[i] != input_host[i]) {
+                printf("ERROR : kernel failed to copy entry %zu input %i output %i\n", i, input_host[i], map_output_buffer1[i]);
+                return EXIT_FAILURE;
+            }
+        }
+    #endif
+
+    #if NDDR_BANKS > 1
     for(int i = 0; i < ddr_banks; i++)
      {
 	delete(buffer[i]);
