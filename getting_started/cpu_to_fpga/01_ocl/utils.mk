@@ -1,3 +1,29 @@
+#+-------------------------------------------------------------------------------
+# The following parameters are assigned with default values. These parameters can
+# be overridden through the make command line
+#+-------------------------------------------------------------------------------
+
+REPORT := no
+PROFILE := no
+DEBUG := no
+
+#'estimate' for estimate report generation
+#'system' for system report generation
+ifneq ($(REPORT), no)
+CLFLAGS += --report estimate
+CLLDFLAGS += --report system
+endif
+
+#Generates profile summary report
+ifeq ($(PROFILE), yes)
+CLFLAGS += --profile_kernel data:all:all:all
+endif
+
+#Generates debug summary report
+ifeq ($(DEBUG), yes)
+CLFLAGS += --dk protocol:all:all:all
+endif
+
 # sanitize_dsa - create a filesystem friendly name from dsa name
 #   $(1) - name of dsa
 COLON=:

@@ -1,17 +1,13 @@
-#+-------------------------------------------------------------------------------
-# The following parameters are assigned with default values. These parameters can
-# be overridden through the make command line
-#+-------------------------------------------------------------------------------
+# Points to Utility Directory
+COMMON_REPO = ../../../
+ABS_COMMON_REPO = $(shell readlink -f $(COMMON_REPO))
+
+include ./utils.mk
 
 # Run Target:
 #   hw  - Compile for hardware
 #   sw_emu/hw_emu - Compile for software/hardware emulation
-# FPGA Board Platform (Default ~ ku115)
-
-include utils.mk
-REPORT := no
-PROFILE := no
-DEBUG := no
+# FPGA Board Platform (Default ~ kcu1500)
 
 TARGETS := hw
 TARGET := $(TARGETS)
@@ -22,10 +18,6 @@ DSA := $(call device2sandsa, $(DEVICE))
 
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
-
-# Points to Utility Directory
-COMMON_REPO = ../../../
-ABS_COMMON_REPO = $(shell readlink -f $(COMMON_REPO))
 
 CXXFLAGS := $(opencl_CXXFLAGS) -Wall -O0 -g -std=c++14
 LDFLAGS := $(opencl_LDFLAGS)
@@ -39,25 +31,6 @@ LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_SDX)/runtime/lib/x86_64
 # Kernel compiler global settings
 CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps 
 CLFLAGS += --xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generateExtraRunData=true" --xp "param:compiler.axiDeadLockFree=no"
-
-
-#'estimate' for estimate report generation
-#'system' for system report generation
-ifneq ($(REPORT), no)
-CLFLAGS += --report estimate
-CLLDFLAGS += --report system
-endif
-
-#Generates profile summary report
-ifeq ($(PROFILE), yes)
-CLFLAGS += --profile_kernel data:all:all:all
-endif
-
-#Generates debug summary report
-ifeq ($(DEBUG), yes)
-CLFLAGS += --dk protocol:all:all:all
-endif
-
 EXECUTABLE = host
 
 BINARY_CONTAINERS += $(XCLBIN)/mmult.$(TARGET).$(DSA).xclbin
