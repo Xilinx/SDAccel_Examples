@@ -104,7 +104,7 @@ emconfigutil --platform 'xilinx:kcu1500:dynamic' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./median ./xclbin/krnl_median.<emulation type>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin data/inputImage.bmp data/goldenImage.bmp
+./median ./xclbin/krnl_median.<emulation type>.xilinx_vcu1525_dynamic_5_1.xclbin data/inputImage.bmp data/goldenImage.bmp
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card

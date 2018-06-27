@@ -13,8 +13,8 @@
         "xcl"
     ],
     "cmd_args" : "BUILD/default.xclbin",
-    "em_cmd": "./multiple_devices xclbin/vector_addition.<emulation target>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin",
-    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./multiple_devices xclbin/vector_addition.hw.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin",
+    "em_cmd": "./multiple_devices xclbin/vector_addition.<emulation target>.xilinx_vcu1525_dynamic_5_1.xclbin",
+    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./multiple_devices xclbin/vector_addition.hw.xilinx_vcu1525_dynamic_5_1.xclbin",
     "accelerators": [
         {
             "container": "vector_addition", 

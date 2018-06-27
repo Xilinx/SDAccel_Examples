@@ -7,7 +7,7 @@
     "xcl": false,
     "opencv": true,
     "cmd_args": "BUILD/default.xclbin PROJECT/data/inputImage.bmp PROJECT/data/goldenImage.bmp",
-    "em_cmd": "./median ./xclbin/krnl_median.<emulation type>.xilinx_adm-pcie-ku3_2ddr_3_1.xclbin data/inputImage.bmp data/goldenImage.bmp",
+    "em_cmd": "./median ./xclbin/krnl_median.<emulation type>.xilinx_vcu1525_dynamic_5_1.xclbin data/inputImage.bmp data/goldenImage.bmp",
     "libs": [
         "xcl2", 
         "bitmap"
