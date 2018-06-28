@@ -4,8 +4,8 @@ import json
 import os
 import subprocess
 
-DSA = 'xilinx:kcu1500:dynamic'
-VERSION = 'SDAccel 2017.4.op'
+DSA = 'xilinx:vcu1525:dynamic'
+VERSION = 'SDAccel 2018.2'
 DEVICES = {
     'xilinx:kcu1500:dynamic': {
        'version': '5.0',
@@ -314,11 +314,6 @@ def footer(target):
     target.write("[Nimbix Application Execution on Xilinx Kintex UltraScale Devices]: " + root + "utility/nimbix/README.md\n")
     return
 
-def profile_report(target):
-    target.write("[Debug]\n")
-    target.write("profile=true\n")
-    return
-
 # Get the argument from the description
 script, desc_file = argv
 
@@ -351,7 +346,3 @@ ack(target,data)
 footer(target)
 target.close
 
-print "Generating sdaccel.ini file for %s" % data["example"]
-target = open("sdaccel.ini","w")
-profile_report(target)
-target.close

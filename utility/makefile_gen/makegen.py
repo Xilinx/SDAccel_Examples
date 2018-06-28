@@ -18,7 +18,12 @@ def create_params(target,data):
     target.write("# FPGA Board Platform (Default ~ ku115)\n")
 
     target.write("\n")
-    target.write("include utils.mk\n")
+    
+    target.write("# Points to Utility Directory\n")
+    target.write("COMMON_REPO = ../../../\n")
+    target.write("ABS_COMMON_REPO = $(shell readlink -f $(COMMON_REPO))\n")
+    target.write("\n")
+    target.write("include ./utils.mk\n")
     target.write("REPORT := no\n")
     target.write("PROFILE := no\n")
     target.write("DEBUG := no\n")
@@ -47,11 +52,6 @@ def create_params(target,data):
     target.write("$(XILINX_SDX)/bin/xcpp\n")
     target.write("XOCC := ")
     target.write("$(XILINX_SDX)/bin/xocc\n")
-    target.write("\n")
-
-    target.write("# Points to Utility Directory\n")
-    target.write("COMMON_REPO = ../../../\n")
-    target.write("ABS_COMMON_REPO = $(shell readlink -f $(COMMON_REPO))\n")
     target.write("\n")
 
     target.write("CXXFLAGS := $(opencl_CXXFLAGS) -Wall -O0 -g -std=c++14\n")
@@ -213,7 +213,7 @@ def add_containers(target, data):
                 else:
                     target.write("BINARY_CONTAINER_1_OBJS += $(XCLBIN)/")
                 target.write(data["containers"][container_name]["name"])
-                target.write(".$(TARGET).$(DSA))")
+                target.write(".$(TARGET).$(DSA)")
                 target.write(".xo\n")
                 target.write("ALL_KERNEL_OBJS += $(XCLBIN)/")
                 target.write(data["containers"][container_name]["name"])
@@ -327,6 +327,12 @@ def building_host(target):
     target.write("\tmkdir -p $(XCLBIN)\n")
     target.write("\t$(CXX) $(CXXFLAGS) $(HOST_SRCS) -o '$@' $(LDFLAGS)\n")
     target.write("\n")
+
+    return
+
+def profile_report(target):
+    target.write("[Debug]\n")
+    target.write("profile=true\n")
 
     return
 
@@ -449,4 +455,9 @@ target.write("README.md: description.json\n")
 target.write("\t$(ABS_COMMON_REPO)/utility/readme_gen/readme_gen.py description.json\n")
 target.write("\n")
 
+target.close
+
+printf "Generating sdaccel.ini file for %s" %data["example"]
+target = open("sdaccel.ini","w")
+profile_report(target)
 target.close
