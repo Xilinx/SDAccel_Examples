@@ -26,9 +26,10 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
+
 #define SIZE       9
 #define CHANNELS   3
-#define MAX_WIDTH  512
+#define MAX_WIDTH  1024
 
 #define imin(X, Y) (((X) < (Y)) ? (X) : (Y))
 #define imax(X, Y) (((X) > (Y)) ? (X) : (Y))
@@ -53,6 +54,7 @@ uint getValue(uint16 vec, int index) {
   if (index == 13) return vec.sd;
   if (index == 14) return vec.se;
   if (index == 15) return vec.sf;
+  return 0;
 }
 
 //
@@ -168,10 +170,12 @@ void median(__global const uint16* input, __global uint16* output, int width, in
   local uint16 linebuf0[MAX_WIDTH/16];
   local uint16 linebuf1[MAX_WIDTH/16];
   local uint16 linebuf2[MAX_WIDTH/16];
-  local uint16 lineres[MAX_WIDTH/16];
   int width16 = width >> 4;
+  uint16 result16;
   
   for (int line = 0; line < height; line++) {
+    int yindex = line*width16;
+    
     // Fetch Lines
     if (line == 0) {
       async_work_group_copy(linebuf0, input, width16, 0);
@@ -215,26 +219,25 @@ void median(__global const uint16* input, __global uint16* output, int width, in
         }
   
         // Store result into memory
-        if (i == 0)  lineres[x].s0 = result;
-        if (i == 1)  lineres[x].s1 = result;
-        if (i == 2)  lineres[x].s2 = result;
-        if (i == 3)  lineres[x].s3 = result;
-        if (i == 4)  lineres[x].s4 = result;
-        if (i == 5)  lineres[x].s5 = result;
-        if (i == 6)  lineres[x].s6 = result;
-        if (i == 7)  lineres[x].s7 = result;
-        if (i == 8)  lineres[x].s8 = result;
-        if (i == 9)  lineres[x].s9 = result;
-        if (i == 10) lineres[x].sa = result;
-        if (i == 11) lineres[x].sb = result;
-        if (i == 12) lineres[x].sc = result;
-        if (i == 13) lineres[x].sd = result;
-        if (i == 14) lineres[x].se = result;
-        if (i == 15) lineres[x].sf = result;
+        if (i == 0)  result16.s0 = result;
+        if (i == 1)  result16.s1 = result;
+        if (i == 2)  result16.s2 = result;
+        if (i == 3)  result16.s3 = result;
+        if (i == 4)  result16.s4 = result;
+        if (i == 5)  result16.s5 = result;
+        if (i == 6)  result16.s6 = result;
+        if (i == 7)  result16.s7 = result;
+        if (i == 8)  result16.s8 = result;
+        if (i == 9)  result16.s9 = result;
+        if (i == 10) result16.sa = result;
+        if (i == 11) result16.sb = result;
+        if (i == 12) result16.sc = result;
+        if (i == 13) result16.sd = result;
+        if (i == 14) result16.se = result;
+        if (i == 15) result16.sf = result;
       }
+      
+      output[yindex + x] = result16;
     }
-    
-    async_work_group_copy(output + line*width16, lineres, width16, 0);
-    barrier(CLK_LOCAL_MEM_FENCE);
   }
 }
