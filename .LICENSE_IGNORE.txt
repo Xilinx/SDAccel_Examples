@@ -14,3 +14,6 @@
 ^acceleration/kmeans/src/read_input.cpp$
 ^acceleration/kmeans/src/rmse.c$
 ^acceleration/kmeans/src/host.cpp$
+^security/aes_decrypt/src/krnl_aes.cl$
+^security/aes_decrypt/src/aes_ecb.cpp$
+^security/aes_decrypt/src/aes_ecb.h$
