@@ -1,5 +1,6 @@
 /**********
 Copyright (c) 2018, Xilinx, Inc.
+Copyright (c) 2018, Akamai Technologies, Inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -35,7 +36,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //Return value 
 // 0    Success
 //-1    Inputsize is not a multiple of 128 bit AES block size
-int aesecb_encrypt(unsigned char *key, unsigned char *input, unsigned char *output, size_t inputsize,const unsigned int rounds);
+int aesecb_encrypt(unsigned char *key, unsigned char *input, unsigned char *output, size_t inputsize, const unsigned int rounds);
 
 /////////////////////////////////////////////////////////////////////////////////
 //Electronic Code Book AES key expansion

@@ -1,5 +1,9 @@
+// -*- mode:c -*-
+// vim:ft=c:
+
 /**********
 Copyright (c) 2018, Xilinx, Inc.
+Copyright (c) 2018, Akamai Technologies, Inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -27,13 +31,13 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 
-///10 round AES ECB SW encrypt and OpenCL HW decrypt
+//10 round AES ECB SW encrypt and OpenCL HW decrypt
 //Implementaiton derived from http://en.wikipedia.org/wiki/Advanced_Encryption_Standard
-
 
 #define ROUNDS 10
 
-__constant uchar rsbox[256] = { 0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3, 0x9e, 0x81, 0xf3, 0xd7, 0xfb\
+__constant uchar rsbox[256] = {
+      0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3, 0x9e, 0x81, 0xf3, 0xd7, 0xfb\
     , 0x7c, 0xe3, 0x39, 0x82, 0x9b, 0x2f, 0xff, 0x87, 0x34, 0x8e, 0x43, 0x44, 0xc4, 0xde, 0xe9, 0xcb\
     , 0x54, 0x7b, 0x94, 0x32, 0xa6, 0xc2, 0x23, 0x3d, 0xee, 0x4c, 0x95, 0x0b, 0x42, 0xfa, 0xc3, 0x4e\
     , 0x08, 0x2e, 0xa1, 0x66, 0x28, 0xd9, 0x24, 0xb2, 0x76, 0x5b, 0xa2, 0x49, 0x6d, 0x8b, 0xd1, 0x25\
@@ -77,10 +81,19 @@ __attribute__((always_inline)) uchar16 ShiftRowsInv(uchar16 value)
 {
   unsigned int i;
   uchar16 tempValue;
-  tempValue.s0123 = value.s0123;
-  tempValue.s4567 = value.s7456;
-  tempValue.s89ab = value.sab89;
-  tempValue.scdef = value.sdefc;
+
+  // Do operations on columns, not rows (the AES state matrix is in column-major
+  // order)
+  
+  // Right Rotation 0
+  tempValue.s048c = value.s048c;
+  // Right Rotation 1
+  tempValue.s159d = value.sd159;
+  // Right Rotation 2
+  tempValue.s26ae = value.sae26;
+  // Right Rotation 3
+  tempValue.s37bf = value.s7bf3;
+  
   return tempValue;
 }
 
@@ -199,131 +212,48 @@ __attribute__((always_inline)) uchar GALOISMULTIPLICATION_11(aparam) {
   return(res);
 }
 
+__attribute__((always_inline)) uchar4 MixColumn16Inv(uchar4 col) {
+  uchar4 res;
+
+  res.s0 = GALOISMULTIPLICATION_14(col.s0) ^
+    GALOISMULTIPLICATION_11(col.s1) ^
+    GALOISMULTIPLICATION_13(col.s2) ^
+    GALOISMULTIPLICATION_09(col.s3);
+  
+  res.s1 = GALOISMULTIPLICATION_09(col.s0) ^
+    GALOISMULTIPLICATION_14(col.s1) ^
+    GALOISMULTIPLICATION_11(col.s2) ^
+    GALOISMULTIPLICATION_13(col.s3);
+  
+  res.s2 = GALOISMULTIPLICATION_13(col.s0) ^
+    GALOISMULTIPLICATION_09(col.s1) ^
+    GALOISMULTIPLICATION_14(col.s2) ^
+    GALOISMULTIPLICATION_11(col.s3);
+  
+  res.s3 = GALOISMULTIPLICATION_11(col.s0) ^
+    GALOISMULTIPLICATION_13(col.s1) ^
+    GALOISMULTIPLICATION_09(col.s2) ^
+    GALOISMULTIPLICATION_14(col.s3);
+
+  return res;
+}
 
 __attribute__((always_inline)) uchar16 mixColumns16inv(uchar16 block)
 {
+  uchar16 returnval;
 
-  uchar16 r0,r1,r2,r3,returnval;
+  // Note that this is operating on rows, not columns.  The AES state matrix
+  // is in column-major order, and C-style arrays are in row-major order, so
+  // this operation must be transposed.
+  returnval.s0123 = MixColumn16Inv(block.s0123);
+  returnval.s4567 = MixColumn16Inv(block.s4567);
+  returnval.s89ab = MixColumn16Inv(block.s89ab);
+  returnval.scdef = MixColumn16Inv(block.scdef);
 
-  //row0
-  //i=0 j=0
-  r0.s0=GALOISMULTIPLICATION_14(block.s0);   //0
-  r1.s0=GALOISMULTIPLICATION_09(block.sc);   //3
-  r2.s0=GALOISMULTIPLICATION_13(block.s8);   //2
-  r3.s0=GALOISMULTIPLICATION_11(block.s4);   //1
-  returnval.s0 = r0.s0 ^ r1.s0 ^ r2.s0 ^ r3.s0;
-
-  //i=0 j=1
-  r0.s1=GALOISMULTIPLICATION_14(block.s1);   //0
-  r1.s1=GALOISMULTIPLICATION_09(block.sd);   //3
-  r2.s1=GALOISMULTIPLICATION_13(block.s9);   //2
-  r3.s1=GALOISMULTIPLICATION_11(block.s5);   //1
-  returnval.s1 = r0.s1 ^ r1.s1 ^ r2.s1 ^ r3.s1;
-
-  //i=0 j=2
-  r0.s2=GALOISMULTIPLICATION_14(block.s2);   //0
-  r1.s2=GALOISMULTIPLICATION_09(block.se);   //3
-  r2.s2=GALOISMULTIPLICATION_13(block.sa);   //2
-  r3.s2=GALOISMULTIPLICATION_11(block.s6);   //1
-  returnval.s2 = r0.s2 ^ r1.s2 ^ r2.s2 ^ r3.s2;
-
-  //i=0 j=3
-  r0.s3=GALOISMULTIPLICATION_14(block.s3);   //0
-  r1.s3=GALOISMULTIPLICATION_09(block.sf);   //3
-  r2.s3=GALOISMULTIPLICATION_13(block.sb);   //2
-  r3.s3=GALOISMULTIPLICATION_11(block.s7);   //1
-  returnval.s3 = r0.s3 ^ r1.s3 ^ r2.s3 ^ r3.s3;
-
-  //row1
-  //i=1 j=0
-  r0.s4=GALOISMULTIPLICATION_14(block.s4);   //1
-  r1.s4=GALOISMULTIPLICATION_09(block.s0);   //0
-  r2.s4=GALOISMULTIPLICATION_13(block.sc);   //3
-  r3.s4=GALOISMULTIPLICATION_11(block.s8);   //2
-  returnval.s4 = r0.s4 ^ r1.s4 ^ r2.s4 ^ r3.s4;
-
-  //i=1 j=1
-  r0.s5=GALOISMULTIPLICATION_14(block.s5);   //1
-  r1.s5=GALOISMULTIPLICATION_09(block.s1);   //0
-  r2.s5=GALOISMULTIPLICATION_13(block.sd);   //3
-  r3.s5=GALOISMULTIPLICATION_11(block.s9);   //2
-  returnval.s5 = r0.s5 ^ r1.s5 ^ r2.s5 ^ r3.s5;
-
-  //i=1 j=2
-  r0.s6=GALOISMULTIPLICATION_14(block.s6);   //1
-  r1.s6=GALOISMULTIPLICATION_09(block.s2);   //0
-  r2.s6=GALOISMULTIPLICATION_13(block.se);   //3
-  r3.s6=GALOISMULTIPLICATION_11(block.sa);   //2
-  returnval.s6 = r0.s6 ^ r1.s6 ^ r2.s6 ^ r3.s6;
-
-  //i=1 j=3
-  r0.s7=GALOISMULTIPLICATION_14(block.s7);   //1
-  r1.s7=GALOISMULTIPLICATION_09(block.s3);   //0
-  r2.s7=GALOISMULTIPLICATION_13(block.sf);   //3
-  r3.s7=GALOISMULTIPLICATION_11(block.sb);   //2
-  returnval.s7 = r0.s7 ^ r1.s7 ^ r2.s7 ^ r3.s7;
-
-  //row2
-  //i=2 j=0
-  r0.s8=GALOISMULTIPLICATION_14(block.s8);   //2
-  r1.s8=GALOISMULTIPLICATION_09(block.s4);   //1
-  r2.s8=GALOISMULTIPLICATION_13(block.s0);   //0
-  r3.s8=GALOISMULTIPLICATION_11(block.sc);   //3
-  returnval.s8 = r0.s8 ^ r1.s8 ^ r2.s8 ^ r3.s8;
-
-  //i=2 j=1
-  r0.s9=GALOISMULTIPLICATION_14(block.s9);   //2
-  r1.s9=GALOISMULTIPLICATION_09(block.s5);   //1
-  r2.s9=GALOISMULTIPLICATION_13(block.s1);   //0
-  r3.s9=GALOISMULTIPLICATION_11(block.sd);   //3
-  returnval.s9 = r0.s9 ^ r1.s9 ^ r2.s9 ^ r3.s9;
-
-  //i=2 j=2
-  r0.sa=GALOISMULTIPLICATION_14(block.sa);   //2
-  r1.sa=GALOISMULTIPLICATION_09(block.s6);   //1
-  r2.sa=GALOISMULTIPLICATION_13(block.s2);   //0
-  r3.sa=GALOISMULTIPLICATION_11(block.se);   //3
-  returnval.sa = r0.sa ^ r1.sa ^ r2.sa ^ r3.sa;
-
-  //i=2 j=3
-  r0.sb=GALOISMULTIPLICATION_14(block.sb);   //2
-  r1.sb=GALOISMULTIPLICATION_09(block.s7);   //1
-  r2.sb=GALOISMULTIPLICATION_13(block.s3);   //0
-  r3.sb=GALOISMULTIPLICATION_11(block.sf);   //3
-  returnval.sb = r0.sb ^ r1.sb ^ r2.sb ^ r3.sb;
-
-  //row3
-  //i=3 j=0
-  r0.sc=GALOISMULTIPLICATION_14(block.sc);   //2
-  r1.sc=GALOISMULTIPLICATION_09(block.s8);   //1
-  r2.sc=GALOISMULTIPLICATION_13(block.s4);   //0
-  r3.sc=GALOISMULTIPLICATION_11(block.s0);   //3
-  returnval.sc = r0.sc ^ r1.sc ^ r2.sc ^ r3.sc;
-
-  //i=3 j=1
-  r0.sd=GALOISMULTIPLICATION_14(block.sd);   //2
-  r1.sd=GALOISMULTIPLICATION_09(block.s9);   //1
-  r2.sd=GALOISMULTIPLICATION_13(block.s5);   //0
-  r3.sd=GALOISMULTIPLICATION_11(block.s1);   //3
-  returnval.sd = r0.sd ^ r1.sd ^ r2.sd ^ r3.sd;
-
-  //i=3 j=2
-  r0.se=GALOISMULTIPLICATION_14(block.se);   //2
-  r1.se=GALOISMULTIPLICATION_09(block.sa);   //1
-  r2.se=GALOISMULTIPLICATION_13(block.s6);   //0
-  r3.se=GALOISMULTIPLICATION_11(block.s2);   //3
-  returnval.se = r0.se ^ r1.se ^ r2.se ^ r3.se;
-
-  //i=3 j=3
-  r0.sf=GALOISMULTIPLICATION_14(block.sf);   //2
-  r1.sf=GALOISMULTIPLICATION_09(block.sb);   //1
-  r2.sf=GALOISMULTIPLICATION_13(block.s7);   //0
-  r3.sf=GALOISMULTIPLICATION_11(block.s3);   //3
-  returnval.sf = r0.sf ^ r1.sf ^ r2.sf ^ r3.sf;
-  return(returnval);
+  return returnval;
 }
 
-__attribute__((always_inline)) uchar16 AddRoundKey(uchar16 block,unsigned int round,local uchar16 *roundkey){
+__attribute__((always_inline)) uchar16 AddRoundKey(uchar16 block, unsigned int round, __local uchar16 *roundkey){
   uchar16 output = block ^ roundkey[round];
   return(output);
 }
@@ -331,18 +261,19 @@ __attribute__((always_inline)) uchar16 AddRoundKey(uchar16 block,unsigned int ro
 
 __kernel
 __attribute__ ((reqd_work_group_size(1,1,1)))
-void krnl_aes_decrypt(__global uchar16  *output,__global uchar16  *input,
-		               __global  uchar16  *roundKey, uint blocks)
+void krnl_aes_decrypt(__global uchar16 *output, __global uchar16 *input,
+		              __global uchar16 *roundKey, uint blocks)
 {
   //load key
   int i;
 
   #ifdef __xilinx__
-  	local uchar16 roundkeylocal[ROUNDS+1] __attribute__((xcl_array_partition(complete,1)));
+  	local uchar16 roundkeylocal[ROUNDS+1] __attribute__((xcl_array_partition(complete, 1)));
   #else
   	local uchar16 roundkeylocal[ROUNDS+1];
   #endif
-  for(i=0;i<(ROUNDS+1);i++) roundkeylocal[i]=roundKey[i];
+  for(i=0; i<(ROUNDS+1); i++)
+    roundkeylocal[i]=roundKey[i];
 
   //decrypt
   unsigned int blockindex;
@@ -350,25 +281,25 @@ void krnl_aes_decrypt(__global uchar16  *output,__global uchar16  *input,
   #ifdef __xilinx__
     __attribute__((xcl_pipeline_loop))
   #endif
-  for(blockindex=0;blockindex<blocks;blockindex++){
+  for(blockindex = 0; blockindex < blocks; blockindex++) {
     uchar16 block0;
 
     block0 = input[blockindex];
 
     //InitialRound
-    block0 = AddRoundKey(block0,ROUNDS,roundkeylocal);
+    block0 = AddRoundKey(block0, ROUNDS, roundkeylocal);
 
     //Rounds
-    for(i=(ROUNDS-1); i>=1;i--){
+    for(i = (ROUNDS-1); i>=1; i--){
       block0 = ShiftRowsInv(block0); //ShiftRowsInc
       block0 = SubBytesRSBox(block0); //SubBytesRSBox
-      block0 = AddRoundKey(block0,i,roundkeylocal); //addRoundKey
+      block0 = AddRoundKey(block0, i, roundkeylocal); //addRoundKey
       block0  = mixColumns16inv(block0); //mixColumnsInv
     }
 
     block0 = ShiftRowsInv(block0); //ShiftRowsInv
     block0 = SubBytesRSBox(block0); //SubBytesRSBox
-    block0 = AddRoundKey(block0,0,roundkeylocal); //addRoundKey
+    block0 = AddRoundKey(block0, 0, roundkeylocal); //addRoundKey
 
     output[blockindex] = block0;
   }
