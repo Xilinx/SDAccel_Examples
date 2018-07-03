@@ -25,7 +25,6 @@ XOS=krnl_idct
 
 # idct xclbin
 krnl_idct_XOS=krnl_idct
-krnl_idct_NDEVICES= xilinx:vcu1525:dynamic xilinx_vcu1525_dynamic_5_0
 
 XCLBINS=krnl_idct
 
@@ -38,7 +37,6 @@ $(foreach target,$(TARGETS),$(foreach device,$(DEVICES),$(eval $(call mk_args,$(
 # check
 check_EXE=idct
 check_XCLBINS=krnl_idct
-check_NDEVICES=$(krnl_idct_NDEVICES)
 
 CHECKS=check
 
