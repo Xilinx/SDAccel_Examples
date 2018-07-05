@@ -41,6 +41,7 @@ static const std::string error_message =
 int main(int argc, char **argv) {
     // compute the size of array in bytes
     size_t size_in_bytes = DATA_SIZE * sizeof(int);
+    cl_int err;
 
     // Creates a vector of DATA_SIZE elements with an initial value of 10 and 32
     vector<int,aligned_allocator<int>> source_a(DATA_SIZE, 10);
@@ -53,9 +54,9 @@ int main(int argc, char **argv) {
     cl::Device device = devices[0];
 
     //Creating Context and Command Queue for selected Device 
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
-    std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+    OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
+    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err)); 
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
     // import_binary() command will find the OpenCL binary file created using the 
@@ -65,18 +66,18 @@ int main(int argc, char **argv) {
     std::string binaryFile = xcl::find_binary_file(device_name,"vector_addition");
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
-    cl::Program program(context, devices, bins);
+    OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
 
     // These commands will allocate memory on the FPGA. The cl::Buffer objects can
     // be used to reference the memory locations on the device. The cl::Buffer
     // object cannot be referenced directly and must be passed to other OpenCL
     // functions.
-    cl::Buffer buffer_a(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
-            size_in_bytes, source_a.data());
-    cl::Buffer buffer_b(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
-            size_in_bytes, source_b.data());
-    cl::Buffer buffer_result(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
-            size_in_bytes, source_results.data());
+    OCL_CHECK(err, cl::Buffer buffer_a(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
+            size_in_bytes, source_a.data(),&err));
+    OCL_CHECK(err, cl::Buffer buffer_b(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
+            size_in_bytes, source_b.data(), &err));
+    OCL_CHECK(err, cl::Buffer buffer_result(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
+            size_in_bytes, source_results.data(), &err));
     //Separate Read/write Buffer vector is needed to migrate data between host/device
     std::vector<cl::Memory> inBufVec, outBufVec;
     inBufVec.push_back(buffer_a);
@@ -88,27 +89,27 @@ int main(int argc, char **argv) {
     // application and into the buffer_a and buffer_b cl::Buffer objects. The data
     // will be be transferred from system memory over PCIe to the FPGA on-board
     // DDR memory.
-    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/));
 
     // This call will extract a kernel out of the program we loaded in the
     // previous line. A kernel is an OpenCL function that is executed on the
     // FPGA. This function is defined in the src/vetor_addition.cl file.
-    cl::Kernel krnl_vector_add(program,"vector_add");
+    OCL_CHECK(err, cl::Kernel krnl_vector_add(program,"vector_add", &err));
 
     //set the kernel Arguments
     int narg=0;
-    krnl_vector_add.setArg(narg++,buffer_result);
-    krnl_vector_add.setArg(narg++,buffer_a);
-    krnl_vector_add.setArg(narg++,buffer_b);
-    krnl_vector_add.setArg(narg++,DATA_SIZE);
+    OCL_CHECK(err, err = krnl_vector_add.setArg(narg++,buffer_result));
+    OCL_CHECK(err, err = krnl_vector_add.setArg(narg++,buffer_a));
+    OCL_CHECK(err, err = krnl_vector_add.setArg(narg++,buffer_b));
+    OCL_CHECK(err, err = krnl_vector_add.setArg(narg++,DATA_SIZE));
 
     //Launch the Kernel
-    q.enqueueTask(krnl_vector_add);
+    OCL_CHECK(err, err = q.enqueueTask(krnl_vector_add));
 
     // The result of the previous kernel execution will need to be retrieved in
     // order to view the results. This call will write the data from the
     // buffer_result cl_mem object to the source_results vector
-    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
     q.finish();
 
 

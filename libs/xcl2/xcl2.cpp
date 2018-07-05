@@ -35,12 +35,13 @@ namespace xcl {
 std::vector<cl::Device> get_devices(const std::string& vendor_name) {
 
     size_t i;
+    cl_int err;
     std::vector<cl::Platform> platforms;
-    cl::Platform::get(&platforms);
+    OCL_CHECK(err, err = cl::Platform::get(&platforms));
     cl::Platform platform;
     for (i  = 0 ; i < platforms.size(); i++){
         platform = platforms[i];
-        std::string platformName  = platform.getInfo<CL_PLATFORM_NAME>();
+        OCL_CHECK(err, err = (std::string platformName  = platform.getInfo<CL_PLATFORM_NAME>()));
         if (platformName == vendor_name){
             std::cout << "Found Platform" << std::endl;
             std::cout << "Platform Name: " << platformName.c_str() << std::endl;
@@ -54,7 +55,7 @@ std::vector<cl::Device> get_devices(const std::string& vendor_name) {
    
     //Getting ACCELERATOR Devices and selecting 1st such device 
     std::vector<cl::Device> devices;
-    platform.getDevices(CL_DEVICE_TYPE_ACCELERATOR, &devices);
+    OCL_CHECK(err, err = platform.getDevices(CL_DEVICE_TYPE_ACCELERATOR, &devices));
     return devices;
 }
    
