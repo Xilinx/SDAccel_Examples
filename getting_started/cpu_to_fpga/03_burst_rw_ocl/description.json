@@ -13,12 +13,17 @@
     ],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
-    "accelerators": [
+    "containers" : [
+    {
+        "name" : "mmult",
+        "accelerators": [
         {
-            "container": "mmult", 
-            "name": "mmult", 
-            "location": "src/mmult.cl"
+            "name" : "vadd",
+            "location": "src/mmult.cl",
+            "clflags": "--xp param:compiler.axiDeadLockFree=no"    
         }
+      ]
+     }
     ],
     "contributors" : [
         {

@@ -1,29 +1,22 @@
-#+-------------------------------------------------------------------------------
-# The following parameters are assigned with default values. These parameters can
-# be overridden through the make command line
-#+-------------------------------------------------------------------------------
-
-# Run Target:
-#   hw  - Compile for hardware
-#   sw_emu/hw_emu - Compile for software/hardware emulation
-# FPGA Board Platform (Default ~ ku115)
-
-REPORT := no
-PROFILE := no
-DEBUG := no
-
-TARGETS := hw
-TARGET := $(TARGETS)
-DEVICES := xilinx_kcu1500_dynamic_5_0
-DEVICE := $(DEVICES)
-XCLBIN := ./xclbin
-
-CXX := $(XILINX_SDX)/bin/xcpp
-XOCC := $(XILINX_SDX)/bin/xocc
-
 # Points to Utility Directory
 COMMON_REPO = ../../../
 ABS_COMMON_REPO = $(shell readlink -f $(COMMON_REPO))
+
+include ./utils.mk
+# Run Target:
+#   hw  - Compile for hardware
+#   sw_emu/hw_emu - Compile for software/hardware emulation
+# FPGA Board Platform (Default ~ vcu1525)
+
+TARGETS := hw
+TARGET := $(TARGETS)
+DEVICES := xilinx_vcu1525_dynamic
+DEVICE := $(DEVICES)
+XCLBIN := ./xclbin
+DSA := $(call device2sandsa, $(DEVICE))
+
+CXX := $(XILINX_SDX)/bin/xcpp
+XOCC := $(XILINX_SDX)/bin/xocc
 
 CXXFLAGS := $(opencl_CXXFLAGS) -Wall -O0 -g -std=c++14
 LDFLAGS := $(opencl_LDFLAGS)
@@ -37,24 +30,9 @@ LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_SDX)/runtime/lib/x86_64
 # Kernel compiler global settings
 CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps 
 CLFLAGS += --xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generateExtraRunData=true"
-#'estimate' for estimate report generation
-#'system' for system report generation
-ifneq ($(REPORT), no)
-CLFLAGS += --report estimate
-CLLDFLAGS += --report system
-endif
-
-#Generates profile summary report
-ifeq ($(PROFILE), yes)
-CLFLAGS += --profile_kernel data:all:all:all
-endif
-
-#Generates debug summary report
-ifeq ($(DEBUG), yes)
-CLFLAGS += --dk protocol:all:all:all
-endif
-
 EXECUTABLE = host
+
+EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
@@ -62,8 +40,8 @@ include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
 
 CP = cp -rf
 
-.PHONY: all clean cleanall docs
-all: $(EXECUTABLE) $(BINARY_CONTAINERS)
+.PHONY: all clean cleanall docs emconfig
+all: $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
 
 .PHONY: exe
 exe: $(EXECUTABLE)
@@ -76,16 +54,22 @@ $(EXECUTABLE): $(HOST_SRCS)
 	mkdir -p $(XCLBIN)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) -o '$@' $(LDFLAGS)
 
+emconfig:$(EMCONFIG_DIR)/emconfig.json
+$(EMCONFIG_DIR)/emconfig.json:
+	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
+
 check: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
-	emconfigutil --platform $(DEVICE) --od .
+	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)
+else
+	 ./$(EXECUTABLE)
 endif
-
 #Reporting warning if not targeting for Targets
 ifneq (sw_emu,$(findstring sw_emu,$(TARGET)))
 	$(warning WARNING:Application supports only sw_emu TARGET. Please use the target for running the application)
 endif
+
 
 # Cleaning stuff
 RM = rm -f

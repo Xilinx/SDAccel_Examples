@@ -14,12 +14,16 @@
     ],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
-    "accelerators": [
+    "containers" : [
+    {
+        "name" : "mmult",        
+        "accelerators": [
         {
-            "container": "mmult", 
             "name": "mmult", 
             "location": "src/mmult.cl"
         }
+       ]
+      }                
     ],
     "contributors" : [
         {

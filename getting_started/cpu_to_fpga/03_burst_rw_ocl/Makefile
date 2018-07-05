@@ -3,15 +3,14 @@ COMMON_REPO = ../../../
 ABS_COMMON_REPO = $(shell readlink -f $(COMMON_REPO))
 
 include ./utils.mk
-
 # Run Target:
 #   hw  - Compile for hardware
 #   sw_emu/hw_emu - Compile for software/hardware emulation
-# FPGA Board Platform (Default ~ kcu1500)
+# FPGA Board Platform (Default ~ vcu1525)
 
 TARGETS := hw
 TARGET := $(TARGETS)
-DEVICES := xilinx_kcu1500_dynamic_5_0
+DEVICES := xilinx_vcu1525_dynamic
 DEVICE := $(DEVICES)
 XCLBIN := ./xclbin
 DSA := $(call device2sandsa, $(DEVICE))
@@ -31,7 +30,10 @@ LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_SDX)/runtime/lib/x86_64
 # Kernel compiler global settings
 CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps 
 CLFLAGS += --xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generateExtraRunData=true" --xp "param:compiler.axiDeadLockFree=no"
+
 EXECUTABLE = host
+
+EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
 BINARY_CONTAINERS += $(XCLBIN)/mmult.$(TARGET).$(DSA).xclbin
 BINARY_CONTAINER_1_OBJS += $(XCLBIN)/mmult.$(TARGET).$(DSA).xo
@@ -46,8 +48,8 @@ HOST_SRCS += $(xcl2_SRCS)
 
 CP = cp -rf
 
-.PHONY: all clean cleanall docs
-all: $(EXECUTABLE) $(BINARY_CONTAINERS)
+.PHONY: all clean cleanall docs emconfig
+all: $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
 
 .PHONY: exe
 exe: $(EXECUTABLE)
@@ -65,12 +67,18 @@ $(EXECUTABLE): $(HOST_SRCS)
 	mkdir -p $(XCLBIN)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) -o '$@' $(LDFLAGS)
 
+emconfig:$(EMCONFIG_DIR)/emconfig.json
+$(EMCONFIG_DIR)/emconfig.json:
+	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
+
 check: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
-	emconfigutil --platform $(DEVICE) --od .
+	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)
-	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
+else
+	 ./$(EXECUTABLE)
 endif
+	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 
 # Cleaning stuff
 RM = rm -f

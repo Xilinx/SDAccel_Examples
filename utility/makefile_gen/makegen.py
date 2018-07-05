@@ -6,28 +6,17 @@ import os
 import subprocess
 
 def create_params(target,data):
-    target.write("#+-------------------------------------------------------------------------------\n")
-    target.write("# The following parameters are assigned with default values. These parameters can\n")
-    target.write("# be overridden through the make command line\n")
-    target.write("#+-------------------------------------------------------------------------------\n")
-    target.write("\n")
-
-    target.write("# Run Target:\n")
-    target.write("#   hw  - Compile for hardware\n")
-    target.write("#   sw_emu/hw_emu - Compile for software/hardware emulation\n")
-    target.write("# FPGA Board Platform (Default ~ ku115)\n")
-
-    target.write("\n")
     
     target.write("# Points to Utility Directory\n")
     target.write("COMMON_REPO = ../../../\n")
     target.write("ABS_COMMON_REPO = $(shell readlink -f $(COMMON_REPO))\n")
     target.write("\n")
     target.write("include ./utils.mk\n")
-    target.write("REPORT := no\n")
-    target.write("PROFILE := no\n")
-    target.write("DEBUG := no\n")
 
+    target.write("# Run Target:\n")
+    target.write("#   hw  - Compile for hardware\n")
+    target.write("#   sw_emu/hw_emu - Compile for software/hardware emulation\n")
+    target.write("# FPGA Board Platform (Default ~ vcu1525)\n")
     target.write("\n")
     target.write("TARGETS := hw\n")
     target.write("TARGET := $(TARGETS)\n")
@@ -36,13 +25,13 @@ def create_params(target,data):
         target.write(data["board"][0])
     elif "nboard" in data:
         target.write("DEVICES := ")
-        if "xilinx_kcu1500_dynamic_5_0" not in data["nboard"]:
-            target.write("xilinx_kcu1500_dynamic_5_0\n")
+        if "xilinx_vcu1525_dynamic" not in data["nboard"]:
+            target.write("xilinx_vcu1525_dynamic\n")
         else:
-            target.write("xilinx_kcu1500_dynamic_5_0\n")
+            target.write("xilinx_vcu1525_dynamic\n")
     else:
         target.write("DEVICES := ")
-        target.write("xilinx_kcu1500_dynamic_5_0\n")
+        target.write("xilinx_vcu1525_dynamic\n")
     target.write("DEVICE := $(DEVICES)\n")
     target.write("XCLBIN := ./xclbin\n")
     target.write("DSA := $(call device2sandsa, $(DEVICE))\n")
@@ -110,20 +99,20 @@ def add_kernel_flags(target, data):
     target.write("CLFLAGS = ")
     target.write("-t $(TARGET) --platform $(DEVICE) --save-temps \n")
     target.write("CLFLAGS += ")
-    target.write('--xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generateExtraRunData=true"\n')
+    target.write('--xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generateExtraRunData=true"')
 
     if "containers" in data:
         for con in data["containers"]:
             for acc in con["accelerators"]:
                 if "max_memory_ports" in acc:
-                    target.write("--max_memory_ports ")
+                    target.write(" --max_memory_ports ")
                     target.write(acc["name"])
         target.write("\n")
 
     if "accelerators" in data:
         for acc in data["accelerators"]:
             if "max_memory_ports" in acc:
-                target.write("--max_memory_ports ")
+                target.write(" --max_memory_ports ")
                 target.write(acc["name"])
         target.write("\n")
 
@@ -157,27 +146,7 @@ def add_kernel_flags(target, data):
                 target.write("LDCLFLAGS = ")
                 target.write(con["ldclflags"])
         target.write("\n")
-    
-    target.write("#'estimate' for estimate report generation\n")
-    target.write("#'system' for system report generation\n")
-    target.write("ifneq ($(REPORT), no)\n")
-    target.write("CLFLAGS += --report estimate\n")
-    target.write("CLLDFLAGS += --report system\n")
-    target.write("endif\n")
     target.write("\n")
-
-    target.write("#Generates profile summary report\n")
-    target.write("ifeq ($(PROFILE), yes)\n")
-    target.write("CLFLAGS += --profile_kernel data:all:all:all\n")
-    target.write("endif\n")
-    target.write("\n")
-
-    target.write("#Generates debug summary report\n")
-    target.write("ifeq ($(DEBUG), yes)\n")
-    target.write("CLFLAGS += --dk protocol:all:all:all\n")
-    target.write("endif\n")
-    target.write("\n")
-
     target.write("EXECUTABLE = ")
     '''if "containers" in data:
         target.write(data["containers"][0]["name"])
@@ -186,6 +155,9 @@ def add_kernel_flags(target, data):
     else:'''
     target.write("host")
 
+    target.write("\n\n")
+
+    target.write("EMCONFIG_DIR = $(XCLBIN)/$(DSA)")
     target.write("\n\n")
 
     return
@@ -328,6 +300,10 @@ def building_host(target):
     target.write("\t$(CXX) $(CXXFLAGS) $(HOST_SRCS) -o '$@' $(LDFLAGS)\n")
     target.write("\n")
 
+    target.write("emconfig:$(EMCONFIG_DIR)/emconfig.json\n")
+    target.write("$(EMCONFIG_DIR)/emconfig.json:\n")
+    target.write("\temconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)\n\n")
+
     return
 
 def profile_report(target):
@@ -364,8 +340,8 @@ def mk_build_all(target, data):
 
     target.write("\n")
 
-    target.write(".PHONY: all clean cleanall docs\n")
-    target.write("all: $(EXECUTABLE) $(BINARY_CONTAINERS)\n")
+    target.write(".PHONY: all clean cleanall docs emconfig\n")
+    target.write("all: $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig\n")
     if any("/data" in string for string in args):
         target.write("\t- if test -d $(DATA); then $(CP) $(DATA) $(BUILD_DIR)/sd_card/; fi\n")
     target.write("\n")
@@ -382,18 +358,18 @@ def mk_build_all(target, data):
 def mk_check(target, data):
     target.write("check: all\n")
     target.write("ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))\n")
-    target.write("\temconfigutil --platform $(DEVICE) --od .\n") 
-    if "em_cmd" in data:
-        emu_args = data["em_cmd"].split(" ")
+    target.write("\t$(CP) $(EMCONFIG_DIR)/emconfig.json .\n") 
     target.write("\tXCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)")
-    if emu_args:
-        for arg in emu_args[1:]:
+    if "cmd_args" in data:
+        args = data["cmd_args"].split(" ")    
+        for arg in args[0:]:
             target.write(" ")
-            target.write(arg)
-    target.write("\n\tsdx_analyze profile -i sdaccel_profile_summary.csv -f html\n")
+            target.write(arg.replace('PROJECT', '.'))
+    target.write("\nelse\n")        
+    target.write("\t ./$(EXECUTABLE)\n")
     target.write("endif\n")
-    target.write("\n")
 
+    target.write("\tsdx_analyze profile -i sdaccel_profile_summary.csv -f html\n")
     if "targets" in data:
         for mode in data["targets"]:
             target.write("#Reporting warning if not targeting for Targets\n")
@@ -406,7 +382,8 @@ def mk_check(target, data):
             target.write(mode)
             target.write(" TARGET. Please use the target for running the application)\n")
             target.write("endif\n\n")
-
+    target.write("\n")
+    
 def mk_help(target):
     target.write("ECHO:= @echo\n")
     target.write("\n")
@@ -457,7 +434,7 @@ target.write("\n")
 
 target.close
 
-printf "Generating sdaccel.ini file for %s" %data["example"]
+print "Generating sdaccel.ini file for %s" %data["example"]
 target = open("sdaccel.ini","w")
 profile_report(target)
 target.close

@@ -45,6 +45,7 @@ Makefile
 README.md
 description.json
 src/host.cpp
+utils.mk
 ```
 
 ## 5. COMPILATION AND EXECUTION
