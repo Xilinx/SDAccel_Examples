@@ -41,7 +41,7 @@ std::vector<cl::Device> get_devices(const std::string& vendor_name) {
     cl::Platform platform;
     for (i  = 0 ; i < platforms.size(); i++){
         platform = platforms[i];
-        OCL_CHECK(err, err = (std::string platformName  = platform.getInfo<CL_PLATFORM_NAME>()));
+        OCL_CHECK(err, std::string platformName = platform.getInfo<CL_PLATFORM_NAME>(&err));
         if (platformName == vendor_name){
             std::cout << "Found Platform" << std::endl;
             std::cout << "Platform Name: " << platformName.c_str() << std::endl;
