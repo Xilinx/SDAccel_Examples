@@ -12,6 +12,7 @@
     "libs": [
         "xcl2"
     ],
+    "host_exe": "sub_devices",
     "em_cmd": "./sub_devices",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./sub_devices",
     "containers": [
@@ -30,13 +31,6 @@
         {
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
-        }
-    ],
-    "revision" : [
-        {
-            "date" : "MAR2018",
-            "version": "1.0",
-            "description": "Initial Xilinx Release"
         }
     ]
 }

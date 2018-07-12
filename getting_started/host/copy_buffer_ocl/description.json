@@ -12,26 +12,24 @@
     "libs": [
         "xcl2"
     ],
-    "accelerators": [
+    "containers": [
+    {
+        "name": "vector_addition",
+        "accelerators": [
         {
-            "container": "vector_addition", 
             "name": "vector_add", 
             "location": "src/vector_addition.cl"
         }
+       ]
+     }
     ],
+    "host_exe": "host",
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "contributors" : [
         {
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
-        }
-    ],
-    "revision" : [
-        {
-            "date" : "May2017",
-            "version": "1.0",
-            "description": "Initial Xilinx Release"
         }
     ]
 }

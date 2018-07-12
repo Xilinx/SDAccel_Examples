@@ -50,8 +50,10 @@ README.md
 data/input1.txt
 data/input2.txt
 description.json
+sdaccel.ini
 src/host.cpp
 src/vector_addition.cl
+utils.mk
 ```
 
 ## 5. COMPILATION AND EXECUTION

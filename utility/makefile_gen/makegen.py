@@ -137,7 +137,7 @@ def add_kernel_flags(target, data):
     if "compiler" in data:
         target.write("CXXFLAGS += ")
         target.write(data["compiler"]["options"])
-        target.write("\n\n")
+        target.write("\n")
 
     if "containers" in data:
         for con in data["containers"]:
@@ -148,12 +148,10 @@ def add_kernel_flags(target, data):
         target.write("\n")
     target.write("\n")
     target.write("EXECUTABLE = ")
-    '''if "containers" in data:
-        target.write(data["containers"][0]["name"])
-    elif "accelerators" in data:
-        target.write(data["accelerators"][0]["name"])
-    else:'''
-    target.write("host")
+    if "host_exe" in data:
+        target.write(data["host_exe"])    
+    else: 
+        target.write("host")
 
     target.write("\n\n")
 
@@ -293,7 +291,7 @@ def building_kernel(target, data):
 
     return
 
-def building_host(target):
+def building_host(target, data):
     target.write("# Building Host\n")
     target.write("$(EXECUTABLE): $(HOST_SRCS)\n")
     target.write("\tmkdir -p $(XCLBIN)\n")
@@ -302,8 +300,11 @@ def building_host(target):
 
     target.write("emconfig:$(EMCONFIG_DIR)/emconfig.json\n")
     target.write("$(EMCONFIG_DIR)/emconfig.json:\n")
-    target.write("\temconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)\n\n")
-
+    target.write("\temconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)")
+    if "num_devices" in data:
+        target.write(" --nd ")
+        target.write(data["num_devices"])
+    target.write("\n\n")        
     return
 
 def profile_report(target):
@@ -314,8 +315,6 @@ def profile_report(target):
 
 def mk_clean(target):
     target.write("# Cleaning stuff\n")
-    target.write("RM = rm -f\n")
-    target.write("RMDIR = rm -rf\n")
     target.write("clean:\n")
     target.write("\t-$(RMDIR) $(EXECUTABLE) $(XCLBIN)/{*sw_emu*,*hw_emu*} \n")
     target.write("\t-$(RMDIR) sdaccel_* TempConfig system_estimate.xtxt *.rpt\n")
@@ -351,7 +350,7 @@ def mk_build_all(target, data):
     target.write("\n")
 
     building_kernel(target, data)
-    building_host(target)
+    building_host(target, data)
 
     return
 
@@ -366,8 +365,13 @@ def mk_check(target, data):
             target.write(" ")
             target.write(arg.replace('PROJECT', '.'))
     target.write("\nelse\n")        
-    target.write("\t ./$(EXECUTABLE)\n")
-    target.write("endif\n")
+    target.write("\t ./$(EXECUTABLE)")
+    if "cmd_args" in data:
+        args = data["cmd_args"].split(" ")    
+        for arg in args[0:]:
+            target.write(" ")
+            target.write(arg.replace('PROJECT', '.'))
+    target.write("\nendif\n")
 
     target.write("\tsdx_analyze profile -i sdaccel_profile_summary.csv -f html\n")
     if "targets" in data:
@@ -385,8 +389,6 @@ def mk_check(target, data):
     target.write("\n")
     
 def mk_help(target):
-    target.write("ECHO:= @echo\n")
-    target.write("\n")
     target.write(".PHONY: help\n")
     target.write("\n")
     target.write("help::\n")

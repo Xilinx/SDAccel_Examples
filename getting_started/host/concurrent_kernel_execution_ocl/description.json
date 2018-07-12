@@ -13,6 +13,7 @@
         "xcl",
         "oclHelper"
     ],
+    "host_exe": "concurrent_execution",
     "em_cmd": "./concurrent_execution",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./concurrent_execution",
     "accelerators": [
@@ -36,13 +37,6 @@
         {
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
-        }
-    ],
-    "revision" : [
-        {
-            "date" : "DEC2016",
-            "version": "1.0",
-            "description": "Initial Xilinx Release"
         }
     ]
 }

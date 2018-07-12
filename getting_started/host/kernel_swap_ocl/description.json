@@ -12,6 +12,7 @@
     "libs": [
         "xcl2"
     ],
+    "host_exe": "vmulvadd",
     "em_cmd" : "./vmulvadd",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./vmulvadd",
     "accelerators": [
@@ -31,13 +32,5 @@
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
         }
-    ],
-    "revision" : [
-        {
-            "date" : "SEP2017",
-            "version": "1.0",
-            "description": "Initial Xilinx Release"
-        }
     ]
-
 }

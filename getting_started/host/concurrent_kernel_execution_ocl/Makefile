@@ -1,33 +1,125 @@
-COMMON_REPO := ../../..
+# Points to Utility Directory
+COMMON_REPO = ../../../
+ABS_COMMON_REPO = $(shell readlink -f $(COMMON_REPO))
 
-#Common Includes
-include $(COMMON_REPO)/utility/boards.mk
-include $(COMMON_REPO)/libs/xcl/xcl.mk
-include $(COMMON_REPO)/libs/opencl/opencl.mk
-include $(COMMON_REPO)/libs/oclHelper/oclHelper.mk
+include ./utils.mk
+# Run Target:
+#   hw  - Compile for hardware
+#   sw_emu/hw_emu - Compile for software/hardware emulation
+# FPGA Board Platform (Default ~ vcu1525)
 
-# Host Application
-concurrent_execution_SRCS=./src/host.cpp $(oclHelper_SRCS) $(xcl_SRCS)
-concurrent_execution_HDRS=$(xcl_HDRS)
-concurrent_execution_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS) $(oclHelper_CXXFLAGS) -std=c++0x
-concurrent_execution_LDFLAGS=$(opencl_LDFLAGS)
+TARGETS := hw
+TARGET := $(TARGETS)
+DEVICES := xilinx_vcu1525_dynamic
+DEVICE := $(DEVICES)
+XCLBIN := ./xclbin
+DSA := $(call device2sandsa, $(DEVICE))
 
-EXES=concurrent_execution
+CXX := $(XILINX_SDX)/bin/xcpp
+XOCC := $(XILINX_SDX)/bin/xocc
 
-# Kernel
-matrix_ops_SRCS=./src/matrix_ops.cl
+CXXFLAGS := $(opencl_CXXFLAGS) -Wall -O0 -g -std=c++14
+LDFLAGS := $(opencl_LDFLAGS)
 
-XOS=matrix_ops
+HOST_SRCS = src/host.cpp
 
-# xclbin
-matrix_ops_XOS=matrix_ops
+# Host compiler global settings
+CXXFLAGS = -I $(XILINX_SDX)/runtime/include/1_2/ -I/$(XILINX_SDX)/Vivado_HLS/include/ -O0 -g -Wall -fmessage-length=0 -std=c++14
+LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_SDX)/runtime/lib/x86_64
 
-XCLBINS=matrix_ops
+# Kernel compiler global settings
+CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps 
+CLFLAGS += --xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generateExtraRunData=true"
 
-# check
-check_EXE=concurrent_execution
-check_XCLBINS=matrix_ops
+EXECUTABLE = concurrent_execution
 
-CHECKS=check
+EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
-include $(COMMON_REPO)/utility/rules.mk
+BINARY_CONTAINERS += $(XCLBIN)/matrix_ops.$(TARGET).$(DSA).xclbin
+BINARY_CONTAINER_1_OBJS += $(XCLBIN)/madd.$(TARGET).$(DSA).xo
+ALL_KERNEL_OBJS += $(XCLBIN)/madd.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_1_OBJS += $(XCLBIN)/mscale.$(TARGET).$(DSA).xo
+ALL_KERNEL_OBJS += $(XCLBIN)/mscale.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_1_OBJS += $(XCLBIN)/mmult.$(TARGET).$(DSA).xo
+ALL_KERNEL_OBJS += $(XCLBIN)/mmult.$(TARGET).$(DSA).xo
+
+#Include Libraries
+include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
+include $(ABS_COMMON_REPO)/libs/xcl/xcl.mk
+include $(ABS_COMMON_REPO)/libs/oclHelper/oclHelper.mk
+CXXFLAGS += $(xcl_CXXFLAGS) $(oclHelper_CXXFLAGS)
+LDFLAGS += $(xcl_LDFLAGS) $(oclHelper_LDFLAGS)
+HOST_SRCS += $(xcl_SRCS) $(oclHelper_SRCS)
+
+CP = cp -rf
+
+.PHONY: all clean cleanall docs emconfig
+all: $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
+
+.PHONY: exe
+exe: $(EXECUTABLE)
+
+# Building kernel
+$(XCLBIN)/madd.$(TARGET).$(DSA).xo: ./src/matrix_ops.cl
+	mkdir -p $(XCLBIN)
+	$(XOCC) $(CLFLAGS) -c -k madd -I'$(<D)' -o'$@' '$<'
+$(XCLBIN)/mscale.$(TARGET).$(DSA).xo: ./src/matrix_ops.cl
+	mkdir -p $(XCLBIN)
+	$(XOCC) $(CLFLAGS) -c -k mscale -I'$(<D)' -o'$@' '$<'
+$(XCLBIN)/mmult.$(TARGET).$(DSA).xo: ./src/matrix_ops.cl
+	mkdir -p $(XCLBIN)
+	$(XOCC) $(CLFLAGS) -c -k mmult -I'$(<D)' -o'$@' '$<'
+
+$(XCLBIN)/matrix_ops.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_1_OBJS)
+	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk madd:1 --nk mscale:1 --nk mmult:1 -o'$@' $(+)
+
+# Building Host
+$(EXECUTABLE): $(HOST_SRCS)
+	mkdir -p $(XCLBIN)
+	$(CXX) $(CXXFLAGS) $(HOST_SRCS) -o '$@' $(LDFLAGS)
+
+emconfig:$(EMCONFIG_DIR)/emconfig.json
+$(EMCONFIG_DIR)/emconfig.json:
+	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
+
+check: all
+ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
+	$(CP) $(EMCONFIG_DIR)/emconfig.json .
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)
+else
+	 ./$(EXECUTABLE)
+endif
+	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
+
+# Cleaning stuff
+clean:
+	-$(RMDIR) $(EXECUTABLE) $(XCLBIN)/{*sw_emu*,*hw_emu*} 
+	-$(RMDIR) sdaccel_* TempConfig system_estimate.xtxt *.rpt
+	-$(RMDIR) src/*.ll _xocc_* .Xil emconfig.json dltmp* xmltmp* *.log *.jou *.wcfg *.wdb
+
+cleanall: clean
+	-$(RMDIR) $(XCLBIN)
+	-$(RMDIR) ./_x
+
+.PHONY: help
+
+help::
+	$(ECHO) "Makefile Usage:"
+	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
+	$(ECHO) "      Command to generate the design for specified Target and Device."
+	$(ECHO) ""
+	$(ECHO) "  make clean "
+	$(ECHO) "      Command to remove the generated non-hardware files."
+	$(ECHO) ""
+	$(ECHO) "  make cleanall"
+	$(ECHO) "      Command to remove all the generated files."
+	$(ECHO) ""
+	$(ECHO) "  make check TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
+	$(ECHO) "      Command to run application in emulation."
+	$(ECHO) ""
+
+docs: README.md
+
+README.md: description.json
+	$(ABS_COMMON_REPO)/utility/readme_gen/readme_gen.py description.json
+

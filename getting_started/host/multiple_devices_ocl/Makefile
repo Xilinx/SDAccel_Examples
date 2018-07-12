@@ -1,42 +1,114 @@
+# Points to Utility Directory
+COMMON_REPO = ../../../
+ABS_COMMON_REPO = $(shell readlink -f $(COMMON_REPO))
 
-COMMON_REPO := ../../..
+include ./utils.mk
+# Run Target:
+#   hw  - Compile for hardware
+#   sw_emu/hw_emu - Compile for software/hardware emulation
+# FPGA Board Platform (Default ~ vcu1525)
 
-#Common Includes
-include $(COMMON_REPO)/utility/boards.mk
-include $(COMMON_REPO)/libs/xcl/xcl.mk
-include $(COMMON_REPO)/libs/opencl/opencl.mk
+TARGETS := hw
+TARGET := $(TARGETS)
+DEVICES := xilinx_vcu1525_dynamic
+DEVICE := $(DEVICES)
+XCLBIN := ./xclbin
+DSA := $(call device2sandsa, $(DEVICE))
 
-# Host Application
-multiple_devices_SRCS=./src/host.cpp $(oclHelper_SRCS) $(xcl_SRCS)
-multiple_devices_HDRS=$(xcl_HDRS)
-multiple_devices_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS) $(oclHelper_CXXFLAGS) -std=c++0x
-multiple_devices_LDFLAGS=$(opencl_LDFLAGS)
+CXX := $(XILINX_SDX)/bin/xcpp
+XOCC := $(XILINX_SDX)/bin/xocc
 
-EXES=multiple_devices
+CXXFLAGS := $(opencl_CXXFLAGS) -Wall -O0 -g -std=c++14
+LDFLAGS := $(opencl_LDFLAGS)
 
-# Kernel
-vector_addition_SRCS=./src/vector_addition.cl
+HOST_SRCS = src/host.cpp
 
-XOS=vector_addition
+# Host compiler global settings
+CXXFLAGS = -I $(XILINX_SDX)/runtime/include/1_2/ -I/$(XILINX_SDX)/Vivado_HLS/include/ -O0 -g -Wall -fmessage-length=0 -std=c++14
+LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_SDX)/runtime/lib/x86_64
 
-# xclbin
-vector_addition_XOS=vector_addition
+# Kernel compiler global settings
+CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps 
+CLFLAGS += --xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generateExtraRunData=true"
 
-XCLBINS=vector_addition
+EXECUTABLE = multiple_devices
 
-# check
-check_EXE=multiple_devices
-check_XCLBINS=vector_addition
-check_TARGETS=sw_emu hw_emu
+EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
-# Pattern to allow cmdline to determine xclbin name
-define mk_args
-check_$(1)_$(call device2sandsa,$(2))_ARGS = ./xclbin/vector_addition.$(1).$(call device2sandsa,$(2)).xclbin
-endef
+BINARY_CONTAINERS += $(XCLBIN)/vector_addition.$(TARGET).$(DSA).xclbin
+BINARY_CONTAINER_1_OBJS += $(XCLBIN)/vector_addition.$(TARGET).$(DSA).xo
+ALL_KERNEL_OBJS += $(XCLBIN)/vector_addition.$(TARGET).$(DSA).xo
 
-$(foreach target,$(TARGETS),$(foreach device,$(DEVICES),$(eval $(call mk_args,$(target),$(device)))))
+#Include Libraries
+include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
+include $(ABS_COMMON_REPO)/libs/xcl/xcl.mk
+CXXFLAGS += $(xcl_CXXFLAGS)
+LDFLAGS += $(xcl_LDFLAGS)
+HOST_SRCS += $(xcl_SRCS)
 
-CHECKS=check
+CP = cp -rf
 
-NUM_DEVICES:=2
-include $(COMMON_REPO)/utility/rules.mk
+.PHONY: all clean cleanall docs emconfig
+all: $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
+
+.PHONY: exe
+exe: $(EXECUTABLE)
+
+# Building kernel
+$(XCLBIN)/vector_addition.$(TARGET).$(DSA).xo: ./src/vector_addition.cl
+	mkdir -p $(XCLBIN)
+	$(XOCC) $(CLFLAGS) -c -k vadd -I'$(<D)' -o'$@' '$<'
+
+$(XCLBIN)/vector_addition.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_1_OBJS)
+	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk vadd:1 -o'$@' $(+)
+
+# Building Host
+$(EXECUTABLE): $(HOST_SRCS)
+	mkdir -p $(XCLBIN)
+	$(CXX) $(CXXFLAGS) $(HOST_SRCS) -o '$@' $(LDFLAGS)
+
+emconfig:$(EMCONFIG_DIR)/emconfig.json
+$(EMCONFIG_DIR)/emconfig.json:
+	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR) --nd 2
+
+check: all
+ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
+	$(CP) $(EMCONFIG_DIR)/emconfig.json .
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) xclbin/vector_addition.$(TARGET).$(DSA).xclbin
+else
+	 ./$(EXECUTABLE) xclbin/vector_addition.$(TARGET).$(DSA).xclbin
+endif
+	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
+
+# Cleaning stuff
+clean:
+	-$(RMDIR) $(EXECUTABLE) $(XCLBIN)/{*sw_emu*,*hw_emu*} 
+	-$(RMDIR) sdaccel_* TempConfig system_estimate.xtxt *.rpt
+	-$(RMDIR) src/*.ll _xocc_* .Xil emconfig.json dltmp* xmltmp* *.log *.jou *.wcfg *.wdb
+
+cleanall: clean
+	-$(RMDIR) $(XCLBIN)
+	-$(RMDIR) ./_x
+
+.PHONY: help
+
+help::
+	$(ECHO) "Makefile Usage:"
+	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
+	$(ECHO) "      Command to generate the design for specified Target and Device."
+	$(ECHO) ""
+	$(ECHO) "  make clean "
+	$(ECHO) "      Command to remove the generated non-hardware files."
+	$(ECHO) ""
+	$(ECHO) "  make cleanall"
+	$(ECHO) "      Command to remove all the generated files."
+	$(ECHO) ""
+	$(ECHO) "  make check TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
+	$(ECHO) "      Command to run application in emulation."
+	$(ECHO) ""
+
+docs: README.md
+
+README.md: description.json
+	$(ABS_COMMON_REPO)/utility/readme_gen/readme_gen.py description.json
+
