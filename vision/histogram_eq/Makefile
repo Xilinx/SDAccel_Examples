@@ -2,14 +2,14 @@
 COMMON_REPO =../../
 
 include $(COMMON_REPO)/utility/boards.mk
-include $(COMMON_REPO)/libs/xcl/xcl.mk
+include $(COMMON_REPO)/libs/xcl2/xcl2.mk
 include $(COMMON_REPO)/libs/opencv/opencv.mk
 include $(COMMON_REPO)/libs/opencl/opencl.mk
 
 # Equalizer Host Application
-equalizer_SRCS=./src/equalizer.cpp $(xcl_SRCS)
-equalizer_HDRS=./src/equalizer.h $(xcl_SRCS)
-equalizer_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl_CXXFLAGS) $(opencv_CXXFLAGS)
+equalizer_SRCS=./src/equalizer.cpp $(xcl2_SRCS)
+equalizer_HDRS=./src/equalizer.h $(xcl2_SRCS)
+equalizer_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(xcl2_CXXFLAGS) $(opencv_CXXFLAGS)
 equalizer_LDFLAGS=$(opencl_LDFLAGS) $(opencv_LDFLAGS) -lopencv_imgproc -lavcodec -lavformat -lavutil -lswscale
 
 EXES=equalizer
