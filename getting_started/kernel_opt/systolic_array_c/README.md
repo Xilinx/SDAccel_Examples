@@ -107,7 +107,6 @@ It is typical for hardware compile times to range from 30 minutes to a couple of
 FPGA acceleration boards have been deployed to the cloud. For information on how to execute the example within a specific cloud, take a look at the following guides.
 * [AWS F1 Application Execution on Xilinx Virtex UltraScale Devices]
 * [Nimbix Application Execution on Xilinx Kintex UltraScale Devices]
-* [IBM SuperVessel Research Cloud on Xilinx Virtex Devices]
 
 
 ## 7. SUPPORT
