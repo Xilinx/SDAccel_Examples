@@ -26,15 +26,15 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
-
 #include <iostream>
-
+#include <vector>
 //Includes
-#include "xcl.h"
+#include "xcl2.hpp"
 #include "bitmap.h"
 
 int main(int argc, char* argv[])
 {
+    cl_int err;
     if (argc < 2)
     {
         std::cout << "Usage: " << argv[0] << " <input bitmap> <golden bitmap>" << std::endl;
@@ -52,76 +52,81 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE ;
     }
 
-
     int width = image.getWidth() ;
-    int height = image.getHeight() ;
-   
-    //Allocate Memory in Host Memory 
-    int image_size_bytes = image.numPixels() * sizeof(int); 
-    int* outImage = (int*)(malloc(image_size_bytes)) ;
-    if (outImage == NULL)
-    {
-        std::cout << "Unable to allocate host memory!" << std::endl ;
-        return EXIT_FAILURE ;
-    }
+    int height = image.getHeight();
 
-//OPENCL HOST CODE AREA START
-   //Create Program and Kernels
-    xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "apply_watermark");
-    cl_kernel krnl_applyWatermark = xcl_get_kernel(program, "apply_watermark");
+    //Allocate Memory in Host Memory
+    size_t image_size = image.numPixels();
+    size_t image_size_bytes = image_size * sizeof(int);
+    std::vector<int,aligned_allocator<int>> inputImage(image_size);
+    std::vector<int,aligned_allocator<int>> outImage(image_size);
+
+    // Copy image host buffer
+    memcpy(inputImage.data(), image.bitmap(), image_size_bytes);
+
+// OPENCL HOST CODE AREA START
+    // get_xil_devices() is a utility API which will find the xilinx
+    // platforms and will return list of devices connected to Xilinx platform
+    std::cout << "Creating Context..." << std::endl;
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
+
+    OCL_CHECK(err, cl::Context context (device, NULL, NULL, NULL, &err));
+    OCL_CHECK(err, cl::CommandQueue q (context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
+
+    // find_binary_file() is a utility API which will search the xclbin file for
+    // targeted mode (sw_emu/hw_emu/hw) and for targeted platforms.
+    std::string binaryFile = xcl::find_binary_file(device_name, "apply_watermark");
+
+    // import_binary_file() is a utility API which will load the binaryFile
+    // and will return Binaries.
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    devices.resize(1);
+    OCL_CHECK(err, cl::Program program (context, devices, bins, NULL, &err));
+    OCL_CHECK(err, cl::Kernel apply_watermark(program, "apply_watermark", &err));
 
     // For Allocating Buffer to specific Global Memory Bank, user has to use cl_mem_ext_ptr_t
     // and provide the Banks
-    //
     cl_mem_ext_ptr_t inExt, outExt;  // Declaring two extensions for both buffers
     inExt.flags  = XCL_MEM_DDR_BANK0; // Specify Bank0 Memory for input memory
     outExt.flags = XCL_MEM_DDR_BANK1; // Specify Bank1 Memory for output Memory
-    inExt.obj = 0   ; outExt.obj = 0; // Setting Obj and Param to Zero
-    inExt.param = 0 ; outExt.param = 0; 
+    inExt.obj 	 = inputImage.data();
+    outExt.obj   = outImage.data(); // Setting Param to Zero
+    inExt.param  = 0 ; outExt.param = 0;
 
-    int err;
-    //Allocate Buffer in Bank0 of Global Memory for Input Image using Xilinx Extension
-    cl_mem buffer_inImage = clCreateBuffer(world.context, CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX,
-            image_size_bytes, &inExt, &err);
-    if (err != CL_SUCCESS){
-        std::cout << "Error: Failed to allocate device Memory" << std::endl;
-        return EXIT_FAILURE;
-    }
-    //Allocate Buffer in Bank1 of Global Memory for Input Image using Xilinx Extension
-    cl_mem buffer_outImage = clCreateBuffer(world.context, CL_MEM_WRITE_ONLY | CL_MEM_EXT_PTR_XILINX,
-            image_size_bytes, &outExt, NULL);
-    if (err != CL_SUCCESS){
-        std::cout << "Error: Failed to allocate device Memory" << std::endl;
-        return EXIT_FAILURE;
-    }
+    // Allocate Buffer in Global Memory
+    // Buffers are allocated using CL_MEM_USE_HOST_PTR for efficient memory and
+    // Device-to-host communication
+    std::cout << "Creating Buffers..." << std::endl;
+    OCL_CHECK(err, cl::Buffer buffer_inImage(context, CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR,
+    		image_size_bytes, &inExt, &err));
+    OCL_CHECK(err, cl::Buffer buffer_outImage(context, CL_MEM_WRITE_ONLY | CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR,
+    		image_size_bytes, &outExt, &err));
 
-    //Copy input Image to device global memory
-    xcl_memcpy_to_device(world,buffer_inImage,image.bitmap(),image_size_bytes);
-   
-    //Set the Kernel Arguments
-    xcl_set_kernel_arg(krnl_applyWatermark,0,sizeof(cl_mem),&buffer_inImage);
-    xcl_set_kernel_arg(krnl_applyWatermark,1,sizeof(cl_mem),&buffer_outImage);
-    xcl_set_kernel_arg(krnl_applyWatermark,2,sizeof(int),&width);
-    xcl_set_kernel_arg(krnl_applyWatermark,3,sizeof(int),&height);
-    
-    //Launch the Kernel
-    xcl_run_kernel3d(world,krnl_applyWatermark,1,1,1);
+    // Copy input data to device global memory
+    std::cout<< "Copying data..." << std::endl;
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_inImage}, 0/*0 means from host*/));
 
-    //Copy Result from Device Global Memory to Host Local Memory
-    xcl_memcpy_from_device(world, outImage, buffer_outImage,image_size_bytes);
-    clFinish(world.command_queue);
+    std::cout<< "Setting arguments..." <<std::endl;
+    OCL_CHECK(err, err = apply_watermark.setArg(0, buffer_inImage));
+    OCL_CHECK(err, err = apply_watermark.setArg(1, buffer_outImage));
+    OCL_CHECK(err, err = apply_watermark.setArg(2, width));
+    OCL_CHECK(err, err = apply_watermark.setArg(3, height));
 
-    //Release Device Memories and Kernels
-    clReleaseMemObject(buffer_inImage);
-    clReleaseMemObject(buffer_outImage);
-    clReleaseKernel(krnl_applyWatermark);
-    clReleaseProgram(program);
-    xcl_release_world(world);
-//OPENCL HOST CODE AREA END
+    // Launch the Kernel
+    // For HLS kernels global and local size is always (1,1,1). So, it is recommended
+    // to always use enqueueTask() for invoking HLS kernel
+    std::cout <<"Launching Kernel... " << std::endl;
+    OCL_CHECK(err, err = q.enqueueTask(apply_watermark));
 
+    // Copy Result from Device Global Memory to Host Local Memory
+    std::cout << "Getting Results..." << std::endl;
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_outImage}, CL_MIGRATE_MEM_OBJECT_HOST));
+    q.finish();
+//OPENCL HOST CODE AREA ENDS
 
-    bool match = false;
+    bool match = true;
     if (argc > 2){
         goldenFilename = argv[2];
         //Read the golden bit map file into memory
@@ -134,28 +139,21 @@ int main(int argc, char* argv[])
         }
         //Compare Golden Image with Output image
         if ( image.getHeight() != goldenImage.getHeight() || image.getWidth() != goldenImage.getWidth()){
-            match = true;
+            match = false;
         }else{
             int* goldImgPtr = goldenImage.bitmap();
             for (unsigned int i = 0 ; i < image.numPixels(); i++){
                 if (outImage[i] != goldImgPtr[i]){
-                    match = true;
+                    match = false;
                     printf ("Pixel %d Mismatch Output %x and Expected %x \n", i, outImage[i], goldImgPtr[i]);
                     break;
                 }
             }
         }
     }
-        
     // Write the final image to disk
-    image.writeBitmapFile(outImage);
+    image.writeBitmapFile(outImage.data());
 
-    free(outImage) ;
-    if (match){
-        std::cout << "TEST FAILED." << std::endl; 
-        return EXIT_FAILURE;
-    }
-    std::cout << "TEST PASSED." << std::endl;
-    return EXIT_SUCCESS;
-
+    std::cout << (match ? "TEST PASSED" : "TEST FAILED") << std::endl;
+    return (match ? EXIT_SUCCESS : EXIT_FAILURE) ;
 }

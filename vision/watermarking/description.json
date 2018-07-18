@@ -7,7 +7,7 @@
     "cmd_args": "PROJECT/data/inputImage.bmp PROJECT/data/golden.bmp",
     "em_cmd": "./watermark data/inputImage.bmp ./data/golden.bmp",
     "libs": [
-        "xcl", 
+        "xcl2", 
         "bitmap"
     ], 
     "containers": [
