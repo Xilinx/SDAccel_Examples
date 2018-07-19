@@ -32,7 +32,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "logger.h"
 #include "huffmancodec_optimized.h"
 #include "simplebmp.h"
-#include "xcl.h"
+#include "xcl2.hpp"
 
 #if defined(__linux__) || defined(linux)
 	#include "sys/time.h"
@@ -45,11 +45,11 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //ROUNDS <= 10 valid
 
 using namespace sda;
-using namespace sda::cl;
 
 /////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////
 //load_file_to_memory
+
 
 
 HuffmanOptimized::HuffmanOptimized() {
@@ -66,29 +66,23 @@ HuffmanOptimized::HuffmanOptimized(string& vendor_name,
 	//store path to input bitmap
 	m_strBitmapFP = strBitmapFP;
 
+	//Creating Context and Command Queue for selected Device
+	OCL_CHECK(err, context = cl::Context(device, NULL, NULL, NULL, &err));
+	OCL_CHECK(err, q = cl::CommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
 
-	m_world = xcl_world_single();
-
-
-	m_program = xcl_import_binary(m_world, "krnl_huffman");
+	std::string xclBinFile = xcl::find_binary_file(device_name, "krnl_huffman");
+	cl::Program::Binaries bins = xcl::import_binary_file(xclBinFile);
+	devices.resize(1);
+	OCL_CHECK(err, m_program = cl::Program(context, devices, bins, NULL, &err));
 
 	//kernels
-	m_clKernelHuffmanEncoder  = xcl_get_kernel(m_program, "encode");
-	m_clKernelHuffmanDecoder  = xcl_get_kernel(m_program, "decode");
+	OCL_CHECK(err, m_clKernelHuffmanEncoder = cl::Kernel(m_program, "encode", &err));
+	OCL_CHECK(err, m_clKernelHuffmanDecoder = cl::Kernel(m_program, "decode", &err));
 
 }
 
 HuffmanOptimized::~HuffmanOptimized() {
 	// TODO Auto-generated destructor stub
-	cleanup();
-}
-
-void HuffmanOptimized::cleanup() {
-
-	clReleaseKernel(m_clKernelHuffmanDecoder);
-	clReleaseKernel(m_clKernelHuffmanEncoder);
-	clReleaseProgram(m_program);
-	xcl_release_world(m_world);
 }
 
 double HuffmanOptimized::timestamp() {
@@ -105,41 +99,21 @@ double HuffmanOptimized::timestamp() {
 	return ms;
 }
 
-double HuffmanOptimized::computeEventDurationInMS(const cl_event& event) {
+double HuffmanOptimized::computeEventDurationInMS(const cl::Event& event) {
 	cl_ulong ts_start = 0, ts_end = 0;
+	cl_int err;
 	double duration = 0;
-	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &ts_start, NULL);
-	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &ts_end, NULL);
+	OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START, &ts_start));
+    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END, &ts_end));
 	duration += (cl_double)(ts_end-ts_start)*(cl_double)(1e-06);
 
 	return duration;
 }
 
-
-bool HuffmanOptimized::releaseMemObject(cl_mem &obj)
-{
-  cl_int   err = 0;
-  bool     returnStatus = true;    // true if successful
-
-  if (obj != NULL)  // This means it has been initialized
-  {
-    err = clReleaseMemObject(obj);
-    if (err != CL_SUCCESS)
-    {
-      cout << "Error releasing variable\n";
-      returnStatus |= false;
-    }
-    else
-      obj = NULL; /* memory was released, re-initialize pointer to NULL */
-  }
-
-  return returnStatus;
-}
-
-bool HuffmanOptimized::invoke_kernel(cl_kernel krnl,
+bool HuffmanOptimized::invoke_kernel(cl::Kernel krnl,
 							   const vector<u8>& vec_input,
 							   vector<u8>& vec_output,
-							   cl_event events[evtCount]) {
+							   cl::Event events[evtCount]) {
 	if(vec_input.size() == 0)
 		return false;
 
@@ -147,47 +121,31 @@ bool HuffmanOptimized::invoke_kernel(cl_kernel krnl,
 	u32 sz_output = 0;
 
 	LogInfo("Creating input/output buffers");
+
 //	__kernel
 //	__attribute__ ((reqd_work_group_size(1,1,1)))
 //	void encode(__global uchar* in_data, uint size_in_data, __global uchar* out_data, __global uint* size_out_data, uchar fetch_size_only)
 //	void decode(__global uchar* in_data, uint size_in_data, __global uchar* out_data, __global uint* size_out_data, uchar fetch_size_only) {
+
 	//create input and output buffers size for 24 bpp image
-	cl_int err;
-	cl_mem mem_input;
 
-	mem_input = clCreateBuffer(m_world.context, CL_MEM_READ_WRITE, sz_input, NULL, &err);
-	if (err != CL_SUCCESS) {
-		LogError("Error: Failed to allocate OpenCL source buffer of size %lu", sz_input);
-		return false;
-	}
+	OCL_CHECK(err, cl::Buffer mem_input(context, CL_MEM_READ_WRITE,
+		            sz_input, NULL, &err));
 
-	cl_mem mem_output;
-	mem_output = clCreateBuffer(m_world.context, CL_MEM_READ_WRITE, sz_input, NULL, &err);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to allocate worst case OpenCL output buffer of size %lu",
-				sz_input);
-		return false;
-	}
+	OCL_CHECK(err, cl::Buffer mem_output(context, CL_MEM_READ_WRITE,
+	            sz_input, NULL, &err));
 
-	cl_mem mem_sz_output;
-	mem_sz_output = clCreateBuffer(m_world.context, CL_MEM_READ_WRITE, sizeof(u32), NULL, &err);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to allocate worst case OpenCL output buffer of size %lu",
-				sizeof(u32));
-		return false;
-	}
+	OCL_CHECK(err, cl::Buffer mem_sz_output(context, CL_MEM_READ_WRITE,
+				sizeof(u32), NULL, &err));
 
 	LogInfo("Write input data to device buffer");
+
 	//copy input dataset to OpenCL buffer
-	err = clEnqueueWriteBuffer(m_world.command_queue, mem_input, CL_TRUE, 0,
-							   sz_input, vec_input.data(), 0, NULL, NULL);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to copy input dataset to OpenCL buffer");
-		return false;
-	}
+	OCL_CHECK(err, err = q.enqueueWriteBuffer(mem_input, CL_TRUE, 0,
+							   sz_input, vec_input.data(), NULL, NULL));
 
 	//finish all memory writes
-	clFinish(m_world.command_queue);
+	q.finish();
 
 	//execute kernel
 	/*!
@@ -199,160 +157,83 @@ bool HuffmanOptimized::invoke_kernel(cl_kernel krnl,
 	 * 			   __global uchar* out_data, __global uint* size_out_data,
 	 * 			   uchar fetch_size_only)
 	 */
-	err = 0;
-	err = clSetKernelArg(krnl, 0, sizeof(cl_mem), &mem_input);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to set kernel argument [0] input_buffer! %d", err);
-		LogError("Test failed");
-		return false;
-	}
 
-	err |= clSetKernelArg(krnl, 1, sizeof(u32), &sz_input);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to set kernel argument [1] sz_input! %d", err);
-		LogError("Test failed");
-		return false;
-	}
-
-	err |= clSetKernelArg(krnl, 2, sizeof(cl_mem), &mem_output);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to set kernel argument [2] output_buffer! %d", err);
-		LogError("Test failed");
-		return false;
-	}
-
-	err |= clSetKernelArg(krnl, 3, sizeof(cl_mem), &mem_sz_output);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to set kernel argument [3] sz_output! %d", err);
-		LogError("Test failed");
-		return false;
-	}
+	OCL_CHECK(err, err = krnl.setArg( 0, sizeof(cl_mem), &mem_input));
+	OCL_CHECK(err, err = krnl.setArg(1, sizeof(u32), &sz_input));
+	OCL_CHECK(err, err = krnl.setArg(2, sizeof(cl_mem), &mem_output));
+	OCL_CHECK(err, err = krnl.setArg(3, sizeof(cl_mem), &mem_sz_output));
 
 	//enable fetch size
 	u8 fetch_size_only = 1;
-	err |= clSetKernelArg(krnl, 4, sizeof(u8), &fetch_size_only);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to set kernel argument [4] fetch_size_only! %d", err);
-		LogError("Test failed");
-		return false;
-	}
+	OCL_CHECK(err, err = krnl.setArg(4, sizeof(u8), &fetch_size_only));
 
-	size_t global[1];
-	size_t local[1];
-	global[0] = 1;
-	local[0] = 1;
+	cl::size_type global;
+	cl::size_type local;
+	global = 1;
+	local = 1;
 
 	LogInfo("EX1: to make sure all buffers are migrated to device");
 
 	//call once to guarentee that all buffers are migrated to device memory
-	err = clEnqueueNDRangeKernel(m_world.command_queue, krnl, 1, NULL, global,
-			local, 0, NULL, &events[evtHostWrite]);
-	if (err != CL_SUCCESS) {
-		LogError("[EX1] Failed to execute kernel %d", err);
-		LogError("Test failed");
-		return false;
-	}
-	clFinish(m_world.command_queue);
+	OCL_CHECK(err, err = q.enqueueNDRangeKernel(krnl, 0, global,
+			local, NULL, &events[evtHostWrite]));
+	q.finish();
 
 
 	LogInfo("EX1: Readback the output size required for the actual kernel execution");
 
 	//read output size
-	err = clEnqueueReadBuffer(m_world.command_queue, mem_sz_output, CL_TRUE, 0,
-			sizeof(u32), (void *) &sz_output, 0, NULL, NULL);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to read output size buffer %d", err);
-		LogError("Test failed");
-		return false;
-	}
-	clFinish(m_world.command_queue);
+	OCL_CHECK(err, err = q.enqueueReadBuffer(mem_sz_output, CL_TRUE, 0,
+			sizeof(u32), (void *) &sz_output, NULL, NULL));
+	q.finish();
 
 
 	LogInfo("EX1: sz_input = %u, sz_output = %u", sz_input, sz_output);
 
-	//resize output-buffer
-	releaseMemObject(mem_output);
-
 	vec_output.resize(sz_output);
 	std::fill(vec_output.begin(), vec_output.end(), 0);
 
-	mem_output = clCreateBuffer(m_world.context, CL_MEM_READ_WRITE, sz_output, NULL, &err);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to allocate worst case OpenCL output buffer of size %lu", sz_output);
-		return false;
-	}
+	OCL_CHECK(err, cl::Buffer mem_output_sz(context, CL_MEM_READ_WRITE,
+					sz_output, NULL, &err));
 
 	LogInfo("Write output data to device buffer");
+
 	//copy input dataset to OpenCL buffer
-	err = clEnqueueWriteBuffer(m_world.command_queue, mem_output, CL_TRUE, 0,
-							   sz_output, vec_output.data(), 0, NULL, NULL);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to clear output dataset in OpenCL buffer");
-		return false;
-	}
+	OCL_CHECK(err, err = q.enqueueWriteBuffer(mem_output_sz, CL_TRUE, 0,
+							   sz_output, vec_output.data(), NULL, NULL));
 
 	//set output again
-	err |= clSetKernelArg(krnl, 2, sizeof(cl_mem), &mem_output);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to set kernel argument [2] output_buffer! %d", err);
-		LogError("Test failed");
-		return false;
-	}
+	OCL_CHECK(err, err = krnl.setArg(2, sizeof(cl_mem), &mem_output_sz));
 
 	//set output size again
-	err |= clSetKernelArg(krnl, 3, sizeof(cl_mem), &mem_sz_output);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to set kernel argument [3] sz_output! %d", err);
-		LogError("Test failed");
-		return false;
-	}
+	OCL_CHECK(err, err = krnl.setArg(3, sizeof(cl_mem), &mem_sz_output));
 
 	//disable fetch size
 	fetch_size_only = 0;
-	err |= clSetKernelArg(krnl, 4, sizeof(u8), &fetch_size_only);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to set kernel argument [4] fetch_size_only! %d", err);
-		LogError("Test failed");
-		return false;
-	}
+	OCL_CHECK(err, err = krnl.setArg(4, sizeof(u8), &fetch_size_only));
 
 	LogInfo("EX2: Real execution of the algorithm to fill the output");
 
 	//call a second time to measure on-chip throughput
-	err = clEnqueueNDRangeKernel(m_world.command_queue, krnl, 1, NULL, global,
-			local, 0, NULL, &events[evtKernelExec]);
-	if (err != CL_SUCCESS) {
-		LogError("[EX2] Failed to execute kernel %d", err);
-		LogError("Test failed");
-		return false;
-	}
+	OCL_CHECK(err, err = q.enqueueNDRangeKernel(krnl, 0, global,
+			local, NULL, &events[evtKernelExec]));
 
-	clFinish(m_world.command_queue);
+	q.finish();
 
 
 	LogInfo("EX2: Readback the results from codec");
 	//copy results back from OpenCL buffer
-	err = clEnqueueReadBuffer(m_world.command_queue, mem_output, CL_TRUE, 0,
-			sz_output, (void *) vec_output.data(), 0, NULL, &events[evtHostRead]);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to read output size buffer %d", err);
-		LogError("Test failed");
-		return false;
-	}
-	clFinish(m_world.command_queue);
+	OCL_CHECK(err, err = q.enqueueReadBuffer(mem_output_sz, CL_TRUE, 0,
+			sz_output, (void *) vec_output.data(), NULL, &events[evtHostRead]));
 
-
-	//cleanup
-	releaseMemObject(mem_input);
-	releaseMemObject(mem_output);
-	releaseMemObject(mem_sz_output);
+	q.finish();
 
 	return true;
 }
 
 int HuffmanOptimized::enc(const vector<u8>& in_data, vector<u8>& out_data) {
 	//timings
-	cl_event events[evtCount];
+	cl::Event events[evtCount];
 	double durations[evtCount];
 	for(int i=0; i < evtCount; i++)
 		durations[i] = 0.0;
@@ -383,7 +264,7 @@ int HuffmanOptimized::enc(const vector<u8>& in_data, vector<u8>& out_data) {
 
 int HuffmanOptimized::dec(const vector<u8>& in_data, vector<u8>& out_data) {
 	//timings
-	cl_event events[evtCount];
+	cl::Event events[evtCount];
 	double durations[evtCount];
 	for(int i=0; i < evtCount; i++)
 		durations[i] = 0.0;
@@ -434,7 +315,7 @@ bool HuffmanOptimized::run(int idevice, int nruns) {
 	LogInfo("Read input data successfully. size = %u", szInputBuffer);
 
 	//timings
-	cl_event events[evtCount];
+	cl::Event events[evtCount];
 	double durations[evtCount];
 	for(int i=0; i < evtCount; i++)
 		durations[i] = 0.0;

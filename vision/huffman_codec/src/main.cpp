@@ -36,7 +36,6 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 using namespace sda;
-using namespace sda::cl;
 using namespace sda::utils;
 
 static void print_huffman_encoded_data(vector<u8> data) {

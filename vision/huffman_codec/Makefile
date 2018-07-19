@@ -5,15 +5,15 @@ include $(COMMON_REPO)/utility/boards.mk
 include $(COMMON_REPO)/libs/logger/logger.mk
 include $(COMMON_REPO)/libs/simplebmp/simplebmp.mk
 include $(COMMON_REPO)/libs/cmdparser/cmdparser.mk
-include $(COMMON_REPO)/libs/xcl/xcl.mk
+include $(COMMON_REPO)/libs/xcl2/xcl2.mk
 include $(COMMON_REPO)/libs/opencl/opencl.mk
 
 # Huffman Codec Host Application
 huffman_SRCS=./src/bit_io.cpp ./src/huffmancodec_naive.cpp ./src/huffmancodec_optimized_cpuonly.cpp ./src/huffmancodec_optimized.cpp \
-	./src/main.cpp $(simplebmp_SRCS) $(xcl_SRCS) $(logger_SRCS) $(cmdparser_SRCS)
+	./src/main.cpp $(simplebmp_SRCS) $(xcl2_SRCS) $(logger_SRCS) $(cmdparser_SRCS)
 huffman_HDRS=./src/bit_io.h ./src/huffmancodec_naive.h ./src/huffmancodec_optimized_cpuonly.h ./src/huffmancodec_optimized.h \
-	$(logger_HDRS) $(simplebmp_HDRS) $(xcl_HDRS) $(cmdparser_HDRS)
-huffman_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(cmdparser_CXXFLAGS) $(xcl_CXXFLAGS) $(simplebmp_CXXFLAGS) $(logger_CXXFLAGS)
+	$(logger_HDRS) $(simplebmp_HDRS) $(xcl2_HDRS) $(cmdparser_HDRS)
+huffman_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) $(cmdparser_CXXFLAGS) $(xcl2_CXXFLAGS) $(simplebmp_CXXFLAGS) $(logger_CXXFLAGS)
 huffman_LDFLAGS=$(opencl_LDFLAGS)
 
 EXES=huffman

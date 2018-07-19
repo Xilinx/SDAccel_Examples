@@ -13,7 +13,7 @@
         "logger", 
         "cmdparser", 
         "simplebmp", 
-        "xcl"
+        "xcl2"
     ], 
     "containers" : [
         {
