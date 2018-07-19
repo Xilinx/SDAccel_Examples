@@ -12,31 +12,28 @@
     "libs": [
         "xcl2"
     ],
+    "host_exe": "loop_fusion",
     "em_cmd": "./loop_fusion",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./loop_fusion",
-    "accelerators": [
+    "containers": [
+    {
+        "name": "nearest_neighbor",        
+        "accelerators": [
         {
-            "container": "nearest_neighbor", 
             "name": "nearest_neighbor", 
             "location": "src/nearest_neighbor.cl"
         },
         {
-            "container": "nearest_neighbor", 
             "name": "nearest_neighbor_loop_fusion", 
             "location": "src/nearest_neighbor.cl"
         }
+       ]
+     }
     ],
     "contributors" : [
         {
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
-        }
-    ],
-    "revision" : [
-        {
-            "date" : "DEC2016",
-            "version": "1.0",
-            "description": "Initial Xilinx Release"
         }
     ]
 }

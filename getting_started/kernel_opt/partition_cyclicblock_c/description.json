@@ -12,31 +12,29 @@
     "libs": [
         "xcl2"
     ],
+    "host_exe": "array_partition",
     "em_cmd": "./array_partition",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./array_partition",
-    "accelerators": [
+    "output_files": "output.png",        
+    "containers": [
+    {
+        "name": "matmul",        
+        "accelerators": [
         {
-            "container": "matmul", 
             "name": "matmul_naive", 
             "location": "src/matmul.cpp"
         },
         {
-            "container": "matmul", 
             "name": "matmul_partition", 
             "location": "src/matmul_partition.cpp"
         }
+       ]
+     }
     ],
     "contributors" : [
         {
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
-        }
-    ],
-    "revision" : [
-        {
-            "date" : "MAY2017",
-            "version": "1.0",
-            "description": "Initial Xilinx Release"
         }
     ]
 }

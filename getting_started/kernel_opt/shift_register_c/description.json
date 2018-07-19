@@ -12,31 +12,28 @@
     "libs": [
         "xcl2"
     ],
+    "host_exe": "host",
     "em_cmd": "./host",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./host",
-    "accelerators": [
+    "containers": [
+    {
+        "name": "fir",        
+        "accelerators": [
         {
-            "container": "fir", 
             "name": "fir_naive", 
             "location": "src/fir_naive.cpp"
         },
         {
-            "container": "fir", 
             "name": "fir_shift_register", 
             "location": "src/fir_shift_register.cpp"
         }
+       ]
+      }
     ],
     "contributors" : [
         {
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
-        }
-    ],
-    "revision" : [
-        {
-            "date" : "MAY2017",
-            "version": "1.0",
-            "description": "Initial Xilinx Release"
         }
     ]
 }

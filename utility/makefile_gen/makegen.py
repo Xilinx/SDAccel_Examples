@@ -178,15 +178,15 @@ def add_containers(target, data):
             for acc in con["accelerators"]:
                 if acc_cnt==2 and bin_cnt==2:
                     target.write("BINARY_CONTAINER_")
-                    target.write(data["containers"][container_name]["name"])
+                    target.write(acc["name"])
                     target.write("_OBJS += $(XCLBIN)/")
                 else:
                     target.write("BINARY_CONTAINER_1_OBJS += $(XCLBIN)/")
-                target.write(data["containers"][container_name]["name"])
+                target.write(acc["name"])
                 target.write(".$(TARGET).$(DSA)")
                 target.write(".xo\n")
                 target.write("ALL_KERNEL_OBJS += $(XCLBIN)/")
-                target.write(data["containers"][container_name]["name"])
+                target.write(acc["name"])
                 target.write(".$(TARGET).$(DSA)")
                 target.write(".xo\n")
             container_name = container_name + 1
@@ -220,7 +220,7 @@ def building_kernel(target, data):
         for con in data["containers"]:
             for acc in con["accelerators"]:
                 target.write("$(XCLBIN)/")
-                target.write(data["containers"][container_name]["name"])
+                target.write(acc["name"])
                 target.write(".$(TARGET).$(DSA)")
                 target.write(".xo: ./")
                 target.write(acc["location"])
@@ -313,7 +313,7 @@ def profile_report(target):
 
     return
 
-def mk_clean(target):
+def mk_clean(target, data):
     target.write("# Cleaning stuff\n")
     target.write("clean:\n")
     target.write("\t-$(RMDIR) $(EXECUTABLE) $(XCLBIN)/{*sw_emu*,*hw_emu*} \n")
@@ -324,6 +324,13 @@ def mk_clean(target):
     target.write("cleanall: clean\n")
     target.write("\t-$(RMDIR) $(XCLBIN)\n")
     target.write("\t-$(RMDIR) ./_x\n")
+    if "output_files" in data:         
+        target.write("\t-$(RMDIR) ")
+        args = data["output_files"].split(" ")
+        for arg in args[0:]:
+            target.write("./")
+            target.write(arg)
+            target.write(" ")       
     target.write("\n")
 
     return
@@ -356,6 +363,16 @@ def mk_build_all(target, data):
 
 def mk_check(target, data):
     target.write("check: all\n")
+    if "nboard" in data:
+        target.write("ifeq ($(DEVICE),$(filter $(DEVICE),")
+        args = data["nboard"]
+        for arg in args:
+            target.write(" ")
+            target.write(arg)
+        target.write("))\n")
+        target.write("$(error Nothing to be done for make)\n")
+    target.write("endif\n")
+    target.write("\n") 
     target.write("ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))\n")
     target.write("\t$(CP) $(EMCONFIG_DIR)/emconfig.json .\n") 
     target.write("\tXCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)")
@@ -415,7 +432,7 @@ def create_mk(target, data):
     add_libs(target, data)
     mk_build_all(target, data)
     mk_check(target, data)
-    mk_clean(target)
+    mk_clean(target,data)
     mk_help(target)
     return
 

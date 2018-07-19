@@ -11,6 +11,7 @@
     "libs": [
         "xcl2"
     ],
+    "host_exe": "aos_vs_soa",
     "em_cmd": "./aos_vs_soa",
     "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./aos_vs_soa",
     "containers": [
@@ -32,13 +33,6 @@
         {
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
-        }
-    ],
-    "revision" : [
-        {
-            "date" : "DEC2016",
-            "version": "1.0",
-            "description": "Initial Xilinx Release"
         }
     ]
 }
