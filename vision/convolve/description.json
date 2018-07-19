@@ -10,7 +10,7 @@
     "em_cmd": "./convolve data/input_buffer_raw.txt data/filter_buffer_raw.txt data/output_buffer_raw.txt",
     "libs": [
         "opencv", 
-        "xcl"
+        "xcl2"
     ],
     "containers": [
     {

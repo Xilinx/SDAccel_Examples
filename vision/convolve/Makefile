@@ -2,14 +2,14 @@
 COMMON_REPO =../../
 
 include $(COMMON_REPO)/utility/boards.mk
-include $(COMMON_REPO)/libs/xcl/xcl.mk
+include $(COMMON_REPO)/libs/xcl2/xcl2.mk
 include $(COMMON_REPO)/libs/opencv/opencv.mk
 include $(COMMON_REPO)/libs/opencl/opencl.mk
 
 # convolve Host Application
-convolve_SRCS=src/convolve.cpp $(xcl_SRCS)
-convolve_HDRS= $(xcl_HDRS)
-convolve_CXXFLAGS=$(xcl_CXXFLAGS) $(opencl_CXXFLAGS) $(opencv_CXXFLAGS)
+convolve_SRCS=src/convolve.cpp $(xcl2_SRCS)
+convolve_HDRS= $(xcl2_HDRS)
+convolve_CXXFLAGS=$(xcl2_CXXFLAGS) $(opencl_CXXFLAGS) $(opencv_CXXFLAGS)
 convolve_LDFLAGS=$(opencl_LDFLAGS) $(opencv_LDFLAGS)
 
 EXES=convolve

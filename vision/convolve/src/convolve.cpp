@@ -26,13 +26,18 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
-
 // Convolve Example
+#define FILTER_WIDTH 11
+#define FILTER_HEIGHT 11
+
+#define IMAGE_WIDTH 1024
+#define IMAGE_HEIGHT 1024
 
 #include <iostream>
 #include <string>
 #include <fstream>
 #include <cstdlib>
+#include <vector>
 
 // OpenCV includes
 #include <opencv2/core/core.hpp>
@@ -40,11 +45,11 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <opencv2/highgui/highgui.hpp>
 
 // XCL Helper Library
-#include "xcl.h"
+#include <xcl2.hpp>
 
 short getAbsMax(cv::Mat mat, size_t rows, size_t cols) {
 	short max = 0;
-	
+
 	for(size_t r = 0; r < rows; r++) {
 		for(size_t c = 0; c < cols; c++) {
 			short tmp = std::abs(mat.at<short>(r,c));
@@ -98,6 +103,9 @@ cv::Mat readFloatTxtFile(std::string fileName, size_t rows, size_t cols) {
 }
 
 int main(int argc, char* argv[]) {
+	cl_int err;
+	cl::Event event;
+
     if(argc != 3 && argc != 4)
     {
         std::cout << "Usage: " << argv[0] <<"<input> <coef> [<golden>]" << std::endl;
@@ -114,49 +122,92 @@ int main(int argc, char* argv[]) {
         validate = true;
     }
 
-    std::cout << "Creating context..." << std::endl;
-    xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "krnl_convolve");
-    cl_kernel krnl = xcl_get_kernel(program, "krnl_convolve");
-
     std::cout << "Reading inputs..." << std::endl;
-    cv::Mat input  = readTxtFile(inputFileName, 1024, 1024);
-    cv::Mat coef   = readTxtFile(coefFileName, 11, 11);
+    cv::Mat input  = readTxtFile(inputFileName, IMAGE_HEIGHT, IMAGE_WIDTH);
+    cv::Mat coef   = readTxtFile(coefFileName, FILTER_HEIGHT, FILTER_WIDTH);
 
     input /= 32;
     coef *= 1;
 
+    std::vector<double, aligned_allocator<double>> vecInput;
+    vecInput.assign((double*)input.datastart, (double*)input.dataend);
+    std::vector<double, aligned_allocator<double>> vecOutput(vecInput.size());
+
     std::cout << "Calculating Max Energy..." << std::endl;
-    short inputMax = getAbsMax(input, 1024, 1024);
-    short coefMax  = getAbsMax(coef, 11, 11);
+    short inputMax = getAbsMax(input, IMAGE_HEIGHT, IMAGE_WIDTH);
+    short coefMax  = getAbsMax(coef, FILTER_HEIGHT, FILTER_WIDTH);
 
     std::cout << "inputBits = " << ceil(log2(inputMax)) << " coefMax = " << ceil(log2(coefMax)) << std::endl;
-    long long max_bits = (long long) inputMax * coefMax * 11*11;
+    long long max_bits = (long long) inputMax * coefMax * FILTER_HEIGHT * FILTER_WIDTH;
+    cv::Mat output(IMAGE_HEIGHT, IMAGE_WIDTH, CV_16S);
+    output.reshape(0);
 
     std::cout << "Max Energy = " << ceil(log2(max_bits)) + 1 << " Bits" << std::endl;
 
-    std::cout << "Creating Buffers..." << std::endl;
-    cl_mem devCoef   = xcl_malloc(world, CL_MEM_READ_ONLY,  ((11*11-1)/32 + 1)*sizeof(cl_uint16));
-    cl_mem devInput  = xcl_malloc(world, CL_MEM_READ_ONLY,  ((1024*1024-1)/32 + 1)*sizeof(cl_uint16));
-    cl_mem devOutput = xcl_malloc(world, CL_MEM_WRITE_ONLY, ((1024*1024-1)/32 + 1)*sizeof(cl_uint16));
- 
-    std::cout << "Copying Buffers to device...." << std::endl;
-    xcl_memcpy_to_device(world, devCoef, coef.data, 11*11*sizeof(short));
-    xcl_memcpy_to_device(world, devInput, input.data, 1024*1024*sizeof(short));
+// OPENCL HOST CODE AREA START
+    // get_xil_devices() is a utility API which will find the Xilinx
+    // platforms and will return list of devices connected to Xilinx platform
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
 
-    std::cout << "Starting Kernel..." << std::endl;
-    clSetKernelArg(krnl, 0, sizeof(cl_mem), &devCoef);
-    clSetKernelArg(krnl, 1, sizeof(cl_mem), &devInput);
-    clSetKernelArg(krnl, 2, sizeof(cl_mem), &devOutput);
+    std::cout << "Creating Context..." <<std::endl;
+    OCL_CHECK(err, cl::Context context (device, NULL, NULL, NULL, &err));
+    OCL_CHECK(err, cl::CommandQueue q (context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
-    unsigned long duration = xcl_run_kernel3d(world, krnl, 1, 1, 1);
-    std::cout << "Kernel Duration: " << duration << " ns" << std::endl;
+    // find_binary_file() is a utility API which will search the xclbin file for
+    // targeted mode (sw_emu/hw_emu/hw) and for targeted platforms.
+    std::string binaryFile = xcl::find_binary_file(device_name, "krnl_convolve");
 
-    cv::Mat output(1024, 1024, CV_16S);
-    xcl_memcpy_from_device(world, output.data, devOutput, 1024*1024*sizeof(short));
+    // import_binary_file() ia a utility API which will load the binaryFile
+    // and will return Binaries.
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    devices.resize(1);
+    OCL_CHECK(err, cl::Program program (context, devices, bins, NULL, &err));
+    OCL_CHECK(err, cl::Kernel krnl_convolve(program, "krnl_convolve", &err));
 
-    short outputMax  = getAbsMax(output, 1024, 1024);
+    // Allocate Buffer in Global Memory
+    // Buffers are allocated using CL_MEM_USE_HOST_PTR for efficient memory and
+    // Device-to-host communication
+    std::cout << "Creating Buffers..." <<std::endl;
+    OCL_CHECK(err, cl::Buffer devCoef(context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY,
+    		((FILTER_HEIGHT*FILTER_WIDTH-1)/32 + 1)*sizeof(cl_uint16), coef.data, &err));
+    OCL_CHECK(err, cl::Buffer devInput(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+    		((IMAGE_HEIGHT*IMAGE_WIDTH-1)/32 + 1)*sizeof(cl_uint16), vecInput.data(), &err));
+    OCL_CHECK(err, cl::Buffer devOutput(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+    		((IMAGE_HEIGHT*IMAGE_WIDTH-1)/32 + 1)*sizeof(cl_uint16), vecOutput.data(), &err));
 
+    // Copy input data to device global memory
+    std::cout << "Copying data..." << std::endl;
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({devCoef, devInput}, 0/*0 means from host*/));
+
+    std::cout << "Setting Arguments..." << std::endl;
+    OCL_CHECK(err, err = krnl_convolve.setArg(0, devCoef));
+    OCL_CHECK(err, err = krnl_convolve.setArg(1, devInput));
+    OCL_CHECK(err, err = krnl_convolve.setArg(2, devOutput));
+    
+    // Launch the Kernel
+    // For HLS kernels global and local size is always (1,1,1). So, it is recommended
+    // to always use enqueueTask() for invoking HLS kernel
+    std::cout << "Launching Kernel..." << std::endl;
+    OCL_CHECK(err, err = q.enqueueTask(krnl_convolve, NULL, &event));
+
+    // Copy Result from Device Global Memory to Host Local Memory
+    std::cout << "Getting Results..." << std::endl;
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({devOutput}, CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.finish());
+    uint64_t nstimestart, nstimeend;
+    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart));
+    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend));
+
+    auto duration = nstimeend-nstimestart;
+
+    std::cout << "Kernel Duration: " << duration << " ns" <<std::endl;
+//OPENCL HOST CODE AREA ENDS
+
+    std::memcpy(output.data, vecOutput.data(), vecOutput.size()*sizeof(double));
+
+    short outputMax  = getAbsMax(output, IMAGE_HEIGHT, IMAGE_WIDTH);
     std::cout << "outputBits = " << ceil(log2(outputMax)) << std::endl;
 
     cv::imwrite("input.bmp", input);
@@ -166,20 +217,11 @@ int main(int argc, char* argv[]) {
     if(validate) {
         std::cout << "Validate" << std::endl;
         std::string goldenFileName(argv[3]);
-        cv::Mat golden  = readFloatTxtFile(goldenFileName, 1014, 1014);
+        cv::Mat golden  = readFloatTxtFile(goldenFileName, IMAGE_HEIGHT, IMAGE_WIDTH);
 
         cv::imwrite("golden.bmp", golden);
     }
 
-    std::cout << "Cleanup..." << std::endl;
-    clReleaseMemObject(devOutput);
-    clReleaseMemObject(devInput);
-    clReleaseMemObject(devCoef);
-    clReleaseKernel(krnl);
-    clReleaseProgram(program);
-    xcl_release_world(world);
-
     std::cout << "Completed Successfully" << std::endl;
-
     return EXIT_SUCCESS;
 }
