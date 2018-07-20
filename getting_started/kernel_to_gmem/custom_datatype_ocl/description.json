@@ -12,27 +12,26 @@
     "libs": [
         "xcl2","bitmap"
     ],
+    "host_exe": "host",
     "cmd_args" : "PROJECT/data/input.bmp",
     "em_cmd": "./host ./data/input.bmp",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host ./data/input.bmp",
-    "accelerators": [
+    "output_files": "output.bmp",        
+    "containers": [
+    {
+        "name": "rgb_to_hsv",        
+        "accelerators": [
         {
-            "container": "rgb_to_hsv", 
             "name": "rgb_to_hsv", 
             "location": "src/rgb_to_hsv.cl"
         }
+       ]
+     }            
     ],
     "contributors" : [
         {
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
-        }
-    ],
-    "revision" : [
-        {
-            "date" : "DEC2016",
-            "version": "1.0",
-            "description": "Initial Xilinx Release"
         }
     ]
 }

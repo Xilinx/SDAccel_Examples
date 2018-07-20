@@ -50,9 +50,11 @@ Makefile
 README.md
 data/input.bmp
 description.json
+sdaccel.ini
 src/host.cpp
 src/rgb_to_hsv.cpp
 src/rgb_to_hsv.h
+utils.mk
 ```
 
 ## 5. COMPILATION AND EXECUTION

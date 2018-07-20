@@ -51,8 +51,10 @@ README.md
 data/golden.bmp
 data/input.bmp
 description.json
+sdaccel.ini
 src/apply_watermark.cpp
 src/host.cpp
+utils.mk
 ```
 
 ## 5. COMPILATION AND EXECUTION

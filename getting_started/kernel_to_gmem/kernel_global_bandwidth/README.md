@@ -45,8 +45,10 @@ Application code is located in the src directory. Accelerator binary files will 
 Makefile
 README.md
 description.json
+sdaccel.ini
 src/kernel.cl
 src/kernel_global_bandwidth.cpp
+utils.mk
 ```
 
 ## 5. COMPILATION AND EXECUTION

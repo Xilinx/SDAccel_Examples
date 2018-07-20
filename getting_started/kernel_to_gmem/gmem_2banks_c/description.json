@@ -14,9 +14,11 @@
     "libs": [
         "xcl2","bitmap"
     ],
+    "host_exe": "host",
     "cmd_args" : "PROJECT/data/input.bmp PROJECT/data/golden.bmp",
     "em_cmd": "./host ./data/input.bmp ./data/golden.bmp",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host ./data/input.bmp ./data/golden.bmp",
+    "output_files": "output.bmp",        
     "containers": [
         {
             "name": "apply_watermark", 
@@ -34,13 +36,6 @@
         {
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
-        }
-    ],
-    "revision" : [
-        {
-            "date" : "DEC2016",
-            "version": "1.0",
-            "description": "Initial Xilinx Release"
         }
     ]
 }

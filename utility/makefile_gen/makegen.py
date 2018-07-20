@@ -371,7 +371,7 @@ def mk_check(target, data):
             target.write(arg)
         target.write("))\n")
         target.write("$(error Nothing to be done for make)\n")
-    target.write("endif\n")
+        target.write("endif\n")
     target.write("\n") 
     target.write("ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))\n")
     target.write("\t$(CP) $(EMCONFIG_DIR)/emconfig.json .\n") 
