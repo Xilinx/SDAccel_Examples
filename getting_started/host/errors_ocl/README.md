@@ -97,7 +97,7 @@ emconfigutil --platform 'xilinx:vcu1525:dynamic' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./errors ./xclbin/vector_addition.<emulation target>.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin
+./errors ./xclbin/vector_addition.<emulation target>.xilinx_vcu1525_dynamic.xclbin
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card

@@ -13,7 +13,7 @@
         "xcl"
     ],
     "host_exe": "multiple_devices",
-    "cmd_args" : "BUILD/default.xclbin",
+    "cmd_args" : "BUILD/vector_addition.xclbin",
     "em_cmd": "./multiple_devices xclbin/vector_addition.<emulation target>.xilinx_vcu1525_dynamic_5_1.xclbin",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./multiple_devices xclbin/vector_addition.hw.xilinx_vcu1525_dynamic_5_1.xclbin",
     "num_devices": "2",        

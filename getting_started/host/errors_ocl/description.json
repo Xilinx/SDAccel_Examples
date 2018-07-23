@@ -10,9 +10,9 @@
         "Linux"
     ],
     "host_exe": "errors",
-    "cmd_args" : "BUILD/default.xclbin",
-    "em_cmd": "./errors ./xclbin/vector_addition.<emulation target>.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
-    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./errors ./xclbin/vector_addition.hw.xilinx_adm-pcie-ku3_2ddr_3_2.xclbin",
+    "cmd_args" : "BUILD/vector_addition.xclbin",
+    "em_cmd": "./errors ./xclbin/vector_addition.<emulation target>.xilinx_vcu1525_dynamic.xclbin",
+    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./errors ./xclbin/vector_addition.hw.xilinx_vcu1525_dynamic.xclbin",
     "containers": [
     {
         "name": "vector_addition",        
