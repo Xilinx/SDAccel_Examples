@@ -12,6 +12,7 @@
     "libs": [
         "xcl2"
     ],
+    "host_exe": "host",
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "containers" : [
@@ -30,13 +31,6 @@
         {
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
-        }
-    ],
-    "revision" : [
-        {
-            "date" : "FEB2018",
-            "version": "1.0",
-            "description": "Initial Xilinx Release"
         }
     ]
 }

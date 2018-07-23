@@ -12,6 +12,7 @@
     "libs": [
         "xcl2"
     ],
+    "host_exe": "host",
     "nboard":["xilinx:kcu1500:dynamic", "xilinx_kcu1500_dynamic_5_0"],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
@@ -31,13 +32,6 @@
         {
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
-        }
-    ],
-    "revision" : [
-        {
-            "date" : "JAN2017",
-            "version": "1.0",
-            "description": "Initial Xilinx Release"
         }
     ]
 }

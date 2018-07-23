@@ -12,36 +12,32 @@
     "libs": [
         "xcl2"
     ],
+    "host_exe": "host",
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
-    "accelerators": [
+    "containers": [
+    {
+        "name": "adder",        
+        "accelerators": [
         {
-            "container": "adder", 
             "name": "adder_stage", 
             "location": "src/adder.cl"
         },
         {
-            "container": "adder", 
             "name": "input_stage", 
             "location": "src/adder.cl"
         },
         {
-            "container": "adder", 
             "name": "output_stage", 
             "location": "src/adder.cl"
         }
+       ]
+     }            
     ],
     "contributors" : [
         {
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
-        }
-    ],
-    "revision" : [
-        {
-            "date" : "DEC2016",
-            "version": "1.0",
-            "description": "Initial Xilinx Release"
         }
     ]
 }
