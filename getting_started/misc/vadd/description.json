@@ -7,40 +7,27 @@
     "os": [
         "Linux"
     ],
+    "host_exe": "vadd",
     "em_cmd" : "./vadd",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./vadd",
     "libs": [
         "xcl2"
     ], 
-    "accelerators": [
+    "containers": [
+    {
+        "name": "krnl_vadd",        
+        "accelerators": [
         {
-            "container": "krnl_vadd", 
             "name": "krnl_vadd", 
             "location": "src/krnl_vadd.cl"
         }
+       ]
+     }                
     ],
     "contributors" : [
         {
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
         }
-    ],
-    "revision" : [
-        {
-            "date" : "FEB2016",
-            "version": "1.0",
-            "description": "Initial Xilinx Release"
-        },
-        {
-            "date" : "JUL2016",
-            "version": "2.0",
-            "description": "Conversion to Makefile based compilation"
-        },
-        {
-            "date":"DEC2016",
-            "version":"3.0",
-            "description": "Update for SDAccel 2016.3"
-        }
     ]
-
 }

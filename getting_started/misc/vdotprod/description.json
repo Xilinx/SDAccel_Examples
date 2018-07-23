@@ -7,40 +7,27 @@
     "os": [
         "Linux"
     ],
+    "host_exe": "vdotprod",
     "em_cmd" : "./vdotprod",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./vdotprod",
     "libs": [
         "xcl2"
     ], 
-    "accelerators": [
+    "containers": [
+    {
+        "name": "krnl_vdotprod",        
+        "accelerators": [
         {
-            "container": "krnl_vdotprod", 
             "name": "krnl_vdotprod", 
             "location": "src/krnl_vdotprod.cl"
         }
+        ]
+     }            
     ],
     "contributors" : [
         {
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
         }
-    ],
-    "revision" : [
-        {
-            "date" : "FEB2016",
-            "version": "1.0",
-            "description": "Initial Xilinx Release"
-        },
-        {
-            "date" : "JUL2016",
-            "version": "2.0",
-            "description": "Conversion to Makefile based compilation"
-        },
-        {
-            "date":"DEC2016",
-            "version":"3.0",
-            "description":"Update for SDAccel 2016.3"
-        }
     ]
-
 }

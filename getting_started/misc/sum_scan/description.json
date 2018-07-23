@@ -7,36 +7,28 @@
     "os": [
         "Linux"
     ],
-    "nboard":["xilinx:kcu1500:dynamic", "xilinx_kcu1500_dynamic_5_0"],
+    "host_exe": "sum_scan",
     "em_cmd" : "./sum_scan",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./sum_scan",
     "libs": [
         "xcl2"
     ], 
-    "accelerators": [
+    "containers": [
+    {
+        "name": "krnl_sum_scan",        
+        "accelerators": [
         {
-            "container": "krnl_sum_scan", 
-            "name": "krnl_sum_scan", 
+            "name": "krnl_sum_scan",
+            "clflags": "--kernel_frequency 235", 
             "location": "src/krnl_sum_scan.cl"
         }
+       ]
+     }            
     ],
     "contributors" : [
         {
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
         }
-    ],
-    "revision" : [
-        {
-            "date" : "SEP2016",
-            "version": "1.0",
-            "description": "Initial Release"
-        },
-        {
-            "date": "DEC2016",
-            "version": "2.0",
-            "description": "Update for SDAccel 2016.3"
-        }
     ]
-
 }
