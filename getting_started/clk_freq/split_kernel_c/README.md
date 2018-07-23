@@ -51,6 +51,7 @@ README.md
 data/car_128x128.bmp
 data/car_480x640.bmp
 description.json
+sdaccel.ini
 src/boost_helper.h
 src/defns.h
 src/host.cpp
@@ -58,6 +59,7 @@ src/median_helper.h
 src/sketch.cpp
 src/sketch_bad.cpp
 src/sketch_helper.h
+utils.mk
 ```
 
 ## 5. COMPILATION AND EXECUTION
