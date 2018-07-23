@@ -73,29 +73,30 @@ int main(int argc, char* argv[]) {
     }
     dummy_op(din1,din2,din3,dout);
 
+    cl_int err;
 //OPENCL HOST CODE AREA START
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
-    std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+    OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
+    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     std::string binaryFile = xcl::find_binary_file(device_name,binary_name.c_str());
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
-    cl::Program program(context, devices, bins);
-    cl::Kernel krnl(program,"dummy_op");
+    OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
+    OCL_CHECK(err, cl::Kernel krnl(program,"dummy_op", &err));
 
     //Allocate Buffer in Global Memory
-    cl::Buffer buffer_din1  (context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-            sizeof(int) * total_size, din1.data());
-    cl::Buffer buffer_din2(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-            sizeof(int) * total_size, din2.data());
-    cl::Buffer buffer_din3  (context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-            sizeof(int) * (ITERATION), din3.data());
-    cl::Buffer buffer_dout  (context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-            sizeof(int) * (ITERATION), result_krnl.data());
+    OCL_CHECK(err, cl::Buffer buffer_din1  (context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+            sizeof(int) * total_size, din1.data(), &err));
+    OCL_CHECK(err, cl::Buffer buffer_din2(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+            sizeof(int) * total_size, din2.data(), &err));
+    OCL_CHECK(err, cl::Buffer buffer_din3  (context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+            sizeof(int) * (ITERATION), din3.data(), &err));
+    OCL_CHECK(err, cl::Buffer buffer_dout  (context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+            sizeof(int) * (ITERATION), result_krnl.data(), &err));
 
     std::vector<cl::Memory> inBufVec, outBufVec;
     inBufVec.push_back(buffer_din1);
@@ -103,21 +104,21 @@ int main(int argc, char* argv[]) {
     inBufVec.push_back(buffer_din3);
     outBufVec.push_back(buffer_dout);
     //Copy input RGB Image to device global memory
-    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/));
 
     /* Set the kernel arguments */
     int nargs=0;
-    krnl.setArg(nargs++,buffer_din1);
-    krnl.setArg(nargs++,buffer_din2);
-    krnl.setArg(nargs++,buffer_din3);
-    krnl.setArg(nargs++,buffer_dout);
+    OCL_CHECK(err, err = krnl.setArg(nargs++,buffer_din1));
+    OCL_CHECK(err, err = krnl.setArg(nargs++,buffer_din2));
+    OCL_CHECK(err, err = krnl.setArg(nargs++,buffer_din3));
+    OCL_CHECK(err, err = krnl.setArg(nargs++,buffer_dout));
 
     /* Launch the kernel */
-    q.enqueueTask(krnl);
+    OCL_CHECK(err, err = q.enqueueTask(krnl));
 
      /* Copy result to local buffer */
-    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
-    q.finish();
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.finish());
 
     /* Compare the results of the kernel to the simulation */
     int krnl_match = 0;

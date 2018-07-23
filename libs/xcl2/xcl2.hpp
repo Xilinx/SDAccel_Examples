@@ -34,6 +34,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CL_HPP_TARGET_OPENCL_VERSION 120
 #define CL_HPP_MINIMUM_OPENCL_VERSION 120
 #define CL_HPP_ENABLE_PROGRAM_CONSTRUCTION_FROM_ARRAY_COMPATIBILITY 1
+
+//OCL_CHECK doesn't work if call has templatized function call
 #define OCL_CHECK(error,call)                                       \
     call;                                                           \
     if (error != CL_SUCCESS) {                                      \
