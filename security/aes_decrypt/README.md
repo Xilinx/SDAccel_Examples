@@ -45,7 +45,9 @@ Application code is located in the src directory. Accelerator binary files will 
 LICENSE.md
 Makefile
 README.md
+data/goldFile.txt
 data/input.bmp
+data/test.txt
 description.json
 src/aes_app.cpp
 src/aes_app.h
@@ -97,7 +99,7 @@ emconfigutil --platform 'xilinx:vcu1525:dynamic' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./aes -b  data/input.bmp
+./aes -b data/test.txt -g data/goldFile.txt
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card

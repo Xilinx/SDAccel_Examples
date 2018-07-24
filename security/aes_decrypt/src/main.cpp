@@ -32,46 +32,36 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cmdlineparser.h"
 #include "logger.h"
 
-using namespace std;
-using namespace sda;
-using namespace sda::cl;
-using namespace sda::utils;
-
 
 //pass cmd line options to select opencl device
 int main(int argc, char* argv[]) {
 
 	LogInfo("Xilinx AES-Decrypt Application started");
 	string strKernelFullPath = sda::GetApplicationPath() + "/";
-
+	bool validateGoldFile = false;
 	//parse commandline
-	CmdLineParser parser;
-	parser.addSwitch("--bitmap", "-b", "input bitmap file path", "input.bmp");
-	parser.addSwitch("--platform-name", "-p", "OpenCl platform vendor name", "xilinx");
-	parser.addSwitch("--device-name", "-d", "OpenCl device name", "fpga0");
-	parser.addSwitch("--kernel-file", "-k", "OpenCl kernel file to use");
-	parser.addSwitch("--select-device", "-s", "Select from multiple matched devices [0-based index]", "0");
-	parser.addSwitch("--number-of-runs", "-n", "Number of times the kernel runs on the device to compute the average.", "1");
-	parser.addSwitch("--output", "-o", "results output file", "result.json");
+	sda::utils::CmdLineParser parser;
+	parser.addSwitch("--inputfile", "-b", "input file path", "test.txt");
+	parser.addSwitch("--goldFile", "-g", "gold file path", "goldfile.txt");
 	parser.setDefaultKey("--kernel-file");
 	parser.parse(argc, argv);
 
-	//bitmap file exist?
-	if(!is_file(parser.value("bitmap"))) {
-		LogError("Input bitmap file: %s does not exist!", parser.value("bitmap").c_str());
+	//input file exist?
+	if(!sda::utils::is_file(parser.value("inputfile"))) {
+		LogError("Input file: %s does not exist!", parser.value("inputfile").c_str());
 		return -1;
 	}
-
-	string strPlatformName = parser.value("platform-name");
-	string strDeviceName = parser.value("device-name");
-	string strBitmapFP = parser.value("bitmap");
-	int nruns = parser.value_to_int("number-of-runs");
-	int idxSelectedDevice = parser.value_to_int("select-device");
-
-	AesApp aesapp(strPlatformName, strDeviceName, idxSelectedDevice, strKernelFullPath, strBitmapFP);
+	
+	if(sda::utils::is_file(parser.value("goldFile"))) {
+		validateGoldFile = true;
+	}
+	std::string strfileFP = parser.value("inputfile");
+	std::string strGoldFileFP = parser.value("goldFile");
+	
+	AesApp aesapp(strfileFP, validateGoldFile, strGoldFileFP);
 
 	//Execute benchmark application
-	bool res = aesapp.run(0, nruns);
+	bool res = aesapp.run();
 	if(!res) {
 		LogError("An error occurred when running benchmark on device 0");
 		return -1;

@@ -30,42 +30,32 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AESAPP_H_
 
 #include <string>
-#include <xcl.h>
+#include "xcl2.hpp"
 
 #define COMPUTE_UNITS 1
-
-using namespace std;
-
-namespace sda {
-namespace cl {
 
 /*!
  *
  */
 class AesApp {
 public:
-	AesApp(const string& vendor_name,
-		   const string& device_name,
-		   int selected_device,
-		   const string& strKernelFP,
-		   const string& strBitmapFP);
+	AesApp(const std::string& strBitmapFP, bool validateGoldFile, const std::string& strGoldFileFP);
 	virtual ~AesApp();
 
-	bool run(int idevice, int nruns);
+	bool run();
 
 protected:
-    void cleanup();
 
 
 private:
-	string m_strBitmapFP;
-
-	cl_kernel m_clKernelAesDecrypt;
-	xcl_world m_world;
-	cl_program m_program;
+	std::string m_strFileFP;
+	bool m_validateGoldFile;
+	std::string m_strGoldFileFP;
+	cl::Context* m_context;
+	cl::CommandQueue* m_q;
+	cl::Program* m_program;
+	cl::Kernel* m_kernel;
 };	
 
-}
-}
 
 #endif /* AESAPP_H_ */

@@ -27,14 +27,13 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 #include <assert.h>
-#include <string.h>
+#include <string>
 #include <stdio.h>
-
+#include <vector>
 #include "logger.h"
 #include "aes_app.h"
 #include "aes_ecb.h"
 
-#include "simplebmp.h"
 
 #if defined(__linux__) || defined(linux)
 	#include "sys/time.h"
@@ -45,9 +44,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define ROUNDS 10
 //ROUNDS <= 10 valid
 
-using namespace sda::cl;
 
-/////////////////////////////////////////////////////////////////////////////////
 static double timestamp() {
 	double ms = 0.0;
 	#if  defined(__linux__) || defined(linux)
@@ -62,243 +59,159 @@ static double timestamp() {
 	return ms;
 }
 
-static double computeEventDurationInMS(const cl_event& event) {
+static double computeEventDurationInMS(const cl::Event& event) {
 	cl_ulong ts_start = 0, ts_end = 0;
 	double duration = 0;
-	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &ts_start, NULL);
-	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &ts_end, NULL);
+	cl_int err;
+	OCL_CHECK(err, err = event.getProfilingInfo(CL_PROFILING_COMMAND_START,&ts_start));
+	OCL_CHECK(err, err = event.getProfilingInfo(CL_PROFILING_COMMAND_END,&ts_end));
 	duration += (cl_double)(ts_end-ts_start)*(cl_double)(1e-06);
 
 	return duration;
 }
-
 /////////////////////////////////////////////////////////////////////////////////
-AesApp::AesApp(const string& vendor_name,
-			   const string& device_name,
-			   int selected_device,
-			   const string& strKernelFP,
-			   const string& strBitmapFP) {
+AesApp::AesApp(const string& strFileFP, bool validateGoldFile,const std::string& strGoldFileFP = "") {
+	cl_int err;
+	m_strFileFP = strFileFP;
+	m_validateGoldFile = validateGoldFile;
+	m_strGoldFileFP = strGoldFileFP;
 
-	m_world = xcl_world_single();
-	m_program = xcl_import_binary(m_world, "krnl_aes");
-	m_clKernelAesDecrypt = xcl_get_kernel(m_program, "krnl_aes_decrypt");
+	std::vector<cl::Device> devices = xcl::get_xil_devices();
+	cl::Device device = devices[0];
 
-	//store path to bitmap
-	m_strBitmapFP = strBitmapFP;
+	
+	OCL_CHECK(err, m_context = new cl::Context(device, NULL, NULL, NULL, &err));
+	OCL_CHECK(err, m_q = new cl::CommandQueue(*m_context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+	OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err)); 
+
+	std::string binaryFile = xcl::find_binary_file(device_name,"krnl_aes");
+	cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+	devices.resize(1);
+    	OCL_CHECK(err, m_program = new cl::Program(*m_context, devices, bins, NULL, &err));
+
+    	OCL_CHECK(err, m_kernel = new cl::Kernel(*m_program,"krnl_aes_decrypt", &err));
+
 }
 
 AesApp::~AesApp() {
-	// TODO Auto-generated destructor stub
-	cleanup();
+	delete m_context;
+	delete m_q;
+	delete m_program;
+	delete m_kernel;
 }
 
-void AesApp::cleanup() {
 
-	clReleaseKernel(m_clKernelAesDecrypt);
-	clReleaseProgram(m_program);
-	xcl_release_world(m_world);
-}
+bool AesApp::run() {
 
-bool AesApp::run(int idevice, int nruns) {
-	if (nruns <= 0)
-		return false;
-
-//	size_t local[] = { 1 };
-//	size_t global[] = { m_nPoints };
-//
-//	if (m_full_device_names[0] == "fpga0") {
-//		LogInfo("Set local workgroup size to %d for fpga", m_nPoints);
-//		local[0] = m_nPoints;
-//	}
-
-
-	//load "input.bmp"
-	int err;
-	struct bmp_t inputbmp;
-	err = readbmp((char*)m_strBitmapFP.c_str(), &inputbmp);
-	if (err != 0) {
-		printf("Error : failed to read imput.bmp\n");
+	size_t datasize;
+	size_t result;
+	cl_int err;
+	FILE *inputFileFp=fopen(m_strFileFP.c_str(),"r");
+	if(inputFileFp==NULL) {
+	 	printf("Error : failed to open file : %s\n",m_strFileFP.c_str());
 		return false;
 	}
-	size_t inputbmpsize = inputbmp.height * inputbmp.width * 3;
+
+	fseek(inputFileFp, 0, SEEK_END);
+	datasize = ftell(inputFileFp);
+	rewind (inputFileFp);
+	
+	std::vector<unsigned char, aligned_allocator<unsigned char>> *buffer = new std::vector<unsigned char,aligned_allocator<unsigned char>> (datasize);
+	if (buffer == NULL) {
+		printf("Error : failed to allocate memory :buffer\n");
+		return false;
+	}
+
+	result = fread (buffer->data(),1,datasize,inputFileFp);
+	if (result != datasize) {
+		printf("Error : failed to read file :%s\n",m_strFileFP.c_str());
+		return false;
+	}
+
+	fclose(inputFileFp);
 
 	//AES ECB encryption in software
-	//encrypted image setup
-	struct bmp_t swencryptbmp;
-	swencryptbmp.pixels = (uint32_t *) malloc(inputbmpsize);
-	swencryptbmp.width = inputbmp.width;
-	swencryptbmp.height = inputbmp.height;
-	if (swencryptbmp.pixels == NULL) {
-		printf(
-				"Error : failed to allocate memory for sw encrypted swencrypted.bmp\n");
+	std::vector<unsigned char, aligned_allocator<unsigned char>> *swencryptintput = new std::vector<unsigned char,aligned_allocator<unsigned char>> (datasize);
+	if (swencryptintput == NULL) {
+		printf("Error : failed to allocate memory :swencryptintput\n");
 		return false;
 	}
 
 	//128 bit encryption key
-	unsigned char key[] = "Xilinx SDAccel  ";
+	unsigned char key[] = "Xilinx SDAccel .";
 
 	//perform SW encryption
-	//Xilinx
-	aesecb_encrypt(key, ((unsigned char *) inputbmp.pixels),
-			((unsigned char *) swencryptbmp.pixels), inputbmpsize, ROUNDS);
-	//write "swencrypted.bmp"
-	char swencryptbmpfile[] = "swencrypt.bmp";
-	writebmp(swencryptbmpfile, &swencryptbmp);
+	aesecb_encrypt(key, ((unsigned char *) buffer->data()),
+			((unsigned char *) swencryptintput->data()), datasize, ROUNDS);
 
 	//AES ECB decryption in hardware
-	//decrypted image setup
-	struct bmp_t hwdecryptbmp;
-	hwdecryptbmp.pixels = (uint32_t *) malloc(inputbmpsize);
-	hwdecryptbmp.width = inputbmp.width;
-	hwdecryptbmp.height = inputbmp.height;
-	if (hwdecryptbmp.pixels == NULL) {
-		printf("Error : failed to allocate memory for sw encrypted hwdecrypted.bmp\n");
+	std::vector<unsigned char,aligned_allocator<unsigned char>> *hwdecryptintput = new std::vector<unsigned char,aligned_allocator<unsigned char>> (datasize);
+	if (hwdecryptintput == NULL) {
+		printf("Error : failed to allocate memory :hwdecryptintput\n");
 		return false;
 	}
 
-	//start
+	FILE *encFp=fopen("encryptedData.txt","w");
+	if(encFp==NULL) {
+		printf("Error : failed to open file :ecn.txt\n");
+		return false;
+	}
+	size_t res = fwrite (swencryptintput->data(),1,datasize,encFp);
+	if (res != datasize) {
+		printf("Error : failed to write encrypted file\n");
+		return false;
+	}
+	fclose(encFp);
+
 	double startMS = timestamp();
 
-	unsigned int datasetsize = inputbmpsize;
-
-	//create input and output buffers size for 24 bpp image
-	cl_mem input_buffer;
-	input_buffer = clCreateBuffer(m_world.context, CL_MEM_READ_WRITE, datasetsize,
-			NULL, &err);
-	if (err != CL_SUCCESS) {
-		LogError("Error: Failed to allocate OpenCL source buffer of size %lu",
-				inputbmpsize);
-		return false;
-	}
-
-	cl_mem roundkey_buffer;
-	roundkey_buffer = clCreateBuffer(m_world.context, CL_MEM_READ_WRITE,
-			(ROUNDS + 1) * 16, NULL, &err);
-	if (err != CL_SUCCESS) {
-		LogError("Error: Failed to allocate OpenCL source buffer of size %lu",
-				inputbmpsize);
-		return false;
-	}
-
-	cl_mem output_buffer;
-	output_buffer = clCreateBuffer(m_world.context, CL_MEM_READ_WRITE, datasetsize,
-			NULL, &err);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to allocate worst case OpenCL output buffer of size %lu",
-				inputbmpsize);
-		return false;
-	}
-
 	//compute expanded roundkey
-	unsigned char roundkey[(10 + 1) * 16];
-	strcpy(((char *) roundkey), ((char *) key));
-	KeyExpansion(roundkey);
+	vector<unsigned char,aligned_allocator<unsigned char>> roundkey((ROUNDS + 1) * 16);
+	std::copy(key, key + 16, roundkey.begin());	
+	KeyExpansion(roundkey.data());
 
-	//copy input dataset to OpenCL buffer
-	err = clEnqueueWriteBuffer(m_world.command_queue, input_buffer, CL_TRUE, 0,
-			inputbmpsize, swencryptbmp.pixels, 0, NULL, NULL);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to copy input dataset to OpenCL buffer");
-		LogError("Test failed");
-		return false;
-	}
+	//create input and output buffers
+	OCL_CHECK(err, cl::Buffer input_buffer(*m_context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, datasize,swencryptintput->data(), &err));
+	OCL_CHECK(err, cl::Buffer roundkey_buffer(*m_context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,(ROUNDS + 1) * 16,roundkey.data(), &err));
+	OCL_CHECK(err, cl::Buffer output_buffer(*m_context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, datasize,hwdecryptintput->data(), &err));
+	
+	
+	std::vector<cl::Memory> inBufVec, outBufVec;
+	inBufVec.push_back(input_buffer);
+	inBufVec.push_back(roundkey_buffer);
+	outBufVec.push_back(output_buffer);
 
-	//copy roundkey to OpenCL buffer
-	err = clEnqueueWriteBuffer(m_world.command_queue, roundkey_buffer, CL_TRUE, 0,
-			(ROUNDS + 1) * 16, roundkey, 0, NULL, NULL);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to copy input dataset to OpenCL buffer");
-		LogError("Test failed");
-		return false;
-	}
-
-	clFinish(m_world.command_queue);
+	OCL_CHECK(err, err = m_q->enqueueMigrateMemObjects(inBufVec, 0/* 0 means from host*/));
+	OCL_CHECK(err, err = m_q->finish());
 
 	//execute kernel
 //	void AESDecrypt(__global uchar16  *output,__global uchar16  *input,
 //	                __global  uchar16  *roundKey, uint blocks)
 
-	err = 0;
-	err = clSetKernelArg(m_clKernelAesDecrypt, 0, sizeof(cl_mem), &output_buffer);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to set kernel argument [0] output_buffer! %d", err);
-		LogError("Test failed");
-		return false;
-	}
+	unsigned int blocks = datasize / 16;
+	int narg=0;
+	OCL_CHECK(err, err = m_kernel->setArg(narg++,output_buffer));
+	OCL_CHECK(err, err = m_kernel->setArg(narg++,input_buffer));
+	OCL_CHECK(err, err = m_kernel->setArg(narg++,roundkey_buffer));
+	OCL_CHECK(err, err = m_kernel->setArg(narg++,blocks));
+	
+	cl::Event event_host_write;
+	cl::Event event_host_read;
 
-	err |= clSetKernelArg(m_clKernelAesDecrypt, 1, sizeof(cl_mem), &input_buffer);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to set kernel argument [1] input_buffer! %d", err);
-		LogError("Test failed");
-		return false;
-	}
+	OCL_CHECK(err, err = m_q->enqueueTask(*m_kernel, NULL, &event_host_write));
+        OCL_CHECK(err, err = m_q->finish());
+	
+	cl::Event ndrangeevent;
+	OCL_CHECK(err, err = m_q->enqueueTask(*m_kernel, NULL, &ndrangeevent));
+        OCL_CHECK(err, err = m_q->finish());
 
-	err |= clSetKernelArg(m_clKernelAesDecrypt, 2, sizeof(cl_mem), &roundkey_buffer);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to set kernel argument [2] roundkey_buffer! %d", err);
-		LogError("Test failed");
-		return false;
-	}
-
-	unsigned int blocks = datasetsize / 16;
-	err |= clSetKernelArg(m_clKernelAesDecrypt, 3, sizeof(unsigned int), &blocks);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to set kernel argument [3] blocks! %d", err);
-		LogError("Test failed");
-		return false;
-	}
-
-	size_t global[1];
-	size_t local[1];
-	global[0] = 1;
-	local[0] = 1;
-
-	cl_event event_host_write;
-	cl_event event_host_read;
-
-
-	//call once to guarentee that all buffers are migrated to device memory
-	err = clEnqueueNDRangeKernel(m_world.command_queue, m_clKernelAesDecrypt, 1, NULL, global,
-			local, 0, NULL, &event_host_write);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to execute kernel %d", err);
-		LogError("Test failed");
-		return false;
-	}
-	clFinish(m_world.command_queue);
-
-	//call a second time to measure on-chip throughput
-	cl_event ndrangeevent;
-	err = clEnqueueNDRangeKernel(m_world.command_queue, m_clKernelAesDecrypt, 1, NULL, global,
-			local, 0, NULL, &ndrangeevent);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to execute kernel %d", err);
-		LogError("Test failed");
-		return false;
-	}
-
-	clFinish(m_world.command_queue);
-
-	//copy results back from OpenCL buffer
-	err = clEnqueueReadBuffer(m_world.command_queue, output_buffer, CL_TRUE, 0,
-			inputbmpsize, (void *) hwdecryptbmp.pixels, 0, NULL, &event_host_read);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to read output size buffer %d", err);
-		LogError("Test failed");
-		return false;
-	}
-	clFinish(m_world.command_queue);
-
-	//write "hwdecrypt.bmp"
-	char hwdecryptbmpfile[] = "hwdecrypt.bmp";
-	writebmp(hwdecryptbmpfile, &hwdecryptbmp);
+	OCL_CHECK(err, err = m_q->enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST,NULL,&event_host_read));
+	OCL_CHECK(err, err = m_q->finish());
 
 	//print profiling information
 	uint64_t nstimequeued, nstimeend;
-	clGetEventProfilingInfo(ndrangeevent, CL_PROFILING_COMMAND_QUEUED,
-			sizeof(uint64_t), ((void *) (&nstimequeued)), NULL);
-	clGetEventProfilingInfo(ndrangeevent, CL_PROFILING_COMMAND_END,
-			sizeof(uint64_t), ((void *) (&nstimeend)), NULL);
+	OCL_CHECK(err, err = ndrangeevent.getProfilingInfo(CL_PROFILING_COMMAND_QUEUED, &nstimequeued));
+	OCL_CHECK(err, err = ndrangeevent.getProfilingInfo(CL_PROFILING_COMMAND_END, &nstimeend));
 
 	uint64_t nsduration = nstimeend - nstimequeued;
 	LogInfo("START %ul END %ul DURATION %ul", nstimequeued, nstimeend, nsduration);
@@ -311,17 +224,17 @@ bool AesApp::run(int idevice, int nruns) {
 	double dnsduration = ((double) nsduration);
 	double dmsduration = dnsduration / ((double) 1000000);
 	double dsduration = dmsduration / ((double) 1000);
-	double dbytes = datasetsize;
+	double dbytes = datasize;
 	double dmbytes = dbytes / (((double) 1024) * ((double) 1024));
 	double bpersec = (dbytes / dsduration);
 	double mbpersec = bpersec / ((double) 1024 * 1024);
-    double d2h_rate = 0;
-    double h2d_rate = 0;
+	double d2h_rate = 0;
+	double h2d_rate = 0;
 
 	//compute transfer rate
 	if(tHostWriteMS > 0) {
 		//bits per second
-		double tmp = (inputbmpsize * 8.0) / (tHostWriteMS / 1000.0);
+		double tmp = (datasize * 8.0) / (tHostWriteMS / 1000.0);
 
 		//mega-bits per second
 		h2d_rate = tmp / (1024.0 * 1024.0);
@@ -329,7 +242,7 @@ bool AesApp::run(int idevice, int nruns) {
 
 	if(tHostReadMS > 0) {
 		//bits per second
-		double tmp = (inputbmpsize * 8.0) / (tHostReadMS / 1000.0);
+		double tmp = (datasize * 8.0) / (tHostReadMS / 1000.0);
 
 		//mega-bits per second
 		d2h_rate = tmp / (1024.0 * 1024.0);
@@ -338,9 +251,9 @@ bool AesApp::run(int idevice, int nruns) {
 	//validate
 	LogInfo("Validating OpenCL output");
 	size_t vi;
-	for (vi = 0; vi < inputbmpsize; vi++) {
-		unsigned char result = ((unsigned char *) hwdecryptbmp.pixels)[vi];
-		unsigned char ref = ((unsigned char *) inputbmp.pixels)[vi];
+	for (vi = 0; vi < datasize; vi++) {
+		unsigned char result = hwdecryptintput->at(vi);
+		unsigned char ref = buffer->at(vi);
 		if (result != ref) {
 			LogError("HW decrypted data (0x%X) != input data (0x%X) at offset %ld",
 					result, ref, vi);
@@ -349,12 +262,60 @@ bool AesApp::run(int idevice, int nruns) {
 		}
 	}
 
+	if(m_validateGoldFile) {
+		size_t gdatasize;
+		size_t res;
+		FILE *goldFileFp=fopen(m_strGoldFileFP.c_str(),"r");
+		if(goldFileFp==NULL) {
+		 	printf("Error : failed to open gold file :%s\n",m_strGoldFileFP.c_str());
+			return false;
+		}
+
+		fseek(goldFileFp, 0, SEEK_END);
+		gdatasize = ftell(goldFileFp);
+		rewind (goldFileFp);
+
+		if(gdatasize <= 0) {
+			LogError("Gold File len (%d)",gdatasize);
+			LogError("Test failed");
+			return false;
+		}
+		std::vector<unsigned char> *gbuffer = new std::vector<unsigned char> (gdatasize);
+		if (gbuffer == NULL) {
+			printf("Error : failed to allocate memory :gbuffer\n");
+			return false;
+		}
+
+		res = fread(gbuffer->data(),1,gdatasize,goldFileFp);
+		if (res != gdatasize) {
+			printf("Error : failed to read gold file\n");
+			return false;
+		}
+
+		fclose(goldFileFp);
+		if(datasize != gdatasize) {
+			LogError("Gold File len (%d) != enxrypted data len (%d)",
+					gdatasize, datasize);
+			LogError("Test failed");
+			return false;
+		}
+		for (size_t i = 0; i < datasize; i++) {
+			unsigned char result = swencryptintput->at(i);
+			unsigned char ref = gbuffer->at(i);
+			if (result != ref) {
+				LogError("Sw encrypted data (0x%X) != Gold File data (0x%X) at offset %ld",
+						result, ref, i);
+				LogError("Test failed");
+				return false;
+			}
+		}
+		delete gbuffer;
+	}
 	LogInfo("Test passed!");
 
 
 
 	//set stats to valid data
-	LogInfo("Number of runs = %d", nruns);
 	LogInfo("Total time in [ms] = %f", timestamp() - startMS);
 	LogInfo("Host write [ms] = %f", tHostWriteMS);
 	LogInfo("Kernel exec [ms] = %f", dmsduration);
@@ -365,9 +326,9 @@ bool AesApp::run(int idevice, int nruns) {
 	LogInfo("TX rate host --> device [mbps] = %f", h2d_rate);
 	LogInfo("TX rate device --> host [mbps] = %f", d2h_rate);
 
-
-
-
+	delete buffer;
+	delete swencryptintput;
+	delete hwdecryptintput; 
 
 	return true;
 }

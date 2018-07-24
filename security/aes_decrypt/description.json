@@ -4,14 +4,13 @@
     "overview" : [
         "Implementation of an AES-128 ECB Encrypt in software, followed by decryption written in OpenCL and targeting execution on an SDAccel supported FPGA acceleration card."
     ],
-    "cmd_args" : "-b PROJECT/data/input.bmp",
-    "em_cmd" : "./aes -b  data/input.bmp",
+    "cmd_args" : "-b PROJECT/data/test.txt -g PROJECT/data/goldFile.txt",
+    "em_cmd" : "./aes -b data/test.txt -g data/goldFile.txt",
     "xcl": false,
     "libs": [
         "logger",
         "cmdparser",
-        "xcl",
-        "simplebmp"
+        "xcl2"
     ], 
     "accelerators": [
         {
