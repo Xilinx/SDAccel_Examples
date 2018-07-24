@@ -13,7 +13,6 @@
         "xcl2"
     ],
     "host_exe": "host",
-    "nboard":["xilinx:vcu1525:dynamic", "xilinx_vcu1525_dynamic_5_1"],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "containers": [
