@@ -38,6 +38,7 @@ int main(int argc, char** argv)
 {
     int size = DATA_SIZE;
     int incr = INCR_VALUE;
+    cl_int err;
 
     //Allocate Memory in Host Memory
     size_t vector_size_bytes = sizeof(int) * DATA_SIZE;
@@ -61,41 +62,41 @@ int main(int argc, char** argv)
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
-    std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+    OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
+    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     //Create Program and Kernel
     std::string binaryFile = xcl::find_binary_file(device_name,"N_stage_Adders");
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
-    cl::Program program(context, devices, bins);
-    cl::Kernel krnl_adders(program,"N_stage_Adders");
+    OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
+    OCL_CHECK(err, cl::Kernel krnl_adders(program,"N_stage_Adders", &err));
 
     //Allocate Buffer in Global Memory
     std::vector<cl::Memory> inBufVec, outBufVec;
-    cl::Buffer buffer_input (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-            vector_size_bytes, source_input.data());
-    cl::Buffer buffer_output(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-            vector_size_bytes, source_hw_results.data());
+    OCL_CHECK(err, cl::Buffer buffer_input (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+            vector_size_bytes, source_input.data(), &err));
+    OCL_CHECK(err, cl::Buffer buffer_output(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+            vector_size_bytes, source_hw_results.data(), &err));
     inBufVec.push_back(buffer_input);
     outBufVec.push_back(buffer_output);
 
     //Copy input data to device global memory
-    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/));
 
     //Set the Kernel Arguments
     int narg=0;
-    krnl_adders.setArg(narg++,buffer_input);
-    krnl_adders.setArg(narg++,buffer_output);
-    krnl_adders.setArg(narg++,incr);
-    krnl_adders.setArg(narg++,size);
+    OCL_CHECK(err, err = krnl_adders.setArg(narg++,buffer_input));
+    OCL_CHECK(err, err = krnl_adders.setArg(narg++,buffer_output));
+    OCL_CHECK(err, err = krnl_adders.setArg(narg++,incr));
+    OCL_CHECK(err, err = krnl_adders.setArg(narg++,size));
 
     //Launch the Kernel
-    q.enqueueTask(krnl_adders);
+    OCL_CHECK(err, err = q.enqueueTask(krnl_adders));
 
     //Copy Result from Device Global Memory to Host Local Memory
-    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
     q.finish();
 //OPENCL HOST CODE AREA END
     
