@@ -303,7 +303,7 @@ int main(int argc, char** argv) {
 
     #if NDDR_BANKS > 3
         unsigned char *map_output_buffer1;
-  	    OCL_CHECKS(err, map_output_buffer1 = (unsigned char *) q.enqueueMapBuffer(*(buffer[3]),
+  	    OCL_CHECK(err, map_output_buffer1 = (unsigned char *) q.enqueueMapBuffer(*(buffer[3]),
                                 								  CL_FALSE, 
                                 								  CL_MAP_READ, 
                                 								  0, 
