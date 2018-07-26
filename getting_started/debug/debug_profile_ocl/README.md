@@ -52,6 +52,7 @@ sdaccel.ini
 src/host.cpp
 src/host.h
 src/vadd.cl
+utils.mk
 ```
 
 ## 5. COMPILATION AND EXECUTION

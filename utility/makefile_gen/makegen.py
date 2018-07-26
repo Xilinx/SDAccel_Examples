@@ -373,6 +373,14 @@ def mk_check(target, data):
         target.write("$(error Nothing to be done for make)\n")
         target.write("endif\n")
     target.write("\n") 
+    if "Emulation" in data:        
+        target1 = open("sdaccel.ini","a+")
+        args = data["Emulation"]
+        target1.write("\n[Emulation]\n")
+        for arg in args:
+            target1.write(arg)
+            target1.write("\n")
+        target1.close
     target.write("ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))\n")
     target.write("\t$(CP) $(EMCONFIG_DIR)/emconfig.json .\n") 
     target.write("\tXCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)")
@@ -440,6 +448,10 @@ script, desc_file = argv
 desc = open(desc_file, 'r')
 data = json.load(desc)
 desc.close()
+print "Generating sdaccel.ini file for %s" %data["example"]
+target = open("sdaccel.ini","w+")
+profile_report(target)
+target.close
 target = open("Makefile", "w")
 
 create_mk(target, data)
@@ -451,9 +463,4 @@ target.write("README.md: description.json\n")
 target.write("\t$(ABS_COMMON_REPO)/utility/readme_gen/readme_gen.py description.json\n")
 target.write("\n")
 
-target.close
-
-print "Generating sdaccel.ini file for %s" %data["example"]
-target = open("sdaccel.ini","w")
-profile_report(target)
 target.close
