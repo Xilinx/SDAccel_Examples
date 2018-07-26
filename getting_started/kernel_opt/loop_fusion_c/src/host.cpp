@@ -80,6 +80,7 @@ int main(int argc, char **argv) {
 
   static const int num_points = 512;
   static const int num_dims = 2;
+  cl_int err;
 
   vector<int,aligned_allocator<int>> data(num_points * num_dims);
   vector<int,aligned_allocator<int>> input(1 * num_dims);
@@ -101,23 +102,23 @@ int main(int argc, char **argv) {
   std::vector<cl::Device> devices = xcl::get_xil_devices();
   cl::Device device = devices[0];
 
-  cl::Context context(device);
-  cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
-  std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+  OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
+  OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+  OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err)); 
 
   //Create Program 
   std::string binaryFile = xcl::find_binary_file(device_name,"nearest_neighbor");
   cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
   devices.resize(1);
-  cl::Program program(context, devices, bins);
+  OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
 
   std::vector<cl::Memory> inBufVec, outBufVec;
-  cl::Buffer buffer_out(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-          num_dims * sizeof(int), out.data());
-  cl::Buffer buffer_points(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-          array_size_bytes, data.data());
-  cl::Buffer buffer_in (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-          num_dims * sizeof(int), input.data());
+  OCL_CHECK(err, cl::Buffer buffer_out(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+          num_dims * sizeof(int), out.data(), &err));
+  OCL_CHECK(err, cl::Buffer buffer_points(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+          array_size_bytes, data.data(), &err));
+  OCL_CHECK(err, cl::Buffer buffer_in (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+          num_dims * sizeof(int), input.data(), &err));
   inBufVec.push_back(buffer_points);
   inBufVec.push_back(buffer_in);
   outBufVec.push_back(buffer_out);
@@ -129,43 +130,47 @@ int main(int argc, char **argv) {
           "| Kernel                         |    Wall-Clock Time (ns) |\n"
           "|--------------------------------+-------------------------|\n");
 
+  
   // set kernel parameters
-  cl::Kernel kernel(program, "nearest_neighbor");
-  kernel.setArg(0,buffer_out);
-  kernel.setArg(1,buffer_points);
-  kernel.setArg(2,buffer_in);
-  kernel.setArg(3,num_points);
-  kernel.setArg(4,num_dims);
+  OCL_CHECK(err, cl::Kernel kernel(program, "nearest_neighbor", &err));
+  
+  OCL_CHECK(err, err = kernel.setArg(0,buffer_out));
+  OCL_CHECK(err, err = kernel.setArg(1,buffer_points));
+  OCL_CHECK(err, err = kernel.setArg(2,buffer_in));
+  OCL_CHECK(err, err = kernel.setArg(3,num_points));
+  OCL_CHECK(err, err = kernel.setArg(4,num_dims));
 
   cl::Event event;
   uint64_t nstimestart, nstimeend;
-  q.enqueueTask(kernel,NULL,&event);
+  OCL_CHECK(err, err = q.enqueueTask(kernel,NULL,&event));
   q.finish();
-  event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart);
-  event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend);
+  
+  OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart));
+  OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend));
   auto simple_time = nstimeend-nstimestart;
   printf("| %-30s | %23lu |\n", "Nearest Neighbor: simple", simple_time);
 
-  q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+  OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
   q.finish();
   verify(gold, out);
 
   // set kernel parameters
-  cl::Kernel kernel_loop(program, "nearest_neighbor_loop_fusion");
-  kernel_loop.setArg(0,buffer_out);
-  kernel_loop.setArg(1,buffer_points);
-  kernel_loop.setArg(2,buffer_in);
-  kernel_loop.setArg(3,num_points);
-  kernel_loop.setArg(4,num_dims);
+  OCL_CHECK(err, cl::Kernel kernel_loop(program, "nearest_neighbor_loop_fusion", &err));
+  OCL_CHECK(err, err = kernel_loop.setArg(0,buffer_out));
+  OCL_CHECK(err, err = kernel_loop.setArg(1,buffer_points));
+  OCL_CHECK(err, err = kernel_loop.setArg(2,buffer_in));
+  OCL_CHECK(err, err = kernel_loop.setArg(3,num_points));
+  OCL_CHECK(err, err = kernel_loop.setArg(4,num_dims));
 
-  q.enqueueTask(kernel_loop,NULL,&event);
+  OCL_CHECK(err, err = q.enqueueTask(kernel_loop,NULL,&event));
   q.finish();
-  event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart);
-  event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend);
+  
+  OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart));
+  OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend));
   auto loop_time = nstimeend-nstimestart;
   printf("| %-30s | %23lu |\n", "Nearest Neighbor: loop fusion", loop_time);
 
-  q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+  OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
   q.finish();
 
   verify(gold, out);

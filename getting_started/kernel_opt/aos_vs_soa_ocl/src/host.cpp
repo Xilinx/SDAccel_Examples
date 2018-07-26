@@ -48,6 +48,7 @@ struct vertex {
 // Each struct represents several vertices. The data is organized as a
 // structure of arrays. This means that each element of the arrays represents
 // one vertix in a triangle.
+
 struct vertex_array {
   vector<int,aligned_allocator<int>> x;
   vector<int,aligned_allocator<int>> y;
@@ -91,7 +92,8 @@ void verify (const vector<int,aligned_allocator<int>>& gold,
 // Array of Structures.
 int main(int argc, char **argv) {
 
-  // allocate memory on host to store input arrays and the output array
+  cl_int err;
+// allocate memory on host to store input arrays and the output array
   vector<int,aligned_allocator<int>> results(VERTEX_COUNT);
 
   vertex_array soa_vertices(VERTEX_COUNT);
@@ -112,25 +114,27 @@ int main(int argc, char **argv) {
 
   std::vector<cl::Device> devices = xcl::get_xil_devices();
   cl::Device device = devices[0];
+
   //Creating Context and Command Queue for selected Device 
-  cl::Context context(device);
-  cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
-  std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+  OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
+  OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+  OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
   std::cout << "Found Device=" << device_name.c_str() << std::endl;
+
   std::string binaryFile = xcl::find_binary_file(device_name,"dot");
   cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
   devices.resize(1);
-  cl::Program program(context, devices, bins);
+  OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
  
   // Allocate memory on the FPGA
-  cl::Buffer buffer_result(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, 
-          results.size() * sizeof(int), results.data());
-  cl::Buffer buffer_x(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-          soa_vertices.x.size() * sizeof(int), soa_vertices.x.data());
-  cl::Buffer buffer_y(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-          soa_vertices.y.size() * sizeof(int), soa_vertices.y.data());
-  cl::Buffer buffer_z(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-          soa_vertices.z.size() * sizeof(int), soa_vertices.z.data());
+  OCL_CHECK(err, cl::Buffer buffer_result(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+          results.size() * sizeof(int), results.data(), &err));
+  OCL_CHECK(err, cl::Buffer buffer_x(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+          soa_vertices.x.size() * sizeof(int), soa_vertices.x.data(), &err));
+  OCL_CHECK(err, cl::Buffer buffer_y(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+          soa_vertices.y.size() * sizeof(int), soa_vertices.y.data(), &err));
+  OCL_CHECK(err, cl::Buffer buffer_z(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+          soa_vertices.z.size() * sizeof(int), soa_vertices.z.data(), &err));
 
   // Transfer data from host to the FPGA
   std::vector<cl::Memory> inBufVec, outBufVec;
@@ -138,55 +142,63 @@ int main(int argc, char **argv) {
   inBufVec.push_back(buffer_y);
   inBufVec.push_back(buffer_z);
   outBufVec.push_back(buffer_result);
-  q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
+
+  OCL_CHECK(err, err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/));
+
   printf( "|-------------------------+-------------------------|\n"
           "| Kernel                  |    Wall-Clock Time (ns) |\n"
           "|-------------------------+-------------------------|\n");
 
   // Allocate memory for the array of struct data structure
-  cl::Buffer buffer_pts(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-          aos_vertices.size() * sizeof(vertex), aos_vertices.data());
+  OCL_CHECK(err, cl::Buffer buffer_pts(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+          aos_vertices.size() * sizeof(vertex), aos_vertices.data(), &err));
 
   // Transfer the entire array to the FPGA
   inBufVec.clear();
   inBufVec.push_back(buffer_pts);
-  q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
+  OCL_CHECK(err, err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/));
 
   cl::Event event;
   uint64_t nstimestart, nstimeend;
   int nargs=0;
-  cl::Kernel kernel_aos(program,"dot_aos");
-  kernel_aos.setArg(nargs++,buffer_result);
-  kernel_aos.setArg(nargs++,buffer_pts);
-  kernel_aos.setArg(nargs++,VERTEX_COUNT);
-  q.enqueueTask(kernel_aos,NULL,&event);
+  OCL_CHECK(err, cl::Kernel kernel_aos(program,"dot_aos", &err));
+  OCL_CHECK(err, err = kernel_aos.setArg(nargs++,buffer_result));
+  OCL_CHECK(err, err = kernel_aos.setArg(nargs++,buffer_pts));
+  OCL_CHECK(err, err = kernel_aos.setArg(nargs++,VERTEX_COUNT));
+
+  OCL_CHECK(err, err = q.enqueueTask(kernel_aos,NULL,&event));
+
   q.finish();
-  event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart);
-  event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend);
+
+  OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart));
+  OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend));
+
   auto aos_time = nstimeend-nstimestart;
   printf("| %-22s  | %23lu |\n", "dot: Array of Structs", aos_time);
 
   // Transfer the results back from the FPGA
-  q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+  OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
   q.finish();
   verify(gold, results);
 
-  cl::Kernel kernel_soa(program,"dot_soa");
+  OCL_CHECK(err, cl::Kernel kernel_soa(program,"dot_soa", &err));
   nargs=0;
-  kernel_soa.setArg(nargs++,buffer_result);
-  kernel_soa.setArg(nargs++,buffer_x);
-  kernel_soa.setArg(nargs++,buffer_y);
-  kernel_soa.setArg(nargs++,buffer_z);
-  kernel_soa.setArg(nargs++,VERTEX_COUNT);
-  q.enqueueTask(kernel_soa,NULL,&event);
+  OCL_CHECK(err, err = kernel_soa.setArg(nargs++,buffer_result));
+  OCL_CHECK(err, err = kernel_soa.setArg(nargs++,buffer_x));
+  OCL_CHECK(err, err = kernel_soa.setArg(nargs++,buffer_y));
+  OCL_CHECK(err, err = kernel_soa.setArg(nargs++,buffer_z));
+  OCL_CHECK(err, err = kernel_soa.setArg(nargs++,VERTEX_COUNT));
+  OCL_CHECK(err, err = q.enqueueTask(kernel_soa,NULL,&event));
   q.finish();
-  event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart);
-  event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend);
+
+  OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart));
+  OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend));
+
   auto soa_time = nstimeend-nstimestart;
   printf("| %-22s  | %23lu |\n", "dot: Struct of Arrays", soa_time);
 
   // Get the results from the FPGA
-  q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
+  OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
   q.finish();
   verify(gold, results);
 
@@ -196,3 +208,4 @@ int main(int argc, char **argv) {
   printf("TEST PASSED\n\n");
   return EXIT_SUCCESS;
 }
+
