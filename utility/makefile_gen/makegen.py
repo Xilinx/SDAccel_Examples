@@ -348,9 +348,6 @@ def mk_build_all(target, data):
 
     target.write(".PHONY: all clean cleanall docs emconfig\n")
     target.write("all: $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig\n")
-    if any("/data" in string for string in args):
-        target.write("\t- if test -d $(DATA); then $(CP) $(DATA) $(BUILD_DIR)/sd_card/; fi\n")
-    target.write("\n")
     
     target.write(".PHONY: exe\n")
     target.write("exe: $(EXECUTABLE)\n")
@@ -369,7 +366,21 @@ def mk_check(target, data):
         for arg in args:
             target.write(" ")
             target.write(arg)
+        target.write("))\n")                   
+        target.write("$(error Nothing to be done for make)\n")
+        target.write("endif\n")
+    if "targets" in data:
+        target.write("ifneq ($(TARGET),$(filter $(TARGET),")
+        args = data["targets"]
+        for arg in args:
+            target.write(" ")
+            target.write(arg)
         target.write("))\n")
+        target.write("$(warning WARNING:Application supports only")
+        for arg in args:
+            target.write(" ")
+            target.write(arg)            
+        target.write(" TARGET. Please use the target for running the application)\n")
         target.write("$(error Nothing to be done for make)\n")
         target.write("endif\n")
     target.write("\n") 
@@ -399,18 +410,6 @@ def mk_check(target, data):
     target.write("\nendif\n")
 
     target.write("\tsdx_analyze profile -i sdaccel_profile_summary.csv -f html\n")
-    if "targets" in data:
-        for mode in data["targets"]:
-            target.write("#Reporting warning if not targeting for Targets\n")
-            target.write("ifneq (")
-            target.write(mode)
-            target.write(",$(findstring ")
-            target.write(mode)
-            target.write(",$(TARGET)))\n")
-            target.write("\t$(warning WARNING:Application supports only ")
-            target.write(mode)
-            target.write(" TARGET. Please use the target for running the application)\n")
-            target.write("endif\n\n")
     target.write("\n")
     
 def mk_help(target):

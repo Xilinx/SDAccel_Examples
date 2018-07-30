@@ -57,9 +57,11 @@ Makefile
 README.md
 data/race_2k.bmp
 description.json
+sdaccel.ini
 src/equalizer.cpp
 src/equalizer.h
 src/krnl_equalizer.cl
+utils.mk
 ```
 
 ## 5. COMPILATION AND EXECUTION

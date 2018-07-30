@@ -14,8 +14,10 @@
     ],
     "xcl": false,
     "opencv": true,
+    "host_exe": "equalizer",        
     "cmd_args": "PROJECT/data/race_2k.bmp",
     "em_cmd": "./equalizer data/race_2k.bmp",
+    "output_files": "out.bmp",        
     "libs": [
         "opencv", 
         "xcl2"
@@ -31,23 +33,6 @@
         {
             "group": "Xilinx",
             "url": "http://www.xilinx.com"
-        }
-    ],
-    "revision": [
-        {
-            "date": "FEB2016",
-            "version": "1.0",
-            "description": "Initial Xilinx Release"
-        },
-        {
-            "date": "JUL2016",
-            "version": "2.0",
-            "description": "Conversion to Makefile based compilation"
-        },
-        {
-            "date": "DEC2016",
-            "version": "3.0",
-            "description": "Update for SDAccel 2016.3"
         }
     ]
 }

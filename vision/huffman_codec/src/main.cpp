@@ -142,7 +142,7 @@ int main(int argc, char* argv[]) {
 	CmdLineParser parser;
 	parser.addSwitch("--bitmap", "-b", "input bitmap file path", "rect_1024.bmp");
 	parser.addSwitch("--platform-name", "-p", "OpenCl platform vendor name", "xilinx");
-	parser.addSwitch("--device-name", "-d", "OpenCl device name", "fpga0");
+	parser.addSwitch("--device-name", "-d", "OpenCl device name", "xilinx_vcu1525_dynamic");
 	parser.addSwitch("--kernel-file", "-k", "OpenCl kernel file to use");
 	parser.addSwitch("--select-device", "-s", "Select from multiple matched devices [0-based index]", "0");
 	parser.addSwitch("--number-of-runs", "-n", "Number of times the kernel runs on the device to compute the average.", "1");

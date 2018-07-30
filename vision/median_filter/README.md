@@ -58,8 +58,10 @@ README.md
 data/goldenImage.bmp
 data/inputImage.bmp
 description.json
+sdaccel.ini
 src/krnl_medianFilter.cl
 src/medianFilter.cpp
+utils.mk
 ```
 
 ## 5. COMPILATION AND EXECUTION

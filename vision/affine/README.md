@@ -36,6 +36,7 @@ where examples is the name of the directory where the repository will be stored 
 Board | Device Name | Software Version
 ------|-------------|-----------------
 Xilinx Kintex UltraScale KCU1500|xilinx:kcu1500:dynamic|SDAccel 2018.2
+Xilinx Virtex UltraScale+ VCU1525|xilinx:vcu1525:dynamic|SDAccel 2018.2
 
 
 *NOTE:* The board/device used for compilation can be changed by adding the DEVICES variable to the make command as shown below
@@ -60,8 +61,10 @@ Makefile
 README.md
 data/CT-MONO2-16-brain.raw
 description.json
+sdaccel.ini
 src/affine.cpp
 src/krnl_affine.cl
+utils.mk
 ```
 
 ## 5. COMPILATION AND EXECUTION

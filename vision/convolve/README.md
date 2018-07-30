@@ -60,8 +60,10 @@ data/filter_buffer_raw.txt
 data/input_buffer_raw.txt
 data/output_buffer_raw.txt
 description.json
+sdaccel.ini
 src/convolve.cpp
 src/krnl_convolve.cl
+utils.mk
 ```
 
 ## 5. COMPILATION AND EXECUTION

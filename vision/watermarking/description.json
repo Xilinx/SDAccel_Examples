@@ -4,8 +4,10 @@
     "overview": [
         "This is an optimized implementation of a watermarking application to add watermarking to images targeting execution on an SDAccel supported FPGA acceleration card."
     ],
+    "host_exe": "watermark",
     "cmd_args": "PROJECT/data/inputImage.bmp PROJECT/data/golden.bmp",
     "em_cmd": "./watermark data/inputImage.bmp ./data/golden.bmp",
+    "output_files": "output.bmp",        
     "libs": [
         "xcl2", 
         "bitmap"
@@ -40,28 +42,6 @@
         {
             "group": "Xilinx",
             "url": "http://www.xilinx.com"
-        }
-    ],
-    "revision": [
-        {
-            "date": "FEB2016",
-            "version": "1.0",
-            "description": "Initial Xilinx Release"
-        },
-        {
-            "date": "JUL2016",
-            "version": "2.0",
-            "description": "Conversion to Makefile based compilation"
-        },
-        {
-            "date": "DEC2016",
-            "version": "3.0",
-            "description": "Update for SDAccel 2016.3"
-        },
-        {
-            "date": "MAR2017",
-            "version": "4.0",
-            "description": "Optimized Kernel using uint16 datawidth. Updated Host code to use xcl_wrapper APIs"
         }
     ]
 }

@@ -57,9 +57,11 @@ data/input/lola.bmp
 data/input/vase.bmp
 data/output/lola.bmp
 description.json
+sdaccel.ini
 src/edge.cpp
 src/edge.h
 src/krnl_sobelfilter.cl
+utils.mk
 ```
 
 ## 5. COMPILATION AND EXECUTION

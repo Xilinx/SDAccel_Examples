@@ -6,8 +6,10 @@
     ],
     "xcl": false,
     "opencv": true,
+    "host_exe": "median",        
     "cmd_args": "BUILD/default.xclbin PROJECT/data/inputImage.bmp PROJECT/data/goldenImage.bmp",
     "em_cmd": "./median ./xclbin/krnl_median.<emulation type>.xilinx_vcu1525_dynamic_5_1.xclbin data/inputImage.bmp data/goldenImage.bmp",
+    "output_files": "output.bmp",        
     "libs": [
         "xcl2", 
         "bitmap"
@@ -30,28 +32,6 @@
         {
             "group": "Xilinx",
             "url": "http://www.xilinx.com"
-        }
-    ],
-    "revision": [
-        {
-            "date": "FEB2016",
-            "version": "1.0",
-            "description": "Initial Xilinx Release"
-        },
-        {
-            "date": "JUL2016",
-            "version": "2.0",
-            "description": "Conversion to Makefile based compilation"
-        },
-        {
-            "date":"DEC2016",
-            "version": "3.0",
-            "description": "Update for SDAccel 2016.3"
-        },
-        {
-            "date":"MAR2018",
-            "version": "4.0",
-            "description": "Update host to xcl2"
         }
     ]
 }

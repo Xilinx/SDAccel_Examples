@@ -53,8 +53,10 @@ data/golden.bmp
 data/inputImage.bmp
 data/inputImage128x128.bmp
 description.json
+sdaccel.ini
 src/krnl_watermarking.cl
 src/watermarking.cpp
+utils.mk
 ```
 
 ## 5. COMPILATION AND EXECUTION

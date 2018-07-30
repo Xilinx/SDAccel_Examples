@@ -58,6 +58,7 @@ data/rect_512.bmp
 data/rect_64.bmp
 data/sdaccel.bmp
 description.json
+sdaccel.ini
 src/bit_io.cpp
 src/bit_io.h
 src/huffmancodec_naive.cpp
@@ -69,6 +70,7 @@ src/huffmancodec_optimized_cpuonly.h
 src/krnl_huffman.cl
 src/krnl_huffman_singleptr.cl
 src/main.cpp
+utils.mk
 ```
 
 ## 5. COMPILATION AND EXECUTION

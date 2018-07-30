@@ -7,6 +7,7 @@
     "os": [
         "Linux"
     ],
+    "host_exe": "idct",
     "cmd_args" : "BUILD/default.xclbin",
     "em_cmd" : "./idct ./xclbin/krnl_idct.<emulation flow>.xilinx_vcu1525_dynamic_5_1.xclbin",
     "containers": [
@@ -17,7 +18,7 @@
                 { 
                     "name": "krnl_idct", 
                     "location": "src/krnl_idct.cpp",
-		    "clflags" : "--xp prop:solution.hls_pre_tcl=../src/hls_config.tcl"
+	           	    "clflags" : "--xp prop:solution.hls_pre_tcl=../src/hls_config.tcl"
                 }
             ]
         }
@@ -27,13 +28,5 @@
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
         }
-    ],
-    "revision" : [
-        {
-            "date" : "JUN2017",
-            "version": "1.0",
-            "description": "Initial Xilinx Release"
-        }
     ]
-
 }
