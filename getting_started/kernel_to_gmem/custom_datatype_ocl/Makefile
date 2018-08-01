@@ -52,7 +52,6 @@ DATA = ./data
 
 .PHONY: all clean cleanall docs emconfig
 all: $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
-	- if test -d $(DATA); then $(CP) $(DATA) $(BUILD_DIR)/sd_card/; fi
 
 .PHONY: exe
 exe: $(EXECUTABLE)
