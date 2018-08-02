@@ -34,7 +34,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <chrono>
 #include <vector>
 
-#include "xcl.h"
+#include "xcl2.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 class Timer {
@@ -53,18 +53,13 @@ public:
 };
 
 
-static int host_to_dev(cl_command_queue commands, int buff_size, std::vector<cl_mem> &mems, std::ostream &strm)
+static int host_to_dev(cl::CommandQueue commands, int buff_size, std::vector<cl::Memory> &mems, std::ostream &strm)
 {
-    cl_int err = 0;
+    cl_int err;
     Timer timer;
-    err = clEnqueueMigrateMemObjects(commands, mems.size(), &mems[0], 0, 0, NULL, NULL);
-    if (err != CL_SUCCESS) {
-        return err;
-    }
-    err = clFinish(commands);
-    if (err != CL_SUCCESS) {
-        return err;
-    }
+    OCL_CHECK(err, err = commands.enqueueMigrateMemObjects(mems, 0/* 0 means from host*/));
+
+    commands.finish();
 
     double timer_stop2 = timer.stop();
     double throput = (double)(buff_size * mems.size());
@@ -76,18 +71,13 @@ static int host_to_dev(cl_command_queue commands, int buff_size, std::vector<cl_
     return CL_SUCCESS;
 }
 
-static int dev_to_host(cl_command_queue commands, int buff_size, std::vector<cl_mem> &mems, std::ostream &strm)
+static int dev_to_host(cl::CommandQueue commands, int buff_size, std::vector<cl::Memory> &mems, std::ostream &strm)
 {
-    cl_int err = 0;
+    cl_int err;
     Timer timer;
-    err = clEnqueueMigrateMemObjects(commands, mems.size(), &mems[0], CL_MIGRATE_MEM_OBJECT_HOST, 0, NULL, NULL);
-    if (err != CL_SUCCESS) {
-        return err;
-    }
-    err = clFinish(commands);
-    if (err != CL_SUCCESS) {
-        return err;
-    }
+    OCL_CHECK(err, err = commands.enqueueMigrateMemObjects(mems, CL_MIGRATE_MEM_OBJECT_HOST));
+
+    commands.finish();
 
     long long timer_stop2 = timer.stop();
     double throput = (double)(buff_size * mems.size());
@@ -119,51 +109,55 @@ int main(int argc, char** argv)
                          {268435456,4},
                          {536870912,2}};
 
-    int err;
-    xcl_world world     = xcl_world_single();
-    cl_program program  = xcl_import_binary(world,"krnl_host_global");
+    cl_int err;
+    // The get_xil_devices will return vector of Xilinx Devices
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
+
+    //Creating Context and Command Queue for selected Device
+    OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
+    OCL_CHECK(err, cl::CommandQueue command_queue(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
+    std::cout << "Found Device=" << device_name.c_str() << std::endl;
+
+    // import_binary() command will find the OpenCL binary file
+    std::string binaryFile = xcl::find_binary_file(device_name,"krnl_host_global");
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    devices.resize(1);
+    OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
 
     const int dim1 = sizeof(buff_tab)/(2 * 4);
 
     std::ofstream handle("metric1.csv");
     handle << "Direction, Buffer Size (bytes), Count, Bandwidth (MB/s)\n";
+
     for(int buff_size_1 = 0; buff_size_1 < dim1; buff_size_1++) {
         int nxtcnt = buff_tab[buff_size_1][0];
         int buff_cnt = buff_tab[buff_size_1][1];
-        std::vector<cl_mem> mems(buff_cnt, 0);
-        for(int i=mems.size() - 1; i>=0; i--){
-            mems[i] = clCreateBuffer(world.context, CL_MEM_READ_WRITE, nxtcnt, NULL, NULL);
-            err = clEnqueueFillBuffer(world.command_queue, mems[i], &i, 4, 0, nxtcnt, 0, 0, 0);
-            if (err != CL_SUCCESS) {
-                break;
-            }
+        std::vector<cl::Memory> mems(buff_cnt);
+
+        for(int i=buff_cnt - 1; i>=0; i--){
+        	OCL_CHECK(err, mems[i] = cl::Buffer(context, CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, nxtcnt, NULL, &err));
+            	OCL_CHECK(err, err = command_queue.enqueueFillBuffer<int>((cl::Buffer&)mems[i], i, 0, nxtcnt, 0, 0));
         }
         if (err != CL_SUCCESS) {
             break;
         }
 
-        err = clFinish(world.command_queue);
+        command_queue.finish();
+
+        err = host_to_dev(command_queue, nxtcnt, mems, handle);
         if (err != CL_SUCCESS) {
             break;
         }
 
-        err = host_to_dev(world.command_queue, nxtcnt, mems, handle);
+        err = dev_to_host(command_queue, nxtcnt, mems, handle);
         if (err != CL_SUCCESS) {
             break;
-        }
-
-        err = dev_to_host(world.command_queue, nxtcnt, mems, handle);
-        if (err != CL_SUCCESS) {
-            break;
-        }
-
-        for (cl_mem m : mems){
-            clReleaseMemObject(m);
         }
     }
 
+    printf("\nTEST PASSED\n");
     // Shutdown and cleanup
     handle.close();
-    clReleaseProgram(program);
-    xcl_release_world(world);
 }

@@ -11,7 +11,7 @@
     "em_cmd" : "./host_global",
     "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./host_global",
     "libs": [
-        "xcl"
+        "xcl2"
     ],
     "containers": [
     {

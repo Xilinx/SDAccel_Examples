@@ -41,10 +41,10 @@ ALL_KERNEL_OBJS += $(XCLBIN)/krnl_host_global.$(TARGET).$(DSA).xo
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
-include $(ABS_COMMON_REPO)/libs/xcl/xcl.mk
-CXXFLAGS += $(xcl_CXXFLAGS)
-LDFLAGS += $(xcl_LDFLAGS)
-HOST_SRCS += $(xcl_SRCS)
+include $(ABS_COMMON_REPO)/libs/xcl2/xcl2.mk
+CXXFLAGS += $(xcl2_CXXFLAGS)
+LDFLAGS += $(xcl2_LDFLAGS)
+HOST_SRCS += $(xcl2_SRCS)
 
 CP = cp -rf
 
