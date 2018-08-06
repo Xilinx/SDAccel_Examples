@@ -31,6 +31,8 @@ LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_SDX)/runtime/lib/x86_64
 CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps 
 CLFLAGS += --xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generateExtraRunData=true"
 
+
+
 EXECUTABLE = edge
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
@@ -42,17 +44,16 @@ ALL_KERNEL_OBJS += $(XCLBIN)/krnl_sobel.$(TARGET).$(DSA).xo
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
 include $(ABS_COMMON_REPO)/libs/opencv/opencv.mk
-include $(ABS_COMMON_REPO)/libs/xcl/xcl.mk
-CXXFLAGS += $(opencv_CXXFLAGS) $(xcl_CXXFLAGS)
-LDFLAGS += $(opencv_LDFLAGS) $(xcl_LDFLAGS)
-HOST_SRCS += $(opencv_SRCS) $(xcl_SRCS)
+include $(ABS_COMMON_REPO)/libs/xcl2/xcl2.mk
+CXXFLAGS += $(opencv_CXXFLAGS) $(xcl2_CXXFLAGS)
+LDFLAGS += $(opencv_LDFLAGS) $(xcl2_LDFLAGS)
+HOST_SRCS += $(opencv_SRCS) $(xcl2_SRCS)
 
 CP = cp -rf
 DATA = ./data
 
 .PHONY: all clean cleanall docs emconfig
 all: $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
-
 .PHONY: exe
 exe: $(EXECUTABLE)
 

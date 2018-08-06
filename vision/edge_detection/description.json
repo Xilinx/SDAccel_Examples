@@ -8,10 +8,10 @@
     "host_exe": "edge",
     "cmd_args": "PROJECT/data/input/eiffel.bmp",
     "em_cmd": "./edge data/input/eiffel.bmp",
-    "output_files": "input.bmp output.bmp",        
+    "output_files": "input.bmp output.bmp",
     "libs": [
         "opencv",
-        "xcl"
+        "xcl2"
     ], 
     "containers" : [
         {
