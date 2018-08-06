@@ -15,7 +15,9 @@
     "board": ["xilinx:kcu1500:dynamic", "xilinx:vcu1525:dynamic"],
     "targets": ["hw", "hw_emu"],
     "xcl": true,
+    "host_exe": "high_perf_mat_mult",        
     "em_cmd" : "./high_perf_mat_mult 64 64 64",
+    "cmd_args": "./high_perf_mat_mult 64 64 64",        
     "libs" : [
         "xcl"
     ],
@@ -23,13 +25,6 @@
         {
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
-        }
-    ],
-    "revision" : [
-        {
-            "date" : "Sept2017",
-            "version": "1.0",
-            "description": "Initial Xilinx Release"
         }
     ],
     "sdx_gui": false

@@ -50,6 +50,7 @@ Application code is located in the src directory. Accelerator binary files will 
 Makefile
 README.md
 description.json
+sdaccel.ini
 src/genseq.cpp
 src/intel/kseq.h
 src/intel/sc_demo.c
@@ -63,6 +64,7 @@ src/opencl_sw_maxscore_systolic.cpp
 src/smithwaterman.cpp
 src/smithwaterman.h
 src/sw.h
+utils.mk
 ```
 
 ## 5. COMPILATION AND EXECUTION

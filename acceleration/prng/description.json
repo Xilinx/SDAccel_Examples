@@ -6,6 +6,7 @@
         "The method used to generate a random number sequence is called complementary multiply with carry (CMWC)",
         "targeting exection on an SDAccel support FPGA acceleration card"
     ],
+    "host_exe": "prng",
     "xcl": true,
     "em_cmd" : "./prng",
     "libs" : [
@@ -29,13 +30,6 @@
         {
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
-        }
-    ],
-    "revision" : [
-        {
-            "date" : "FEB2017",
-            "version": "1.0",
-            "description": "Initial Xilinx Release"
         }
     ]
 }

@@ -1,43 +1,126 @@
-# Smithwaterman Application
-COMMON_REPO =../../
+# Points to Utility Directory
+COMMON_REPO = ../../
+ABS_COMMON_REPO = $(shell readlink -f $(COMMON_REPO))
 
-include $(COMMON_REPO)/utility/boards.mk
-include $(COMMON_REPO)/libs/xcl/xcl.mk
-include $(COMMON_REPO)/libs/logger/logger.mk
-include $(COMMON_REPO)/libs/cmdparser/cmdparser.mk
-include $(COMMON_REPO)/libs/opencl/opencl.mk
+include ./utils.mk
+# Run Target:
+#   hw  - Compile for hardware
+#   sw_emu/hw_emu - Compile for software/hardware emulation
+# FPGA Board Platform (Default ~ vcu1525)
 
-# Smithwaterman Application
-smithwaterman_SRCS=./src/main.cpp ./src/genseq.cpp ./src/matcharray.cpp ./src/smithwaterman.cpp
-smithwaterman_SRCS+= ./src/intel/ssw.c ./src/intel/sc_demo.c
-smithwaterman_SRCS+= $(logger_SRCS) $(cmdparser_SRCS) $(xcl_SRCS)
-smithwaterman_HDRS=./src/matcharray.h ./src/smithwaterman.h ./src/sw.h
-smithwaterman_HDRS+= ./src/intel/ssw.h ./src/intel/kseq.h
-smithwaterman_HDRS+= $(logger_HDRS) $(cmdparser_HDRS) $(xcl_HDRS)
-smithwaterman_CXXFLAGS=-std=c++0x -DFPGA_DEVICE -I./src/ $(opencl_CXXFLAGS)
-smithwaterman_CXXFLAGS+= $(logger_CXXFLAGS) $(cmdparser_CXXFLAGS) $(xcl_CXXFLAGS)
-smithwaterman_LDFLAGS=$(opencl_LDFLAGS) -fopenmp -lz
+TARGETS := hw
+TARGET := $(TARGETS)
+DEVICES := xilinx_vcu1525_dynamic
+DEVICE := $(DEVICES)
+XCLBIN := ./xclbin
+DSA := $(call device2sandsa, $(DEVICE))
 
-EXES=smithwaterman
+CXX := $(XILINX_SDX)/bin/xcpp
+XOCC := $(XILINX_SDX)/bin/xocc
 
-# Smithwaterman Kernel
-krnl_smithwaterman_SRCS=./src/opencl_sw_maxscore_systolic.cpp
-krnl_smithwaterman_HDRS=./src/sw.h
-krnl_smithwaterman_CLFLAGS=--kernel opencl_sw_maxscore -I./src/ --kernel_frequency 235 
+LDFLAGS := $(opencl_LDFLAGS)
 
-XOS=krnl_smithwaterman
+HOST_SRCS = ./src/main.cpp ./src/genseq.cpp ./src/matcharray.cpp ./src/smithwaterman.cpp ./src/intel/ssw.c ./src/intel/sc_demo.c 
+KRNL_SRCS = ./src/opencl_sw_maxscore_systolic.cpp
+HOST_HDRS = ./src/matcharray.h ./src/smithwaterman.h ./src/sw.h ./src/intel/ssw.h ./src/intel/kseq.h 
+KRNl_HDRS = ./src/sw.h
 
-# Smithwaterman xclbin
-krnl_smithwaterman_XOS=krnl_smithwaterman
-krnl_smithwaterman_LDCLFLAGS=--nk opencl_sw_maxscore:2
+# Host compiler global settings
+CXXFLAGS = -I $(XILINX_SDX)/runtime/include/1_2/ -I/$(XILINX_SDX)/Vivado_HLS/include/ -O0 -g -Wall -fmessage-length=0 -std=c++14 -DFPGA_DEVICE -I./src/ -I/$(XILINX_VIVADO)/include/ 
+LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_SDX)/runtime/lib/x86_64
 
-XCLBINS=krnl_smithwaterman
+# Kernel compiler global settings
+CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps 
+CLFLAGS += --xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generateExtraRunData=true"
+CLFLAGS += -I./src/ --kernel_frequency "235"
 
-# check
-check_EXE=smithwaterman
-check_XCLBINS=krnl_smithwaterman
+EXECUTABLE = smithwaterman
 
-CHECKS=check
+EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
-include $(COMMON_REPO)/utility/rules.mk
+BINARY_CONTAINERS += $(XCLBIN)/krnl_smithwaterman.$(TARGET).$(DSA).xclbin
+BINARY_CONTAINER_1_OBJS += $(XCLBIN)/krnl_smithwaterman.$(TARGET).$(DSA).xo
+ALL_KERNEL_OBJS += $(XCLBIN)/krnl_smithwaterman.$(TARGET).$(DSA).xo
+
+#Include Libraries
+include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
+include $(ABS_COMMON_REPO)/libs/logger/logger.mk
+include $(ABS_COMMON_REPO)/libs/cmdparser/cmdparser.mk
+include $(ABS_COMMON_REPO)/libs/xcl/xcl.mk
+CXXFLAGS += $(logger_CXXFLAGS) $(cmdparser_CXXFLAGS) $(xcl_CXXFLAGS) $(opencl_CXXFLAGS)
+LDFLAGS += $(logger_LDFLAGS) $(cmdparser_LDFLAGS) $(xcl_LDFLAGS)
+HOST_SRCS += $(logger_SRCS) $(cmdparser_SRCS) $(xcl_SRCS)
+HOST_HDRS += $(logger_HDRS) $(cmdparser_HDRS) $(xcl_HDRS)
+
+LDFLAGS += -lz -fopenmp
+CP = cp -rf
+
+.PHONY: all clean cleanall docs emconfig
+all: $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
+
+.PHONY: exe
+exe: $(EXECUTABLE)
+
+# Building kernel
+$(XCLBIN)/krnl_smithwaterman.$(TARGET).$(DSA).xo: ./src/opencl_sw_maxscore_systolic.cpp
+	mkdir -p $(XCLBIN)
+	$(XOCC) $(CLFLAGS) -c -k opencl_sw_maxscore -I'$(<D)' -o'$@' '$<'
+
+$(XCLBIN)/krnl_smithwaterman.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_1_OBJS)
+	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk opencl_sw_maxscore:2 -o'$@' $(+)
+
+# Building Host
+$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS) $(KRNL_SRCS) $(KRNL_HDRS)
+	mkdir -p $(XCLBIN)
+	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) $(KRNL_SRCS) $(KRNL_HDRS) -o '$@' $(LDFLAGS)
+
+emconfig:$(EMCONFIG_DIR)/emconfig.json
+$(EMCONFIG_DIR)/emconfig.json:
+	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
+
+check: all
+ifneq ($(TARGET),$(filter $(TARGET), sw_emu hw))
+$(warning WARNING:Application supports only sw_emu hw TARGET. Please use the target for running the application)
+$(error Nothing to be done for make)
+endif
+
+ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
+	$(CP) $(EMCONFIG_DIR)/emconfig.json .
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)
+else
+	 ./$(EXECUTABLE)
+endif
+	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
+
+# Cleaning stuff
+clean:
+	-$(RMDIR) $(EXECUTABLE) $(XCLBIN)/{*sw_emu*,*hw_emu*} 
+	-$(RMDIR) sdaccel_* TempConfig system_estimate.xtxt *.rpt
+	-$(RMDIR) src/*.ll _xocc_* .Xil emconfig.json dltmp* xmltmp* *.log *.jou *.wcfg *.wdb
+
+cleanall: clean
+	-$(RMDIR) $(XCLBIN)
+	-$(RMDIR) ./_x
+
+.PHONY: help
+
+help::
+	$(ECHO) "Makefile Usage:"
+	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
+	$(ECHO) "      Command to generate the design for specified Target and Device."
+	$(ECHO) ""
+	$(ECHO) "  make clean "
+	$(ECHO) "      Command to remove the generated non-hardware files."
+	$(ECHO) ""
+	$(ECHO) "  make cleanall"
+	$(ECHO) "      Command to remove all the generated files."
+	$(ECHO) ""
+	$(ECHO) "  make check TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
+	$(ECHO) "      Command to run application in emulation."
+	$(ECHO) ""
+
+docs: README.md
+
+README.md: description.json
+	$(ABS_COMMON_REPO)/utility/readme_gen/readme_gen.py description.json
 

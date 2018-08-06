@@ -9,8 +9,8 @@
         "1. Compute MaxScore",
         "2. Systolic array implementation"
     ],
-    "nboards": ["xilinx:adm-pcie-ku3:2ddr-xpr"],
     "targets": ["sw_emu", "hw"],
+    "host_exe": "smithwaterman",
     "xcl": false,
     "em_cmd" : "./smithwaterman",
     "linker" : {
@@ -40,23 +40,5 @@
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
         }
-    ],
-    "revision" : [
-        {
-            "date" : "FEB2016",
-            "version": "1.0",
-            "description": "Initial Xilinx Release"
-        },
-        {
-            "date": "OCT2016",
-            "version": "2.0",
-            "description": "Conversion to Makefile based compilation"
-        },
-        {
-            "date": "DEC2016",
-            "version": "3.0",
-            "description": "Update for SDAccel 2016.3"
-        }
     ]
-
 }

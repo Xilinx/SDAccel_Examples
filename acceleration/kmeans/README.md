@@ -76,6 +76,7 @@ README.md
 data/100
 data/100.gold_c5
 description.json
+sdaccel.ini
 src/cluster.c
 src/fpga_kmeans.cpp
 src/fpga_kmeans.h
@@ -84,6 +85,7 @@ src/kmeans.cl
 src/kmeans.h
 src/kmeans_clustering_cmodel.c
 src/rmse.c
+utils.mk
 ```
 
 ## 5. COMPILATION AND EXECUTION

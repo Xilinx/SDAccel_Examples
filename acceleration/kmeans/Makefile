@@ -1,10 +1,25 @@
-COMMON_REPO:=../../
-include $(COMMON_REPO)/utility/boards.mk
-include $(COMMON_REPO)/libs/opencl/opencl.mk
-include $(COMMON_REPO)/libs/cmdparser/cmdparser.mk
-include $(COMMON_REPO)/libs/logger/logger.mk
-include $(COMMON_REPO)/libs/xcl/xcl.mk
-include $(COMMON_REPO)/libs/oclHelper/oclHelper.mk
+# Points to Utility Directory
+COMMON_REPO = ../../
+ABS_COMMON_REPO = $(shell readlink -f $(COMMON_REPO))
+
+include ./utils.mk
+# Run Target:
+#   hw  - Compile for hardware
+#   sw_emu/hw_emu - Compile for software/hardware emulation
+# FPGA Board Platform (Default ~ vcu1525)
+
+TARGETS := hw
+TARGET := $(TARGETS)
+DEVICES := xilinx_vcu1525_dynamic
+DEVICE := $(DEVICES)
+XCLBIN := ./xclbin
+DSA := $(call device2sandsa, $(DEVICE))
+
+CXX := $(XILINX_SDX)/bin/xcpp
+XOCC := $(XILINX_SDX)/bin/xocc
+
+CXXFLAGS := $(opencl_CXXFLAGS) -Wall -O0 -g -std=c++14
+LDFLAGS := $(opencl_LDFLAGS)
 
 ################################################################################
 #K-Means Settings
@@ -34,35 +49,103 @@ else
 	PARALLEL_FEATURES = 8 
 endif
 
-host_kmeans_SRCS=src/cluster.c src/rmse.c src/fpga_kmeans.cpp src/host.cpp src/kmeans_clustering_cmodel.c 
-host_kmeans_SRCS+= $(logger_SRCS) $(cmdparser_SRCS) $(xcl_SRCS) $(oclHelper_SRCS)
-host_kmeans_HDRS = $(logger_SRCS) $(cmdparser_HDRS) $(xcl_HDRS) $(oclHelper_HDRS)
-host_kmeans_CXXFLAGS=-I./src/ $(opencl_CXXFLAGS) -D RECORD_OVERALL_TIME -D USE_DATA_TYPE=$(DATATYPE_ID) #-DVERIFY_USING_CMODEL 
-host_kmeans_CXXFLAGS+= $(logger_CXXFLAGS) $(cmdparser_CXXFLAGS) $(xcl_CXXFLAGS) $(oclHelper_CXXFLAGS) 
-host_kmeans_LDFLAGS=$(opencl_LDFLAGS) -lxilinxopencl -lpthread -lrt
+HOST_SRCS = ./src/host.cpp ./src/cluster.c ./src/rmse.c ./src/fpga_kmeans.cpp ./src/kmeans_clustering_cmodel.c
 
-EXES=host_kmeans
+# Host compiler global settings
+CXXFLAGS = -I $(XILINX_SDX)/runtime/include/1_2/ -I/$(XILINX_SDX)/Vivado_HLS/include/ -O0 -g -Wall -fmessage-length=0 -std=c++14
+LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_SDX)/runtime/lib/x86_64 -lxilinxopencl
 
-#Kmeans Kernel
-kmeans_SRCS=./src/kmeans.cl
-kmeans_CLFLAGS=-D PARALLEL_POINTS=$(PARALLEL_POINTS) -D PARALLEL_FEATURES=$(PARALLEL_FEATURES) -D USE_DATA_TYPE=$(DATATYPE_ID)
+# Kernel compiler global settings
+CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps 
+CLFLAGS += --xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generateExtraRunData=true"
+CLFLAGS += -D "PARALLEL_POINTS=$(PARALLEL_POINTS)" -D "PARALLEL_FEATURES=$(PARALLEL_FEATURES)" -D USE_DATA_TYPE=$(DATATYPE_ID)
 
-XOS=kmeans
+CXXFLAGS += -DRECORD_OVERALL_TIME -DUSE_DATA_TYPE=$(DATATYPE_ID) -DPARALLEL_POINTS=$(PARALLEL_POINTS)
 
-# Kmeans xclbin
-kmeans_XOS=kmeans
-kmeans_LDCLFLAGS=--nk kmeans:$(COMPUTE_UNITS)
+EXECUTABLE = host_kmeans
 
-XCLBINS=kmeans
+EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
-EXTRA_CLEAN=membership.out
+BINARY_CONTAINERS += $(XCLBIN)/kmeans.$(TARGET).$(DSA).xclbin
+BINARY_CONTAINER_1_OBJS += $(XCLBIN)/kmeans.$(TARGET).$(DSA).xo
+ALL_KERNEL_OBJS += $(XCLBIN)/kmeans.$(TARGET).$(DSA).xo
 
-# check
-check_EXE=$(EXES)
-check_XCLBINS=$(XCLBINS)
-check_ARGS= -i $(TEST_FILE) -m $(NCLUSTERS) -n $(NCLUSTERS) -c $(GOLD_FILE) -g $(COMPUTE_UNITS) 
+#Include Libraries
+include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
+include $(ABS_COMMON_REPO)/libs/logger/logger.mk
+include $(ABS_COMMON_REPO)/libs/oclHelper/oclHelper.mk
+include $(ABS_COMMON_REPO)/libs/cmdparser/cmdparser.mk
+include $(ABS_COMMON_REPO)/libs/xcl/xcl.mk
+CXXFLAGS += $(logger_CXXFLAGS) $(oclHelper_CXXFLAGS) $(cmdparser_CXXFLAGS) $(xcl_CXXFLAGS)
+LDFLAGS += $(logger_LDFLAGS) $(oclHelper_LDFLAGS) $(cmdparser_LDFLAGS) $(xcl_LDFLAGS)
+HOST_SRCS += $(logger_SRCS) $(oclHelper_SRCS) $(cmdparser_SRCS) $(xcl_SRCS)
 
-CHECKS=check
+CP = cp -rf
+DATA = ./data
 
-include $(COMMON_REPO)/utility/rules.mk
+.PHONY: all clean cleanall docs emconfig
+all: $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
+
+.PHONY: exe
+exe: $(EXECUTABLE)
+
+# Building kernel
+$(XCLBIN)/kmeans.$(TARGET).$(DSA).xo: ./src/kmeans.cl
+	mkdir -p $(XCLBIN)
+	$(XOCC) $(CLFLAGS) -c -k kmeans -I'$(<D)' -o'$@' '$<'
+
+$(XCLBIN)/kmeans.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_1_OBJS)
+	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk kmeans:$(COMPUTE_UNITS) -o'$@' $(+)
+
+# Building Host
+$(EXECUTABLE): $(HOST_SRCS)
+	mkdir -p $(XCLBIN)
+	$(CXX) $(CXXFLAGS) $(HOST_SRCS) -o '$@' $(LDFLAGS)
+
+emconfig:$(EMCONFIG_DIR)/emconfig.json
+$(EMCONFIG_DIR)/emconfig.json:
+	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
+
+check: all
+
+ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
+	$(CP) $(EMCONFIG_DIR)/emconfig.json .
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) -i ./data/100 -c ./data/100.gold_c5 -m 5 -n 5 -g 2
+else
+	 ./$(EXECUTABLE) -i ./data/100 -c ./data/100.gold_c5 -m 5 -n 5 -g 2
+endif
+	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
+
+# Cleaning stuff
+clean:
+	-$(RMDIR) $(EXECUTABLE) $(XCLBIN)/{*sw_emu*,*hw_emu*} 
+	-$(RMDIR) sdaccel_* TempConfig system_estimate.xtxt *.rpt
+	-$(RMDIR) src/*.ll _xocc_* .Xil emconfig.json dltmp* xmltmp* *.log *.jou *.wcfg *.wdb
+
+cleanall: clean
+	-$(RMDIR) $(XCLBIN)
+	-$(RMDIR) ./_x
+	-$(RMDIR) ./membership.out
+
+.PHONY: help
+
+help::
+	$(ECHO) "Makefile Usage:"
+	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
+	$(ECHO) "      Command to generate the design for specified Target and Device."
+	$(ECHO) ""
+	$(ECHO) "  make clean "
+	$(ECHO) "      Command to remove the generated non-hardware files."
+	$(ECHO) ""
+	$(ECHO) "  make cleanall"
+	$(ECHO) "      Command to remove all the generated files."
+	$(ECHO) ""
+	$(ECHO) "  make check TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
+	$(ECHO) "      Command to run application in emulation."
+	$(ECHO) ""
+
+docs: README.md
+
+README.md: description.json
+	$(ABS_COMMON_REPO)/utility/readme_gen/readme_gen.py description.json
 
