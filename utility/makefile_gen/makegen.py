@@ -77,8 +77,15 @@ def add_libs(target, data):
             target.write(" $(")
             target.write(lib)
             target.write("_SRCS)")
-    target.write("\n\n")
-
+    target.write("\n")
+    if "linker" in data:
+        if "libraries" in data["linker"]:
+            target.write("\nCXXFLAGS +=")
+            for lin in data["linker"]["libraries"]:
+                target.write(" ")
+                target.write("-l")
+                target.write(lin)
+    target.write("\n")                
     return
 
 def add_host_flags(target, data):
@@ -135,8 +142,14 @@ def add_kernel_flags(target, data):
         target.write("\n")
 
     if "compiler" in data:
-        target.write("CXXFLAGS += ")
-        target.write(data["compiler"]["options"])
+        if "options" in data["compiler"]:
+            target.write("\n")
+        if "symbols" in data["compiler"]:
+            target.write("\nCXXFLAGS +=")
+            for sym in data["compiler"]["symbols"]:
+                target.write(" ")
+                target.write("-D")
+                target.write(sym)
         target.write("\n")
 
     if "containers" in data:
@@ -348,6 +361,7 @@ def mk_build_all(target, data):
 
     target.write(".PHONY: all clean cleanall docs emconfig\n")
     target.write("all: $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig\n")
+    target.write("\n")
     
     target.write(".PHONY: exe\n")
     target.write("exe: $(EXECUTABLE)\n")

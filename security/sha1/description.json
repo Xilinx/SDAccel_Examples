@@ -5,6 +5,7 @@
         "This is an optimized implementation of SHA1 secure hash algorithm targeting execution on an SDAccel supported FPGA acceleration card."
     ],
     "xcl": false,
+    "host_exe": "sha1",
     "cmd_args" : "-t 20 -p Xilinx -k BUILD/default.xclbin",
     "em_cmd" : "./sha1 -t 20 -p Xilinx -k ./xclbin/krnl_sha1.<emulation flow>.xilinx_vcu1525_dynamic_5_1.xclbin",
     "libs": [
@@ -13,7 +14,7 @@
     ],
     "containers": [
     {
-        "name": "dev_sha1_update",
+        "name": "krnl_sha1",
         "accelerators": [
         {
             "name": "dev_sha1_update",
@@ -28,23 +29,5 @@
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
         }
-    ],
-    "revision" : [
-        {
-            "date" : "FEB2016",
-            "version": "1.0",
-            "description": "Initial Xilinx Release"
-        },
-        {
-            "date" : "JUL2016",
-            "version": "2.0",
-            "description": "Conversion to Makefile based compilation"
-        },
-        {
-            "date": "DEC2016",
-            "version": "3.0",
-            "description": "Update for SDAccel 2016.3"
-        }
     ]
-
 }

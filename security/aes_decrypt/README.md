@@ -49,12 +49,14 @@ data/goldFile.txt
 data/input.bmp
 data/test.txt
 description.json
+sdaccel.ini
 src/aes_app.cpp
 src/aes_app.h
 src/aes_ecb.cpp
 src/aes_ecb.h
 src/krnl_aes.cl
 src/main.cpp
+utils.mk
 ```
 
 ## 5. COMPILATION AND EXECUTION

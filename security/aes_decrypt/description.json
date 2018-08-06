@@ -4,8 +4,10 @@
     "overview" : [
         "Implementation of an AES-128 ECB Encrypt in software, followed by decryption written in OpenCL and targeting execution on an SDAccel supported FPGA acceleration card."
     ],
+    "host_exe": "aes",
     "cmd_args" : "-b PROJECT/data/test.txt -g PROJECT/data/goldFile.txt",
     "em_cmd" : "./aes -b data/test.txt -g data/goldFile.txt",
+    "output_files": "encryptedData.txt",        
     "xcl": false,
     "libs": [
         "logger",
@@ -23,23 +25,5 @@
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
         }
-    ],
-    "revision" : [
-        {
-            "date" : "FEB2016",
-            "version": "1.0",
-            "description": "Initial Xilinx Release"
-        },
-        {
-            "date" : "JUL2016",
-            "version": "2.0",
-            "description": "Conversion to Makefile based compilation"
-        },
-        {
-            "date": "DEC2016",
-            "version": "3.0",
-            "description": "Update for SDAccel 2016.3"
-        }
     ]
-
 }

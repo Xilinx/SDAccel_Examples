@@ -46,8 +46,10 @@ README.md
 data/image1.bmp
 data/image2.bmp
 description.json
+sdaccel.ini
 src/krnl_tinyEncryption.cl
 src/tinyEncryption.cpp
+utils.mk
 ```
 
 ## 5. COMPILATION AND EXECUTION

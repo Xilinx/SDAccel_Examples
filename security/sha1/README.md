@@ -45,6 +45,7 @@ Application code is located in the src directory. Accelerator binary files will 
 Makefile
 README.md
 description.json
+sdaccel.ini
 src/clSha1.cpp
 src/clSha1.h
 src/krnl_clSha1.cl
@@ -52,6 +53,7 @@ src/main.cpp
 src/oswendian.h
 src/sha1.c
 src/sha1.h
+utils.mk
 ```
 
 ## 5. COMPILATION AND EXECUTION

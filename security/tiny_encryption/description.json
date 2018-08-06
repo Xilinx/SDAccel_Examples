@@ -6,8 +6,10 @@
     ],
     "xcl": false,
     "nboard":["xilinx:vcu1525:dynamic"],
+    "host_exe": "tiny",
     "cmd_args" : "PROJECT/data/image1.bmp PROJECT/data/image2.bmp BUILD/default.xclbin",
     "em_cmd" : "./tiny data/image1.bmp data/image2.bmp xclbin/krnl_tiny.<emulation flow>.xilinx_xil-accel-rd-ku115_4ddr-xpr_3_3.xclbin",
+    "output_files": "output.bmp",
     "libs": [
         "oclHelper",
         "bitmap"
@@ -29,23 +31,5 @@
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
         }
-    ],
-    "revision" : [
-        {
-            "date" : "FEB2016",
-            "version": "1.0",
-            "description": "Initial Xilinx Release"
-        },
-        {
-            "date" : "JUL2016",
-            "version": "2.0",
-            "description": "Conversion to Makefile based compilation"
-        },
-        {
-            "date": "DEC2016",
-            "version":"3.0",
-            "description": "Update for SDAccel 2016.3"
-        }
     ]
-
 }

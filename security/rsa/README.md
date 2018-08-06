@@ -54,12 +54,14 @@ data/0_1024_key.pem
 data/0_2048_key.pem
 data/0_out.msg
 description.json
+sdaccel.ini
 src/common.cpp
 src/common.h
 src/krnl_rsa.cpp
 src/main.cpp
 src/rsa_app.cpp
 src/rsa_app.h
+utils.mk
 ```
 
 ## 5. COMPILATION AND EXECUTION
