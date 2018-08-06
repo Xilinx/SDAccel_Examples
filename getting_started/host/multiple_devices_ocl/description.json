@@ -10,7 +10,7 @@
         "Linux"
     ],
     "libs": [
-        "xcl"
+        "xcl2"
     ],
     "host_exe": "multiple_devices",
     "cmd_args" : "BUILD/vector_addition.xclbin",

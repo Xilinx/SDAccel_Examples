@@ -31,31 +31,32 @@ LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_SDX)/runtime/lib/x86_64
 CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps 
 CLFLAGS += --xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generateExtraRunData=true"
 
+
+
 EXECUTABLE = multiple_devices
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
 BINARY_CONTAINERS += $(XCLBIN)/vector_addition.$(TARGET).$(DSA).xclbin
-BINARY_CONTAINER_1_OBJS += $(XCLBIN)/vector_addition.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/vector_addition.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_1_OBJS += $(XCLBIN)/vadd.$(TARGET).$(DSA).xo
+ALL_KERNEL_OBJS += $(XCLBIN)/vadd.$(TARGET).$(DSA).xo
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
-include $(ABS_COMMON_REPO)/libs/xcl/xcl.mk
-CXXFLAGS += $(xcl_CXXFLAGS)
-LDFLAGS += $(xcl_LDFLAGS)
-HOST_SRCS += $(xcl_SRCS)
+include $(ABS_COMMON_REPO)/libs/xcl2/xcl2.mk
+CXXFLAGS += $(xcl2_CXXFLAGS)
+LDFLAGS += $(xcl2_LDFLAGS)
+HOST_SRCS += $(xcl2_SRCS)
 
 CP = cp -rf
 
 .PHONY: all clean cleanall docs emconfig
 all: $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
-
 .PHONY: exe
 exe: $(EXECUTABLE)
 
 # Building kernel
-$(XCLBIN)/vector_addition.$(TARGET).$(DSA).xo: ./src/vector_addition.cl
+$(XCLBIN)/vadd.$(TARGET).$(DSA).xo: ./src/vector_addition.cl
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) -c -k vadd -I'$(<D)' -o'$@' '$<'
 
@@ -72,11 +73,12 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR) --nd 2
 
 check: all
+
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) xclbin/vector_addition.$(TARGET).$(DSA).xclbin
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) ./xclbin/vector_addition.$(TARGET).$(DSA).xclbin
 else
-	 ./$(EXECUTABLE) xclbin/vector_addition.$(TARGET).$(DSA).xclbin
+	 ./$(EXECUTABLE) ./xclbin/vector_addition.$(TARGET).$(DSA).xclbin
 endif
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 
