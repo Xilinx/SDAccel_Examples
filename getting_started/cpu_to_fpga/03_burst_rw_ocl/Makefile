@@ -29,15 +29,17 @@ LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_SDX)/runtime/lib/x86_64
 
 # Kernel compiler global settings
 CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps 
-CLFLAGS += --xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generateExtraRunData=true" --xp "param:compiler.axiDeadLockFree=no"
+CLFLAGS += --xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generateExtraRunData=true"
+CLFLAGS += --xp "param:compiler.axiDeadLockFree=no"
+
 
 EXECUTABLE = host
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
 BINARY_CONTAINERS += $(XCLBIN)/mmult.$(TARGET).$(DSA).xclbin
-BINARY_CONTAINER_1_OBJS += $(XCLBIN)/mmult.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/mmult.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_1_OBJS += $(XCLBIN)/vadd.$(TARGET).$(DSA).xo
+ALL_KERNEL_OBJS += $(XCLBIN)/vadd.$(TARGET).$(DSA).xo
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
@@ -55,12 +57,12 @@ all: $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
 exe: $(EXECUTABLE)
 
 # Building kernel
-$(XCLBIN)/mmult.$(TARGET).$(DSA).xo: ./src/mmult.cl
+$(XCLBIN)/vadd.$(TARGET).$(DSA).xo: ./src/mmult.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k mmult -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) -c -k vadd -I'$(<D)' -o'$@' '$<'
 
 $(XCLBIN)/mmult.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_1_OBJS)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk mmult:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk vadd:1 -o'$@' $(+)
 
 # Building Host
 $(EXECUTABLE): $(HOST_SRCS)
@@ -72,6 +74,7 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
+
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)
@@ -81,8 +84,6 @@ endif
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 
 # Cleaning stuff
-RM = rm -f
-RMDIR = rm -rf
 clean:
 	-$(RMDIR) $(EXECUTABLE) $(XCLBIN)/{*sw_emu*,*hw_emu*} 
 	-$(RMDIR) sdaccel_* TempConfig system_estimate.xtxt *.rpt
@@ -91,8 +92,6 @@ clean:
 cleanall: clean
 	-$(RMDIR) $(XCLBIN)
 	-$(RMDIR) ./_x
-
-ECHO:= @echo
 
 .PHONY: help
 

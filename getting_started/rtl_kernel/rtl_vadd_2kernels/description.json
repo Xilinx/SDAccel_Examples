@@ -10,6 +10,7 @@
     "libs": [
         "xcl2"
     ],
+    "host_exe": "host",
     "runtime": ["OpenCL"],
     "em_cmd": "./host",
     "targets": ["hw", "hw_emu"],

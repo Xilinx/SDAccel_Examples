@@ -59,21 +59,16 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
+
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)
 else
 	 ./$(EXECUTABLE)
 endif
-#Reporting warning if not targeting for Targets
-ifneq (sw_emu,$(findstring sw_emu,$(TARGET)))
-	$(warning WARNING:Application supports only sw_emu TARGET. Please use the target for running the application)
-endif
-
+	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 
 # Cleaning stuff
-RM = rm -f
-RMDIR = rm -rf
 clean:
 	-$(RMDIR) $(EXECUTABLE) $(XCLBIN)/{*sw_emu*,*hw_emu*} 
 	-$(RMDIR) sdaccel_* TempConfig system_estimate.xtxt *.rpt
@@ -82,8 +77,6 @@ clean:
 cleanall: clean
 	-$(RMDIR) $(XCLBIN)
 	-$(RMDIR) ./_x
-
-ECHO:= @echo
 
 .PHONY: help
 

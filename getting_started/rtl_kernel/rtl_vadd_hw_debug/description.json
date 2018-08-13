@@ -16,6 +16,7 @@
     "boards":["xilinx_kcu1500_dynamic_5_0", "xilinx_vcu1525_dynamic_5_0"],
     "targets": ["hw", "hw_emu"],
     "xcl": true,
+    "host_exe": "host",
     "em_cmd" : "./host",
     "hw_cmd" : "./host",
     "libs" : [
