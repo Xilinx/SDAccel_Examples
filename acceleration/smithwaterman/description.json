@@ -24,7 +24,7 @@
     ],
     "containers": [
     {
-      "name": "opencl_sw_maxscore",
+      "name": "krnl_smithwaterman",
       "accelerators": [
         {
             "name": "opencl_sw_maxscore",
