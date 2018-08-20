@@ -19,7 +19,7 @@
         "name" : "mmult",
         "accelerators": [
         {
-            "name" : "vadd",
+            "name" : "mmult",
             "location": "src/mmult.cl",
             "clflags": "--xp param:compiler.axiDeadLockFree=no"    
         }

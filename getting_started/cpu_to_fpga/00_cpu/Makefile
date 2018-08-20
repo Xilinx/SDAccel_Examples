@@ -66,7 +66,10 @@ ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 else
 	 ./$(EXECUTABLE)
 endif
-	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
+#Reporting warning if not targeting for Targets
+ifneq (sw_emu,$(findstring sw_emu,$(TARGET)))
+	$(warning WARNING:Application supports only sw_emu TARGET. Please use the target for running the application)
+endif
 
 # Cleaning stuff
 clean:

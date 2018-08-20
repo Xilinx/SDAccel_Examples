@@ -38,8 +38,8 @@ EXECUTABLE = host
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
 BINARY_CONTAINERS += $(XCLBIN)/mmult.$(TARGET).$(DSA).xclbin
-BINARY_CONTAINER_1_OBJS += $(XCLBIN)/vadd.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/vadd.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_1_OBJS += $(XCLBIN)/mmult.$(TARGET).$(DSA).xo
+ALL_KERNEL_OBJS += $(XCLBIN)/mmult.$(TARGET).$(DSA).xo
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
@@ -57,12 +57,12 @@ all: $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
 exe: $(EXECUTABLE)
 
 # Building kernel
-$(XCLBIN)/vadd.$(TARGET).$(DSA).xo: ./src/mmult.cl
+$(XCLBIN)/mmult.$(TARGET).$(DSA).xo: ./src/mmult.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k vadd -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) -c -k mmult -I'$(<D)' -o'$@' '$<'
 
 $(XCLBIN)/mmult.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_1_OBJS)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk vadd:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk mmult:1 -o'$@' $(+)
 
 # Building Host
 $(EXECUTABLE): $(HOST_SRCS)

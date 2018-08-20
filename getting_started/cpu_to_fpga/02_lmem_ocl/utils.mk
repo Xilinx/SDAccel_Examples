@@ -24,6 +24,7 @@ ifeq ($(DEBUG), yes)
 CLFLAGS += --dk protocol:all:all:all
 endif
 
+
 # sanitize_dsa - create a filesystem friendly name from dsa name
 #   $(1) - name of dsa
 COLON=:
@@ -35,4 +36,9 @@ device2dsa = $(if $(filter $(suffix $(1)),.xpfm),$(shell $(COMMON_REPO)/utility/
 device2sandsa = $(call sanitize_dsa,$(call device2dsa,$(1)))
 device2dep = $(if $(filter $(suffix $(1)),.xpfm),$(dir $(1))/$(shell $(COMMON_REPO)/utility/parsexpmf.py $(1) hw 2>/dev/null) $(1),)
 
+# Cleaning stuff
+RM = rm -f
+RMDIR = rm -rf
+
+ECHO:= @echo
 
