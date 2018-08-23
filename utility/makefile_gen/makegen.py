@@ -93,11 +93,11 @@ def add_host_flags(target, data):
     target.write("src/host.cpp\n\n")
     target.write("# Host compiler global settings\n")
     target.write("CXXFLAGS = ")
-    target.write("-I $(XILINX_SDX)/runtime/include/1_2/ -I/$(XILINX_SDX)/Vivado_HLS/include/ ")
+    target.write("-I $(XILINX_XRT)/include/ -I/$(XILINX_SDX)/Vivado_HLS/include/ ")
     target.write("-O0 -g -Wall -fmessage-length=0 -std=c++14\n")
     target.write("LDFLAGS = ")
     target.write("-lOpenCL -lpthread -lrt -lstdc++ ")
-    target.write("-L$(XILINX_SDX)/runtime/lib/x86_64\n\n")
+    target.write("-L$(XILINX_XRT)/lib/\n\n")
 
     return
 

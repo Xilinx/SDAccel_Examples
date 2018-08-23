@@ -26,8 +26,8 @@ HOST_HDRS = ./src/matcharray.h ./src/smithwaterman.h ./src/sw.h ./src/intel/ssw.
 KRNl_HDRS = ./src/sw.h
 
 # Host compiler global settings
-CXXFLAGS = -I $(XILINX_SDX)/runtime/include/1_2/ -I/$(XILINX_SDX)/Vivado_HLS/include/ -O0 -g -Wall -fmessage-length=0 -std=c++14 -DFPGA_DEVICE -I./src/ -I/$(XILINX_VIVADO)/include/ 
-LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_SDX)/runtime/lib/x86_64
+CXXFLAGS = -I $(XILINX_XRT)/include/ -I/$(XILINX_SDX)/Vivado_HLS/include/ -O0 -g -Wall -fmessage-length=0 -std=c++14 -DFPGA_DEVICE -I./src/ -I/$(XILINX_VIVADO)/include/ 
+LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_XRT)/lib/
 
 # Kernel compiler global settings
 CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps 

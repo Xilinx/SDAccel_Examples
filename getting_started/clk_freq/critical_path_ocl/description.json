@@ -16,8 +16,8 @@
             "name": "apply_watermark_GOOD", 
             "accelerators": [
                 {
-                    "name": "apply_watermark",        
-                    "clflags" : "-DBAD_DESIGN=0",             
+                    "name": "apply_watermark",      
+                    "clflags" : "-DBAD_DESIGN=0",  
                     "location": "src/apply_watermark.cl"
                 }
             ]

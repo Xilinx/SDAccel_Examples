@@ -24,12 +24,14 @@ LDFLAGS := $(opencl_LDFLAGS)
 HOST_SRCS = src/host.cpp
 
 # Host compiler global settings
-CXXFLAGS = -I $(XILINX_SDX)/runtime/include/1_2/ -I/$(XILINX_SDX)/Vivado_HLS/include/ -O0 -g -Wall -fmessage-length=0 -std=c++14
-LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_SDX)/runtime/lib/x86_64
+CXXFLAGS = -I $(XILINX_XRT)/include/ -I/$(XILINX_SDX)/Vivado_HLS/include/ -O0 -g -Wall -fmessage-length=0 -std=c++14
+LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_XRT)/lib/
 
 # Kernel compiler global settings
 CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps 
 CLFLAGS += --xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generateExtraRunData=true"
+
+
 
 EXECUTABLE = loop_fusion
 
@@ -77,7 +79,7 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
-ifeq ($(DEVICE),$(filter $(DEVICE), xilinx_kcu1500_dynamic_5_0 xilinx:kcu1500:dynamic))
+ifeq ($(DEVICE),$(filter $(DEVICE), xilinx:kcu1500:dynamic xilinx_kcu1500_dynamic_5_0))
 $(error Nothing to be done for make)
 endif
 
