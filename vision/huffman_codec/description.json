@@ -7,7 +7,7 @@
     "targets": ["sw_emu", "hw"],
     "xcl": false,
     "opencv": true,
-    "cmd_args": "-b PROJECT/data/rect_1024.bmp",
+    "cmd_args": "-d ${sdx:platform} -b PROJECT/data/rect_1024.bmp",
     "em_cmd": "./huffman -b data/rect_1024.bmp",
     "host_exe": "huffman",       
     "output_files": "decoded.bmp",        
