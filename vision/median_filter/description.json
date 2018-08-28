@@ -6,19 +6,25 @@
     ],
     "xcl": false,
     "opencv": true,
-    "host_exe": "median",        
-    "cmd_args": "BUILD/default.xclbin PROJECT/data/inputImage.bmp PROJECT/data/goldenImage.bmp",
+    "host_exe": "median",
+    "host_srcs": "src/medianFilter.cpp",        
+    "cmd_args": "BUILD/median.xclbin PROJECT/data/inputImage.bmp PROJECT/data/goldenImage.bmp",
     "em_cmd": "./median ./xclbin/krnl_median.<emulation type>.xilinx_vcu1525_dynamic_5_1.xclbin data/inputImage.bmp data/goldenImage.bmp",
     "output_files": "output.bmp",        
     "libs": [
         "xcl2", 
         "bitmap"
     ], 
-    "accelerators": [
+    "containers": [
+	{
+	"name": "krnl_median",
+	"accelerators": [
         {
             "name": "median", 
             "location": "src/krnl_medianFilter.cl"
         }
+	]
+	}
     ],
     "perf_fields": ["Board", "Image Size", "Frames / Second"],
     "performance": [

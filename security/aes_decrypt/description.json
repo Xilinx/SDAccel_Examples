@@ -5,6 +5,7 @@
         "Implementation of an AES-128 ECB Encrypt in software, followed by decryption written in OpenCL and targeting execution on an SDAccel supported FPGA acceleration card."
     ],
     "host_exe": "aes",
+    "host_srcs": "src/aes_app.cpp src/aes_ecb.cpp src/main.cpp",
     "cmd_args" : "-b PROJECT/data/test.txt -g PROJECT/data/goldFile.txt",
     "em_cmd" : "./aes -b data/test.txt -g data/goldFile.txt",
     "output_files": "encryptedData.txt",        
@@ -14,11 +15,16 @@
         "cmdparser",
         "xcl2"
     ], 
-    "accelerators": [
+    "containers": [
+	{
+	"name": "krnl_aes",
+	"accelerators": [
         {
             "name": "krnl_aes_decrypt",
             "location": "src/krnl_aes.cl"
         }
+	]
+	}
     ],
     "contributors" : [
         {

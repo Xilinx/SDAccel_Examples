@@ -29,7 +29,7 @@ LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_SDX)/runtime/lib/x86_64
 
 # Kernel compiler global settings
 CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps 
-CLFLAGS += --xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generateExtraRunData=true"
+
 EXECUTABLE = host
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
@@ -48,27 +48,25 @@ exe: $(EXECUTABLE)
 
 # Building kernel
 
-
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS)
+$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
 	mkdir -p $(XCLBIN)
-	$(CXX) $(CXXFLAGS) $(HOST_SRCS) -o '$@' $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 
 emconfig:$(EMCONFIG_DIR)/emconfig.json
 $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
+ifneq ($(TARGET),$(findstring $(TARGET), sw_emu))
+$(warning WARNING:Application supports only sw_emu TARGET. Please use the target for running the application)
+endif
 
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)
 else
 	 ./$(EXECUTABLE)
-endif
-#Reporting warning if not targeting for Targets
-ifneq (sw_emu,$(findstring sw_emu,$(TARGET)))
-	$(warning WARNING:Application supports only sw_emu TARGET. Please use the target for running the application)
 endif
 
 # Cleaning stuff

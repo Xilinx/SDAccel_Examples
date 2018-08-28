@@ -16,7 +16,10 @@
     "host_exe": "concurrent_execution",
     "em_cmd": "./concurrent_execution",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./concurrent_execution",
-    "accelerators": [
+    "containers": [	
+	{
+	"name": "matrix_ops", 
+	"accelerators": [
         {
             "name": "madd", 
             "location": "src/matrix_ops.cl",
@@ -32,6 +35,8 @@
             "location": "src/matrix_ops.cl",
             "container": "matrix_ops"
         }
+    	]
+	}
     ],
     "contributors" : [
         {

@@ -9,7 +9,9 @@
     "opencv": true,
     "cmd_args": "-d ${sdx:platform} -b PROJECT/data/rect_1024.bmp",
     "em_cmd": "./huffman -b data/rect_1024.bmp",
-    "host_exe": "huffman",       
+    "host_exe": "huffman",
+    "host_srcs": "src/main.cpp src/huffmancodec_optimized.cpp src/huffmancodec_naive.cpp src/bit_io.cpp src/huffmancodec_optimized_cpuonly.cpp",
+    "host_hdrs": "src/bit_io.h src/huffmancodec_naive.h src/huffmancodec_optimized.h src/huffmancodec_optimized_cpuonly.h",       
     "output_files": "decoded.bmp",        
     "libs": [
         "logger", 

@@ -57,6 +57,9 @@ krnl_vadd(__global int* a, __global int* e)
     e[globalid]=a[4*globalid]+a[4*globalid+1]+a[4*globalid+2]+a[4*globalid+3];
 
     // Use printf to print the information, work items and results
+    // Disabled autoPipelining for entire kernel using compiler flag enableAutoPipelining=false
+    // as pipeline is not feasible with printf statement in kernel. 
+    // This will allow compiler to generate design quickly as it will not attempt to pipeline.
     printf("** Printing from inside krnl_vadd: globalid: %d of \
             global_work_size<%d,1,1> localid: %d of local_workgroup_size<%d,1,1>", 
             globalid,globalsize, localid,localsize); 

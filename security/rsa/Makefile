@@ -21,18 +21,18 @@ XOCC := $(XILINX_SDX)/bin/xocc
 CXXFLAGS := $(opencl_CXXFLAGS) -Wall -O0 -g -std=c++14
 LDFLAGS := $(opencl_LDFLAGS)
 
-HOST_SRCS = ./src/main.cpp ./src/rsa_app.cpp ./src/common.cpp
-HOST_HDRS = ./src/common.h ./src/rsa_app.h
+HOST_SRCS = src/main.cpp src/rsa_app.cpp src/common.cpp
+HOST_HDRS = src/common.h src/rsa_app.h
 
 # Host compiler global settings
-CXXFLAGS = -I $(XILINX_SDX)/runtime/include/1_2/ -I/$(XILINX_SDX)/Vivado_HLS/include/ -O3 -g -Wall -fmessage-length=0 -std=c++14
+CXXFLAGS = -I $(XILINX_SDX)/runtime/include/1_2/ -I/$(XILINX_SDX)/Vivado_HLS/include/ -O0 -g -Wall -fmessage-length=0 -std=c++14
 LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_SDX)/runtime/lib/x86_64
 
 # Kernel compiler global settings
 CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps 
-CLFLAGS += --xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generateExtraRunData=true"
 
 CXXFLAGS += -DRSA_2048
+
 
 EXECUTABLE = rsa
 
@@ -50,7 +50,6 @@ include $(ABS_COMMON_REPO)/libs/xcl/xcl.mk
 CXXFLAGS += $(logger_CXXFLAGS) $(cmdparser_CXXFLAGS) $(xcl_CXXFLAGS)
 LDFLAGS += $(logger_LDFLAGS) $(cmdparser_LDFLAGS) $(xcl_LDFLAGS)
 HOST_SRCS += $(logger_SRCS) $(cmdparser_SRCS) $(xcl_SRCS)
-HOST_HDRS += $(logger_HDRS) $(cmdparser_HDRS) $(xcl_HDRS)
 
 CXXFLAGS += -lssl -lcrypto -ldl
 CP = cp -rf
@@ -80,9 +79,8 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
-ifneq ($(TARGET),$(filter $(TARGET), sw_emu hw))
+ifneq ($(TARGET),$(findstring $(TARGET), sw_emu hw))
 $(warning WARNING:Application supports only sw_emu hw TARGET. Please use the target for running the application)
-$(error Nothing to be done for make)
 endif
 
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
@@ -102,7 +100,7 @@ clean:
 cleanall: clean
 	-$(RMDIR) $(XCLBIN)
 	-$(RMDIR) ./_x
-
+	-$(RMDIR) ././data/0_out.msg 
 .PHONY: help
 
 help::
