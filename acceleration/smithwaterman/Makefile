@@ -18,12 +18,11 @@ DSA := $(call device2sandsa, $(DEVICE))
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
+CXXFLAGS := $(opencl_CXXFLAGS) -Wall -O0 -g -std=c++14
 LDFLAGS := $(opencl_LDFLAGS)
 
-HOST_SRCS = ./src/main.cpp ./src/genseq.cpp ./src/matcharray.cpp ./src/smithwaterman.cpp ./src/intel/ssw.c ./src/intel/sc_demo.c 
-KRNL_SRCS = ./src/opencl_sw_maxscore_systolic.cpp
-HOST_HDRS = ./src/matcharray.h ./src/smithwaterman.h ./src/sw.h ./src/intel/ssw.h ./src/intel/kseq.h 
-KRNl_HDRS = ./src/sw.h
+HOST_SRCS = ./src/main.cpp ./src/genseq.cpp ./src/matcharray.cpp ./src/smithwaterman.cpp ./src/intel/ssw.c ./src/intel/sc_demo.c
+HOST_HDRS = ./src/matcharray.h ./src/smithwaterman.h ./src/sw.h ./src/intel/ssw.h ./src/intel/kseq.h
 
 # Host compiler global settings
 CXXFLAGS = -I $(XILINX_XRT)/include/ -I/$(XILINX_SDX)/Vivado_HLS/include/ -O0 -g -Wall -fmessage-length=0 -std=c++14 -DFPGA_DEVICE -I./src/ -I/$(XILINX_VIVADO)/include/ 
@@ -31,28 +30,27 @@ LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_XRT)/lib/
 
 # Kernel compiler global settings
 CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps 
-CLFLAGS += --xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generateExtraRunData=true"
 CLFLAGS += -I./src/ --kernel_frequency "235"
+
 
 EXECUTABLE = smithwaterman
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
 BINARY_CONTAINERS += $(XCLBIN)/krnl_smithwaterman.$(TARGET).$(DSA).xclbin
-BINARY_CONTAINER_1_OBJS += $(XCLBIN)/krnl_smithwaterman.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/krnl_smithwaterman.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_1_OBJS += $(XCLBIN)/opencl_sw_maxscore.$(TARGET).$(DSA).xo
+ALL_KERNEL_OBJS += $(XCLBIN)/opencl_sw_maxscore.$(TARGET).$(DSA).xo
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
 include $(ABS_COMMON_REPO)/libs/logger/logger.mk
 include $(ABS_COMMON_REPO)/libs/cmdparser/cmdparser.mk
 include $(ABS_COMMON_REPO)/libs/xcl/xcl.mk
-CXXFLAGS += $(logger_CXXFLAGS) $(cmdparser_CXXFLAGS) $(xcl_CXXFLAGS) $(opencl_CXXFLAGS)
+CXXFLAGS += $(logger_CXXFLAGS) $(cmdparser_CXXFLAGS) $(xcl_CXXFLAGS)
 LDFLAGS += $(logger_LDFLAGS) $(cmdparser_LDFLAGS) $(xcl_LDFLAGS)
 HOST_SRCS += $(logger_SRCS) $(cmdparser_SRCS) $(xcl_SRCS)
-HOST_HDRS += $(logger_HDRS) $(cmdparser_HDRS) $(xcl_HDRS)
 
-LDFLAGS += -lz -fopenmp
+CXXFLAGS += -lz -fopenmp
 CP = cp -rf
 
 .PHONY: all clean cleanall docs emconfig
@@ -62,7 +60,7 @@ all: $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
 exe: $(EXECUTABLE)
 
 # Building kernel
-$(XCLBIN)/krnl_smithwaterman.$(TARGET).$(DSA).xo: ./src/opencl_sw_maxscore_systolic.cpp
+$(XCLBIN)/opencl_sw_maxscore.$(TARGET).$(DSA).xo: ./src/opencl_sw_maxscore_systolic.cpp
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) -c -k opencl_sw_maxscore -I'$(<D)' -o'$@' '$<'
 
@@ -70,18 +68,17 @@ $(XCLBIN)/krnl_smithwaterman.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_1_OBJS)
 	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk opencl_sw_maxscore:2 -o'$@' $(+)
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS) $(KRNL_SRCS) $(KRNL_HDRS)
+$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
 	mkdir -p $(XCLBIN)
-	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) $(KRNL_SRCS) $(KRNL_HDRS) -o '$@' $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 
 emconfig:$(EMCONFIG_DIR)/emconfig.json
 $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
-ifneq ($(TARGET),$(filter $(TARGET), sw_emu hw))
+ifneq ($(TARGET),$(findstring $(TARGET), sw_emu hw))
 $(warning WARNING:Application supports only sw_emu hw TARGET. Please use the target for running the application)
-$(error Nothing to be done for make)
 endif
 
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))

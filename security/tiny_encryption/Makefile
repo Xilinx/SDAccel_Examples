@@ -29,7 +29,6 @@ LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_XRT)/lib/
 
 # Kernel compiler global settings
 CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps 
-CLFLAGS += --xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generateExtraRunData=true"
 
 # Kernel linker flags
 LDCLFLAGS = --kernel_frequency 200
@@ -68,9 +67,9 @@ $(XCLBIN)/tinyEncryption.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_1_OBJS)
 	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk tinyEncryption:1 -o'$@' $(+)
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS)
+$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
 	mkdir -p $(XCLBIN)
-	$(CXX) $(CXXFLAGS) $(HOST_SRCS) -o '$@' $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 
 emconfig:$(EMCONFIG_DIR)/emconfig.json
 $(EMCONFIG_DIR)/emconfig.json:
@@ -83,9 +82,9 @@ endif
 
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) ./data/image1.bmp ./data/image2.bmp ./xclbin/tinyEncryption.$(TARGET).$(DSA).xclbin
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) ./data/image1.bmp ./data/image2.bmp $(XCLBIN)/tinyEncryption.$(TARGET).$(DSA).xclbin
 else
-	 ./$(EXECUTABLE) ./data/image1.bmp ./data/image2.bmp ./xclbin/tinyEncryption.$(TARGET).$(DSA).xclbin
+	 ./$(EXECUTABLE) ./data/image1.bmp ./data/image2.bmp $(XCLBIN)/tinyEncryption.$(TARGET).$(DSA).xclbin
 endif
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 
@@ -98,7 +97,7 @@ clean:
 cleanall: clean
 	-$(RMDIR) $(XCLBIN)
 	-$(RMDIR) ./_x
-	-$(RMDIR) ./output.bmp
+	-$(RMDIR) ./output.bmp 
 .PHONY: help
 
 help::

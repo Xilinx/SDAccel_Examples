@@ -5,6 +5,8 @@
        "This is an optimized implementation of a nearest neighbor linear search algorithm targeting execution on a SDAccel supported FPGA acceleration card."
     ],
     "host_exe": "nearest",
+    "host_srcs": "src/linear_search.c",
+    "host_hdrs": "src/linear_search.h",
     "nboard": ["xilinx:kcu1500:dynamic", "xilinx_kcu1500_dynamic_5_0"],
     "cmd_args" : "PROJECT/data/queries.txt PROJECT/data/targets.txt",
     "em_cmd" : "./nearest data/queries.txt data/targets.txt",

@@ -21,18 +21,16 @@ XOCC := $(XILINX_SDX)/bin/xocc
 CXXFLAGS := $(opencl_CXXFLAGS) -Wall -O0 -g -std=c++14
 LDFLAGS := $(opencl_LDFLAGS)
 
-HOST_SRCS = ./src/prng.cpp 
-KRNL_SRCS = ./src/dma.cpp
-HOST_HDRS = ./src/prng.h 
-KRNL_HDRS = ./src/dma.h
+HOST_SRCS = src/prng.cpp
+HOST_HDRS = src/prng.h
 
 # Host compiler global settings
 CXXFLAGS = -I $(XILINX_XRT)/include/ -I/$(XILINX_SDX)/Vivado_HLS/include/ -O0 -g -Wall -fmessage-length=0 -std=c++14 -I$(XILINX_SDACCEL)/Vivado_HLS/include/ -I$(XILINX_VIVADO)/include
 LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_XRT)lib/
 
 # Kernel compiler global settings
-CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps
-CLFLAGS += --xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generateExtraRunData=true"
+CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps 
+
 
 EXECUTABLE = prng
 
@@ -48,12 +46,12 @@ include $(ABS_COMMON_REPO)/libs/xcl/xcl.mk
 CXXFLAGS += $(xcl_CXXFLAGS)
 LDFLAGS += $(xcl_LDFLAGS)
 HOST_SRCS += $(xcl_SRCS)
-HOST_HDRS += $(xcl_HDRS)
 
 CP = cp -rf
 
 .PHONY: all clean cleanall docs emconfig
 all: $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
+
 .PHONY: exe
 exe: $(EXECUTABLE)
 
@@ -66,9 +64,9 @@ $(XCLBIN)/dma.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_1_OBJS)
 	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk dma:1 -o'$@' $(+)
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS) $(KRNL_SRCS) $(KRNL_HDRS)
+$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
 	mkdir -p $(XCLBIN)
-	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) $(KRNL_SRCS) $(KRNL_HDRS) -o '$@' $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 
 emconfig:$(EMCONFIG_DIR)/emconfig.json
 $(EMCONFIG_DIR)/emconfig.json:
@@ -115,3 +113,4 @@ docs: README.md
 
 README.md: description.json
 	$(ABS_COMMON_REPO)/utility/readme_gen/readme_gen.py description.json
+

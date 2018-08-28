@@ -7,16 +7,23 @@
         "targeting exection on an SDAccel support FPGA acceleration card"
     ],
     "host_exe": "prng",
+    "host_srcs": "src/prng.cpp",
+    "host_hdrs": "src/prng.h",
     "xcl": true,
     "em_cmd" : "./prng",
     "libs" : [
         "xcl"
     ],
-    "accelerators": [
+    "containers": [
+	{
+	"name": "dma",
+	"accelerators": [
         {
             "name": "dma", 
             "location": "src/dma.cpp"
         }
+	]
+	}
     ],
     "perf_fields" : ["Board", "Total Number of Samples", "Kernel Duration"],
     "performance" : [

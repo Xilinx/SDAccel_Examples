@@ -5,6 +5,7 @@
         "This is an optimized implementation of a watermarking application to add watermarking to images targeting execution on an SDAccel supported FPGA acceleration card."
     ],
     "host_exe": "watermark",
+    "host_srcs": "src/watermarking.cpp",
     "cmd_args": "PROJECT/data/inputImage.bmp PROJECT/data/golden.bmp",
     "em_cmd": "./watermark data/inputImage.bmp ./data/golden.bmp",
     "output_files": "output.bmp",        

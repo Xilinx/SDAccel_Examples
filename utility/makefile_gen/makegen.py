@@ -8,7 +8,15 @@ import subprocess
 def create_params(target,data):
     
     target.write("# Points to Utility Directory\n")
-    target.write("COMMON_REPO = ../../../\n")
+    dirName = os.getcwd()
+    dirNameList = list(dirName.split("/"))
+    dirNameIndex = dirNameList.index("apps")
+    diff = len(dirNameList) - dirNameIndex - 1
+    target.write("COMMON_REPO = ")
+    while diff > 0:
+	target.write("../")
+	diff -= 1 
+    target.write("\n")
     target.write("ABS_COMMON_REPO = $(shell readlink -f $(COMMON_REPO))\n")
     target.write("\n")
     target.write("include ./utils.mk\n")
@@ -85,16 +93,39 @@ def add_libs(target, data):
                 target.write(" ")
                 target.write("-l")
                 target.write(lin)
+	if "options" in data["linker"]:
+	    for lin in data["linker"]["options"]:
+		target.write(" ")
+		target.write(lin)
     target.write("\n")                
     return
 
 def add_host_flags(target, data):
     target.write("HOST_SRCS = ")
-    target.write("src/host.cpp\n\n")
+    if "host_srcs" in data:
+    	target.write(data["host_srcs"])
+	target.write("\n")
+    else:
+	target.write("src/host.cpp\n")
+    if "host_hdrs" in data:
+	target.write("HOST_HDRS = ")
+	target.write(data["host_hdrs"])
+	target.write("\n")
+    if "compiler" in data:
+	if "options" in data["compiler"]:
+	    target.write("ddr_banks := 4\n")
+    target.write("\n")
     target.write("# Host compiler global settings\n")
     target.write("CXXFLAGS = ")
     target.write("-I $(XILINX_XRT)/include/ -I/$(XILINX_SDX)/Vivado_HLS/include/ ")
     target.write("-O0 -g -Wall -fmessage-length=0 -std=c++14\n")
+    if "host_exe" in data:
+	if "prng" in data["host_exe"]:
+	    target.write(" -I$(XILINX_SDACCEL)/Vivado_HLS/include/ -I$(XILINX_VIVADO)/include/")
+    if "linker" in data:
+	if "options" in data["linker"]:
+	    target.write(" -DFPGA_DEVICE -I./src/ -I/$(XILINX_VIVADO)/include/")
+    target.write("\n")
     target.write("LDFLAGS = ")
     target.write("-lOpenCL -lpthread -lrt -lstdc++ ")
     target.write("-L$(XILINX_XRT)/lib/\n\n")
@@ -104,46 +135,43 @@ def add_host_flags(target, data):
 def add_kernel_flags(target, data):
     target.write("# Kernel compiler global settings\n")
     target.write("CLFLAGS = ")
-    target.write("-t $(TARGET) --platform $(DEVICE) --save-temps \n")
-    target.write("CLFLAGS += ")
-    target.write('--xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generateExtraRunData=true"')
+    target.write("-t $(TARGET) --platform $(DEVICE) --save-temps \n")   
 
     if "containers" in data:
         for con in data["containers"]:
             for acc in con["accelerators"]:
                 if "max_memory_ports" in acc:
+		    target.write("CLFLAGS += ")
                     target.write(" --max_memory_ports ")
                     target.write(acc["name"])
-        target.write("\n")
-
-    if "accelerators" in data:
-        for acc in data["accelerators"]:
-            if "max_memory_ports" in acc:
-                target.write(" --max_memory_ports ")
-                target.write(acc["name"])
-        target.write("\n")
+        	    target.write("\n")
 
     if "containers" in data:
         for con in data["containers"]:
             for acc in con["accelerators"]:
                 if "clflags" in acc:
+		    target.write("CLFLAGS += ")
+		    if "linker" in data:
+			if "options" in data["linker"]:
+			    target.write("-I./src/ ")
                     flagsplt = acc["clflags"].split()
-                    target.write("CLFLAGS += ")
                     target.write(flagsplt[0])
-                    target.write(' "%s"' %flagsplt[1])
-        target.write("\n")
-    if "accelerators" in data:
-        for acc in data["accelerators"]:
-            if "clflags" in acc:
-                flagsplt = acc["clflags"].split()
-                target.write("CLFLAGS += ")
-                target.write(flagsplt[0])
-                target.write(' "%s"' %flagsplt[1])
-        target.write("\n")
-
+		    if len(flagsplt) > 1:
+                    	target.write(' "%s"' %flagsplt[1])
+                    target.write("\n")
+    
     if "compiler" in data:
         if "options" in data["compiler"]:
-            target.write("\n")
+            target.write("CLFLAGS += ")
+	    for opt in data["compiler"]["options"]:
+		target.write(opt)
+	    target.write("=$(ddr_banks)\n")
+	    target.write("\n")
+	    target.write("CXXFLAGS += ")
+	    for opt in data["compiler"]["options"]:
+		target.write(opt)	
+	    target.write("=$(ddr_banks)\n")
+	    target.write("\n")
         if "symbols" in data["compiler"]:
             target.write("\nCXXFLAGS +=")
             for sym in data["compiler"]["symbols"]:
@@ -155,6 +183,7 @@ def add_kernel_flags(target, data):
     if "containers" in data:
         for con in data["containers"]:
             if  "ldclflags" in con:
+		target.write("\n")
                 target.write("# Kernel linker flags\n")
                 target.write("LDCLFLAGS = ")
                 target.write(con["ldclflags"])
@@ -205,27 +234,6 @@ def add_containers(target, data):
             container_name = container_name + 1
         target.write("\n")
 
-    else:
-        if "accelerators" in data:
-            target.write("BINARY_CONTAINERS += $(XCLBIN)/")
-            xclbin_name = data["accelerators"][0]["location"].split("/")[1].split(".")[0]
-            target.write(xclbin_name)
-            target.write(".$(TARGET).$(DSA)")
-            target.write(".xclbin\n")
-            for acc in data["accelerators"]:
-                target.write("BINARY_CONTAINER_1_OBJS += $(XCLBIN)/")
-                target.write(acc["name"])
-                target.write(".$(TARGET).$(DSA)")
-                target.write(".xo\n")
-                target.write("ALL_KERNEL_OBJS += $(XCLBIN)/")
-                target.write(acc["name"])
-                target.write(".$(TARGET).$(DSA)")
-                target.write(".xo\n")
-            target.write("\n")
-
-    return
-
-
 def building_kernel(target, data):
     target.write("# Building kernel\n")
     container_name = 0
@@ -245,21 +253,7 @@ def building_kernel(target, data):
                 target.write(" -o'$@' '$<'\n")
             container_name = container_name + 1    
         target.write("\n")
-    else:
-        if "accelerators" in data:
-            for acc in data["accelerators"]:
-                target.write("$(XCLBIN)/")
-                target.write(acc["name"])
-                target.write(".$(TARGET).$(DSA)")
-                target.write(".xo: ./")
-                target.write(acc["location"])
-                target.write("\n")
-                target.write("\tmkdir -p $(XCLBIN)\n")
-                target.write("\t$(XOCC) $(CLFLAGS) -c -k ")
-                target.write(acc["name"])
-                target.write(" -I'$(<D)'")
-                target.write(" -o'$@' '$<'\n")
-        target.write("\n")
+    
     if "containers" in data:
         container_name = 0 
         acc_cnt = 0
@@ -275,40 +269,31 @@ def building_kernel(target, data):
             if acc_cnt==2 and bin_cnt==2:
                 target.write(".$(TARGET).$(DSA)")
                 target.write(".xclbin: $(BINARY_CONTAINER_")
-                target.write(data["containers"][container_name]["name"])
+                target.write(acc["name"])
                 target.write("_OBJS)\n")
             else:                
-               target.write(".$(TARGET).$(DSA)")
-               target.write(".xclbin: $(BINARY_CONTAINER_1_OBJS)\n")
+                target.write(".$(TARGET).$(DSA)")
+                target.write(".xclbin: $(BINARY_CONTAINER_1_OBJS)\n")
             target.write("\t$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS)")
             for acc in con["accelerators"]:
                 target.write(" --nk ")
                 target.write(acc["name"])
-                target.write(":1")
+                if "num_compute_units" in acc.keys():
+		    target.write(":")
+		    target.write(acc["num_compute_units"])
+		else:
+		    target.write(":1")
             target.write(" -o'$@' $(+)\n")
             container_name = container_name + 1    
-    else:
-        if "accelerators" in data:
-            target.write("$(XCLBIN)/")
-            xclbin_name = data["accelerators"][0]["location"].split("/")[1].split(".")[0]
-            target.write(xclbin_name)
-            target.write(".$(TARGET).$(DSA)")
-            target.write(".xclbin: $(BINARY_CONTAINER_1_OBJS)\n")
-            target.write("\t$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS)")
-            for acc in data["accelerators"]:
-                target.write(" --nk ")
-                target.write(acc["name"])
-                target.write(":1")
-            target.write(" -o'$@' $(+)\n")
+    
     target.write("\n")
-
     return
 
 def building_host(target, data):
     target.write("# Building Host\n")
-    target.write("$(EXECUTABLE): $(HOST_SRCS)\n")
+    target.write("$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)\n")
     target.write("\tmkdir -p $(XCLBIN)\n")
-    target.write("\t$(CXX) $(CXXFLAGS) $(HOST_SRCS) -o '$@' $(LDFLAGS)\n")
+    target.write("\t$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)\n")
     target.write("\n")
 
     target.write("emconfig:$(EMCONFIG_DIR)/emconfig.json\n")
@@ -384,7 +369,7 @@ def mk_check(target, data):
         target.write("$(error Nothing to be done for make)\n")
         target.write("endif\n")
     if "targets" in data:
-        target.write("ifneq ($(TARGET),$(filter $(TARGET),")
+        target.write("ifneq ($(TARGET),$(findstring $(TARGET),")
         args = data["targets"]
         for arg in args:
             target.write(" ")
@@ -395,7 +380,7 @@ def mk_check(target, data):
             target.write(" ")
             target.write(arg)            
         target.write(" TARGET. Please use the target for running the application)\n")
-        target.write("$(error Nothing to be done for make)\n")
+        #target.write("$(error Nothing to be done for make)\n")
         target.write("endif\n")
     target.write("\n") 
     if "Emulation" in data:        
@@ -413,17 +398,28 @@ def mk_check(target, data):
         args = data["cmd_args"].split(" ")    
         for arg in args[0:]:
             target.write(" ")
-            target.write(arg.replace('PROJECT', '.'))
+	    arg = arg.replace('.xclbin', '')
+            arg = arg.replace('BUILD', '$(XCLBIN)')
+	    arg = arg.replace('PROJECT', '.')
+	    target.write(arg)
+  	    if "$(XCLBIN)" in arg:
+	    	target.write(".$(TARGET).$(DSA).xclbin")
     target.write("\nelse\n")        
     target.write("\t ./$(EXECUTABLE)")
     if "cmd_args" in data:
         args = data["cmd_args"].split(" ")    
         for arg in args[0:]:
             target.write(" ")
-            target.write(arg.replace('PROJECT', '.'))
+	    arg = arg.replace('.xclbin', '')
+	    arg = arg.replace('BUILD', '$(XCLBIN)')
+	    arg = arg.replace('PROJECT', '.')
+	    target.write(arg)
+	    if "$(XCLBIN)" in arg:
+            	target.write(".$(TARGET).$(DSA).xclbin")
     target.write("\nendif\n")
 
-    target.write("\tsdx_analyze profile -i sdaccel_profile_summary.csv -f html\n")
+    if data["example"] != "00 Matrix Multiplication":
+	target.write("\tsdx_analyze profile -i sdaccel_profile_summary.csv -f html\n")
     target.write("\n")
     
 def mk_help(target):

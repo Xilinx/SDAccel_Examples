@@ -52,7 +52,6 @@ data/0_0_1024_key.cip
 data/0_0_2048_key.cip
 data/0_1024_key.pem
 data/0_2048_key.pem
-data/0_out.msg
 description.json
 sdaccel.ini
 src/common.cpp

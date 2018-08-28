@@ -229,6 +229,7 @@ module add proxy
 
 ./utility/check_license.sh LICENSE.txt
 ./utility/check_readme.sh
+./utility/check_makefile.sh
 """
 	}
 

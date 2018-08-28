@@ -7,7 +7,8 @@
     "targets": ["sw_emu", "hw"],
     "xcl": true,
     "opencv": true,
-    "host_exe": "affine",        
+    "host_exe": "affine",
+    "host_srcs": "src/affine.cpp",        
     "cmd_args": "PROJECT/data/CT-MONO2-16-brain.raw",
     "em_cmd": "./affine ./data/CT-MONO2-16-brain.raw",
     "output_files": "transformed_image.raw",        
@@ -15,11 +16,16 @@
         "xcl2",
         "bitmap"
     ],
-    "accelerators": [
+    "containers": [
+	{
+	"name": "krnl_affine",
+	"accelerators": [
         {
            "name": "affine_kernel", 
            "location": "src/krnl_affine.cl"
-        }                    
+        }
+	]
+	}                    
     ],
     "perf_fields":["Task","Xilinx Execution Time (in ns)", "GTX 780 Execution Time (in ns)"],
     "performance": [

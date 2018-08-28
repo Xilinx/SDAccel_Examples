@@ -21,7 +21,8 @@ XOCC := $(XILINX_SDX)/bin/xocc
 CXXFLAGS := $(opencl_CXXFLAGS) -Wall -O0 -g -std=c++14
 LDFLAGS := $(opencl_LDFLAGS)
 
-HOST_SRCS = src/main.cpp src/bit_io.cpp src/huffmancodec_naive.cpp src/huffmancodec_optimized_cpuonly.cpp src/huffmancodec_optimized.cpp
+HOST_SRCS = src/main.cpp src/huffmancodec_optimized.cpp src/huffmancodec_naive.cpp src/bit_io.cpp src/huffmancodec_optimized_cpuonly.cpp
+HOST_HDRS = src/bit_io.h src/huffmancodec_naive.h src/huffmancodec_optimized.h src/huffmancodec_optimized_cpuonly.h
 
 # Host compiler global settings
 CXXFLAGS = -I $(XILINX_XRT)include/ -I/$(XILINX_SDX)/Vivado_HLS/include/ -O0 -g -Wall -fmessage-length=0 -std=c++14
@@ -29,8 +30,9 @@ LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_XRT)/lib/
 
 # Kernel compiler global settings
 CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps 
-CLFLAGS += --xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generateExtraRunData=true"
 CLFLAGS += --xp "param:compiler.version=31"
+CLFLAGS += --xp "param:compiler.version=31"
+
 
 EXECUTABLE = huffman
 
@@ -73,18 +75,17 @@ $(XCLBIN)/krnl_huffman.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_1_OBJS)
 	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk encode:1 --nk decode:1 -o'$@' $(+)
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS)
+$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
 	mkdir -p $(XCLBIN)
-	$(CXX) $(CXXFLAGS) $(HOST_SRCS) -o '$@' $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 
 emconfig:$(EMCONFIG_DIR)/emconfig.json
 $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
-ifneq ($(TARGET),$(filter $(TARGET), sw_emu hw))
+ifneq ($(TARGET),$(findstring $(TARGET), sw_emu hw))
 $(warning WARNING:Application supports only sw_emu hw TARGET. Please use the target for running the application)
-$(error Nothing to be done for make)
 endif
 
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
@@ -104,8 +105,7 @@ clean:
 cleanall: clean
 	-$(RMDIR) $(XCLBIN)
 	-$(RMDIR) ./_x
-	-$(RMDIR) ./decoded.bmp
-
+	-$(RMDIR) ./decoded.bmp 
 .PHONY: help
 
 help::
