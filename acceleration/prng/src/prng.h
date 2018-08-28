@@ -30,6 +30,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _PRNG_
 #define _PRNG_
 
+#include <cstddef>
 #include <inttypes.h>
 
 template <int CYCLE, typename T >

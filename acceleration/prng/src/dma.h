@@ -30,6 +30,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef H_DMA_
 #define H_DMA_
 
+#include <cstddef>
 #include <inttypes.h>
 #include <ap_fixed.h>
 #include <ap_int.h>
