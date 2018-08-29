@@ -31,8 +31,6 @@ LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_XRT)/lib/
 CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps 
 CLFLAGS += --xp "param:compiler.interfaceWrBurstLen=256"
 
-
-
 EXECUTABLE = host
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)

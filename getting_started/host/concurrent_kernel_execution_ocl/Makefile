@@ -30,8 +30,6 @@ LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_XRT)/lib/
 # Kernel compiler global settings
 CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps 
 
-
-
 EXECUTABLE = concurrent_execution
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
