@@ -38,16 +38,9 @@ CLC:=$(XILINX_SDACCEL)/bin/xocc
 LDCLC:=$(CLC)
 EMCONFIGUTIL := $(XILINX_SDACCEL)/bin/emconfigutil
 
-# By default build for X86, this could also be set to POWER to build for power
-ARCH:=X86
-
 DEVICES:= xilinx:vcu1525:dynamic
 
-ifeq ($(ARCH),POWER)
-CXX:=$(XILINX_SDACCEL)/gnu/ppc64le/4.9.3/lnx64/bin/powerpc64le-linux-gnu-g++
-else
 CXX:=$(XILINX_SDACCEL)/bin/xcpp
-endif
 
 #if COMMON_REPO is not defined use the default value support existing Designs
 COMMON_REPO ?= ../../

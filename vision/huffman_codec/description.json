@@ -7,7 +7,7 @@
     "targets": ["sw_emu", "hw"],
     "xcl": false,
     "opencv": true,
-    "cmd_args": "-d ${sdx:platform} -b PROJECT/data/rect_1024.bmp",
+    "cmd_args": "-b PROJECT/data/rect_1024.bmp",
     "em_cmd": "./huffman -b data/rect_1024.bmp",
     "host_exe": "huffman",
     "host_srcs": "src/main.cpp src/huffmancodec_optimized.cpp src/huffmancodec_naive.cpp src/bit_io.cpp src/huffmancodec_optimized_cpuonly.cpp",
