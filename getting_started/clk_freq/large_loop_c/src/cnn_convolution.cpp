@@ -164,12 +164,15 @@ void convolution_operation(int img_lcl[IChan][ISize * ISize], int wgt_lcl[WInCha
     
     // Summation of temporary accumulator buffer
     short sum = 0;
-    accJ: for(int j = 0; j < WSize;j++)
-        accK: for(int k = 0; k < WSize; k++)
+    accJ: for(int j = 0; j < WSize;j++) {
+        accK: for(int k = 0; k < WSize; k++) {
         #pragma HLS PIPELINE II=1
-            accI: for(int i = 0; i < i_chan; i++)
-            #pragma HLS LOOP_TRIPCOUNT min=96 max=96
-                sum += acc[i][j][k];
+            accI: for(int i = 0; i < i_chan; i++) {
+            #pragma HLS LOOP_TRIPCOUNT min=c_ichan max=c_ichan
+              sum += acc[i][j][k];
+		}
+	    }
+	}
 
     // Update output pixel
     out_lcl[y * OSize + x] = sum;
@@ -215,7 +218,7 @@ extern "C"
         
         // Burst Read Image
         readImg: for(int itr = 0, i = 0, j = 0; itr < i_chan * ISize * ISize; itr++, j++) {
-        #pragma HLS LOOP_TRIPCOUNT min=96*27*27 max=96*27*27
+        #pragma HLS LOOP_TRIPCOUNT min=c_ichan*c_isize*c_isize max=c_ichan*c_isize*c_isize
         #pragma HLS PIPELINE II=1
             if(j == ISize * ISize) {j = 0; i++;}
                 img_lcl[i][j] = image[itr];
@@ -240,7 +243,7 @@ extern "C"
         //          outXaxis  : This Loop Operates on Output Filter/Image X Axis
 
         outThread: for(int output = thread_work_start; output < thread_work_end; output++) {
-        #pragma HLS LOOP_TRIPCOUNT min=256/4 max=256/4
+        #pragma HLS LOOP_TRIPCOUNT min=c_ochan/4 max=c_ochan/4
             
             // Burst read weight data from global to local buffer
             copy_weight(weights, wgt_lcl, output);

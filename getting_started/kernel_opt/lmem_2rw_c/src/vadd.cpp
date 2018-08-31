@@ -36,7 +36,12 @@ Description:
 
 #include <string.h>
 
+#define DATA_SIZE 4096
 #define BUFFER_SIZE 1024
+
+//TRIPCOUNT identifiers
+const unsigned int c_chunk_sz = BUFFER_SIZE;
+const unsigned int c_size = DATA_SIZE;
 
 /*
     Vector Addition Kernel Implementation 
@@ -71,7 +76,7 @@ void vadd(
     //Per iteration of this loop perform BUFFER_SIZE vector addition
     for(int i = 0; i < size;  i += BUFFER_SIZE)
     {
-    #pragma HLS LOOP_TRIPCOUNT min=4 max=4
+    #pragma HLS LOOP_TRIPCOUNT min=c_size/c_chunk_sz max=c_size/c_chunk_sz
         int chunk_size = BUFFER_SIZE;
         //boundary checks
         if ((i + BUFFER_SIZE) > size) 
@@ -79,11 +84,11 @@ void vadd(
 
         // burst read of v1 and v2 vector from global memory
         for (int j = 0 ; j < chunk_size ; j++){
-        #pragma HLS LOOP_TRIPCOUNT min=1024 max=1024
+        #pragma HLS LOOP_TRIPCOUNT min=c_chunk_sz max=c_chunk_sz
             v1_buffer[j] = in1[i + j];
         }
         for (int j = 0 ; j < chunk_size ; j++){
-        #pragma HLS LOOP_TRIPCOUNT min=1024 max=1024
+        #pragma HLS LOOP_TRIPCOUNT min=c_chunk_sz max=c_chunk_sz
             v2_buffer[j] = in2[i + j];
         }
 
@@ -100,14 +105,14 @@ void vadd(
         vadd: for (int j = 0 ; j < chunk_size; j ++){
         #pragma HLS PIPELINE
         #pragma HLS UNROLL FACTOR=2
-        #pragma HLS LOOP_TRIPCOUNT min=1024 max=1024
+        #pragma HLS LOOP_TRIPCOUNT min=c_chunk_sz max=c_chunk_sz
             //perform vector addition
             vout_buffer[j] = v1_buffer[j] + v2_buffer[j]; 
         }
 
         //burst write the result
         for (int j = 0 ; j < chunk_size ; j++){
-        #pragma HLS LOOP_TRIPCOUNT min=1024 max=1024
+        #pragma HLS LOOP_TRIPCOUNT min=c_chunk_sz max=c_chunk_sz
             out[i + j] = vout_buffer[j];
         }
     }
