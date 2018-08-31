@@ -41,6 +41,13 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define Stride 1
 #define Padding 2
 
-#define MAX_CU 4 
+#define MAX_CU 4
+
+//TRIPCOUNT indentifiers
+const int c_ichan = IChan;
+const int c_ochan = OChan;
+const int c_isize = ISize;
+const int c_wsize = WSize;
+const int c_osize = OSize;
 
 #endif

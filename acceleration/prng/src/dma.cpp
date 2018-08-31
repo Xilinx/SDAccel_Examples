@@ -109,7 +109,7 @@ void dma (dout_t *mem_out, data_t *mem_in, int nofBlock) {
 
 // generate sequence one at a time
 	L_output: for (int i=0; i<nofBlock*maxSizeOfBlock; i++ ) {
-#pragma HLS LOOP_TRIPCOUNT min=1 max = maxNofSample
+#pragma HLS LOOP_TRIPCOUNT min= minNofSample max = maxNofSample
 #pragma HLS pipeline II=1
 
 		data_t t0  = R0.makeOne( );

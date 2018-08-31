@@ -73,6 +73,11 @@ Description:
 //Includes 
 #include <hls_stream.h>
 
+#define DATA_SIZE 4096
+
+//TRIPCOUNT indentifiers
+const int c_size = DATA_SIZE;
+
 extern "C" {
 /*
     Vector Addition Kernel Implementation using dataflow on loops
@@ -111,8 +116,8 @@ void adder(unsigned int *in, unsigned int *out, int inc, int size)
     mem_rd: for (int i = 0 ; i < size ; i++){
     //Xilinx HLS by default try to implement pipeline design for loop, 
     //so explicit PIPELINE pragma is not needed
-    #pragma HLS LOOP_TRIPCOUNT min=4096 max=4096
-        //Blocking write command to inStream 
+    #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
+    //Blocking write command to inStream 
         inStream << in[i];
     }
 
@@ -120,7 +125,7 @@ void adder(unsigned int *in, unsigned int *out, int inc, int size)
     execute: for (int j = 0 ; j < size ; j++){
     //Xilinx HLS by default try to implement pipeline design for loop, 
     //so explicit PIPELINE pragma is not needed
-    #pragma HLS LOOP_TRIPCOUNT min=4096 max=4096
+    #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
         //Blocking read command from inStream and Blocking write command 
         //to outStream 
         outStream << (inStream.read() + inc);
@@ -130,7 +135,7 @@ void adder(unsigned int *in, unsigned int *out, int inc, int size)
     mem_wr: for (int k = 0 ; k < size ; k++) {
     //Xilinx HLS by default try to implement pipeline design for loop, 
     //so explicit PIPELINE pragma is not needed
-    #pragma HLS LOOP_TRIPCOUNT min=4096 max=4096
+    #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
         //Blocking read command from OutStream 
         out[k] = outStream.read();
     }

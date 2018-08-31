@@ -92,13 +92,14 @@ Kernel Description (Good Example) :
 #include <stdio.h>
 #include <hls_stream.h>
 #include "defns.h"
+
 // Fetch input image from global memory and write to boost_in & med_in streams.
 // This stage supplies inputs to the boost and median stages.
 void input_stage(int *input, hls::stream<uint> &boost_in, hls::stream<uint> &med_in, int size)
 {
     // Burst Read on input and write to boost_in & med_in streams.
     readInput: for (int i = 0 ; i < size ; i++){
-    #pragma HLS LOOP_TRIPCOUNT min=128*128 max=128*128
+    #pragma HLS LOOP_TRIPCOUNT min=c_width*c_height max=c_width*c_height
     #pragma HLS PIPELINE
         int in_lcl = input[i];
         boost_in << in_lcl;
@@ -123,14 +124,14 @@ void boost_stage(hls::stream<uint> &boost_in, hls::stream<uint> &boost_out, int 
     
     // Fetch first lines
     fetchBoostLine1: for(int i = 0; i < width; i++){
-    #pragma HLS LOOP_TRIPCOUNT min=128 max=128
+    #pragma HLS LOOP_TRIPCOUNT min=c_width max=c_width
     #pragma HLS PIPELINE
         boost_in >> linebuf[0][i];
         linebuf[1][i] = linebuf[0][i];
     }
 
     fetchBoostLine2: for(int i = 0; i < width; i++){
-    #pragma HLS LOOP_TRIPCOUNT min=128 max=128
+    #pragma HLS LOOP_TRIPCOUNT min=c_width max=c_width
     #pragma HLS PIPELINE
         boost_in >> linebuf[2][i];
     }
@@ -143,9 +144,9 @@ void boost_stage(hls::stream<uint> &boost_in, hls::stream<uint> &boost_out, int 
     // Perform boost filtering over the current 3 lines for one entire row
     // getBoost() is defined in kernels/boost_helper.h  
     boostHeight: for (int line = 0; line < height; line++){
-    #pragma HLS LOOP_TRIPCOUNT min=128 max=128
+    #pragma HLS LOOP_TRIPCOUNT min=c_height max=c_height
         boostWidth: for (int x=0; x < width; x++){
-        #pragma HLS LOOP_TRIPCOUNT min=128 max=128
+        #pragma HLS LOOP_TRIPCOUNT min=c_width max=c_width
         #pragma HLS PIPELINE
             
             // Get pixels within 3x3 aperture
@@ -184,14 +185,14 @@ void median_stage(hls::stream<uint> &med_in, hls::stream<uint> &med_out, int wid
 
     // Fetch first lines
     fetchMedianLine1: for(int i = 0; i < width; i++){
-    #pragma HLS LOOP_TRIPCOUNT min=128 max=128
+    #pragma HLS LOOP_TRIPCOUNT min=c_width max=c_width
     #pragma HLS PIPELINE
         med_in >> linebuf[0][i];
         linebuf[1][i] = linebuf[0][i];
     }
 
     fetchMedianLine2: for(int i = 0; i < width; i++){
-    #pragma HLS LOOP_TRIPCOUNT min=128 max=128
+    #pragma HLS LOOP_TRIPCOUNT min=c_width max=c_width
     #pragma HLS PIPELINE
         med_in >> linebuf[2][i];
     }
@@ -204,9 +205,9 @@ void median_stage(hls::stream<uint> &med_in, hls::stream<uint> &med_out, int wid
     // Perform median filtering over the current 3 lines for one entire row
     // getMedian() is defined in kernels/median_helper.h
     medianHeight: for (int line = 0; line < height; line++){
-    #pragma HLS LOOP_TRIPCOUNT min=128 max=128
+    #pragma HLS LOOP_TRIPCOUNT min=c_height max=c_height
         medianWidth: for (int x=0; x < width; x++){
-        #pragma HLS LOOP_TRIPCOUNT min=128 max=128
+        #pragma HLS LOOP_TRIPCOUNT min=c_width max=c_width
         #pragma HLS PIPELINE
             
             // Get pixels within 3x3 aperture
@@ -236,7 +237,7 @@ void sketch_stage(hls::stream<uint> &boost_out, hls::stream<uint> &med_out, hls:
     // Do Sketch Operation and write into sketch_out stream.
     // getSketch() is defined in kernels/sketch_helper.h
     sketchLoop: for(int i = 0; i < size; i++){
-    #pragma HLS LOOP_TRIPCOUNT min=128*128 max=128*128
+    #pragma HLS LOOP_TRIPCOUNT min=c_width*c_height max=c_width*c_height
     #pragma HLS PIPELINE
         boost_out >> boost_input;
         med_out >> median_input;
@@ -252,18 +253,18 @@ void output_stage(int *output, hls::stream<uint> &sketch_out, int width, int hei
     // Flips the Image by Reading Output Results from Sketch stream 
     // Burst write back results onto output
     writeOutput1: for(int i = 0 ; i < height; i++){
-    #pragma HLS LOOP_TRIPCOUNT min=128 max=128
+    #pragma HLS LOOP_TRIPCOUNT min=c_height max=c_height
 
         // Reads from sketch_out stream and flip the row
         flipOutput: for(int j = width; j > 0; j--){
-        #pragma HLS LOOP_TRIPCOUNT min=128 max=128
+        #pragma HLS LOOP_TRIPCOUNT min=c_width max=c_width
         #pragma HLS PIPELINE
             sketch_out >> result[j - 1];
         }
 
         // Burst write output
         writeOutput2: for(int k = 0; k < width; k++){
-        #pragma HLS LOOP_TRIPCOUNT min=128 max=128
+        #pragma HLS LOOP_TRIPCOUNT min=c_width max=c_width
         #pragma HLS PIPELINE
             output[i*width + k] = result[k];
         }

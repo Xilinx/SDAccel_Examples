@@ -48,6 +48,12 @@ typedef unsigned int uint;
 #include "median_helper.h"
 #include "sketch_helper.h"
 
+/* The values assigned to the TRIPCOUNT identifiers must be changed as per the input image size. 
+ For instance, it has been set for the image with dimenstions 128x128 */
+//TRIPCOUNT identifiers
+const unsigned int c_width = 128;
+const unsigned int c_height = 128;
+
 
 
 

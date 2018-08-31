@@ -70,13 +70,18 @@ Description:
 #include <hls_stream.h>
 #include <ap_int.h>
 
+#define DATA_SIZE 4096
+
+//TRIPCOUNT identifier
+const int c_size = DATA_SIZE;
+
 // Read Data from Global Memory and write into Stream inStream
 static void read_input(unsigned int *in, hls::stream<unsigned int> &inStream,
         int size)
 {
     mem_rd: for (int i = 0 ; i < size ; i++){
 #pragma HLS pipeline
-#pragma HLS LOOP_TRIPCOUNT min=4096 max=4096
+#pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
         //Blocking write command to inStream 
         inStream << in[i];
     }
@@ -88,7 +93,7 @@ static void compute_add(hls::stream<unsigned int> &inStream ,
 {
     execute: for (int i = 0 ; i < size ; i++){
 #pragma HLS pipeline
-#pragma HLS LOOP_TRIPCOUNT min=4096 max=4096
+#pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
         //Blocking read command from inStream and Blocking write command 
         //to outStream 
         outStream << (inStream.read() + inc);
@@ -101,7 +106,7 @@ static void write_result(unsigned int *out, hls::stream<unsigned int>
 {
     mem_wr: for (int i = 0 ; i < size ; i++){
 #pragma HLS pipeline
-#pragma HLS LOOP_TRIPCOUNT min=4096 max=4096
+#pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
         //Blocking read command to inStream 
         out[i] = outStream.read();
     }

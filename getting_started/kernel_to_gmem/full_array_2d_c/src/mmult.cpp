@@ -38,6 +38,10 @@ Description:
 
 #define MAX_MATRIX_DIM 256
 
+//TRIPCOUNT identifiers
+const unsigned int c_dim_min = 1;
+const unsigned int c_dim_max = MAX_MATRIX_DIM;
+
 extern "C" {
     void mmult(int *a, int *b, int *c, int dim) {
     #pragma HLS INTERFACE m_axi port=a offset=slave bundle=gmem
@@ -58,7 +62,7 @@ extern "C" {
         // Read data from global memory and write into local buffer for a, loop pipeline will be automatically inferred
         int x = 0, y = 0;
         read_data_a: for (int i = 0 ; i < matrix_size ; i++){
-        #pragma HLS LOOP_TRIPCOUNT min=1 max=65536
+        #pragma HLS LOOP_TRIPCOUNT min=c_dim_min*c_dim_min max=c_dim_max*c_dim_max
             int tmpData_a = a[i];
             bufa[x][y] = tmpData_a;
             if (y == dim - 1){
@@ -71,7 +75,7 @@ extern "C" {
     
         // Read data from global memory and write into local buffer for b, loop pipeline will be automatically inferred
         read_data_b: for (int i = 0, x=0, y=0; i < matrix_size ; i++){
-        #pragma HLS LOOP_TRIPCOUNT min=1 max=65536
+        #pragma HLS LOOP_TRIPCOUNT min=c_dim_min*c_dim_min max=c_dim_max*c_dim_max
             int tmpData_b = b[i];
             bufb[x][y] = tmpData_b;
             if (y == dim - 1){
@@ -84,12 +88,12 @@ extern "C" {
     
         // Calculate matrix multiplication using local data buffer based on input size, and write results into local buffer for c
         matrix_mult: for (int row = 0; row < dim; row++) {
-        #pragma HLS LOOP_TRIPCOUNT min=1 max=256
+        #pragma HLS LOOP_TRIPCOUNT min=c_dim_min max=c_dim_max
             for (int col = 0; col < dim; col++) {
-            #pragma HLS LOOP_TRIPCOUNT min=1 max=256
+            #pragma HLS LOOP_TRIPCOUNT min=c_dim_min max=c_dim_max
                 int result = 0;
                 for (int k = 0; k < dim; k++) {
-                #pragma HLS LOOP_TRIPCOUNT min=1 max=256
+                #pragma HLS LOOP_TRIPCOUNT min=c_dim_min max=c_dim_max
                 #pragma HLS pipeline
                     result += bufa[row][k] * bufb[k][col];
                 }
@@ -99,7 +103,7 @@ extern "C" {
         // Write results from local buffer to global memory for c, loop pipeline will be automatically inferred
         int m = 0, n = 0;
         write_data: for (int i = 0 ; i < matrix_size ; i++){
-        #pragma HLS LOOP_TRIPCOUNT min=1 max=65536
+        #pragma HLS LOOP_TRIPCOUNT min=c_dim_min*c_dim_min max=c_dim_max*c_dim_max
             int tmpData_c = bufc[m][n];
             c[i] = tmpData_c;
             if (n == dim - 1){

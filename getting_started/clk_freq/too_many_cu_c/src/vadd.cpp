@@ -69,9 +69,12 @@ Kernel Description (Good Example) :
 
 // Work load of each Work_Item
 #define BUFFER_SIZE 5120
-
+#define DATA_SIZE 81920
 //Number of Compute Units (CU)
 #define NUM_CU 8
+
+//TRIPCOUNT indentifier
+const int c_size = DATA_SIZE/(BUFFER_SIZE*NUM_CU);
 
 typedef unsigned int uint;
 
@@ -107,7 +110,7 @@ extern "C"
         
         // Computes vector addition operation iteratively over entire data set of the work item
         for(int offset = 0; offset < size; offset += NUM_CU*BUFFER_SIZE){
-        #pragma HLS LOOP_TRIPCOUNT min=2 max=2
+        #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
             // Enables burst reads on input vectors from global memory
             // Each Work_Item asynchronously moves its work load from global memory
             // to local memory (in1_lcl, in2_lcl) associated per each Work_Group
