@@ -36,10 +36,8 @@ EXECUTABLE = loop_fusion
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
 BINARY_CONTAINERS += $(XCLBIN)/nearest_neighbor.$(TARGET).$(DSA).xclbin
-BINARY_CONTAINER_1_OBJS += $(XCLBIN)/nearest_neighbor.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/nearest_neighbor.$(TARGET).$(DSA).xo
-BINARY_CONTAINER_1_OBJS += $(XCLBIN)/nearest_neighbor_loop_fusion.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/nearest_neighbor_loop_fusion.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_nearest_neighbor_OBJS += $(XCLBIN)/nearest_neighbor.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_nearest_neighbor_OBJS += $(XCLBIN)/nearest_neighbor_loop_fusion.$(TARGET).$(DSA).xo
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
@@ -64,7 +62,7 @@ $(XCLBIN)/nearest_neighbor_loop_fusion.$(TARGET).$(DSA).xo: ./src/nearest_neighb
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) -c -k nearest_neighbor_loop_fusion -I'$(<D)' -o'$@' '$<'
 
-$(XCLBIN)/nearest_neighbor.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_1_OBJS)
+$(XCLBIN)/nearest_neighbor.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_nearest_neighbor_OBJS)
 	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk nearest_neighbor:1 --nk nearest_neighbor_loop_fusion:1 -o'$@' $(+)
 
 # Building Host
@@ -77,7 +75,6 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
-
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)

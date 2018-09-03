@@ -39,8 +39,7 @@ EXECUTABLE = idct
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
 BINARY_CONTAINERS += $(XCLBIN)/krnl_idct.$(TARGET).$(DSA).xclbin
-BINARY_CONTAINER_1_OBJS += $(XCLBIN)/krnl_idct.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/krnl_idct.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_krnl_idct_OBJS += $(XCLBIN)/krnl_idct.$(TARGET).$(DSA).xo
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
@@ -59,7 +58,7 @@ $(XCLBIN)/krnl_idct.$(TARGET).$(DSA).xo: ./src/krnl_idct.cpp
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) -c -k krnl_idct -I'$(<D)' -o'$@' '$<'
 
-$(XCLBIN)/krnl_idct.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_1_OBJS)
+$(XCLBIN)/krnl_idct.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_idct_OBJS)
 	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk krnl_idct:1 -o'$@' $(+)
 
 # Building Host
@@ -72,7 +71,6 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
-
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/krnl_idct.$(TARGET).$(DSA).xclbin

@@ -68,7 +68,6 @@ EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
 BINARY_CONTAINERS += $(XCLBIN)/kmeans.$(TARGET).$(DSA).xclbin
 BINARY_CONTAINER_1_OBJS += $(XCLBIN)/kmeans.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/kmeans.$(TARGET).$(DSA).xo
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk

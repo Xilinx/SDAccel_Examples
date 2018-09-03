@@ -36,8 +36,7 @@ EXECUTABLE = convolve
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
 BINARY_CONTAINERS += $(XCLBIN)/krnl_convolve.$(TARGET).$(DSA).xclbin
-BINARY_CONTAINER_1_OBJS += $(XCLBIN)/krnl_convolve.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/krnl_convolve.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_krnl_convolve_OBJS += $(XCLBIN)/krnl_convolve.$(TARGET).$(DSA).xo
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
@@ -61,7 +60,7 @@ $(XCLBIN)/krnl_convolve.$(TARGET).$(DSA).xo: ./src/krnl_convolve.cl
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) -c -k krnl_convolve -I'$(<D)' -o'$@' '$<'
 
-$(XCLBIN)/krnl_convolve.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_1_OBJS)
+$(XCLBIN)/krnl_convolve.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_convolve_OBJS)
 	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk krnl_convolve:3 -o'$@' $(+)
 
 # Building Host

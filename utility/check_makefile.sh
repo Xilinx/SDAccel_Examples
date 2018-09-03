@@ -7,7 +7,6 @@ echo "--  CHECKING MAKEFILES --"
 echo "-----------------------"
 echo "ignoring: acceleration/kmeans/"
 echo "ignoring: acceleration/high_perf_mat_mult/"
-echo "ignoring: getting_started/clk_freq/"
 echo "ignoring: getting_started/kernel_to_gmem/kernel_global_bandwidth/"
 echo "ignoring: getting_started/rtl_kernels/"
 echo "ignoring: security/sha1/"
@@ -63,7 +62,7 @@ cd ..
 VCS_FILES=$(git ls-files)
 
 for f in $VCS_FILES; do
-	if [[ ($f == */description.json) && ($f != */kernel_global_bandwidth/*) && ($f != */kmeans/*) && ($f != */clk_freq/*) && ($f != */sha1/*) && ($f != */rtl_kernel/*) && ($f != */high_perf_mat_mult/*) ]]; then
+	if [[ ($f == */description.json) && ($f != */kernel_global_bandwidth/*) && ($f != */kmeans/*) && ($f != */sha1/*) && ($f != */rtl_kernel/*) && ($f != */high_perf_mat_mult/*) ]]; then
 		check_file $(readlink -f $f)
 	fi
 done

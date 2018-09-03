@@ -39,8 +39,7 @@ EXECUTABLE = rsa
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
 BINARY_CONTAINERS += $(XCLBIN)/krnl_rsa.$(TARGET).$(DSA).xclbin
-BINARY_CONTAINER_1_OBJS += $(XCLBIN)/rsa.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/rsa.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_krnl_rsa_OBJS += $(XCLBIN)/rsa.$(TARGET).$(DSA).xo
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
@@ -66,7 +65,7 @@ $(XCLBIN)/rsa.$(TARGET).$(DSA).xo: ./src/krnl_rsa.cpp
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) -c -k rsa -I'$(<D)' -o'$@' '$<'
 
-$(XCLBIN)/krnl_rsa.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_1_OBJS)
+$(XCLBIN)/krnl_rsa.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_rsa_OBJS)
 	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk rsa:1 -o'$@' $(+)
 
 # Building Host
@@ -79,16 +78,16 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
-ifneq ($(TARGET),$(findstring $(TARGET), sw_emu hw))
-$(warning WARNING:Application supports only sw_emu hw TARGET. Please use the target for running the application)
-endif
-
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) --in ./data/0_0_1024_key.cip --out ./data/0_out.msg --key ./data/0_1024_key.pem
 else
 	 ./$(EXECUTABLE) --in ./data/0_0_1024_key.cip --out ./data/0_out.msg --key ./data/0_1024_key.pem
 endif
+ifneq ($(TARGET),$(findstring $(TARGET), sw_emu hw))
+$(warning WARNING:Application supports only sw_emu hw TARGET. Please use the target for running the application)
+endif
+
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 
 # Cleaning stuff

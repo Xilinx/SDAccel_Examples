@@ -58,7 +58,6 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
-
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)

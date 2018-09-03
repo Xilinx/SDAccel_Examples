@@ -37,10 +37,8 @@ EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
 BINARY_CONTAINERS += $(XCLBIN)/krnl_vmul.$(TARGET).$(DSA).xclbin
 BINARY_CONTAINER_krnl_vmul_OBJS += $(XCLBIN)/krnl_vmul.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/krnl_vmul.$(TARGET).$(DSA).xo
 BINARY_CONTAINERS += $(XCLBIN)/krnl_vadd.$(TARGET).$(DSA).xclbin
 BINARY_CONTAINER_krnl_vadd_OBJS += $(XCLBIN)/krnl_vadd.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/krnl_vadd.$(TARGET).$(DSA).xo
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
@@ -65,9 +63,9 @@ $(XCLBIN)/krnl_vadd.$(TARGET).$(DSA).xo: ./src/krnl_vadd.cl
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) -c -k krnl_vadd -I'$(<D)' -o'$@' '$<'
 
-$(XCLBIN)/krnl_vmul.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_vadd_OBJS)
+$(XCLBIN)/krnl_vmul.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_vmul_OBJS)
 	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk krnl_vmul:1 -o'$@' $(+)
-$(XCLBIN)/krnl_vadd.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_vmul_OBJS)
+$(XCLBIN)/krnl_vadd.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_vadd_OBJS)
 	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk krnl_vadd:1 -o'$@' $(+)
 
 # Building Host
@@ -80,7 +78,6 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
-
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)

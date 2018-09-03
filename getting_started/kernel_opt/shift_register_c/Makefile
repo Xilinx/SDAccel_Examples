@@ -36,10 +36,8 @@ EXECUTABLE = host
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
 BINARY_CONTAINERS += $(XCLBIN)/fir.$(TARGET).$(DSA).xclbin
-BINARY_CONTAINER_1_OBJS += $(XCLBIN)/fir_naive.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/fir_naive.$(TARGET).$(DSA).xo
-BINARY_CONTAINER_1_OBJS += $(XCLBIN)/fir_shift_register.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/fir_shift_register.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_fir_OBJS += $(XCLBIN)/fir_naive.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_fir_OBJS += $(XCLBIN)/fir_shift_register.$(TARGET).$(DSA).xo
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
@@ -64,7 +62,7 @@ $(XCLBIN)/fir_shift_register.$(TARGET).$(DSA).xo: ./src/fir_shift_register.cpp
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) -c -k fir_shift_register -I'$(<D)' -o'$@' '$<'
 
-$(XCLBIN)/fir.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_1_OBJS)
+$(XCLBIN)/fir.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_fir_OBJS)
 	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk fir_naive:1 --nk fir_shift_register:1 -o'$@' $(+)
 
 # Building Host
@@ -77,7 +75,6 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
-
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)

@@ -29,7 +29,7 @@ update_file() {
 VCS_FILES=$(git ls-files)
 
 for f in $VCS_FILES; do
-	if [[ ($f == */description.json) && ($f != */smithwaterman/description.json) && ($f != */sha1/description.json) && ($f != */rtl_kernel/*) && ($f != */high_perf_mat_mult/*)]]; then
+	if [[ ($f == */description.json) && ($f != */kmeans/*) && ($f != */kernel_global_bandwidth/*) && ($f != */sha1/*) && ($f != */rtl_kernel/*) && ($f != */high_perf_mat_mult/*)]]; then
 		echo $f
 		update_file $(readlink -f $f)
 	fi

@@ -39,8 +39,7 @@ EXECUTABLE = host
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
 BINARY_CONTAINERS += $(XCLBIN)/N_stage_Adders.$(TARGET).$(DSA).xclbin
-BINARY_CONTAINER_1_OBJS += $(XCLBIN)/N_stage_Adders.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/N_stage_Adders.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_N_stage_Adders_OBJS += $(XCLBIN)/N_stage_Adders.$(TARGET).$(DSA).xo
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
@@ -62,7 +61,7 @@ $(XCLBIN)/N_stage_Adders.$(TARGET).$(DSA).xo: ./src/N_stage_adders.cpp
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) -c -k N_stage_Adders -I'$(<D)' -o'$@' '$<'
 
-$(XCLBIN)/N_stage_Adders.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_1_OBJS)
+$(XCLBIN)/N_stage_Adders.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_N_stage_Adders_OBJS)
 	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk N_stage_Adders:1 -o'$@' $(+)
 
 # Building Host
@@ -75,7 +74,6 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
-
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)

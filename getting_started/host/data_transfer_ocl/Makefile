@@ -36,8 +36,7 @@ EXECUTABLE = data_transfer
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
 BINARY_CONTAINERS += $(XCLBIN)/dummy_kernel.$(TARGET).$(DSA).xclbin
-BINARY_CONTAINER_1_OBJS += $(XCLBIN)/dummy_kernel.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/dummy_kernel.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_dummy_kernel_OBJS += $(XCLBIN)/dummy_kernel.$(TARGET).$(DSA).xo
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
@@ -59,7 +58,7 @@ $(XCLBIN)/dummy_kernel.$(TARGET).$(DSA).xo: ./src/dummy_kernel.cl
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) -c -k dummy_kernel -I'$(<D)' -o'$@' '$<'
 
-$(XCLBIN)/dummy_kernel.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_1_OBJS)
+$(XCLBIN)/dummy_kernel.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_dummy_kernel_OBJS)
 	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk dummy_kernel:1 -o'$@' $(+)
 
 # Building Host
@@ -72,7 +71,6 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
-
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)

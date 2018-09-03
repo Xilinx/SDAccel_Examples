@@ -36,8 +36,7 @@ EXECUTABLE = host_global
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
 BINARY_CONTAINERS += $(XCLBIN)/krnl_host_global.$(TARGET).$(DSA).xclbin
-BINARY_CONTAINER_1_OBJS += $(XCLBIN)/bandwidth.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/bandwidth.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_krnl_host_global_OBJS += $(XCLBIN)/bandwidth.$(TARGET).$(DSA).xo
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
@@ -59,7 +58,7 @@ $(XCLBIN)/bandwidth.$(TARGET).$(DSA).xo: ./src/kernel.cl
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) -c -k bandwidth -I'$(<D)' -o'$@' '$<'
 
-$(XCLBIN)/krnl_host_global.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_1_OBJS)
+$(XCLBIN)/krnl_host_global.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_host_global_OBJS)
 	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk bandwidth:1 -o'$@' $(+)
 
 # Building Host
@@ -72,7 +71,6 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
-
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)
