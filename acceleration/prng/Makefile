@@ -37,8 +37,7 @@ EXECUTABLE = prng
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
 BINARY_CONTAINERS += $(XCLBIN)/dma.$(TARGET).$(DSA).xclbin
-BINARY_CONTAINER_1_OBJS += $(XCLBIN)/dma.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/dma.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_dma_OBJS += $(XCLBIN)/dma.$(TARGET).$(DSA).xo
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
@@ -60,7 +59,7 @@ $(XCLBIN)/dma.$(TARGET).$(DSA).xo: ./src/dma.cpp
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) -c -k dma -I'$(<D)' -o'$@' '$<'
 
-$(XCLBIN)/dma.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_1_OBJS)
+$(XCLBIN)/dma.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_dma_OBJS)
 	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk dma:1 -o'$@' $(+)
 
 # Building Host
@@ -73,7 +72,6 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
-
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)

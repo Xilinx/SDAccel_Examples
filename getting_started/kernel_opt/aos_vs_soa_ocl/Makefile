@@ -35,10 +35,8 @@ EXECUTABLE = aos_vs_soa
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
 BINARY_CONTAINERS += $(XCLBIN)/dot.$(TARGET).$(DSA).xclbin
-BINARY_CONTAINER_1_OBJS += $(XCLBIN)/dot_aos.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/dot_aos.$(TARGET).$(DSA).xo
-BINARY_CONTAINER_1_OBJS += $(XCLBIN)/dot_soa.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/dot_soa.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_dot_OBJS += $(XCLBIN)/dot_aos.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_dot_OBJS += $(XCLBIN)/dot_soa.$(TARGET).$(DSA).xo
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
@@ -63,7 +61,7 @@ $(XCLBIN)/dot_soa.$(TARGET).$(DSA).xo: ./src/dot.cl
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) -c -k dot_soa -I'$(<D)' -o'$@' '$<'
 
-$(XCLBIN)/dot.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_1_OBJS)
+$(XCLBIN)/dot.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_dot_OBJS)
 	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk dot_aos:1 --nk dot_soa:1 -o'$@' $(+)
 
 # Building Host
@@ -76,7 +74,6 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
-
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)

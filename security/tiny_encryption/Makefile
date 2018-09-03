@@ -38,8 +38,7 @@ EXECUTABLE = tiny
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
 BINARY_CONTAINERS += $(XCLBIN)/tinyEncryption.$(TARGET).$(DSA).xclbin
-BINARY_CONTAINER_1_OBJS += $(XCLBIN)/tinyEncryption.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/tinyEncryption.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_tinyEncryption_OBJS += $(XCLBIN)/tinyEncryption.$(TARGET).$(DSA).xo
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
@@ -63,7 +62,7 @@ $(XCLBIN)/tinyEncryption.$(TARGET).$(DSA).xo: ./src/krnl_tinyEncryption.cl
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) -c -k tinyEncryption -I'$(<D)' -o'$@' '$<'
 
-$(XCLBIN)/tinyEncryption.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_1_OBJS)
+$(XCLBIN)/tinyEncryption.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_tinyEncryption_OBJS)
 	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk tinyEncryption:1 -o'$@' $(+)
 
 # Building Host

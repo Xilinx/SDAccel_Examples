@@ -36,8 +36,7 @@ EXECUTABLE = median
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
 BINARY_CONTAINERS += $(XCLBIN)/krnl_median.$(TARGET).$(DSA).xclbin
-BINARY_CONTAINER_1_OBJS += $(XCLBIN)/median.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/median.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_krnl_median_OBJS += $(XCLBIN)/median.$(TARGET).$(DSA).xo
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
@@ -61,7 +60,7 @@ $(XCLBIN)/median.$(TARGET).$(DSA).xo: ./src/krnl_medianFilter.cl
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) -c -k median -I'$(<D)' -o'$@' '$<'
 
-$(XCLBIN)/krnl_median.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_1_OBJS)
+$(XCLBIN)/krnl_median.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_median_OBJS)
 	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk median:1 -o'$@' $(+)
 
 # Building Host
@@ -74,7 +73,6 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
-
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/median.$(TARGET).$(DSA).xclbin ./data/inputImage.bmp ./data/goldenImage.bmp

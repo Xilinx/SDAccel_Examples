@@ -35,12 +35,9 @@ EXECUTABLE = concurrent_execution
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
 BINARY_CONTAINERS += $(XCLBIN)/matrix_ops.$(TARGET).$(DSA).xclbin
-BINARY_CONTAINER_1_OBJS += $(XCLBIN)/madd.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/madd.$(TARGET).$(DSA).xo
-BINARY_CONTAINER_1_OBJS += $(XCLBIN)/mscale.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/mscale.$(TARGET).$(DSA).xo
-BINARY_CONTAINER_1_OBJS += $(XCLBIN)/mmult.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/mmult.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_matrix_ops_OBJS += $(XCLBIN)/madd.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_matrix_ops_OBJS += $(XCLBIN)/mscale.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_matrix_ops_OBJS += $(XCLBIN)/mmult.$(TARGET).$(DSA).xo
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
@@ -69,7 +66,7 @@ $(XCLBIN)/mmult.$(TARGET).$(DSA).xo: ./src/matrix_ops.cl
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) -c -k mmult -I'$(<D)' -o'$@' '$<'
 
-$(XCLBIN)/matrix_ops.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_1_OBJS)
+$(XCLBIN)/matrix_ops.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_matrix_ops_OBJS)
 	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk madd:1 --nk mscale:1 --nk mmult:1 -o'$@' $(+)
 
 # Building Host
@@ -82,7 +79,6 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
-
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)

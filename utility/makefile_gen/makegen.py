@@ -206,8 +206,10 @@ def add_containers(target, data):
     container_name = 0
     acc_cnt = 0
     bin_cnt = 0
+    ctn_cnt = 0
     if "containers" in data:
         for dictionary in data["containers"]:
+	    ctn_cnt = ctn_cnt + 1
             if dictionary["accelerators"]:
                 acc_cnt = acc_cnt + 1 
             if dictionary["name"]:
@@ -217,40 +219,70 @@ def add_containers(target, data):
             target.write(data["containers"][container_name]["name"])
             target.write(".$(TARGET).$(DSA)")
             target.write(".xclbin\n")
-            for acc in con["accelerators"]:
-                if acc_cnt==2 and bin_cnt==2:
-                    target.write("BINARY_CONTAINER_")
+	    if ctn_cnt > 1:
+		for acc in con["accelerators"]:
+                    if acc_cnt==2 and bin_cnt==2:
+                        target.write("BINARY_CONTAINER_")
+                        target.write(data["containers"][container_name]["name"])
+                        target.write("_OBJS += $(XCLBIN)/")
+                    else:
+                        target.write("BINARY_CONTAINER_1_OBJS += $(XCLBIN)/")
+                    target.write(data["containers"][container_name]["name"])
+                    target.write(".$(TARGET).$(DSA)")
+                    target.write(".xo\n")
+	    elif ctn_cnt > 0:
+                for acc in con["accelerators"]:
+                    if acc_cnt==2 and bin_cnt==2:
+                        target.write("BINARY_CONTAINER_")
+                        target.write(acc["name"])
+                        target.write("_OBJS += $(XCLBIN)/")
+                    else:
+                        target.write("BINARY_CONTAINER_")
+			target.write(data["containers"][container_name]["name"])
+			target.write("_OBJS += $(XCLBIN)/")
                     target.write(acc["name"])
-                    target.write("_OBJS += $(XCLBIN)/")
-                else:
-                    target.write("BINARY_CONTAINER_1_OBJS += $(XCLBIN)/")
-                target.write(acc["name"])
-                target.write(".$(TARGET).$(DSA)")
-                target.write(".xo\n")
-                target.write("ALL_KERNEL_OBJS += $(XCLBIN)/")
-                target.write(acc["name"])
-                target.write(".$(TARGET).$(DSA)")
-                target.write(".xo\n")
-            container_name = container_name + 1
+                    target.write(".$(TARGET).$(DSA)")
+                    target.write(".xo\n")
+            container_name = container_name + 1	       	
         target.write("\n")
 
 def building_kernel(target, data):
     target.write("# Building kernel\n")
     container_name = 0
+    ctn_cnt = 0
+
     if "containers" in data:
-        for con in data["containers"]:
-            for acc in con["accelerators"]:
-                target.write("$(XCLBIN)/")
-                target.write(acc["name"])
-                target.write(".$(TARGET).$(DSA)")
-                target.write(".xo: ./")
-                target.write(acc["location"])
-                target.write("\n")
-                target.write("\tmkdir -p $(XCLBIN)\n")
-                target.write("\t$(XOCC) $(CLFLAGS) -c -k ")
-                target.write(acc["name"])
-                target.write(" -I'$(<D)'")
-                target.write(" -o'$@' '$<'\n")
+        for dictionary in data["containers"]:
+	    ctn_cnt = ctn_cnt + 1
+        
+    if "containers" in data:	
+	for con in data["containers"]:
+	    if ctn_cnt > 1:
+	         for acc in con["accelerators"]:
+                    target.write("$(XCLBIN)/")
+                    target.write(data["containers"][container_name]["name"])
+                    target.write(".$(TARGET).$(DSA)")
+                    target.write(".xo: ./")
+                    target.write(acc["location"])
+                    target.write("\n")
+                    target.write("\tmkdir -p $(XCLBIN)\n")
+                    target.write("\t$(XOCC) $(CLFLAGS) -c -k ")
+                    target.write(acc["name"])
+                    target.write(" -I'$(<D)'")
+                    target.write(" -o'$@' '$<'\n")    	
+            elif ctn_cnt > 0:
+                for acc in con["accelerators"]:
+                    target.write("$(XCLBIN)/")
+                    target.write(acc["name"])
+                    target.write(".$(TARGET).$(DSA)")
+                    target.write(".xo: ./")
+                    target.write(acc["location"])
+                    target.write("\n")
+                    target.write("\tmkdir -p $(XCLBIN)\n")
+                    target.write("\t$(XOCC) $(CLFLAGS) -c -k ")
+                    target.write(acc["name"])
+                    target.write(" -I'$(<D)'")
+                    target.write(" -o'$@' '$<'\n")
             container_name = container_name + 1    
         target.write("\n")
     
@@ -258,22 +290,32 @@ def building_kernel(target, data):
         container_name = 0 
         acc_cnt = 0
         bin_cnt = 0
+        ctn_cnt = 0
         for dictionary in data["containers"]:
-            if dictionary["accelerators"]:
+            ctn_cnt = ctn_cnt + 1
+	    if dictionary["accelerators"]:
                 acc_cnt = acc_cnt + 1 
             if dictionary["name"]:
                 bin_cnt = bin_cnt + 1 
         for con in data["containers"]:
             target.write("$(XCLBIN)/")
             target.write(data["containers"][container_name]["name"])
-            if acc_cnt==2 and bin_cnt==2:
-                target.write(".$(TARGET).$(DSA)")
-                target.write(".xclbin: $(BINARY_CONTAINER_")
-                target.write(acc["name"])
-                target.write("_OBJS)\n")
-            else:                
-                target.write(".$(TARGET).$(DSA)")
-                target.write(".xclbin: $(BINARY_CONTAINER_1_OBJS)\n")
+            if ctn_cnt > 1:
+		target.write(".$(TARGET).$(DSA)")
+		target.write(".xclbin: $(BINARY_CONTAINER_")
+		target.write(data["containers"][container_name]["name"])
+		target.write("_OBJS)\n")
+	    elif ctn_cnt > 0:
+		if acc_cnt==2 and bin_cnt==2:
+                    target.write(".$(TARGET).$(DSA)")
+                    target.write(".xclbin: $(BINARY_CONTAINER_")
+                    target.write(acc["name"])
+                    target.write("_OBJS)\n")
+            	else:                
+                    target.write(".$(TARGET).$(DSA)")
+                    target.write(".xclbin: $(BINARY_CONTAINER_")
+		    target.write(data["containers"][container_name]["name"])
+		    target.write("_OBJS)\n")
             target.write("\t$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS)")
             for acc in con["accelerators"]:
                 target.write(" --nk ")
@@ -368,21 +410,7 @@ def mk_check(target, data):
         target.write("))\n")                   
         target.write("$(error Nothing to be done for make)\n")
         target.write("endif\n")
-    if "targets" in data:
-        target.write("ifneq ($(TARGET),$(findstring $(TARGET),")
-        args = data["targets"]
-        for arg in args:
-            target.write(" ")
-            target.write(arg)
-        target.write("))\n")
-        target.write("$(warning WARNING:Application supports only")
-        for arg in args:
-            target.write(" ")
-            target.write(arg)            
-        target.write(" TARGET. Please use the target for running the application)\n")
-        #target.write("$(error Nothing to be done for make)\n")
-        target.write("endif\n")
-    target.write("\n") 
+        target.write("\n") 
     if "Emulation" in data:        
         target1 = open("sdaccel.ini","a+")
         args = data["Emulation"]
@@ -417,6 +445,21 @@ def mk_check(target, data):
 	    if "$(XCLBIN)" in arg:
             	target.write(".$(TARGET).$(DSA).xclbin")
     target.write("\nendif\n")
+    if "targets" in data:
+        target.write("ifneq ($(TARGET),$(findstring $(TARGET),")
+        args = data["targets"]
+        for arg in args:
+            target.write(" ")
+            target.write(arg)
+        target.write("))\n")
+        target.write("$(warning WARNING:Application supports only")
+        for arg in args:
+            target.write(" ")
+            target.write(arg)
+        target.write(" TARGET. Please use the target for running the application)\n")
+        #target.write("$(error Nothing to be done for make)\n")
+        target.write("endif\n")
+        target.write("\n")
 
     if data["example"] != "00 Matrix Multiplication":
 	target.write("\tsdx_analyze profile -i sdaccel_profile_summary.csv -f html\n")

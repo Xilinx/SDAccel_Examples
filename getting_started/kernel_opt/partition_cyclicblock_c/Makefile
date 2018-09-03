@@ -36,10 +36,8 @@ EXECUTABLE = array_partition
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
 BINARY_CONTAINERS += $(XCLBIN)/matmul.$(TARGET).$(DSA).xclbin
-BINARY_CONTAINER_1_OBJS += $(XCLBIN)/matmul_naive.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/matmul_naive.$(TARGET).$(DSA).xo
-BINARY_CONTAINER_1_OBJS += $(XCLBIN)/matmul_partition.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/matmul_partition.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_matmul_OBJS += $(XCLBIN)/matmul_naive.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_matmul_OBJS += $(XCLBIN)/matmul_partition.$(TARGET).$(DSA).xo
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
@@ -64,7 +62,7 @@ $(XCLBIN)/matmul_partition.$(TARGET).$(DSA).xo: ./src/matmul_partition.cpp
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) -c -k matmul_partition -I'$(<D)' -o'$@' '$<'
 
-$(XCLBIN)/matmul.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_1_OBJS)
+$(XCLBIN)/matmul.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_matmul_OBJS)
 	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk matmul_naive:1 --nk matmul_partition:1 -o'$@' $(+)
 
 # Building Host
@@ -77,7 +75,6 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
-
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)

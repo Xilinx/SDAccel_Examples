@@ -39,10 +39,8 @@ EXECUTABLE = huffman
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
 BINARY_CONTAINERS += $(XCLBIN)/krnl_huffman.$(TARGET).$(DSA).xclbin
-BINARY_CONTAINER_1_OBJS += $(XCLBIN)/encode.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/encode.$(TARGET).$(DSA).xo
-BINARY_CONTAINER_1_OBJS += $(XCLBIN)/decode.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/decode.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_krnl_huffman_OBJS += $(XCLBIN)/encode.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_krnl_huffman_OBJS += $(XCLBIN)/decode.$(TARGET).$(DSA).xo
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
@@ -71,7 +69,7 @@ $(XCLBIN)/decode.$(TARGET).$(DSA).xo: ./src/krnl_huffman_singleptr.cl
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) -c -k decode -I'$(<D)' -o'$@' '$<'
 
-$(XCLBIN)/krnl_huffman.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_1_OBJS)
+$(XCLBIN)/krnl_huffman.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_huffman_OBJS)
 	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk encode:1 --nk decode:1 -o'$@' $(+)
 
 # Building Host
@@ -84,16 +82,16 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
-ifneq ($(TARGET),$(findstring $(TARGET), sw_emu hw))
-$(warning WARNING:Application supports only sw_emu hw TARGET. Please use the target for running the application)
-endif
-
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) -b ./data/rect_1024.bmp
 else
 	 ./$(EXECUTABLE) -b ./data/rect_1024.bmp
 endif
+ifneq ($(TARGET),$(findstring $(TARGET), sw_emu hw))
+$(warning WARNING:Application supports only sw_emu hw TARGET. Please use the target for running the application)
+endif
+
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 
 # Cleaning stuff

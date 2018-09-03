@@ -38,7 +38,6 @@ EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
 BINARY_CONTAINERS += $(XCLBIN)/krnl_sha1.$(TARGET).$(DSA).xclbin
 BINARY_CONTAINER_1_OBJS += $(XCLBIN)/krnl_sha1.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/krnl_sha1.$(TARGET).$(DSA).xo
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk

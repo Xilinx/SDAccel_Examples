@@ -29,7 +29,8 @@ LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_XRT)/lib/
 
 # Kernel compiler global settings
 CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps 
-CLFLAGS += --xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generateExtraRunData=true" "-DBAD_DESIGN=0"
+CLFLAGS += -DBAD_DESIGN=0
+
 
 
 EXECUTABLE = host
@@ -37,8 +38,7 @@ EXECUTABLE = host
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
 BINARY_CONTAINERS += $(XCLBIN)/apply_watermark_GOOD.$(TARGET).$(DSA).xclbin
-BINARY_CONTAINER_1_OBJS += $(XCLBIN)/apply_watermark.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/apply_watermark.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_apply_watermark_GOOD_OBJS += $(XCLBIN)/apply_watermark.$(TARGET).$(DSA).xo
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
@@ -62,20 +62,19 @@ $(XCLBIN)/apply_watermark.$(TARGET).$(DSA).xo: ./src/apply_watermark.cl
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) -c -k apply_watermark -I'$(<D)' -o'$@' '$<'
 
-$(XCLBIN)/apply_watermark_GOOD.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_1_OBJS)
+$(XCLBIN)/apply_watermark_GOOD.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_apply_watermark_GOOD_OBJS)
 	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk apply_watermark:1 -o'$@' $(+)
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS)
+$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
 	mkdir -p $(XCLBIN)
-	$(CXX) $(CXXFLAGS) $(HOST_SRCS) -o '$@' $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 
 emconfig:$(EMCONFIG_DIR)/emconfig.json
 $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
-
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) apply_watermark_GOOD ./data/input.bmp ./data/golden.bmp

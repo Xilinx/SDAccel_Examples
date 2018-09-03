@@ -37,8 +37,7 @@ EXECUTABLE = host
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
 BINARY_CONTAINERS += $(XCLBIN)/adder.$(TARGET).$(DSA).xclbin
-BINARY_CONTAINER_1_OBJS += $(XCLBIN)/adder.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/adder.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_adder_OBJS += $(XCLBIN)/adder.$(TARGET).$(DSA).xo
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
@@ -60,7 +59,7 @@ $(XCLBIN)/adder.$(TARGET).$(DSA).xo: ./src/adder.cl
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) -c -k adder -I'$(<D)' -o'$@' '$<'
 
-$(XCLBIN)/adder.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_1_OBJS)
+$(XCLBIN)/adder.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_adder_OBJS)
 	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk adder:1 -o'$@' $(+)
 
 # Building Host
@@ -73,7 +72,6 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
-
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)

@@ -58,16 +58,16 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
-ifneq ($(TARGET),$(findstring $(TARGET), sw_emu))
-$(warning WARNING:Application supports only sw_emu TARGET. Please use the target for running the application)
-endif
-
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)
 else
 	 ./$(EXECUTABLE)
 endif
+ifneq ($(TARGET),$(findstring $(TARGET), sw_emu))
+$(warning WARNING:Application supports only sw_emu TARGET. Please use the target for running the application)
+endif
+
 
 # Cleaning stuff
 clean:

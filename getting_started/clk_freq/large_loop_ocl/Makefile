@@ -29,7 +29,7 @@ LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_XRT)/lib/
 
 # Kernel compiler global settings
 CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps 
-CLFLAGS += --xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generateExtraRunData=true"
+
 
 EXECUTABLE = host
 
@@ -37,10 +37,8 @@ EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
 BINARY_CONTAINERS += $(XCLBIN)/cnn_GOOD.$(TARGET).$(DSA).xclbin
 BINARY_CONTAINER_cnn_GOOD_OBJS += $(XCLBIN)/cnn_GOOD.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/cnn_GOOD.$(TARGET).$(DSA).xo
 BINARY_CONTAINERS += $(XCLBIN)/cnn_BAD.$(TARGET).$(DSA).xclbin
 BINARY_CONTAINER_cnn_BAD_OBJS += $(XCLBIN)/cnn_BAD.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/cnn_BAD.$(TARGET).$(DSA).xo
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
@@ -71,16 +69,15 @@ $(XCLBIN)/cnn_BAD.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_cnn_BAD_OBJS)
 	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk cnn:1 -o'$@' $(+)
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS)
+$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
 	mkdir -p $(XCLBIN)
-	$(CXX) $(CXXFLAGS) $(HOST_SRCS) -o '$@' $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 
 emconfig:$(EMCONFIG_DIR)/emconfig.json
 $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
-
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)

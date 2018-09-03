@@ -37,8 +37,7 @@ EXECUTABLE = nearest
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
 BINARY_CONTAINERS += $(XCLBIN)/krnl_nearest.$(TARGET).$(DSA).xclbin
-BINARY_CONTAINER_1_OBJS += $(XCLBIN)/krnl_linear_search.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/krnl_linear_search.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_krnl_nearest_OBJS += $(XCLBIN)/krnl_linear_search.$(TARGET).$(DSA).xo
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
@@ -61,7 +60,7 @@ $(XCLBIN)/krnl_linear_search.$(TARGET).$(DSA).xo: ./src/krnl_linear_search.cpp
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) -c -k krnl_linear_search -I'$(<D)' -o'$@' '$<'
 
-$(XCLBIN)/krnl_nearest.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_1_OBJS)
+$(XCLBIN)/krnl_nearest.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_nearest_OBJS)
 	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk krnl_linear_search:2 -o'$@' $(+)
 
 # Building Host

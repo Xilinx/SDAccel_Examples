@@ -35,8 +35,7 @@ EXECUTABLE = host
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
 BINARY_CONTAINERS += $(XCLBIN)/vector_addition.$(TARGET).$(DSA).xclbin
-BINARY_CONTAINER_1_OBJS += $(XCLBIN)/vector_add.$(TARGET).$(DSA).xo
-ALL_KERNEL_OBJS += $(XCLBIN)/vector_add.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_vector_addition_OBJS += $(XCLBIN)/vector_add.$(TARGET).$(DSA).xo
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
@@ -58,7 +57,7 @@ $(XCLBIN)/vector_add.$(TARGET).$(DSA).xo: ./src/vector_addition.cl
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) -c -k vector_add -I'$(<D)' -o'$@' '$<'
 
-$(XCLBIN)/vector_addition.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_1_OBJS)
+$(XCLBIN)/vector_addition.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_vector_addition_OBJS)
 	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk vector_add:1 -o'$@' $(+)
 
 # Building Host
@@ -71,7 +70,6 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
-
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)
