@@ -75,8 +75,6 @@ private:
 	string m_strBitmapFP;
 	cl_int err;
 
-	std::vector<cl::Device> devices = xcl::get_xil_devices();
-	cl::Device device = devices[0];
 	cl::Context context;
 	cl::CommandQueue q;
 	cl::Program m_program;

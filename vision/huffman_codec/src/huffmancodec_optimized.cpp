@@ -66,11 +66,15 @@ HuffmanOptimized::HuffmanOptimized(string& vendor_name,
 	//store path to input bitmap
 	m_strBitmapFP = strBitmapFP;
 
+	std::vector<cl::Device> devices = xcl::get_xil_devices();
+	cl::Device device = devices[0];
+
 	//Creating Context and Command Queue for selected Device
 	OCL_CHECK(err, context = cl::Context(device, NULL, NULL, NULL, &err));
 	OCL_CHECK(err, q = cl::CommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
-
-	std::string xclBinFile = xcl::find_binary_file(device_name, "krnl_huffman");
+	OCL_CHECK(err, std::string deviceName = device.getInfo<CL_DEVICE_NAME>(&err));
+	
+	std::string xclBinFile = xcl::find_binary_file(deviceName, "krnl_huffman");
 	cl::Program::Binaries bins = xcl::import_binary_file(xclBinFile);
 	devices.resize(1);
 	OCL_CHECK(err, m_program = cl::Program(context, devices, bins, NULL, &err));
