@@ -22,7 +22,7 @@
     "libs": [
         "logger", 
         "cmdparser", 
-        "xcl"
+        "xcl2"
     ],
     "containers": [
     {
