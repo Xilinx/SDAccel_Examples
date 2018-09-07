@@ -32,7 +32,7 @@ CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps
 CLFLAGS += -DDEADLOCK=0
 
 
-EXECUTABLE = kernel_GOOD
+EXECUTABLE = host
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 

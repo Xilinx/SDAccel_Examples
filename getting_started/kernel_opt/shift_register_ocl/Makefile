@@ -31,7 +31,7 @@ LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_XRT)/lib/
 CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps 
 
 
-EXECUTABLE = host
+EXECUTABLE = shift_register
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
