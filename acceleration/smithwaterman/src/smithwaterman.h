@@ -30,7 +30,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef SWAPP_H_
 #define SWAPP_H_
 
-#include "xcl.h"
+#include "xcl2.hpp"
 #include "matcharray.h"
 
 #define COMPUTE_UNITS 1
@@ -43,12 +43,6 @@ typedef			 short		i16;
 typedef			 int		i32;
 
 
-namespace sda {
-namespace cl {
-
-    /*!
- *
- */
 
     class SmithWatermanApp {
     public:        
@@ -72,15 +66,12 @@ namespace cl {
 
         bool run(int idevice, int nruns);
 
-        bool invoke_kernel(unsigned int* input, unsigned int* output, int* iterNum, int sz_input, int sz_output, int sz_sz, cl_event events[evtCount], double eTotal[evtCount]);
-        bool invoke_kernel_blocking(unsigned int* input, unsigned int* output, int* iterNum, int sz_input, int sz_output, int sz_sz, cl_event events[evtCount], double eTotal[evtCount]);
-        bool invoke_kernel_doublebuffered(unsigned int* input, unsigned int* output, int* iterNum, int sz_input, int sz_output, int sz_sz, cl_event events[evtCount], double eTotal[evtCount]);
+        bool invoke_kernel(unsigned int* input, unsigned int* output, int* iterNum, int sz_input, int sz_output, int sz_sz, cl::Event events[evtCount], double eTotal[evtCount]);
+        bool invoke_kernel_blocking(unsigned int* input, unsigned int* output, int* iterNum, int sz_input, int sz_output, int sz_sz, cl::Event events[evtCount], double eTotal[evtCount]);
+        bool invoke_kernel_doublebuffered(unsigned int* input, unsigned int* output, int* iterNum, int sz_input, int sz_output, int sz_sz, cl::Event events[evtCount], double eTotal[evtCount]);
 
         static bool unit_test_kernel_cpu();
         static bool unit_test_naive();
-
-    protected:
-        bool releaseMemObject(cl_mem& obj);
 
     private:
         string m_strSampleFP;
@@ -90,13 +81,12 @@ namespace cl {
         int m_blockSz;
         bool m_verifyMode; //true == verify, false is not verify
         bool m_writeMatchArray; //true == writeMatchArray
-        cl_program m_program;
-        cl_kernel m_clKernelSmithWaterman;
-        xcl_world m_world;
+        cl::Program m_program;
+        cl::Kernel m_clKernelSmithWaterman;
+     	cl::CommandQueue q;
+	cl::Context context;
 
         MatchArray* m_pMatchInfo;
     };
-}
-}
 
 #endif /* SWAPP_H_ */

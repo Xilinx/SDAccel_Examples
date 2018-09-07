@@ -46,9 +46,6 @@ typedef struct _eventLog {
     double totalExecute;
 } eventLog;
 
-using namespace sda;
-using namespace sda::cl;
-
 unsigned int* generatePackedNReadRefPair(int N, int readSize, int refSize, unsigned int** maxVal, int computeOutput = 1);
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -66,14 +63,11 @@ static double timestamp() {
 	return ms;
 }
 
-static double computeEventDurationInMS(const cl_event& event) {
-	cl_ulong ts_start = 0, ts_end = 0;
-	double duration = 0;
-	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &ts_start, NULL);
-	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &ts_end, NULL);
-	duration += (cl_double)(ts_end-ts_start)*(cl_double)(1e-06);
-
-	return duration;
+static double computeEventDurationInMS(const cl::Event& event) {
+	double nsduration = 0;
+	cl_int err;
+    	nsduration = OCL_CHECK(err, event.getProfilingInfo<CL_PROFILING_COMMAND_END>(&err)) - OCL_CHECK(err, event.getProfilingInfo<CL_PROFILING_COMMAND_START>(&err));
+	return nsduration;
 }
 
 static int getToken(FILE* fp, char* tok)
@@ -192,19 +186,27 @@ SmithWatermanApp::SmithWatermanApp(const string& vendor_name,
     m_pMatchInfo = pm;
     m_writeMatchArray = writeMatchArray;
 
-    m_world = xcl_world_single();
+    cl_int err;
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
 
-    m_program = xcl_import_binary(m_world, "krnl_smithwaterman");
-   //kernels
-    m_clKernelSmithWaterman = xcl_get_kernel(m_program, "opencl_sw_maxscore");
+    OCL_CHECK(err, context = cl::Context(device, NULL, NULL, NULL, &err));
+    OCL_CHECK(err, q = cl::CommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(err, std::string dev_name = device.getInfo<CL_DEVICE_NAME>(&err));
+    std::cout << "Found Device=" << dev_name.c_str() << std::endl;
 
+    std::string binaryFile = xcl::find_binary_file(dev_name, "krnl_smithwaterman");
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    devices.resize(1);
+    OCL_CHECK(err, m_program = cl::Program(context, devices, bins, NULL, &err));
+    OCL_CHECK(err, m_clKernelSmithWaterman = cl::Kernel(m_program, "opencl_sw_maxscore", &err));
 }
 
 SmithWatermanApp::~SmithWatermanApp()
 {
-    clReleaseKernel(m_clKernelSmithWaterman);
-    clReleaseProgram(m_program);
-    xcl_release_world(m_world);
+    cl_int err;
+    OCL_CHECK(err, err = q.flush());
+    OCL_CHECK(err, err = q.finish());
 }
 
 bool SmithWatermanApp::unit_test_kernel_cpu()
@@ -225,25 +227,6 @@ bool SmithWatermanApp::unit_test_naive()
     return true;
 }
 
-bool SmithWatermanApp::releaseMemObject(cl_mem& obj)
-{
-    cl_int err = 0;
-    bool returnStatus = true; // true if successful
-
-    if (obj != NULL) // This means it has been initialized
-    {
-        err = clReleaseMemObject(obj);
-        if (err != CL_SUCCESS) {
-            cout << "Error releasing variable\n";
-            returnStatus |= false;
-        }
-        else
-            obj = NULL; /* memory was released, re-initialize pointer to NULL */
-    }
-
-    return returnStatus;
-}
-
 bool SmithWatermanApp::invoke_kernel(
     unsigned int* input,
     unsigned int* output,
@@ -251,7 +234,7 @@ bool SmithWatermanApp::invoke_kernel(
     int sz_input,
     int sz_output,
     int sz_sz,
-    cl_event events[evtCount],
+    cl::Event events[evtCount],
     double eTotal[evtCount])
 {
     if (m_useDoubleBuffered) {
@@ -279,57 +262,27 @@ bool SmithWatermanApp::invoke_kernel_blocking(
     int sz_input,
     int sz_output,
     int sz_sz,
-    cl_event events[evtCount],
+    cl::Event events[evtCount],
     double eTotal[evtCount])
 {
 
-    cl_kernel kernel = m_clKernelSmithWaterman;
+    cl::Kernel kernel = m_clKernelSmithWaterman;
 
     cl_int err;
-    cl_mem mem_input;
-    mem_input = clCreateBuffer(m_world.context, CL_MEM_READ_WRITE, sz_input, NULL, &err);
-    if (err != CL_SUCCESS) {
-        LogError("Error: Failed to allocate OpenCL source buffer of size %lu", sz_input);
-        return false;
-    }
+    cl::Buffer mem_input;
+    OCL_CHECK(err, mem_input = cl::Buffer(context, CL_MEM_READ_WRITE, sz_input, NULL, &err));
 
-    cl_mem mem_output;
-    mem_output = clCreateBuffer(m_world.context, CL_MEM_READ_WRITE, sz_output, NULL, &err);
-    if (err != CL_SUCCESS) {
-        LogError("Failed to allocate worst case OpenCL output buffer of size %lu",
-            sz_input);
-        return false;
-    }
+    cl::Buffer mem_output;
+    OCL_CHECK(err, mem_output = cl::Buffer(context, CL_MEM_READ_WRITE, sz_output, NULL, &err));
 
-    cl_mem mem_sz_sz;
-    mem_sz_sz = clCreateBuffer(m_world.context, CL_MEM_READ_WRITE, sz_sz, NULL, &err);
-    if (err != CL_SUCCESS) {
-        LogError("Failed to allocate worst case OpenCL output buffer of size %lu",
-            sizeof(u32));
-        return false;
-    }
+    cl::Buffer mem_sz_sz;
+    OCL_CHECK(err, mem_sz_sz = cl::Buffer(context, CL_MEM_READ_WRITE, sz_sz, NULL, &err));
 
     err = 0;
-    err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &mem_input);
-    if (err != CL_SUCCESS) {
-        LogError("Failed to set kernel argument [0] input_buffer! %d", err);
-        LogError("Test failed");
-        return false;
-    }
 
-    err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &mem_output);
-    if (err != CL_SUCCESS) {
-        LogError("Failed to set kernel argument [1] output_buffer! %d", err);
-        LogError("Test failed");
-        return false;
-    }
-
-    err |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &mem_sz_sz);
-    if (err != CL_SUCCESS) {
-        LogError("Failed to set kernel argument [2] sz_output! %d", err);
-        LogError("Test failed");
-        return false;
-    }
+    OCL_CHECK(err, err = kernel.setArg(0, mem_input));
+    OCL_CHECK(err, err = kernel.setArg(1, mem_output));
+    OCL_CHECK(err, err = kernel.setArg(2, mem_sz_sz));
 
     int numIter = m_numBlocks;
 
@@ -339,49 +292,24 @@ bool SmithWatermanApp::invoke_kernel_blocking(
     for (int iter = 0; iter < numIter; ++iter) {
         //copy input dataset to OpenCL buffer
         //cout << "In iteration" << iter << "\n";
-        err = clEnqueueWriteBuffer(m_world.command_queue, mem_input, CL_TRUE, 0,
-            sz_input, (input + iter * (sz_input / sizeof(unsigned int))), 0, NULL, &events[evtHostWrite]);
-        if (err != CL_SUCCESS) {
-            LogError("Failed to copy input dataset to OpenCL buffer");
-            return false;
-        }
-        err = clEnqueueWriteBuffer(m_world.command_queue, mem_sz_sz, CL_TRUE, 0,
-            sz_sz, iterNum, 0, NULL, NULL);
-        if (err != CL_SUCCESS) {
-            LogError("Failed to copy input dataset to OpenCL buffer");
-            return false;
-        }
-        //finish all memory writes
-        clFinish(m_world.command_queue);
+    	OCL_CHECK(err, err = q.enqueueMigrateMemObjects({mem_input, mem_sz_sz}, 0/* 0 means from the host*/, NULL, &events[evtHostWrite]));
 
-        //call once to guarentee that all buffers are migrated to device memory
-        err = clEnqueueTask(m_world.command_queue, kernel, 0, NULL, &events[evtKernelExec]);
-        if (err != CL_SUCCESS) {
-            LogError("[EX1] Failed to execute kernel %d", err);
-            LogError("Test failed");
-            return false;
-        }
-        clFinish(m_world.command_queue);
+        //finish all memory writes
+        OCL_CHECK(err, err = q.finish());
+
+        //call once to guarantee that all buffers are migrated to device memory
+        OCL_CHECK(err, err = q.enqueueTask(kernel, NULL, &events[evtKernelExec]));
+
+        OCL_CHECK(err, err = q.finish());
 
         //read output size
-        err = clEnqueueReadBuffer(m_world.command_queue, mem_output, CL_TRUE, 0,
-            sz_output, (output + iter * (sz_output / sizeof(unsigned int))), 0, NULL, &events[evtHostRead]);
-        if (err != CL_SUCCESS) {
-            LogError("Failed to read output size buffer %d", err);
-            LogError("Test failed");
-            return false;
-        }
-        clFinish(m_world.command_queue);
+        OCL_CHECK(err, err = q.enqueueMigrateMemObjects({mem_output}, CL_MIGRATE_MEM_OBJECT_HOST, NULL, &events[evtHostRead]));
+
+        OCL_CHECK(err, err = q.finish());
         eTotal[evtHostWrite] += computeEventDurationInMS(events[evtHostWrite]);
         eTotal[evtKernelExec] += computeEventDurationInMS(events[evtKernelExec]);
         eTotal[evtHostRead] += computeEventDurationInMS(events[evtHostRead]);
     }
-
-    //cleanup
-    releaseMemObject(mem_input);
-    releaseMemObject(mem_output);
-    releaseMemObject(mem_sz_sz);
-
     return true;
 }
 
@@ -392,178 +320,106 @@ bool SmithWatermanApp::invoke_kernel_doublebuffered(
     int sz_input,
     int sz_output,
     int sz_sz,
-    cl_event events[evtCount],
+    cl::Event events[evtCount],
     double eTotal[evtCount])
 {
 
-    cl_kernel kernel = m_clKernelSmithWaterman;
+    cl::Kernel kernel = m_clKernelSmithWaterman;
 
     cl_int err;
-    cl_mem mem_input_ping;
-    mem_input_ping = clCreateBuffer(m_world.context, CL_MEM_READ_WRITE, sz_input, NULL, &err);
-    if (err != CL_SUCCESS) {
-        LogError("Error: Failed to allocate OpenCL source buffer of size %lu", sz_input);
-        return false;
-    }
 
-    cl_mem mem_input_pong;
-    mem_input_pong = clCreateBuffer(m_world.context, CL_MEM_READ_WRITE, sz_input, NULL, &err);
-    if (err != CL_SUCCESS) {
-        LogError("Error: Failed to allocate OpenCL source buffer of size %lu", sz_input);
-        return false;
-    }
+    cl::Buffer mem_input_ping;
+    OCL_CHECK(err, mem_input_ping = cl::Buffer(context, CL_MEM_READ_WRITE, sz_input, NULL, &err));
+    cl::Buffer mem_input_pong;
+    OCL_CHECK(err, mem_input_pong = cl::Buffer(context, CL_MEM_READ_WRITE, sz_input, NULL, &err));
 
-    cl_mem mem_output_ping;
-    mem_output_ping = clCreateBuffer(m_world.context, CL_MEM_READ_WRITE, sz_output, NULL, &err);
-    if (err != CL_SUCCESS) {
-        LogError("Failed to allocate worst case OpenCL output buffer of size %lu",
-            sz_input);
-        return false;
-    }
+    cl::Buffer mem_output_ping;
+    OCL_CHECK(err, mem_output_ping = cl::Buffer(context, CL_MEM_READ_WRITE, sz_output, NULL, &err));
+    cl::Buffer mem_output_pong;
+    OCL_CHECK(err, mem_output_pong = cl::Buffer(context, CL_MEM_READ_WRITE, sz_output, NULL, &err));
 
-    cl_mem mem_output_pong;
-    mem_output_pong = clCreateBuffer(m_world.context, CL_MEM_READ_WRITE, sz_output, NULL, &err);
-    if (err != CL_SUCCESS) {
-        LogError("Failed to allocate worst case OpenCL output buffer of size %lu",
-            sz_input);
-        return false;
-    }
+    cl::Buffer mem_sz_sz;
+    OCL_CHECK(err, mem_sz_sz = cl::Buffer(context, CL_MEM_READ_WRITE, sz_sz, NULL, &err));
 
-    cl_mem mem_sz_sz;
-    mem_sz_sz = clCreateBuffer(m_world.context, CL_MEM_READ_WRITE, sz_sz, NULL, &err);
-    if (err != CL_SUCCESS) {
-        LogError("Failed to allocate worst case OpenCL output buffer of size %lu",
-            sizeof(u32));
-        return false;
-    }
+    OCL_CHECK(err, err = kernel.setArg(2, mem_sz_sz));
 
-    err |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &mem_sz_sz);
-    if (err != CL_SUCCESS) {
-        LogError("Failed to set kernel argument [2] sz_output! %d", err);
-        LogError("Test failed");
-        return false;
-    }
-
-    cl_event ping[3];
-    cl_event pong[3];
+    cl::Event ping[3];
+    cl::Event pong[3];
 
     int numIter = m_numBlocks;
     cout << "Processing " << m_numSamples << " Samples \n";
     if (numIter >= 1) {
-        err = clEnqueueWriteBuffer(m_world.command_queue, mem_input_ping, CL_FALSE, 0,
-            sz_input, input, 0, NULL, &ping[evtHostWrite]);
-        assert(err == CL_SUCCESS);
-        err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &mem_input_ping);
-        assert(err == CL_SUCCESS);
-        err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &mem_output_ping);
-        assert(err == CL_SUCCESS);
+        OCL_CHECK(err, err = q.enqueueMigrateMemObjects({mem_input_ping}, 0/* 0 means from the host*/, NULL, &ping[evtHostWrite]));
+        OCL_CHECK(err, err = kernel.setArg(0, mem_input_ping));
+        OCL_CHECK(err, err = kernel.setArg(1, mem_output_ping));
 
         if (numIter > 1) {
-            err = clEnqueueWriteBuffer(m_world.command_queue, mem_input_pong, CL_FALSE, 0,
-                sz_input, (input + (sz_input / sizeof(unsigned int))), 0, NULL, &pong[evtHostWrite]);
+            OCL_CHECK(err, err = q.enqueueMigrateMemObjects({mem_input_pong}, 0/* 0 means from the host*/, NULL, &pong[evtHostWrite]));
         }
-        assert(err == CL_SUCCESS);
-        err = clEnqueueTask(m_world.command_queue, kernel, 0, NULL, &ping[evtKernelExec]);
-        assert(err == CL_SUCCESS);
-        err = clEnqueueReadBuffer(m_world.command_queue, mem_output_ping, CL_FALSE, 0,
-            sz_output, output, 1, &ping[evtKernelExec], &ping[evtHostRead]);
-        assert(err == CL_SUCCESS);
+	std::vector<cl::Event> vec_evt1 = {ping[evtHostRead], ping[evtKernelExec]};
+        OCL_CHECK(err, err = q.enqueueTask(kernel, NULL, &ping[evtKernelExec]));
+        OCL_CHECK(err, err = q.enqueueMigrateMemObjects({mem_output_ping}, CL_MIGRATE_MEM_OBJECT_HOST, &vec_evt1, NULL));
     }
 
     if (numIter >= 2) {
-        err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &mem_input_pong);
-        assert(err == CL_SUCCESS);
+        OCL_CHECK(err, err = kernel.setArg(0, mem_input_pong));
+        OCL_CHECK(err, err = kernel.setArg(1, mem_output_pong));
 
-        err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &mem_output_pong);
-        assert(err == CL_SUCCESS);
         if (numIter > 2) {
-            err = clWaitForEvents(1, &ping[evtHostWrite]);
-            assert(err == CL_SUCCESS);
-            err = clEnqueueWriteBuffer(m_world.command_queue, mem_input_ping, CL_FALSE, 0,
-                sz_input, (input + (sz_input / sizeof(unsigned int))), 0, NULL, &ping[evtHostWrite]);
-            assert(err == CL_SUCCESS);
+            ping[evtHostWrite].wait();
+            OCL_CHECK(err, err = q.enqueueMigrateMemObjects({mem_input_ping}, 0/* 0 means from the host*/, NULL, &ping[evtHostWrite]));
         }
 
         //call once to guarentee that all buffers are migrated to device memory
-        err = clEnqueueTask(m_world.command_queue, kernel, 0, NULL, &pong[evtKernelExec]);
-        assert(err == CL_SUCCESS);
+        OCL_CHECK(err, err = q.enqueueTask(kernel, NULL, &pong[evtKernelExec]));
 
         //read output size
-        err = clEnqueueReadBuffer(m_world.command_queue, mem_output_pong, CL_FALSE, 0,
-            sz_output, (output + (sz_output / sizeof(unsigned int))), 1, &pong[evtKernelExec], &pong[evtHostRead]);
-        assert(err == CL_SUCCESS);
-    }
+	std::vector<cl::Event> vec_evt2 = {pong[evtHostRead], pong[evtKernelExec]};        
+        OCL_CHECK(err, err = q.enqueueMigrateMemObjects({mem_output_pong}, CL_MIGRATE_MEM_OBJECT_HOST, &vec_evt2, NULL));
+	}
 
     for (int iter = 2; iter < numIter; ++iter) {
         //copy input dataset to OpenCL buffer
         //cout << "In iteration" << iter << "\n";
         if (iter & 1) { //pong
-            err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &mem_input_pong);
-            assert(err == CL_SUCCESS);
+            OCL_CHECK(err, err = kernel.setArg(0, mem_input_pong));
+            OCL_CHECK(err, err = kernel.setArg(1, mem_output_pong));
 
-            err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &mem_output_pong);
-            assert(err == CL_SUCCESS);
             if (iter < numIter - 1) {
-                err = clWaitForEvents(1, &ping[evtHostWrite]);
-                assert(err == CL_SUCCESS);
-                err = clEnqueueWriteBuffer(m_world.command_queue, mem_input_ping, CL_FALSE, 0,
-                    sz_input, (input + (iter + 1) * (sz_input / sizeof(unsigned int))), 0, NULL, &ping[evtHostWrite]);
-                assert(err == CL_SUCCESS);
+                ping[evtHostWrite].wait();
+                OCL_CHECK(err, err = q.enqueueMigrateMemObjects({mem_input_ping}, 0/* 0 means from the host*/, NULL, &ping[evtHostWrite]));
             }
 
             //finish all memory writes
-
-            //call once to guarentee that all buffers are migrated to device memory
-            err = clWaitForEvents(2, pong);
-            assert(err == CL_SUCCESS);
-            err = clEnqueueTask(m_world.command_queue, kernel, 0, NULL, &pong[evtKernelExec]);
-            assert(err == CL_SUCCESS);
+            OCL_CHECK(err, err = q.finish());
+            OCL_CHECK(err, err = q.enqueueTask(kernel, NULL, &pong[evtKernelExec]));
 
             //read output size
-            err = clWaitForEvents(2, pong + 1);
-            assert(err == CL_SUCCESS);
-            err = clEnqueueReadBuffer(m_world.command_queue, mem_output_pong, CL_FALSE, 0,
-                sz_output, (output + iter * (sz_output / sizeof(unsigned int))), 0, NULL, &pong[evtHostRead]);
-            assert(err == CL_SUCCESS);
+            OCL_CHECK(err, err = q.finish());
+            OCL_CHECK(err, err = q.enqueueMigrateMemObjects({mem_output_pong}, CL_MIGRATE_MEM_OBJECT_HOST, NULL, &pong[evtKernelExec]));
         }
         else { //ping
-            err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &mem_input_ping);
-            assert(err == CL_SUCCESS);
-            err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &mem_output_ping);
-            assert(err == CL_SUCCESS);
+            OCL_CHECK(err, err = kernel.setArg(0, mem_input_ping));
+            OCL_CHECK(err, err = kernel.setArg(1, mem_output_ping));
+
             if (iter < numIter - 1) {
-                err = clWaitForEvents(1, &pong[evtHostWrite]);
-                assert(err == CL_SUCCESS);
-                err = clEnqueueWriteBuffer(m_world.command_queue, mem_input_pong, CL_FALSE, 0,
-                    sz_input, (input + (iter + 1) * (sz_input / sizeof(unsigned int))), 0, NULL, &pong[evtHostWrite]);
-                assert(err == CL_SUCCESS);
+                pong[evtHostWrite].wait();
+                OCL_CHECK(err, err = q.enqueueMigrateMemObjects({mem_input_pong}, 0/* 0 means from the host*/, NULL, &pong[evtHostWrite]));
             }
 
             //call once to guarentee that all buffers are migrated to device memory
-            err = clWaitForEvents(2, ping);
-            assert(err == CL_SUCCESS);
-            err = clEnqueueTask(m_world.command_queue, kernel, 0, NULL, &ping[evtKernelExec]);
-            assert(err == CL_SUCCESS);
+            OCL_CHECK(err, err = q.finish());
+            OCL_CHECK(err, err = q.enqueueTask(kernel, NULL, &ping[evtKernelExec]));
 
             //read output size
-            err = clWaitForEvents(2, ping + 1);
-            assert(err == CL_SUCCESS);
-            err = clEnqueueReadBuffer(m_world.command_queue, mem_output_ping, CL_FALSE, 0,
-                sz_output, (output + iter * (sz_output / sizeof(unsigned int))), 0, NULL, &ping[evtHostRead]);
-            assert(err == CL_SUCCESS);
+            OCL_CHECK(err, err = q.finish());
+            OCL_CHECK(err, err = q.enqueueMigrateMemObjects({mem_output_ping}, CL_MIGRATE_MEM_OBJECT_HOST, NULL, &ping[evtKernelExec]));
         }
         eTotal[evtHostWrite] += computeEventDurationInMS(events[evtHostWrite]);
         eTotal[evtKernelExec] += computeEventDurationInMS(events[evtKernelExec]);
         eTotal[evtHostRead] += computeEventDurationInMS(events[evtHostRead]);
     }
-    clFinish(m_world.command_queue);
-
-    //cleanup
-    releaseMemObject(mem_input_ping);
-    releaseMemObject(mem_output_ping);
-    releaseMemObject(mem_input_pong);
-    releaseMemObject(mem_output_pong);
-    releaseMemObject(mem_sz_sz);
+    OCL_CHECK(err, err = q.finish());
 
     return true;
 }
@@ -617,7 +473,7 @@ bool SmithWatermanApp::run(int idevice, int nruns)
     *iterNum = m_blockSz;
 
     //timings
-    cl_event events[evtCount];
+    cl::Event events[evtCount];
     double eTotal[evtCount];
     double durations[evtCount];
     for (int i = 0; i < evtCount; i++) {
@@ -676,7 +532,8 @@ bool SmithWatermanApp::run(int idevice, int nruns)
 
         //mega-bits per second
         tmp = tmp / (1024.0 * 1024.0);
-		LogInfo("Host2Device rate [mbps] = %.3f", tmp);
+	
+		LogInfo("Host2Device rate [mbps] = %f", tmp);
     }
 
     //compute transfer rate for host read
@@ -688,7 +545,7 @@ bool SmithWatermanApp::run(int idevice, int nruns)
 
         //mega-bits per second
         tmp = tmp / (1024.0 * 1024.0);
-		LogInfo("Device2Host rate [mbps] = %.3f", tmp);
+		LogInfo("Device2Host rate [mbps] = %f", tmp);
     }
 
     if (m_verifyMode) {
@@ -700,4 +557,3 @@ bool SmithWatermanApp::run(int idevice, int nruns)
     delete iterNum;
     return true;
 }
-
