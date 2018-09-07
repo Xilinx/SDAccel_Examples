@@ -13,7 +13,7 @@
     "libs": [
         "xcl2"
     ],
-    "host_exe": "kernel_GOOD",
+    "host_exe": "host",
     "em_cmd": "./host kernel_GOOD",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host ./kernel_GOOD",
     "containers": [

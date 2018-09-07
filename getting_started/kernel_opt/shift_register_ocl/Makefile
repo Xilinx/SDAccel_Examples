@@ -31,7 +31,7 @@ LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_SDX)/runtime/lib/x86_64
 CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps 
 
 
-EXECUTABLE = host
+EXECUTABLE = shift_register
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
