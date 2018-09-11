@@ -75,6 +75,44 @@ ifeq ($(findstring vcu1525,$(call spaced_dsa,$(1))),vcu1525)
 	high_perf_mat_mult_CXXFLAGS=-Wall -I./src/ -DVCU1525 -I$(XILINX_SDACCEL)/Vivado_HLS/include/  -I$(XILINX_SDACCEL)/include $(opencl_CXXFLAGS) $(xcl_CXXFLAGS)
 endif
 
+ifeq ($(findstring u200,$(call spaced_dsa,$(1))),u200) 
+	high_perf_mat_mult0_LDCLFLAGS+= -I./src \
+        --xp vivado_param:bd.ForceAppCoreUpgrade=1 \
+	--sp krnl_0.m00_axi:bank3 \
+	--sp krnl_0.m01_axi:bank1 \
+        --xp vivado_prop:run.pfm_dynamic_krnl_0_0_synth_1.STEPS.SYNTH_DESIGN.TCL.PRE=$(PWD)/src/u200/presynth.tcl \
+        --xp param:compiler.userPostSysLinkTcl=$(PWD)/src/u200/syslink-100kernel.tcl \
+        --xp vivado_prop:run.impl_1.STEPS.OPT_DESIGN.TCL.POST=$(PWD)/src/u200/postopt.tcl \
+        --xp vivado_prop:run.impl_1.STEPS.OPT_DESIGN.ARGS.DIRECTIVE=Explore \
+        --xp vivado_prop:run.impl_1.STEPS.PLACE_DESIGN.ARGS.DIRECTIVE=Explore \
+        --xp vivado_prop:run.impl_1.STEPS.PHYS_OPT_DESIGN.IS_ENABLED=true \
+        --xp vivado_prop:run.impl_1.STEPS.PHYS_OPT_DESIGN.ARGS.DIRECTIVE=AggressiveExplore \
+        --xp vivado_prop:run.impl_1.STEPS.ROUTE_DESIGN.ARGS.DIRECTIVE=Explore \
+	--nk kernelSgemm_0:1:krnl_0 \
+	--kernel_frequency "0:300|1:400" 
+	high_perf_mat_mult_CXXFLAGS=-Wall -I./src/ -DU200 -I$(XILINX_SDACCEL)/Vivado_HLS/include/  -I$(XILINX_SDACCEL)/include $(opencl_CXXFLAGS) $(xcl_CXXFLAGS)
+endif
+
+ifeq ($(findstring u250,$(call spaced_dsa,$(1))),u250) 
+	high_perf_mat_mult0_LDCLFLAGS+= -I./src \
+        --xp vivado_param:bd.ForceAppCoreUpgrade=1 \
+	--sp krnl_0.m00_axi:bank3 \
+	--sp krnl_0.m01_axi:bank1 \
+        --xp vivado_prop:run.pfm_dynamic_krnl_0_0_synth_1.STEPS.SYNTH_DESIGN.TCL.PRE=$(PWD)/src/u250/presynth.tcl \
+        --xp param:compiler.userPostSysLinkTcl=$(PWD)/src/u250/syslink-100kernel.tcl \
+        --xp vivado_prop:run.impl_1.STEPS.OPT_DESIGN.TCL.POST=$(PWD)/src/u250/postopt.tcl \
+        --xp vivado_prop:run.impl_1.STEPS.OPT_DESIGN.ARGS.DIRECTIVE=Explore \
+        --xp vivado_prop:run.impl_1.STEPS.PLACE_DESIGN.ARGS.DIRECTIVE=Explore \
+        --xp vivado_prop:run.impl_1.STEPS.PHYS_OPT_DESIGN.IS_ENABLED=true \
+        --xp vivado_prop:run.impl_1.STEPS.PHYS_OPT_DESIGN.ARGS.DIRECTIVE=AggressiveExplore \
+        --xp vivado_prop:run.impl_1.STEPS.ROUTE_DESIGN.ARGS.DIRECTIVE=Explore \
+	--nk kernelSgemm_0:1:krnl_0 \
+	--kernel_frequency "0:300|1:400" 
+	high_perf_mat_mult_CXXFLAGS=-Wall -I./src/ -DU250 -I$(XILINX_SDACCEL)/Vivado_HLS/include/  -I$(XILINX_SDACCEL)/include $(opencl_CXXFLAGS) $(xcl_CXXFLAGS)
+endif
+
+
+
 high_perf_mat_mult0_LDCLFLAGS+= -I./src \
 
 

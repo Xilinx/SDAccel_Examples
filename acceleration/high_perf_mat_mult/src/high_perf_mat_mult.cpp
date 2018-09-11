@@ -43,9 +43,10 @@ using namespace std;
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/time.h>
-#include <CL/opencl.h>
-#include <CL/cl_ext.h>
 
+#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
+
+#include <CL/cl.h>
 #include "xcl.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -195,7 +196,7 @@ int main(int argc, char** argv)
     d_b_ext.obj = NULL; //h_b;
     d_b_ext.param = 0;
 
-#if defined(VU9P) || defined(VCU1525)    
+#if defined(VU9P) || defined(VCU1525) || defined(U200) || defined(U250)    
     d_d_ext.flags = XCL_MEM_DDR_BANK1; //B1 --> bank1
     d_d_ext.obj = NULL; //h_d;
     d_d_ext.param = 0;
