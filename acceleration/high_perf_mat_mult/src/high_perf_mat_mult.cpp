@@ -46,8 +46,7 @@ using namespace std;
 
 #define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 
-#include <CL/cl.h>
-#include "xcl.h"
+#include <CL/opencl.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -63,6 +62,50 @@ using namespace std;
 #define TWO_KERN false // enable both kernels
 
 ////////////////////////////////////////////////////////////////////////////////
+
+static void* smalloc(size_t size) {
+  void* ptr;
+  
+  ptr = malloc(size);
+  
+  if (ptr == NULL) {
+    printf("Error: Cannot allocate memory\n");
+    exit(EXIT_FAILURE);
+  }
+  
+  return ptr;
+}
+
+
+static int load_file_to_memory(const char *filename, char **result) {
+  unsigned int size;
+  
+  FILE *f = fopen(filename, "rb");
+  if (f == NULL) {
+    *result = NULL;
+    printf("Error: Could not read file %s\n", filename);
+    exit(EXIT_FAILURE);
+  }
+  
+  fseek(f, 0, SEEK_END);
+  size = ftell(f);
+  fseek(f, 0, SEEK_SET);
+  
+  *result = (char *) smalloc(sizeof(char)*(size+1));
+  
+  if (size != fread(*result, sizeof(char), size, f)) {
+    free(*result);
+    printf("Error: read of kernel failed\n");
+    exit(EXIT_FAILURE);
+  }
+  
+  fclose(f);
+  (*result)[size] = 0;
+  
+  return size;
+}
+
+
 
 int roundup ( int num, int multiple){
 	if ( num == 0)
@@ -94,24 +137,180 @@ int main(int argc, char** argv)
     short *tb_b;
     short *tb_c;
 
+
+    if (argc != 5) {
+      printf("Usage: %s <xclbin> #row #col #depth\n", argv[0]);
+      return EXIT_FAILURE;
+
+    }
+    
+    char* xclbin_file_name = argv[1];
+      
+    // round of the input sizes to the GEMM requirement
+    int num_of_rows = roundup(atoi(argv[2]), 32);
+    int num_of_cols = roundup(atoi(argv[3]), 64);
+    int depth       = roundup(atoi(argv[4]), 64);
+
     //------------------------------------------------------------------------------
     // SETUP SDACCEL PLATFROM
     //------------------------------------------------------------------------------
 
     std::cout << "Creating context..." << std::endl;
-    xcl_world world = xcl_world_single();
-    cl_program program = xcl_import_binary(world, "high_perf_mat_mult0");    // compute programs
-    cl_kernel kernelSgemm_0 = xcl_get_kernel(program, "kernelSgemm_0");    // compute kernel
+    cl_context context;
+    cl_platform_id platform_id;
+    cl_device_id device_id;
+    cl_command_queue command_queue;
+    char *device_name;
 
-    if (argc != 4) {
-        printf("Usage: %s #row, #col, #depth\n", argv[0]);
-        return EXIT_FAILURE;
+    cl_uint num_platforms;
+
+    err = clGetPlatformIDs(0, NULL, &num_platforms);
+    if (err != CL_SUCCESS) {
+      printf("Error: no platforms available or OpenCL install broken\n");
+      exit(EXIT_FAILURE);
     }
 
-    // round of the input sizes to the GEMM requirement
-    int num_of_rows = roundup(atoi(argv[1]), 32);
-    int num_of_cols = roundup(atoi(argv[2]), 64);
-    int depth       = roundup(atoi(argv[3]), 64);
+    cl_platform_id *platform_ids = (cl_platform_id *) malloc(sizeof(cl_platform_id) * num_platforms);
+    if (platform_ids == NULL) {
+      printf("Error: Out of Memory\n");
+      exit(EXIT_FAILURE);
+    }
+
+    err = clGetPlatformIDs(num_platforms, platform_ids, NULL);
+    if (err != CL_SUCCESS) {
+      printf("Error: Failed to find an OpenCL platform!\n");
+      exit(EXIT_FAILURE);
+    }
+
+    size_t index;
+    for(index = 0; index < num_platforms; index++) {
+      size_t platform_name_size;
+      err = clGetPlatformInfo(platform_ids[index], CL_PLATFORM_NAME, 
+			      0, NULL, &platform_name_size);
+      if( err != CL_SUCCESS) {
+	printf("Error: Could not determine platform name!\n");
+	exit(EXIT_FAILURE);
+      }
+
+      char *platform_name = (char*) malloc(sizeof(char)*platform_name_size);
+      if(platform_name == NULL) {
+	printf("Error: out of memory!\n");
+	exit(EXIT_FAILURE);
+      }
+
+      err = clGetPlatformInfo(platform_ids[index], CL_PLATFORM_NAME,
+			      platform_name_size, platform_name, NULL);
+      if(err != CL_SUCCESS) {
+	printf("Error: could not determine platform name!\n");
+	exit(EXIT_FAILURE);
+      }
+
+      if (!strcmp(platform_name, "Xilinx")) {
+	free(platform_name);
+	platform_id = platform_ids[index];
+	break;
+      }
+      
+      free(platform_name);
+    }
+
+    free(platform_ids);
+
+    if (index == num_platforms) {
+      printf("Error: Failed to find Xilinx platform\n");
+      exit(EXIT_FAILURE);
+    }
+
+    err = clGetDeviceIDs(platform_id, CL_DEVICE_TYPE_ALL,
+			 1, &device_id, NULL);
+    if (err != CL_SUCCESS) {
+      printf("Error: could not get device ids\n");
+      exit(EXIT_FAILURE);
+    }
+
+    size_t device_name_size;
+    err = clGetDeviceInfo(device_id, CL_DEVICE_NAME,
+			  0, NULL, &device_name_size);
+    if(err != CL_SUCCESS) {
+      printf("Error: could not determine device name\n");
+      exit(EXIT_FAILURE);
+    }
+
+    device_name = (char*) malloc(sizeof(char)*device_name_size);
+    
+    if(device_name == NULL) {
+      printf("Error: Out of Memory!\n");
+      exit(EXIT_FAILURE);
+    }
+    
+    err = clGetDeviceInfo(device_id, CL_DEVICE_NAME,
+			  device_name_size, device_name, NULL);
+    if(err != CL_SUCCESS) {
+      printf("Error: could not determine device name\n");
+      exit(EXIT_FAILURE);
+    }
+    
+    context = clCreateContext(0, 1, &device_id,
+			      NULL, NULL, &err);
+    if (err != CL_SUCCESS) {
+      printf("Error: Failed to create a compute context!\n");
+      exit(EXIT_FAILURE);
+    }
+    
+    command_queue = clCreateCommandQueue(context,
+					 device_id,
+					 CL_QUEUE_PROFILING_ENABLE,
+					 &err);
+    if (err != CL_SUCCESS) {
+      printf("Error: Failed to create a command queue!\n");
+      exit(EXIT_FAILURE);
+    }
+
+    printf("INFO: Importing %s\n", xclbin_file_name);
+    
+    if(access(xclbin_file_name, R_OK) != 0) {
+      printf("ERROR: %s xclbin not available please build\n", xclbin_file_name);
+      exit(EXIT_FAILURE);
+    }
+
+    char *krnl_bin;
+    const size_t krnl_size = load_file_to_memory(xclbin_file_name, &krnl_bin);
+    printf("INFO: Loaded file\n");
+
+    cl_program program = clCreateProgramWithBinary(context, 1,
+						   &device_id, &krnl_size,
+						   (const unsigned char**) &krnl_bin,
+						   NULL, &err);
+    if ((!program) || (err!=CL_SUCCESS)) {
+      printf("Error: Failed to create compute program from binary %d!\n",
+	     err);
+      printf("Test failed\n");
+      exit(EXIT_FAILURE);
+    }
+
+    printf("INFO: Created Binary\n");
+
+    err = clBuildProgram(program, 0, NULL, NULL, NULL, NULL);
+    if (err != CL_SUCCESS) {
+      size_t len;
+      char buffer[2048];
+      
+      clGetProgramBuildInfo(program, device_id, CL_PROGRAM_BUILD_LOG,
+			    sizeof(buffer), buffer, &len);
+      printf("%s\n", buffer);
+      printf("Error: Failed to build program executable!\n");
+      exit(EXIT_FAILURE);
+    }
+
+    printf("INFO: Built Program\n");
+
+    free(krnl_bin);
+    const char *krnl_name = "kernelSgemm_0";
+    cl_kernel kernelSgemm_0 = clCreateKernel(program, krnl_name, &err);
+    if (!kernelSgemm_0 || err != CL_SUCCESS) {
+      printf("Error: Failed to create kernel for %s: %d\n", krnl_name, err);
+      exit(EXIT_FAILURE);
+    }
 
     int row_mult    = num_of_rows/PARALLEL_ROWS;
     int col_mult    = (num_of_cols/2)/PARALLEL_COLS;
@@ -220,19 +419,34 @@ int main(int argc, char** argv)
     cl_mem d_d;                         // device memory used for b vector
     cl_mem d_c;                         // device memory used for c vector
 
-    d_a = clCreateBuffer(world.context, CL_MEM_READ_ONLY |  CL_MEM_EXT_PTR_XILINX, sizeof(short) * num_of_rows * depth, &d_a_ext, &err);
+    d_a = clCreateBuffer(context, CL_MEM_READ_ONLY |  CL_MEM_EXT_PTR_XILINX, sizeof(short) * num_of_rows * depth, &d_a_ext, &err);
     assert(err == CL_SUCCESS);
-    d_b = clCreateBuffer(world.context, CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX,  sizeof(short) * (num_of_cols/2) * depth , &d_b_ext, &err);
+    d_b = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX,  sizeof(short) * (num_of_cols/2) * depth , &d_b_ext, &err);
     assert(err == CL_SUCCESS);
-    d_d = clCreateBuffer(world.context, CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX,  sizeof(short) * (num_of_cols/2) * depth , &d_d_ext, &err);
+    d_d = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX,  sizeof(short) * (num_of_cols/2) * depth , &d_d_ext, &err);
     assert(err == CL_SUCCESS);
-    d_c = clCreateBuffer(world.context, CL_MEM_WRITE_ONLY | CL_MEM_EXT_PTR_XILINX,  sizeof(short) * num_of_rows * num_of_cols, &d_c_ext, &err);
+    d_c = clCreateBuffer(context, CL_MEM_WRITE_ONLY | CL_MEM_EXT_PTR_XILINX,  sizeof(short) * num_of_rows * num_of_cols, &d_c_ext, &err);
     assert(err == CL_SUCCESS);
 
     std::cout << "Copying Buffers to device...." << std::endl;
-    xcl_memcpy_to_device(world,d_a,h_a,sizeof(short) * num_of_rows * depth);
-    xcl_memcpy_to_device(world,d_b,h_b,sizeof(short) * (num_of_cols/2) * depth);
-    xcl_memcpy_to_device(world,d_d,h_d,sizeof(short) * (num_of_cols/2) * depth);
+    err = clEnqueueWriteBuffer(command_queue, d_a, CL_TRUE, 0, sizeof(short) * num_of_rows * depth,
+			       h_a, 0, NULL, NULL);
+    if (err != CL_SUCCESS) {
+      printf("Error: Failed to write to source array! %d\n", err);
+      exit(EXIT_FAILURE);
+    }
+    err = clEnqueueWriteBuffer(command_queue, d_b, CL_TRUE, 0, sizeof(short) * (num_of_cols/2) * depth,
+			       h_b, 0, NULL, NULL);
+    if (err != CL_SUCCESS) {
+      printf("Error: Failed to write to source array! %d\n", err);
+      exit(EXIT_FAILURE);
+    }
+    err = clEnqueueWriteBuffer(command_queue, d_d, CL_TRUE, 0, sizeof(short) * (num_of_cols/2) * depth,
+			       h_d, 0, NULL, NULL);
+    if (err != CL_SUCCESS) {
+      printf("Error: Failed to write to source array! %d\n", err);
+      exit(EXIT_FAILURE);
+    }
 
     // SET THE ARGUMENTS TO COMPUTE FIRST KERNEL
     err |= clSetKernelArg(kernelSgemm_0, 0, sizeof(int), &row);
@@ -245,19 +459,24 @@ int main(int argc, char** argv)
 
     // EXECUTE THE KERNEL OVER THE INPUT DATA SET
     cl_event ks_0_event;
-    err = clEnqueueTask(world.command_queue, kernelSgemm_0, 0, NULL, &ks_0_event);
+    err = clEnqueueTask(command_queue, kernelSgemm_0, 0, NULL, &ks_0_event);
     if (err) {
             printf("Error: Failed to execute kernelSgemm_0! %d\n", err);
             printf("Test failed\n");
             return EXIT_FAILURE;
         }
 
-    err = clFinish(world.command_queue);
+    err = clFinish(command_queue);
     assert(err == CL_SUCCESS);
 
     std::cout << "Copying results to host...." << std::endl;
     // READ BACK THE RESULTS FROM THE DEVICE TO VERIFY THE OUTPUT
-    xcl_memcpy_from_device(world, h_c, d_c, sizeof(short) * num_of_rows * num_of_cols);
+    err = clEnqueueReadBuffer(command_queue, d_c, CL_TRUE, 0, sizeof(short) * num_of_rows * num_of_cols,
+			      h_c, 0, NULL, NULL);
+    if (err != CL_SUCCESS) {
+      printf("Error: Failed to read output array! %d\n", err);
+      exit(EXIT_FAILURE);
+    }
 
     printf ("INFO: Execution done\n");
 
@@ -307,7 +526,9 @@ DONE:
    clReleaseMemObject(d_c);
    clReleaseProgram(program);
    clReleaseKernel(kernelSgemm_0);
-   xcl_release_world(world);
+   clReleaseCommandQueue(command_queue);
+   clReleaseContext(context);
+   free(device_name);
 
    free(h_a);
    free(h_b);

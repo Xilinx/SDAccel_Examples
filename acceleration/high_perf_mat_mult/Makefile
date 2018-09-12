@@ -2,12 +2,11 @@
 COMMON_REPO =../..
 
 include $(COMMON_REPO)/utility/boards.mk
-include $(COMMON_REPO)/libs/xcl/xcl.mk
 include $(COMMON_REPO)/libs/opencl/opencl.mk
 
 # General Matrix Multiply  Host Application
-high_perf_mat_mult_SRCS=src/high_perf_mat_mult.cpp $(xcl_SRCS)
-high_perf_mat_mult_LDFLAGS=$(opencl_LDFLAGS)
+high_perf_mat_mult_SRCS=src/high_perf_mat_mult.cpp $(opencl_SRCS) 
+high_perf_mat_mult_LDFLAGS=$(opencl_LDFLAGS) 
 
 EXES=high_perf_mat_mult
 
@@ -36,7 +35,7 @@ ifeq ($(findstring kcu1500,$(call spaced_dsa,$(1))),kcu1500)
         --xp vivado_prop:run.impl_1.STEPS.ROUTE_DESIGN.ARGS.DIRECTIVE=Explore \
 	--nk kernelSgemm_0:1:krnl_0 \
 	--kernel_frequency "0:300|1:400" 
-	high_perf_mat_mult_CXXFLAGS=-Wall -I./src/ -I$(XILINX_SDACCEL)/Vivado_HLS/include/  -I$(XILINX_SDACCEL)/include $(opencl_CXXFLAGS) $(xcl_CXXFLAGS)
+	high_perf_mat_mult_CXXFLAGS=-Wall -I./src/ -I$(XILINX_SDACCEL)/Vivado_HLS/include/  -I$(XILINX_SDACCEL)/include $(opencl_CXXFLAGS) 
 endif
 
 ifeq ($(findstring vu9p,$(call spaced_dsa,$(1))),vu9p) 
@@ -54,7 +53,7 @@ ifeq ($(findstring vu9p,$(call spaced_dsa,$(1))),vu9p)
         --xp vivado_prop:run.impl_1.STEPS.ROUTE_DESIGN.ARGS.DIRECTIVE=Explore \
 	--nk kernelSgemm_0:1:krnl_0 \
 	--kernel_frequency "0:300|1:400" 
-	high_perf_mat_mult_CXXFLAGS=-Wall -I./src/ -DVU9P -I$(XILINX_SDACCEL)/Vivado_HLS/include/  -I$(XILINX_SDACCEL)/include $(opencl_CXXFLAGS) $(xcl_CXXFLAGS)
+	high_perf_mat_mult_CXXFLAGS=-Wall -I./src/ -DVU9P -I$(XILINX_SDACCEL)/Vivado_HLS/include/  -I$(XILINX_SDACCEL)/include $(opencl_CXXFLAGS) 
 endif
 
 ifeq ($(findstring vcu1525,$(call spaced_dsa,$(1))),vcu1525) 
@@ -72,7 +71,7 @@ ifeq ($(findstring vcu1525,$(call spaced_dsa,$(1))),vcu1525)
         --xp vivado_prop:run.impl_1.STEPS.ROUTE_DESIGN.ARGS.DIRECTIVE=Explore \
 	--nk kernelSgemm_0:1:krnl_0 \
 	--kernel_frequency "0:300|1:400" 
-	high_perf_mat_mult_CXXFLAGS=-Wall -I./src/ -DVCU1525 -I$(XILINX_SDACCEL)/Vivado_HLS/include/  -I$(XILINX_SDACCEL)/include $(opencl_CXXFLAGS) $(xcl_CXXFLAGS)
+	high_perf_mat_mult_CXXFLAGS=-Wall -I./src/ -DVCU1525 -I$(XILINX_SDACCEL)/Vivado_HLS/include/  -I$(XILINX_SDACCEL)/include $(opencl_CXXFLAGS) 
 endif
 
 ifeq ($(findstring u200,$(call spaced_dsa,$(1))),u200) 
@@ -90,7 +89,7 @@ ifeq ($(findstring u200,$(call spaced_dsa,$(1))),u200)
         --xp vivado_prop:run.impl_1.STEPS.ROUTE_DESIGN.ARGS.DIRECTIVE=Explore \
 	--nk kernelSgemm_0:1:krnl_0 \
 	--kernel_frequency "0:300|1:400" 
-	high_perf_mat_mult_CXXFLAGS=-Wall -I./src/ -DU200 -I$(XILINX_SDACCEL)/Vivado_HLS/include/  -I$(XILINX_SDACCEL)/include $(opencl_CXXFLAGS) $(xcl_CXXFLAGS)
+	high_perf_mat_mult_CXXFLAGS=-Wall -I./src/ -DU200 -I$(XILINX_SDACCEL)/Vivado_HLS/include/  -I$(XILINX_SDACCEL)/include $(opencl_CXXFLAGS) 
 endif
 
 ifeq ($(findstring u250,$(call spaced_dsa,$(1))),u250) 
@@ -108,7 +107,7 @@ ifeq ($(findstring u250,$(call spaced_dsa,$(1))),u250)
         --xp vivado_prop:run.impl_1.STEPS.ROUTE_DESIGN.ARGS.DIRECTIVE=Explore \
 	--nk kernelSgemm_0:1:krnl_0 \
 	--kernel_frequency "0:300|1:400" 
-	high_perf_mat_mult_CXXFLAGS=-Wall -I./src/ -DU250 -I$(XILINX_SDACCEL)/Vivado_HLS/include/  -I$(XILINX_SDACCEL)/include $(opencl_CXXFLAGS) $(xcl_CXXFLAGS)
+	high_perf_mat_mult_CXXFLAGS=-Wall -I./src/ -DU250 -I$(XILINX_SDACCEL)/Vivado_HLS/include/  -I$(XILINX_SDACCEL)/include $(opencl_CXXFLAGS) 
 endif
 
 
@@ -127,9 +126,11 @@ high_perf_mat_mult0_NTARGETS=sw_emu
 XCLBINS=high_perf_mat_mult0
 
 # check
+LOCAL_TARGET = $(TARGETS)
+LOCAL_DSA = $(call device2sandsa, $(DEVICES))
 check_EXE=high_perf_mat_mult
 check_XCLBINS=high_perf_mat_mult0
-check_ARGS=64 64 64
+check_ARGS= xclbin/$(check_XCLBINS).$(LOCAL_TARGET).$(LOCAL_DSA).xclbin 64 64 64
 check_NTARGETS=sw_emu
 
 CHECKS=check
