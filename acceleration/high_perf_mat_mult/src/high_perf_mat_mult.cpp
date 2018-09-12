@@ -183,10 +183,10 @@ int main(int argc, char** argv)
 
     // CREATE THE INPUT AND OUTPUT ARRAYS IN DEVICE MEMORY FOR OUR CALCULATION
 
-    cl_mem_ext_ptr_t d_a_ext;
-    cl_mem_ext_ptr_t d_b_ext;
-    cl_mem_ext_ptr_t d_d_ext;
-    cl_mem_ext_ptr_t d_c_ext;
+    cl_mem_ext_ptr_t d_a_ext={0};
+    cl_mem_ext_ptr_t d_b_ext={0};
+    cl_mem_ext_ptr_t d_d_ext={0};
+    cl_mem_ext_ptr_t d_c_ext={0};
 
     d_a_ext.flags = XCL_MEM_DDR_BANK3; //A --> bank3
     d_a_ext.obj = NULL;// h_a;

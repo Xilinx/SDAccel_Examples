@@ -239,6 +239,9 @@ void oclDct::init(cl_context   context,
   mDevice  = device;
   mKernel  = krnl;
   mQ       = q;
+  mBlockExt={0};
+  mQExt    ={0};
+  mOutExt  ={0};
   
   mNumBlocks64 = numBlocks64;
   

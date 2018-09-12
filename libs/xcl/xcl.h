@@ -31,6 +31,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
 #include <CL/opencl.h>
+#include <CL/cl_ext_xilinx.h>
 
 typedef struct {
 	char *mode;

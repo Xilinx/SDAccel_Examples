@@ -48,7 +48,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <CL/cl2.hpp>
 #include <iostream>
 #include <fstream>
-
+#include <CL/cl_ext_xilinx.h>
 // When creating a buffer with user pointer (CL_MEM_USE_HOST_PTR), under the hood
 // User ptr is used if and only if it is properly aligned (page aligned). When not 
 // aligned, runtime has no choice but to create its own host side buffer that backs

@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
 
     // For Allocating Buffer to specific Global Memory Bank, user has to use cl_mem_ext_ptr_t
     // and provide the Banks 
-    cl_mem_ext_ptr_t inExt, outExt;  // Declaring two extensions for both buffers
+    cl_mem_ext_ptr_t inExt={0}, outExt={0};  // Declaring two extensions for both buffers
     inExt.flags  = XCL_MEM_DDR_BANK0; // Specify Bank0 Memory for input memory
     outExt.flags = XCL_MEM_DDR_BANK1; // Specify Bank1 Memory for output Memory
     inExt.obj   = inputImage.data(); 
