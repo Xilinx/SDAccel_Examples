@@ -25,7 +25,7 @@ HOST_SRCS = src/main.cpp src/huffmancodec_optimized.cpp src/huffmancodec_naive.c
 HOST_HDRS = src/bit_io.h src/huffmancodec_naive.h src/huffmancodec_optimized.h src/huffmancodec_optimized_cpuonly.h
 
 # Host compiler global settings
-CXXFLAGS = -I $(XILINX_XRT)include/ -I/$(XILINX_SDX)/Vivado_HLS/include/ -O0 -g -Wall -fmessage-length=0 -std=c++14
+CXXFLAGS = -I $(XILINX_XRT)/include/ -I/$(XILINX_SDX)/Vivado_HLS/include/ -O0 -g -Wall -fmessage-length=0 -std=c++14
 LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_XRT)/lib/
 
 # Kernel compiler global settings
