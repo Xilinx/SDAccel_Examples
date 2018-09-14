@@ -87,9 +87,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   - Task flow (2): Matrix Multiplication
  */
 
-#include "CL/cl.h"
-#include "oclHelper.h"
-#include "xcl.h"
+#include "xcl2.hpp"
 
 #include <algorithm>
 #include <cstdio>
@@ -101,39 +99,21 @@ using std::find;
 
 const int MAT_DIM0 = 16;
 const int MAT_DIM1 = 16;
-size_t offset[1] = {0};
-size_t global[1] = {1};
-size_t local[1] = {1};
-
-// Wrap any OpenCL API calls that return error code(cl_int) with the below macro
-// to quickly check for an error
-#define OCL_CHECK(call)                                                        \
-  do {                                                                         \
-    cl_int err = call;                                                         \
-    if (err != CL_SUCCESS) {                                                   \
-      printf(__FILE__ ":%d: [ERROR] " #call " returned %s\n", __LINE__,        \
-             oclErrorCode(err));                                               \
-      exit(EXIT_FAILURE);                                                      \
-    }                                                                          \
-  } while (0);
-
-// Checks OpenCL error codes
-void check(cl_int err_code) {
-  if (err_code != CL_SUCCESS) {
-    printf("ERROR: %d\n", err_code);
-    exit(EXIT_FAILURE);
-  }
-}
+size_t offset = 0;
+size_t global = 1;
+size_t local = 1;
 
 // An event callback function that prints the operations performed by the OpenCL
 // runtime.
-void event_cb(cl_event event, cl_int cmd_status, void *data) {
+
+void event_cb(cl_event event1, cl_int cmd_status, void *data) {
+  cl_int err;
   cl_command_type command;
-  clGetEventInfo(event, CL_EVENT_COMMAND_TYPE, sizeof(cl_command_type),
-                 &command, nullptr);
+  cl::Event event(event1, true);
+  OCL_CHECK(err, err = event.getInfo<cl_command_type>(CL_EVENT_COMMAND_TYPE, &command));
   cl_int status;
-  clGetEventInfo(event, CL_EVENT_COMMAND_EXECUTION_STATUS, sizeof(cl_int),
-                 &status, nullptr);
+  OCL_CHECK(err, err = event.getInfo<cl_int>(CL_EVENT_COMMAND_EXECUTION_STATUS, &status));
+
   const char *command_str;
   const char *status_str;
   switch (command) {
@@ -166,10 +146,11 @@ void event_cb(cl_event event, cl_int cmd_status, void *data) {
 }
 
 // Sets the callback for a particular event
-void set_callback(cl_event event, const char *queue_name) {
-  OCL_CHECK(
-      clSetEventCallback(event, CL_COMPLETE, event_cb, (void *)queue_name));
+void set_callback(cl::Event event, const char *queue_name) {
+  cl_int err;
+  OCL_CHECK(err, err = event.setCallback(CL_COMPLETE, event_cb, (void *)queue_name));
 }
+
 
 // Verify the result of the out put buffers
 void verify_results(const vector<int> &C, const vector<int> &F) {
@@ -183,59 +164,53 @@ void verify_results(const vector<int> &C, const vector<int> &F) {
   }
 }
 
-void multiple_command_queues(xcl_world &world, cl_kernel kernel_mscale,
-                             cl_kernel kernel_madd, cl_kernel kernel_mmult,
-                             cl_mem buffer_a, cl_mem buffer_b, cl_mem buffer_c,
-                             cl_mem buffer_d, cl_mem buffer_e, cl_mem buffer_f,
+void multiple_command_queues(cl::Context &context, cl::Device &device, cl::Kernel &kernel_mscale,
+                             cl::Kernel &kernel_madd, cl::Kernel &kernel_mmult,
+                             cl::Buffer &buffer_a, cl::Buffer &buffer_b, cl::Buffer &buffer_c,
+			     cl::Buffer &buffer_d, cl::Buffer &buffer_e, cl::Buffer &buffer_f,
                              size_t size_in_bytes) {
   cl_int err;
-  cl_command_queue ordered_queue1 = clCreateCommandQueue(
-      world.context, world.device_id, CL_QUEUE_PROFILING_ENABLE, &err);
-  check(err);
-  cl_command_queue ordered_queue2 = clCreateCommandQueue(
-      world.context, world.device_id, CL_QUEUE_PROFILING_ENABLE, &err);
-  check(err);
+  OCL_CHECK(err, cl::CommandQueue ordered_queue1(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+  OCL_CHECK(err, cl::CommandQueue ordered_queue2(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
 
   // copy the input arrays to input memory allocated on the accelerator
   // devices
   const int matrix_scale_factor = 2;
-  xcl_set_kernel_arg(kernel_mscale, 0, sizeof(cl_mem), &buffer_a);
-  xcl_set_kernel_arg(kernel_mscale, 1, sizeof(cl_int), &matrix_scale_factor);
-  xcl_set_kernel_arg(kernel_mscale, 2, sizeof(cl_int), &MAT_DIM0);
-  xcl_set_kernel_arg(kernel_mscale, 3, sizeof(cl_int), &MAT_DIM1);
+  OCL_CHECK(err, err = kernel_mscale.setArg(0, buffer_a));
+  OCL_CHECK(err, err = kernel_mscale.setArg(1, matrix_scale_factor));
+  OCL_CHECK(err, err = kernel_mscale.setArg(2, MAT_DIM0));
+  OCL_CHECK(err, err = kernel_mscale.setArg(3, MAT_DIM1));
 
-  vector<cl_event> kernel_events(3);
+  vector<cl::Event> kernel_events(3);
 
   printf("[Ordered Queue 1]: Enqueueing scale kernel\n");
-  OCL_CHECK(clEnqueueNDRangeKernel(ordered_queue1, kernel_mscale, 1, offset,
-                                   global, local, 0, nullptr,
-                                   &kernel_events[0]));
+  OCL_CHECK(err, err = ordered_queue1.enqueueNDRangeKernel(kernel_mscale, offset,
+                                   global, local, nullptr, &kernel_events[0]));
+
   set_callback(kernel_events[0], "scale");
 
-  // set OpenCL kernel parameters to add scaled matrix A and matrix B
-  xcl_set_kernel_arg(kernel_madd, 0, sizeof(cl_mem), &buffer_c);
-  xcl_set_kernel_arg(kernel_madd, 1, sizeof(cl_mem), &buffer_a);
-  xcl_set_kernel_arg(kernel_madd, 2, sizeof(cl_mem), &buffer_b);
-  xcl_set_kernel_arg(kernel_madd, 3, sizeof(cl_int), &MAT_DIM0);
-  xcl_set_kernel_arg(kernel_madd, 4, sizeof(cl_int), &MAT_DIM1);
+  OCL_CHECK(err, err = kernel_madd.setArg(0, buffer_c));
+  OCL_CHECK(err, err = kernel_madd.setArg(1, buffer_a));
+  OCL_CHECK(err, err = kernel_madd.setArg(2, buffer_b));
+  OCL_CHECK(err, err = kernel_madd.setArg(3, MAT_DIM0));
+  OCL_CHECK(err, err = kernel_madd.setArg(4, MAT_DIM1));
 
   printf("[Ordered Queue 1]: Enqueueing addition kernel\n");
-  OCL_CHECK(clEnqueueNDRangeKernel(ordered_queue1, kernel_madd, 1, offset,
-                                   global, local, 0, nullptr,
-                                   &kernel_events[1]));
+  OCL_CHECK(err, err = ordered_queue1.enqueueNDRangeKernel(kernel_madd, offset,
+                                   global, local, nullptr, &kernel_events[1]));
+
   set_callback(kernel_events[1], "addition");
 
   // set OpenCL kernel parameters to multiply matrix D and E */
-  xcl_set_kernel_arg(kernel_mmult, 0, sizeof(cl_mem), &buffer_f);
-  xcl_set_kernel_arg(kernel_mmult, 1, sizeof(cl_mem), &buffer_d);
-  xcl_set_kernel_arg(kernel_mmult, 2, sizeof(cl_mem), &buffer_e);
-  xcl_set_kernel_arg(kernel_mmult, 3, sizeof(cl_int), &MAT_DIM0);
-  xcl_set_kernel_arg(kernel_mmult, 4, sizeof(cl_int), &MAT_DIM1);
+  OCL_CHECK(err, err = kernel_mmult.setArg(0, buffer_f));
+  OCL_CHECK(err, err = kernel_mmult.setArg(1, buffer_d));
+  OCL_CHECK(err, err = kernel_mmult.setArg(2, buffer_e));
+  OCL_CHECK(err, err = kernel_mmult.setArg(3, MAT_DIM0));
+  OCL_CHECK(err, err = kernel_mmult.setArg(4, MAT_DIM1));
 
   printf("[Ordered Queue 2]: Enqueueing matrix multiplication kernel\n");
-  OCL_CHECK(clEnqueueNDRangeKernel(ordered_queue2, kernel_mmult, 1, offset,
-                                   global, local, 0, nullptr,
-                                   &kernel_events[2]));
+  OCL_CHECK(err, err = ordered_queue2.enqueueNDRangeKernel(kernel_mmult, offset,
+                                   global, local, nullptr, &kernel_events[2]));
   set_callback(kernel_events[2], "matrix multiplication");
 
   const size_t array_size = MAT_DIM0 * MAT_DIM1;
@@ -243,110 +218,101 @@ void multiple_command_queues(xcl_world &world, cl_kernel kernel_mscale,
   vector<int> C(array_size);
   vector<int> F(array_size);
 
-  vector<cl_event> transfer_events(3);
+  vector<cl::Event> transfer_events(3);
   printf("[Ordered Queue 1]: Enqueueing Read Buffer A\n");
-  OCL_CHECK(clEnqueueReadBuffer(ordered_queue1, buffer_a, CL_FALSE, 0,
-                                size_in_bytes, A.data(), 0, nullptr,
-                                &transfer_events[0]));
+  OCL_CHECK(err, err = ordered_queue1.enqueueReadBuffer(buffer_a, CL_FALSE, 0,
+                                size_in_bytes, A.data(), nullptr, &transfer_events[0]));
   set_callback(transfer_events[0], "A");
+
   printf("[Ordered Queue 1]: Enqueueing Read Buffer C\n");
-  OCL_CHECK(clEnqueueReadBuffer(ordered_queue1, buffer_c, CL_FALSE, 0,
-                                size_in_bytes, C.data(), 0, nullptr,
-                                &transfer_events[1]));
+  OCL_CHECK(err, err = ordered_queue1.enqueueReadBuffer(buffer_c, CL_FALSE, 0,
+                                size_in_bytes, C.data(), nullptr, &transfer_events[1]));
   set_callback(transfer_events[1], "C");
 
   printf("[Ordered Queue 2]: Enqueueing Read Buffer F\n");
-  OCL_CHECK(clEnqueueReadBuffer(ordered_queue2, buffer_f, CL_FALSE, 0,
-                                size_in_bytes, F.data(), 0, nullptr,
-                                &transfer_events[2]));
+  OCL_CHECK(err, err = ordered_queue2.enqueueReadBuffer(buffer_f, CL_FALSE, 0,
+                                size_in_bytes, F.data(), nullptr, &transfer_events[2]));
   set_callback(transfer_events[2], "F");
 
   printf("[Ordered Queue 1]: Waiting\n");
   printf("[Ordered Queue 2]: Waiting\n");
-  clWaitForEvents(3, transfer_events.data());
-  for (auto event : kernel_events)
-    clReleaseEvent(event);
-  for (auto event : transfer_events)
-    clReleaseEvent(event);
-  OCL_CHECK(clReleaseCommandQueue(ordered_queue1));
-  OCL_CHECK(clReleaseCommandQueue(ordered_queue2));
+  OCL_CHECK(err, err = cl::Event::waitForEvents(transfer_events));
   verify_results(C, F);
 }
 
-void out_of_order_queue(xcl_world &world, cl_kernel kernel_mscale,
-                        cl_kernel kernel_madd, cl_kernel kernel_mmult,
-                        cl_mem buffer_a, cl_mem buffer_b, cl_mem buffer_c,
-                        cl_mem buffer_d, cl_mem buffer_e, cl_mem buffer_f,
+void out_of_order_queue(cl::Context &context, cl::Device &device, cl::Kernel &kernel_mscale,
+                        cl::Kernel &kernel_madd, cl::Kernel &kernel_mmult,
+                        cl::Buffer &buffer_a, cl::Buffer &buffer_b, cl::Buffer &buffer_c,
+						cl::Buffer &buffer_d, cl::Buffer &buffer_e, cl::Buffer &buffer_f,
                         size_t size_in_bytes) {
   cl_int err;
-  vector<cl_event> ooo_events(6);
+  vector<cl::Event> ooo_events(6);
+  vector<cl::Event> kernel_wait_events;
 
   // We are creating an out of order queue here.
-  cl_command_queue ooo_queue = clCreateCommandQueue(
-      world.context, world.device_id,
-      CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err);
-  check(err);
+  OCL_CHECK(err, cl::CommandQueue ooo_queue(context, device,
+		  CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err));
 
   // Clear values in the result buffers
   {
     int zero = 0;
     int one = 1;
-    vector<cl_event> fill_events(3);
-    clEnqueueFillBuffer(ooo_queue, buffer_a, &one, sizeof(int), 0,
-                        size_in_bytes, 0, nullptr, &fill_events[0]);
-    clEnqueueFillBuffer(ooo_queue, buffer_c, &zero, sizeof(int), 0,
-                        size_in_bytes, 0, nullptr, &fill_events[1]);
-    clEnqueueFillBuffer(ooo_queue, buffer_f, &zero, sizeof(int), 0,
-                        size_in_bytes, 0, nullptr, &fill_events[2]);
-    clWaitForEvents(3, fill_events.data());
-    for (auto event : fill_events)
-      clReleaseEvent(event);
+    vector<cl::Event> fill_events(3);
+    OCL_CHECK(err, err = ooo_queue.enqueueFillBuffer(buffer_a, one, 0,
+                        size_in_bytes, nullptr, &fill_events[0]));
+    OCL_CHECK(err, err = ooo_queue.enqueueFillBuffer(buffer_c, zero, 0,
+                        size_in_bytes, nullptr, &fill_events[1]));
+    OCL_CHECK(err, err = ooo_queue.enqueueFillBuffer(buffer_f, zero, 0,
+                        size_in_bytes, nullptr, &fill_events[2]));
+    OCL_CHECK(err, err = cl::Event::waitForEvents(fill_events));
   }
 
   // copy the input arrays to input memory allocated on the accelerator
   // devices
   const int matrix_scale_factor = 2;
-  xcl_set_kernel_arg(kernel_mscale, 0, sizeof(cl_mem), &buffer_a);
-  xcl_set_kernel_arg(kernel_mscale, 1, sizeof(cl_int), &matrix_scale_factor);
-  xcl_set_kernel_arg(kernel_mscale, 2, sizeof(cl_int), &MAT_DIM0);
-  xcl_set_kernel_arg(kernel_mscale, 3, sizeof(cl_int), &MAT_DIM1);
+  OCL_CHECK(err, err = kernel_mscale.setArg(0, buffer_a));
+  OCL_CHECK(err, err = kernel_mscale.setArg(1, matrix_scale_factor));
+  OCL_CHECK(err, err = kernel_mscale.setArg(2, MAT_DIM0));
+  OCL_CHECK(err, err = kernel_mscale.setArg(3, MAT_DIM1));
 
   printf("[OOO Queue]: Enqueueing scale kernel\n");
-  OCL_CHECK(clEnqueueNDRangeKernel(ooo_queue, kernel_mscale, 1, offset, global,
-                                   local, 0, nullptr, &ooo_events[0]));
+  OCL_CHECK(err, err = ooo_queue.enqueueNDRangeKernel(kernel_mscale, offset, global,
+                                   local, nullptr, &ooo_events[0]));
   set_callback(ooo_events[0], "scale");
 
   // set OpenCL kernel parameters to add scaled matrix A and matrix B
-  xcl_set_kernel_arg(kernel_madd, 0, sizeof(cl_mem), &buffer_c);
-  xcl_set_kernel_arg(kernel_madd, 1, sizeof(cl_mem), &buffer_a);
-  xcl_set_kernel_arg(kernel_madd, 2, sizeof(cl_mem), &buffer_b);
-  xcl_set_kernel_arg(kernel_madd, 3, sizeof(cl_int), &MAT_DIM0);
-  xcl_set_kernel_arg(kernel_madd, 4, sizeof(cl_int), &MAT_DIM1);
+  OCL_CHECK(err, err = kernel_madd.setArg(0, buffer_c));
+  OCL_CHECK(err, err = kernel_madd.setArg(1, buffer_a));
+  OCL_CHECK(err, err = kernel_madd.setArg(2, buffer_b));
+  OCL_CHECK(err, err = kernel_madd.setArg(3, MAT_DIM0));
+  OCL_CHECK(err, err = kernel_madd.setArg(4, MAT_DIM1));
 
   // This is an out of order queue, events can be executed in any order. Since
   // this call depends on the results of the previous call we must pass the
   // event object from the previous call to this kernel's event wait list.
   printf("[OOO Queue]: Enqueueing addition kernel (Depends on scale)\n");
-  OCL_CHECK(clEnqueueNDRangeKernel(ooo_queue, kernel_madd, 1, offset, global,
-                                   local, 1,
-                                   &ooo_events[0], // Event from previous call
+
+  kernel_wait_events.resize(0);
+  kernel_wait_events.push_back(ooo_events[0]);
+
+  OCL_CHECK(err, err = ooo_queue.enqueueNDRangeKernel(kernel_madd, offset, global, local,
+		  	  	  	  	  	  	  &kernel_wait_events, // Event from previous call
                                    &ooo_events[1]));
   set_callback(ooo_events[1], "addition");
 
   // set OpenCL kernel parameters to multiply matrix D and E */
-  xcl_set_kernel_arg(kernel_mmult, 0, sizeof(cl_mem), &buffer_f);
-  xcl_set_kernel_arg(kernel_mmult, 1, sizeof(cl_mem), &buffer_d);
-  xcl_set_kernel_arg(kernel_mmult, 2, sizeof(cl_mem), &buffer_e);
-  xcl_set_kernel_arg(kernel_mmult, 3, sizeof(cl_int), &MAT_DIM0);
-  xcl_set_kernel_arg(kernel_mmult, 4, sizeof(cl_int), &MAT_DIM1);
+  OCL_CHECK(err, err = kernel_mmult.setArg(0, buffer_f));
+  OCL_CHECK(err, err = kernel_mmult.setArg(1, buffer_d));
+  OCL_CHECK(err, err = kernel_mmult.setArg(2, buffer_e));
+  OCL_CHECK(err, err = kernel_mmult.setArg(3, MAT_DIM0));
+  OCL_CHECK(err, err = kernel_mmult.setArg(4, MAT_DIM1));
 
   // This call does not depend on previous calls so we are passing nullptr
   // into the event wait list. The runtime should schedule this kernel in
   // parallel to the previous calls.
   printf("[OOO Queue]: Enqueueing matrix multiplication kernel\n");
-  OCL_CHECK(clEnqueueNDRangeKernel(ooo_queue, kernel_mmult, 1, offset, global,
-                                   local, 0,
-                                   nullptr, // Does not depend on previous call
+  OCL_CHECK(err, err = ooo_queue.enqueueNDRangeKernel(kernel_mmult, offset, global, local,
+								   nullptr, // Does not depend on previous call
                                    &ooo_events[2]));
   set_callback(ooo_events[2], "matrix multiplication");
 
@@ -357,90 +323,94 @@ void out_of_order_queue(xcl_world &world, cl_kernel kernel_mscale,
 
   // Depends on the addition kernel
   printf("[OOO Queue]: Enqueueing Read Buffer A (depends on addition)\n");
-  OCL_CHECK(clEnqueueReadBuffer(ooo_queue, buffer_a, CL_FALSE, 0, size_in_bytes,
-                                A.data(), 1, &ooo_events[1], &ooo_events[3]));
+  kernel_wait_events.resize(0);
+  kernel_wait_events.push_back(ooo_events[1]);
+  OCL_CHECK(err, err = ooo_queue.enqueueReadBuffer(buffer_a, CL_FALSE, 0, size_in_bytes,
+                                A.data(), &kernel_wait_events, &ooo_events[3]));
   set_callback(ooo_events[3], "A");
+
   printf("[OOO Queue]: Enqueueing Read Buffer C (depends on addition)\n");
-  OCL_CHECK(clEnqueueReadBuffer(ooo_queue, buffer_c, CL_FALSE, 0, size_in_bytes,
-                                C.data(), 1, &ooo_events[1], &ooo_events[4]));
+  kernel_wait_events.resize(0);
+  kernel_wait_events.push_back(ooo_events[1]);
+  OCL_CHECK(err, err = ooo_queue.enqueueReadBuffer(buffer_c, CL_FALSE, 0, size_in_bytes,
+                                C.data(), &kernel_wait_events, &ooo_events[4]));
   set_callback(ooo_events[4], "C");
 
   // Depends on the matrix multiplication kernel
   printf("[OOO Queue]: Enqueueing Read Buffer F (depends on matrix "
          "multiplication)\n");
-  OCL_CHECK(clEnqueueReadBuffer(ooo_queue, buffer_f, CL_FALSE, 0, size_in_bytes,
-                                F.data(), 1, &ooo_events[2], &ooo_events[5]));
+  kernel_wait_events.resize(0);
+  kernel_wait_events.push_back(ooo_events[2]);
+  OCL_CHECK(err, err = ooo_queue.enqueueReadBuffer(buffer_f, CL_FALSE, 0, size_in_bytes,
+                                F.data(), &kernel_wait_events, &ooo_events[5]));
   set_callback(ooo_events[5], "F");
 
   // Block until all operations have completed
-  clFlush(ooo_queue);
-  clFinish(ooo_queue);
+  ooo_queue.flush();
+  ooo_queue.finish();
   verify_results(C, F);
-
-  for (auto event : ooo_events)
-    clReleaseEvent(event);
-
-  OCL_CHECK(clReleaseCommandQueue(ooo_queue));
 }
 
 int main(int argc, char **argv) {
 
+  cl_int err;
   const size_t array_size = MAT_DIM0 * MAT_DIM1;
   const size_t size_in_bytes = array_size * sizeof(int);
 
   // allocate memory on host for input and output matrices
-  vector<int> A(array_size, 1);
-  vector<int> B(array_size, 1);
-  vector<int> D(array_size, 1);
-  vector<int> E(array_size, 1);
-
-  cl_kernel kernel_madd = 0;
-  cl_kernel kernel_mscale = 0;
-  cl_kernel kernel_mmult = 0;
+  vector<int, aligned_allocator<int>> A(array_size, 1);
+  vector<int, aligned_allocator<int>> B(array_size, 1);
+  vector<int, aligned_allocator<int>> D(array_size, 1);
+  vector<int, aligned_allocator<int>> E(array_size, 1);
 
   // Called to set environment variables
-  xcl_world world = xcl_world_single();
-  cl_program program = xcl_import_binary(world, "matrix_ops");
+  // The get_xil_devices will return vector of Xilinx Devices
+  // platforms and will return list of devices connected to Xilinx platform
+  std::vector<cl::Device> devices = xcl::get_xil_devices();
+  cl::Device device = devices[0];
 
-  kernel_madd = xcl_get_kernel(program, "madd");
-  kernel_mscale = xcl_get_kernel(program, "mscale");
-  kernel_mmult = xcl_get_kernel(program, "mmult");
+  OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
+  OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
-  cl_mem buffer_a = xcl_malloc(world, CL_MEM_READ_WRITE, size_in_bytes);
-  cl_mem buffer_b = xcl_malloc(world, CL_MEM_READ_ONLY, size_in_bytes);
-  cl_mem buffer_c = xcl_malloc(world, CL_MEM_WRITE_ONLY, size_in_bytes);
-  cl_mem buffer_d = xcl_malloc(world, CL_MEM_READ_ONLY, size_in_bytes);
-  cl_mem buffer_e = xcl_malloc(world, CL_MEM_READ_ONLY, size_in_bytes);
-  cl_mem buffer_f = xcl_malloc(world, CL_MEM_WRITE_ONLY, size_in_bytes);
+  // find_binary_file() is a utility API which will search the xclbin file for
+  // targeted mode (sw_emu/hw_emu/hw) and for targeted platforms.
+  std::string binaryFile = xcl::find_binary_file(device_name,"matrix_ops");
 
-  xcl_memcpy_to_device(world, buffer_a, A.data(), size_in_bytes);
-  xcl_memcpy_to_device(world, buffer_b, B.data(), size_in_bytes);
-  xcl_memcpy_to_device(world, buffer_d, D.data(), size_in_bytes);
-  xcl_memcpy_to_device(world, buffer_e, E.data(), size_in_bytes);
+  // import_binary_file() ia a utility API which will load the binaryFile
+  // and will return Binaries.
+  cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+  devices.resize(1);
+  OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
+
+  OCL_CHECK(err, cl::Kernel kernel_madd(program,"madd", &err));
+  OCL_CHECK(err, cl::Kernel kernel_mscale(program,"mscale", &err));
+  OCL_CHECK(err, cl::Kernel kernel_mmult(program,"mmult", &err));
+
+  // Allocate Buffer in Global Memory
+  // Buffers are allocated using CL_MEM_USE_HOST_PTR for efficient memory and
+  // Device-to-host communication
+  OCL_CHECK(err, cl::Buffer buffer_a (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+              size_in_bytes, A.data(), &err));
+  OCL_CHECK(err, cl::Buffer buffer_b (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                size_in_bytes, B.data(), &err));
+  OCL_CHECK(err, cl::Buffer buffer_c (context,CL_MEM_ALLOC_HOST_PTR | CL_MEM_WRITE_ONLY,
+                size_in_bytes, NULL, &err));
+  OCL_CHECK(err, cl::Buffer buffer_d (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                size_in_bytes, D.data(), &err));
+  OCL_CHECK(err, cl::Buffer buffer_e (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                size_in_bytes, E.data(), &err));
+  OCL_CHECK(err, cl::Buffer buffer_f (context,CL_MEM_ALLOC_HOST_PTR | CL_MEM_WRITE_ONLY,
+                size_in_bytes, NULL, &err));
 
   // Use multiple command queues to execute the kernels
-  multiple_command_queues(world, kernel_mscale, kernel_madd, kernel_mmult,
+  multiple_command_queues(context, device, kernel_mscale, kernel_madd, kernel_mmult,
                           buffer_a, buffer_b, buffer_c, buffer_d, buffer_e,
                           buffer_f, size_in_bytes);
 
   // Use out of order command queue to execute the kernels
-  out_of_order_queue(world, kernel_mscale, kernel_madd, kernel_mmult, buffer_a,
+  out_of_order_queue(context, device, kernel_mscale, kernel_madd, kernel_mmult, buffer_a,
                      buffer_b, buffer_c, buffer_d, buffer_e, buffer_f,
                      size_in_bytes);
-
-  // Release OpenCL objects
-  OCL_CHECK(clReleaseMemObject(buffer_a));
-  OCL_CHECK(clReleaseMemObject(buffer_b));
-  OCL_CHECK(clReleaseMemObject(buffer_c));
-  OCL_CHECK(clReleaseMemObject(buffer_d));
-  OCL_CHECK(clReleaseMemObject(buffer_e));
-  OCL_CHECK(clReleaseMemObject(buffer_f));
-
-  OCL_CHECK(clReleaseKernel(kernel_mscale));
-  OCL_CHECK(clReleaseKernel(kernel_madd));
-  OCL_CHECK(clReleaseKernel(kernel_mmult));
-  OCL_CHECK(clReleaseProgram(program));
-  xcl_release_world(world);
 
   printf(
       "View the timeline trace in SDx for a visual overview of the\n"
@@ -451,3 +421,4 @@ int main(int argc, char **argv) {
   printf("TEST PASSED\n");
   return EXIT_SUCCESS;
 }
+

@@ -10,8 +10,7 @@
         "Linux"
     ],
     "libs": [
-        "xcl",
-        "oclHelper"
+        "xcl2"
     ],
     "host_exe": "concurrent_execution",
     "em_cmd": "./concurrent_execution",

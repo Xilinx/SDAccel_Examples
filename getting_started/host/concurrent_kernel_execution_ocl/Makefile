@@ -42,11 +42,10 @@ BINARY_CONTAINER_matrix_ops_OBJS += $(XCLBIN)/mmult.$(TARGET).$(DSA).xo
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
-include $(ABS_COMMON_REPO)/libs/xcl/xcl.mk
-include $(ABS_COMMON_REPO)/libs/oclHelper/oclHelper.mk
-CXXFLAGS += $(xcl_CXXFLAGS) $(oclHelper_CXXFLAGS)
-LDFLAGS += $(xcl_LDFLAGS) $(oclHelper_LDFLAGS)
-HOST_SRCS += $(xcl_SRCS) $(oclHelper_SRCS)
+include $(ABS_COMMON_REPO)/libs/xcl2/xcl2.mk
+CXXFLAGS += $(xcl2_CXXFLAGS)
+LDFLAGS += $(xcl2_LDFLAGS)
+HOST_SRCS += $(xcl2_SRCS)
 
 CP = cp -rf
 
