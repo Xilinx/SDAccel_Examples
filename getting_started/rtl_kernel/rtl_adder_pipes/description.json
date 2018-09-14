@@ -15,6 +15,25 @@
     "targets": ["hw", "hw_emu"],
     "em_cmd": "./host",
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
+    "containers": [
+    {
+	"name": "adder",
+	"accelerators": [
+	{
+	"name": "input",
+	"location": "src/kernel_input_stage.xml"
+	},
+	{
+	"name": "adder",
+	"location": "src/kernel_adder_stage.xml"
+	},
+	{
+	"name": "output",
+	"location": "src/kernel_output_stage.xml"
+	}
+	]
+    }
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

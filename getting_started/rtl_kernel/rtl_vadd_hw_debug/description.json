@@ -22,6 +22,16 @@
     "libs" : [
         "xcl"
     ],
+    "containers": [
+	{
+	   "name": "vadd",
+	   "accelerators": [
+	    {
+		"name": "krnl_vadd_rtl"
+	    }
+	]
+	}
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

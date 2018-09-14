@@ -15,6 +15,19 @@
     "em_cmd": "./host",
     "targets": ["hw", "hw_emu"],
     "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
+    "containers": [
+	{
+	   "name": "vadd",
+	   "accelerators": [
+	    {
+  		"name": "krnl_vadd_rtl"
+    	    },
+	    {
+	  	"name": "krnl_vadd"
+	    }
+	]
+	}
+    ],
     "contributors" : [
         {
             "group": "Xilinx",

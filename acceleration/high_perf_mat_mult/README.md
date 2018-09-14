@@ -58,6 +58,12 @@ src/kcu1500/postopt.tcl
 src/kcu1500/presynth.tcl
 src/kcu1500/syslink-100kernel.tcl
 src/kernelShigh_perf_mat_mult_0.xo
+src/u200/postopt.tcl
+src/u200/presynth.tcl
+src/u200/syslink-100kernel.tcl
+src/u250/postopt.tcl
+src/u250/presynth.tcl
+src/u250/syslink-100kernel.tcl
 src/vcu1525/postopt.tcl
 src/vcu1525/presynth.tcl
 src/vcu1525/syslink-100kernel.tcl
