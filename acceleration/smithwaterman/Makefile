@@ -25,7 +25,7 @@ HOST_SRCS = ./src/main.cpp ./src/genseq.cpp ./src/matcharray.cpp ./src/smithwate
 HOST_HDRS = ./src/matcharray.h ./src/smithwaterman.h ./src/sw.h ./src/intel/ssw.h ./src/intel/kseq.h
 
 # Host compiler global settings
-CXXFLAGS = -I $(XILINX_XRT)/include/ -I/$(XILINX_SDX)/Vivado_HLS/include/ -O0 -g -Wall -fmessage-length=0 -std=c++14 -DFPGA_DEVICE -I./src/ -I/$(XILINX_VIVADO)/include/ 
+CXXFLAGS = -I $(XILINX_XRT)/include/ -I/$(XILINX_SDX)/Vivado_HLS/include/ -O0 -g -Wall -fmessage-length=0 -std=c++14 -DFPGA_DEVICE -I./src/ -I/$(XILINX_VIVADO)/include/
 LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_XRT)/lib/
 
 # Kernel compiler global settings
@@ -82,10 +82,6 @@ ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 else
 	 ./$(EXECUTABLE)
 endif
-ifneq ($(TARGET),$(findstring $(TARGET), sw_emu hw))
-$(warning WARNING:Application supports only sw_emu hw TARGET. Please use the target for running the application)
-endif
-
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 
 # Cleaning stuff

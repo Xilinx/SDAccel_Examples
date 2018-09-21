@@ -25,7 +25,7 @@ HOST_SRCS = src/main.cpp src/rsa_app.cpp src/common.cpp
 HOST_HDRS = src/common.h src/rsa_app.h
 
 # Host compiler global settings
-CXXFLAGS = -I $(XILINX_XRT)/include/ -I/$(XILINX_SDX)/Vivado_HLS/include/ -O3 -g -Wall -fmessage-length=0 -std=c++14
+CXXFLAGS = -I $(XILINX_XRT)/include/ -I/$(XILINX_SDX)/Vivado_HLS/include/ -O0 -g -Wall -fmessage-length=0 -std=c++14
 LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_XRT)/lib/
 
 # Kernel compiler global settings
@@ -84,10 +84,6 @@ ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 else
 	 ./$(EXECUTABLE) --in ./data/0_0_1024_key.cip --out ./data/0_out.msg --key ./data/0_1024_key.pem
 endif
-ifneq ($(TARGET),$(findstring $(TARGET), sw_emu hw))
-$(warning WARNING:Application supports only sw_emu hw TARGET. Please use the target for running the application)
-endif
-
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 
 # Cleaning stuff

@@ -118,7 +118,7 @@ def add_host_flags(target, data):
     target.write("# Host compiler global settings\n")
     target.write("CXXFLAGS = ")
     target.write("-I $(XILINX_XRT)/include/ -I/$(XILINX_SDX)/Vivado_HLS/include/ ")
-    target.write("-O0 -g -Wall -fmessage-length=0 -std=c++14\n")
+    target.write("-O0 -g -Wall -fmessage-length=0 -std=c++14")
     if "host_exe" in data:
 	if "prng" in data["host_exe"]:
 	    target.write(" -I$(XILINX_SDACCEL)/Vivado_HLS/include/ -I$(XILINX_VIVADO)/include/")
