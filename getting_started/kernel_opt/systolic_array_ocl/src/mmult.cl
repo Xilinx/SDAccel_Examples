@@ -57,14 +57,14 @@ Kernel Description :
 
     Kernel Configuration :
         
-        Max Size    --> 16
+        Max Size    --> 12
     
     Note : 
         Max Size is dependent on the available DSP resources in the FPGA
 */
 
 //Maximum Array Size
-#define MAX_SIZE 16
+#define MAX_SIZE 12
 
 __kernel __attribute__((reqd_work_group_size(1, 1, 1)))
 void mmult(
