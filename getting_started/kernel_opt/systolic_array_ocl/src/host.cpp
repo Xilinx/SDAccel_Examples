@@ -41,10 +41,10 @@ Description:
 #include <vector>
 
 //Array Size to access 
-#define DATA_SIZE 16
+#define DATA_SIZE 12
 
 //Maximum Array Size
-#define MAX_SIZE 16
+#define MAX_SIZE 12
 
 // Software implementation of Matrix Multiplication
 // The inputs are of the size (DATA_SIZE x DATA_SIZE)
