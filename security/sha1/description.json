@@ -4,6 +4,7 @@
     "overview" : [
         "This is an optimized implementation of SHA1 secure hash algorithm targeting execution on an SDAccel supported FPGA acceleration card."
     ],
+    "targets": [ "sw_emu", "hw" ],
     "xcl": false,
     "host_exe": "sha1",
     "cmd_args" : "-t 20 -p Xilinx -k BUILD/krnl_sha1.xclbin",

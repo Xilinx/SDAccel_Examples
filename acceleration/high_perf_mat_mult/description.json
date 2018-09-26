@@ -16,8 +16,8 @@
     "targets": ["hw", "hw_emu"],
     "xcl": true,
     "host_exe": "high_perf_mat_mult",        
-    "em_cmd" : "./high_perf_mat_mult 64 64 64",
-    "cmd_args": "./high_perf_mat_mult 64 64 64",        
+    "em_cmd" : "./high_perf_mat_mult BUILD/high_perf_mat_mult0.xclbin 64 64 64",
+    "cmd_args": "./high_perf_mat_mult BUILD/high_perf_mat_mult0.xclbin 64 64 64",        
     "libs" : [
         "xcl"
     ],
