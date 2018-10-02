@@ -12,7 +12,6 @@
     " ",
     "The test is based on an encrypted RTL kernel. This kernel can also be configured to run with int8 data values, which effectively doubles the number of operations and throughput."
     ],
-    "board": ["xilinx:kcu1500:dynamic", "xilinx:vcu1525:dynamic"],
     "targets": ["hw", "hw_emu"],
     "xcl": true,
     "host_exe": "high_perf_mat_mult",        

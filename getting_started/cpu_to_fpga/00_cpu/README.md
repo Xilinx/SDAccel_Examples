@@ -27,8 +27,10 @@ where examples is the name of the directory where the repository will be stored 
 ## 3. SOFTWARE AND SYSTEM REQUIREMENTS
 Board | Device Name | Software Version
 ------|-------------|-----------------
-Xilinx Kintex UltraScale KCU1500|xilinx:kcu1500:dynamic|SDAccel 2018.2
-Xilinx Virtex UltraScale+ VCU1525|xilinx:vcu1525:dynamic|SDAccel 2018.2
+Xilinx Virtex UltraScale+ VCU1526|xilinx_u250_xdma_201820_1|SDAccel 2018.2.xdf
+Xilinx Kintex UltraScale KCU1500|xilinx_kcu1500_dynamic|SDAccel 2018.2.xdf
+Xilinx Virtex UltraScale+ VCU1525|xilinx_vcu1525_dynamic|SDAccel 2018.2.xdf
+Xilinx Virtex UltraScale+ VCU1525|xilinx_u200_xdma_201820_1|SDAccel 2018.2.xdf
 
 
 *NOTE:* The board/device used for compilation can be changed by adding the DEVICES variable to the make command as shown below
@@ -86,7 +88,7 @@ To manually configure the environment to run the application, set the following
 ```
 export LD_LIBRARY_PATH=$XILINX_SDX/runtime/lib/x86_64/:$LD_LIBRARY_PATH
 export XCL_EMULATION_MODE=<sw_emu|hw_emu>
-emconfigutil --platform 'xilinx:vcu1525:dynamic' --nd 1
+emconfigutil --platform 'xilinx_vcu1525_dynamic' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```

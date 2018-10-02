@@ -4,18 +4,28 @@ import json
 import os
 import subprocess
 
-DSA = 'xilinx:vcu1525:dynamic'
-VERSION = 'SDAccel 2018.2'
+DSA = 'xilinx_vcu1525_dynamic'
+VERSION = 'SDAccel 2018.2.xdf'
 DEVICES = {
-    'xilinx:kcu1500:dynamic': {
+    'xilinx_kcu1500_dynamic': {
        'version': '5.0',
        'name': 'Xilinx Kintex UltraScale KCU1500',
        'nae':  'nx4'
     },
-    'xilinx:vcu1525:dynamic': {
+    'xilinx_vcu1525_dynamic': {
        'version': '5.0',
        'name': 'Xilinx Virtex UltraScale+ VCU1525',
        'nae':  'nx5'
+    },
+    'xilinx_u200_xdma_201820_1': {
+       'version': '5.0',
+       'name': 'Xilinx Virtex UltraScale+ VCU1525',
+       'nae':  'nx6'
+    },
+    'xilinx_u250_xdma_201820_1': {
+       'version': '5.0',
+       'name': 'Xilinx Virtex UltraScale+ VCU1526',
+       'nae':  'nx7'
     }
 }
 
