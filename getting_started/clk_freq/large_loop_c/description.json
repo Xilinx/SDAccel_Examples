@@ -20,7 +20,7 @@
             "name": "cnn_GOOD", 
             "accelerators": [
                 {
-                    "name": "cnn", 
+                    "name": "cnn_GOOD", 
                     "num_compute_units" : "4",
                     "location": "src/cnn_convolution.cpp"
                 }
@@ -30,7 +30,7 @@
             "name": "cnn_BAD", 
             "accelerators": [
                 {
-                    "name": "cnn", 
+                    "name": "cnn_BAD", 
                     "location": "src/cnn_convolution_bad.cpp"
                 }
             ]

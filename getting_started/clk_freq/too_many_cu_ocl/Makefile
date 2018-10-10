@@ -1,12 +1,25 @@
+.PHONY: help
+
+help::
+	$(ECHO) "Makefile Usage:"
+	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
+	$(ECHO) "      Command to generate the design for specified Target and Device."
+	$(ECHO) ""
+	$(ECHO) "  make clean "
+	$(ECHO) "      Command to remove the generated non-hardware files."
+	$(ECHO) ""
+	$(ECHO) "  make cleanall"
+	$(ECHO) "      Command to remove all the generated files."
+	$(ECHO) ""
+	$(ECHO) "  make check TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
+	$(ECHO) "      Command to run application in emulation."
+	$(ECHO) ""
+
 # Points to Utility Directory
 COMMON_REPO = ../../../
 ABS_COMMON_REPO = $(shell readlink -f $(COMMON_REPO))
 
 include ./utils.mk
-# Run Target:
-#   hw  - Compile for hardware
-#   sw_emu/hw_emu - Compile for software/hardware emulation
-# FPGA Board Platform (Default ~ vcu1525)
 
 TARGETS := hw
 TARGET := $(TARGETS)
@@ -18,17 +31,23 @@ DSA := $(call device2sandsa, $(DEVICE))
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
-CXXFLAGS := $(opencl_CXXFLAGS) -Wall -O0 -g -std=c++14
-LDFLAGS := $(opencl_LDFLAGS)
+#Include Libraries
+include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
+include $(ABS_COMMON_REPO)/libs/xcl2/xcl2.mk
+CXXFLAGS += $(xcl2_CXXFLAGS)
+LDFLAGS += $(xcl2_LDFLAGS)
+HOST_SRCS += $(xcl2_SRCS)
+CXXFLAGS += $(opencl_CXXFLAGS) -Wall -O0 -g -std=c++14
+LDFLAGS += $(opencl_LDFLAGS)
 
-HOST_SRCS = src/host.cpp
+HOST_SRCS += src/host.cpp
 
 # Host compiler global settings
-CXXFLAGS = -I $(XILINX_XRT)/include/ -I/$(XILINX_SDX)/Vivado_HLS/include/ -O0 -g -Wall -fmessage-length=0 -std=c++14
-LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_XRT)/lib/
+CXXFLAGS += -fmessage-length=0
+LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps 
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 
 
 EXECUTABLE = host
@@ -40,13 +59,6 @@ BINARY_CONTAINER_vadd_GOOD_OBJS += $(XCLBIN)/vadd_GOOD.$(TARGET).$(DSA).xo
 BINARY_CONTAINERS += $(XCLBIN)/vadd_BAD.$(TARGET).$(DSA).xclbin
 BINARY_CONTAINER_vadd_BAD_OBJS += $(XCLBIN)/vadd_BAD.$(TARGET).$(DSA).xo
 
-#Include Libraries
-include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
-include $(ABS_COMMON_REPO)/libs/xcl2/xcl2.mk
-CXXFLAGS += $(xcl2_CXXFLAGS)
-LDFLAGS += $(xcl2_LDFLAGS)
-HOST_SRCS += $(xcl2_SRCS)
-
 CP = cp -rf
 
 .PHONY: all clean cleanall docs emconfig
@@ -56,17 +68,18 @@ all: $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
 exe: $(EXECUTABLE)
 
 # Building kernel
-$(XCLBIN)/vadd_GOOD.$(TARGET).$(DSA).xo: ./src/vadd.cl
+$(XCLBIN)/vadd_GOOD.$(TARGET).$(DSA).xo: src/vadd.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k vadd -I'$(<D)' -o'$@' '$<'
-$(XCLBIN)/vadd_BAD.$(TARGET).$(DSA).xo: ./src/vadd_bad.cl
+	$(XOCC) $(CLFLAGS) -c -k vadd_GOOD -I'$(<D)' -o'$@' '$<'
+$(XCLBIN)/vadd_BAD.$(TARGET).$(DSA).xo: src/vadd_bad.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k vadd -I'$(<D)' -o'$@' '$<'
-
+	$(XOCC) $(CLFLAGS) -c -k vadd_BAD -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/vadd_GOOD.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_vadd_GOOD_OBJS)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk vadd:1 -o'$@' $(+)
+	mkdir -p $(XCLBIN)
+	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk vadd_GOOD:1 -o'$@' $(+)
 $(XCLBIN)/vadd_BAD.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_vadd_BAD_OBJS)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk vadd:8 -o'$@' $(+)
+	mkdir -p $(XCLBIN)
+	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk vadd_BAD:8 -o'$@' $(+)
 
 # Building Host
 $(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
@@ -95,26 +108,4 @@ clean:
 cleanall: clean
 	-$(RMDIR) $(XCLBIN)
 	-$(RMDIR) ./_x
-
-.PHONY: help
-
-help::
-	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
-	$(ECHO) "      Command to generate the design for specified Target and Device."
-	$(ECHO) ""
-	$(ECHO) "  make clean "
-	$(ECHO) "      Command to remove the generated non-hardware files."
-	$(ECHO) ""
-	$(ECHO) "  make cleanall"
-	$(ECHO) "      Command to remove all the generated files."
-	$(ECHO) ""
-	$(ECHO) "  make check TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
-	$(ECHO) "      Command to run application in emulation."
-	$(ECHO) ""
-
-docs: README.md
-
-README.md: description.json
-	$(ABS_COMMON_REPO)/utility/readme_gen/readme_gen.py description.json
 

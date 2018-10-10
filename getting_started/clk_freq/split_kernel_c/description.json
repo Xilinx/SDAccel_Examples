@@ -23,7 +23,7 @@
             "name": "sketch_GOOD", 
             "accelerators" : [
                 {
-                    "name": "process_image", 
+                    "name": "sketch_GOOD", 
                     "location": "src/sketch.cpp"
                 }
             ]
@@ -32,7 +32,7 @@
             "name": "sketch_BAD", 
             "accelerators" : [
                 {
-                    "name": "process_image", 
+                    "name": "sketch_BAD", 
                     "location": "src/sketch_bad.cpp"
                 }
             ]

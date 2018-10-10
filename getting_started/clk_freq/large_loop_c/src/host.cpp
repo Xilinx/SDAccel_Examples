@@ -122,7 +122,13 @@ uint64_t run_opencl_cnn(
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
     cl::Program program(context, devices, bins);
-    cl::Kernel krnl_cnn_conv(program,"cnn");
+    cl::Kernel krnl_cnn_conv;
+    if (good) {
+	krnl_cnn_conv = cl::Kernel(program,"cnn_GOOD");
+    }
+    else {
+	krnl_cnn_conv = cl::Kernel(program, "cnn_BAD");
+    }
 
     std::cout << "Starting " << (good ? "GOOD" : "BAD") << " Kernel" << std::endl;
 

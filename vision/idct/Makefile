@@ -1,12 +1,25 @@
+.PHONY: help
+
+help::
+	$(ECHO) "Makefile Usage:"
+	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
+	$(ECHO) "      Command to generate the design for specified Target and Device."
+	$(ECHO) ""
+	$(ECHO) "  make clean "
+	$(ECHO) "      Command to remove the generated non-hardware files."
+	$(ECHO) ""
+	$(ECHO) "  make cleanall"
+	$(ECHO) "      Command to remove all the generated files."
+	$(ECHO) ""
+	$(ECHO) "  make check TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
+	$(ECHO) "      Command to run application in emulation."
+	$(ECHO) ""
+
 # Points to Utility Directory
 COMMON_REPO = ../../
 ABS_COMMON_REPO = $(shell readlink -f $(COMMON_REPO))
 
 include ./utils.mk
-# Run Target:
-#   hw  - Compile for hardware
-#   sw_emu/hw_emu - Compile for software/hardware emulation
-# FPGA Board Platform (Default ~ vcu1525)
 
 TARGETS := hw
 TARGET := $(TARGETS)
@@ -18,21 +31,24 @@ DSA := $(call device2sandsa, $(DEVICE))
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
-CXXFLAGS := $(opencl_CXXFLAGS) -Wall -O0 -g -std=c++14
-LDFLAGS := $(opencl_LDFLAGS)
+#Include Libraries
+include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
 
-HOST_SRCS = src/idct.cpp
+CXXFLAGS += $(opencl_CXXFLAGS) -Wall -O0 -g -std=c++14
+LDFLAGS += $(opencl_LDFLAGS)
+
+HOST_SRCS += src/idct.cpp
 
 # Host compiler global settings
-CXXFLAGS = -I $(XILINX_XRT)/include/ -I/$(XILINX_SDX)/Vivado_HLS/include/ -O0 -g -Wall -fmessage-length=0 -std=c++14
-LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_XRT)/lib/
+CXXFLAGS += -fmessage-length=0
+LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps 
-CLFLAGS += --xp "prop:solution.hls_pre_tcl=src/hls_config.tcl"
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
+CLFLAGS += --xp prop:solution.hls_pre_tcl=src/hls_config.tcl
 
 # Kernel linker flags
-LDCLFLAGS =   --sp krnl_idct_1.m_axi_gmem0:bank0 --sp krnl_idct_1.m_axi_gmem1:bank0 --sp krnl_idct_1.m_axi_gmem2:bank1 --kernel_frequency 250
+LDCLFLAGS +=   --sp krnl_idct_1.m_axi_gmem0:bank0 --sp krnl_idct_1.m_axi_gmem1:bank0 --sp krnl_idct_1.m_axi_gmem2:bank1 --kernel_frequency 250
 
 EXECUTABLE = idct
 
@@ -40,10 +56,6 @@ EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
 BINARY_CONTAINERS += $(XCLBIN)/krnl_idct.$(TARGET).$(DSA).xclbin
 BINARY_CONTAINER_krnl_idct_OBJS += $(XCLBIN)/krnl_idct.$(TARGET).$(DSA).xo
-
-#Include Libraries
-include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
-
 
 CP = cp -rf
 
@@ -54,11 +66,11 @@ all: $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
 exe: $(EXECUTABLE)
 
 # Building kernel
-$(XCLBIN)/krnl_idct.$(TARGET).$(DSA).xo: ./src/krnl_idct.cpp
+$(XCLBIN)/krnl_idct.$(TARGET).$(DSA).xo: src/krnl_idct.cpp
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) -c -k krnl_idct -I'$(<D)' -o'$@' '$<'
-
 $(XCLBIN)/krnl_idct.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_idct_OBJS)
+	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk krnl_idct:1 -o'$@' $(+)
 
 # Building Host
@@ -88,26 +100,4 @@ clean:
 cleanall: clean
 	-$(RMDIR) $(XCLBIN)
 	-$(RMDIR) ./_x
-
-.PHONY: help
-
-help::
-	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
-	$(ECHO) "      Command to generate the design for specified Target and Device."
-	$(ECHO) ""
-	$(ECHO) "  make clean "
-	$(ECHO) "      Command to remove the generated non-hardware files."
-	$(ECHO) ""
-	$(ECHO) "  make cleanall"
-	$(ECHO) "      Command to remove all the generated files."
-	$(ECHO) ""
-	$(ECHO) "  make check TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
-	$(ECHO) "      Command to run application in emulation."
-	$(ECHO) ""
-
-docs: README.md
-
-README.md: description.json
-	$(ABS_COMMON_REPO)/utility/readme_gen/readme_gen.py description.json
 

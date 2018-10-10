@@ -1,12 +1,25 @@
+.PHONY: help
+
+help::
+	$(ECHO) "Makefile Usage:"
+	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
+	$(ECHO) "      Command to generate the design for specified Target and Device."
+	$(ECHO) ""
+	$(ECHO) "  make clean "
+	$(ECHO) "      Command to remove the generated non-hardware files."
+	$(ECHO) ""
+	$(ECHO) "  make cleanall"
+	$(ECHO) "      Command to remove all the generated files."
+	$(ECHO) ""
+	$(ECHO) "  make check TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
+	$(ECHO) "      Command to run application in emulation."
+	$(ECHO) ""
+
 # Points to Utility Directory
 COMMON_REPO = ../../
 ABS_COMMON_REPO = $(shell readlink -f $(COMMON_REPO))
 
 include ./utils.mk
-# Run Target:
-#   hw  - Compile for hardware
-#   sw_emu/hw_emu - Compile for software/hardware emulation
-# FPGA Board Platform (Default ~ vcu1525)
 
 TARGETS := hw
 TARGET := $(TARGETS)
@@ -97,25 +110,4 @@ cleanall: clean
 	-$(RMDIR) $(XCLBIN)
 	-$(RMDIR) ./_x
 
-.PHONY: help
-
-help::
-	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
-	$(ECHO) "      Command to generate the design for specified Target and Device."
-	$(ECHO) ""
-	$(ECHO) "  make clean "
-	$(ECHO) "      Command to remove the generated non-hardware files."
-	$(ECHO) ""
-	$(ECHO) "  make cleanall"
-	$(ECHO) "      Command to remove all the generated files."
-	$(ECHO) ""
-	$(ECHO) "  make check TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
-	$(ECHO) "      Command to run application in emulation."
-	$(ECHO) ""
-
-docs: README.md
-
-README.md: description.json
-	$(ABS_COMMON_REPO)/utility/readme_gen/readme_gen.py description.json
 

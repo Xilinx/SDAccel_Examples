@@ -180,7 +180,7 @@ void convolution_operation(int img_lcl[IChan][ISize * ISize], int wgt_lcl[WInCha
 
 extern "C"
 {
-    void cnn(
+    void cnn_GOOD(
             int *image,         // Read-Only Image 
             int *weights,       // Read-Only Weight Matrix
             int *out,           // Output Filters/Images

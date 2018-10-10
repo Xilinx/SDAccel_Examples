@@ -14,6 +14,9 @@
     "host_hdrs": "./src/matcharray.h ./src/smithwaterman.h ./src/sw.h ./src/intel/ssw.h ./src/intel/kseq.h", 
     "xcl": false,
     "em_cmd" : "./smithwaterman",
+    "compiler": {
+    	"options": " -DFPGA_DEVICE -I./src/" 
+    },
     "linker" : {
         "options" : [ "-fopenmp" ],
         "libraries" : [ "z" ]
@@ -30,7 +33,7 @@
         {
             "name": "opencl_sw_maxscore",
             "num_compute_units": "2", 
-            "clflags": "--kernel_frequency 235",
+            "clflags": "-I./src/ --kernel_frequency 235",
             "location": "src/opencl_sw_maxscore_systolic.cpp"
         }
       ]

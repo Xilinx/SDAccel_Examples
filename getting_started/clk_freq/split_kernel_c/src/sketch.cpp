@@ -273,7 +273,7 @@ void output_stage(int *output, hls::stream<uint> &sketch_out, int width, int hei
 
 extern "C"
 {
-    void process_image(int *input, int *output, int width, int height)
+    void sketch_GOOD(int *input, int *output, int width, int height)
     {
     #pragma HLS DATAFLOW
 
