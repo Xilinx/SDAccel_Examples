@@ -1,12 +1,25 @@
+.PHONY: help
+
+help::
+	$(ECHO) "Makefile Usage:"
+	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
+	$(ECHO) "      Command to generate the design for specified Target and Device."
+	$(ECHO) ""
+	$(ECHO) "  make clean "
+	$(ECHO) "      Command to remove the generated non-hardware files."
+	$(ECHO) ""
+	$(ECHO) "  make cleanall"
+	$(ECHO) "      Command to remove all the generated files."
+	$(ECHO) ""
+	$(ECHO) "  make check TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
+	$(ECHO) "      Command to run application in emulation."
+	$(ECHO) ""
+
 # Points to Utility Directory
 COMMON_REPO = ../../
 ABS_COMMON_REPO = $(shell readlink -f $(COMMON_REPO))
 
 include ./utils.mk
-# Run Target:
-#   hw  - Compile for hardware
-#   sw_emu/hw_emu - Compile for software/hardware emulation
-# FPGA Board Platform (Default ~ vcu1525)
 
 TARGETS := hw
 TARGET := $(TARGETS)
@@ -18,29 +31,6 @@ DSA := $(call device2sandsa, $(DEVICE))
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
-CXXFLAGS := $(opencl_CXXFLAGS) -Wall -O0 -g -std=c++14
-LDFLAGS := $(opencl_LDFLAGS)
-
-HOST_SRCS = src/watermarking.cpp
-
-# Host compiler global settings
-CXXFLAGS = -I $(XILINX_XRT)/include/ -I/$(XILINX_SDX)/Vivado_HLS/include/ -O0 -g -Wall -fmessage-length=0 -std=c++14
-LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_XRT)/lib/
-
-# Kernel compiler global settings
-CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps 
-CLFLAGS += --max_memory_ports "apply_watermark"
-
-# Kernel linker flags
-LDCLFLAGS = --sp apply_watermark_1.m_axi_gmem0:bank0 --sp apply_watermark_1.m_axi_gmem1:bank1
-
-EXECUTABLE = watermark
-
-EMCONFIG_DIR = $(XCLBIN)/$(DSA)
-
-BINARY_CONTAINERS += $(XCLBIN)/apply_watermark.$(TARGET).$(DSA).xclbin
-BINARY_CONTAINER_apply_watermark_OBJS += $(XCLBIN)/apply_watermark.$(TARGET).$(DSA).xo
-
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
 include $(ABS_COMMON_REPO)/libs/xcl2/xcl2.mk
@@ -48,6 +38,28 @@ include $(ABS_COMMON_REPO)/libs/bitmap/bitmap.mk
 CXXFLAGS += $(xcl2_CXXFLAGS) $(bitmap_CXXFLAGS)
 LDFLAGS += $(xcl2_LDFLAGS) $(bitmap_LDFLAGS)
 HOST_SRCS += $(xcl2_SRCS) $(bitmap_SRCS)
+CXXFLAGS += $(opencl_CXXFLAGS) -Wall -O0 -g -std=c++14
+LDFLAGS += $(opencl_LDFLAGS)
+
+HOST_SRCS += src/watermarking.cpp
+
+# Host compiler global settings
+CXXFLAGS += -fmessage-length=0
+LDFLAGS += -lrt -lstdc++ 
+
+# Kernel compiler global settings
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
+CLFLAGS += --max_memory_ports apply_watermark
+
+# Kernel linker flags
+LDCLFLAGS += --sp apply_watermark_1.m_axi_gmem0:bank0 --sp apply_watermark_1.m_axi_gmem1:bank1
+
+EXECUTABLE = watermark
+
+EMCONFIG_DIR = $(XCLBIN)/$(DSA)
+
+BINARY_CONTAINERS += $(XCLBIN)/apply_watermark.$(TARGET).$(DSA).xclbin
+BINARY_CONTAINER_apply_watermark_OBJS += $(XCLBIN)/apply_watermark.$(TARGET).$(DSA).xo
 
 CP = cp -rf
 DATA = ./data
@@ -59,11 +71,11 @@ all: $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
 exe: $(EXECUTABLE)
 
 # Building kernel
-$(XCLBIN)/apply_watermark.$(TARGET).$(DSA).xo: ./src/krnl_watermarking.cl
+$(XCLBIN)/apply_watermark.$(TARGET).$(DSA).xo: src/krnl_watermarking.cl
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) -c -k apply_watermark -I'$(<D)' -o'$@' '$<'
-
 $(XCLBIN)/apply_watermark.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_apply_watermark_OBJS)
+	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk apply_watermark:1 -o'$@' $(+)
 
 # Building Host
@@ -94,25 +106,3 @@ cleanall: clean
 	-$(RMDIR) $(XCLBIN)
 	-$(RMDIR) ./_x
 	-$(RMDIR) ./output.bmp 
-.PHONY: help
-
-help::
-	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
-	$(ECHO) "      Command to generate the design for specified Target and Device."
-	$(ECHO) ""
-	$(ECHO) "  make clean "
-	$(ECHO) "      Command to remove the generated non-hardware files."
-	$(ECHO) ""
-	$(ECHO) "  make cleanall"
-	$(ECHO) "      Command to remove all the generated files."
-	$(ECHO) ""
-	$(ECHO) "  make check TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
-	$(ECHO) "      Command to run application in emulation."
-	$(ECHO) ""
-
-docs: README.md
-
-README.md: description.json
-	$(ABS_COMMON_REPO)/utility/readme_gen/readme_gen.py description.json
-

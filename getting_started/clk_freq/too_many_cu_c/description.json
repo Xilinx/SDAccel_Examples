@@ -20,7 +20,7 @@
             "name": "vadd_GOOD",
             "accelerators" : [
                 {
-                   "name": "vadd",
+                   "name": "vadd_GOOD",
                    "location": "src/vadd.cpp"
                 }
            ]
@@ -29,7 +29,7 @@
             "name": "vadd_BAD",
             "accelerators" : [
                 {
-                   "name": "vadd",
+                   "name": "vadd_BAD",
                    "num_compute_units": "8",
                    "location": "src/vadd_bad.cpp"
                 }

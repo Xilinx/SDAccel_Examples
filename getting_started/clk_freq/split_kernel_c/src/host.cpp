@@ -178,7 +178,9 @@ void run_opencl_sketch
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
     cl::Program program(context, devices, bins);
-    cl::Kernel krnl_process_image(program,"process_image");
+    cl::Kernel krnl_process_image;
+    if (good) krnl_process_image = cl::Kernel(program,"sketch_GOOD");
+    else krnl_process_image = cl::Kernel(program, "sketch_BAD");
 
     //Allocate Buffer in Global Memory
     std::vector<cl::Memory> inBufVec, outBufVec;

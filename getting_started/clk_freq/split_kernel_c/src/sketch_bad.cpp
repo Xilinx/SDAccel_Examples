@@ -105,7 +105,7 @@ void getWindow(int *image, uint rgbWindow[SIZE], int row, int col, int width, in
 
 extern "C"
 {
-    void process_image( int *input,     // Input image
+    void sketch_BAD( int *input,     // Input image
                         int *output,    // Output image
                         int width,      // Image width  (max 640)
                         int height      // Image height (max 480)

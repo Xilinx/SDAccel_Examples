@@ -67,7 +67,7 @@ Kernel Description (Bad Example) :
 #define BUFFER_SIZE 5120                
 
 __kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
-void vadd(
+void vadd_BAD(
         const __global int *in1, // Read-Only Vector 1
         const __global int *in2, // Read-Only Vector 2
         __global int *out,       // Output Result

@@ -107,7 +107,7 @@ Kernel Description (Bad Example) :
 
 extern "C"
 {
-    void cnn(
+    void cnn_BAD(
             int *image,     // Read-Only Image 
             int *weights,   // Read-Only Weight Matrix
             int *out,       // Output Filters/Images

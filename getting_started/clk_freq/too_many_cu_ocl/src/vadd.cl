@@ -72,7 +72,7 @@ Kernel Description (Good Example) :
 #define NUM_CU 8
 
 __kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
-void vadd(
+void vadd_GOOD(
         const __global int *in1, // Read-Only Vector 1
         const __global int *in2, // Read-Only Vector 2
         __global int *out,       // Output Result

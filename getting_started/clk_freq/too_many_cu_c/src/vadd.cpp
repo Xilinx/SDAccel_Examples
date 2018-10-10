@@ -80,7 +80,7 @@ typedef unsigned int uint;
 
 extern "C"
 {
-    void vadd(
+    void vadd_GOOD(
             const int *in1, // Read-Only Vector 1
             const int *in2, // Read-Only Vector 2
             int *out,       // Output Result

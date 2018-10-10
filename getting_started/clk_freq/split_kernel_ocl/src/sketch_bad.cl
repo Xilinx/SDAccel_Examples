@@ -71,7 +71,7 @@ Kernel Description (Bad Example) :
 #include "defns.h"
 
 __kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
-void process_image( const __global int *input,     // Input image
+void sketch_BAD( const __global int *input,     // Input image
                           __global int *output,    // Output image
                                    int width,      // Image width  (max 640)
                                    int height      // Image height (max 480)

@@ -275,7 +275,7 @@ void output_stage(__global int *output, int *sketch_out, int width, int height)
 __kernel 
 __attribute__ ((reqd_work_group_size(1, 1, 1)))
 __attribute__ ((xcl_dataflow))
-void process_image(__global int *input, __global int *output, int width, int height)
+void sketch_GOOD(__global int *input, __global int *output, int width, int height)
 {
 
     // Input Image Streams for Boost and Median Kernels

@@ -3,10 +3,10 @@ from sys import argv
 import json
 import glob
 import os
+import re
 import subprocess
 
-def create_params(target,data):
-    
+def create_params(target,data):    
     target.write("# Points to Utility Directory\n")
     dirName = os.getcwd()
     dirNameList = list(dirName.split("/"))
@@ -20,11 +20,6 @@ def create_params(target,data):
     target.write("ABS_COMMON_REPO = $(shell readlink -f $(COMMON_REPO))\n")
     target.write("\n")
     target.write("include ./utils.mk\n")
-
-    target.write("# Run Target:\n")
-    target.write("#   hw  - Compile for hardware\n")
-    target.write("#   sw_emu/hw_emu - Compile for software/hardware emulation\n")
-    target.write("# FPGA Board Platform (Default ~ vcu1525)\n")
     target.write("\n")
     target.write("TARGETS := hw\n")
     target.write("TARGET := $(TARGETS)\n")
@@ -50,13 +45,18 @@ def create_params(target,data):
     target.write("XOCC := ")
     target.write("$(XILINX_SDX)/bin/xocc\n")
     target.write("\n")
-
-    target.write("CXXFLAGS := $(opencl_CXXFLAGS) -Wall -O0 -g -std=c++14\n")
-    target.write("LDFLAGS := $(opencl_LDFLAGS)\n")
+    add_libs1(target, data)
+    add_libs2(target, data) 
+    if "config_make" in data:
+	target.write("include ")
+	target.write(data["config_make"])
+	target.write("\n\n")    
+    target.write("CXXFLAGS += $(opencl_CXXFLAGS) -Wall -O0 -g -std=c++14\n")
+    target.write("LDFLAGS += $(opencl_LDFLAGS)\n")
     target.write("\n")
     return
 
-def add_libs(target, data):
+def add_libs1(target, data):
     target.write("#Include Libraries\n")
     target.write("include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk\n")
     if "libs" in data:
@@ -67,7 +67,10 @@ def add_libs(target, data):
             target.write(lib)
             target.write(".mk")
             target.write("\n")
-        #for lib in data["libs"]:
+    return
+
+def add_libs2(target, data):
+    if "libs" in data:
         target.write("CXXFLAGS +=")
         for lib in data["libs"]:
             target.write(" $(")
@@ -93,48 +96,47 @@ def add_libs(target, data):
                 target.write(" ")
                 target.write("-l")
                 target.write(lin)
-	if "options" in data["linker"]:
-	    for lin in data["linker"]["options"]:
-		target.write(" ")
-		target.write(lin)
-    target.write("\n")                
+        if "options" in data["linker"]:
+            for lin in data["linker"]["options"]:
+  	        target.write(" ")
+	        target.write(lin)
+        target.write("\n")                
     return
 
 def add_host_flags(target, data):
-    target.write("HOST_SRCS = ")
+    target.write("HOST_SRCS += ")
     if "host_srcs" in data:
     	target.write(data["host_srcs"])
 	target.write("\n")
     else:
 	target.write("src/host.cpp\n")
     if "host_hdrs" in data:
-	target.write("HOST_HDRS = ")
+	target.write("HOST_HDRS += ")
 	target.write(data["host_hdrs"])
 	target.write("\n")
-    if "compiler" in data:
-	if "options" in data["compiler"]:
-	    target.write("ddr_banks := 4\n")
     target.write("\n")
     target.write("# Host compiler global settings\n")
-    target.write("CXXFLAGS = ")
-    target.write("-I $(XILINX_XRT)/include/ -I/$(XILINX_SDX)/Vivado_HLS/include/ ")
-    target.write("-O0 -g -Wall -fmessage-length=0 -std=c++14")
+    target.write("CXXFLAGS += ")
+    target.write("-fmessage-length=0")
+        
+    if "compiler" in data:
+	if "options" in data["compiler"]:
+	    target.write(data["compiler"]["options"])
     if "host_exe" in data:
 	if "prng" in data["host_exe"]:
-	    target.write(" -I$(XILINX_SDACCEL)/Vivado_HLS/include/ -I$(XILINX_VIVADO)/include/")
-    if "linker" in data:
-	if "options" in data["linker"]:
-	    target.write(" -DFPGA_DEVICE -I./src/ -I/$(XILINX_VIVADO)/include/")
-    target.write("\n")
-    target.write("LDFLAGS = ")
-    target.write("-lOpenCL -lpthread -lrt -lstdc++ ")
-    target.write("-L$(XILINX_XRT)/lib/\n\n")
+	    target.write(" -I $(XILINX_VIVADO)/include/")
+	if "smithwaterman" in data["host_exe"]:
+	    target.write(" -I $(XILINX_VIVADO)/include/")
+    target.write("\n")	
+    target.write("LDFLAGS += ")
+    target.write("-lrt -lstdc++ ")
+    target.write("\n\n")
 
     return
 
 def add_kernel_flags(target, data):
     target.write("# Kernel compiler global settings\n")
-    target.write("CLFLAGS = ")
+    target.write("CLFLAGS += ")
     target.write("-t $(TARGET) --platform $(DEVICE) --save-temps \n")   
 
     if "containers" in data:
@@ -151,27 +153,10 @@ def add_kernel_flags(target, data):
             for acc in con["accelerators"]:
                 if "clflags" in acc:
 		    target.write("CLFLAGS += ")
-		    if "linker" in data:
-			if "options" in data["linker"]:
-			    target.write("-I./src/ ")
-                    flagsplt = acc["clflags"].split()
-                    target.write(flagsplt[0])
-		    if len(flagsplt) > 1:
-                    	target.write(' "%s"' %flagsplt[1])
+		    target.write(acc["clflags"])		    
                     target.write("\n")
     
     if "compiler" in data:
-        if "options" in data["compiler"]:
-            target.write("CLFLAGS += ")
-	    for opt in data["compiler"]["options"]:
-		target.write(opt)
-	    target.write("=$(ddr_banks)\n")
-	    target.write("\n")
-	    target.write("CXXFLAGS += ")
-	    for opt in data["compiler"]["options"]:
-		target.write(opt)	
-	    target.write("=$(ddr_banks)\n")
-	    target.write("\n")
         if "symbols" in data["compiler"]:
             target.write("\nCXXFLAGS +=")
             for sym in data["compiler"]["symbols"]:
@@ -185,7 +170,7 @@ def add_kernel_flags(target, data):
             if  "ldclflags" in con:
 		target.write("\n")
                 target.write("# Kernel linker flags\n")
-                target.write("LDCLFLAGS = ")
+                target.write("LDCLFLAGS += ")
                 target.write(con["ldclflags"])
         target.write("\n")
     target.write("\n")
@@ -203,120 +188,50 @@ def add_kernel_flags(target, data):
     return
 
 def add_containers(target, data):
-    container_name = 0
-    acc_cnt = 0
-    bin_cnt = 0
-    ctn_cnt = 0
     if "containers" in data:
-        for dictionary in data["containers"]:
-	    ctn_cnt = ctn_cnt + 1
-            if dictionary["accelerators"]:
-                acc_cnt = acc_cnt + 1 
-            if dictionary["name"]:
-                bin_cnt = bin_cnt + 1 
-        for con in data["containers"]:
-            target.write("BINARY_CONTAINERS += $(XCLBIN)/")
-            target.write(data["containers"][container_name]["name"])
+	for con in data["containers"]:
+	    target.write("BINARY_CONTAINERS += $(XCLBIN)/")
+            target.write(con["name"])
             target.write(".$(TARGET).$(DSA)")
             target.write(".xclbin\n")
-	    if ctn_cnt > 1:
+	    if "accelerators" in con:
 		for acc in con["accelerators"]:
-                    if acc_cnt==2 and bin_cnt==2:
-                        target.write("BINARY_CONTAINER_")
-                        target.write(data["containers"][container_name]["name"])
-                        target.write("_OBJS += $(XCLBIN)/")
-                    else:
-                        target.write("BINARY_CONTAINER_1_OBJS += $(XCLBIN)/")
-                    target.write(data["containers"][container_name]["name"])
+		    target.write("BINARY_CONTAINER_")
+                    target.write(con["name"])
+                    target.write("_OBJS += $(XCLBIN)/") 
+		    target.write(acc["name"])
                     target.write(".$(TARGET).$(DSA)")
-                    target.write(".xo\n")
-	    elif ctn_cnt > 0:
-                for acc in con["accelerators"]:
-                    if acc_cnt==2 and bin_cnt==2:
-                        target.write("BINARY_CONTAINER_")
-                        target.write(acc["name"])
-                        target.write("_OBJS += $(XCLBIN)/")
-                    else:
-                        target.write("BINARY_CONTAINER_")
-			target.write(data["containers"][container_name]["name"])
-			target.write("_OBJS += $(XCLBIN)/")
-                    target.write(acc["name"])
-                    target.write(".$(TARGET).$(DSA)")
-                    target.write(".xo\n")
-            container_name = container_name + 1	       	
-        target.write("\n")
+                    target.write(".xo\n")       	
+    target.write("\n")
 
 def building_kernel(target, data):
     target.write("# Building kernel\n")
-    container_name = 0
-    ctn_cnt = 0
-
     if "containers" in data:
-        for dictionary in data["containers"]:
-	    ctn_cnt = ctn_cnt + 1
-        
-    if "containers" in data:	
 	for con in data["containers"]:
-	    if ctn_cnt > 1:
-	         for acc in con["accelerators"]:
-                    target.write("$(XCLBIN)/")
-                    target.write(data["containers"][container_name]["name"])
+	    if "accelerators" in con:
+		for acc in con["accelerators"]:
+		    target.write("$(XCLBIN)/")
+            	    target.write(acc["name"])
                     target.write(".$(TARGET).$(DSA)")
-                    target.write(".xo: ./")
-                    target.write(acc["location"])
-                    target.write("\n")
-                    target.write("\tmkdir -p $(XCLBIN)\n")
-                    target.write("\t$(XOCC) $(CLFLAGS) -c -k ")
-                    target.write(acc["name"])
-                    target.write(" -I'$(<D)'")
-                    target.write(" -o'$@' '$<'\n")    	
-            elif ctn_cnt > 0:
-                for acc in con["accelerators"]:
-                    target.write("$(XCLBIN)/")
-                    target.write(acc["name"])
-                    target.write(".$(TARGET).$(DSA)")
-                    target.write(".xo: ./")
-                    target.write(acc["location"])
-                    target.write("\n")
+            	    target.write(".xo: ")
+		    target.write(acc["location"])
+		    target.write("\n")
                     target.write("\tmkdir -p $(XCLBIN)\n")
                     target.write("\t$(XOCC) $(CLFLAGS) -c -k ")
                     target.write(acc["name"])
                     target.write(" -I'$(<D)'")
                     target.write(" -o'$@' '$<'\n")
-            container_name = container_name + 1    
-        target.write("\n")
-    
     if "containers" in data:
-        container_name = 0 
-        acc_cnt = 0
-        bin_cnt = 0
-        ctn_cnt = 0
-        for dictionary in data["containers"]:
-            ctn_cnt = ctn_cnt + 1
-	    if dictionary["accelerators"]:
-                acc_cnt = acc_cnt + 1 
-            if dictionary["name"]:
-                bin_cnt = bin_cnt + 1 
-        for con in data["containers"]:
-            target.write("$(XCLBIN)/")
-            target.write(data["containers"][container_name]["name"])
-            if ctn_cnt > 1:
-		target.write(".$(TARGET).$(DSA)")
-		target.write(".xclbin: $(BINARY_CONTAINER_")
-		target.write(data["containers"][container_name]["name"])
-		target.write("_OBJS)\n")
-	    elif ctn_cnt > 0:
-		if acc_cnt==2 and bin_cnt==2:
-                    target.write(".$(TARGET).$(DSA)")
-                    target.write(".xclbin: $(BINARY_CONTAINER_")
-                    target.write(acc["name"])
-                    target.write("_OBJS)\n")
-            	else:                
-                    target.write(".$(TARGET).$(DSA)")
-                    target.write(".xclbin: $(BINARY_CONTAINER_")
-		    target.write(data["containers"][container_name]["name"])
-		    target.write("_OBJS)\n")
-            target.write("\t$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS)")
+	for con in data["containers"]:
+	    target.write("$(XCLBIN)/")
+            target.write(con["name"])
+            target.write(".$(TARGET).$(DSA)")
+            target.write(".xclbin:")
+	    target.write(" $(BINARY_CONTAINER_")
+            target.write(con["name"])
+            target.write("_OBJS)\n")
+	    target.write("\tmkdir -p $(XCLBIN)\n")
+	    target.write("\t$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS)")
             for acc in con["accelerators"]:
                 target.write(" --nk ")
                 target.write(acc["name"])
@@ -326,9 +241,30 @@ def building_kernel(target, data):
 		else:
 		    target.write(":1")
             target.write(" -o'$@' $(+)\n")
-            container_name = container_name + 1    
-    
     target.write("\n")
+    return
+
+def building_kernel_rtl(target, data):
+    target.write("# Building kernel\n")
+    if "containers" in data:
+	for con in data["containers"]:
+	    target.write("$(XCLBIN)/")
+            target.write(con["name"])
+            target.write(".$(TARGET).$(DSA)")
+            target.write(".xclbin:")
+	    target.write(" $(BINARY_CONTAINER_")
+            target.write(con["name"])
+            target.write("_OBJS)\n")
+	    target.write("\tmkdir -p $(XCLBIN)\n")
+	    target.write("\t$(XOCC) $(CLFLAGS) $(LDCLFLAGS) -lo")
+	    target.write(" $(XCLBIN)/")
+	    target.write(con["name"])
+	    target.write(".$(TARGET).$(DSA).xclbin")
+            for acc in con["accelerators"]:
+                target.write(" $(XCLBIN)/")
+		target.write(acc["name"])
+		target.write(".$(TARGET).$(DSA).xo")		   
+	    target.write("\n\n")
     return
 
 def building_host(target, data):
@@ -337,7 +273,6 @@ def building_host(target, data):
     target.write("\tmkdir -p $(XCLBIN)\n")
     target.write("\t$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)\n")
     target.write("\n")
-
     target.write("emconfig:$(EMCONFIG_DIR)/emconfig.json\n")
     target.write("$(EMCONFIG_DIR)/emconfig.json:\n")
     target.write("\temconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)")
@@ -345,6 +280,17 @@ def building_host(target, data):
         target.write(" --nd ")
         target.write(data["num_devices"])
     target.write("\n\n")        
+    return
+
+def building_host_rtl(target, data):
+    target.write("# Building Host\n")
+    target.write("$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)\n")
+    target.write("\tmkdir -p $(XCLBIN)\n")
+    target.write("\t$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)\n")
+    target.write("\n")
+    target.write("emconfig:emconfig.json\n")
+    target.write("emconfig.json:\n")
+    target.write("\temconfigutil --platform $(DSA) --nd 1\n\n")
     return
 
 def profile_report(target):
@@ -394,9 +340,12 @@ def mk_build_all(target, data):
     target.write("exe: $(EXECUTABLE)\n")
     target.write("\n")
 
-    building_kernel(target, data)
-    building_host(target, data)
-
+    if "config_make" in data:
+	building_kernel_rtl(target, data)
+	building_host_rtl(target, data)
+    else:
+    	building_kernel(target, data)
+	building_host(target, data)
     return
 
 def mk_check(target, data):
@@ -420,8 +369,11 @@ def mk_check(target, data):
             target1.write("\n")
         target1.close
     target.write("ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))\n")
-    target.write("\t$(CP) $(EMCONFIG_DIR)/emconfig.json .\n") 
-    target.write("\tXCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)")
+    if "config_make" in data:
+    	target.write("\tXCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)")    	
+    else:
+	target.write("\t$(CP) $(EMCONFIG_DIR)/emconfig.json .\n") 
+    	target.write("\tXCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)")
     if "cmd_args" in data:
         args = data["cmd_args"].split(" ")    
         for arg in args[0:]:
@@ -457,7 +409,6 @@ def mk_check(target, data):
             target.write(" ")
             target.write(arg)
         target.write(" TARGET. Please use the target for running the application)\n")
-        #target.write("$(error Nothing to be done for make)\n")
         target.write("endif\n")
         target.write("\n")
 
@@ -485,16 +436,15 @@ def mk_help(target):
     target.write("\n")
 
 def create_mk(target, data):
+    mk_help(target)
     create_params(target,data)
     add_host_flags(target, data)
     add_kernel_flags(target, data)
     add_containers(target, data)
-    add_libs(target, data)
     mk_build_all(target, data)
     mk_check(target, data)
     mk_clean(target,data)
-    mk_help(target)
-    return
+    return 
 
 script, desc_file = argv
 desc = open(desc_file, 'r')
@@ -503,16 +453,6 @@ desc.close()
 print "Generating sdaccel.ini file for %s" %data["example"]
 target = open("sdaccel.ini","w+")
 profile_report(target)
-target.close
 target = open("Makefile", "w")
-
 create_mk(target, data)
-
-target.write("docs: README.md\n")
-target.write("\n")
-
-target.write("README.md: description.json\n")
-target.write("\t$(ABS_COMMON_REPO)/utility/readme_gen/readme_gen.py description.json\n")
-target.write("\n")
-
 target.close

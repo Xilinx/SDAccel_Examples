@@ -108,7 +108,7 @@ Kernel Description (Bad Example) :
 #include "defns.h"
 
 __kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
-void cnn(
+void cnn_BAD(
         const __global int *image,      // Read-Only Image 
         const __global int *weights,    // Read-Only Weight Matrix
         __global int *out,              // Output Filters/Images

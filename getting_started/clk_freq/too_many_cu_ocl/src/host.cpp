@@ -77,7 +77,9 @@ bool run_opencl_vadd(
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
     cl::Program program(context, devices, bins);
-    cl::Kernel krnl_vector_add(program,"vadd");
+    cl::Kernel krnl_vector_add;
+    if (good) krnl_vector_add = cl::Kernel(program,"vadd_GOOD");
+    else krnl_vector_add = cl::Kernel(program, "vadd_BAD");
 
     std::cout << "Starting " << (good ? "GOOD" : "BAD") << " Kernel" << std::endl;
 
