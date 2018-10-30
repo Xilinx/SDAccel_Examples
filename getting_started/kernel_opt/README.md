@@ -22,6 +22,7 @@ Example        | Description           | Key Concepts / Keywords
 [systolic_array_c/][]|This is a simple example of matrix multiplication (Row x Col) to help developers learn systolic array based algorithm design. Note : Systolic array based algorithm design is well suited for FPGA.|
 [systolic_array_ocl/][]|This is a simple example of matrix multiplication (Row x Col) to help developers learn systolic array based algorithm design. Note: Systolic array based algorithm design is well suited for FPGA.|
 [vectorization_memorycoalescing_ocl/][]|This example is a simple OpenCL application which highlights the vectorization concept. It provides a basis for calculating the bandwidth utilization when the compiler looking to vectorize.|__Key__ __Concepts__<br> - Vectorization<br> - Memory Coalescing<br>__Keywords__<br> - vec_type_hint
+[dependence_inter_c/][]|This Example demonstrates the HLS pragma 'DEPENDENCE'.Using 'DEPENDENCE' pragma, user can provide additional dependency details to the compiler by specifying if the dependency in consecutive loop iterations on buffer is true/false, which allows the compiler to perform unrolling/pipelining to get better performance.|__Key__ __Concepts__<br> - Inter Dependence<br>__Keywords__<br> - DEPENDENCE<br> - inter<br> - WAR
 
 [.]:.
 [aos_vs_soa_ocl/]:aos_vs_soa_ocl/
@@ -40,3 +41,4 @@ Example        | Description           | Key Concepts / Keywords
 [systolic_array_c/]:systolic_array_c/
 [systolic_array_ocl/]:systolic_array_ocl/
 [vectorization_memorycoalescing_ocl/]:vectorization_memorycoalescing_ocl/
+[dependence_inter_c/]:dependence_inter_c/

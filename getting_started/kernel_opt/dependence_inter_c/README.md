@@ -1,4 +1,4 @@
-Systolic Array Implementation (C)
+Loop Iteration Dependency (C)
 ======================
 
 This README file contains the following sections:
@@ -15,7 +15,11 @@ This README file contains the following sections:
 
 
 ## 1. OVERVIEW
-This is a simple example of matrix multiplication (Row x Col) to help developers learn systolic array based algorithm design. Note : Systolic array based algorithm design is well suited for FPGA.
+This Example demonstrates the HLS pragma 'DEPENDENCE'.Using 'DEPENDENCE' pragma, user can provide additional dependency details to the compiler by specifying if the dependency in consecutive loop iterations on buffer is true/false, which allows the compiler to perform unrolling/pipelining to get better performance.
+
+***KEY CONCEPTS:*** Inter Dependence
+
+***KEYWORDS:*** DEPENDENCE, inter, WAR
 
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
@@ -48,7 +52,8 @@ README.md
 description.json
 sdaccel.ini
 src/host.cpp
-src/mmult.cpp
+src/vconv.cpp
+src/vconv.h
 utils.mk
 ```
 
