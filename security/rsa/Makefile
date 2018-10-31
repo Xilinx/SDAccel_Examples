@@ -35,10 +35,10 @@ XOCC := $(XILINX_SDX)/bin/xocc
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
 include $(ABS_COMMON_REPO)/libs/logger/logger.mk
 include $(ABS_COMMON_REPO)/libs/cmdparser/cmdparser.mk
-include $(ABS_COMMON_REPO)/libs/xcl/xcl.mk
-CXXFLAGS += $(logger_CXXFLAGS) $(cmdparser_CXXFLAGS) $(xcl_CXXFLAGS)
-LDFLAGS += $(logger_LDFLAGS) $(cmdparser_LDFLAGS) $(xcl_LDFLAGS)
-HOST_SRCS += $(logger_SRCS) $(cmdparser_SRCS) $(xcl_SRCS)
+include $(ABS_COMMON_REPO)/libs/xcl2/xcl2.mk
+CXXFLAGS += $(logger_CXXFLAGS) $(cmdparser_CXXFLAGS) $(xcl2_CXXFLAGS)
+LDFLAGS += $(logger_LDFLAGS) $(cmdparser_LDFLAGS) $(xcl2_LDFLAGS)
+HOST_SRCS += $(logger_SRCS) $(cmdparser_SRCS) $(xcl2_SRCS)
 
 CXXFLAGS += -lssl -lcrypto -ldl
 CXXFLAGS += $(opencl_CXXFLAGS) -Wall -O0 -g -std=c++14

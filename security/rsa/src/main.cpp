@@ -27,7 +27,6 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 
-#include <CL/cl.h>
 #include "common.h"
 #include <openssl/bn.h>
 #include <openssl/rsa.h>
@@ -40,9 +39,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 using namespace sda;
-using namespace sda::cl;
+//using namespace sda::cl;
 using namespace sda::utils;
-
 
 int main(int argc, char* argv[]) {
 	LogInfo("Xilinx 2048 bit RSA Application");

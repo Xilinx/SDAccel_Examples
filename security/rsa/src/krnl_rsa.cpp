@@ -30,7 +30,6 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define AP_INT_MAX_W 8192 //default maximum bit is 1024 bits
 #include "ap_int.h"
 
-//#include <iostream.h>
 #include <string.h> 
 typedef ap_uint<17> u17;
 typedef ap_uint<1024> u1024;
@@ -42,14 +41,6 @@ typedef unsigned long u64;
 
 #define N 32
 
-//the 26x17 unsigned mult C++ example design, which HLS can map it into 1 DSP48E2 in KU115
-/*void mult_17x26(ap_uint<17> A,  ap_uint<26> B,  ap_uint<48> &mult_out) {
-#pragma HLS PIPELINE
-	   mult_out = (ap_uint<48>)(A * B);
-
-    }
-
-*/
 // Compute the 2adic inverse of x
 //inverse %2^32
 int inv2adic(u32 x)
@@ -89,7 +80,7 @@ int add_32( u32 *z,  u32 *x, u32 *y)
   u32 new_carry = 0;
   u32 temp;
   unsigned i;
-//#pragma HLS PIPELINE
+
   for (i=0; i <N; i++)
   {
     //Broken into two steps to handle the case where one of the operands
@@ -112,7 +103,7 @@ int add_64(  u32 *z, u32 *x,   u32 *y)
   u32 new_carry = 0;
   u32 temp;
   unsigned i;
-//#pragma HLS PIPELINE
+
   for (i=0; i <64; i++)
   {
     //Broken into two steps to handle the case where one of the operands
@@ -139,7 +130,6 @@ int cmp_ge_n(  u32 *x, u32 *y)
 	return 1;
  	 }
 
-//#pragma HLS PIPELINE
   for(i=N-1; i >= 0; --i){
 	if(x[i] > y[i]){
   		return 1;
@@ -161,7 +151,7 @@ int addmul_1(  u32 *z,   u32 *x,u32 y)
   u64 prod;
 
   cy = 0;
-//#pragma HLS PIPELINE
+
   for(i=0; i < N; i++)
   {
     prod = (u64)x[i]*(u64)y;
@@ -182,7 +172,7 @@ int addmul_1(  u32 *z,   u32 *x,u32 y)
 
 	rr=&(z[N]);
 	rr[0]=addmul_1(z,x,y[0]);
-//#pragma HLS PIPELINE
+
 	for(;;)
 	{
   		if(--i<=0)return;
@@ -211,7 +201,6 @@ void mulredc(  u32 *z,  u32 *x,   u32 *y,  u32 *n, const u32 d,   u32 *t)
   for(i=0; i < N+2; i++)
     t[i] = 0;
 
-//#pragma HLS PIPELINE
   for(i=0; i < N; i++)
   {
     cy = addmul_1(t, x, y[i]); // t += x*y[i]
@@ -258,7 +247,7 @@ void redc( u32 *z,  u32 *x,  u32 *n, const u32 d,  u32 *t)
     t[i] = x[i];
 
   t[N] = 0;
-//#pragma HLS PIPELINE
+
  for(i=0; i < N; i++)
   {
     m = t[0]*d;
@@ -323,7 +312,7 @@ void rsa(u32 *z, u32 *Cpg, u32 *Cqg,  u32 *pg,  u32 *qg,  u32 *dmp1g, u32 *dmq1g
   	u32 iqmp[32];
   	u32 a[32];
 	int i,j;
-//#pragma HLS PIPELINE
+
 	for(i=0;i<64;i++)
 	{
 		product[i]=0;
@@ -356,13 +345,12 @@ void rsa(u32 *z, u32 *Cpg, u32 *Cqg,  u32 *pg,  u32 *qg,  u32 *dmp1g, u32 *dmq1g
                  
 		if(ex&(0x80000000>>j))
       		{
-			//memcpy(a,dtemp,128);
 			mulredc(a, a, t, n, d, workspace); // a=a*t
-
-		}
-    	 }
+            }
     }
- 	 redc(a,a,n,d, workspace); //a=a%n, montgomery back to ordinary
+  }
+  
+  redc(a,a,n,d, workspace); //a=a%n, montgomery back to ordinary
 
  	for(i=0;i<32;i++)
 		m2[i]=a[i]; //store Cq^dq % q
@@ -403,7 +391,6 @@ void rsa(u32 *z, u32 *Cpg, u32 *Cqg,  u32 *pg,  u32 *qg,  u32 *dmp1g, u32 *dmq1g
 
   redc(a,a,n,d, workspace); //a=a%n, montgomery back to ordinary
 
-//#pragma HLS PIPELINE
  for(i=0;i<32;i++)
 		m1[i]=a[i]; //store Cp^dp % p
 
@@ -421,7 +408,6 @@ void rsa(u32 *z, u32 *Cpg, u32 *Cqg,  u32 *pg,  u32 *qg,  u32 *dmp1g, u32 *dmq1g
 	mul_n(product,m1,q); //h*q
 	add_64(product,product,m2);	//m=m2+hq
   	memcpy(z, product, 256);
-
 }
 
 }

@@ -102,7 +102,7 @@ An emulated application can also be executed directly from the command line with
 To manually configure the environment to run the application, set the following
 ```
 export LD_LIBRARY_PATH=$XILINX_SDX/runtime/lib/x86_64/:$LD_LIBRARY_PATH
-export XCL_EMULATION_MODE=true
+export XCL_EMULATION_MODE=<sw_emu|hw_emu>
 emconfigutil --platform 'xilinx_vcu1525_dynamic' --nd 1
 ```
 Once the environment has been configured, the application can be executed by

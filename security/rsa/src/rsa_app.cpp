@@ -32,7 +32,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 #include "logger.h"
 #include "rsa_app.h"
-#include "xcl.h"
+#include "xcl2.hpp"
 
 #if defined(__linux__) || defined(linux)
 	#include "sys/time.h"
@@ -42,19 +42,13 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #define ROUNDS 10
-//ROUNDS <= 10 valid
-
-using namespace sda;
-using namespace sda::cl;
 
 /////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////
 //load_file_to_memory
 
-
 RSAApp::RSAApp() {
 	// TODO Auto-generated constructor stub
-
 }
 
 RSAApp::RSAApp(const string& vendor_name,
@@ -65,27 +59,29 @@ RSAApp::RSAApp(const string& vendor_name,
                const string& strOutputFP,
                const string& strKeyFP)
 {
+	cl_int err;
 	//store path to input bitmap
 	m_strInputFP = strInputFP;
 	m_strOutputFP = strOutputFP;
 	m_strKeyFP = strKeyFP;
 
-	//kernels
-	m_world = xcl_world_single();
-	m_program = xcl_import_binary(m_world, "krnl_rsa");
-	m_clKernelRSA  = xcl_get_kernel(m_program, "rsa");
+	std::vector<cl::Device> devices = xcl::get_xil_devices();
+	cl::Device device = devices[0];
+
+	OCL_CHECK(err, m_context = cl::Context(device, NULL, NULL, NULL, &err));
+	OCL_CHECK(err, m_q = cl::CommandQueue(m_context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+	OCL_CHECK(err, std::string deviceName = device.getInfo<CL_DEVICE_NAME>(&err));
+
+	std::string binaryFile = xcl::find_binary_file(deviceName,"krnl_rsa");
+
+	cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+	devices.resize(1);
+	OCL_CHECK(err, m_program = cl::Program(m_context, devices, bins, NULL, &err));
+	OCL_CHECK(err, m_clKernelRSA = cl::Kernel(m_program,"rsa", &err));
 }
 
 RSAApp::~RSAApp() {
 	// TODO Auto-generated destructor stub
-	cleanup();
-}
-
-void RSAApp::cleanup() {
-
-	clReleaseKernel(m_clKernelRSA);
-	clReleaseProgram(m_program);
-	xcl_release_world(m_world);
 }
 
 double RSAApp::timestamp() {
@@ -102,385 +98,148 @@ double RSAApp::timestamp() {
 	return ms;
 }
 
-double RSAApp::computeEventDurationInMS(const cl_event& event) {
+double RSAApp::computeEventDurationInMS(const cl::Event& event) {
+	cl_int err;
 	cl_ulong ts_start = 0, ts_end = 0;
 	double duration = 0;
-	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &ts_start, NULL);
-	clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &ts_end, NULL);
-	duration += (cl_double)(ts_end-ts_start)*(cl_double)(1e-06);
+    OCL_CHECK(err, err = event.getProfilingInfo<cl_ulong>(CL_PROFILING_COMMAND_START, &ts_start));
+    OCL_CHECK(err, err = event.getProfilingInfo<cl_ulong>(CL_PROFILING_COMMAND_END, &ts_end));
+
+    duration += (cl_double)(ts_end-ts_start)*(cl_double)(1e-06);
 
 	return duration;
 }
 
-bool RSAApp::releaseMemObject(cl_mem &obj)
-{
-  cl_int   err = 0;
-  bool     returnStatus = true;    // true if successful
+bool RSAApp::invoke_kernel(cl::Kernel kernel, cl_uint *message, cl_uint *Cp, cl_uint *Cq,
+							cl_uint *p, cl_uint *q, cl_uint *dmp1, cl_uint *dmq1, cl_uint *iqmp,
+							cl_uint *r2p, cl_uint *r2q, cl::Event events[evtCount]) {
 
-  if (obj != NULL)  // This means it has been initialized
-  {
-    err = clReleaseMemObject(obj);
-    if (err != CL_SUCCESS)
-    {
-      cout << "Error releasing variable\n";
-      returnStatus |= false;
-    }
-    else
-      obj = NULL; /* memory was released, re-initialize pointer to NULL */
-  }
-
-  return returnStatus;
-}
-
-bool RSAApp::invoke_kernel(cl_kernel kernel,cl_uint *message,cl_uint *Cp,cl_uint *Cq, cl_uint *p, cl_uint *q, cl_uint *dmp1, cl_uint *dmq1, cl_uint *iqmp, cl_uint *r2p, cl_uint *r2q, cl_event events[evtCount]) {
-
-      cl_uint sizeInBytes = 32* sizeof(cl_uint);
-      int status;
+    cl_uint sizeInBytes = 32* sizeof(cl_uint);
+    cl_int err;
 
 	/////////////////////////////////////////////////////////////////
 	// Create OpenCL memory buffers
 	/////////////////////////////////////////////////////////////////
 
-cl_mem messageBuffer = clCreateBuffer(
-				      m_world.context,
-                      CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR,
-                     2*sizeInBytes,
-                      message,
-                      &status);
-    if(status != CL_SUCCESS)
-	{
-		printf("Error: clCreateBuffer (messageBuffer)\n");
-		return false;
-	}
+    OCL_CHECK(err, cl::Buffer messageBuffer (m_context,CL_MEM_COPY_HOST_PTR | CL_MEM_READ_WRITE,
+    		  	  	  2*sizeInBytes, message, &err));
 
+    OCL_CHECK(err, cl::Buffer CpBuffer (m_context,CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY,
+        		  	  sizeInBytes, Cp, &err));
 
-cl_mem CpBuffer  = clCreateBuffer(
-				      m_world.context,
-                      CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
-                     sizeInBytes,
-                      Cp,
-                      &status);
-    if(status != CL_SUCCESS)
-	{
-		printf("Error: clCreateBuffer (CpBuffer)\n");
-		return false;
-	}
+    OCL_CHECK(err, cl::Buffer CqBuffer (m_context,CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY,
+        		  	  sizeInBytes, Cq, &err));
 
-cl_mem CqBuffer = clCreateBuffer(
-				      m_world.context,
-                      CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
-                     sizeInBytes,
-                      Cq,
-                      &status);
-    if(status != CL_SUCCESS)
-	{
-		printf("Error: clCreateBuffer (CqBuffer)\n");
-		return false;
-	}
+    OCL_CHECK(err, cl::Buffer dmp1Buffer (m_context,CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY,
+        		  	  sizeInBytes, dmp1, &err));
 
-cl_mem dmp1Buffer= clCreateBuffer(
-				      m_world.context,
-                      CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
-                     sizeInBytes,
-                      dmp1,
-                      &status);
-    if(status != CL_SUCCESS)
-	{
-		printf("Error: clCreateBuffer (dmp1Buffer)\n");
-		return false;
-	}
+    OCL_CHECK(err, cl::Buffer dmq1Buffer (m_context,CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY,
+        		  	  sizeInBytes, dmq1, &err));
 
-cl_mem dmq1Buffer = clCreateBuffer(
-				      m_world.context,
-                      CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
-                     sizeInBytes,
-                      dmq1,
-                      &status);
-    if(status != CL_SUCCESS)
-	{
-		printf("Error: clCreateBuffer (dmq1Buffer)\n");
-		return false;
-	}
+    OCL_CHECK(err, cl::Buffer pBuffer (m_context,CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY,
+        		  	  sizeInBytes, p, &err));
 
-cl_mem pBuffer = clCreateBuffer(
-				      m_world.context,
-                      CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
-                     sizeInBytes,
-                      p,
-                      &status);
-    if(status != CL_SUCCESS)
-	{
-		printf("Error: clCreateBuffer (pBuffer)\n");
-		return false;
-	}
-cl_mem qBuffer = clCreateBuffer(
-				     m_world.context,
-                      CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
-                     sizeInBytes,
-                      q,
-                      &status);
-    if(status != CL_SUCCESS)
-	{
-		printf("Error: clCreateBuffer (qBuffer)\n");
-		return false;
-	}
-cl_mem r2pBuffer = clCreateBuffer(
-				      m_world.context,
-                      CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
-                     sizeInBytes,
-                      r2p,
-                      &status);
-    if(status != CL_SUCCESS)
-	{
-		printf("Error: clCreateBuffer (r2pBuffer)\n");
-		return false;
-	}
-cl_mem r2qBuffer = clCreateBuffer(
-				      m_world.context,
-                      CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
-                     sizeInBytes,
-                      r2q,
-                      &status);
-    if(status != CL_SUCCESS)
-	{
-		printf("Error: clCreateBuffer (r2qBuffer)\n");
-		return false;
-	}
+    OCL_CHECK(err, cl::Buffer qBuffer (m_context,CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY,
+        		  	  sizeInBytes, q, &err));
 
-cl_mem iqmpBuffer=clCreateBuffer(
-				      m_world.context,
-                      CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
-                     sizeInBytes,
-                      iqmp,
-                      &status);
-    if(status != CL_SUCCESS)
-	{
-		printf("Error: clCreateBuffer (iqmpBuffer)\n");
-		return false;
-	}
+    OCL_CHECK(err, cl::Buffer r2pBuffer (m_context,CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY,
+        		  	  sizeInBytes, r2p, &err));
+
+    OCL_CHECK(err, cl::Buffer r2qBuffer (m_context,CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY,
+        		  	  sizeInBytes, r2q, &err));
+
+    OCL_CHECK(err, cl::Buffer iqmpBuffer (m_context,CL_MEM_COPY_HOST_PTR | CL_MEM_READ_WRITE,
+        		  	  sizeInBytes, iqmp, &err));
+
 	//execute kernel
-	cl_int err = 0;
-	err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &messageBuffer);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to set kernel argument [0] messageBuffer! %d", err);
-		LogError("Test failed");
-		return false;
-	}
-
-	err |= clSetKernelArg(kernel, 1,
-                    sizeof(cl_mem),
-                    (void *)&CpBuffer);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to set kernel argument [1] CpBuffer! %d", err);
-		LogError("Test failed");
-		return false;
-	}
-
-	err |= clSetKernelArg(kernel, 2,
-                    sizeof(cl_mem),
-                    (void *)&CqBuffer);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to set kernel argument [2] CqBuffer! %d", err);
-		LogError("Test failed");
-		return false;
-	}
-
-	err |= clSetKernelArg(kernel, 3,
-                    sizeof(cl_mem),
-                    (void *)&pBuffer);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to set kernel argument [3] pBuffer! %d", err);
-		LogError("Test failed");
-		return false;
-	}
-
-
-	err |= clSetKernelArg(kernel, 4,
-                    sizeof(cl_mem),
-                    (void *)&qBuffer);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to set kernel argument [4] qBuffer! %d", err);
-		LogError("Test failed");
-		return false;
-	}
-
-	err |= clSetKernelArg(kernel,5,
-                    sizeof(cl_mem),
-                    (void *)&dmp1Buffer);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to set kernel argument [5] dmp1Buffer! %d", err);
-		LogError("Test failed");
-		return false;
-	}
-
-	err |= clSetKernelArg(kernel,6,
-                    sizeof(cl_mem),
-                    (void *)&dmq1Buffer);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to set kernel argument [6] dmq1Buffer! %d", err);
-		LogError("Test failed");
-		return false;
-	}
-
-
-	err |= clSetKernelArg(kernel, 7,
-                    sizeof(cl_mem),
-                    (void *)&iqmpBuffer);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to set kernel argument [7] iqmpBuffer! %d", err);
-		LogError("Test failed");
-		return false;
-	}
-
-	err |= clSetKernelArg(kernel,8,
-                    sizeof(cl_mem),
-                    (void *)&r2pBuffer);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to set kernel argument [8] r2pBuffer! %d", err);
-		LogError("Test failed");
-		return false;
-	}
-
-	err |= clSetKernelArg(kernel,9,
-                    sizeof(cl_mem),
-                    (void *)&r2qBuffer);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to set kernel argument [9] r2qBuffer! %d", err);
-		LogError("Test failed");
-		return false;
-	}
-
-
-	size_t global[1];
-	size_t local[1];
-	global[0] = 1;
-	local[0] = 1;
+	OCL_CHECK(err, err = kernel.setArg(0, messageBuffer));
+	OCL_CHECK(err, err = kernel.setArg(1, CpBuffer));
+	OCL_CHECK(err, err = kernel.setArg(2, CqBuffer));
+	OCL_CHECK(err, err = kernel.setArg(3, pBuffer));
+	OCL_CHECK(err, err = kernel.setArg(4, qBuffer));
+	OCL_CHECK(err, err = kernel.setArg(5, dmp1Buffer));
+	OCL_CHECK(err, err = kernel.setArg(6, dmq1Buffer));
+	OCL_CHECK(err, err = kernel.setArg(7, iqmpBuffer));
+	OCL_CHECK(err, err = kernel.setArg(8, r2pBuffer));
+	OCL_CHECK(err, err = kernel.setArg(9, r2qBuffer));
 
 	LogInfo("EX1: to make sure all buffers are migrated to device");
 
 	//call once to guarentee that all buffers are migrated to device memory
-	err = clEnqueueNDRangeKernel(m_world.command_queue, kernel, 1, NULL, global,
-			local, 0, NULL, &events[evtHostWrite]);
-	if (err != CL_SUCCESS) {
-		LogError("[EX1] Failed to execute kernel %d", err);
-		LogError("Test failed");
-		return false;
-	}
-	clFinish(m_world.command_queue);
-
+	OCL_CHECK(err, err = m_q.enqueueTask(kernel, NULL, &events[evtHostWrite]));
 
 	//read output size
-	err = clEnqueueReadBuffer(m_world.command_queue, messageBuffer, CL_TRUE, 0,
-			 2*sizeInBytes, message,0, NULL, NULL);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to read output messageBuffer %d", err);
-		LogError("Test failed");
-		return false;
-	}
-	clFinish(m_world.command_queue);
+	OCL_CHECK(err, err = m_q.enqueueReadBuffer(messageBuffer, CL_TRUE, 0, 2*sizeInBytes, message, NULL, NULL));
 
 	LogInfo("EX2: Real execution of the algorithm to fill the output");
 
 	//call a second time to measure on-chip throughput
-	err = clEnqueueNDRangeKernel(m_world.command_queue, kernel, 1, NULL, global,
-			local, 0, NULL, &events[evtKernelExec]);
-	if (err != CL_SUCCESS) {
-		LogError("[EX2] Failed to execute kernel %d", err);
-		LogError("Test failed");
-		return false;
-	}
-
-	clFinish(m_world.command_queue);
+	OCL_CHECK(err, err = m_q.enqueueTask(kernel, NULL, &events[evtKernelExec]));
 
 	//copy results back from OpenCL buffer
-	err = clEnqueueReadBuffer(m_world.command_queue, messageBuffer, CL_TRUE, 0,
-			2*sizeInBytes,
-                message,
-			0, NULL, &events[evtHostRead]);
-	if (err != CL_SUCCESS) {
-		LogError("Failed to read output size buffer %d", err);
-		LogError("Test failed");
-		return false;
-	}
-	clFinish(m_world.command_queue);
+	OCL_CHECK(err, err = m_q.enqueueReadBuffer(messageBuffer, CL_TRUE, 0, 2*sizeInBytes, message, NULL, &events[evtHostRead]));
 
-
-	//cleanup
-
-       releaseMemObject(messageBuffer);
-       releaseMemObject(CqBuffer);
-       releaseMemObject(CpBuffer);
-       releaseMemObject(r2qBuffer);
-       releaseMemObject(r2pBuffer);
-       releaseMemObject(iqmpBuffer);
-       releaseMemObject(pBuffer);
-       releaseMemObject(qBuffer);
-       releaseMemObject(r2pBuffer);
-       releaseMemObject(r2qBuffer);
-
+	m_q.finish();
 	return true;
 }
-
-
-
 
 bool RSAApp::run(int idevice, int nruns) {
 	if (nruns <= 0)
 		return false;
 
-        cl_uchar  *p, *q, *p_r, *q_r,*dmp1, *dmq1, *iqmp, *dmp1_r,*dmq1_r, *iqmp_r;
+    cl_uchar  *p, *q, *p_r, *q_r,*dmp1, *dmq1, *iqmp, *dmp1_r,*dmq1_r, *iqmp_r;
 	cl_uint r2p[32], r2q[32], Cp[32], Cq[32];
 	int p_size = 0, q_size = 0, dmp1_size = 0, dmq1_size = 0, iqmp_size = 0;
-         uint message[NUM_WORDS], ciphertext[NUM_WORDS];
-	//input ciphertext
-	FILE *key_fp = fopen(m_strKeyFP.c_str(), "r");
-  	  if(!key_fp) {
-     	 printf("Could not locate file: %s\n", m_strKeyFP.c_str());
-      	return 1;
-   	 }
+    uint message[NUM_WORDS], ciphertext[NUM_WORDS];
 
+    //input ciphertext
+	FILE *key_fp = fopen(m_strKeyFP.c_str(), "r");
+  	if(!key_fp) {
+     	printf("Could not locate file: %s\n", m_strKeyFP.c_str());
+      	return 1;
+   	}
 
 	printf("read in ciphertext\n");
-    	read_data(ciphertext, m_strInputFP.c_str());
+    read_data(ciphertext, m_strInputFP.c_str());
 	print_big_number(ciphertext, 64, "ciphertext");
 
-    	RSA *rsa_key = PEM_read_RSAPrivateKey(key_fp, NULL, NULL, NULL);
+    RSA *rsa_key = PEM_read_RSAPrivateKey(key_fp, NULL, NULL, NULL);
 	printf("n is \n");
 	BN_print_fp(stdout, rsa_key->n);  
 	printf("d is\n"); 
 	BN_print_fp(stdout, rsa_key->d);  
 	int n_size = BN_num_bytes(rsa_key->n);
-    	p = (unsigned char *) malloc(NUM_WORDS*2);
-   	 q = (unsigned char *) malloc(NUM_WORDS*2);
-   	 dmp1 = (unsigned char *) malloc(NUM_WORDS*2);
-   	 dmq1 = (unsigned char *) malloc(NUM_WORDS*2);
-   	 iqmp = (unsigned char *) malloc(NUM_WORDS*2);
+    p = (unsigned char *) malloc(NUM_WORDS*2);
+   	q = (unsigned char *) malloc(NUM_WORDS*2);
+   	dmp1 = (unsigned char *) malloc(NUM_WORDS*2);
+   	dmq1 = (unsigned char *) malloc(NUM_WORDS*2);
+   	iqmp = (unsigned char *) malloc(NUM_WORDS*2);
 
-    	p_r = (unsigned char *) malloc(NUM_WORDS*2);
-    	q_r = (unsigned char *) malloc(NUM_WORDS*2);
-    	dmp1_r = (unsigned char *) malloc(NUM_WORDS*2);
+    p_r = (unsigned char *) malloc(NUM_WORDS*2);
+    q_r = (unsigned char *) malloc(NUM_WORDS*2);
+    dmp1_r = (unsigned char *) malloc(NUM_WORDS*2);
    	dmq1_r = (unsigned char *) malloc(NUM_WORDS*2);
-    	iqmp_r = (unsigned char *) malloc(NUM_WORDS*2);
+    iqmp_r = (unsigned char *) malloc(NUM_WORDS*2);
 
-        BN_bn2bin(rsa_key->p, p_r);
+    BN_bn2bin(rsa_key->p, p_r);
    	BN_bn2bin(rsa_key->q, q_r);
    	BN_bn2bin(rsa_key->dmp1, dmp1_r);
    	BN_bn2bin(rsa_key->dmq1, dmq1_r);
-    	BN_bn2bin(rsa_key->iqmp, iqmp_r);
+    BN_bn2bin(rsa_key->iqmp, iqmp_r);
 
-    	p_size = BN_num_bytes(rsa_key->p);
-    	q_size = BN_num_bytes(rsa_key->q);
-    	dmp1_size = BN_num_bytes(rsa_key->dmp1);
-    	dmq1_size = BN_num_bytes(rsa_key->dmq1);
-    	iqmp_size = BN_num_bytes(rsa_key->iqmp);
+    p_size = BN_num_bytes(rsa_key->p);
+    q_size = BN_num_bytes(rsa_key->q);
+    dmp1_size = BN_num_bytes(rsa_key->dmp1);
+    dmq1_size = BN_num_bytes(rsa_key->dmq1);
+    iqmp_size = BN_num_bytes(rsa_key->iqmp);
 
 	reverse_array(p, p_r, p_size);
    	reverse_array(q, q_r, q_size);
    	reverse_array(dmp1, dmp1_r, dmp1_size);
-    	reverse_array(dmq1, dmq1_r, dmq1_size);
+    reverse_array(dmq1, dmq1_r, dmq1_size);
    	reverse_array(iqmp, iqmp_r, iqmp_size);
 
-        //compute r2p=r2 mod p, r2q=r2 mod q
+    //compute r2p=r2 mod p, r2q=r2 mod q
 	unsigned char *temp1=(unsigned char *) malloc(128*2);
 	unsigned char *temp2=(unsigned char *) malloc(128*2);
 	unsigned char *temp3=(unsigned char *) malloc(64*2);
@@ -497,15 +256,13 @@ bool RSAApp::run(int idevice, int nruns) {
 	BN_mod(R2,R2,rsa_key->p,ctx);
 	BN_bn2bin(R2,temp3);
 	reverse_array(temp4,temp3,128);
-        memcpy(r2p,temp4,128);
-
+    memcpy(r2p,temp4,128);
 
 	BN_mul(R2,R,R,ctx);
 	BN_mod(R2,R2,rsa_key->q,ctx);
 	BN_bn2bin(R2,temp3);
 	reverse_array(temp4,temp3,128);
-        memcpy(r2q,temp4,128);
-
+    memcpy(r2q,temp4,128);
 
 	//prepare C%p, C%q for CRT
 	BIGNUM *C1=BN_CTX_get(ctx);
@@ -515,26 +272,24 @@ bool RSAApp::run(int idevice, int nruns) {
 	BN_mod(C1,C,rsa_key->p,ctx);
 	BN_bn2bin(C1,temp3);
 	reverse_array(temp4,temp3,64*2);
-        memcpy(Cp,temp4,64*2);
+    memcpy(Cp,temp4,64*2);
 	print_big_number(Cp, n_size/8, "\n C mod p");
 
 	BN_mod(C1,C,rsa_key->q,ctx);
 	BN_bn2bin(C1,temp3);
 	reverse_array(temp4,temp3,64*2);
-        memcpy(Cq,temp4,64*2);
+    memcpy(Cq,temp4,64*2);
 	print_big_number(Cq, n_size/8, "\n C mod q");
 
-        print_big_number((uint *)p, n_size/8, "\n p");
-        print_big_number((uint *)q, n_size/8, "\n q");
+    print_big_number((uint *)p, n_size/8, "\n p");
+    print_big_number((uint *)q, n_size/8, "\n q");
 	BN_CTX_end(ctx);
 	BN_CTX_free(ctx);
 
-	printf("start running kernel");
-
-
+	printf("start running kernel \n");
 
 	//timings
-	cl_event events[evtCount];
+	cl::Event events[evtCount];
 	double durations[evtCount];
 	for(int i=0; i < evtCount; i++)
 		durations[i] = 0.0;
@@ -545,7 +300,8 @@ bool RSAApp::run(int idevice, int nruns) {
 
 	//encode image
 	LogInfo("Invoking rsa");
-	bool res = invoke_kernel(m_clKernelRSA, message, Cp, Cq, (uint *)p,(uint *) q, (uint *)dmp1, (uint *)dmq1, (uint *)iqmp,r2p,r2q,&events[0]);
+	bool res = invoke_kernel(m_clKernelRSA, message, Cp, Cq, (uint *)p,(uint *) q, (uint *)dmp1, (uint *)dmq1,
+								(uint *)iqmp,r2p,r2q,&events[0]);
 	if(!res) {
 		LogError("Failed to decrypt the ciphertext. Test Failed");
 		return false;
@@ -559,16 +315,15 @@ bool RSAApp::run(int idevice, int nruns) {
 	double h2d_rate = 0.0;
 	double d2h_rate = 0.0;
 
-
 	//compute transfer rate for host write
 	if(durations[evtHostWrite] > 0) {
 		uint sz_bytes = 32*4*2;
 
-		//bits per second
-		double tmp = (sz_bytes * 8.0) / (durations[evtHostWrite] / 1000.0);
+	    //bits per second
+	    double tmp = (sz_bytes * 8.0) / (durations[evtHostWrite] / 1000.0);
 
-		//mega-bits per second
-		h2d_rate = tmp / (1024.0 * 1024.0);
+	    //mega-bits per second
+	    h2d_rate = tmp / (1024.0 * 1024.0);
 	}
 
 	//compute transfer rate for host read
@@ -593,8 +348,9 @@ bool RSAApp::run(int idevice, int nruns) {
 	LogInfo("TX rate device --> host [mbps] = %f", d2h_rate);
 
 	print_big_number(message, 64, "message");
-    	output_data_to_file(m_strOutputFP.c_str(), message);
-        free(temp1);
+    output_data_to_file(m_strOutputFP.c_str(), message);
+
+    free(temp1);
 	free(temp2);
 	free(temp3);
 	free(temp4);
@@ -610,3 +366,4 @@ bool RSAApp::run(int idevice, int nruns) {
 	free(iqmp_r);
 	return true;
 }
+
