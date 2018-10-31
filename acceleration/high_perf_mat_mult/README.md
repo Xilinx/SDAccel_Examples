@@ -116,7 +116,7 @@ emconfigutil --platform 'xilinx_vcu1525_dynamic' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./high_perf_mat_mult BUILD/high_perf_mat_mult0.xclbin 64 64 64
+./high_perf_mat_mult ./xclbin/high_perf_mat_mult0.<emulation target>.<device name>.xclbin 64 64 64
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card

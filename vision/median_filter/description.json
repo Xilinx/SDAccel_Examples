@@ -8,7 +8,7 @@
     "opencv": true,
     "host_exe": "median",
     "host_srcs": "src/medianFilter.cpp",        
-    "cmd_args": "BUILD/median.xclbin PROJECT/data/inputImage.bmp PROJECT/data/goldenImage.bmp",
+    "cmd_args": "BUILD/krnl_median.xclbin PROJECT/data/inputImage.bmp PROJECT/data/goldenImage.bmp",
     "em_cmd": "./median ./xclbin/krnl_median.<emulation type>.xilinx_vcu1525_dynamic_5_1.xclbin data/inputImage.bmp data/goldenImage.bmp",
     "output_files": "output.bmp",        
     "libs": [

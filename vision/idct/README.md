@@ -95,7 +95,7 @@ emconfigutil --platform 'xilinx_vcu1525_dynamic' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./idct ./xclbin/krnl_idct.<emulation flow>.xilinx_vcu1525_dynamic_5_1.xclbin
+./idct ./xclbin/krnl_idct.<emulation target>.<device name>.xclbin
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card

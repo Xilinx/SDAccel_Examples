@@ -107,7 +107,7 @@ emconfigutil --platform 'xilinx_vcu1525_dynamic' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./rsa --in data/0_0_1024_key.cip --out data/0_out.msg --key data/0_1024_key.pem
+./rsa --in ./data/0_0_1024_key.cip --out ./data/0_out.msg --key ./data/0_1024_key.pem
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card

@@ -87,9 +87,9 @@ $(EMCONFIG_DIR)/emconfig.json:
 check: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/median.$(TARGET).$(DSA).xclbin ./data/inputImage.bmp ./data/goldenImage.bmp
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/krnl_median.$(TARGET).$(DSA).xclbin ./data/inputImage.bmp ./data/goldenImage.bmp
 else
-	 ./$(EXECUTABLE) $(XCLBIN)/median.$(TARGET).$(DSA).xclbin ./data/inputImage.bmp ./data/goldenImage.bmp
+	 ./$(EXECUTABLE) $(XCLBIN)/krnl_median.$(TARGET).$(DSA).xclbin ./data/inputImage.bmp ./data/goldenImage.bmp
 endif
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 
