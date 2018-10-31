@@ -74,7 +74,9 @@ float   min_rmse_ref = FLT_MAX;
 /* reference min_rmse value */
 
 /*---< cluster() >-----------------------------------------------------------*/
-int cluster(int     npoints,                /* number of data points */
+int cluster(
+            FPGA_KMEANS* fpga,
+            int     npoints,                /* number of data points */
             int     nfeatures,              /* number of attributes for each point */
             float   **features,             /* array: [npoints][nfeatures] */                  
             int     min_nclusters,          /* range of min to max number of clusters */
@@ -107,7 +109,7 @@ int cluster(int     npoints,                /* number of data points */
         exit(1);
     }
 
-     fpga_kmeans_init();
+     fpga->fpga_kmeans_init();
 
     /* sweep k from min to max_nclusters to find the best number of clusters */
     for(nclusters = min_nclusters; nclusters <= max_nclusters; nclusters++)
@@ -119,7 +121,7 @@ int cluster(int     npoints,                /* number of data points */
         printf("Device Initialization Time %f ms\n",d_time);
         clock_gettime(CLOCK_MONOTONIC,&d_start);
         /* allocate device memory, (@ kmeans_cuda.cu) */
-        fpga_kmeans_allocate(npoints, nfeatures, nclusters, features);
+        fpga->fpga_kmeans_allocate(npoints, nfeatures, nclusters, features);
         clock_gettime(CLOCK_MONOTONIC,&d_end);
         d_time = time_elapsed(d_start,d_end);
         printf("Device Data Writing Time %f ms\n",d_time);
@@ -129,7 +131,7 @@ int cluster(int     npoints,                /* number of data points */
             printf("Running Device execution \n");
             clock_gettime(CLOCK_MONOTONIC,&d_start);
             /* initialize initial cluster centers, CUDA calls (@ kmeans_cuda.cu) */
-            tmp_cluster_centres = fpga_kmeans_clustering(
+            tmp_cluster_centres = fpga->fpga_kmeans_clustering(
                                                     features,
                                                     nfeatures,
                                                     npoints,
@@ -229,11 +231,10 @@ int cluster(int     npoints,                /* number of data points */
                 }
             }            
         }
-        fpga_kmeans_deallocateMemory();                            /* free device memory (@ kmeans_cuda.cu) */
-        fpga_kmeans_print_report();
+        fpga->fpga_kmeans_deallocateMemory(); 
+        fpga->fpga_kmeans_print_report();
     }
 
-    fpga_kmeans_shutdown();
     free(membership);
     free(cmodel_membership);
 

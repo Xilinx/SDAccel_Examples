@@ -41,14 +41,76 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 #include <string.h>
 #include <time.h>
-#include <CL/cl.h>
+
+#include "xcl2.hpp"
+
+#define FLOAT_DT    0
+#define INT_DT      1
+
+
+#if USE_DATA_TYPE == INT_DT
+    #define DATA_TYPE unsigned int 
+    #define INT_DATA_TYPE int
+#else
+    #define DATA_TYPE float
+    #define INT_DATA_TYPE int
+#endif
+
+class FPGA_KMEANS
+{
+public:
+        float **
+        fpga_kmeans_clustering(
+        float **feature, /* in: [npoints][nfeatures] */
+        int nfeatures,
+        int npoints,
+        int nclusters,
+        float threshold,
+        int *membership /* out: [npoints] */
+        );
+
+        int fpga_kmeans_compute(
+            float **feature,    /* in: [npoints][nfeatures] */
+            int     n_features,
+            int     n_points,
+            int     n_clusters,
+            int    *membership,
+		        float **clusters,
+            int     *new_centers_len,
+            float  **new_centers);
+
+        int fpga_kmeans_setup(int global_size = 1);
+        int fpga_kmeans_init();
+        int fpga_kmeans_allocate(int n_points, int n_features, int n_clusters, float **feature);
+        int fpga_kmeans_deallocateMemory();
+        int fpga_kmeans_print_report();
+private:
+        cl::Context 	 g_context;
+        cl::CommandQueue g_q;
+        cl::Program      g_prog;
+        INT_DATA_TYPE   *g_membership_OCL;
+        cl::Kernel       g_kernel_kmeans;
+
+        cl::Buffer d_feature;
+        cl::Buffer d_cluster;
+        cl::Buffer d_membership;
+
+        int g_global_size = 1;
+        int g_vector_size = 16;
+        float g_scale_factor =  1.0;
+
+        float g_t_exec;
+        int   g_iteration;
+};
+
 /* rmse.c */
 float   euclid_dist_2        (float*, float*, int);
 int     find_nearest_point   (float* , int, float**, int);
 float   rms_err(float**, int, int, float**, int);
-int     cluster(int, int, float**, int, int, float, int*, float***, float*, int, int, const char* goldenFile = NULL);
+int     cluster(FPGA_KMEANS* fpga, int, int, float**, int, int, float, int*, float***, float*, int, int, const char* goldenFile = NULL);
 float** kmeans_clustering_cmodel(float **feature, int nfeatures, int npoints, int nclusters, float threshold, 
         int* iteration, int *membership); 
+
 //return elapsed time in ms from t0 to t1
 inline double time_elapsed(struct timespec t0, struct timespec t1){
   double result = ((double)t1.tv_sec - (double)t0.tv_sec) * 1.0E9 + ((double)t1.tv_nsec - (double)t0.tv_nsec);

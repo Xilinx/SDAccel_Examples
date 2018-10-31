@@ -182,7 +182,6 @@ float** kmeans_clustering_cmodel(float **feature,    /* in: [npoints][nfeatures]
             new_centers_len[i] = 0;   /* set back to 0 */
         }
             
-        //delta /= npoints;
     (*iteration)++;
     } while (delta > threshold);
 

@@ -85,12 +85,11 @@ BINARY_CONTAINER_1_OBJS += $(XCLBIN)/kmeans.$(TARGET).$(DSA).xo
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
 include $(ABS_COMMON_REPO)/libs/logger/logger.mk
-include $(ABS_COMMON_REPO)/libs/oclHelper/oclHelper.mk
 include $(ABS_COMMON_REPO)/libs/cmdparser/cmdparser.mk
-include $(ABS_COMMON_REPO)/libs/xcl/xcl.mk
-CXXFLAGS += $(logger_CXXFLAGS) $(oclHelper_CXXFLAGS) $(cmdparser_CXXFLAGS) $(xcl_CXXFLAGS)
-LDFLAGS += $(logger_LDFLAGS) $(oclHelper_LDFLAGS) $(cmdparser_LDFLAGS) $(xcl_LDFLAGS)
-HOST_SRCS += $(logger_SRCS) $(oclHelper_SRCS) $(cmdparser_SRCS) $(xcl_SRCS)
+include $(ABS_COMMON_REPO)/libs/xcl2/xcl2.mk
+CXXFLAGS += $(logger_CXXFLAGS) $(cmdparser_CXXFLAGS) $(xcl2_CXXFLAGS)
+LDFLAGS += $(logger_LDFLAGS) $(cmdparser_LDFLAGS) $(xcl2_LDFLAGS)
+HOST_SRCS += $(logger_SRCS) $(cmdparser_SRCS) $(xcl2_SRCS)
 
 CP = cp -rf
 DATA = ./data
