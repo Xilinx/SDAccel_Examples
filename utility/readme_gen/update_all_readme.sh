@@ -2,7 +2,7 @@
 # This script regenerates all of the README files in the SDAccel example repository
 # An example with an auto-generated README file requires a description.json file
 # Only examples with a valid description.json file are updated by this script
-echo test
+
 BASEDIR=$(pwd)
 
 dir_list=( $(git ls-files | grep 'description.json' | sed -r 's|/[^/]+$||' | sort | uniq ))

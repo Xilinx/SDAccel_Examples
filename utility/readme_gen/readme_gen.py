@@ -200,7 +200,17 @@ def compilation(target,data):
     target.write("```\n")
     target.write("Once the environment has been configured, the application can be executed by\n")
     target.write("```\n")
-    target.write(data["em_cmd"])
+    if not "cmd_args" in data:
+        target.write('./' + data["host_exe"])
+    else:
+        target.write('./' + data["host_exe"])
+        args = data["cmd_args"].split(" ")
+        for arg in args[0:]:
+            target.write(" ")
+            arg = arg.replace('BUILD', './xclbin')
+            arg = arg.replace('PROJECT', '.')
+            arg = arg.replace('.xclbin', '.<emulation target>.<device name>.xclbin') 
+            target.write(arg)
     target.write("\n```\n")
     target.write("This is the same command executed by the check makefile rule\n")
     target.write("### Compiling for Application Execution in the FPGA Accelerator Card\n")
@@ -243,7 +253,25 @@ def nimbix(target):
     target.write("* Follow the instructions in [Nimbix Application Submission README][]\n\n")
     target.write("* Use the following command to launch the application from the users terminal (on a system outside of the Nimbix environment)\n")
     target.write("```\n")
-    target.write(data["hw_cmd"])
+    dirName = os.getcwd()
+    dirNameList = list(dirName.split("/"))
+    dirNameIndex = dirNameList.index("apps")
+    diff = len(dirNameList) - dirNameIndex - 1
+    while diff > 0:
+	    target.write("../")
+	    diff -= 1 
+    target.write("utility/nimbix/nimbix-run.py -- ")
+    if not "cmd_args" in data:
+        target.write('./' + data["host_exe"])
+    else:
+        target.write('./' + data["host_exe"])
+        args = data["cmd_args"].split(" ")
+        for arg in args[0:]:
+            target.write(" ")
+            arg = arg.replace('BUILD', './xclbin')
+            arg = arg.replace('PROJECT', '.')
+            arg = arg.replace('.xclbin', '.<emulation target>.<device name>.xclbin')
+            target.write(arg)
     target.write("\n")
     target.write("```\n\n")
     target.write("***Copy the application files from the Developer to Runtime instances on Nimbix***\n")
@@ -251,7 +279,17 @@ def nimbix(target):
     target.write("* Launch the application using the Nimbix web interface as described in [Nimbix Getting Started Guide][]\n")
     target.write("* Make sure that the application launch options in the Nimbix web interface reflect the applications command line syntax\n")
     target.write("```\n")
-    target.write(data["em_cmd"])
+    if not "cmd_args" in data:
+        target.write('./' + data["host_exe"])
+    else:
+        target.write('./' + data["host_exe"])
+        args = data["cmd_args"].split(" ")
+        for arg in args[0:]:
+            target.write(" ")
+            arg = arg.replace('BUILD', './xclbin')
+            arg = arg.replace('PROJECT', '.')
+            arg = arg.replace('.xclbin', '.<emulation target>.<device name>.xclbin')
+            target.write(arg)
     target.write("\n")
     target.write("```\n")
     return

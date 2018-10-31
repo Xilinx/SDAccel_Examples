@@ -30,9 +30,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "fpga_kmeans.h"
 #include <iostream>
 #include "kmeans.h"
-#include <CL/cl.h>
-#include "xcl.h"
-#include "oclHelper.h"
+#include "xcl2.hpp"
 
 #define FLOAT_DT    0
 #define INT_DT      1
@@ -48,42 +46,9 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 //Global Variables
-xcl_world       g_world;
-cl_program      g_prog;
-INT_DATA_TYPE   *g_membership_OCL;
-cl_kernel       g_kernel_kmeans;
-
-cl_mem d_feature;
-cl_mem d_cluster;
-cl_mem d_membership;
-
 int g_global_size = 1;
 int g_vector_size = 16;
 float g_scale_factor =  1.0;
-
-float g_t_exec;
-int   g_iteration;
-
-
-// Wrap any OpenCL API calls that return error code(cl_int) with the below macro
-// to quickly check for an error
-#define OCL_CHECK(call)                                                        \
-  do {                                                                         \
-    cl_int err = call;                                                         \
-    if (err != CL_SUCCESS) {                                                   \
-      printf(__FILE__ ":%d: [ERROR] " #call " returned %s\n", __LINE__,        \
-             oclErrorCode(err));                                               \
-      exit(EXIT_FAILURE);                                                      \
-    }                                                                          \
-  } while (0);
-
-// Checks OpenCL error codes
-void check(cl_int err_code) {
-  if (err_code != CL_SUCCESS) {
-    printf("ERROR: %d\n", err_code);
-    exit(EXIT_FAILURE);
-  }
-}
 
 #if USE_DATA_TYPE == INT_DT
 
@@ -101,6 +66,7 @@ static void calculate_scale_factor(float* mem, int size)
     g_scale_factor = diff / 0x00FFFFFF;
     printf ("Float to Integer Scale Factor = %f MaxFloat=%f and MinFloat=%f \n",g_scale_factor, max,min);
 }
+
 static int scaled_float2int (float value)
 {
     int ret_value;
@@ -136,7 +102,6 @@ static DATA_TYPE* re_align_clusters(float** clusters, int n_clusters, int N_Feat
         }
     }
     return temp_clusters;
-
 }
 
 static DATA_TYPE* re_align_features(float** feature, int N_Features, int NPoints, int n_features, int n_points, int size)
@@ -168,46 +133,50 @@ static DATA_TYPE* re_align_features(float** feature, int N_Features, int NPoints
     return temp_feature;
 }
 
-static int  fpga_kmeans_compute(
+int FPGA_KMEANS::fpga_kmeans_compute(
         float **feature,    /* in: [npoints][nfeatures] */
            int     n_features,
            int     n_points,
            int     n_clusters,
            int    *membership,
-           float **clusters,
+		   float **clusters,
            int     *new_centers_len,
            float  **new_centers)
 {
-  
+	cl_int err;
     int delta = 0;
     int i, j;
-    cl_event wait_event;
-    
-    size_t global_work[3] = { g_global_size, 1, 1 }; 
-    size_t local_work[3] = { 1, 1, 1 };
-
+    cl::Event wait_event;
     int N_Features = ( (n_features -1)/g_vector_size + 1) * g_vector_size;
     DATA_TYPE* temp_clusters = re_align_clusters(clusters,n_clusters, N_Features,n_features);
-    xcl_memcpy_to_device(g_world,d_cluster, temp_clusters, n_clusters * N_Features * sizeof(DATA_TYPE));
-    clFinish(g_world.command_queue);
+
+    OCL_CHECK(err, err = g_q.enqueueWriteBuffer(d_cluster, CL_TRUE, 0,
+    							n_clusters * N_Features * sizeof(DATA_TYPE), temp_clusters, NULL, NULL));
+    g_q.finish();
     free(temp_clusters);
 
-
     int narg = 0;
-    xcl_set_kernel_arg(g_kernel_kmeans, narg++, sizeof(cl_mem), &d_feature);
-    xcl_set_kernel_arg(g_kernel_kmeans, narg++, sizeof(cl_mem), &d_cluster);
-    xcl_set_kernel_arg(g_kernel_kmeans, narg++, sizeof(cl_mem), &d_membership);
-    xcl_set_kernel_arg(g_kernel_kmeans, narg++, sizeof(cl_int), (void*) &n_points);
-    xcl_set_kernel_arg(g_kernel_kmeans, narg++, sizeof(cl_int), (void*) &n_clusters);
-    xcl_set_kernel_arg(g_kernel_kmeans, narg++, sizeof(cl_int), (void*) &n_features);
-    OCL_CHECK(clEnqueueNDRangeKernel(g_world.command_queue, g_kernel_kmeans, 3, NULL, global_work, local_work, 0, NULL,   &wait_event));
+    OCL_CHECK(err, err = g_kernel_kmeans.setArg(narg++, d_feature));
+    OCL_CHECK(err, err = g_kernel_kmeans.setArg(narg++, d_cluster));
+    OCL_CHECK(err, err = g_kernel_kmeans.setArg(narg++, d_membership));
+    OCL_CHECK(err, err = g_kernel_kmeans.setArg(narg++, sizeof(cl_int), (void*) &n_points));
+    OCL_CHECK(err, err = g_kernel_kmeans.setArg(narg++, sizeof(cl_int), (void*) &n_clusters));
+    OCL_CHECK(err, err = g_kernel_kmeans.setArg(narg++, sizeof(cl_int), (void*) &n_features));
 
-    clWaitForEvents(1,&wait_event);
-    g_t_exec += xcl_get_event_duration(wait_event);
+    OCL_CHECK(err, err = g_q.enqueueNDRangeKernel(g_kernel_kmeans, 0, 1, 1, NULL, &wait_event));
+    g_q.finish();
+    OCL_CHECK(err, err = wait_event.wait());
+
+    unsigned long start, stop;
+
+    OCL_CHECK(err, err = wait_event.getProfilingInfo<unsigned long>(CL_PROFILING_COMMAND_START, &start));
+    OCL_CHECK(err, err = wait_event.getProfilingInfo<unsigned long>(CL_PROFILING_COMMAND_END, &stop));
+    g_t_exec += (stop - start);
     g_iteration++;
-    clFinish(g_world.command_queue);
-    xcl_memcpy_from_device(g_world,g_membership_OCL,d_membership, n_points * sizeof(INT_DATA_TYPE));
-    clFinish(g_world.command_queue);
+ 
+    OCL_CHECK(err, err = g_q.enqueueReadBuffer(d_membership, CL_TRUE, 0, n_points * sizeof(INT_DATA_TYPE),
+    											g_membership_OCL, NULL, NULL));
+    g_q.finish();
     
     delta = 0;
     for (i = 0; i < n_points; i++)
@@ -228,7 +197,7 @@ static int  fpga_kmeans_compute(
     return delta;
 }
 
-float** fpga_kmeans_clustering(
+float** FPGA_KMEANS::fpga_kmeans_clustering(
                           float **feature,    /* in: [npoints][nfeatures] */
                           int     nfeatures,
                           int     npoints,
@@ -282,9 +251,7 @@ float** fpga_kmeans_clustering(
     initial_points = npoints;
 
     /* randomly pick cluster centers */
-    for (i=0; i<nclusters && initial_points >= 0; i++) {
-        //n = (int)rand() % initial_points;
-        
+    for (i=0; i<nclusters && initial_points >= 0; i++) {     
         for (j=0; j<nfeatures; j++)
             clusters[i][j] = feature[initial[n]][j];// remapped
         
@@ -358,24 +325,30 @@ float** fpga_kmeans_clustering(
     return clusters;
 }
 
+int FPGA_KMEANS::fpga_kmeans_init()
+{
+    cl_int err;
 
-int fpga_kmeans_shutdown()
-{
-    // release resources
-    clReleaseKernel(g_kernel_kmeans);
-    clReleaseProgram(g_prog);
-    xcl_release_world(g_world);
+	std::vector<cl::Device> devices = xcl::get_xil_devices();
+	cl::Device device = devices[0];
+
+	OCL_CHECK(err, g_context = cl::Context(device, NULL, NULL, NULL, &err));
+	OCL_CHECK(err, g_q = cl::CommandQueue(g_context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+	OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
+
+	std::string binaryFile = xcl::find_binary_file(device_name,"kmeans");
+
+	cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+	devices.resize(1);
+	OCL_CHECK(err, g_prog = cl::Program(g_context, devices, bins, NULL, &err));
+	OCL_CHECK(err, g_kernel_kmeans = cl::Kernel(g_prog,"kmeans", &err));
+
     return 0;
 }
-int fpga_kmeans_init()
+
+int FPGA_KMEANS::fpga_kmeans_allocate(int n_points, int n_features, int n_clusters, float **feature)
 {
-    g_world = xcl_world_single();
-    g_prog = xcl_import_binary(g_world, "kmeans");
-    g_kernel_kmeans = xcl_get_kernel(g_prog, "kmeans");
-    return 0;
-}
-int fpga_kmeans_allocate(int n_points, int n_features, int n_clusters, float **feature)
-{
+	cl_int err;
     DATA_TYPE* temp_feature;
 #if USE_DATA_TYPE == INT_DT
     calculate_scale_factor(feature[0], n_points * n_features);
@@ -383,12 +356,18 @@ int fpga_kmeans_allocate(int n_points, int n_features, int n_clusters, float **f
     int N_Features = ( (n_features -1)/g_vector_size + 1) * g_vector_size;
     int NPoints = ( (n_points-1)/g_vector_size+ 1 ) * g_vector_size;
     temp_feature = re_align_features(feature,N_Features, NPoints, n_features, n_points ,g_vector_size );
-    d_feature   = xcl_malloc(g_world, CL_MEM_READ_WRITE, NPoints * n_features * sizeof(DATA_TYPE));
-    d_cluster   = xcl_malloc(g_world, CL_MEM_READ_WRITE, n_clusters * N_Features * sizeof(DATA_TYPE));
-    d_membership= xcl_malloc(g_world, CL_MEM_READ_WRITE, NPoints * sizeof(INT_DATA_TYPE));
-    xcl_memcpy_to_device(g_world,d_feature,temp_feature, NPoints * n_features * sizeof(DATA_TYPE));
-    clFinish(g_world.command_queue);
+
+    OCL_CHECK(err, d_feature = cl::Buffer(g_context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_WRITE,
+    						NPoints * n_features * sizeof(DATA_TYPE), temp_feature, &err));
+
+    OCL_CHECK(err, d_cluster = cl::Buffer(g_context, CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE,
+    						n_clusters * N_Features * sizeof(DATA_TYPE), NULL, &err));
+
+    OCL_CHECK(err, d_membership = cl::Buffer(g_context, CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE,
+    						NPoints * sizeof(INT_DATA_TYPE), NULL, &err));
+
     free(temp_feature);
+
     g_membership_OCL = ( INT_DATA_TYPE *) malloc(n_points * sizeof(int));
     if (g_membership_OCL == NULL){
         fprintf(stderr, "Error: Failed to allocate memory for g_membership_OCL\n");
@@ -397,16 +376,13 @@ int fpga_kmeans_allocate(int n_points, int n_features, int n_clusters, float **f
     return true;
 }
 
-int fpga_kmeans_deallocateMemory()
+int FPGA_KMEANS::fpga_kmeans_deallocateMemory()
 {
-   clReleaseMemObject(d_feature);
-   clReleaseMemObject(d_cluster);
-   clReleaseMemObject(d_membership);
    free(g_membership_OCL);
    return true;
 }
 
-int fpga_kmeans_print_report()
+int FPGA_KMEANS::fpga_kmeans_print_report()
 {
     printf("*******************************************************\n");
     printf("\tK-means Execution Summary:\n");
@@ -419,7 +395,7 @@ int fpga_kmeans_print_report()
     return 0;
 }
 
-int fpga_kmeans_setup( int global_size)
+int FPGA_KMEANS::fpga_kmeans_setup( int global_size)
 {
     g_global_size   = global_size;
     return 0;

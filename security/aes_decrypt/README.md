@@ -103,7 +103,7 @@ emconfigutil --platform 'xilinx_vcu1525_dynamic' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./aes -b data/test.txt -g data/goldFile.txt
+./aes -b ./data/test.txt -g ./data/goldFile.txt
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card

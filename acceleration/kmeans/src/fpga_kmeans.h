@@ -32,22 +32,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <CL/cl.h>
+
 #include "kmeans.h"
 
-float** fpga_kmeans_clustering(
-                          float **feature,    /* in: [npoints][nfeatures] */
-                          int     nfeatures,
-                          int     npoints,
-                          int     nclusters,
-                          float   threshold,
-                          int    *membership /* out: [npoints] */
-        );
-
-int fpga_kmeans_setup(int global_size = 1);
-int fpga_kmeans_init();
-int fpga_kmeans_shutdown();
-int fpga_kmeans_allocate( int n_points, int n_features, int n_clusters, float **feature);
-int fpga_kmeans_deallocateMemory();
-int fpga_kmeans_print_report();
 #endif // _H_FPGA_KMEANS_

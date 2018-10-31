@@ -36,10 +36,9 @@
     "host_exe": "host_kmeans",       
     "output_files": "membership.out",        
     "libs": [
-        "logger", 
-        "oclHelper", 
+        "logger",  
         "cmdparser", 
-        "xcl"
+        "xcl2"
     ], 
     "compiler" : {
         "symbols" : [
