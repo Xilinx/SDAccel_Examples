@@ -45,7 +45,6 @@ void print_big_number(WORD_TYPE *n, int num_words, const char *name) {
     printf("%08X", n[i]);
   }
 
- // printf("\n");
   printf("\n");
 }
 

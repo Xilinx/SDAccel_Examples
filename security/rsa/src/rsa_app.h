@@ -33,23 +33,15 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <vector>
 #include "common.h"
-#include "xcl.h"
-#include <CL/cl.h>
+#include "xcl2.hpp"
 #include <openssl/bn.h>
 #include <openssl/rsa.h>
 #include <openssl/pem.h>
-
 
 #define COMPUTE_UNITS 1
 
 using namespace std;
 
-namespace sda {
-namespace cl {
-
-/*!
- *
- */
 class RSAApp {
 public:
 	RSAApp();
@@ -66,27 +58,20 @@ public:
 
 	bool run(int idevice, int nruns);
 
-	bool invoke_kernel(cl_kernel kernel, cl_uint *message,cl_uint *Cp,cl_uint *Cq, cl_uint *p, cl_uint *q, cl_uint *dmp1, cl_uint *dmq1, cl_uint *iqmp, cl_uint *r2p, cl_uint *r2q, cl_event events[evtCount]);
+	bool invoke_kernel(cl::Kernel kernel, cl_uint *message, cl_uint *Cp, cl_uint *Cq, cl_uint *p, cl_uint *q, cl_uint *dmp1, cl_uint *dmq1, cl_uint *iqmp,          cl_uint *r2p, cl_uint *r2q, cl::Event events[evtCount]);
 
 	static double timestamp();
-	static double computeEventDurationInMS(const cl_event& event);
-
-
-
-protected:
-	void cleanup();
-	bool releaseMemObject(cl_mem &obj);
+	static double computeEventDurationInMS(const cl::Event& event);
 
 private:
 	string m_strInputFP;
-        string m_strOutputFP;
-        string m_strKeyFP;
-	xcl_world m_world;
-	cl_program m_program;
-	cl_kernel m_clKernelRSA;
+    string m_strOutputFP;
+    string m_strKeyFP;
+	
+    cl::Context m_context;
+    cl::CommandQueue m_q; 
+	cl::Program m_program; 
+	cl::Kernel m_clKernelRSA;
 };
-
-}
-}
 
 #endif /* RSAAPP_H_ */

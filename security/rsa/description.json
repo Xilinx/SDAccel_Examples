@@ -5,7 +5,6 @@
         "This is an implementation of a RSA Decryption algorithm targeting execution on an SDAccel supported FPGA acceleration card."
     ],
     "targets": [ "sw_emu", "hw" ],
-    "xcl": false,
     "host_exe": "rsa",
     "host_srcs": "src/main.cpp src/rsa_app.cpp src/common.cpp",
     "host_hdrs": "src/common.h src/rsa_app.h",
@@ -15,7 +14,7 @@
     "libs": [
         "logger",
         "cmdparser",
-        "xcl"
+        "xcl2"
     ],
     "containers": [
 	{

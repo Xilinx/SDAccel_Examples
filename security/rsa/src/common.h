@@ -36,9 +36,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-//#include "sys_info.h"
 
-#include <CL/cl.h>
+#include <stdint.h>
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
@@ -57,32 +56,6 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define CPU_SYNC 	{ __asm__ __volatile__ ("xorl %eax, %eax\n\t"\
 						"cpuid");}
-
-//#define CPU_GET_CYCLES(low)			{low = my_rdtsc();}
-
-//#define TABLE_SIZE		32
-//#define WINDOW_SIZE		5		//for constant window this has to divide the BITS_PER_WORD value
-//#define WINDOW_MASK		0x1f
-
-#define CL_CHECK(_expr)                                                         \
-   do {                                                                         \
-     cl_int _err = _expr;                                                       \
-     if (_err == CL_SUCCESS)                                                    \
-       break;                                                                   \
-     fprintf(stderr, "OpenCL Error: '%s' returned %d!\n", #_expr, (int)_err);   \
-     abort();                                                                   \
-   } while (0)
-
-#define CL_CHECK_ERR(_expr)                                                     \
-   ({                                                                           \
-     cl_int _err = CL_INVALID_VALUE;                                            \
-     typeof(_expr) _ret = _expr;                                                \
-     if (_err != CL_SUCCESS) {                                                  \
-       fprintf(stderr, "OpenCL Error: '%s' returned %d!\n", #_expr, (int)_err); \
-       abort();                                                                 \
-     }                                                                          \
-     _ret;                                                                      \
-   })
 
 uint64_t my_rdtsc();
 
