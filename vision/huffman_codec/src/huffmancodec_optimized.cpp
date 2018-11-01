@@ -57,11 +57,7 @@ HuffmanOptimized::HuffmanOptimized() {
 
 }
 
-HuffmanOptimized::HuffmanOptimized(string& vendor_name,
-			   string& device_name,
-			   int selected_device,
-			   string& strKernelFP,
-			   string& strBitmapFP)
+HuffmanOptimized::HuffmanOptimized(string& strBitmapFP)
 {
 	//store path to input bitmap
 	m_strBitmapFP = strBitmapFP;

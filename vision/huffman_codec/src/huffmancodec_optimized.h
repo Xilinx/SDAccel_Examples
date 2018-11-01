@@ -47,11 +47,7 @@ namespace sda {
 class HuffmanOptimized : public ICodec {
 public:
 	HuffmanOptimized();
-	HuffmanOptimized(string& vendor_name,
-		   string& device_name,
-		   int selected_device,
-		   string& strKernelFP,
-		   string& strBitmapFP);
+	HuffmanOptimized(string& strBitmapFP);
 	virtual ~HuffmanOptimized();
 
 	enum EvBreakDown {evtHostWrite = 0, evtKernelExec = 1, evtHostRead = 2, evtCount = 3};

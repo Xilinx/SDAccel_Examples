@@ -141,10 +141,7 @@ int main(int argc, char* argv[]) {
 	//parse commandline
 	CmdLineParser parser;
 	parser.addSwitch("--bitmap", "-b", "input bitmap file path", "rect_1024.bmp");
-	parser.addSwitch("--platform-name", "-p", "OpenCl platform vendor name", "xilinx");
-	parser.addSwitch("--device-name", "-d", "OpenCl device name", "xilinx_vcu1525_dynamic");
 	parser.addSwitch("--kernel-file", "-k", "OpenCl kernel file to use");
-	parser.addSwitch("--select-device", "-s", "Select from multiple matched devices [0-based index]", "0");
 	parser.addSwitch("--number-of-runs", "-n", "Number of times the kernel runs on the device to compute the average.", "1");
 	parser.setDefaultKey("--kernel-file");
 	parser.parse(argc, argv);
@@ -158,14 +155,11 @@ int main(int argc, char* argv[]) {
 
 	//read settings
 	string strBitmapFP = parser.value("bitmap");
-	string strPlatformName = parser.value("platform-name");
-	string strDeviceName = parser.value("device-name");
 
 	int nruns = parser.value_to_int("number-of-runs");
-	int idxSelectedDevice = parser.value_to_int("select-device");
   
 	LogInfo("Chosen bitmap file is %s",strBitmapFP.c_str());
-	HuffmanOptimized huffman(strPlatformName, strDeviceName, idxSelectedDevice, strKernelFullPath, strBitmapFP);
+	HuffmanOptimized huffman(strBitmapFP);
 
 	LogInfo("Perform some unit tests before the actual image decode, encode");
 	unit_test_codec(&huffman,&cpuonly);
