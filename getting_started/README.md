@@ -56,6 +56,7 @@ Example        | Description           | Key Concepts / Keywords
 [kernel_to_gmem/window_array_2d_ocl/][]|This is a simple example of accessing each window of data from 2d array|__Key__ __Concepts__<br> - window/tile of 2D data array access<br>__Keywords__<br> - pipe<br> - xcl_pipeline_loop<br> - xcl_reqd_pipe_depth
 [kernel_opt/aos_vs_soa_ocl/][]|This example demonstrates how data layout can impact the performance of certain kernels. The example we will demonstrate how using the Structure of Array data layout can impact certain data parallel problems.|__Key__ __Concepts__<br> - Kernel Optimization<br> - Data Layout<br>
 [kernel_opt/array_partition_ocl/][]|This example shows how to use array partitioning to improve performance of a kernel|__Key__ __Concepts__<br> - Kernel Optimization<br> - Array Partitioning<br>__Keywords__<br> - xcl_array_partition<br> - complete
+[kernel_opt/dependence_inter_c/][]|This Example demonstrates the HLS pragma 'DEPENDENCE'.Using 'DEPENDENCE' pragma, user can provide additional dependency details to the compiler by specifying if the dependency in consecutive loop iterations on buffer is true/false, which allows the compiler to perform unrolling/pipelining to get better performance.|__Key__ __Concepts__<br> - Inter Dependence<br>__Keywords__<br> - DEPENDENCE<br> - inter<br> - WAR
 [kernel_opt/lmem_2rw_c/][]|This is simple example of vector addition to demonstrate how to utilized both ports of Local Memory memory.|__Key__ __Concepts__<br> - Kernel Optimization<br> - 2port BRAM Utilization<br> - two read/write Local Memory<br>__Keywords__<br> - #pragma HLS UNROLL FACTOR=2
 [kernel_opt/lmem_2rw_ocl/][]|This is simple example of vector addition to demonstrate how to utilized both ports of Local Memory.|__Key__ __Concepts__<br> - Kernel Optimization<br> - 2port BRAM Utilization<br> - two read/write Local Memory<br>__Keywords__<br> - opencl_unroll_hint(2)
 [kernel_opt/loop_fusion_c/][]|This example will demonstrate how to fuse two loops into one to improve the performance of an OpenCL  C/C++ Kernel.|__Key__ __Concepts__<br> - Kernel Optimization<br> - Loop Fusion<br> - Loop Pipelining<br>__Keywords__<br> - #pragma HLS PIPELINE
@@ -70,7 +71,6 @@ Example        | Description           | Key Concepts / Keywords
 [kernel_opt/systolic_array_c/][]|This is a simple example of matrix multiplication (Row x Col) to help developers learn systolic array based algorithm design. Note : Systolic array based algorithm design is well suited for FPGA.|
 [kernel_opt/systolic_array_ocl/][]|This is a simple example of matrix multiplication (Row x Col) to help developers learn systolic array based algorithm design. Note: Systolic array based algorithm design is well suited for FPGA.|
 [kernel_opt/vectorization_memorycoalescing_ocl/][]|This example is a simple OpenCL application which highlights the vectorization concept. It provides a basis for calculating the bandwidth utilization when the compiler looking to vectorize.|__Key__ __Concepts__<br> - Vectorization<br> - Memory Coalescing<br>__Keywords__<br> - vec_type_hint
-[kernel_opt/dependence_inter_c/][]|This Example demonstrates the HLS pragma 'DEPENDENCE'.Using 'DEPENDENCE' pragma, user can provide additional dependency details to the compiler by specifying if the dependency in consecutive loop iterations on buffer is true/false, which allows the compiler to perform unrolling/pipelining to get better performance.|__Key__ __Concepts__<br> - Inter Dependence<br>__Keywords__<br> - DEPENDENCE<br> - inter<br> - WAR
 [dataflow/dataflow_func_ocl/][]|This is simple example of vector addition to demonstrate Dataflow functionality in OpenCL Kernel. OpenCL Dataflow allows user to run multiple functions together to achieve higher throughput.|__Key__ __Concepts__<br> - Function/Task Level Parallelism<br>__Keywords__<br> - xcl_dataflow<br> - xclDataflowFifoDepth
 [dataflow/dataflow_loop_c/][]|This is simple example of vector addition to demonstrate Loops Dataflow functionality of HLS. HLS Dataflow allows user to schedule multiple sequential loops concurrently to achieve higher throughput.|__Key__ __Concepts__<br> - Loop Dataflow<br>__Keywords__<br> - dataflow<br> - hls::stream<>
 [dataflow/dataflow_loop_ocl/][]|This is simple example of vector addition to demonstrate Loops Dataflow functionality. OpenCL Dataflow allows user to schedule multiple sequential loops to run concurrently to achieve higher throughput.|__Key__ __Concepts__<br> - Loop Dataflow<br>__Keywords__<br> - xcl_dataflow<br> - xclDataflowFifoDepth
@@ -138,6 +138,7 @@ Example        | Description           | Key Concepts / Keywords
 [kernel_opt]:kernel_opt
 [kernel_opt/aos_vs_soa_ocl/]:kernel_opt/aos_vs_soa_ocl/
 [kernel_opt/array_partition_ocl/]:kernel_opt/array_partition_ocl/
+[kernel_opt/dependence_inter_c/]:kernel_opt/dependence_inter_c/
 [kernel_opt/lmem_2rw_c/]:kernel_opt/lmem_2rw_c/
 [kernel_opt/lmem_2rw_ocl/]:kernel_opt/lmem_2rw_ocl/
 [kernel_opt/loop_fusion_c/]:kernel_opt/loop_fusion_c/
@@ -152,7 +153,6 @@ Example        | Description           | Key Concepts / Keywords
 [kernel_opt/systolic_array_c/]:kernel_opt/systolic_array_c/
 [kernel_opt/systolic_array_ocl/]:kernel_opt/systolic_array_ocl/
 [kernel_opt/vectorization_memorycoalescing_ocl/]:kernel_opt/vectorization_memorycoalescing_ocl/
-[kernel_opt/dependence_inter_c/]:kernel_opt/dependence_inter_c/
 [dataflow]:dataflow
 [dataflow/dataflow_func_ocl/]:dataflow/dataflow_func_ocl/
 [dataflow/dataflow_loop_c/]:dataflow/dataflow_loop_c/

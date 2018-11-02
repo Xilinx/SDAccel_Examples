@@ -19,3 +19,16 @@ do
     git add README.md
     cd $BASEDIR
 done
+
+summary_list=( $(git ls-files | grep 'summary.json' | sed -r 's|/[^/]+$||' | sort | uniq ))
+echo ${summary_list[@]}
+echo $BASEDIR
+for i in "${summary_list[@]}"
+do
+    cd $i
+    echo "Updating README for = $i"
+    rm README.md
+    make docs
+    git add README.md
+    cd $BASEDIR
+done
