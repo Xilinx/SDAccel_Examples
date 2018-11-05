@@ -9,20 +9,25 @@ __Prerequisites__
 
 S.No.   | Category  | Description 
 --------|-----------|-----------------------------------------
-1 | [host][]      |OpenCL host code for optimized interfacing with Xilinx Devices
-2 | [kernel_to_gmem][]      |Kernel to Global Memory Access Optimization.
-3 | [kernel_opt][]      |Kernel Optimization for performance
-4 | [dataflow][]      |Kernel Optimization through Macro Level Pipelining
-5 | [clk_freq][]      |Improving Kernel Clock Frequency through Optimized code.
-6 | [debug][]      |Debugging and Profiling of Kernel.
-7 | [rtl_kernel][]      |RTL Kernel Based Examples
-8 | [misc][]      |OpenCL miscellaneous Examples
-9 | [cpu_to_fpga][]      |Labs to showcase the cpu to fpga conversion with kernel optimizations.
+1 | [cpu_to_fpga][]      |Labs to showcase the cpu to fpga conversion with kernel optimizations.
+2 | [host][]      |OpenCL host code for optimized interfacing with Xilinx Devices
+3 | [kernel_to_gmem][]      |Kernel to Global Memory Access Optimization.
+4 | [kernel_opt][]      |Kernel Optimization for performance
+5 | [dataflow][]      |Kernel Optimization through Macro Level Pipelining
+6 | [clk_freq][]      |Improving Kernel Clock Frequency through Optimized code.
+7 | [debug][]      |Debugging and Profiling of Kernel.
+8 | [rtl_kernel][]      |RTL Kernel Based Examples
+9 | [misc][]      |OpenCL miscellaneous Examples
 
  __Examples Table__ 
 
 Example        | Description           | Key Concepts / Keywords 
 ---------------|-----------------------|-------------------------
+[cpu_to_fpga/00_cpu/][]|This is a simple example of matrix multiplication (Row x Col).|
+[cpu_to_fpga/01_ocl/][]|This is a simple example of OpenCL matrix multiplication (Row x Col).|__Key__ __Concepts__<br> - OpenCL APIs<br>
+[cpu_to_fpga/02_lmem_ocl/][]|This is a simple example of matrix multiplication (Row x Col) to demonstrate how to reduce number of memory accesses using local memory.|__Key__ __Concepts__<br> - Kernel Optimization<br> - Local Memory<br>
+[cpu_to_fpga/03_burst_rw_ocl/][]|This is a simple example of matrix multiplication (Row x Col) to demonstrate how to achieve better pipeline with burst read and write to/from local memory from/to DDR.|__Key__ __Concepts__<br> - Kernel Optimization<br> - Burst Read/Write<br>
+[cpu_to_fpga/04_partition_ocl/][]|This is a simple example of matrix multiplication (Row x Col) to demonstrate how to achieve better performance by array partitioning and loop unrolling.|__Key__ __Concepts__<br> - Array Partition<br> - Loop Unroll<br>__Keywords__<br> - xcl_pipeline_loop<br> - xcl_array_partition(complete, dim)<br> - opencl_unroll_hint
 [host/concurrent_kernel_execution_ocl/][]|This example will demonstrate how to use multiple and out of order command queues to simultaneously execute multiple kernels on an FPGA.|__Key__ __Concepts__<br> - Concurrent execution<br> - Out of Order Command Queues<br> - Multiple Command Queues<br>__Keywords__<br> - CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE<br> - clSetEventCallback()
 [host/copy_buffer_ocl/][]|This Copy Buffer example demonstrate how one buffer can be copied from another buffer.|__Key__ __Concepts__<br> - Copy Buffer<br>__Keywords__<br> - cl::CommandQueue::enqueueCopyBuffer()
 [host/data_transfer_ocl/][]|This example illustrates several ways to use the OpenCL API to transfer data to and from the FPGA|__Key__ __Concepts__<br> - OpenCL API<br> - Data Transfer<br> - Write Buffers<br> - Read Buffers<br> - Map Buffers<br> - Async Memcpy<br>__Keywords__<br> - enqueueWriteBuffer()<br> - enqueueReadBuffer()<br> - enqueueMapBuffer()<br> - enqueueUnmapMemObject()<br> - enqueueMigrateMemObjects()
@@ -96,12 +101,13 @@ Example        | Description           | Key Concepts / Keywords
 [misc/sum_scan/][]|Example of parallel prefix sum|
 [misc/vadd/][]|Simple example of vector addition.|
 [misc/vdotprod/][]|Simple example of vector dot-product.|
-[cpu_to_fpga/00_cpu/][]|This is a simple example of matrix multiplication (Row x Col).|
-[cpu_to_fpga/01_ocl/][]|This is a simple example of OpenCL matrix multiplication (Row x Col).|__Key__ __Concepts__<br> - OpenCL APIs<br>
-[cpu_to_fpga/02_lmem_ocl/][]|This is a simple example of matrix multiplication (Row x Col) to demonstrate how to reduce number of memory accesses using local memory.|__Key__ __Concepts__<br> - Kernel Optimization<br> - Local Memory<br>
-[cpu_to_fpga/03_burst_rw_ocl/][]|This is a simple example of matrix multiplication (Row x Col) to demonstrate how to achieve better pipeline with burst read and write to/from local memory from/to DDR.|__Key__ __Concepts__<br> - Kernel Optimization<br> - Burst Read/Write<br>
-[cpu_to_fpga/04_partition_ocl/][]|This is a simple example of matrix multiplication (Row x Col) to demonstrate how to achieve better performance by array partitioning and loop unrolling.|__Key__ __Concepts__<br> - Array Partition<br> - Loop Unroll<br>__Keywords__<br> - xcl_pipeline_loop<br> - xcl_array_partition(complete, dim)<br> - opencl_unroll_hint
 
+[cpu_to_fpga]:cpu_to_fpga
+[cpu_to_fpga/00_cpu/]:cpu_to_fpga/00_cpu/
+[cpu_to_fpga/01_ocl/]:cpu_to_fpga/01_ocl/
+[cpu_to_fpga/02_lmem_ocl/]:cpu_to_fpga/02_lmem_ocl/
+[cpu_to_fpga/03_burst_rw_ocl/]:cpu_to_fpga/03_burst_rw_ocl/
+[cpu_to_fpga/04_partition_ocl/]:cpu_to_fpga/04_partition_ocl/
 [host]:host
 [host/concurrent_kernel_execution_ocl/]:host/concurrent_kernel_execution_ocl/
 [host/copy_buffer_ocl/]:host/copy_buffer_ocl/
@@ -183,9 +189,3 @@ Example        | Description           | Key Concepts / Keywords
 [misc/sum_scan/]:misc/sum_scan/
 [misc/vadd/]:misc/vadd/
 [misc/vdotprod/]:misc/vdotprod/
-[cpu_to_fpga]:cpu_to_fpga
-[cpu_to_fpga/00_cpu/]:cpu_to_fpga/00_cpu/
-[cpu_to_fpga/01_ocl/]:cpu_to_fpga/01_ocl/
-[cpu_to_fpga/02_lmem_ocl/]:cpu_to_fpga/02_lmem_ocl/
-[cpu_to_fpga/03_burst_rw_ocl/]:cpu_to_fpga/03_burst_rw_ocl/
-[cpu_to_fpga/04_partition_ocl/]:cpu_to_fpga/04_partition_ocl/
