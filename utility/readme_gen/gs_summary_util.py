@@ -79,7 +79,7 @@ def genReadMe(dir):
   if 'subdirs' in data:
     subDirs = data['subdirs'];
   else:
-    subDirs = get_immediate_subdirectories(dir);
+    subDirs = sorted(get_immediate_subdirectories(dir));
   outfile.write("\nS.No.   | Category  | Description \n")
   outfile.write("--------|-----------|-----------------------------------------\n")
   counter = 1;
