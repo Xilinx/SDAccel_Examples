@@ -10,8 +10,6 @@
         "Linux"
     ],
     "host_exe": "device_query",
-    "em_cmd": "./device_query",
-    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./device_query",
     "contributors" : [
         {
             "group": "Xilinx",

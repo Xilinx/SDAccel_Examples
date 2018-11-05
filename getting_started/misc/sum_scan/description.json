@@ -8,8 +8,6 @@
         "Linux"
     ],
     "host_exe": "sum_scan",
-    "em_cmd" : "./sum_scan",
-    "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./sum_scan",
     "libs": [
         "xcl2"
     ], 

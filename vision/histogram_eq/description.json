@@ -18,7 +18,6 @@
     "host_srcs": "src/equalizer.cpp",
     "host_hdrs": "src/equalizer.h",      
     "cmd_args": "PROJECT/data/race_2k.bmp",
-    "em_cmd": "./equalizer data/race_2k.bmp",
     "output_files": "out.bmp",        
     "libs": [
         "opencv", 

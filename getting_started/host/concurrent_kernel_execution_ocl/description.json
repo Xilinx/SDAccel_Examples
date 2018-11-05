@@ -13,8 +13,6 @@
         "xcl2"
     ],
     "host_exe": "concurrent_execution",
-    "em_cmd": "./concurrent_execution",
-    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./concurrent_execution",
     "containers": [	
 	{
 	"name": "matrix_ops", 

@@ -7,7 +7,6 @@
     "host_exe": "aes",
     "host_srcs": "src/aes_app.cpp src/aes_ecb.cpp src/main.cpp",
     "cmd_args" : "-b PROJECT/data/test.txt -g PROJECT/data/goldFile.txt",
-    "em_cmd" : "./aes -b data/test.txt -g data/goldFile.txt",
     "output_files": "encryptedData.txt",        
     "xcl": false,
     "libs": [

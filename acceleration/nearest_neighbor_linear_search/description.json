@@ -8,7 +8,6 @@
     "host_srcs": "src/linear_search.cpp",
     "host_hdrs": "src/linear_search.h",
     "cmd_args" : "PROJECT/data/queries.txt PROJECT/data/targets.txt",
-    "em_cmd" : "./nearest data/queries.txt data/targets.txt",
     "libs": [
         "xcl2"
     ],

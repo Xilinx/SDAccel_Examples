@@ -11,8 +11,6 @@
         "xcl2"
     ],
     "host_exe": "kernel_global",
-    "em_cmd" : "./kernel_global",
-    "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./kernel_global",
     "compiler" : {
              "options" : "-DNDDR_BANKS"
     },

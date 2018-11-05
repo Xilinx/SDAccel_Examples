@@ -25,8 +25,6 @@
     ],
     "host_exe": "host",
     "cmd_args" : "apply_watermark_GOOD PROJECT/data/input.bmp PROJECT/data/golden.bmp",
-    "em_cmd": "./host apply_watermark_GOOD ./data/input.bmp ./data/golden.bmp",
-    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host apply_watermark_GOOD ./data/input.bmp ./data/golden.bmp",
     "output_files": "output.bmp",        
     "contributors" : [
         {

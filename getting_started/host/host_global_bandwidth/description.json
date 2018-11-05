@@ -8,8 +8,6 @@
         "Linux"
     ],
     "host_exe": "host_global",
-    "em_cmd" : "./host_global",
-    "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./host_global",
     "libs": [
         "xcl2"
     ],

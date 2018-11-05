@@ -10,8 +10,6 @@
         "Linux"
     ],
     "host_exe": "overlap",
-    "em_cmd": "./overlap",
-    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./overlap",
     "libs": [
         "oclHelper", 
         "xcl"

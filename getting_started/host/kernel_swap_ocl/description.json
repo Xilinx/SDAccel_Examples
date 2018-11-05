@@ -13,8 +13,6 @@
         "xcl2"
     ],
     "host_exe": "vmulvadd",
-    "em_cmd" : "./vmulvadd",
-    "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./vmulvadd",
     "containers": [
 	{
 	"name": "krnl_vmul",

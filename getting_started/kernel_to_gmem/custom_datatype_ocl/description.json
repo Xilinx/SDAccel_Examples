@@ -14,8 +14,6 @@
     ],
     "host_exe": "host",
     "cmd_args" : "PROJECT/data/input.bmp",
-    "em_cmd": "./host ./data/input.bmp",
-    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host ./data/input.bmp",
     "output_files": "output.bmp",        
     "containers": [
     {

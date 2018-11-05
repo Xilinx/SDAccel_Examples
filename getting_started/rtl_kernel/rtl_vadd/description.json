@@ -12,9 +12,7 @@
         "xcl2"
     ],
     "host_exe": "host",
-    "em_cmd": "./host",
     "targets": ["hw", "hw_emu"],
-    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "containers": [
     	{
 	"name": "vadd",

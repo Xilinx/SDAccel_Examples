@@ -17,8 +17,6 @@
     "targets": ["hw", "hw_emu"],
     "xcl": true,
     "host_exe": "host",
-    "em_cmd" : "./host",
-    "hw_cmd" : "./host",
     "libs" : [
         "xcl"
     ],

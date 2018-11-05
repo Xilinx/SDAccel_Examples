@@ -10,7 +10,6 @@
     "host_exe": "affine",
     "host_srcs": "src/affine.cpp",        
     "cmd_args": "PROJECT/data/CT-MONO2-16-brain.raw",
-    "em_cmd": "./affine ./data/CT-MONO2-16-brain.raw",
     "output_files": "transformed_image.raw",        
     "libs": [
         "xcl2",

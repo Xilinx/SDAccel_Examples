@@ -12,9 +12,7 @@
     ],
     "host_exe": "host",
     "runtime": ["OpenCL"],
-    "em_cmd": "./host",
     "targets": ["hw", "hw_emu"],
-    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "containers": [
     	{
 	"name": "vadd",
