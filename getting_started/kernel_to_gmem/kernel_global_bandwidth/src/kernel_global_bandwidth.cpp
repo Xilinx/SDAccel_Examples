@@ -116,6 +116,8 @@ int main(int argc, char** argv) {
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
+    OCL_CHECK(err, cl::Kernel krnl_global_bandwidth(program, "bandwidth", &err));
+    cl_kernel krnl = krnl_global_bandwidth.get();
 
     size_t globalbuffersize = 1024*1024*1024;    /* 1GB */
 
@@ -149,20 +151,20 @@ int main(int argc, char** argv) {
      * buffer[3] is output1 */
     cl::Buffer *buffer[num_buffers];
 
+    /* As per latest Bank association mechanism, User has to provide Kernel name in param field of buffer 
+     * extension and should provide respective argument numbers in flags fields. 
+     * This allows runtime to associate buffer with correct DDR banks and will make host code more portable.
+     * 
+     * Note: This is applicable only if "param" was not set to nullptr initially */
+
     cl_mem_ext_ptr_t ext_buffer[num_buffers];
 
     #if NDDR_BANKS > 1
-        unsigned xcl_bank[4] = {
-            XCL_MEM_DDR_BANK0,
-            XCL_MEM_DDR_BANK1,
-            XCL_MEM_DDR_BANK2,
-            XCL_MEM_DDR_BANK3
-        };
 
         for (int i = 0; i < ddr_banks; i++) {
-            ext_buffer[i].flags = xcl_bank[i];
+            ext_buffer[i].flags = i; 
             ext_buffer[i].obj = NULL;
-            ext_buffer[i].param = 0;
+            ext_buffer[i].param = krnl;
 
 	        buffer[i] = new cl::Buffer(context,
 		                           CL_MEM_READ_WRITE | CL_MEM_EXT_PTR_XILINX, 
@@ -237,7 +239,6 @@ int main(int argc, char** argv) {
     #endif
 
     /* Set the kernel arguments */
-    OCL_CHECK(err, cl::Kernel krnl_global_bandwidth(program, "bandwidth", &err));
     int arg_index = 0;
     int buffer_index = 0;
 
