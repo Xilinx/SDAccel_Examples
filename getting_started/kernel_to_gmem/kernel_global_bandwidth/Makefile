@@ -43,7 +43,7 @@ LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_XRT)/lib/
 
 # Kernel compiler global settings
 CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps 
-CLFLAGS += --xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generateExtraRunData=true" --max_memory_ports bandwidth -DNDDR_BANKS=$(ddr_banks)
+CLFLAGS += --max_memory_ports bandwidth -DNDDR_BANKS=$(ddr_banks)
 
 CXXFLAGS += -DNDDR_BANKS=$(ddr_banks)
 
