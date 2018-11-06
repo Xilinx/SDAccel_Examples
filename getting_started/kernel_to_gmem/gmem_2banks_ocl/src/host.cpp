@@ -75,15 +75,17 @@ int main(int argc, char* argv[])
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel krnl_applyWatermark(program,"apply_watermark", &err));
-
+    cl_kernel krnl = krnl_applyWatermark.get();
+     
     // For Allocating Buffer to specific Global Memory Bank, user has to use cl_mem_ext_ptr_t
     // and provide the Banks 
-    cl_mem_ext_ptr_t inExt={0}, outExt={0};  // Declaring two extensions for both buffers
-    inExt.flags  = XCL_MEM_DDR_BANK0; // Specify Bank0 Memory for input memory
-    outExt.flags = XCL_MEM_DDR_BANK1; // Specify Bank1 Memory for output Memory
+    cl_mem_ext_ptr_t inExt, outExt;  // Declaring two extensions for both buffers
+    inExt.flags  = 0;// argument index ( 0 means that this buffer will be passed to argument 0 of the kernel )
+    outExt.flags = 1;// argument index ( 1 means that this buffer will be passed to argument 0 of the kernel )
     inExt.obj   = inputImage.data(); 
-    outExt.obj  = outImage.data(); // Setting Obj and Param to Zero
-    inExt.param = 0 ; outExt.param = 0; 
+    outExt.obj  = outImage.data();
+    // Setting kernel handle to Param
+    inExt.param = krnl ; outExt.param = krnl; 
 
     //Allocate Buffer in Bank0 of Global Memory for Input Image using Xilinx Extension
     OCL_CHECK(err, cl::Buffer buffer_inImage(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR | CL_MEM_EXT_PTR_XILINX,

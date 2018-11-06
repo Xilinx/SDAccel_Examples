@@ -85,19 +85,22 @@ int main(int argc, char* argv[])
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
+    
+    OCL_CHECK(err, cl::Kernel krnl_applyWatermark(program, "apply_watermark", &err));
+    cl_kernel krnl = krnl_applyWatermark.get();
 
     // For Allocating Buffer to specific Global Memory Bank, user has to use cl_mem_ext_ptr_t
     // and provide the Banks
     //
-    cl_mem_ext_ptr_t inExt={0}, outExt={0};  // Declaring two extensions for both buffers
-    inExt.flags  = XCL_MEM_DDR_BANK0; // Specify Bank0 Memory for input memory
-    outExt.flags = XCL_MEM_DDR_BANK1; // Specify Bank1 Memory for output Memory
+    cl_mem_ext_ptr_t inExt, outExt;  // Declaring two extensions for both buffers
+    inExt.flags  = 0; // argument index ( 0 means that this buffer will be passed to argument 0 of the kernel )
+    outExt.flags = 1; // argument index ( 1 means that this buffer will be passed to argument 1 of the kernel )
     // Setting input and output objects
-    inExt.obj = inputImage.data(); 
+    inExt.obj = inputImage.data(); // pointer to data
     outExt.obj = outImage.data();
     
-    // Setting param to zero 
-    inExt.param = 0 ; outExt.param = 0; 
+    // Setting kernel handle to param 
+    inExt.param = krnl ; outExt.param = krnl; 
 
     //Allocate Buffer in Bank0 of Global Memory for Input Image using Xilinx Extension
     OCL_CHECK(err, cl::Buffer buffer_inImage(context, CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR,
@@ -113,16 +116,15 @@ int main(int argc, char* argv[])
     //Copy input Image to device global memory
     OCL_CHECK(err, err = q.enqueueMigrateMemObjects(inBufVec, 0 /* 0 means from host*/));
 
-    //make the Kernel functor
-    auto krnl_applyWatermark = cl::KernelFunctor<cl::Buffer&, cl::Buffer& ,int,int>(program, "apply_watermark", &err);
-    if (err != CL_SUCCESS) {
-          printf("Error calling Kernel Functor: Error code is: %d\n", err);
-          exit(EXIT_FAILURE);
-        }
+    // Set the kernel arguments
+    int arg_index = 0;
+    OCL_CHECK(err, err = krnl_applyWatermark.setArg(arg_index++, buffer_inImage));
+    OCL_CHECK(err, err = krnl_applyWatermark.setArg(arg_index++, buffer_outImage));
+    OCL_CHECK(err, err = krnl_applyWatermark.setArg(arg_index++, width));
+    OCL_CHECK(err, err = krnl_applyWatermark.setArg(arg_index++, height));
 
     //Launch the Kernel
-    krnl_applyWatermark(cl::EnqueueArgs(q,cl::NDRange(1,1,1), cl::NDRange(1,1,1)),
-            buffer_inImage, buffer_outImage, width, height);
+    OCL_CHECK(err, err = q.enqueueTask(krnl_applyWatermark));
 
     //Copy Result from Device Global Memory to Host Local Memory
     OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec, CL_MIGRATE_MEM_OBJECT_HOST));

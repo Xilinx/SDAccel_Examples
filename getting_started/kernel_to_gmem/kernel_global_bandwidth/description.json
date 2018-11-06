@@ -10,6 +10,7 @@
     "libs": [
         "xcl2"
     ],
+    "nboard":["xilinx_xbb1551_dynamic_5_1", "xilinx_vcu1525_dynamic_6_0"],
     "host_exe": "kernel_global",
     "compiler" : {
              "options" : "-DNDDR_BANKS"
