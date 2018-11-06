@@ -9,20 +9,25 @@ __Prerequisites__
 
 S.No.   | Category  | Description 
 --------|-----------|-----------------------------------------
-1 | [host][]      |OpenCL host code for optimized interfacing with Xilinx Devices
-2 | [kernel_to_gmem][]      |Kernel to Global Memory Access Optimization.
-3 | [kernel_opt][]      |Kernel Optimization for performance
-4 | [dataflow][]      |Kernel Optimization through Macro Level Pipelining
-5 | [clk_freq][]      |Improving Kernel Clock Frequency through Optimized code.
-6 | [debug][]      |Debugging and Profiling of Kernel.
-7 | [rtl_kernel][]      |RTL Kernel Based Examples
-8 | [misc][]      |OpenCL miscellaneous Examples
-9 | [cpu_to_fpga][]      |Labs to showcase the cpu to fpga conversion with kernel optimizations.
+1 | [cpu_to_fpga][]      |Labs to showcase the cpu to fpga conversion with kernel optimizations.
+2 | [host][]      |OpenCL host code for optimized interfacing with Xilinx Devices
+3 | [kernel_to_gmem][]      |Kernel to Global Memory Access Optimization.
+4 | [kernel_opt][]      |Kernel Optimization for performance
+5 | [dataflow][]      |Kernel Optimization through Macro Level Pipelining
+6 | [clk_freq][]      |Improving Kernel Clock Frequency through Optimized code.
+7 | [debug][]      |Debugging and Profiling of Kernel.
+8 | [rtl_kernel][]      |RTL Kernel Based Examples
+9 | [misc][]      |OpenCL miscellaneous Examples
 
  __Examples Table__ 
 
 Example        | Description           | Key Concepts / Keywords 
 ---------------|-----------------------|-------------------------
+[cpu_to_fpga/00_cpu/][]|This is a simple example of matrix multiplication (Row x Col).|
+[cpu_to_fpga/01_ocl/][]|This is a simple example of OpenCL matrix multiplication (Row x Col).|__Key__ __Concepts__<br> - OpenCL APIs<br>
+[cpu_to_fpga/02_lmem_ocl/][]|This is a simple example of matrix multiplication (Row x Col) to demonstrate how to reduce number of memory accesses using local memory.|__Key__ __Concepts__<br> - Kernel Optimization<br> - Local Memory<br>
+[cpu_to_fpga/03_burst_rw_ocl/][]|This is a simple example of matrix multiplication (Row x Col) to demonstrate how to achieve better pipeline with burst read and write to/from local memory from/to DDR.|__Key__ __Concepts__<br> - Kernel Optimization<br> - Burst Read/Write<br>
+[cpu_to_fpga/04_partition_ocl/][]|This is a simple example of matrix multiplication (Row x Col) to demonstrate how to achieve better performance by array partitioning and loop unrolling.|__Key__ __Concepts__<br> - Array Partition<br> - Loop Unroll<br>__Keywords__<br> - xcl_pipeline_loop<br> - xcl_array_partition(complete, dim)<br> - opencl_unroll_hint
 [host/concurrent_kernel_execution_ocl/][]|This example will demonstrate how to use multiple and out of order command queues to simultaneously execute multiple kernels on an FPGA.|__Key__ __Concepts__<br> - Concurrent execution<br> - Out of Order Command Queues<br> - Multiple Command Queues<br>__Keywords__<br> - CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE<br> - clSetEventCallback()
 [host/copy_buffer_ocl/][]|This Copy Buffer example demonstrate how one buffer can be copied from another buffer.|__Key__ __Concepts__<br> - Copy Buffer<br>__Keywords__<br> - cl::CommandQueue::enqueueCopyBuffer()
 [host/data_transfer_ocl/][]|This example illustrates several ways to use the OpenCL API to transfer data to and from the FPGA|__Key__ __Concepts__<br> - OpenCL API<br> - Data Transfer<br> - Write Buffers<br> - Read Buffers<br> - Map Buffers<br> - Async Memcpy<br>__Keywords__<br> - enqueueWriteBuffer()<br> - enqueueReadBuffer()<br> - enqueueMapBuffer()<br> - enqueueUnmapMemObject()<br> - enqueueMigrateMemObjects()
@@ -56,6 +61,7 @@ Example        | Description           | Key Concepts / Keywords
 [kernel_to_gmem/window_array_2d_ocl/][]|This is a simple example of accessing each window of data from 2d array|__Key__ __Concepts__<br> - window/tile of 2D data array access<br>__Keywords__<br> - pipe<br> - xcl_pipeline_loop<br> - xcl_reqd_pipe_depth
 [kernel_opt/aos_vs_soa_ocl/][]|This example demonstrates how data layout can impact the performance of certain kernels. The example we will demonstrate how using the Structure of Array data layout can impact certain data parallel problems.|__Key__ __Concepts__<br> - Kernel Optimization<br> - Data Layout<br>
 [kernel_opt/array_partition_ocl/][]|This example shows how to use array partitioning to improve performance of a kernel|__Key__ __Concepts__<br> - Kernel Optimization<br> - Array Partitioning<br>__Keywords__<br> - xcl_array_partition<br> - complete
+[kernel_opt/dependence_inter_c/][]|This Example demonstrates the HLS pragma 'DEPENDENCE'.Using 'DEPENDENCE' pragma, user can provide additional dependency details to the compiler by specifying if the dependency in consecutive loop iterations on buffer is true/false, which allows the compiler to perform unrolling/pipelining to get better performance.|__Key__ __Concepts__<br> - Inter Dependence<br>__Keywords__<br> - DEPENDENCE<br> - inter<br> - WAR
 [kernel_opt/lmem_2rw_c/][]|This is simple example of vector addition to demonstrate how to utilized both ports of Local Memory memory.|__Key__ __Concepts__<br> - Kernel Optimization<br> - 2port BRAM Utilization<br> - two read/write Local Memory<br>__Keywords__<br> - #pragma HLS UNROLL FACTOR=2
 [kernel_opt/lmem_2rw_ocl/][]|This is simple example of vector addition to demonstrate how to utilized both ports of Local Memory.|__Key__ __Concepts__<br> - Kernel Optimization<br> - 2port BRAM Utilization<br> - two read/write Local Memory<br>__Keywords__<br> - opencl_unroll_hint(2)
 [kernel_opt/loop_fusion_c/][]|This example will demonstrate how to fuse two loops into one to improve the performance of an OpenCL  C/C++ Kernel.|__Key__ __Concepts__<br> - Kernel Optimization<br> - Loop Fusion<br> - Loop Pipelining<br>__Keywords__<br> - #pragma HLS PIPELINE
@@ -70,7 +76,6 @@ Example        | Description           | Key Concepts / Keywords
 [kernel_opt/systolic_array_c/][]|This is a simple example of matrix multiplication (Row x Col) to help developers learn systolic array based algorithm design. Note : Systolic array based algorithm design is well suited for FPGA.|
 [kernel_opt/systolic_array_ocl/][]|This is a simple example of matrix multiplication (Row x Col) to help developers learn systolic array based algorithm design. Note: Systolic array based algorithm design is well suited for FPGA.|
 [kernel_opt/vectorization_memorycoalescing_ocl/][]|This example is a simple OpenCL application which highlights the vectorization concept. It provides a basis for calculating the bandwidth utilization when the compiler looking to vectorize.|__Key__ __Concepts__<br> - Vectorization<br> - Memory Coalescing<br>__Keywords__<br> - vec_type_hint
-[kernel_opt/dependence_inter_c/][]|This Example demonstrates the HLS pragma 'DEPENDENCE'.Using 'DEPENDENCE' pragma, user can provide additional dependency details to the compiler by specifying if the dependency in consecutive loop iterations on buffer is true/false, which allows the compiler to perform unrolling/pipelining to get better performance.|__Key__ __Concepts__<br> - Inter Dependence<br>__Keywords__<br> - DEPENDENCE<br> - inter<br> - WAR
 [dataflow/dataflow_func_ocl/][]|This is simple example of vector addition to demonstrate Dataflow functionality in OpenCL Kernel. OpenCL Dataflow allows user to run multiple functions together to achieve higher throughput.|__Key__ __Concepts__<br> - Function/Task Level Parallelism<br>__Keywords__<br> - xcl_dataflow<br> - xclDataflowFifoDepth
 [dataflow/dataflow_loop_c/][]|This is simple example of vector addition to demonstrate Loops Dataflow functionality of HLS. HLS Dataflow allows user to schedule multiple sequential loops concurrently to achieve higher throughput.|__Key__ __Concepts__<br> - Loop Dataflow<br>__Keywords__<br> - dataflow<br> - hls::stream<>
 [dataflow/dataflow_loop_ocl/][]|This is simple example of vector addition to demonstrate Loops Dataflow functionality. OpenCL Dataflow allows user to schedule multiple sequential loops to run concurrently to achieve higher throughput.|__Key__ __Concepts__<br> - Loop Dataflow<br>__Keywords__<br> - xcl_dataflow<br> - xclDataflowFifoDepth
@@ -96,12 +101,13 @@ Example        | Description           | Key Concepts / Keywords
 [misc/sum_scan/][]|Example of parallel prefix sum|
 [misc/vadd/][]|Simple example of vector addition.|
 [misc/vdotprod/][]|Simple example of vector dot-product.|
-[cpu_to_fpga/00_cpu/][]|This is a simple example of matrix multiplication (Row x Col).|
-[cpu_to_fpga/01_ocl/][]|This is a simple example of OpenCL matrix multiplication (Row x Col).|__Key__ __Concepts__<br> - OpenCL APIs<br>
-[cpu_to_fpga/02_lmem_ocl/][]|This is a simple example of matrix multiplication (Row x Col) to demonstrate how to reduce number of memory accesses using local memory.|__Key__ __Concepts__<br> - Kernel Optimization<br> - Local Memory<br>
-[cpu_to_fpga/03_burst_rw_ocl/][]|This is a simple example of matrix multiplication (Row x Col) to demonstrate how to achieve better pipeline with burst read and write to/from local memory from/to DDR.|__Key__ __Concepts__<br> - Kernel Optimization<br> - Burst Read/Write<br>
-[cpu_to_fpga/04_partition_ocl/][]|This is a simple example of matrix multiplication (Row x Col) to demonstrate how to achieve better performance by array partitioning and loop unrolling.|__Key__ __Concepts__<br> - Array Partition<br> - Loop Unroll<br>__Keywords__<br> - xcl_pipeline_loop<br> - xcl_array_partition(complete, dim)<br> - opencl_unroll_hint
 
+[cpu_to_fpga]:cpu_to_fpga
+[cpu_to_fpga/00_cpu/]:cpu_to_fpga/00_cpu/
+[cpu_to_fpga/01_ocl/]:cpu_to_fpga/01_ocl/
+[cpu_to_fpga/02_lmem_ocl/]:cpu_to_fpga/02_lmem_ocl/
+[cpu_to_fpga/03_burst_rw_ocl/]:cpu_to_fpga/03_burst_rw_ocl/
+[cpu_to_fpga/04_partition_ocl/]:cpu_to_fpga/04_partition_ocl/
 [host]:host
 [host/concurrent_kernel_execution_ocl/]:host/concurrent_kernel_execution_ocl/
 [host/copy_buffer_ocl/]:host/copy_buffer_ocl/
@@ -138,6 +144,7 @@ Example        | Description           | Key Concepts / Keywords
 [kernel_opt]:kernel_opt
 [kernel_opt/aos_vs_soa_ocl/]:kernel_opt/aos_vs_soa_ocl/
 [kernel_opt/array_partition_ocl/]:kernel_opt/array_partition_ocl/
+[kernel_opt/dependence_inter_c/]:kernel_opt/dependence_inter_c/
 [kernel_opt/lmem_2rw_c/]:kernel_opt/lmem_2rw_c/
 [kernel_opt/lmem_2rw_ocl/]:kernel_opt/lmem_2rw_ocl/
 [kernel_opt/loop_fusion_c/]:kernel_opt/loop_fusion_c/
@@ -152,7 +159,6 @@ Example        | Description           | Key Concepts / Keywords
 [kernel_opt/systolic_array_c/]:kernel_opt/systolic_array_c/
 [kernel_opt/systolic_array_ocl/]:kernel_opt/systolic_array_ocl/
 [kernel_opt/vectorization_memorycoalescing_ocl/]:kernel_opt/vectorization_memorycoalescing_ocl/
-[kernel_opt/dependence_inter_c/]:kernel_opt/dependence_inter_c/
 [dataflow]:dataflow
 [dataflow/dataflow_func_ocl/]:dataflow/dataflow_func_ocl/
 [dataflow/dataflow_loop_c/]:dataflow/dataflow_loop_c/
@@ -183,9 +189,3 @@ Example        | Description           | Key Concepts / Keywords
 [misc/sum_scan/]:misc/sum_scan/
 [misc/vadd/]:misc/vadd/
 [misc/vdotprod/]:misc/vdotprod/
-[cpu_to_fpga]:cpu_to_fpga
-[cpu_to_fpga/00_cpu/]:cpu_to_fpga/00_cpu/
-[cpu_to_fpga/01_ocl/]:cpu_to_fpga/01_ocl/
-[cpu_to_fpga/02_lmem_ocl/]:cpu_to_fpga/02_lmem_ocl/
-[cpu_to_fpga/03_burst_rw_ocl/]:cpu_to_fpga/03_burst_rw_ocl/
-[cpu_to_fpga/04_partition_ocl/]:cpu_to_fpga/04_partition_ocl/

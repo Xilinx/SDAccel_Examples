@@ -13,8 +13,6 @@
         "xcl2"
     ],
     "host_exe": "shift_register",
-    "em_cmd": "./shift_register",
-    "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./shift_register",
     "containers": [
     {
         "name": "fir",

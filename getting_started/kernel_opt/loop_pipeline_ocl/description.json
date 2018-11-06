@@ -13,8 +13,6 @@
         "xcl2"
     ],
     "host_exe": "loop_pipeline",
-    "em_cmd": "./loop_pipeline",
-    "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./loop_pipeline",
     "containers": [
     {
         "name": "vector_addition",        

@@ -8,8 +8,6 @@
         "Linux"
     ],
     "host_exe": "vdotprod",
-    "em_cmd" : "./vdotprod",
-    "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./vdotprod",
     "libs": [
         "xcl2"
     ], 

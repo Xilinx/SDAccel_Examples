@@ -9,7 +9,6 @@
     "host_srcs": "src/edge.cpp",
     "host_hdrs": "src/edge.h",
     "cmd_args": "PROJECT/data/input/eiffel.bmp",
-    "em_cmd": "./edge data/input/eiffel.bmp",
     "output_files": "input.bmp output.bmp",
     "libs": [
         "opencv",

@@ -11,8 +11,6 @@
     ],
     "host_exe": "stream_access",
     "cmd_args": "PROJECT/data/input1.txt PROJECT/data/input2.txt",
-    "em_cmd": "./stream_access ./data/input1.txt ./data/input2.txt",
-    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./stream_access ./data/input1.txt ./data/input2.txt",
     "libs": [
         "oclHelper", 
         "xcl2"

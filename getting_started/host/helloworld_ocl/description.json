@@ -12,8 +12,6 @@
         "xcl2"
     ],
     "host_exe": "helloworld",
-    "em_cmd": "./helloworld",
-    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./helloworld",
     "containers": [
     {
         "name": "vector_addition",    

@@ -9,7 +9,6 @@
     "host_srcs": "src/main.cpp src/rsa_app.cpp src/common.cpp",
     "host_hdrs": "src/common.h src/rsa_app.h",
     "cmd_args" : "--in PROJECT/data/0_0_1024_key.cip --out PROJECT/data/0_out.msg --key PROJECT/data/0_1024_key.pem",
-    "em_cmd" : "./rsa --in data/0_0_1024_key.cip --out data/0_out.msg --key data/0_1024_key.pem",
     "output_files": "./data/0_out.msg",
     "libs": [
         "logger",

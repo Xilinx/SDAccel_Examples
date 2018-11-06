@@ -13,8 +13,6 @@
     ],
     "host_exe": "host",
     "targets": ["hw", "hw_emu"],
-    "em_cmd": "./host",
-    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "containers": [
     {
 	"name": "adder",

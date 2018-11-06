@@ -13,8 +13,6 @@
         "xcl2"
     ],
     "host_exe": "sub_devices",
-    "em_cmd": "./sub_devices",
-    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./sub_devices",
     "containers": [
         {
             "name" : "krnl_vadd",

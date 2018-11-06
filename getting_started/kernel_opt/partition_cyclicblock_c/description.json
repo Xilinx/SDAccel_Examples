@@ -13,8 +13,6 @@
         "xcl2"
     ],
     "host_exe": "array_partition",
-    "em_cmd": "./array_partition",
-    "hw_cmd": "../../utility/nimbix/nimbix-run.py -- ./array_partition",
     "output_files": "output.png",        
     "containers": [
     {

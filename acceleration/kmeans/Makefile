@@ -70,7 +70,6 @@ LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_XRT)/lib/ -lxilinxopencl
 
 # Kernel compiler global settings
 CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps 
-CLFLAGS += --xp "param:compiler.preserveHlsOutput=1" --xp "param:compiler.generateExtraRunData=true"
 CLFLAGS += -D "PARALLEL_POINTS=$(PARALLEL_POINTS)" -D "PARALLEL_FEATURES=$(PARALLEL_FEATURES)" -D USE_DATA_TYPE=$(DATATYPE_ID)
 
 CXXFLAGS += -DRECORD_OVERALL_TIME -DUSE_DATA_TYPE=$(DATATYPE_ID) -DPARALLEL_POINTS=$(PARALLEL_POINTS)

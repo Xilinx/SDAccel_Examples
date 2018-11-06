@@ -32,7 +32,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string.h>
 #include <math.h>
 
-#include <xcl.h>
+#include "xcl2.hpp"
 
 #include "linear_search.h"
 
@@ -40,7 +40,6 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 #endif
 
-#define KRNL_NAME "krnl_linear_search"
 
 void linear_search_read_datafile(char* filename, float* data, size_t size) {
 	FILE* fp = fopen(filename, "r");
@@ -55,50 +54,65 @@ void linear_search_read_datafile(char* filename, float* data, size_t size) {
 	fclose(fp);
 }
 
-void linear_search_init( xcl_world *world, cl_program *program, cl_kernel *krnl,
-	cl_mem *dev_targets, cl_mem *dev_queries, cl_mem *dev_indices
-) {
+void linear_search_init( cl::Context *context, cl::CommandQueue *q, cl::Program *program, cl::Kernel *krnl,
+		cl::Buffer* dev_targets, cl::Buffer* dev_queries, cl::Buffer* dev_indices,
+        	float *targets, float *queries, unsigned int *indices)
+{
+	cl_int err;
+	// get_xil_devices() is a utility API which will find the xilinx
+	// platforms and will return list of devices connected to Xilinx platform
+	std::vector<cl::Device> devices = xcl::get_xil_devices();
+	cl::Device device = devices[0];
 
-	*world = xcl_world_single();
-	*program = xcl_import_binary(*world, "krnl_nearest");
-	*krnl = xcl_get_kernel(*program, KRNL_NAME);
+	OCL_CHECK(err, *context = cl::Context(device, NULL, NULL, NULL, &err));
+	OCL_CHECK(err, *q = cl::CommandQueue(*context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+	OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
+	// find_binary_file() is a utility API which will search the xclbin file for
+	// targeted mode (sw_emu/hw_emu/hw) and for targeted platforms.
+	std::string binaryFile = xcl::find_binary_file(device_name, "krnl_nearest");
+
+	// import_binary_file() is a utility API which will load the binaryFile
+	// and will return Binaries.
+	cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+	devices.resize(1);
+
+	OCL_CHECK(err, *program = cl::Program(*context, devices, bins, NULL, &err));
+	OCL_CHECK(err, *krnl = cl::Kernel(*program, "krnl_linear_search", &err));
+
+	// Allocate Buffer in Global Memory
+	// Buffers are allocated using CL_MEM_USE_HOST_PTR for efficient memory and Device-to-host communication
 	/* Create Buffers padded to 512 bit boundry */
-	*dev_targets = xcl_malloc(*world, CL_MEM_READ_ONLY, ((TARGETS * DIMS - 1) / 16 + 1) * 16 * sizeof(float));
-	*dev_queries = xcl_malloc(*world, CL_MEM_READ_ONLY, ((QUERIES * DIMS - 1) / 16 + 1) * 16 * sizeof(float));
-	*dev_indices = xcl_malloc(*world, CL_MEM_READ_ONLY, ((QUERIES - 1) / 16 + 1) * 16 * sizeof(unsigned int));
+	OCL_CHECK(err, *dev_targets = cl::Buffer(*context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+			((TARGETS * DIMS - 1) / 16 + 1) * 16 * sizeof(float), (void*)targets, &err));
 
+	OCL_CHECK(err, *dev_queries = cl::Buffer(*context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+			((QUERIES * DIMS - 1) / 16 + 1) * 16 * sizeof(float), (void*)queries, &err));
+
+	OCL_CHECK(err, *dev_indices = cl::Buffer(*context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+			((QUERIES - 1) / 16 + 1) * 16 * sizeof(unsigned int), (void*)indices, &err));
 }
 
-void linear_search_exit(
-	xcl_world *world, cl_program *program, cl_kernel *krnl,
-	cl_mem *dev_targets, cl_mem *dev_queries, cl_mem *dev_indices
-) {
-	clReleaseMemObject(*dev_targets);
-	clReleaseMemObject(*dev_queries);
-	clReleaseMemObject(*dev_indices);
+unsigned long linear_search_exec(cl::Context *context, cl::CommandQueue *q, cl::Program *program, cl::Kernel *krnl,
+		cl::Buffer* dev_targets, cl::Buffer* dev_queries, cl::Buffer* dev_indices, unsigned int *indices)
+{
+    	cl_int err;	
+	cl::Event event;
 
-	clReleaseKernel(*krnl);
-	clReleaseProgram(*program);
-	xcl_release_world(*world);
-}
+	OCL_CHECK(err, err = krnl->setArg(0, *dev_targets));
+	OCL_CHECK(err, err = krnl->setArg(1, *dev_queries));
+	OCL_CHECK(err, err = krnl->setArg(2, *dev_indices));
 
-unsigned long linear_search_exec(
-		xcl_world *world, cl_kernel *krnl,
-		float *targets, float *queries, unsigned int *indices,
-		cl_mem *dev_targets, cl_mem *dev_queries, cl_mem *dev_indices
-) {
-	xcl_memcpy_to_device(*world, *dev_targets, targets, (TARGETS * DIMS) * sizeof(float));
-	xcl_memcpy_to_device(*world, *dev_queries, queries, (QUERIES * DIMS) * sizeof(float));
+	OCL_CHECK(err, err = q->enqueueTask(*krnl, NULL, &event));
 
-	xcl_set_kernel_arg(*krnl, 0, sizeof(cl_mem), dev_targets);
-	xcl_set_kernel_arg(*krnl, 1, sizeof(cl_mem), dev_queries);
-	xcl_set_kernel_arg(*krnl, 2, sizeof(cl_mem), dev_indices);
+	unsigned long start, stop;
+	OCL_CHECK(err, err = event.getProfilingInfo<unsigned long>(CL_PROFILING_COMMAND_START, &start));
+	OCL_CHECK(err, err = event.getProfilingInfo<unsigned long>(CL_PROFILING_COMMAND_END, &stop));
 
-	unsigned long duration = xcl_run_kernel3d(*world, *krnl, 1, 1, 1);
+	unsigned long duration = stop - start;
 
-	xcl_memcpy_from_device(*world, indices, *dev_indices, (QUERIES) * sizeof(unsigned int));
-
+	OCL_CHECK(err, err = q->enqueueReadBuffer(*dev_indices, CL_TRUE, 0, (QUERIES) * sizeof(unsigned int), (void*)indices, NULL, NULL));
+	q->finish();
 	return duration;
 }
 
@@ -119,17 +133,16 @@ int main(int argc, char** argv) {
 		check_results = 1;
 	}
 
-	float* queries = (float*) malloc(QUERIES * DIMS * sizeof(float));
-	float* targets = (float*) malloc(TARGETS * DIMS * sizeof(float));
-	unsigned int* indices = (unsigned int*) malloc(QUERIES * sizeof(unsigned int));
-
-	if (!queries || !targets || !indices) {
+    	std::vector<float,aligned_allocator<float>> queries(QUERIES * DIMS);
+    	std::vector<float,aligned_allocator<float>> targets(TARGETS * DIMS);
+    	std::vector<unsigned int,aligned_allocator<unsigned int>> indices(QUERIES);
+    
+	if (queries.empty() || targets.empty() || indices.empty()) {
 		printf("ERROR: Could not allocate memory!\n");
 		return EXIT_FAILURE;
 	}
-
-	    
-	linear_search_read_datafile(queries_filename, queries, QUERIES*DIMS);
+	  
+	linear_search_read_datafile(queries_filename, queries.data(), QUERIES*DIMS);
 
 	for(size_t i = 0; i < QUERIES*DIMS; i++) {
 		if (!isfinite(queries[i])) {
@@ -138,7 +151,7 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	linear_search_read_datafile(targets_filename, targets, TARGETS*DIMS);
+	linear_search_read_datafile(targets_filename, targets.data(), TARGETS*DIMS);
 
 	for(size_t i = 0; i < TARGETS*DIMS; i++) {
 		if (!isfinite(targets[i])) {
@@ -147,33 +160,28 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	xcl_world world;
-	cl_program program;
-	cl_kernel krnl;
+	cl::Program program;
+	cl::Context context;
+	cl::CommandQueue q;
+	cl::Kernel krnl;
+	cl::Buffer dev_targets, dev_queries, dev_indices;
 
-	cl_mem dev_targets, dev_queries, dev_indices;
-
-	linear_search_init(&world, &program, &krnl,
-	    &dev_targets, &dev_queries, &dev_indices);
+	linear_search_init(&context, &q, &program, &krnl,
+	    &dev_targets, &dev_queries, &dev_indices, targets.data(), queries.data(), indices.data());
 
 	unsigned long duration = linear_search_exec(
-	    &world, &krnl, targets, queries, indices,
-	    &dev_targets, &dev_queries, &dev_indices);
-
-	linear_search_exit(&world, &program, &krnl,
-	    &dev_targets, &dev_queries, &dev_indices);
+		&context, &q, &program, &krnl, &dev_targets, &dev_queries, &dev_indices, indices.data());
 
 	printf("Kernel Execution Time: %ld ns\n", duration);
 
-	float *refs;
+	std::vector<float,aligned_allocator<float>> refs(QUERIES);
 
 	if(check_results == 1) {
-		refs = (float*) malloc(sizeof(float) * QUERIES);
-		if(!refs) {
+		if(refs.empty()) {
 			printf("ERROR: Failed to allocate memory!\n");
 			return EXIT_FAILURE;
 		}
-		linear_search_read_datafile(refs_filename, refs, QUERIES);
+		linear_search_read_datafile(refs_filename, refs.data(), QUERIES);
 	}
 
 	int pass = 1;
@@ -220,15 +228,8 @@ int main(int argc, char** argv) {
 		return EXIT_FAILURE;
 	}
 
-	free(queries);
-	free(targets);
-	free(indices);
-
-	if(check_results == 1) {
-		free(refs);
-	}
-
 	printf("INFO: Test Passed\n");
 
 	return EXIT_SUCCESS;
 }
+

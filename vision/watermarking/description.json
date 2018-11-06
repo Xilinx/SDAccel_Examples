@@ -7,7 +7,6 @@
     "host_exe": "watermark",
     "host_srcs": "src/watermarking.cpp",
     "cmd_args": "PROJECT/data/inputImage.bmp PROJECT/data/golden.bmp",
-    "em_cmd": "./watermark data/inputImage.bmp ./data/golden.bmp",
     "output_files": "output.bmp",        
     "libs": [
         "xcl2", 

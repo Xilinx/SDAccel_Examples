@@ -8,8 +8,6 @@
         "Linux"
     ],
     "host_exe": "vadd",
-    "em_cmd" : "./vadd",
-    "hw_cmd" : "../../../utility/nimbix/nimbix-run.py -- ./vadd",
     "libs": [
         "xcl2"
     ], 

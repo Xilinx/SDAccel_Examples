@@ -13,8 +13,6 @@
         "xcl2"
     ],
     "host_exe": "host",
-    "em_cmd": "./host",
-    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host",
     "containers": [
     {
         "name": "window_array_2d",        

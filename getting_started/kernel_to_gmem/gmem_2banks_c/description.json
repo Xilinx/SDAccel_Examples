@@ -16,8 +16,6 @@
     ],
     "host_exe": "host",
     "cmd_args" : "PROJECT/data/input.bmp PROJECT/data/golden.bmp",
-    "em_cmd": "./host ./data/input.bmp ./data/golden.bmp",
-    "hw_cmd": "../../../utility/nimbix/nimbix-run.py -- ./host ./data/input.bmp ./data/golden.bmp",
     "output_files": "output.bmp",        
     "containers": [
         {

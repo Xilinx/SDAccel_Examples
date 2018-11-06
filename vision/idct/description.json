@@ -10,7 +10,6 @@
     "host_exe": "idct",
     "host_srcs": "src/idct.cpp",
     "cmd_args" : "BUILD/krnl_idct.xclbin",
-    "em_cmd" : "./idct ./xclbin/krnl_idct.<emulation flow>.xilinx_vcu1525_dynamic_5_1.xclbin",
     "containers": [
         {
             "name": "krnl_idct", 

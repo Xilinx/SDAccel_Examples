@@ -55,7 +55,7 @@ data/targets.txt
 description.json
 sdaccel.ini
 src/krnl_linear_search.cpp
-src/linear_search.c
+src/linear_search.cpp
 src/linear_search.h
 utils.mk
 ```

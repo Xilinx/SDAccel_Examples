@@ -10,7 +10,6 @@
     "host_srcs": "src/prng.cpp",
     "host_hdrs": "src/prng.h",
     "xcl": true,
-    "em_cmd" : "./prng",
     "libs" : [
         "xcl"
     ],
