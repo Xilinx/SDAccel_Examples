@@ -49,7 +49,7 @@ HOST_HDRS += ./src/matcharray.h ./src/smithwaterman.h ./src/sw.h ./src/intel/ssw
 
 # Host compiler global settings
 CXXFLAGS += -fmessage-length=0 -DFPGA_DEVICE -I./src/ -I $(XILINX_VIVADO)/include/
-LDFLAGS += -lrt -lstdc++ 
+LDFLAGS += -lrt -lstdc++ -lz 
 
 # Kernel compiler global settings
 CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 

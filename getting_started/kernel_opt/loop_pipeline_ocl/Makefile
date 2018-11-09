@@ -56,6 +56,7 @@ EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
 BINARY_CONTAINERS += $(XCLBIN)/vector_addition.$(TARGET).$(DSA).xclbin
 BINARY_CONTAINER_vector_addition_OBJS += $(XCLBIN)/vadd.$(TARGET).$(DSA).xo
+BINARY_CONTAINER_vector_addition_OBJS += $(XCLBIN)/vadd_pipelined.$(TARGET).$(DSA).xo
 
 CP = cp -rf
 
@@ -69,9 +70,12 @@ exe: $(EXECUTABLE)
 $(XCLBIN)/vadd.$(TARGET).$(DSA).xo: src/vector_addition.cl
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) -c -k vadd -I'$(<D)' -o'$@' '$<'
+$(XCLBIN)/vadd_pipelined.$(TARGET).$(DSA).xo: src/vector_addition.cl
+	mkdir -p $(XCLBIN)
+	$(XOCC) $(CLFLAGS) -c -k vadd_pipelined -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/vector_addition.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_vector_addition_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk vadd:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk vadd:1 --nk vadd_pipelined:1 -o'$@' $(+)
 
 # Building Host
 $(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
