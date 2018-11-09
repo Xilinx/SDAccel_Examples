@@ -20,7 +20,11 @@
         {
             "name": "vadd", 
             "location": "src/vector_addition.cl"
-        }
+        },
+	{
+	    "name": "vadd_pipelined",
+	    "location": "src/vector_addition.cl"
+	}
        ]
      }
     ],

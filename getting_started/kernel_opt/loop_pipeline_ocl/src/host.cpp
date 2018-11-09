@@ -126,7 +126,7 @@ int main(int argc, char** argv)
     q.finish();
     verify(gold, source_results);
 
-    OCL_CHECK(err, cl::Kernel kernel_pipelined(program, "vadd", &err));
+    OCL_CHECK(err, cl::Kernel kernel_pipelined(program, "vadd_pipelined", &err));
     
     OCL_CHECK(err, err = kernel_pipelined.setArg(0,buffer_result));
     OCL_CHECK(err, err = kernel_pipelined.setArg(1,buffer_a));
