@@ -267,7 +267,6 @@ bool SmithWatermanApp::invoke_kernel_blocking(
 {
 
     cl::Kernel kernel = m_clKernelSmithWaterman;
-
     cl_int err;
     cl::Buffer mem_input;
     OCL_CHECK(err, mem_input = cl::Buffer(context, CL_MEM_READ_WRITE, sz_input, NULL, &err));
@@ -292,18 +291,20 @@ bool SmithWatermanApp::invoke_kernel_blocking(
     for (int iter = 0; iter < numIter; ++iter) {
         //copy input dataset to OpenCL buffer
         //cout << "In iteration" << iter << "\n";
-    	OCL_CHECK(err, err = q.enqueueMigrateMemObjects({mem_input, mem_sz_sz}, 0/* 0 means from the host*/, NULL, &events[evtHostWrite]));
-
+	
+	OCL_CHECK(err, err = q.enqueueWriteBuffer(mem_input, CL_TRUE, 0, sz_input, (input + iter * (sz_input / sizeof(unsigned int))), NULL, &events[evtHostWrite]));
+	OCL_CHECK(err, err = q.enqueueWriteBuffer(mem_sz_sz, CL_TRUE, 0, sz_sz, iterNum, NULL, NULL));
+	
         //finish all memory writes
         OCL_CHECK(err, err = q.finish());
-
+    	
         //call once to guarantee that all buffers are migrated to device memory
         OCL_CHECK(err, err = q.enqueueTask(kernel, NULL, &events[evtKernelExec]));
 
         OCL_CHECK(err, err = q.finish());
 
         //read output size
-        OCL_CHECK(err, err = q.enqueueMigrateMemObjects({mem_output}, CL_MIGRATE_MEM_OBJECT_HOST, NULL, &events[evtHostRead]));
+        OCL_CHECK(err, err = q.enqueueReadBuffer(mem_output, CL_TRUE, 0, sz_output, (output + iter * (sz_output / sizeof(unsigned int))), NULL, &events[evtHostRead]));
 
         OCL_CHECK(err, err = q.finish());
         eTotal[evtHostWrite] += computeEventDurationInMS(events[evtHostWrite]);
@@ -349,16 +350,16 @@ bool SmithWatermanApp::invoke_kernel_doublebuffered(
     int numIter = m_numBlocks;
     cout << "Processing " << m_numSamples << " Samples \n";
     if (numIter >= 1) {
-        OCL_CHECK(err, err = q.enqueueMigrateMemObjects({mem_input_ping}, 0/* 0 means from the host*/, NULL, &ping[evtHostWrite]));
+        OCL_CHECK(err, err = q.enqueueWriteBuffer(mem_input_ping, CL_FALSE, 0, sz_input, input, NULL, &ping[evtHostWrite]));
         OCL_CHECK(err, err = kernel.setArg(0, mem_input_ping));
         OCL_CHECK(err, err = kernel.setArg(1, mem_output_ping));
 
         if (numIter > 1) {
-            OCL_CHECK(err, err = q.enqueueMigrateMemObjects({mem_input_pong}, 0/* 0 means from the host*/, NULL, &pong[evtHostWrite]));
+            OCL_CHECK(err, err = q.enqueueWriteBuffer(mem_input_pong, CL_FALSE, 0, sz_input, (input + (sz_input / sizeof(unsigned int))), NULL, &pong[evtHostWrite]));
         }
 	std::vector<cl::Event> vec_evt1 = {ping[evtHostRead], ping[evtKernelExec]};
         OCL_CHECK(err, err = q.enqueueTask(kernel, NULL, &ping[evtKernelExec]));
-        OCL_CHECK(err, err = q.enqueueMigrateMemObjects({mem_output_ping}, CL_MIGRATE_MEM_OBJECT_HOST, &vec_evt1, NULL));
+        OCL_CHECK(err, err = q.enqueueReadBuffer(mem_output_ping, CL_FALSE, 0, sz_output, output, &vec_evt1, NULL));
     }
 
     if (numIter >= 2) {
@@ -367,7 +368,7 @@ bool SmithWatermanApp::invoke_kernel_doublebuffered(
 
         if (numIter > 2) {
             ping[evtHostWrite].wait();
-            OCL_CHECK(err, err = q.enqueueMigrateMemObjects({mem_input_ping}, 0/* 0 means from the host*/, NULL, &ping[evtHostWrite]));
+            OCL_CHECK(err, err = q.enqueueWriteBuffer(mem_input_ping, CL_FALSE, 0, sz_input, (input + (sz_input / sizeof(unsigned int))), NULL, &ping[evtHostWrite]));
         }
 
         //call once to guarentee that all buffers are migrated to device memory
@@ -375,7 +376,7 @@ bool SmithWatermanApp::invoke_kernel_doublebuffered(
 
         //read output size
 	std::vector<cl::Event> vec_evt2 = {pong[evtHostRead], pong[evtKernelExec]};        
-        OCL_CHECK(err, err = q.enqueueMigrateMemObjects({mem_output_pong}, CL_MIGRATE_MEM_OBJECT_HOST, &vec_evt2, NULL));
+        OCL_CHECK(err, err = q.enqueueReadBuffer(mem_output_pong, CL_FALSE, 0, sz_output, (output + (sz_output / sizeof(unsigned int))), &vec_evt2, NULL));
 	}
 
     for (int iter = 2; iter < numIter; ++iter) {
@@ -387,7 +388,7 @@ bool SmithWatermanApp::invoke_kernel_doublebuffered(
 
             if (iter < numIter - 1) {
                 ping[evtHostWrite].wait();
-                OCL_CHECK(err, err = q.enqueueMigrateMemObjects({mem_input_ping}, 0/* 0 means from the host*/, NULL, &ping[evtHostWrite]));
+                OCL_CHECK(err, err = q.enqueueWriteBuffer(mem_input_ping, CL_FALSE, 0, sz_input, (input + (iter + 1) * (sz_input / sizeof(unsigned int))), NULL, &ping[evtHostWrite]));
             }
 
             //finish all memory writes
@@ -396,7 +397,7 @@ bool SmithWatermanApp::invoke_kernel_doublebuffered(
 
             //read output size
             OCL_CHECK(err, err = q.finish());
-            OCL_CHECK(err, err = q.enqueueMigrateMemObjects({mem_output_pong}, CL_MIGRATE_MEM_OBJECT_HOST, NULL, &pong[evtKernelExec]));
+            OCL_CHECK(err, err = q.enqueueReadBuffer(mem_output_pong, CL_FALSE, 0, sz_output, (output + iter * (sz_output / sizeof(unsigned int))), NULL, &pong[evtHostRead]));
         }
         else { //ping
             OCL_CHECK(err, err = kernel.setArg(0, mem_input_ping));
@@ -404,7 +405,7 @@ bool SmithWatermanApp::invoke_kernel_doublebuffered(
 
             if (iter < numIter - 1) {
                 pong[evtHostWrite].wait();
-                OCL_CHECK(err, err = q.enqueueMigrateMemObjects({mem_input_pong}, 0/* 0 means from the host*/, NULL, &pong[evtHostWrite]));
+                OCL_CHECK(err, err = q.enqueueWriteBuffer(mem_input_pong, CL_FALSE, 0, sz_input, (input + (iter + 1) * (sz_input / sizeof(unsigned int))), NULL, &pong[evtHostWrite]));
             }
 
             //call once to guarentee that all buffers are migrated to device memory
@@ -413,7 +414,7 @@ bool SmithWatermanApp::invoke_kernel_doublebuffered(
 
             //read output size
             OCL_CHECK(err, err = q.finish());
-            OCL_CHECK(err, err = q.enqueueMigrateMemObjects({mem_output_ping}, CL_MIGRATE_MEM_OBJECT_HOST, NULL, &ping[evtKernelExec]));
+            OCL_CHECK(err, err = q.enqueueReadBuffer(mem_output_ping, CL_FALSE, 0, sz_output, (output + iter * (sz_output / sizeof(unsigned int))), NULL, &ping[evtHostRead]));
         }
         eTotal[evtHostWrite] += computeEventDurationInMS(events[evtHostWrite]);
         eTotal[evtKernelExec] += computeEventDurationInMS(events[evtKernelExec]);
