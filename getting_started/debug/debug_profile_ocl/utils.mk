@@ -16,7 +16,7 @@ endif
 
 #Generates profile summary report
 ifeq ($(PROFILE), yes)
-CLFLAGS += --profile_kernel data:all:all:all
+LDCLFLAGS += --profile_kernel data:all:all:all
 endif
 
 #Generates debug summary report
