@@ -48,9 +48,11 @@ Application code is located in the src directory. Accelerator binary files will 
 .gitignore
 Makefile
 README.md
+config.mk
 description.json
 scripts/gen_xo.tcl
 scripts/package_kernel.tcl
+sdaccel.ini
 src/hdl/krnl_vadd_rtl.v
 src/hdl/krnl_vadd_rtl_adder.sv
 src/hdl/krnl_vadd_rtl_axi_read_master.sv
@@ -60,6 +62,7 @@ src/hdl/krnl_vadd_rtl_counter.sv
 src/hdl/krnl_vadd_rtl_int.sv
 src/host.cpp
 src/kernel.xml
+utils.mk
 ```
 
 ## 5. COMPILATION AND EXECUTION

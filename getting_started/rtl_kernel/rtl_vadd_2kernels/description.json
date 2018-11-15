@@ -10,6 +10,9 @@
     "libs": [
         "xcl2"
     ],
+    "config_make": "config.mk",
+    "output_files": "tmp_kernel_pack* packaged_kernel*",
+    "host_srcs": "src/host.cpp",
     "host_exe": "host",
     "runtime": ["OpenCL"],
     "targets": ["hw", "hw_emu"],
@@ -19,11 +22,11 @@
 	"accelerators": [
 	    {
  		"name": "vadd0",
-		"location": "src/kernel_0.xml"
+		"kernel_type": "RTL"
 	    },
 	    {
 		"name": "vadd1",
-		"location": "src/kernel_1.xml"
+		"kernel_type": "RTL"
 	    }
 	]
 	}

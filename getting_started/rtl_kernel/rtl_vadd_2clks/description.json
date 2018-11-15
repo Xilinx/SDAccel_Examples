@@ -12,15 +12,19 @@
     "libs": [
         "xcl2"
     ],
+    "config_make": "config.mk",
+    "output_files": "tmp_kernel_pack* packaged_kernel*",
+    "host_srcs": "src/host.cpp",
     "host_exe": "host",
     "targets": ["hw", "hw_emu"],
     "containers": [
     	{
 	"name": "vadd",
 	"accelerators": [
-	   {
-		"name": "krnl_vadd_rtl"
-	   }
+	    {
+		"name": "vadd",
+		"kernel_type": "RTL"
+	    }
 	]
 	}
     ],

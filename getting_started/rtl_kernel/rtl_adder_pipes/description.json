@@ -11,7 +11,10 @@
     "libs": [
         "xcl2"
     ],
+    "config_make": "config.mk",
+    "output_files": "tmp_kernel_pack* packaged_kernel*",
     "host_exe": "host",
+    "host_srcs": "src/host.cpp",
     "targets": ["hw", "hw_emu"],
     "containers": [
     {
@@ -19,15 +22,15 @@
 	"accelerators": [
 	{
 	"name": "input",
-	"location": "src/kernel_input_stage.xml"
+	"kernel_type": "RTL"
 	},
 	{
 	"name": "adder",
-	"location": "src/kernel_adder_stage.xml"
+	"kernel_type": "RTL"
 	},
 	{
 	"name": "output",
-	"location": "src/kernel_output_stage.xml"
+	"kernel_type": "RTL"
 	}
 	]
     }
