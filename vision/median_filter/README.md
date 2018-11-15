@@ -19,7 +19,7 @@ This is an optimized implementation of a median filter being used to remove nois
 
 ### PERFORMANCE
 Board|Image Size|Frames / Second
-----|-----|-----
+-----|-----|-----
 xilinx:adm-pcie-7v3:1ddr|128 x 128|22,222
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:

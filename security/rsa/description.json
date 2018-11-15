@@ -40,11 +40,9 @@
     },
     "perf_fields" : ["Board", "Cipher Text Length", "Throughput"],
     "performance": [
-        {
-            "system" : "xilinx:adm-pcie-7v3:1ddr",
-            "constraint" : "1,024 bits",
-            "metric" : "272,340 bytes / second"
-        }
+        [
+            "xilinx:adm-pcie-7v3:1ddr", "1,024 bits", "272,340 bytes / second"
+        ]
     ],
     "contributors" : [
         {

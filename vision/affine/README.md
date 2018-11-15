@@ -19,7 +19,7 @@ Affine transformation is a linear mapping method that preserves points, straight
 
 ### PERFORMANCE
 Task|Xilinx Execution Time (in ns)|GTX 780 Execution Time (in ns)
-----|-----|-----
+-----|-----|-----
 Host to Device|1,009,087|1,828,606
 Device to Host|774,714|563,740
 Device to Kernel|46,460,532|195,938,535

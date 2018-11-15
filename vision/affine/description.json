@@ -28,31 +28,21 @@
     ],
     "perf_fields":["Task","Xilinx Execution Time (in ns)", "GTX 780 Execution Time (in ns)"],
     "performance": [
-        {
-            "system": "Host to Device",
-            "constraint": "1,009,087",
-            "metric": "1,828,606"
-        },
-        {
-            "system": "Device to Host",
-            "constraint": "774,714",
-            "metric": "563,740"
-        },
-        {
-            "system": "Device to Kernel",
-            "constraint": "46,460,532",
-            "metric": "195,938,535"
-        },
-        {
-            "system": "Total Execution",
-            "constraint": "48,244,355",
-            "metric": "198,330,886"
-        },
-        {
-            "system": "Frames per Second",
-            "constraint": "21.5",
-            "metric": "5.1"
-        }
+        [
+            "Host to Device", "1,009,087", "1,828,606"
+        ],
+        [
+            "Device to Host", "774,714", "563,740"
+        ],
+        [
+            "Device to Kernel", "46,460,532", "195,938,535"
+        ],
+        [
+            "Total Execution", "48,244,355", "198,330,886"
+        ],
+        [
+            "Frames per Second", "21.5", "5.1"
+        ]
     ],
     "contributors": [
         {

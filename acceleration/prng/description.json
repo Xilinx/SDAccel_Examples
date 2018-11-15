@@ -26,11 +26,9 @@
     ],
     "perf_fields" : ["Board", "Total Number of Samples", "Kernel Duration"],
     "performance" : [
-        {
-            "system" : "xilinx:adm-pcie-ku3:2ddr-xpr",
-            "constraint" : "16777216",
-            "metric" : "59.1ms"
-        }
+        [
+            "xilinx:adm-pcie-ku3:2ddr-xpr", "16777216", "59.1ms"
+        ]
     ],
     "contributors" : [
         {

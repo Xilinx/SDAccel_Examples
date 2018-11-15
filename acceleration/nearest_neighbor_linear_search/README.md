@@ -19,7 +19,7 @@ This is an optimized implementation of a nearest neighbor linear search algorith
 
 ### PERFORMANCE
 Board|Measurements per Cycle|Gigameasurements / Second
-----|-----|-----
+-----|-----|-----
 xilinx:adm-pcie-ku3:2ddr-xpr|256|37.5
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
