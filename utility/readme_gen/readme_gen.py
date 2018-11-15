@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from sys import argv
+from collections import OrderedDict
 import json
 import os
 import subprocess
@@ -64,19 +65,21 @@ def overview(target,data):
         target.write("\n\n")
     if 'perf_fields' in data:
         target.write("### PERFORMANCE\n")
-        target.write(data["perf_fields"][0])
-        target.write("|")
-        target.write(data["perf_fields"][1])
-        target.write("|")
-        target.write(data["perf_fields"][2])
+	ctr = len(data["perf_fields"])
+	for idx in range(0, ctr - 1):
+            target.write(data["perf_fields"][idx])
+            target.write("|")
+	target.write(data["perf_fields"][ctr - 1])
         target.write("\n")
-        target.write("----|-----|-----\n")
-        for result in data["performance"]:
-            target.write(result["system"])
-            target.write("|")
-            target.write(result["constraint"])
-            target.write("|")
-            target.write(result["metric"])
+	for idx in range(0, ctr - 1):
+            target.write("-----|")
+	target.write("-----\n")
+	count = len(data["performance"])	
+        for result in range(0, count):
+	    for i in range(0, ctr - 1):
+		target.write(data["performance"][result][i])
+		target.write("|")
+            target.write(data["performance"][result][ctr - 1])	
             target.write("\n")
     if 'key_concepts' in data:
         target.write("***KEY CONCEPTS:*** ")

@@ -25,11 +25,9 @@
     ],
     "perf_fields" : ["Board", "Measurements per Cycle", "Gigameasurements / Second"],
     "performance": [
-        {
-            "system" : "xilinx:adm-pcie-ku3:2ddr-xpr",
-            "constraint" : "256",
-            "metric" : "37.5"
-        }
+        [
+            "xilinx:adm-pcie-ku3:2ddr-xpr", "256", "37.5"
+        ]
     ],
     "contributors" : [
         {

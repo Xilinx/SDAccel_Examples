@@ -21,7 +21,7 @@ targeting exection on an SDAccel support FPGA acceleration card
 
 ### PERFORMANCE
 Board|Total Number of Samples|Kernel Duration
-----|-----|-----
+-----|-----|-----
 xilinx:adm-pcie-ku3:2ddr-xpr|16777216|59.1ms
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:

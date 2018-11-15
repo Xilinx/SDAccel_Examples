@@ -48,6 +48,7 @@ Application code is located in the src directory. Accelerator binary files will 
 .gitignore
 Makefile
 README.md
+config.mk
 description.json
 scripts/gen_adder_xo.tcl
 scripts/gen_input_xo.tcl
@@ -55,6 +56,7 @@ scripts/gen_output_xo.tcl
 scripts/package_kernel_adder_stage.tcl
 scripts/package_kernel_input_stage.tcl
 scripts/package_kernel_output_stage.tcl
+sdaccel.ini
 src/adder_stage/hdl/krnl_adder_stage_rtl.v
 src/adder_stage/hdl/krnl_adder_stage_rtl_adder.sv
 src/adder_stage/hdl/krnl_adder_stage_rtl_control_s_axi.v
@@ -75,6 +77,7 @@ src/output_stage/hdl/krnl_output_stage_rtl_control_s_axi.v
 src/output_stage/hdl/krnl_output_stage_rtl_counter.sv
 src/output_stage/hdl/krnl_output_stage_rtl_int.sv
 src/output_stage/hdl/krnl_output_stage_rtl_register_slice.sv
+utils.mk
 ```
 
 ## 5. COMPILATION AND EXECUTION

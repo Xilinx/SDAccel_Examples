@@ -19,7 +19,7 @@ This is an optimized implementation of a watermarking application to add waterma
 
 ### PERFORMANCE
 Board|Image Size|Frames / Second
-----|-----|-----
+-----|-----|-----
 xilinx:adm-pcie-ku3:2ddr-xpr|1024 x 768|2,658
 xilinx:xil-accel-rd-ku115:4ddr-xpr|1024 x 768|3526
 ## 2. HOW TO DOWNLOAD THE REPOSITORY

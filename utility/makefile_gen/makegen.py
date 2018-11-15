@@ -339,13 +339,20 @@ def mk_build_all(target, data):
     target.write(".PHONY: exe\n")
     target.write("exe: $(EXECUTABLE)\n")
     target.write("\n")
-
-    if "config_make" in data:
+    
+    counter = 0
+    if "containers" in data:
+	for con in data["containers"]:
+	    if "accelerators" in con:
+		for acc in con["accelerators"]:
+		    if "kernel_type" in acc:
+		    	if acc["kernel_type"] == "RTL":
+			    counter = 1
+    if counter == 1:
 	building_kernel_rtl(target, data)
-	building_host_rtl(target, data)
     else:
     	building_kernel(target, data)
-	building_host(target, data)
+    building_host(target, data)
     return
 
 def mk_check(target, data):
@@ -369,11 +376,8 @@ def mk_check(target, data):
             target1.write("\n")
         target1.close
     target.write("ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))\n")
-    if "config_make" in data:
-    	target.write("\tXCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)")    	
-    else:
-	target.write("\t$(CP) $(EMCONFIG_DIR)/emconfig.json .\n") 
-    	target.write("\tXCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)")
+    target.write("\t$(CP) $(EMCONFIG_DIR)/emconfig.json .\n") 
+    target.write("\tXCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)")
     if "cmd_args" in data:
         args = data["cmd_args"].split(" ")    
         for arg in args[0:]:

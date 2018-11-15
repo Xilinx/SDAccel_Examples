@@ -28,16 +28,12 @@
     ],
     "perf_fields": ["Board", "Image Size", "Frames / Second"],
     "performance": [
-        {
-            "system": "xilinx:adm-pcie-7v3:1ddr",
-            "constraint": "1,024 x 1,024",
-            "metric": "1,000"
-        },
-        {
-            "system": "xilinx:adm-pcie-ku3:2ddr-xpr",
-            "constraint": "1,024 x 1,024",
-            "metric": "1,000"
-        }
+        [
+            "xilinx:adm-pcie-7v3:1ddr", "1,024 x 1,024", "1,000"
+        ],
+        [
+            "xilinx:adm-pcie-ku3:2ddr-xpr", "1,024 x 1,024", "1,000"
+        ]
 
     ],
     "contributors": [

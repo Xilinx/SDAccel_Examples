@@ -6,11 +6,9 @@
     ],
     "perf_fields": ["Board", "Image Size", "Frames per Second"],
     "performance": [
-        {
-            "system": "xilinx:adm-pcie-7v3:1ddr",
-            "constraint": "2,048 x 1,080",
-            "metric": "333"
-        }
+        [
+            "xilinx:adm-pcie-7v3:1ddr", "2,048 x 1,080", "333"
+        ]
     ],
     "xcl": false,
     "opencv": true,

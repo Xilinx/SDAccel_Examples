@@ -19,7 +19,7 @@ The convolve example is a performant design which showcases convolutional image 
 
 ### PERFORMANCE
 Board|Image Size|Frames / Second
-----|-----|-----
+-----|-----|-----
 xilinx:adm-pcie-7v3:1ddr|1,024 x 1,024|1,000
 xilinx:adm-pcie-ku3:2ddr-xpr|1,024 x 1,024|1,000
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
