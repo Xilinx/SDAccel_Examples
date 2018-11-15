@@ -53,7 +53,7 @@ check_file() {
 VCS_FILES=$(git ls-files)
 
 for f in $VCS_FILES; do
-	if [[ ($f == */description.json) || ($f == */summary.json) ]]; then
+	if [[ ($f == */description.json) ]]; then
 		check_file $f
 	fi
 done
