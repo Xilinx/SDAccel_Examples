@@ -111,6 +111,7 @@ void fir_shift_register(__global int* restrict output,
     }
 
     outer_loop:
+    __attribute__((xcl_pipeline_loop(1)))
     for(int j = 0; j < signal_length; j++) {
         int acc = 0;
         int x = signal[j];
@@ -118,7 +119,7 @@ void fir_shift_register(__global int* restrict output,
         // This is the shift register operation. The N_COEFF variable is defined
         // at compile time so the compiler knows the number of operations
         // performed by the loop. This loop does not require the unroll
-        // attribute because the outer loop will be automatically pipelined so
+        // attribute because the outer loop will be pipelined so
         // the compiler will unroll this loop in the process.
         shift_loop:
         for (int i = N_COEFF-1; i >= 0; i--) {
