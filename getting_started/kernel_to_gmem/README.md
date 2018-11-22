@@ -22,6 +22,7 @@ Example        | Description           | Key Concepts / Keywords
 [wide_mem_rw_ocl/][]|This is simple example of vector addition to demonstrate Wide Memory Access using uint16 data type. Based on input argument type, xocc compiler will figure our the memory datawidth between Global Memory and Kernel. For this example, uint16 datatype is used, so Memory datawidth will be 16 x (integer bit size) = 16 x 32 = 512 bit.|__Key__ __Concepts__<br> - Kernel to DDR<br> - wide memory access<br> - burst read and write<br>__Keywords__<br> - uint16<br> - xcl_pipeline_loop
 [window_array_2d_c/][]|This is a simple example of accessing each window of data from 2d array|__Key__ __Concepts__<br> - window of 2D data array access<br>__Keywords__<br> - #pragma HLS DATAFLOW<br> - #pragma HLS PIPELINE<br> - #pragma HLS stream
 [window_array_2d_ocl/][]|This is a simple example of accessing each window of data from 2d array|__Key__ __Concepts__<br> - window/tile of 2D data array access<br>__Keywords__<br> - pipe<br> - xcl_pipeline_loop<br> - xcl_reqd_pipe_depth
+[plram_access_c/][]|This example shows the usage of PLRAM and how to use it with simple matrix multiplication (Row x Col).|__Key__ __Concepts__<br> - SDx Memory Hierarchy<br> - PLRAMs<br>__Keywords__<br> - cl_mem_ext_ptr_t<br> - cl_mem_ext_ptr_t:param<br> - cl_mem_ext_ptr_t:flags<br> - cl_mem_ext_ptr_t:obj<br> - CL_MEM_EXT_PTR_XILINX<br> - PLRAM
 
 [.]:.
 [burst_rw_c/]:burst_rw_c/
@@ -40,3 +41,4 @@ Example        | Description           | Key Concepts / Keywords
 [wide_mem_rw_ocl/]:wide_mem_rw_ocl/
 [window_array_2d_c/]:window_array_2d_c/
 [window_array_2d_ocl/]:window_array_2d_ocl/
+[plram_access_c/]:plram_access_c/
