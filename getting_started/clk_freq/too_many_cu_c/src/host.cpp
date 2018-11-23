@@ -131,12 +131,12 @@ bool run_opencl_vadd(
 
         //Launch the Kernel
         q.enqueueTask(krnl_vector_add);
+        }
         q.finish();
 
         //Copy Result from Device Global Memory to Host Local Memory
         q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
         q.finish();
-        }
         std::cout << "Kernel Execution Finished...." << std::endl;
     }
     return true;
