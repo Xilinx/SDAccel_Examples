@@ -27,11 +27,12 @@ def create_params(target,data):
         target.write("DEVICES := ")
         target.write(data["board"][0])
     elif "nboard" in data:
-        target.write("DEVICES := ")
         if "xilinx_vcu1525_dynamic" not in data["nboard"]:
+            target.write("DEVICES := ")
             target.write("xilinx_vcu1525_dynamic\n")
         else:
-            target.write("xilinx_vcu1525_dynamic\n")
+            target.write("DEVICES := ")
+            target.write("xilinx_u200_xdma\n")
     else:
         target.write("DEVICES := ")
         target.write("xilinx_vcu1525_dynamic\n")
@@ -358,15 +359,15 @@ def mk_build_all(target, data):
 def mk_check(target, data):
     target.write("check: all\n")
     if "nboard" in data:
-        target.write("ifeq ($(DEVICE),$(filter $(DEVICE),")
-        args = data["nboard"]
-        for arg in args:
-            target.write(" ")
-            target.write(arg)
-        target.write("))\n")                   
-        target.write("$(error Nothing to be done for make)\n")
-        target.write("endif\n")
-        target.write("\n") 
+        for board in data["nboard"]:
+            target.write("ifeq ($(findstring ")
+	    target.write(board)
+	    target.write(", $(DEVICE)), ")
+	    target.write(board)
+            target.write(")\n")                   
+            target.write("$(error Nothing to be done for make)\n")
+            target.write("endif\n")
+        target.write("\n")
     if "Emulation" in data:        
         target1 = open("sdaccel.ini","a+")
         args = data["Emulation"]

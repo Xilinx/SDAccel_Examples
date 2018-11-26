@@ -87,7 +87,7 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
-ifeq ($(DEVICE),$(filter $(DEVICE), xilinx:kcu1500:dynamic xilinx_kcu1500_dynamic_5_0))
+ifeq ($(findstring xilinx_kcu1500_dynamic, $(DEVICE)), xilinx_kcu1500_dynamic)
 $(error Nothing to be done for make)
 endif
 
