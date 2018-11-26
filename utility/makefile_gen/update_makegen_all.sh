@@ -1,6 +1,10 @@
 #!/bin/bash
 appDir=$(dirname $(dirname $(dirname $(readlink -f $0))))
 
+echo "-----------------------"
+echo "--  UPDATING MAKEFILES --"
+echo "-----------------------"
+
 update_file() {
 	ignore=0
 
@@ -29,8 +33,13 @@ update_file() {
 VCS_FILES=$(git ls-files)
 
 for f in $VCS_FILES; do
-	if [[ ($f == */description.json) && ($f != */kmeans/*) && ($f != */kernel_global_bandwidth/*) && ($f != */sha1/*) && ($f != */high_perf_mat_mult/*)]]; then
-		echo $f
-		update_file $(readlink -f $f)
+	if [[ ($f == */description.json) ]]; then
+		if grep -q '"match_makefile": "false"' $f; then
+			echo $f
+			echo "Makefile Manually Edited:: AutoMakefile Generator Failed"			
+		else
+			echo $f
+			update_file $(readlink -f $f)
+		fi
 	fi
 done

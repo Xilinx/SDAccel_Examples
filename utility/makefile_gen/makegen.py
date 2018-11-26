@@ -453,6 +453,9 @@ def create_mk(target, data):
 script, desc_file = argv
 desc = open(desc_file, 'r')
 data = json.load(desc)
+if "match_makefile" in data:
+    if data["match_makefile"] == "false":
+	exit("Error:: Makefile Manually Edited:: AutoMakefile Generator Failed\n")
 desc.close()
 print "Generating sdaccel.ini file for %s" %data["example"]
 target = open("sdaccel.ini","w+")
