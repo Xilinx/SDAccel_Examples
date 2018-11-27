@@ -12,7 +12,7 @@
     "libs": [
         "xcl2"
     ],
-    "nboard":["xilinx:kcu1500:dynamic", "xilinx_kcu1500_dynamic_5_0"],
+    "nboard":["xilinx_kcu1500_dynamic"],
     "host_exe": "loop_fusion",
     "containers": [
         {

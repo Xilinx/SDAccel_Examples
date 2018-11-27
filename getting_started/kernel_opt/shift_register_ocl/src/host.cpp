@@ -189,14 +189,14 @@ uint64_t get_duration_ns (const cl::Event &event) {
     return(nstimeend-nstimestart);
 }
 void print_summary(std::string k1, std::string k2, uint64_t t1, uint64_t t2, int iterations ) {
-    int percentage_improvement = ((t1-t2)*100) / t1;
+    double speedup = (double)t1 / (double)t2;
     printf("|-------------------------+-------------------------|\n"
            "| Kernel(%3d iterations)  |    Wall-Clock Time (ns) |\n"
            "|-------------------------+-------------------------|\n",iterations);
     printf("| %-23s | %23lu |\n", k1.c_str(), t1);
     printf("| %-23s | %23lu |\n", k2.c_str(), t2);
     printf("|-------------------------+-------------------------|\n");
-    printf("| Percentage improvement: | %23d |\n",percentage_improvement);
+    printf("| Speedup: | %23lf |\n",speedup);
     printf("|-------------------------+-------------------------|\n");
     printf("Note: Wall Clock Time is meaningful for real hardware execution only, not for emulation.\n");
     printf("Please refer to profile summary for kernel execution time for hardware emulation.\n");
