@@ -64,10 +64,14 @@ static double timestamp() {
 }
 
 static double computeEventDurationInMS(const cl::Event& event) {
-	double nsduration = 0;
+	cl_ulong ts_start = 0, ts_end = 0;
 	cl_int err;
-    	nsduration = OCL_CHECK(err, event.getProfilingInfo<CL_PROFILING_COMMAND_END>(&err)) - OCL_CHECK(err, event.getProfilingInfo<CL_PROFILING_COMMAND_START>(&err));
-	return nsduration;
+	double duration = 0;
+	OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START, &ts_start));
+	OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END, &ts_end));
+	duration += (cl_double)(ts_end-ts_start)*(cl_double)(1e-06);
+
+	return duration;
 }
 
 static int getToken(FILE* fp, char* tok)
