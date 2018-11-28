@@ -23,7 +23,7 @@ include ./utils.mk
 
 TARGETS := hw
 TARGET := $(TARGETS)
-DEVICES := xilinx_vcu1525_dynamic
+DEVICES := xilinx_u200_xdma
 DEVICE := $(DEVICES)
 XCLBIN := ./xclbin
 DSA := $(call device2sandsa, $(DEVICE))
@@ -35,7 +35,10 @@ CXXFLAGS := $(opencl_CXXFLAGS) -Wall -O0 -g -std=c++14
 LDFLAGS := $(opencl_LDFLAGS)
 
 HOST_SRCS = src/kernel_global_bandwidth.cpp
-ddr_banks := 4
+
+# By default, the value of ddr_banks is kept 2 as every platform has atleast 2DDR configuration. 
+# The ddr_banks should be chosen in such a way that the selected platform supports the DDR configuration.
+ddr_banks := 2
 
 # Host compiler global settings
 CXXFLAGS = -I $(XILINX_XRT)/include/ -I/$(XILINX_SDX)/Vivado_HLS/include/ -O0 -g -Wall -fmessage-length=0 -std=c++14
@@ -120,5 +123,3 @@ clean:
 cleanall: clean
 	-$(RMDIR) $(XCLBIN)
 	-$(RMDIR) ./_x
-
-
