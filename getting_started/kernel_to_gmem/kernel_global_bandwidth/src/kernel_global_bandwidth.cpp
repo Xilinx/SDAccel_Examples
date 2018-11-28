@@ -33,8 +33,6 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *  all the DSAs. To make this example to work with multi DDR DSAs
 *  please follow steps mentioned below.
 *
-*  Note : "bandwidth" in map_connect options below is the kernel name defined in kernel.cl   
-*
 *  ***************************************************************************************
 *  DSA  (2DDR):
 *              
@@ -42,11 +40,10 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *                  > Miscellaneous > Other flags
 *  2.In "Other flags" box enter following
 *     a. --max_memory_ports all 
-*     b. --sp bandwidth_1.m_axi_gmem0:bank0
-*     c. --sp bandwidth_1.m_axi_gmem1:bank1 
 *  3.<SDx Project> > Properties > C/C++ Build > Settings > SDx XOCC Kernel Linker
 *                  > Miscellaneous > Other flags
-*  4.Repeat step 2 above
+*     a. --sp bandwidth_1.m_axi_gmem0:bank0
+*     b. --sp bandwidth_1.m_axi_gmem1:bank1 
 *
 * *****************************************************************************************
 *  DSA  (3DDR):
@@ -55,36 +52,36 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *                  > Miscellaneous > Other flags
 *  2.In "Other flags" box enter following
 *     a. --max_memory_ports all 
-*     b. --sp bandwidth_1.m_axi_gmem0:bank0
-*     c. --sp bandwidth_1.m_axi_gmem1:bank1 
-*     d. --sp bandwidth_1.m_axi_gmem2:bank2
 *  3.<SDx Project> > Properties > C/C++ Build > Settings > SDx XOCC Kernel Linker
 *                  > Miscellaneous > Other flags
-*  4.Repeat step 2 above
-*  5.Define NDDR_BANKS 3 in kernel "#define NDDR_BANKS 3" at the top of kernel.cl 
+*     a. --sp bandwidth_1.m_axi_gmem0:bank0
+*     b. --sp bandwidth_1.m_axi_gmem1:bank1 
+*     c. --sp bandwidth_1.m_axi_gmem2:bank2
+*  4.Define NDDR_BANKS 3 in kernel "#define NDDR_BANKS 3" at the top of kernel.cl 
 * 
 * *****************************************************************************************
 *  DSA  (4DDR):
+*      
+*  Note: The selected platform must support 4DDR.             
 *              
 *  1.<SDx Project> > Properties > C/C++ Build > Settings > SDx XOCC Kernel Compiler 
 *                  > Miscellaneous > Other flags
 *  2.In "Other flags" box enter following
 *     a. --max_memory_ports all 
-*     b. --sp bandwidth_1.m_axi_gmem0:bank0
-*     c. --sp bandwidth_1.m_axi_gmem1:bank1 
-*     d. --sp bandwidth_1.m_axi_gmem2:bank2
-*     e. --sp bandwidth_1.m_axi_gmem3:bank3 
 *  3.<SDx Project> > Properties > C/C++ Build > Settings > SDx XOCC Kernel Linker
 *                  > Miscellaneous > Other flags
-*  4.Repeat step 2 above
-*  5.Define NDDR_BANKS 4 in kernel "#define NDDR_BANKS 4" at the top of kernel.cl 
+*     a. --sp bandwidth_1.m_axi_gmem0:bank0
+*     b. --sp bandwidth_1.m_axi_gmem1:bank1 
+*     c. --sp bandwidth_1.m_axi_gmem2:bank2
+*     d. --sp bandwidth_1.m_axi_gmem3:bank3 
+*  4.Define NDDR_BANKS 4 in kernel "#define NDDR_BANKS 4" at the top of kernel.cl 
 * 
 * *****************************************************************************************
 *
 *  CLI Flow:
 *
-*  In CLI flow makefile detects the DDR of a device and based on that
-*  automatically it adds all the flags that are necessary. This example can be
+*  In CLI flow makefile detects the DDR of a device on the basis of ddr_banks variable
+*  and based on that automatically it adds all the flags that are necessary. This example can be
 *  used similar to other examples in CLI flow, extra setup is not needed.
 *
 *********************************************************************************************/
