@@ -12,6 +12,7 @@
     "libs": [
         "xcl2"
     ],
+    "nboard": ["xilinx_kcu1500_dynamic"],
     "host_exe": "host",
     "containers" : [
     {
