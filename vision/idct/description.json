@@ -7,6 +7,7 @@
     "os": [
         "Linux"
     ],
+    "nboard": ["xilinx_vcu1525_dynamic"],
     "host_exe": "idct",
     "host_srcs": "src/idct.cpp",
     "cmd_args" : "BUILD/krnl_idct.xclbin",
