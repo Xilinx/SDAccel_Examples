@@ -133,7 +133,7 @@ void N_stage_Adders(int *input, int *output, int incr, int size)
 #pragma HLS INTERFACE s_axilite port=return bundle=control
 
     //array of stream declaration
-    hls::stream<int> streamArray[STAGES+1];
+    static hls::stream<int> streamArray[STAGES+1];
 
     #pragma HLS dataflow
     //one read input unit for data read
