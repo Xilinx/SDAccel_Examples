@@ -44,10 +44,10 @@ using namespace std;
 #include <stdbool.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <vector>
 #include <time.h>
-#include <CL/opencl.h>
 
-#include "xcl.h"
+#include "xcl2.hpp"
 #include "dma.h"
 #include "prng.h"
 
@@ -72,6 +72,7 @@ double timestamp() {
 	#endif
 	return ms;
 }
+
 //______________________________________________________________________________
 // initialize the seed table
 
@@ -112,63 +113,75 @@ int main(int argc, char** argv) {
 
 	parseArguments(argc, argv);
 
-// seed table
-	data_t Q_sw[nofPRNG*CMWC_CYCLE];
-	data_t Q_hw[nofPRNG*CMWC_CYCLE];
+// seed table	
+	std::vector<data_t> Q_sw(nofPRNG*CMWC_CYCLE);
+	std::vector<data_t,aligned_allocator<data_t>> Q_hw(nofPRNG*CMWC_CYCLE);
 
 // results from SW, 32 bit each
-	data_t *Dout_sw;
-	Dout_sw = new data_t[nofSample];
+	std::vector<data_t> Dout_sw(nofSample);
 
 // results from HW, (32 * number of PRNG) per sample
-	dout_t *Dout_hw;
-	Dout_hw = new dout_t[nofBlock*maxSizeOfBlock];
+	std::vector<dout_t,aligned_allocator<dout_t>> Dout_hw(nofBlock*maxSizeOfBlock);
 
 // SW processing
-	processInCPU ( Dout_sw, Q_sw);
-
-	std::cout << "Creating context..." << std::endl;
-	xcl_world world = xcl_world_single();
-	cl_program program = xcl_import_binary(world, "dma");
-	cl_kernel krnl = xcl_get_kernel(program, "dma");
-
-	std::cout << "Creating Buffers..." << std::endl;
-	cl_mem cmem_Q = xcl_malloc(world, CL_MEM_READ_ONLY,sizeof(data_t) * CMWC_CYCLE * nofPRNG);
-	cl_mem cmem_output = xcl_malloc(world,CL_MEM_WRITE_ONLY, sizeof(dout_t) * nofBlock * maxSizeOfBlock);
-
+	processInCPU ( Dout_sw.data(), Q_sw.data());
 
 // initialize seed table
 	for (int j=0; j<nofPRNG; j++ ) {
 		initCMWC (&Q_hw[j*CMWC_CYCLE], j);
 	}
 
-	std::cout << "Copying Buffers to device...." << std::endl;
-	xcl_memcpy_to_device(world, cmem_Q,Q_hw,sizeof(data_t) * CMWC_CYCLE * nofPRNG);
+	std::cout << "Creating context..." << std::endl;
 
+	cl_int err;
+	std::vector<cl::Device> devices = xcl::get_xil_devices();
+	cl::Device device = devices[0];
+
+	OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
+	OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+	OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
+
+	std::string binaryFile = xcl::find_binary_file(device_name,"dma");
+
+	cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+	devices.resize(1);
+	OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
+	OCL_CHECK(err, cl::Kernel krnl(program,"dma", &err));
+
+    std::cout << "Creating Buffers..." << std::endl;
+	OCL_CHECK(err, cl::Buffer cmem_Q(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+							sizeof(data_t) * CMWC_CYCLE * nofPRNG, Q_hw.data(), &err));
+
+	OCL_CHECK(err, cl::Buffer cmem_output(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+							sizeof(dout_t) * nofBlock * maxSizeOfBlock, Dout_hw.data(), &err));
+
+    std::cout << "Copying Buffers to device...." << std::endl;
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({cmem_Q}, 0/* 0 means from host*/));
 
 	std::cout << "Starting Kernel..." << std::endl;
-	xcl_set_kernel_arg(krnl, 0, sizeof(cl_mem), &cmem_output);
-	xcl_set_kernel_arg(krnl, 1, sizeof(cl_mem), &cmem_Q);
-	xcl_set_kernel_arg(krnl, 2, sizeof(int),    &nofBlock);
+	OCL_CHECK(err, err = krnl.setArg(0, cmem_output));
+	OCL_CHECK(err, err = krnl.setArg(1, cmem_Q));
+	OCL_CHECK(err, err = krnl.setArg(2, sizeof(int), &nofBlock));
 
-	unsigned long duration = xcl_run_kernel3d(world, krnl, 1, 1, 1);
+	cl::Event event;
+	unsigned long start = 0, stop = 0;
+
+	OCL_CHECK(err, err = q.enqueueTask(krnl, NULL, &event));
+	q.finish();
+
+	OCL_CHECK(err, err = event.getProfilingInfo<unsigned long>(CL_PROFILING_COMMAND_START, &start));
+	OCL_CHECK(err, err = event.getProfilingInfo<unsigned long>(CL_PROFILING_COMMAND_END, &stop));
+	unsigned long duration = (stop - start);
+
 	std::cout << "Kernel Duration: " << duration/1000000.0 << " ms" << std::endl;
 
 	std::cout << "Copying results to host...." << std::endl;
-	xcl_memcpy_from_device(world, Dout_hw, cmem_output, sizeof(dout_t) * nofBlock * maxSizeOfBlock);
+
+	OCL_CHECK(err, err = q.enqueueMigrateMemObjects({cmem_output}, CL_MIGRATE_MEM_OBJECT_HOST))
+    q.finish();
 
 // check results
-	checkResults( Dout_hw, Dout_sw );
-
-	delete[] Dout_hw;
-	delete[] Dout_sw;
-
-
-	clReleaseMemObject(cmem_Q);
-	clReleaseMemObject(cmem_output);
-	clReleaseKernel(krnl);
-	clReleaseProgram(program);
-	xcl_release_world(world);
+	checkResults( Dout_hw.data(), Dout_sw.data());
 
 	std::cout << "Completed Successfully" << std::endl;
 
@@ -231,3 +244,4 @@ void checkResults(dout_t *Dout_hw, data_t *Dout_sw) {
 	cout << "<<<<<<<<<<<<< error count = " << err_cnt << endl;
 
 }
+

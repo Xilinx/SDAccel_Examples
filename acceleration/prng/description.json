@@ -9,9 +9,8 @@
     "host_exe": "prng",
     "host_srcs": "src/prng.cpp",
     "host_hdrs": "src/prng.h",
-    "xcl": true,
     "libs" : [
-        "xcl"
+        "xcl2"
     ],
     "containers": [
 	{

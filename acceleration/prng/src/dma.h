@@ -55,5 +55,4 @@ extern "C" {
 	void dma (dout_t *mem_out, data_t *mem_in, int nofBlock);
 }
 
-
 #endif
