@@ -46,9 +46,10 @@ arrays are partitioned and the innermost loop is unrolled in the kernel.
 #define DATA_SIZE 64 
 
 uint64_t get_duration_ns (const cl::Event &event) {
+    cl_int err;
     uint64_t nstimestart, nstimeend;
-    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart);
-    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend);
+    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart));
+    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend));
     return(nstimeend-nstimestart);
 }
 
@@ -79,6 +80,7 @@ uint64_t mmult_fpga (
     int dim                                         //One dimension of matrix
 )
 {
+    cl_int err;
     int size = dim;    
     size_t matrix_size_bytes = sizeof(int) * size * size;
 
@@ -87,8 +89,8 @@ uint64_t mmult_fpga (
     cl::Device device = devices[0];
 
     //Creating Context and Command Queue for selected Device
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+    OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
+    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
 
     //import_binary() command will find the OpenCL binary file created using the 
@@ -98,48 +100,48 @@ uint64_t mmult_fpga (
     std::string binaryFile = xcl::find_binary_file(device_name,"mmult");
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
-    cl::Program program(context, devices, bins);
+    OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
 
     //This call will extract a kernel out of the program we loaded in the
     //previous line. A kernel is an OpenCL function that is executed on the
     //FPGA. This function is defined in the src/mmult.cl file.
-    cl::Kernel kernel(program,"mmult");
+    OCL_CHECK(err, cl::Kernel kernel(program,"mmult", &err));
 
     //These commands will allocate memory on the FPGA. The cl::Buffer
     //objects can be used to reference the memory locations on the device.
     //The cl::Buffer object cannot be referenced directly and must be passed
     //to other OpenCL functions.
-    cl::Buffer buffer_in1(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-            matrix_size_bytes,source_in1.data());    
-    cl::Buffer buffer_in2(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-            matrix_size_bytes,source_in2.data());
-    cl::Buffer buffer_output(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
-            matrix_size_bytes,source_fpga_results.data());
+    OCL_CHECK(err, cl::Buffer buffer_in1(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            matrix_size_bytes,source_in1.data(), &err));    
+    OCL_CHECK(err, cl::Buffer buffer_in2(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            matrix_size_bytes,source_in2.data(), &err));
+    OCL_CHECK(err, cl::Buffer buffer_output(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
+            matrix_size_bytes,source_fpga_results.data(), &err));
 
     //These commands will load the source_in1 and source_in2 vectors from the host
     //application into the buffer_in1 and buffer_in2 cl::Buffer objects. The data
     //will be be transferred from system memory over PCIe to the FPGA on-board
     //DDR memory.
-    q.enqueueMigrateMemObjects({buffer_in1, buffer_in2},0/* 0 means from host*/);
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_in1, buffer_in2},0/* 0 means from host*/));
 
     //Set the kernel arguments
     int narg = 0;
-    kernel.setArg(narg++, buffer_in1);
-    kernel.setArg(narg++, buffer_in2);
-    kernel.setArg(narg++, buffer_output);
-    kernel.setArg(narg++, size);
+    OCL_CHECK(err, err = kernel.setArg(narg++, buffer_in1));
+    OCL_CHECK(err, err = kernel.setArg(narg++, buffer_in2));
+    OCL_CHECK(err, err = kernel.setArg(narg++, buffer_output));
+    OCL_CHECK(err, err = kernel.setArg(narg++, size));
     
     cl::Event event;
     uint64_t kernel_duration = 0;
 
     //Launch the kernel
-    q.enqueueTask(kernel, NULL, &event);
+    OCL_CHECK(err, err = q.enqueueTask(kernel, NULL, &event));
 
     //The result of the previous kernel execution will need to be retrieved in
     //order to view the results. This call will write the data from the
     //buffer_output cl_mem object to the source_fpga_results vector
-    q.enqueueMigrateMemObjects({buffer_output},CL_MIGRATE_MEM_OBJECT_HOST);
-    q.finish();
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_output},CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.finish());
 
     kernel_duration = get_duration_ns(event);
 

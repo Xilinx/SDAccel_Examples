@@ -90,50 +90,50 @@ int main(int argc, char* argv[]) {
         out[i] = (sum += in[i]);
     }
 
-
 //OPENCL HOST CODE AREA START
+    cl_int err;
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+    OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
+    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
 
     std::string binaryFile = xcl::find_binary_file(device_name,"krnl_sum_scan");
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
-    cl::Program program(context, devices, bins);
-    cl::Kernel krnl(program,"krnl_sum_scan");
+    OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
+    OCL_CHECK(err, cl::Kernel krnl(program,"krnl_sum_scan", &err));
 
     std::vector<cl::Memory> inBufVec, outBufVec;
-    cl::Buffer dev_in (context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-            vector_size_bytes,in.data());
-    cl::Buffer dev_out(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-            vector_size_bytes,out_fpga.data());
+    OCL_CHECK(err, cl::Buffer dev_in (context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            vector_size_bytes,in.data(), &err));
+    OCL_CHECK(err, cl::Buffer dev_out(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            vector_size_bytes,out_fpga.data(), &err));
     inBufVec.push_back(dev_in);
     outBufVec.push_back(dev_out);
 
     
     /* Copy input vectors to memory */
-    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/));
 
     /* Set the kernel arguments */
-    krnl.setArg(0, dev_in);
-    krnl.setArg(1, dev_out);
-    krnl.setArg(2, length);
+    OCL_CHECK(err, err = krnl.setArg(0, dev_in));
+    OCL_CHECK(err, err = krnl.setArg(1, dev_out));
+    OCL_CHECK(err, err = krnl.setArg(2, length));
 
     /* Launch the kernel */
     cl::Event event;
-    q.enqueueTask(krnl,NULL,&event);
-    q.finish();
+    OCL_CHECK(err, err = q.enqueueTask(krnl,NULL,&event));
+    OCL_CHECK(err, err = q.finish());
 
      /* Copy result to local buffer */
-    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
-    q.finish();
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.finish());
 
     uint64_t nstimestart, nstimeend;
-    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart);
-    event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend);
+    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart));
+    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend));
     auto duration = nstimeend-nstimestart;
 
 //OPENCL HOST CODE AREA END

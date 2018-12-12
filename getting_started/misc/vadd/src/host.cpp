@@ -31,7 +31,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "vadd.h"
 
 int main(int argc, char* argv[]) {
-
+    cl_int err;
     size_t vector_size_bytes = sizeof(int) * LENGTH;
     std::vector<int,aligned_allocator<int>> source_a   (LENGTH);
     std::vector<int,aligned_allocator<int>> source_b   (LENGTH);
@@ -48,44 +48,44 @@ int main(int argc, char* argv[]) {
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+    OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
+    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
 
     std::string binaryFile = xcl::find_binary_file(device_name,"krnl_vadd");
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
-    cl::Program program(context, devices, bins);
-    cl::Kernel krnl(program,"krnl_vadd");
+    OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
+    OCL_CHECK(err, cl::Kernel krnl(program,"krnl_vadd", &err));
 
     std::vector<cl::Memory> inBufVec, outBufVec;
-    cl::Buffer buffer_a(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-            vector_size_bytes, source_a.data());
-    cl::Buffer buffer_b(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-            vector_size_bytes, source_b.data());
-    cl::Buffer buffer_c(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
-            vector_size_bytes, result_krnl.data());
+    OCL_CHECK(err, cl::Buffer buffer_a(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            vector_size_bytes, source_a.data(), &err));
+    OCL_CHECK(err, cl::Buffer buffer_b(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            vector_size_bytes, source_b.data(), &err));
+    OCL_CHECK(err, cl::Buffer buffer_c(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
+            vector_size_bytes, result_krnl.data(), &err));
     inBufVec.push_back(buffer_a);
     inBufVec.push_back(buffer_b);
     outBufVec.push_back(buffer_c);
 
    
     /* Copy input vectors to memory */
-    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/));
 
     /* Set the kernel arguments */
     int vector_length = LENGTH;
-    krnl.setArg(0, buffer_a);
-    krnl.setArg(1, buffer_b);
-    krnl.setArg(2, buffer_c);
-    krnl.setArg(3, vector_length);
+    OCL_CHECK(err, err = krnl.setArg(0, buffer_a));
+    OCL_CHECK(err, krnl.setArg(1, buffer_b));
+    OCL_CHECK(err, krnl.setArg(2, buffer_c));
+    OCL_CHECK(err, krnl.setArg(3, vector_length));
 
     /* Launch the kernel */
-    q.enqueueTask(krnl);
+    OCL_CHECK(err, err = q.enqueueTask(krnl));
 
      /* Copy result to local buffer */
-    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
-    q.finish();
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.finish());
 
 
     /* Compare the results of the kernel to the simulation */

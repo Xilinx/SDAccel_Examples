@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
 
     std::string in1Filename = argv[1];
     std::string in2Filename = argv[2];
-
+    cl_int err;
     std::string in1_data, in2_data;
 
     std::ifstream in1_stream(in1Filename);
@@ -143,18 +143,18 @@ int main(int argc, char **argv) {
 
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
-    cl::Context context(device);
+    OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
 
     // This example will use an out of order command queue.
-    cl::CommandQueue q(context, device, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err));
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
 
     std::string binaryFile = xcl::find_binary_file(device_name,"vector_addition");
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
 
-    cl::Program program(context, devices, bins);
-    cl::Kernel kernel(program, "vec_add");
+    OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
+    OCL_CHECK(err, cl::Kernel kernel(program, "vec_add", &err));
     
     // Create buffers with the vector size data
     cl::Buffer *buffer_a[2], *buffer_b[2], *buffer_c[2], *buffer_size[2];
@@ -163,14 +163,14 @@ int main(int argc, char **argv) {
         B[i].resize(bytes_per_iteration);
         device_result[i].resize(bytes_per_iteration);
         result_size[i].resize(bytes_length_buffer);
-        buffer_a[i] = new cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
-                                        bytes_per_iteration, A[i].data(), NULL);
-        buffer_b[i] = new cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
-                                        bytes_per_iteration, B[i].data(), NULL);
-        buffer_c[i] = new cl::Buffer(context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
-                                        bytes_per_iteration, device_result[i].data(), NULL);
-        buffer_size[i] = new cl::Buffer(context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
-                                        bytes_length_buffer, result_size[i].data(), NULL);
+        OCL_CHECK(err, buffer_a[i] = new cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
+                                        bytes_per_iteration, A[i].data(), &err));
+        OCL_CHECK(err, buffer_b[i] = new cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
+                                        bytes_per_iteration, B[i].data(), &err));
+        OCL_CHECK(err, buffer_c[i] = new cl::Buffer(context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
+                                        bytes_per_iteration, device_result[i].data(), &err));
+        OCL_CHECK(err, buffer_size[i] = new cl::Buffer(context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
+                                        bytes_length_buffer, result_size[i].data(), &err));
     }
 
     int in1_buffer_counter, in2_buffer_counter, flag;
@@ -240,36 +240,36 @@ int main(int argc, char **argv) {
         }
 
         // These calls are asynchronous with respect to the main thread
-        q.enqueueMigrateMemObjects({*(buffer_a[flag])}, 0 /* flags, 0 means from host */,
-                                    NULL, &write_events[flag][0]);
+        OCL_CHECK(err, err = q.enqueueMigrateMemObjects({*(buffer_a[flag])}, 0 /* flags, 0 means from host */,
+                                    NULL, &write_events[flag][0]));
 
-        q.enqueueMigrateMemObjects({*(buffer_b[flag])}, 0 /* flags, 0 means from host */,
-                                    NULL, &write_events[flag][1]);
+        OCL_CHECK(err, err = q.enqueueMigrateMemObjects({*(buffer_b[flag])}, 0 /* flags, 0 means from host */,
+                                    NULL, &write_events[flag][1]));
 
-        kernel.setArg(0, *(buffer_c[flag]));
-        kernel.setArg(1, *(buffer_a[flag]));
-        kernel.setArg(2, *(buffer_b[flag]));
-        kernel.setArg(3, *(buffer_size[flag]));
-        kernel.setArg(4, elements_per_iteration);
+        OCL_CHECK(err, err = kernel.setArg(0, *(buffer_c[flag])));
+        OCL_CHECK(err, err = kernel.setArg(1, *(buffer_a[flag])));
+        OCL_CHECK(err, err = kernel.setArg(2, *(buffer_b[flag])));
+        OCL_CHECK(err, err = kernel.setArg(3, *(buffer_size[flag])));
+        OCL_CHECK(err, err = kernel.setArg(4, elements_per_iteration));
 
         // This event needs to wait for the write buffer operations to complete
         // before executing. We are sending the write_events into its wait list to
         // ensure that the order of operations is correct.
-        q.enqueueTask(kernel, &write_events[flag], &kernel_events[flag]);
+        OCL_CHECK(err, err = q.enqueueTask(kernel, &write_events[flag], &kernel_events[flag]));
 
         // This operation only needs to wait for the kernel call. This call will
         // potentially overlap the next kernel call as well as the next read
         // operations
         std::vector<cl::Event> eventList;
         eventList.push_back(kernel_events[flag]);
-        q.enqueueMigrateMemObjects({*(buffer_c[flag])}, CL_MIGRATE_MEM_OBJECT_HOST,
-                                    &eventList, &read_events[flag][0]);
-        q.enqueueMigrateMemObjects({*(buffer_size[flag])}, CL_MIGRATE_MEM_OBJECT_HOST,
-                                    &eventList, &read_events[flag][1]);
+        OCL_CHECK(err, err = q.enqueueMigrateMemObjects({*(buffer_c[flag])}, CL_MIGRATE_MEM_OBJECT_HOST,
+                                    &eventList, &read_events[flag][0]));
+        OCL_CHECK(err, err = q.enqueueMigrateMemObjects({*(buffer_size[flag])}, CL_MIGRATE_MEM_OBJECT_HOST,
+                                    &eventList, &read_events[flag][1]));
     }
     // Wait for all of the OpenCL operations to complete
-    q.flush();
-    q.finish();
+    OCL_CHECK(err, err = q.flush());
+    OCL_CHECK(err, err = q.finish());
 
     size_t elements_last_iteration = elements_per_iteration;
     // Releasing mem objects and events

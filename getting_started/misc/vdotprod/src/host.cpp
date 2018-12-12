@@ -31,6 +31,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "vdotprod.h"
 
 int main(int argc, char* argv[]) {
+    cl_int err;
     int nhalf = NPOINTS >> 1;
     size_t input_size_bytes = sizeof(int) * NPOINTS;
     size_t output_size_bytes = sizeof(int) * nhalf;
@@ -59,46 +60,46 @@ int main(int argc, char* argv[]) {
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+    OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
+    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE));
     std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
 
     std::string binaryFile = xcl::find_binary_file(device_name,"krnl_vdotprod");
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
-    cl::Program program(context, devices, bins);
-    cl::Kernel krnl(program,"krnl_vdotprod");
+    OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
+    OCL_CHECK(err, cl::Kernel krnl(program,"krnl_vdotprod", &err));
 
     std::vector<cl::Memory> inBufVec, outBufVec;
-    cl::Buffer buffer_x(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-            input_size_bytes,source_x.data());
-    cl::Buffer buffer_y(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-            input_size_bytes,source_y.data());
-    cl::Buffer buffer_z(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-            input_size_bytes,source_z.data());
-    cl::Buffer buffer_d(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
-            output_size_bytes, result_krnl.data());
+    OCL_CHECK(err, cl::Buffer buffer_x(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            input_size_bytes,source_x.data(), &err));
+    OCL_CHECK(err, cl::Buffer buffer_y(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            input_size_bytes,source_y.data(), &err));
+    OCL_CHECK(err, cl::Buffer buffer_z(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            input_size_bytes,source_z.data(), &err));
+    OCL_CHECK(err, cl::Buffer buffer_d(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
+            output_size_bytes, result_krnl.data(), &err));
     inBufVec.push_back(buffer_x);
     inBufVec.push_back(buffer_y);
     inBufVec.push_back(buffer_z);
     outBufVec.push_back(buffer_d);
     
     /* Copy input vectors to memory */
-    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/));
 
     /* Set the kernel arguments */
-    krnl.setArg( 0, buffer_x);
-    krnl.setArg( 1, buffer_y);
-    krnl.setArg( 2, buffer_z);
-    krnl.setArg( 3, buffer_d);
-    krnl.setArg( 4, nhalf);
+    OCL_CHECK(err, err = krnl.setArg( 0, buffer_x));
+    OCL_CHECK(err, err = krnl.setArg( 1, buffer_y));
+    OCL_CHECK(err, err = krnl.setArg( 2, buffer_z));
+    OCL_CHECK(err, err = krnl.setArg( 3, buffer_d));
+    OCL_CHECK(err, err = krnl.setArg( 4, nhalf));
 
     /* Launch the kernel */
-    q.enqueueTask(krnl);
+    OCL_CHECK(err, err = q.enqueueTask(krnl));
 
      /* Copy result to local buffer */
-    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
-    q.finish();
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.finish());
 
 // OPENCL HOST CODE AREA END
 

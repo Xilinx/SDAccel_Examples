@@ -166,6 +166,7 @@ void run_opencl_sketch
    int height
  )
  {
+    cl_int err;
     std::string binaryFile;
     size_t image_size_bytes = sizeof(int) * size;
 
@@ -177,44 +178,50 @@ void run_opencl_sketch
 
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
-    cl::Program program(context, devices, bins);
+    OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     cl::Kernel krnl_process_image;
-    if(good) krnl_process_image = cl::Kernel(program,"sketch_GOOD");
-    else krnl_process_image = cl::Kernel(program, "sketch_BAD");
+    if (good) {
+	OCL_CHECK(err, krnl_process_image = cl::Kernel(program,"sketch_GOOD", &err));
+    }
+    else {
+	OCL_CHECK(err, krnl_process_image = cl::Kernel(program, "sketch_BAD", &err));
+    }
 
     //Allocate Buffer in Global Memory
     std::vector<cl::Memory> inBufVec, outBufVec;
-    cl::Buffer buffer_input (context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                  image_size_bytes,hw_inImage.data());
-    cl::Buffer buffer_output(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-            image_size_bytes,hw_outImage.data());
+    OCL_CHECK(err, cl::Buffer buffer_input (context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                            image_size_bytes,hw_inImage.data(), &err));
+ 
+    OCL_CHECK(err, cl::Buffer buffer_output(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+            image_size_bytes,hw_outImage.data(), &err));
     inBufVec.push_back(buffer_input);
     outBufVec.push_back(buffer_output);
 
     std::cout << "Writing input image to buffer...\n";
 
     //Copy input data to device global memory
-    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/));
     
     int narg = 0;
+
     //Set the Kernel Arguments
-    krnl_process_image.setArg(narg++, buffer_input);
-    krnl_process_image.setArg(narg++, buffer_output);
-    krnl_process_image.setArg(narg++, width);
-    krnl_process_image.setArg(narg++, height);
+    OCL_CHECK(err, err = krnl_process_image.setArg(narg++, buffer_input));
+    OCL_CHECK(err, err = krnl_process_image.setArg(narg++, buffer_output));
+    OCL_CHECK(err, err = krnl_process_image.setArg(narg++, width));
+    OCL_CHECK(err, err = krnl_process_image.setArg(narg++, height));
     
     std::cout << "Launching Kernels...." << std::endl;
 
     //Launch the Kernel
-    q.enqueueTask(krnl_process_image);
+    OCL_CHECK(err, err = q.enqueueTask(krnl_process_image));
     std::cout << "Kernel Execution Finished...." << std::endl;
     
     //Copy Result from Device Global Memory to Host Local Memory
-    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
-    q.finish();
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.finish());
 
-  }  
- 
+  }
+
 
 int main(int argc, char** argv)
 {
@@ -250,25 +257,28 @@ int main(int argc, char** argv)
     std::vector<int,aligned_allocator<int>> hw_inImage(image.numPixels());
     std::vector<int,aligned_allocator<int>> hw_outImage(image.numPixels());
     std::vector<int,aligned_allocator<int>> sw_outImage(image.numPixels());
+
     //Copying image host buffer
     memcpy(hw_inImage.data(),image.bitmap(),image_size_bytes);
 
-    int size = image.numPixels();
+    int size = image.numPixels();  
 
 //OPENCL HOST CODE AREA START
+    cl_int err;
 
     //Create Program and Kernels. 
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+    OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
+    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
 
     run_opencl_sketch(devices,q,context,device_name,true,hw_inImage,hw_outImage,size,width,height);
     run_opencl_sketch(devices,q,context,device_name,false,hw_inImage,hw_outImage,size,width,height);
 
 //OPENCL HOST CODE AREA END
+
 
     // Software sketch function 
     software_sketch(image.bitmap(), sw_outImage.data(), width, height);

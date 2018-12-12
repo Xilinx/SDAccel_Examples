@@ -46,7 +46,7 @@ Description:
 #define DATA_SIZE (MB*N)
 
 int main(int argc, char** argv) {
-
+    cl_int err;
     int size;
     const char *xcl_emu = getenv("XCL_EMULATION_MODE");
     if(xcl_emu && !strcmp(xcl_emu, "hw_emu")) {
@@ -81,16 +81,16 @@ int main(int argc, char** argv) {
     cl::Device device = devices[0];
 
     //Creating Context and Command Queue for selected device
-    cl::Context context(device);
-    cl::CommandQueue q(context, device);
+    OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
+    OCL_CHECK(err, cl::CommandQueue q(context, device, 0, &err));
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
     std::string vaddBinaryFile = xcl::find_binary_file(device_name,"krnl_vadd");
     cl::Program::Binaries vadd_bins = xcl::import_binary_file(vaddBinaryFile);
     devices.resize(1);
-    cl::Program program(context, devices, vadd_bins);
-    cl::Kernel krnl_vadd(program, "krnl_vadd");
+    OCL_CHECK(err, cl::Program program(context, devices, vadd_bins, NULL, &err));
+    OCL_CHECK(err, cl::Kernel krnl_vadd(program, "krnl_vadd", &err));
 
     //Num sub_devices
     int num_sub_devices= N;
@@ -105,7 +105,7 @@ int main(int argc, char** argv) {
 
     //Create sub_devices, sub_context and corresponding queues
     std::vector<cl::Device> sub_devices(num_sub_devices);
-    device.createSubDevices(device_part_properties, &sub_devices);
+    OCL_CHECK(err, err = device.createSubDevices(device_part_properties, &sub_devices));
 
     cl::Context sub_context(sub_devices);
     std::vector<cl::CommandQueue> sub_q(num_sub_devices);
@@ -116,16 +116,16 @@ int main(int argc, char** argv) {
     for (int i = 0; i < num_sub_devices; i++ ) {
         //Determines each sub_devices data offset for a, b and result
         size_t offset = i * elements_per_subdevice;
-        sub_q[i] = cl::CommandQueue(sub_context, device);
-        sub_kernel[i] = cl::Kernel(program, "krnl_vadd");
+        OCL_CHECK(err, sub_q[i] = cl::CommandQueue(sub_context, device, 0, &err));
+        OCL_CHECK(err, sub_kernel[i] = cl::Kernel(program, "krnl_vadd", &err));
 
         //Allocates memory on the FPGA DDR memory
-        d_a[i] = new cl::Buffer(sub_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                                        size_per_subdevice, &h_a[offset], NULL);
-        d_b[i] = new cl::Buffer(sub_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                                        size_per_subdevice, &h_b[offset], NULL);
-        d_output[i] = new cl::Buffer(sub_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-                                        size_per_subdevice, &hw_results[offset], NULL);
+        OCL_CHECK(err, d_a[i] = new cl::Buffer(sub_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                        size_per_subdevice, &h_a[offset], &err));
+        OCL_CHECK(err, d_b[i] = new cl::Buffer(sub_context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                        size_per_subdevice, &h_b[offset], &err));
+        OCL_CHECK(err, d_output[i] = new cl::Buffer(sub_context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                                        size_per_subdevice, &hw_results[offset], &err));
 
         cl::Event write_event;
         cl::Event task_event;
@@ -134,27 +134,27 @@ int main(int argc, char** argv) {
         std::vector<cl::Event> wait_task_event;
 
         //Copy the data to the device memory
-        sub_q[i].enqueueMigrateMemObjects({*(d_a[i]), *(d_b[i])}, 0, NULL, &write_event);
+        OCL_CHECK(err, err = sub_q[i].enqueueMigrateMemObjects({*(d_a[i]), *(d_b[i])}, 0, NULL, &write_event));
 
         //Set the kernel arguments
-        krnl_vadd.setArg(0, *(d_a[i]));
-        krnl_vadd.setArg(1, *(d_b[i]));
-        krnl_vadd.setArg(2, *(d_output[i]));
-        krnl_vadd.setArg(3, elements_per_subdevice);
+        OCL_CHECK(err, err = krnl_vadd.setArg(0, *(d_a[i])));
+        OCL_CHECK(err, err = krnl_vadd.setArg(1, *(d_b[i])));
+        OCL_CHECK(err, err = krnl_vadd.setArg(2, *(d_output[i])));
+        OCL_CHECK(err, err = krnl_vadd.setArg(3, elements_per_subdevice));
 
         wait_write_event.push_back(write_event);
         //Launch the kernel
-        sub_q[i].enqueueTask(krnl_vadd, &wait_write_event, &task_event);
+        OCL_CHECK(err, err = sub_q[i].enqueueTask(krnl_vadd, &wait_write_event, &task_event));
 
         wait_task_event.push_back(task_event);
         //Copy back the result and this call will write the data from the d_output
         //buffer object to the source hw_result vector
-        sub_q[i].enqueueMigrateMemObjects({*(d_output[i])}, CL_MIGRATE_MEM_OBJECT_HOST, &wait_task_event, NULL);
+        OCL_CHECK(err, err = sub_q[i].enqueueMigrateMemObjects({*(d_output[i])}, CL_MIGRATE_MEM_OBJECT_HOST, &wait_task_event, NULL));
     }
 
     for(int i = 0; i < num_sub_devices; i++){
         //Wait for all the commands to finish in the queue
-        sub_q[i].finish();
+        OCL_CHECK(err, err = sub_q[i].finish());
     }
 
     //Compare the device results with software results

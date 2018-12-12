@@ -33,6 +33,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 int main(int argc, char** argv)
 {
+    cl_int err;
     std::vector<int,aligned_allocator<int>> h_a(LENGTH);//host memory for a vector
     std::vector<int,aligned_allocator<int>> h_b(LENGTH);//host memory for b vector
     std::vector<int,aligned_allocator<int>> h_temp(LENGTH);//host memory for temp vector
@@ -51,8 +52,8 @@ int main(int argc, char** argv)
     cl::Device device = devices[0];
 
     //Creating Context and Command Queue for selected Device 
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+    OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
+    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
@@ -69,28 +70,28 @@ int main(int argc, char** argv)
         std::string vmulBinaryFile = xcl::find_binary_file(device_name,"krnl_vmul");
         cl::Program::Binaries vmul_bins = xcl::import_binary_file(vmulBinaryFile);
         devices.resize(1);
-        cl::Program program(context, devices, vmul_bins);
-        cl::Kernel krnl_vmul(program, "krnl_vmul");
+        OCL_CHECK(err, cl::Program program(context, devices, vmul_bins, NULL, &err));
+        OCL_CHECK(err, cl::Kernel krnl_vmul(program, "krnl_vmul", &err));
     
-        cl::Buffer d_a(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
-                   sizeof(int) * LENGTH, h_a.data());
-        cl::Buffer d_b(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
-                   sizeof(int) * LENGTH, h_b.data());
-        cl::Buffer d_mul(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, 
-                   sizeof(int) * LENGTH, h_temp.data());
+        OCL_CHECK(err, cl::Buffer d_a(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
+                   sizeof(int) * LENGTH, h_a.data(), &err));
+        OCL_CHECK(err, cl::Buffer d_b(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
+                   sizeof(int) * LENGTH, h_b.data(), &err));
+        OCL_CHECK(err, cl::Buffer d_mul(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, 
+                   sizeof(int) * LENGTH, h_temp.data(), &err));
 
-        q.enqueueMigrateMemObjects({d_a, d_b},0/* 0 means from host*/);
+        OCL_CHECK(err, err = q.enqueueMigrateMemObjects({d_a, d_b},0/* 0 means from host*/));
 
-        krnl_vmul.setArg(0, d_a);
-        krnl_vmul.setArg(1, d_b);
-        krnl_vmul.setArg(2, d_mul);
-        krnl_vmul.setArg(3,vector_length);
+        OCL_CHECK(err, err = krnl_vmul.setArg(0, d_a));
+        OCL_CHECK(err, err = krnl_vmul.setArg(1, d_b));
+        OCL_CHECK(err, err = krnl_vmul.setArg(2, d_mul));
+        OCL_CHECK(err, err = krnl_vmul.setArg(3,vector_length));
 
         // This function will execute the kernel on the FPGA
-        q.enqueueTask(krnl_vmul);
+        OCL_CHECK(err, err = q.enqueueTask(krnl_vmul));
 
-        q.enqueueMigrateMemObjects({d_mul},CL_MIGRATE_MEM_OBJECT_HOST);
-        q.finish();
+        OCL_CHECK(err, err = q.enqueueMigrateMemObjects({d_mul},CL_MIGRATE_MEM_OBJECT_HOST));
+        OCL_CHECK(err, err = q.finish());
     
         // Check Results
         for(int i = 0; i < LENGTH; i++) {

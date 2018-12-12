@@ -45,8 +45,9 @@ void check(cl_int err) {
 }
 
 void verify(cl::CommandQueue &q, cl::Buffer &buffer, const int value) {
+    cl_int err;
     std::vector<int, aligned_allocator<int>> values(elements, 0);
-    q.enqueueReadBuffer(buffer, CL_TRUE, 0, elements*sizeof(int), values.data(), nullptr, nullptr);
+    OCL_CHECK(err, err = q.enqueueReadBuffer(buffer, CL_TRUE, 0, elements*sizeof(int), values.data(), nullptr, nullptr));
 
     if (find(begin(values), end(values), value) == end(values)) {
         printf("TEST FAILED\n");
@@ -56,20 +57,19 @@ void verify(cl::CommandQueue &q, cl::Buffer &buffer, const int value) {
 // This example illustrates how to transfer data back and forth
 // between host and device
 int main(int argc, char **argv) {
-
+    cl_int err;
     std::vector<int, aligned_allocator<int>> host_memory(elements, 42);
     std::vector<int, aligned_allocator<int>> host_memory2(elements, 15);
 
     size_t size_in_bytes = host_memory.size() * sizeof(int);
-    cl_int err;
 
     //The get_xil_devices will return vector of Xilinx Devices
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
     //Creating Context and Command Queue for selected Device
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
+    OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
+    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
     printf("Allocating and transferring data to %s\n", device_name.c_str());
 
@@ -78,12 +78,12 @@ int main(int argc, char **argv) {
     std::string binaryFile = xcl::find_binary_file(device_name,"dummy_kernel");
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
-    cl::Program program(context, devices, bins);
+    OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
 
     //There are several ways to transfer data to the FPGA. The most
     //straightforward way is to transfer the data during the creation of the
     //cl buffer object using the CL_MEM_COPY_HOST_PTR flag
-    cl::Buffer buffer_in(context, CL_MEM_COPY_HOST_PTR, size_in_bytes, host_memory.data(), &err);
+    OCL_CHECK(err, cl::Buffer buffer_in(context, CL_MEM_COPY_HOST_PTR, size_in_bytes, host_memory.data(), &err));
 
     verify(q, buffer_in, 42);
 
@@ -92,19 +92,19 @@ int main(int argc, char **argv) {
     //
     // NOTE: The CL_MEM_READ_ONLY flag indicates that the FPGA can only read from
     // this location. The host can read and write to this buffer at any time
-    cl::Buffer buffer(context, CL_MEM_READ_ONLY, size_in_bytes, nullptr, &err);
+    OCL_CHECK(err, cl::Buffer buffer(context, CL_MEM_READ_ONLY, size_in_bytes, nullptr, &err));
 
     cl::Event blocking_call_event;
     printf("Writing %.1e elements to buffer using a blocking transfer\n",
          (float)elements);
 
     // Copying data to the FPGA is done using an enqueue write operation.
-    q.enqueueWriteBuffer(buffer,              // buffer on the FPGA
+    OCL_CHECK(err, err = q.enqueueWriteBuffer(buffer,              // buffer on the FPGA
                          CL_TRUE,             // blocking call
                          0,                   // buffer offset in bytes
                          size_in_bytes,       // Size in bytes
                          host_memory.data(),  // Pointer to the data to copy
-                         nullptr, &blocking_call_event);
+                         nullptr, &blocking_call_event));
     verify(q, buffer, 42);
 
     cl::Event async_event;
@@ -113,12 +113,12 @@ int main(int argc, char **argv) {
 
     // Data can also be copied asynchronously with respect to the main thread by
     // sending CL_FALSE as the second parameter
-    q.enqueueWriteBuffer(buffer,              // buffer on the FPGA
+    OCL_CHECK(err, err = q.enqueueWriteBuffer(buffer,              // buffer on the FPGA
                             CL_FALSE,             // blocking call
                             0,                   // buffer offset in bytes
                             size_in_bytes,       // Size in bytes
                             host_memory2.data(),  // Pointer to the data to copy
-                            nullptr, &async_event);
+                            nullptr, &async_event));
     printf("Write Enqueued. Waiting to complete.\n");
     // It is the user's responsibility to make sure the data does not change
     // between the call and the actual operation. This can be ensured using OpenCL
@@ -132,12 +132,12 @@ int main(int argc, char **argv) {
     printf("Reading %.1e elements from buffer\n", (float)elements);
 
     // Data can be transferred back to the host using the read buffer operation
-    q.enqueueReadBuffer(buffer,  // This buffers data will be read
+    OCL_CHECK(err, err = q.enqueueReadBuffer(buffer,  // This buffers data will be read
                           CL_TRUE, // blocking call
                           0,       // offset
                           size_in_bytes,
                           host_memory.data(), // Data will be stored here
-                          nullptr, &read_event);
+                          nullptr, &read_event));
 
     printf("Mapping %.1e elements of buffer\n", (float)elements);
 
@@ -164,9 +164,9 @@ int main(int argc, char **argv) {
     printf("Unmapping elements of buffer\n");
 
     // The buffer must be unmapped before it can be used in other operations
-    q.enqueueUnmapMemObject(buffer,
+    OCL_CHECK(err, err = q.enqueueUnmapMemObject(buffer,
                             ptr, // pointer returned by Map call
-                            nullptr, nullptr);
+                            nullptr, nullptr));
     verify(q, buffer, 33);
 
     printf("Using host pointer with MapBuffer\n");
@@ -177,13 +177,14 @@ int main(int argc, char **argv) {
     //
     // NOTE: The OpenCL implementation may copy these values into a buffer
     // allocated on the FPGA.
-    cl::Buffer buffer2(context, CL_MEM_USE_HOST_PTR,
-                       size_in_bytes, host_memory2.data(), &err);
+    OCL_CHECK(err, cl::Buffer buffer2(context, CL_MEM_USE_HOST_PTR,
+                       size_in_bytes, host_memory2.data(), &err));
 
     ptr = q.enqueueMapBuffer(buffer2, CL_TRUE, CL_MAP_READ,
-                                0, size_in_bytes, nullptr, nullptr, nullptr);
+                                0, size_in_bytes, nullptr, nullptr, &err);
+    check(err);
 
-    q.enqueueUnmapMemObject(buffer2, ptr, nullptr, nullptr);
+    OCL_CHECK(err, err = q.enqueueUnmapMemObject(buffer2, ptr, nullptr, nullptr) );
     verify(q, buffer2, 15);
 
     // These commands will load vector from the host
@@ -191,11 +192,11 @@ int main(int argc, char **argv) {
     // will be be transferred from system memory over PCIe to the FPGA on-board
     // DDR memory.
     printf("Using host pointer with MigrateMemObjects\n");
-    cl::Buffer buffer_mem(context, CL_MEM_USE_HOST_PTR,
-                     size_in_bytes, host_memory2.data(), &err);
-    q.enqueueMigrateMemObjects({buffer_mem}, 0 /* 0 means from host*/ );
-    q.enqueueMigrateMemObjects({buffer_mem}, CL_MIGRATE_MEM_OBJECT_HOST);
-    q.finish();
+    OCL_CHECK(err, cl::Buffer buffer_mem(context, CL_MEM_USE_HOST_PTR,
+                     size_in_bytes, host_memory2.data(), &err));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_mem}, 0 /* 0 means from host*/ ));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_mem}, CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.finish());
 
     verify(q, buffer_mem, 15);
 

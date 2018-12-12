@@ -76,29 +76,30 @@ int main(int argc, char* argv[])
 
 //OPENCL HOST CODE AREA START
 
+    int err;
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
-    cl::Context context(device);
-    cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
-    std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+    OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
+    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err)); 
 
     std::string binaryFile = xcl::find_binary_file(device_name,binaryName.c_str());
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
-    cl::Program program(context, devices, bins);
-    cl::Kernel kernel(program,"apply_watermark");
+    OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
+    OCL_CHECK(err, cl::Kernel kernel(program,"apply_watermark", &err));
 
     std::vector<cl::Memory> inBufVec, outBufVec;
-    cl::Buffer buffer_inImage(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, 
-            image_size_bytes, inImage.data());
-    cl::Buffer buffer_outImage(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
-            image_size_bytes, outImage.data());
+    OCL_CHECK(err, cl::Buffer buffer_inImage(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, 
+            image_size_bytes, inImage.data(), &err));
+    OCL_CHECK(err, cl::Buffer buffer_outImage(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
+            image_size_bytes, outImage.data(), &err));
     inBufVec.push_back(buffer_inImage);
     outBufVec.push_back(buffer_outImage);
 
     //Copy input Image to device global memory
-    q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/));
   
     auto krnl_applyWatermark= cl::KernelFunctor<cl::Buffer&, cl::Buffer& ,int,int>(kernel);
     
@@ -107,8 +108,8 @@ int main(int argc, char* argv[])
             buffer_inImage, buffer_outImage, width, height);
 
     //Copy Result from Device Global Memory to Host Local Memory
-    q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST);
-    q.finish();
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.finish());
 //OPENCL HOST CODE AREA END
 
 
