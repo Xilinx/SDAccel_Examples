@@ -47,7 +47,8 @@ CXXFLAGS += -fmessage-length=0
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps
+CLFLAGS += --xp prop:solution.hls_pre_tcl=data/hls_config.tcl 
 
 
 EXECUTABLE = host

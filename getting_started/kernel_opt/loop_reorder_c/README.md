@@ -50,6 +50,7 @@ Application code is located in the src directory. Accelerator binary files will 
 .gitignore
 Makefile
 README.md
+data/hls_config.tcl
 description.json
 sdaccel.ini
 src/host.cpp

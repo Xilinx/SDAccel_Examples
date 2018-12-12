@@ -32,7 +32,6 @@ where examples is the name of the directory where the repository will be stored 
 Board | Device Name | Software Version
 ------|-------------|-----------------
 Xilinx Virtex UltraScale+ VCU1526|xilinx_u250_xdma_201820_1|SDAccel 2018.2.xdf
-Xilinx Kintex UltraScale KCU1500|xilinx_kcu1500_dynamic|SDAccel 2018.2.xdf
 Xilinx Virtex UltraScale+ VCU1525|xilinx_vcu1525_dynamic|SDAccel 2018.2.xdf
 Xilinx Virtex UltraScale+ VCU1525|xilinx_u200_xdma_201820_1|SDAccel 2018.2.xdf
 
