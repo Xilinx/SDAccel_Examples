@@ -84,59 +84,19 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   in the order the operation was enqueued. See the concurrent execution example
   for additional details on how create an use these types of command queues.
  */
-
-#include "CL/cl.h"
-#include "xcl.h"
+#include "xcl2.hpp"
 
 #include <algorithm>
-#include <array>
-#include <chrono>
 #include <cstdio>
 #include <random>
 #include <vector>
 
-using std::array;
-using std::chrono::duration;
-using std::chrono::nanoseconds;
-using std::chrono::seconds;
 using std::default_random_engine;
 using std::generate;
 using std::uniform_int_distribution;
 using std::vector;
 
-//Allocator template to align buffer to Page boundary for better data transfer
-template <typename T>
-struct aligned_allocator
-{
-  using value_type = T;
-  T* allocate(std::size_t num)
-  {
-    void* ptr = nullptr;
-    if (posix_memalign(&ptr,4096,num*sizeof(T)))
-      throw std::bad_alloc();
-    return reinterpret_cast<T*>(ptr);
-  }
-  void deallocate(T* p, std::size_t num)
-  {
-    free(p);
-  }
-};
-
 const int ARRAY_SIZE = 1 << 14;
-static const char *error_message =
-    "Error: Result mismatch:\n"
-    "i = %d CPU result = %d Device result = %d\n";
-
-// Wrap any OpenCL API calls that return error code(cl_int) with the below macros
-// to quickly check for an error
-#define OCL_CHECK(call)                                                        \
-  do {                                                                         \
-    cl_int err = call;                                                         \
-    if (err != CL_SUCCESS) {                                                   \
-      printf("Error calling " #call ", error code is: %d\n", err);       \
-      exit(EXIT_FAILURE);                                                      \
-    }                                                                          \
-  } while (0);
 
 int gen_random() {
   static default_random_engine e;
@@ -147,13 +107,13 @@ int gen_random() {
 
 // An event callback function that prints the operations performed by the OpenCL
 // runtime.
-void event_cb(cl_event event, cl_int cmd_status, void *data) {
+void event_cb(cl_event event1, cl_int cmd_status, void *data) {
+  cl_int err;
   cl_command_type command;
-  clGetEventInfo(event, CL_EVENT_COMMAND_TYPE, sizeof(cl_command_type),
-                 &command, nullptr);
+  cl::Event event(event1, true);
+  OCL_CHECK(err, err = event.getInfo(CL_EVENT_COMMAND_TYPE, &command));
   cl_int status;
-  clGetEventInfo(event, CL_EVENT_COMMAND_EXECUTION_STATUS, sizeof(cl_int),
-                 &status, nullptr);
+  OCL_CHECK(err, err = event.getInfo(CL_EVENT_COMMAND_EXECUTION_STATUS, &status));
   const char *command_str;
   const char *status_str;
   switch (command) {
@@ -198,30 +158,42 @@ void event_cb(cl_event event, cl_int cmd_status, void *data) {
 }
 
 // Sets the callback for a particular event
-void set_callback(cl_event event, const char *queue_name) {
-  OCL_CHECK(
-      clSetEventCallback(event, CL_COMPLETE, event_cb, (void *)queue_name));
+void set_callback(cl::Event event, const char *queue_name) {
+	cl_int err;
+	OCL_CHECK(err, err = event.setCallback(CL_COMPLETE, event_cb, (void *)queue_name));
 }
 
 int main(int argc, char **argv) {
   cl_int err;
 
-  xcl_world world = xcl_world_single();
-  cl_program program = xcl_import_binary(world, "vector_addition");
+// OPENCL HOST CODE AREA START
+  // get_xil_devices() is a utility API which will find the xilinx
+  // platforms and will return list of devices connected to Xilinx platform
+  std::cout << "Creating Context..." << std::endl;
+  std::vector<cl::Device> devices = xcl::get_xil_devices();
+  cl::Device device = devices[0];
+
+  OCL_CHECK(err, cl::Context context (device, NULL, NULL, NULL, &err));
+  // This example will use an out of order command queue. The default command
+  // queue created by cl::CommandQueue is an inorder command queue.
+  OCL_CHECK(err, cl::CommandQueue q (context, device, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err));
+  OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
+
+  // find_binary_file() is a utility API which will search the xclbin file for
+  // targeted mode (sw_emu/hw_emu/hw) and for targeted platforms.
+  std::string binaryFile = xcl::find_binary_file(device_name, "vector_addition");
+
+  // import_binary_file() is a utility API which will load the binaryFile
+  // and will return Binaries.
+  cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+  devices.resize(1);
+  OCL_CHECK(err, cl::Program program (context, devices, bins, NULL, &err));
 
   // We will break down our problem into multiple iterations. Each iteration
   // will perform computation on a subset of the entire data-set.
   size_t elements_per_iteration = 2048;
   size_t bytes_per_iteration = elements_per_iteration * sizeof(int);
   size_t num_iterations = ARRAY_SIZE / elements_per_iteration;
-
-  // This example will use an out of order command queue. The default command
-  // queue created by xcl_world_single is an inorder command queue. Here we will
-  // release the original queue and replace it with an out of order queue.
-  clReleaseCommandQueue(world.command_queue);
-  world.command_queue =
-      clCreateCommandQueue(world.context, world.device_id,
-                           CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err);
 
   // Allocate memory on the host and fill with random data.
   vector<int,aligned_allocator<int>> A(ARRAY_SIZE);
@@ -230,111 +202,89 @@ int main(int argc, char **argv) {
   generate(begin(B), end(B), gen_random);
   vector<int,aligned_allocator<int>> device_result(ARRAY_SIZE);
 
-  cl_kernel kernel = xcl_get_kernel(program, "vadd");
+  // THIS PAIR OF EVENTS WILL BE USED TO TRACK WHEN A KERNEL IS FINISHED WITH
+  // THE INPUT BUFFERS. ONCE THE KERNEL IS FINISHED PROCESSING THE DATA, A NEW
+  // SET OF ELEMENTS WILL BE WRITTEN INTO THE BUFFER.
+  vector<cl::Event> kernel_events(2);
+  vector<cl::Event> read_events(2);
+  cl::Buffer buffer_a[2], buffer_b[2], buffer_c[2];
 
-  // This pair of events will be used to track when a kernel is finished with
-  // the input buffers. Once the kernel is finished processing the data, a new
-  // set of elements will be written into the buffer.
-  array<cl_event, 2> kernel_events;
-  array<cl_event, 2> read_events;
-  cl_mem buffer_a[2], buffer_b[2], buffer_c[2];
-  size_t global = 1, local = 1;
   for (size_t iteration_idx = 0; iteration_idx < num_iterations; iteration_idx++) {
     int flag = iteration_idx % 2;
 
     if (iteration_idx >= 2) {
-        clWaitForEvents(1, &read_events[flag]);
-        OCL_CHECK(clReleaseMemObject(buffer_a[flag]));
-        OCL_CHECK(clReleaseMemObject(buffer_b[flag]));
-        OCL_CHECK(clReleaseMemObject(buffer_c[flag]));
-        OCL_CHECK(clReleaseEvent(read_events[flag]));
-        OCL_CHECK(clReleaseEvent(kernel_events[flag]));
+ 	OCL_CHECK(err, err = read_events[flag].wait());
     }
 
-    buffer_a[flag] = clCreateBuffer(world.context,  
-            CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
-           bytes_per_iteration, &A[iteration_idx * elements_per_iteration], NULL);
-    buffer_b[flag] = clCreateBuffer(world.context,  
-            CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
-           bytes_per_iteration, &B[iteration_idx * elements_per_iteration], NULL);
-    buffer_c[flag] = clCreateBuffer(world.context,  
-            CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
-           bytes_per_iteration, &device_result[iteration_idx * elements_per_iteration], NULL);
-    array<cl_event, 2> write_events;
-    printf("Enqueueing Migrate Mem Object (Host to Device) calls\n");
-    // Because we are passing the write_event, it returns an event object
-    // that identifies this particular command and can be used to query 
-    // or queue a wait for this particular command to complete.
-    OCL_CHECK(clEnqueueMigrateMemObjects(
-        world.command_queue, 1, &buffer_a[flag],
-        0 /* flags, 0 means from host */,
-        0, NULL, 
-        &write_events[0]));
-    set_callback(write_events[0], "ooo_queue");
+  // Allocate Buffer in Global Memory
+  // Buffers are allocated using CL_MEM_USE_HOST_PTR for efficient memory and
+  // Device-to-host communication
+  std::cout << "Creating Buffers..." << std::endl;
+  OCL_CHECK(err, buffer_a[flag] = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
+		  bytes_per_iteration, &A[iteration_idx * elements_per_iteration], &err));
+  OCL_CHECK(err, buffer_b[flag] = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
+		  bytes_per_iteration, &B[iteration_idx * elements_per_iteration], &err));
+  OCL_CHECK(err, buffer_c[flag] = cl::Buffer(context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
+		  bytes_per_iteration, &device_result[iteration_idx * elements_per_iteration], &err));
 
-    OCL_CHECK(clEnqueueMigrateMemObjects(
-        world.command_queue, 1, &buffer_b[flag],
-        0 /* flags, 0 means from host */,
-        0, NULL, 
-        &write_events[1]));
-    set_callback(write_events[1], "ooo_queue");
+  vector<cl::Event> write_event(1);
 
-    xcl_set_kernel_arg(kernel, 0, sizeof(cl_mem), &buffer_c[iteration_idx % 2]);
-    xcl_set_kernel_arg(kernel, 1, sizeof(cl_mem), &buffer_a[iteration_idx % 2]);
-    xcl_set_kernel_arg(kernel, 2, sizeof(cl_mem), &buffer_b[iteration_idx % 2]);
-    xcl_set_kernel_arg(kernel, 3, sizeof(int), &elements_per_iteration);
+  // Copy input data to device global memory
+  std::cout<< "Copying data (Host to Device)..." << std::endl;
+  // Because we are passing the write_event, it returns an event object
+  // that identifies this particular command and can be used to query 
+  // or queue a wait for this particular command to complete.
+  OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_a[flag], buffer_b[flag]}, 0/*0 means from host*/, NULL, &write_event[0]));
+  set_callback(write_event[0], "ooo_queue");
 
-    printf("Enqueueing NDRange kernel.\n");
-    // This event needs to wait for the write buffer operations to complete
-    // before executing. We are sending the write_events into its wait list to
-    // ensure that the order of operations is correct.
-    OCL_CHECK(clEnqueueNDRangeKernel(world.command_queue, kernel, 1, nullptr,
-                                     &global, &local, 2 , write_events.data(),
-                                     &kernel_events[flag]));
-    set_callback(kernel_events[flag], "ooo_queue");
+  printf("Enqueueing NDRange kernel.\n");
+  // This event needs to wait for the write buffer operations to complete
+  // before executing. We are sending the write_events into its wait list to
+  // ensure that the order of operations is correct.
+  // Make the Kernel Functor
+  auto krnl_mmult
+      = cl::KernelFunctor<cl::Buffer&,cl::Buffer&,cl::Buffer&,int>(program, "vadd", &err);
 
-    printf("Enqueueing Migrate Mem Object (Device to Host) calls\n");
-    // This operation only needs to wait for the kernel call. This call will
-    // potentially overlap the next kernel call as well as the next read
-    // operations
-    OCL_CHECK(clEnqueueMigrateMemObjects(world.command_queue, 1, &buffer_c[flag], 
-                CL_MIGRATE_MEM_OBJECT_HOST, 1, &kernel_events[flag], &read_events[flag]));
+  if (err != CL_SUCCESS) {
+        printf("Error calling Kernel Functor: Error code is: %d\n", err);
+        exit(EXIT_FAILURE);
+      }
 
-    set_callback(read_events[flag], "ooo_queue");
+  //Launch the Kernel
+  kernel_events[flag] = krnl_mmult(cl::EnqueueArgs(q,cl::NDRange(1,1,1), cl::NDRange(1,1,1)),
+          buffer_c[iteration_idx % 2],buffer_a[iteration_idx % 2],buffer_b[iteration_idx % 2], elements_per_iteration);
+  set_callback(kernel_events[flag], "ooo_queue");
 
-    OCL_CHECK(clReleaseEvent(write_events[0]));
-    OCL_CHECK(clReleaseEvent(write_events[1]));
+  // Copy Result from Device Global Memory to Host Local Memory
+  std::cout << "Getting Results (Device to Host)..." << std::endl;
+  std::vector<cl::Event> eventList;
+  eventList.push_back(kernel_events[flag]);
+  // This operation only needs to wait for the kernel call. This call will
+  // potentially overlap the next kernel call as well as the next read
+  // operations
+  OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_c[flag]}, CL_MIGRATE_MEM_OBJECT_HOST, &eventList, &read_events[flag]));
+  set_callback(read_events[flag], "ooo_queue");
+
+  OCL_CHECK(err, err = write_event[0].wait());
   }
+
   // Wait for all of the OpenCL operations to complete
   printf("Waiting...\n");
-  clFlush(world.command_queue);
-  clFinish(world.command_queue);
-
-  //Releasing mem objects and events
-  for(int i = 0 ; i < 2 ; i++){
-    OCL_CHECK(clWaitForEvents(1, &read_events[i]));
-    OCL_CHECK(clReleaseMemObject(buffer_a[i]));
-    OCL_CHECK(clReleaseMemObject(buffer_b[i]));
-    OCL_CHECK(clReleaseMemObject(buffer_c[i]));
-    OCL_CHECK(clReleaseEvent(read_events[i]));
-    OCL_CHECK(clReleaseEvent(kernel_events[i]));
-  }
-
-  int match = 0;
-  // verify the results
+  OCL_CHECK(err, err = q.flush());
+  OCL_CHECK(err, err = q.finish());
+//OPENCL HOST CODE AREA ENDS
+  bool match = true;
+  // Verify the results
   for (int i = 0; i < ARRAY_SIZE; i++) {
     int host_result = A[i] + B[i];
     if (device_result[i] != host_result) {
-      printf(error_message, i, host_result, device_result[i]);
-      match = 1;
-      // break;
+      printf("Error: Result mismatch:\n");
+      printf("i = %d CPU result = %d Device result = %d\n", i, host_result, device_result[i]);
+      match = false;
+      break;
     }
   }
 
-  OCL_CHECK(clReleaseKernel(kernel));
-  OCL_CHECK(clReleaseProgram(program));
-  xcl_release_world(world);
-
-  printf("TEST %s\n", (match ? "FAILED" : "PASSED"));
-  return (match ? EXIT_FAILURE :  EXIT_SUCCESS);
+  printf("TEST %s\n", (match ? "PASSED" : "FAILED"));
+  return (match ? EXIT_SUCCESS :  EXIT_FAILURE);
 }

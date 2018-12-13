@@ -11,8 +11,7 @@
     ],
     "host_exe": "overlap",
     "libs": [
-        "oclHelper", 
-        "xcl"
+        "xcl2"
     ], 
     "containers": [
     {
