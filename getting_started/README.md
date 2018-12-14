@@ -32,7 +32,9 @@ Example        | Description           | Key Concepts / Keywords
 [host/copy_buffer_ocl/][]|This Copy Buffer example demonstrate how one buffer can be copied from another buffer.|__Key__ __Concepts__<br> - Copy Buffer<br>__Keywords__<br> - cl::CommandQueue::enqueueCopyBuffer()
 [host/data_transfer_ocl/][]|This example illustrates several ways to use the OpenCL API to transfer data to and from the FPGA|__Key__ __Concepts__<br> - OpenCL API<br> - Data Transfer<br> - Write Buffers<br> - Read Buffers<br> - Map Buffers<br> - Async Memcpy<br>__Keywords__<br> - enqueueWriteBuffer()<br> - enqueueReadBuffer()<br> - enqueueMapBuffer()<br> - enqueueUnmapMemObject()<br> - enqueueMigrateMemObjects()
 [host/device_query_ocl/][]|This example prints the OpenCL properties of the platform and its devices. It also displays the limits and capabilities of the hardware.|__Key__ __Concepts__<br> - OpenCL API<br> - Querying device properties<br>__Keywords__<br> - clGetPlatformIDs()<br> - clGetPlatformInfo()<br> - clGetDeviceIDs()<br> - clGetDeviceInfo()
+[host/device_query_oclpp/][]|This Example prints the OpenCL properties of the platform and its devices using OpenCLPP APIs. It also displays the limits and capabilities of the hardware.|__Key__ __Concepts__<br> - OpenCL API<br> - Querying device properties<br>
 [host/errors_ocl/][]|This example discuss the different reasons for errors in OpenCL and how to handle them at runtime.|__Key__ __Concepts__<br> - OpenCL API<br> - Error handling<br>__Keywords__<br> - CL_SUCCESS<br> - CL_DEVICE_NOT_FOUND<br> - CL_DEVICE_NOT_AVAILABLE
+[host/errors_oclpp/][]|This example discuss the different reasons for errors in OpenCL C++ and how to handle them at runtime.|__Key__ __Concepts__<br> - OpenCL C++ API<br> - Error handling<br>__Keywords__<br> - CL_SUCCESS<br> - CL_DEVICE_NOT_FOUND<br> - CL_DEVICE_NOT_AVAILABLE<br> - CL_INVALID_VALUE<br> - CL_INVALID_KERNEL_NAME<br> - CL_INVALID_BUFFER_SIZE
 [host/helloworld_c/][]|This is simple example of vector addition to describe how to use HLS kernels in Sdx Environment. This example highlights the concepts like PIPELINE which increases the kernel performance |__Key__ __Concepts__<br> - HLS C Kernel<br> - OpenCL Host APIs<br>__Keywords__<br> - gmem<br> - bundle<br> - #pragma HLS INTERFACE<br> - m_axi<br> - s_axi4lite
 [host/helloworld_ocl/][]|This example is a simple OpenCL application. It will highlight the basic flow of an OpenCL application.|__Key__ __Concepts__<br> - OpenCL API<br>
 [host/host_global_bandwidth/][]|Host to global memory bandwidth test|
@@ -41,8 +43,6 @@ Example        | Description           | Key Concepts / Keywords
 [host/overlap_ocl/][]|This examples demonstrates techniques that allow user to overlap Host(CPU) and FPGA computation in an application. It will cover asynchronous operations and event object.|__Key__ __Concepts__<br> - OpenCL API<br> - Synchronize Host and FPGA<br> - Asynchronous Processing<br> - Events<br> - Asynchronous memcpy<br>__Keywords__<br> - cl_event<br> - clCreateCommandQueue<br> - CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE<br> - clEnqueueMigrateMemObjects
 [host/stream_access_ocl/][]|This is a simple example that demonstrates on how to process an input stream of data for computation in an application. It shows how to perform asynchronous operations and event handling.|__Key__ __Concepts__<br> - OpenCL API<br> - Synchronize Host and FPGA<br> - Asynchronous Processing<br> - Events<br> - Asynchronous Data Transfer<br>__Keywords__<br> - cl::event<br> - CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE
 [host/sub_devices_ocl/][]|This example demonstrates how to create OpenCL subdevices which uses a single kernel multiple times in order to show how to handle each instance independently including independent buffers, command queues and sequencing.|__Key__ __Concepts__<br> - Sub Devices<br>__Keywords__<br> - cl_device_partition_property<br> - createSubDevices<br> - CL_DEVICE_PARTITION_EQUALLY
-[host/device_query_oclpp/][]|This Example prints the OpenCL properties of the platform and its devices using OpenCLPP APIs. It also displays the limits and capabilities of the hardware.|__Key__ __Concepts__<br> - OpenCL API<br> - Querying device properties<br>
-[host/errors_oclpp/][]|This example discuss the different reasons for errors in OpenCL C++ and how to handle them at runtime.|__Key__ __Concepts__<br> - OpenCL C++ API<br> - Error handling<br>__Keywords__<br> - CL_SUCCESS<br> - CL_DEVICE_NOT_FOUND<br> - CL_DEVICE_NOT_AVAILABLE<br> - CL_INVALID_VALUE<br> - CL_INVALID_KERNEL_NAME<br> - CL_INVALID_BUFFER_SIZE
 [kernel_to_gmem/burst_rw_c/][]|This is simple example of using AXI4-master interface for burst read and write|__Key__ __Concepts__<br> - burst access<br>__Keywords__<br> - memcpy<br> - max_read_burst_length<br> - max_write_burst_length
 [kernel_to_gmem/burst_rw_ocl/][]|This is simple example of using AXI4-master interface for burst read and write|__Key__ __Concepts__<br> - burst access<br>__Keywords__<br> - param:compiler.interfaceWrBurstLen<br> - param:compiler.interfaceRdBurstLen
 [kernel_to_gmem/custom_datatype_c/][]|This is simple example of RGB to HSV conversion to demonstrate Custom DATA Type usages in C Based Kernel. Xilinx HLS Compiler Supports Custom Data Type to use for operation as well as Memory Interface between Kernel and Global Memory.|__Key__ __Concepts__<br> - Custom Datatype<br>__Keywords__<br> - struct<br> - #pragma HLS data_pack<br> - #pragma HLS LOOP_TRIPCOUNT
@@ -53,15 +53,17 @@ Example        | Description           | Key Concepts / Keywords
 [kernel_to_gmem/gmem_2banks_ocl/][]|This example of 2ddr to demonstrate on how to use 2ddr DSA. How to create buffers in each DDR.|__Key__ __Concepts__<br> - Multiple Banks<br>__Keywords__<br> - max_memory_ports<br> - misc:map_connect<br> - cl_mem_ext_ptr_t<br> - XCL_MEM_DDR_BANK0<br> - XCL_MEM_DDR_BANK1<br> - XCL_MEM_DDR_BANKx<br> - CL_MEM_EXT_PTR_XILINX
 [kernel_to_gmem/kernel_global_bandwidth/][]|Bandwidth test of global to local memory.|
 [kernel_to_gmem/memcoalesce_hang_c/][]|This example shows Memory Coalesce Deadlock/Hand situation and how to handle it. User can switch between BAD and GOOD case using makefile variable KFLOW.|__Key__ __Concepts__<br> - Memory Coalesce<br> - Memory Deadlock/Hang<br> - Multiple Interfaces<br>__Keywords__<br> - HLS INTERFACE<br> - bundle<br> - m_axi
+[kernel_to_gmem/plram_access_c/][]|This example shows the usage of PLRAM and how to use it with simple matrix multiplication (Row x Col).|__Key__ __Concepts__<br> - SDx Memory Hierarchy<br> - PLRAMs<br>__Keywords__<br> - cl_mem_ext_ptr_t<br> - cl_mem_ext_ptr_t:param<br> - cl_mem_ext_ptr_t:flags<br> - cl_mem_ext_ptr_t:obj<br> - CL_MEM_EXT_PTR_XILINX<br> - PLRAM
 [kernel_to_gmem/row_array_2d_c/][]|This is a simple example of accessing each row of data from 2d array|__Key__ __Concepts__<br> - Row of 2D data array access<br>__Keywords__<br> - hls::stream
 [kernel_to_gmem/row_array_2d_ocl/][]|This is a simple example of accessing each row of data from 2d array|__Key__ __Concepts__<br> - Row of 2D data array access<br>__Keywords__<br> - xcl_dataflow<br> - xcl_pipeline_loop
 [kernel_to_gmem/wide_mem_rw_c/][]|This is simple example of vector addition to demonstrate Wide Memory Access using ap_uint<512> data type. Based on input argument type, xocc compiler will figure our the memory datawidth between Global Memory and Kernel. For this example, ap_uint<512> datatype is used, so Memory datawidth will be 16 x (integer bit size) = 16 x 32 = 512 bit.|__Key__ __Concepts__<br> - Kernel to DDR<br> - wide memory access<br> - burst read and write<br>__Keywords__<br> - ap_uint<><br> - ap_int.h
 [kernel_to_gmem/wide_mem_rw_ocl/][]|This is simple example of vector addition to demonstrate Wide Memory Access using uint16 data type. Based on input argument type, xocc compiler will figure our the memory datawidth between Global Memory and Kernel. For this example, uint16 datatype is used, so Memory datawidth will be 16 x (integer bit size) = 16 x 32 = 512 bit.|__Key__ __Concepts__<br> - Kernel to DDR<br> - wide memory access<br> - burst read and write<br>__Keywords__<br> - uint16<br> - xcl_pipeline_loop
 [kernel_to_gmem/window_array_2d_c/][]|This is a simple example of accessing each window of data from 2d array|__Key__ __Concepts__<br> - window of 2D data array access<br>__Keywords__<br> - #pragma HLS DATAFLOW<br> - #pragma HLS PIPELINE<br> - #pragma HLS stream
 [kernel_to_gmem/window_array_2d_ocl/][]|This is a simple example of accessing each window of data from 2d array|__Key__ __Concepts__<br> - window/tile of 2D data array access<br>__Keywords__<br> - pipe<br> - xcl_pipeline_loop<br> - xcl_reqd_pipe_depth
-[kernel_to_gmem/plram_access_c/][]|This example shows the usage of PLRAM and how to use it with simple matrix multiplication (Row x Col).|__Key__ __Concepts__<br> - SDx Memory Hierarchy<br> - PLRAMs<br>__Keywords__<br> - cl_mem_ext_ptr_t<br> - cl_mem_ext_ptr_t:param<br> - cl_mem_ext_ptr_t:flags<br> - cl_mem_ext_ptr_t:obj<br> - CL_MEM_EXT_PTR_XILINX<br> - PLRAM
+[kernel_to_gmem/slr_assign/][]|This is simple example to describe SLR assignment information for a platform design. This example highlights how to provide extra input to assign the logic of the kernel into a nominated SLR. In this example we are assigning first kernel(Vector Multiplication) to SLR0 and assigning the second kernel(Vector Addition) to SLR1|__Key__ __Concepts__<br> - SLR Assignments<br>__Keywords__<br> - slr
 [kernel_opt/aos_vs_soa_ocl/][]|This example demonstrates how data layout can impact the performance of certain kernels. The example we will demonstrate how using the Structure of Array data layout can impact certain data parallel problems.|__Key__ __Concepts__<br> - Kernel Optimization<br> - Data Layout<br>
 [kernel_opt/array_partition_ocl/][]|This example shows how to use array partitioning to improve performance of a kernel|__Key__ __Concepts__<br> - Kernel Optimization<br> - Array Partitioning<br>__Keywords__<br> - xcl_array_partition<br> - complete
+[kernel_opt/dependence_inter_c/][]|This Example demonstrates the HLS pragma 'DEPENDENCE'.Using 'DEPENDENCE' pragma, user can provide additional dependency details to the compiler by specifying if the dependency in consecutive loop iterations on buffer is true/false, which allows the compiler to perform unrolling/pipelining to get better performance.|__Key__ __Concepts__<br> - Inter Dependence<br>__Keywords__<br> - DEPENDENCE<br> - inter<br> - WAR
 [kernel_opt/lmem_2rw_c/][]|This is simple example of vector addition to demonstrate how to utilized both ports of Local Memory memory.|__Key__ __Concepts__<br> - Kernel Optimization<br> - 2port BRAM Utilization<br> - two read/write Local Memory<br>__Keywords__<br> - #pragma HLS UNROLL FACTOR=2
 [kernel_opt/lmem_2rw_ocl/][]|This is simple example of vector addition to demonstrate how to utilized both ports of Local Memory.|__Key__ __Concepts__<br> - Kernel Optimization<br> - 2port BRAM Utilization<br> - two read/write Local Memory<br>__Keywords__<br> - opencl_unroll_hint(2)
 [kernel_opt/loop_fusion_c/][]|This example will demonstrate how to fuse two loops into one to improve the performance of an OpenCL  C/C++ Kernel.|__Key__ __Concepts__<br> - Kernel Optimization<br> - Loop Fusion<br> - Loop Pipelining<br>__Keywords__<br> - #pragma HLS PIPELINE
@@ -76,10 +78,7 @@ Example        | Description           | Key Concepts / Keywords
 [kernel_opt/systolic_array_c/][]|This is a simple example of matrix multiplication (Row x Col) to help developers learn systolic array based algorithm design. Note : Systolic array based algorithm design is well suited for FPGA.|
 [kernel_opt/systolic_array_ocl/][]|This is a simple example of matrix multiplication (Row x Col) to help developers learn systolic array based algorithm design. Note: Systolic array based algorithm design is well suited for FPGA.|
 [kernel_opt/vectorization_memorycoalescing_ocl/][]|This example is a simple OpenCL application which highlights the vectorization concept. It provides a basis for calculating the bandwidth utilization when the compiler looking to vectorize.|__Key__ __Concepts__<br> - Vectorization<br> - Memory Coalescing<br>__Keywords__<br> - vec_type_hint
-[kernel_opt/dependence_inter_c/][]|This Example demonstrates the HLS pragma 'DEPENDENCE'.Using 'DEPENDENCE' pragma, user can provide additional dependency details to the compiler by specifying if the dependency in consecutive loop iterations on buffer is true/false, which allows the compiler to perform unrolling/pipelining to get better performance.|__Key__ __Concepts__<br> - Inter Dependence<br>__Keywords__<br> - DEPENDENCE<br> - inter<br> - WAR
 [dataflow/dataflow_func_ocl/][]|This is simple example of vector addition to demonstrate Dataflow functionality in OpenCL Kernel. OpenCL Dataflow allows user to run multiple functions together to achieve higher throughput.|__Key__ __Concepts__<br> - Function/Task Level Parallelism<br>__Keywords__<br> - xcl_dataflow<br> - xclDataflowFifoDepth
-[dataflow/dataflow_loop_c/][]|This is simple example of vector addition to demonstrate Loops Dataflow functionality of HLS. HLS Dataflow allows user to schedule multiple sequential loops concurrently to achieve higher throughput.|__Key__ __Concepts__<br> - Loop Dataflow<br>__Keywords__<br> - dataflow<br> - hls::stream<>
-[dataflow/dataflow_loop_ocl/][]|This is simple example of vector addition to demonstrate Loops Dataflow functionality. OpenCL Dataflow allows user to schedule multiple sequential loops to run concurrently to achieve higher throughput.|__Key__ __Concepts__<br> - Loop Dataflow<br>__Keywords__<br> - xcl_dataflow<br> - xclDataflowFifoDepth
 [dataflow/dataflow_pipes_ocl/][]|This is simple example of vector addition to demonstrate OpenCL Pipe Memory usage. OpenCL PIPE memory functionality allows user to achieve kernel-to-kernel data transfer without using global memory.|__Key__ __Concepts__<br> - Dataflow<br> - kernel to kernel pipes<br>__Keywords__<br> - pipe<br> - xcl_reqd_pipe_depth<br> - read_pipe_block()<br> - write_pipe_block()
 [dataflow/dataflow_stream_array_c/][]|This is simple example of Multiple Stages Vector Addition to demonstrate Array of Stream usage in HLS C Kernel Code.|__Key__ __Concepts__<br> - Array of Stream<br>__Keywords__<br> - dataflow<br> - hls::stream<>
 [dataflow/dataflow_stream_c/][]|This is simple example of vector addition to demonstrate Dataflow functionality of HLS. HLS Dataflow allows user to schedule multiple task together to achieve higher throughput.|__Key__ __Concepts__<br> - Task Level Parallelism<br>__Keywords__<br> - dataflow<br> - hls::stream<>
@@ -114,7 +113,9 @@ Example        | Description           | Key Concepts / Keywords
 [host/copy_buffer_ocl/]:host/copy_buffer_ocl/
 [host/data_transfer_ocl/]:host/data_transfer_ocl/
 [host/device_query_ocl/]:host/device_query_ocl/
+[host/device_query_oclpp/]:host/device_query_oclpp/
 [host/errors_ocl/]:host/errors_ocl/
+[host/errors_oclpp/]:host/errors_oclpp/
 [host/helloworld_c/]:host/helloworld_c/
 [host/helloworld_ocl/]:host/helloworld_ocl/
 [host/host_global_bandwidth/]:host/host_global_bandwidth/
@@ -123,8 +124,6 @@ Example        | Description           | Key Concepts / Keywords
 [host/overlap_ocl/]:host/overlap_ocl/
 [host/stream_access_ocl/]:host/stream_access_ocl/
 [host/sub_devices_ocl/]:host/sub_devices_ocl/
-[host/device_query_oclpp/]:host/device_query_oclpp/
-[host/errors_oclpp/]:host/errors_oclpp/
 [kernel_to_gmem]:kernel_to_gmem
 [kernel_to_gmem/burst_rw_c/]:kernel_to_gmem/burst_rw_c/
 [kernel_to_gmem/burst_rw_ocl/]:kernel_to_gmem/burst_rw_ocl/
@@ -136,16 +135,18 @@ Example        | Description           | Key Concepts / Keywords
 [kernel_to_gmem/gmem_2banks_ocl/]:kernel_to_gmem/gmem_2banks_ocl/
 [kernel_to_gmem/kernel_global_bandwidth/]:kernel_to_gmem/kernel_global_bandwidth/
 [kernel_to_gmem/memcoalesce_hang_c/]:kernel_to_gmem/memcoalesce_hang_c/
+[kernel_to_gmem/plram_access_c/]:kernel_to_gmem/plram_access_c/
 [kernel_to_gmem/row_array_2d_c/]:kernel_to_gmem/row_array_2d_c/
 [kernel_to_gmem/row_array_2d_ocl/]:kernel_to_gmem/row_array_2d_ocl/
 [kernel_to_gmem/wide_mem_rw_c/]:kernel_to_gmem/wide_mem_rw_c/
 [kernel_to_gmem/wide_mem_rw_ocl/]:kernel_to_gmem/wide_mem_rw_ocl/
 [kernel_to_gmem/window_array_2d_c/]:kernel_to_gmem/window_array_2d_c/
 [kernel_to_gmem/window_array_2d_ocl/]:kernel_to_gmem/window_array_2d_ocl/
-[kernel_to_gmem/plram_access_c/]:kernel_to_gmem/plram_access_c/
+[kernel_to_gmem/slr_assign/]:kernel_to_gmem/slr_assign/
 [kernel_opt]:kernel_opt
 [kernel_opt/aos_vs_soa_ocl/]:kernel_opt/aos_vs_soa_ocl/
 [kernel_opt/array_partition_ocl/]:kernel_opt/array_partition_ocl/
+[kernel_opt/dependence_inter_c/]:kernel_opt/dependence_inter_c/
 [kernel_opt/lmem_2rw_c/]:kernel_opt/lmem_2rw_c/
 [kernel_opt/lmem_2rw_ocl/]:kernel_opt/lmem_2rw_ocl/
 [kernel_opt/loop_fusion_c/]:kernel_opt/loop_fusion_c/
@@ -160,11 +161,8 @@ Example        | Description           | Key Concepts / Keywords
 [kernel_opt/systolic_array_c/]:kernel_opt/systolic_array_c/
 [kernel_opt/systolic_array_ocl/]:kernel_opt/systolic_array_ocl/
 [kernel_opt/vectorization_memorycoalescing_ocl/]:kernel_opt/vectorization_memorycoalescing_ocl/
-[kernel_opt/dependence_inter_c/]:kernel_opt/dependence_inter_c/
 [dataflow]:dataflow
 [dataflow/dataflow_func_ocl/]:dataflow/dataflow_func_ocl/
-[dataflow/dataflow_loop_c/]:dataflow/dataflow_loop_c/
-[dataflow/dataflow_loop_ocl/]:dataflow/dataflow_loop_ocl/
 [dataflow/dataflow_pipes_ocl/]:dataflow/dataflow_pipes_ocl/
 [dataflow/dataflow_stream_array_c/]:dataflow/dataflow_stream_array_c/
 [dataflow/dataflow_stream_c/]:dataflow/dataflow_stream_c/

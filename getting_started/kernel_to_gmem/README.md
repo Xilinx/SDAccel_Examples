@@ -16,13 +16,14 @@ Example        | Description           | Key Concepts / Keywords
 [gmem_2banks_ocl/][]|This example of 2ddr to demonstrate on how to use 2ddr DSA. How to create buffers in each DDR.|__Key__ __Concepts__<br> - Multiple Banks<br>__Keywords__<br> - max_memory_ports<br> - misc:map_connect<br> - cl_mem_ext_ptr_t<br> - XCL_MEM_DDR_BANK0<br> - XCL_MEM_DDR_BANK1<br> - XCL_MEM_DDR_BANKx<br> - CL_MEM_EXT_PTR_XILINX
 [kernel_global_bandwidth/][]|Bandwidth test of global to local memory.|
 [memcoalesce_hang_c/][]|This example shows Memory Coalesce Deadlock/Hand situation and how to handle it. User can switch between BAD and GOOD case using makefile variable KFLOW.|__Key__ __Concepts__<br> - Memory Coalesce<br> - Memory Deadlock/Hang<br> - Multiple Interfaces<br>__Keywords__<br> - HLS INTERFACE<br> - bundle<br> - m_axi
+[plram_access_c/][]|This example shows the usage of PLRAM and how to use it with simple matrix multiplication (Row x Col).|__Key__ __Concepts__<br> - SDx Memory Hierarchy<br> - PLRAMs<br>__Keywords__<br> - cl_mem_ext_ptr_t<br> - cl_mem_ext_ptr_t:param<br> - cl_mem_ext_ptr_t:flags<br> - cl_mem_ext_ptr_t:obj<br> - CL_MEM_EXT_PTR_XILINX<br> - PLRAM
 [row_array_2d_c/][]|This is a simple example of accessing each row of data from 2d array|__Key__ __Concepts__<br> - Row of 2D data array access<br>__Keywords__<br> - hls::stream
 [row_array_2d_ocl/][]|This is a simple example of accessing each row of data from 2d array|__Key__ __Concepts__<br> - Row of 2D data array access<br>__Keywords__<br> - xcl_dataflow<br> - xcl_pipeline_loop
 [wide_mem_rw_c/][]|This is simple example of vector addition to demonstrate Wide Memory Access using ap_uint<512> data type. Based on input argument type, xocc compiler will figure our the memory datawidth between Global Memory and Kernel. For this example, ap_uint<512> datatype is used, so Memory datawidth will be 16 x (integer bit size) = 16 x 32 = 512 bit.|__Key__ __Concepts__<br> - Kernel to DDR<br> - wide memory access<br> - burst read and write<br>__Keywords__<br> - ap_uint<><br> - ap_int.h
 [wide_mem_rw_ocl/][]|This is simple example of vector addition to demonstrate Wide Memory Access using uint16 data type. Based on input argument type, xocc compiler will figure our the memory datawidth between Global Memory and Kernel. For this example, uint16 datatype is used, so Memory datawidth will be 16 x (integer bit size) = 16 x 32 = 512 bit.|__Key__ __Concepts__<br> - Kernel to DDR<br> - wide memory access<br> - burst read and write<br>__Keywords__<br> - uint16<br> - xcl_pipeline_loop
 [window_array_2d_c/][]|This is a simple example of accessing each window of data from 2d array|__Key__ __Concepts__<br> - window of 2D data array access<br>__Keywords__<br> - #pragma HLS DATAFLOW<br> - #pragma HLS PIPELINE<br> - #pragma HLS stream
 [window_array_2d_ocl/][]|This is a simple example of accessing each window of data from 2d array|__Key__ __Concepts__<br> - window/tile of 2D data array access<br>__Keywords__<br> - pipe<br> - xcl_pipeline_loop<br> - xcl_reqd_pipe_depth
-[plram_access_c/][]|This example shows the usage of PLRAM and how to use it with simple matrix multiplication (Row x Col).|__Key__ __Concepts__<br> - SDx Memory Hierarchy<br> - PLRAMs<br>__Keywords__<br> - cl_mem_ext_ptr_t<br> - cl_mem_ext_ptr_t:param<br> - cl_mem_ext_ptr_t:flags<br> - cl_mem_ext_ptr_t:obj<br> - CL_MEM_EXT_PTR_XILINX<br> - PLRAM
+[slr_assign/][]|This is simple example to describe SLR assignment information for a platform design. This example highlights how to provide extra input to assign the logic of the kernel into a nominated SLR. In this example we are assigning first kernel(Vector Multiplication) to SLR0 and assigning the second kernel(Vector Addition) to SLR1|__Key__ __Concepts__<br> - SLR Assignments<br>__Keywords__<br> - slr
 
 [.]:.
 [burst_rw_c/]:burst_rw_c/
@@ -35,10 +36,11 @@ Example        | Description           | Key Concepts / Keywords
 [gmem_2banks_ocl/]:gmem_2banks_ocl/
 [kernel_global_bandwidth/]:kernel_global_bandwidth/
 [memcoalesce_hang_c/]:memcoalesce_hang_c/
+[plram_access_c/]:plram_access_c/
 [row_array_2d_c/]:row_array_2d_c/
 [row_array_2d_ocl/]:row_array_2d_ocl/
 [wide_mem_rw_c/]:wide_mem_rw_c/
 [wide_mem_rw_ocl/]:wide_mem_rw_ocl/
 [window_array_2d_c/]:window_array_2d_c/
 [window_array_2d_ocl/]:window_array_2d_ocl/
-[plram_access_c/]:plram_access_c/
+[slr_assign/]:slr_assign/
