@@ -23,7 +23,6 @@ include ./utils.mk
 
 TARGETS := hw
 TARGET := $(TARGETS)
-DEVICES := xilinx_u200_xdma
 DEVICE := $(DEVICES)
 XCLBIN := ./xclbin
 DSA := $(call device2sandsa, $(DEVICE))
@@ -60,7 +59,7 @@ BINARY_CONTAINER_krnl_idct_OBJS += $(XCLBIN)/krnl_idct.$(TARGET).$(DSA).xo
 CP = cp -rf
 
 .PHONY: all clean cleanall docs emconfig
-all: $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
+all: check-device $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
 
 .PHONY: exe
 exe: $(EXECUTABLE)
@@ -86,6 +85,7 @@ check: all
 ifeq ($(findstring xilinx_vcu1525_dynamic, $(DEVICE)), xilinx_vcu1525_dynamic)
 $(error Nothing to be done for make)
 endif
+
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/krnl_idct.$(TARGET).$(DSA).xclbin

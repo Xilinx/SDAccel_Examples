@@ -23,7 +23,6 @@ include ./utils.mk
 
 TARGETS := hw
 TARGET := $(TARGETS)
-DEVICES := xilinx_vcu1525_dynamic
 DEVICE := $(DEVICES)
 XCLBIN := ./xclbin
 DSA := $(call device2sandsa, $(DEVICE))
@@ -63,7 +62,7 @@ BINARY_CONTAINER_N_stage_Adders_OBJS += $(XCLBIN)/N_stage_Adders.$(TARGET).$(DSA
 CP = cp -rf
 
 .PHONY: all clean cleanall docs emconfig
-all: $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
+all: check-device $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
 
 .PHONY: exe
 exe: $(EXECUTABLE)

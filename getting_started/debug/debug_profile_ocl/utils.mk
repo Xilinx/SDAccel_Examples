@@ -50,3 +50,8 @@ docs: README.md
 
 README.md: description.json
 	$(ABS_COMMON_REPO)/utility/readme_gen/readme_gen.py description.json
+
+check-devices:
+ifndef DEVICE
+	$(error DEVICE not set. Please set the DEVICE properly and rerun. Run "make help" for more details.)
+endif

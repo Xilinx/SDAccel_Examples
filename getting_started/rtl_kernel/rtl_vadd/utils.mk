@@ -16,7 +16,7 @@ endif
 
 #Generates profile summary report
 ifeq ($(PROFILE), yes)
-CLFLAGS += --profile_kernel data:all:all:all
+LDCLFLAGS += --profile_kernel data:all:all:all
 endif
 
 #Generates debug summary report
@@ -50,3 +50,8 @@ docs: README.md
 
 README.md: description.json
 	$(ABS_COMMON_REPO)/utility/readme_gen/readme_gen.py description.json
+
+check-devices:
+ifndef DEVICE
+	$(error DEVICE not set. Please set the DEVICE properly and rerun. Run "make help" for more details.)
+endif

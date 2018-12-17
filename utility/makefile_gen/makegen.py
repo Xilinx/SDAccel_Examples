@@ -23,19 +23,6 @@ def create_params(target,data):
     target.write("\n")
     target.write("TARGETS := hw\n")
     target.write("TARGET := $(TARGETS)\n")
-    if "board" in data:
-        target.write("DEVICES := ")
-        target.write(data["board"][0])
-    elif "nboard" in data:
-        if "xilinx_vcu1525_dynamic" not in data["nboard"]:
-            target.write("DEVICES := ")
-            target.write("xilinx_vcu1525_dynamic\n")
-        else:
-            target.write("DEVICES := ")
-            target.write("xilinx_u200_xdma\n")
-    else:
-        target.write("DEVICES := ")
-        target.write("xilinx_vcu1525_dynamic\n")
     target.write("DEVICE := $(DEVICES)\n")
     target.write("XCLBIN := ./xclbin\n")
     target.write("DSA := $(call device2sandsa, $(DEVICE))\n")
@@ -334,7 +321,7 @@ def mk_build_all(target, data):
     target.write("\n")
 
     target.write(".PHONY: all clean cleanall docs emconfig\n")
-    target.write("all: $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig\n")
+    target.write("all: check-device $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig\n")
     target.write("\n")
     
     target.write(".PHONY: exe\n")
