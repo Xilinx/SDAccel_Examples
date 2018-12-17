@@ -26,6 +26,7 @@ def create_params(target,data):
     target.write("DEVICE := $(DEVICES)\n")
     target.write("XCLBIN := ./xclbin\n")
     target.write("DSA := $(call device2sandsa, $(DEVICE))\n")
+    target.write("BUILD_DIR := ./_x.$(TARGET).$(DSA)\n")
     target.write("\n")
 
     target.write("CXX := ")
@@ -125,7 +126,7 @@ def add_host_flags(target, data):
 def add_kernel_flags(target, data):
     target.write("# Kernel compiler global settings\n")
     target.write("CLFLAGS += ")
-    target.write("-t $(TARGET) --platform $(DEVICE) --save-temps \n")   
+    target.write("-t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) \n")   
 
     if "containers" in data:
         for con in data["containers"]:
@@ -297,7 +298,7 @@ def mk_clean(target, data):
 
     target.write("cleanall: clean\n")
     target.write("\t-$(RMDIR) $(XCLBIN)\n")
-    target.write("\t-$(RMDIR) ./_x\n")
+    target.write("\t-$(RMDIR) _x.*\n")
     if "output_files" in data:         
         target.write("\t-$(RMDIR) ")
         args = data["output_files"].split(" ")
