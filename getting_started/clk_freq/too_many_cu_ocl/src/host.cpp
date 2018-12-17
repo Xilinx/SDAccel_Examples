@@ -170,7 +170,7 @@ int main(int argc, char** argv)
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE | CL_QUEUE_PROFILING_ENABLE));
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
 
-    bool good_return = run_opencl_vadd(devices,q,context,device_name, true, size, source_in1, source_in2, source_hw_good_results);
+    run_opencl_vadd(devices,q,context,device_name, true, size, source_in1, source_in2, source_hw_good_results);
     bool bad_return = run_opencl_vadd(devices,q,context,device_name, false, size, source_in1, source_in2, source_hw_bad_results);
 
 //OPENCL HOST CODE AREA END

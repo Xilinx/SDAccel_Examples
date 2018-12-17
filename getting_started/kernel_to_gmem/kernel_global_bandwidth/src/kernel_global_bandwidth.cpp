@@ -249,13 +249,15 @@ int main(int argc, char** argv) {
     #endif
     OCL_CHECK(err, err = krnl_global_bandwidth.setArg(arg_index++, num_blocks));
 
-    unsigned long nsduration;
+    unsigned long start, end, nsduration;
     cl::Event event;
 
     /* Execute Kernel */
     OCL_CHECK(err, err = q.enqueueTask(krnl_global_bandwidth, NULL, &event));
     OCL_CHECK(err, err = event.wait());
-    nsduration = OCL_CHECK(err, event.getProfilingInfo<CL_PROFILING_COMMAND_END>(&err)) - OCL_CHECK(err, event.getProfilingInfo<CL_PROFILING_COMMAND_START>(&err));
+    end = OCL_CHECK(err, event.getProfilingInfo<CL_PROFILING_COMMAND_END>(&err));
+    start = OCL_CHECK(err, event.getProfilingInfo<CL_PROFILING_COMMAND_START>(&err));
+    nsduration = end - start;
 
     /* Copy results back from OpenCL buffer */
     unsigned char *map_output_buffer0;

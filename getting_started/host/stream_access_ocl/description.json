@@ -12,7 +12,6 @@
     "host_exe": "stream_access",
     "cmd_args": "PROJECT/data/input1.txt PROJECT/data/input2.txt",
     "libs": [
-        "oclHelper", 
         "xcl2"
     ],
     "containers": [

@@ -35,11 +35,11 @@ int main(int argc, char* argv[]) {
     int nhalf = NPOINTS >> 1;
     size_t input_size_bytes = sizeof(int) * NPOINTS;
     size_t output_size_bytes = sizeof(int) * nhalf;
-    std::vector<int> source_x(NPOINTS);
-    std::vector<int> source_y(NPOINTS);
-    std::vector<int> source_z(NPOINTS);
-    std::vector<int> result_sim(nhalf);
-    std::vector<int> result_krnl(nhalf);
+    std::vector<int, aligned_allocator<int>> source_x(NPOINTS);
+    std::vector<int, aligned_allocator<int>> source_y(NPOINTS);
+    std::vector<int, aligned_allocator<int>> source_z(NPOINTS);
+    std::vector<int, aligned_allocator<int>> result_sim(nhalf);
+    std::vector<int, aligned_allocator<int>> result_krnl(nhalf);
 
     /* Create the test data and run the vector addition locally */
     for(int i=0; i < NPOINTS; i++) {

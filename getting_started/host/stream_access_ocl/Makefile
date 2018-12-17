@@ -33,11 +33,10 @@ XOCC := $(XILINX_SDX)/bin/xocc
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
-include $(ABS_COMMON_REPO)/libs/oclHelper/oclHelper.mk
 include $(ABS_COMMON_REPO)/libs/xcl2/xcl2.mk
-CXXFLAGS += $(oclHelper_CXXFLAGS) $(xcl2_CXXFLAGS)
-LDFLAGS += $(oclHelper_LDFLAGS) $(xcl2_LDFLAGS)
-HOST_SRCS += $(oclHelper_SRCS) $(xcl2_SRCS)
+CXXFLAGS += $(xcl2_CXXFLAGS)
+LDFLAGS += $(xcl2_LDFLAGS)
+HOST_SRCS += $(xcl2_SRCS)
 CXXFLAGS += $(opencl_CXXFLAGS) -Wall -O0 -g -std=c++14
 LDFLAGS += $(opencl_LDFLAGS)
 
