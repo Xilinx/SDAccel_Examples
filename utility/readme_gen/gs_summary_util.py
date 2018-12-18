@@ -31,6 +31,7 @@ def gen_category(dir ,outfile, subdircount):
 
   links = "[" + dir +"]:"+ dir + "\n"
   testcaselist = get_testcases(dir);
+  testcaselist.sort();
   for testcase in testcaselist:
     drives = get_drives(testcase)
     link = ""
@@ -79,7 +80,8 @@ def genReadMe(dir):
   if 'subdirs' in data:
     subDirs = data['subdirs'];
   else:
-    subDirs = sorted(get_immediate_subdirectories(dir));
+    subDirs = get_immediate_subdirectories(dir);
+    subDir.sort();
   outfile.write("\nS.No.   | Category  | Description \n")
   outfile.write("--------|-----------|-----------------------------------------\n")
   counter = 1;
