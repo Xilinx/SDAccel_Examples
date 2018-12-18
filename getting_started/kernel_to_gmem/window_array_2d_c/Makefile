@@ -60,7 +60,7 @@ BINARY_CONTAINER_window_array_2d_OBJS += $(XCLBIN)/window_array_2d.$(TARGET).$(D
 CP = cp -rf
 
 .PHONY: all clean cleanall docs emconfig
-all: check-device $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
+all: check-devices $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
 
 .PHONY: exe
 exe: $(EXECUTABLE)

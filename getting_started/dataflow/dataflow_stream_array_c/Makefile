@@ -63,7 +63,7 @@ BINARY_CONTAINER_N_stage_Adders_OBJS += $(XCLBIN)/N_stage_Adders.$(TARGET).$(DSA
 CP = cp -rf
 
 .PHONY: all clean cleanall docs emconfig
-all: check-device $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
+all: check-devices $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
 
 .PHONY: exe
 exe: $(EXECUTABLE)

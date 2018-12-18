@@ -60,7 +60,7 @@ BINARY_CONTAINER_vector_addition_OBJS += $(XCLBIN)/vec_add.$(TARGET).$(DSA).xo
 CP = cp -rf
 
 .PHONY: all clean cleanall docs emconfig
-all: check-device $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
+all: check-devices $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
 
 .PHONY: exe
 exe: $(EXECUTABLE)

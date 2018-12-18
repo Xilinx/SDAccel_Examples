@@ -61,7 +61,7 @@ BINARY_CONTAINER_krnl_sum_scan_OBJS += $(XCLBIN)/krnl_sum_scan.$(TARGET).$(DSA).
 CP = cp -rf
 
 .PHONY: all clean cleanall docs emconfig
-all: check-device $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
+all: check-devices $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
 
 .PHONY: exe
 exe: $(EXECUTABLE)

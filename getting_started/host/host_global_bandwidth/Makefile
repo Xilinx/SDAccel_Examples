@@ -60,7 +60,7 @@ BINARY_CONTAINER_krnl_host_global_OBJS += $(XCLBIN)/bandwidth.$(TARGET).$(DSA).x
 CP = cp -rf
 
 .PHONY: all clean cleanall docs emconfig
-all: check-device $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
+all: check-devices $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
 
 .PHONY: exe
 exe: $(EXECUTABLE)

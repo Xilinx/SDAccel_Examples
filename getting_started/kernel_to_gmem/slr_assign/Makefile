@@ -26,6 +26,7 @@ TARGET := $(TARGETS)
 DEVICE := $(DEVICES)
 XCLBIN := ./xclbin
 DSA := $(call device2sandsa, $(DEVICE))
+BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
@@ -46,7 +47,7 @@ CXXFLAGS += -fmessage-length=0
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
 CLFLAGS += --slr vmult_1:SLR0
 CLFLAGS += --slr vadd_1:SLR1
 
@@ -64,7 +65,7 @@ BINARY_CONTAINER_vmult_vadd_OBJS += $(XCLBIN)/vadd.$(TARGET).$(DSA).xo
 CP = cp -rf
 
 .PHONY: all clean cleanall docs emconfig
-all: check-device $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
+all: check-devices $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
 
 .PHONY: exe
 exe: $(EXECUTABLE)
@@ -106,5 +107,5 @@ clean:
 
 cleanall: clean
 	-$(RMDIR) $(XCLBIN)
-	-$(RMDIR) ./_x
+	-$(RMDIR) _x.*
 

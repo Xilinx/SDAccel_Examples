@@ -62,7 +62,7 @@ BINARY_CONTAINER_cnn_BAD_OBJS += $(XCLBIN)/cnn_BAD.$(TARGET).$(DSA).xo
 CP = cp -rf
 
 .PHONY: all clean cleanall docs emconfig
-all: check-device $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
+all: check-devices $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
 
 .PHONY: exe
 exe: $(EXECUTABLE)

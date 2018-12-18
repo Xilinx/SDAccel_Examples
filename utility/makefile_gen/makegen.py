@@ -322,7 +322,7 @@ def mk_build_all(target, data):
     target.write("\n")
 
     target.write(".PHONY: all clean cleanall docs emconfig\n")
-    target.write("all: check-device $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig\n")
+    target.write("all: check-devices $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig\n")
     target.write("\n")
     
     target.write(".PHONY: exe\n")

@@ -67,7 +67,7 @@ BINARY_CONTAINER_krnl_smithwaterman_OBJS += $(XCLBIN)/opencl_sw_maxscore.$(TARGE
 CP = cp -rf
 
 .PHONY: all clean cleanall docs emconfig
-all: check-device $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
+all: check-devices $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
 
 .PHONY: exe
 exe: $(EXECUTABLE)

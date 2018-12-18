@@ -47,7 +47,7 @@ CXXFLAGS += -fmessage-length=0
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
 CLFLAGS += --xp prop:solution.hls_pre_tcl=data/hls_config.tcl
 
 
@@ -61,7 +61,7 @@ BINARY_CONTAINER_mmult_OBJS += $(XCLBIN)/mmult.$(TARGET).$(DSA).xo
 CP = cp -rf
 
 .PHONY: all clean cleanall docs emconfig
-all: check-device $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
+all: check-devices $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
 
 .PHONY: exe
 exe: $(EXECUTABLE)
