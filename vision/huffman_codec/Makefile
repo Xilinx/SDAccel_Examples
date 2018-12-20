@@ -19,12 +19,13 @@ help::
 COMMON_REPO = ../../
 ABS_COMMON_REPO = $(shell readlink -f $(COMMON_REPO))
 
-include ./utils.mk
-
 TARGETS := hw
 TARGET := $(TARGETS)
 DEVICE := $(DEVICES)
 XCLBIN := ./xclbin
+
+include ./utils.mk
+
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
