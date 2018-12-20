@@ -14,6 +14,9 @@ help::
 	$(ECHO) "  make check TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
 	$(ECHO) "      Command to run application in emulation."
 	$(ECHO) ""
+	$(ECHO) "  make run_nimbix DEVICE=<FPGA platform>"
+	$(ECHO) "      Command to run application on Nimbix Cloud."
+	$(ECHO) ""
 
 # Points to Utility Directory
 COMMON_REPO = ../../
@@ -76,6 +79,8 @@ CLFLAGS += -D "PARALLEL_POINTS=$(PARALLEL_POINTS)" -D "PARALLEL_FEATURES=$(PARAL
 CXXFLAGS += -DRECORD_OVERALL_TIME -DUSE_DATA_TYPE=$(DATATYPE_ID) -DPARALLEL_POINTS=$(PARALLEL_POINTS)
 
 EXECUTABLE = host_kmeans
+CMD_ARGS = -i ./data/100 -c ./data/100.gold_c5 -m 5 -n 5 -g 2
+
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
@@ -126,6 +131,9 @@ else
 	 ./$(EXECUTABLE) -i ./data/100 -c ./data/100.gold_c5 -m 5 -n 5 -g 2
 endif
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
+
+run_nimbix: all
+	$(COMMON_REPO)utility/nimbix/run_nimbix.py $(EXECUTABLE) $(CMD_ARGS) $(DSA)   
 
 # Cleaning stuff
 clean:

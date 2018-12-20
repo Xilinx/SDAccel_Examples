@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import sys
-import optparse
+import argparse
 
 import os
 import pwd
@@ -271,18 +271,18 @@ def submit_testcase(username, apikey, testid, exe, args, type, nae, tt, dp):
 	return job
 
 description = "Application for Running Jobs on Nimbix"
-parser = optparse.OptionParser(description=description)
-parser.add_option("--nae", help="Set Nimbix Application Environment to use (Advanced)", type=str, default="xilinx-sdx")
-parser.add_option("--type", help="Set Nimbix Node Type to use (nx1, nx2, nx3, nx4)", type=str, default="nx3")
-parser.add_option("--tt", help="Enable timeline trace", action="store_true", default=False)
-parser.add_option("--dp", help="Enable device profiling", action="store_true", default=False)
-parser.add_option("--out", help="Set output directory", type=str, default=".")
-parser.add_option("--queue_timeout", help="How long to wait for job to run while in queue (minutes)", type=int, default=60)
-parser.add_option("--exe_timeout", help="How long to wait for job to run on the board (minutes)", type=int, default=5)
-parser.add_option("-v", "--verbose", help="Print out additional information", action="store_true", default=False)
+parser = argparse.ArgumentParser(description=description)
+parser.add_argument("--nae", help="Set Nimbix Application Environment to use (Advanced)", type=str, default="xilinx-sdx")
+parser.add_argument("--type", help="Set Nimbix Node Type to use (nx1, nx2, nx3, nx4)", type=str, default="nx3")
+parser.add_argument("--tt", help="Enable timeline trace", action="store_true", default=False)
+parser.add_argument("--dp", help="Enable device profiling", action="store_true", default=False)
+parser.add_argument("--out", help="Set output directory", type=str, default=".")
+parser.add_argument("--queue_timeout", help="How long to wait for job to run while in queue (minutes)", type=int, default=60)
+parser.add_argument("--exe_timeout", help="How long to wait for job to run on the board (minutes)", type=int, default=5)
+parser.add_argument("-v", "--verbose", help="Print out additional information", action="store_true", default=False)
 
 try:
-	opts, remainder = parser.parse_args()
+	opts, remainder = parser.parse_known_args()
 except:
 	print "ERROR: Could not parse command line options"
 	raise
