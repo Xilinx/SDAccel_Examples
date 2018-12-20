@@ -31,6 +31,8 @@
         "\t -b               : input file is in binary format",
         "\t -o               : output cluster center coordinates [default=off]"
     ],
+    "host_srcs": "./src/host.cpp ./src/cluster.c ./src/rmse.c ./src/fpga_kmeans.cpp ./src/kmeans_clustering_cmodel.c",
+    "config_make": "config.mk",
     "cmd_args": "-i PROJECT/data/100 -c PROJECT/data/100.gold_c5 -m 5 -n 5 -g 2",
     "host_exe": "host_kmeans",       
     "output_files": "membership.out",        
@@ -39,13 +41,6 @@
         "cmdparser", 
         "xcl2"
     ], 
-    "compiler" : {
-        "symbols" : [
-            "RECORD_OVERALL_TIME",
-            "USE_DATA_TYPE=1",
-            "PARALLEL_POINTS=4"
-        ]
-    },
     "containers": [
         {
             "name": "kmeans", 
@@ -53,7 +48,6 @@
                 {
                     "name": "kmeans", 
                     "num_compute_units" : "2",
-                    "clflags" : "-D PARALLEL_POINTS=4 -D PARALLEL_FEATURES=2 -D USE_DATA_TYPE=1", 
                     "location": "src/kmeans.cl"
                 }
             ]
@@ -68,6 +62,5 @@
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
         }
-    ],
-    "match_makefile": "false"
+    ]
 }

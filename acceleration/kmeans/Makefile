@@ -35,58 +35,6 @@ BUILD_DIR := ./_x.$(TARGET).$(DSA)
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
-CXXFLAGS := $(opencl_CXXFLAGS) -Wall -O0 -g -std=c++14
-LDFLAGS := $(opencl_LDFLAGS)
-
-################################################################################
-#K-Means Settings
-################################################################################
-#Select  the data type INT/FLOAT both supported
-DATATYPE:=INT
-#Select the number of Compute units. 
-COMPUTE_UNITS:=2
-#NOTE: Kmeans can give better results with more compute units but for all Devices
-#More than 2 compute units are not feasible so it is restricted to 2 compute units.
-#User can increase the number of Compute units for bigger Devices and can get better
-#Results.
-
-#Select the number of parallel points to execute
-PARALLEL_POINTS:=4
-
-#Test Setup and files
-NCLUSTERS:=5
-TEST_FILE:=./data/100
-GOLD_FILE:=$(TEST_FILE).gold_c$(NCLUSTERS)
-################################################################################
-ifeq ($(DATATYPE), INT)
-	DATATYPE_ID = 1
-	PARALLEL_FEATURES = 2 
-else
-	DATATYPE_ID = 0
-	PARALLEL_FEATURES = 8 
-endif
-
-HOST_SRCS = ./src/host.cpp ./src/cluster.c ./src/rmse.c ./src/fpga_kmeans.cpp ./src/kmeans_clustering_cmodel.c
-
-# Host compiler global settings
-CXXFLAGS = -I $(XILINX_XRT)/include/ -I/$(XILINX_SDX)/Vivado_HLS/include/ -O0 -g -Wall -fmessage-length=0 -std=c++14
-LDFLAGS = -lOpenCL -lpthread -lrt -lstdc++ -L$(XILINX_XRT)/lib/ -lxilinxopencl
-
-# Kernel compiler global settings
-CLFLAGS = -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR)
-CLFLAGS += -D "PARALLEL_POINTS=$(PARALLEL_POINTS)" -D "PARALLEL_FEATURES=$(PARALLEL_FEATURES)" -D USE_DATA_TYPE=$(DATATYPE_ID)
-
-CXXFLAGS += -DRECORD_OVERALL_TIME -DUSE_DATA_TYPE=$(DATATYPE_ID) -DPARALLEL_POINTS=$(PARALLEL_POINTS)
-
-EXECUTABLE = host_kmeans
-CMD_ARGS = -i ./data/100 -c ./data/100.gold_c5 -m 5 -n 5 -g 2
-
-
-EMCONFIG_DIR = $(XCLBIN)/$(DSA)
-
-BINARY_CONTAINERS += $(XCLBIN)/kmeans.$(TARGET).$(DSA).xclbin
-BINARY_CONTAINER_1_OBJS += $(XCLBIN)/kmeans.$(TARGET).$(DSA).xo
-
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
 include $(ABS_COMMON_REPO)/libs/logger/logger.mk
@@ -95,6 +43,28 @@ include $(ABS_COMMON_REPO)/libs/xcl2/xcl2.mk
 CXXFLAGS += $(logger_CXXFLAGS) $(cmdparser_CXXFLAGS) $(xcl2_CXXFLAGS)
 LDFLAGS += $(logger_LDFLAGS) $(cmdparser_LDFLAGS) $(xcl2_LDFLAGS)
 HOST_SRCS += $(logger_SRCS) $(cmdparser_SRCS) $(xcl2_SRCS)
+include config.mk
+
+CXXFLAGS += $(opencl_CXXFLAGS) -Wall -O0 -g -std=c++14
+LDFLAGS += $(opencl_LDFLAGS)
+
+HOST_SRCS += ./src/host.cpp ./src/cluster.c ./src/rmse.c ./src/fpga_kmeans.cpp ./src/kmeans_clustering_cmodel.c
+
+# Host compiler global settings
+CXXFLAGS += -fmessage-length=0
+LDFLAGS += -lrt -lstdc++ 
+
+# Kernel compiler global settings
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
+
+
+EXECUTABLE = host_kmeans
+CMD_ARGS = -i ./data/100 -c ./data/100.gold_c5 -m 5 -n 5 -g 2
+
+EMCONFIG_DIR = $(XCLBIN)/$(DSA)
+
+BINARY_CONTAINERS += $(XCLBIN)/kmeans.$(TARGET).$(DSA).xclbin
+BINARY_CONTAINER_kmeans_OBJS += $(XCLBIN)/kmeans.$(TARGET).$(DSA).xo
 
 CP = cp -rf
 DATA = ./data
@@ -106,24 +76,23 @@ all: check-devices $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
 exe: $(EXECUTABLE)
 
 # Building kernel
-$(XCLBIN)/kmeans.$(TARGET).$(DSA).xo: ./src/kmeans.cl
+$(XCLBIN)/kmeans.$(TARGET).$(DSA).xo: src/kmeans.cl
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) -c -k kmeans -I'$(<D)' -o'$@' '$<'
-
-$(XCLBIN)/kmeans.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_1_OBJS)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk kmeans:$(COMPUTE_UNITS) -o'$@' $(+)
+$(XCLBIN)/kmeans.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_kmeans_OBJS)
+	mkdir -p $(XCLBIN)
+	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk kmeans:2 -o'$@' $(+)
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS)
+$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
 	mkdir -p $(XCLBIN)
-	$(CXX) $(CXXFLAGS) $(HOST_SRCS) -o '$@' $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 
 emconfig:$(EMCONFIG_DIR)/emconfig.json
 $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
-
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) -i ./data/100 -c ./data/100.gold_c5 -m 5 -n 5 -g 2
@@ -143,7 +112,5 @@ clean:
 
 cleanall: clean
 	-$(RMDIR) $(XCLBIN)
-	-$(RMDIR) ./_x.*
-	-$(RMDIR) ./membership.out
-
-
+	-$(RMDIR) _x.*
+	-$(RMDIR) ./membership.out 

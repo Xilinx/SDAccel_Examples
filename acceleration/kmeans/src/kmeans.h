@@ -47,6 +47,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define FLOAT_DT    0
 #define INT_DT      1
 
+#ifndef USE_DATA_TYPE
+#define USE_DATA_TYPE INT_DT
+#endif
 
 #if USE_DATA_TYPE == INT_DT
     #define DATA_TYPE unsigned int 
