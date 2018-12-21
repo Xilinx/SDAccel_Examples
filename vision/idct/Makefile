@@ -46,10 +46,10 @@ LDFLAGS += -lrt -lstdc++
 
 # Kernel compiler global settings
 CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
-CLFLAGS += --xp prop:solution.hls_pre_tcl=src/hls_config.tcl
+CLFLAGS += --xp prop:solution.hls_pre_tcl=./src/hls_config.tcl
 
 # Kernel linker flags
-LDCLFLAGS +=   --sp krnl_idct_1.m_axi_gmem0:bank0 --sp krnl_idct_1.m_axi_gmem1:bank0 --sp krnl_idct_1.m_axi_gmem2:bank1 --kernel_frequency 250
+LDCLFLAGS += --sp krnl_idct_1.m_axi_gmem0:bank0 --sp krnl_idct_1.m_axi_gmem1:bank0 --sp krnl_idct_1.m_axi_gmem2:bank1 --kernel_frequency 250
 
 EXECUTABLE = idct
 

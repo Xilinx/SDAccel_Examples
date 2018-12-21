@@ -14,12 +14,12 @@
     "containers": [
         {
             "name": "krnl_idct", 
-            "ldclflags": "  --sp krnl_idct_1.m_axi_gmem0:bank0 --sp krnl_idct_1.m_axi_gmem1:bank0 --sp krnl_idct_1.m_axi_gmem2:bank1 --kernel_frequency 250",
+            "ldclflags": "--sp krnl_idct_1.m_axi_gmem0:bank0 --sp krnl_idct_1.m_axi_gmem1:bank0 --sp krnl_idct_1.m_axi_gmem2:bank1 --kernel_frequency 250",
             "accelerators": [
                 { 
                     "name": "krnl_idct", 
                     "location": "src/krnl_idct.cpp",
-	            "clflags" : "--xp prop:solution.hls_pre_tcl=src/hls_config.tcl"
+	            "clflags" : "--xp prop:solution.hls_pre_tcl=PROJECT/src/hls_config.tcl"
                 }
             ]
         }

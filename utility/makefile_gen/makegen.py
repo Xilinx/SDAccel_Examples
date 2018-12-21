@@ -142,8 +142,12 @@ def add_kernel_flags(target, data):
         for con in data["containers"]:
             for acc in con["accelerators"]:
                 if "clflags" in acc:
-		    target.write("CLFLAGS += ")
-		    target.write(acc["clflags"])		    
+		    target.write("CLFLAGS +=")
+		    flags = acc["clflags"].split(" ")
+		    for flg in flags[0:]:
+			target.write(" ")
+			flg = flg.replace('PROJECT', '.')
+			target.write(flg)
                     target.write("\n")
     
     if "compiler" in data:
@@ -160,9 +164,13 @@ def add_kernel_flags(target, data):
             if  "ldclflags" in con:
 		target.write("\n")
                 target.write("# Kernel linker flags\n")
-                target.write("LDCLFLAGS += ")
-                target.write(con["ldclflags"])
-        target.write("\n")
+                target.write("LDCLFLAGS +=")
+		ldclflags = con["ldclflags"].split(" ")
+		for flg in ldclflags[0:]:
+		    target.write(" ")
+		    flg = flg.replace('PROJECT', '.')
+		    target.write(flg)
+            target.write("\n")
     target.write("\n")
     target.write("EXECUTABLE = ")
     if "host_exe" in data:
