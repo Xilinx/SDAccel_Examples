@@ -127,9 +127,8 @@ def requirements(target,data):
     target.write("\n\n")
     target.write("*NOTE:* The board/device used for compilation can be changed by adding the DEVICES variable to the make command as shown below\n")
     target.write("```\n")
-    target.write("make DEVICES=<device name>\n")
+    target.write("make DEVICES=<.xpfm file path> all\n")
     target.write("```\n")
-    target.write("where the *DEVICES* variable accepts either 1 device from the table above or a comma separated list of device names.\n\n")
     try:
       if data['opencv']:
                 target.write("***OpenCV for Example Applications***\n\n")
@@ -163,7 +162,7 @@ def compilation(target,data):
     target.write("These modes, which are named sw_emu and hw_emu, allow the developer to profile and evaluate the performance of a design before compiling for board execution.\n")
     target.write("It is recommended that all applications are executed in at least the sw_emu mode before being compiled and executed on an FPGA board.\n")
     target.write("```\n")
-    target.write("make TARGETS=<sw_emu|hw_emu> all\n")
+    target.write("make all TARGET=<sw_emu|hw_emu> DEVICE=<FPGA Platform>\n")
     target.write("```\n")
     target.write("where\n")
     target.write("```\n")
@@ -177,7 +176,7 @@ def compilation(target,data):
     target.write("***Recommended Execution Flow for Example Applications in Emulation*** \n\n")
     target.write("The makefile for the application can directly executed the application with the following command:\n")
     target.write("```\n")
-    target.write("make TARGETS=<sw_emu|hw_emu> check\n\n")
+    target.write("make check TARGET=<sw_emu|hw_emu> DEVICE=<FPGA Platform>\n\n")
     target.write("```\n")
     target.write("where\n")
     target.write("```\n")
@@ -219,7 +218,7 @@ def compilation(target,data):
     target.write("### Compiling for Application Execution in the FPGA Accelerator Card\n")
     target.write("The command to compile the application for execution on the FPGA acceleration board is\n")
     target.write("```\n")
-    target.write("make all\n")
+    target.write("make all DEVICE=<FPGA Platform>\n")
     target.write("```\n")
     target.write("The default target for the makefile is to compile for hardware. Therefore, setting the TARGETS option is not required.\n")
     target.write("*NOTE:* Compilation for application execution in hardware generates custom logic to implement the functionality of the kernels in an application.\n")
@@ -302,7 +301,7 @@ def power(target):
     target.write("View the SuperVessel [Walkthrough Video][] to become familiar with the environment.\n\n")
     target.write("Compile the application with the following command\n")
     target.write("```\n")
-    target.write("make ARCH=POWER all\n")
+    target.write("make ARCH=POWER DEVICES=<FPGA Platform> all\n")
     target.write("```\n")
     return
 

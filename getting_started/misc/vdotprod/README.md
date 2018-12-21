@@ -35,10 +35,8 @@ Xilinx Virtex UltraScale+ VCU1525|xilinx_u200_xdma_201820_1|SDAccel 2018.2.xdf
 
 *NOTE:* The board/device used for compilation can be changed by adding the DEVICES variable to the make command as shown below
 ```
-make DEVICES=<device name>
+make DEVICES=<.xpfm file path> all
 ```
-where the *DEVICES* variable accepts either 1 device from the table above or a comma separated list of device names.
-
 ## 4. DESIGN FILE HIERARCHY
 Application code is located in the src directory. Accelerator binary files will be compiled to the xclbin directory. The xclbin directory is required by the Makefile and its contents will be filled during compilation. A listing of all the files in this example is shown below
 
@@ -60,7 +58,7 @@ As part of the capabilities available to an application developer, SDAccel inclu
 These modes, which are named sw_emu and hw_emu, allow the developer to profile and evaluate the performance of a design before compiling for board execution.
 It is recommended that all applications are executed in at least the sw_emu mode before being compiled and executed on an FPGA board.
 ```
-make TARGETS=<sw_emu|hw_emu> all
+make all TARGET=<sw_emu|hw_emu> DEVICE=<FPGA Platform>
 ```
 where
 ```
@@ -75,7 +73,7 @@ It is recommended that for this example the user skips running hardware emulatio
 
 The makefile for the application can directly executed the application with the following command:
 ```
-make TARGETS=<sw_emu|hw_emu> check
+make check TARGET=<sw_emu|hw_emu> DEVICE=<FPGA Platform>
 
 ```
 where
@@ -102,7 +100,7 @@ This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card
 The command to compile the application for execution on the FPGA acceleration board is
 ```
-make all
+make all DEVICE=<FPGA Platform>
 ```
 The default target for the makefile is to compile for hardware. Therefore, setting the TARGETS option is not required.
 *NOTE:* Compilation for application execution in hardware generates custom logic to implement the functionality of the kernels in an application.
