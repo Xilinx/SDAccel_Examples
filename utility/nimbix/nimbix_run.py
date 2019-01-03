@@ -14,6 +14,8 @@ import urllib2
 import urllib
 import re
 
+sys.dont_write_bytecode = True
+
 HEADER = {"Content-Type": "application/json"}
 API_URL = "https://api.jarvice.com/jarvice"
 

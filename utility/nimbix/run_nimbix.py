@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 import sys
 import os
+import nimbix_run
+
+sys.dont_write_bytecode = True
 
 # Arguments
 executable = sys.argv[1:-1]
@@ -21,6 +24,5 @@ elif "u250" in device:
 else:
 	exit("Error: DEVICE not supported. Please select the DEVICE properly and rerun.")
 string = ' '.join(executable)
-print(string)
 # Function Call for Nimbix
 os.system("nimbix_run.py " + string + " --type " + node + " --nae " + name)
