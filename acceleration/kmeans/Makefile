@@ -102,7 +102,7 @@ endif
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 
 run_nimbix: all
-	$(COMMON_REPO)utility/nimbix/run_nimbix.py $(EXECUTABLE) $(CMD_ARGS) $(DSA)   
+	$(COMMON_REPO)/utility/nimbix/run_nimbix.py $(EXECUTABLE) $(CMD_ARGS) $(DSA)
 
 # Cleaning stuff
 clean:

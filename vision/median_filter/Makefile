@@ -14,6 +14,9 @@ help::
 	$(ECHO) "  make check TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
 	$(ECHO) "      Command to run application in emulation."
 	$(ECHO) ""
+	$(ECHO) "  make run_nimbix DEVICE=<FPGA platform>"
+	$(ECHO) "      Command to run application on Nimbix Cloud."
+	$(ECHO) ""
 
 # Points to Utility Directory
 COMMON_REPO = ../../
@@ -53,6 +56,7 @@ CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR
 
 
 EXECUTABLE = median
+CMD_ARGS = $(XCLBIN)/krnl_median.$(TARGET).$(DSA).xclbin ./data/inputImage.bmp ./data/goldenImage.bmp
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
@@ -93,6 +97,9 @@ else
 	 ./$(EXECUTABLE) $(XCLBIN)/krnl_median.$(TARGET).$(DSA).xclbin ./data/inputImage.bmp ./data/goldenImage.bmp
 endif
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
+
+run_nimbix: all
+	$(COMMON_REPO)/utility/nimbix/run_nimbix.py $(EXECUTABLE) $(CMD_ARGS) $(DSA)
 
 # Cleaning stuff
 clean:

@@ -14,6 +14,9 @@ help::
 	$(ECHO) "  make check TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
 	$(ECHO) "      Command to run application in emulation."
 	$(ECHO) ""
+	$(ECHO) "  make run_nimbix DEVICE=<FPGA platform>"
+	$(ECHO) "      Command to run application on Nimbix Cloud."
+	$(ECHO) ""
 
 # Points to Utility Directory
 COMMON_REPO = ../../
@@ -53,6 +56,7 @@ CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR
 
 
 EXECUTABLE = affine
+CMD_ARGS = ./data/CT-MONO2-16-brain.raw
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
@@ -97,6 +101,9 @@ $(warning WARNING:Application supports only sw_emu hw TARGET. Please use the tar
 endif
 
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
+
+run_nimbix: all
+	$(COMMON_REPO)/utility/nimbix/run_nimbix.py $(EXECUTABLE) $(CMD_ARGS) $(DSA)
 
 # Cleaning stuff
 clean:

@@ -177,6 +177,18 @@ def add_kernel_flags(target, data):
         target.write(data["host_exe"])    
     else: 
         target.write("host")
+    if "cmd_args" in data:
+    	target.write("\n")
+        target.write("CMD_ARGS =")
+	cmd_args = data["cmd_args"].split(" ")
+	for cmdargs in cmd_args[0:]:
+	    target.write(" ")
+            cmdargs = cmdargs.replace('.xclbin', '')
+            cmdargs = cmdargs.replace('BUILD', '$(XCLBIN)')
+            cmdargs = cmdargs.replace('PROJECT', '.')
+	    target.write(cmdargs)
+    	    if "$(XCLBIN)" in cmdargs:
+            	target.write(".$(TARGET).$(DSA).xclbin")
 
     target.write("\n\n")
 
@@ -417,6 +429,13 @@ def mk_check(target, data):
     if data["example"] != "00 Matrix Multiplication":
 	target.write("\tsdx_analyze profile -i sdaccel_profile_summary.csv -f html\n")
     target.write("\n")
+
+def run_nimbix(target, data):
+    target.write("run_nimbix: all\n")
+    if "cmd_args" in data:
+    	target.write("\t$(COMMON_REPO)/utility/nimbix/run_nimbix.py $(EXECUTABLE) $(CMD_ARGS) $(DSA)\n\n")
+    else:
+    	target.write("\t$(COMMON_REPO)/utility/nimbix/run_nimbix.py $(EXECUTABLE) $(DSA)\n\n")	
     
 def mk_help(target):
     target.write(".PHONY: help\n")
@@ -435,6 +454,9 @@ def mk_help(target):
     target.write("\t$(ECHO) \"  make check TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>\"\n");
     target.write("\t$(ECHO) \"      Command to run application in emulation.\"\n")
     target.write("\t$(ECHO) \"\"\n")
+    target.write("\t$(ECHO) \"  make run_nimbix DEVICE=<FPGA platform>\"\n");
+    target.write("\t$(ECHO) \"      Command to run application on Nimbix Cloud.\"\n")
+    target.write("\t$(ECHO) \"\"\n")
     target.write("\n")
 
 def create_mk(target, data):
@@ -445,6 +467,7 @@ def create_mk(target, data):
     add_containers(target, data)
     mk_build_all(target, data)
     mk_check(target, data)
+    run_nimbix(target, data)
     mk_clean(target,data)
     return 
 
