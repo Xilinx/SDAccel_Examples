@@ -11,10 +11,9 @@
         "xcl2"
     ],
     "nboard":["xilinx_xbb1551_dynamic_5_1", "xilinx_vcu1525_dynamic_6_0"],
+    "host_srcs": "src/kernel_global_bandwidth.cpp",
     "host_exe": "kernel_global",
-    "compiler" : {
-             "options" : "-DNDDR_BANKS"
-    },
+    "config_make": "config.mk",
     "containers": [
         {
             "name": "krnl_kernel_global", 
@@ -22,7 +21,6 @@
                 {
                     "name": "bandwidth",
                     "max_memory_ports": "true",
-                    "clflags": "-DNDDR_BANKS",                        
                     "location": "src/kernel.cl"
                 }
             ]
@@ -33,6 +31,5 @@
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
         }
-    ],
-    "match_makefile": "false"
+    ]
 }

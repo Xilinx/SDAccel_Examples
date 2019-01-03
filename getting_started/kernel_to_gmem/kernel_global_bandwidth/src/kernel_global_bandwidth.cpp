@@ -93,6 +93,10 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include "xcl2.hpp"
 
+#ifndef NDDR_BANKS
+#define NDDR_BANKS 1
+#endif
+
 int main(int argc, char** argv) {
 
     if(argc != 1) {
