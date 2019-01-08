@@ -55,3 +55,8 @@ check-devices:
 ifndef DEVICE
 	$(error DEVICE not set. Please set the DEVICE properly and rerun. Run "make help" for more details.)
 endif
+
+check-aws_repo:
+ifndef SDACCEL_DIR
+	$(error SDACCEL_DIR not set. Please set it properly and rerun. Run "make help" for more details.)	
+endif

@@ -437,6 +437,10 @@ def run_nimbix(target, data):
     else:
     	target.write("\t$(COMMON_REPO)/utility/nimbix/run_nimbix.py $(EXECUTABLE) $(DSA)\n\n")	
     
+def aws_build(target):
+    target.write("aws_build: all check-aws_repo\n")
+    target.write("\t$(COMMON_REPO)/utility/aws/run_aws.py $(BINARY_CONTAINERS)\n\n")
+
 def mk_help(target):
     target.write(".PHONY: help\n")
     target.write("\n")
@@ -457,6 +461,9 @@ def mk_help(target):
     target.write("\t$(ECHO) \"  make run_nimbix DEVICE=<FPGA platform>\"\n");
     target.write("\t$(ECHO) \"      Command to run application on Nimbix Cloud.\"\n")
     target.write("\t$(ECHO) \"\"\n")
+    target.write("\t$(ECHO) \"  make aws_build DEVICE=<FPGA platform>\"\n");
+    target.write("\t$(ECHO) \"      Command to build AWS xclbin application on AWS Cloud.\"\n")
+    target.write("\t$(ECHO) \"\"\n")
     target.write("\n")
 
 def create_mk(target, data):
@@ -468,6 +475,7 @@ def create_mk(target, data):
     mk_build_all(target, data)
     mk_check(target, data)
     run_nimbix(target, data)
+    aws_build(target)
     mk_clean(target,data)
     return 
 
