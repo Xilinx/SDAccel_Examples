@@ -95,6 +95,7 @@ int main(int argc, char** argv)
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
+    OCL_CHECK(err, cl::Kernel krnl_mmult(program,"mmult", &err));
 
     //Allocate Buffer in Global Memory
     OCL_CHECK(err, cl::Buffer buffer_a(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
@@ -110,17 +111,14 @@ int main(int argc, char** argv)
     //Migrate  input data to device global memory
     OCL_CHECK(err, err = q.enqueueMigrateMemObjects(writeBufVec,0/* 0 means from host*/));
 
-    //Make the Kernel Functor
-    auto krnl_mmult = cl::KernelFunctor<cl::Buffer&,cl::Buffer&,cl::Buffer&,int>(program, "mmult", &err);
-    if (err != CL_SUCCESS) {
-          printf("Error calling Kernel Functor: Error code is: %d\n", err);
-          exit(EXIT_FAILURE);
-        }
+    OCL_CHECK(err, err = krnl_mmult.setArg(0, buffer_a));
+    OCL_CHECK(err, err = krnl_mmult.setArg(1, buffer_b));
+    OCL_CHECK(err, err = krnl_mmult.setArg(2, buffer_c));
+    OCL_CHECK(err, err = krnl_mmult.setArg(3, dim));
 
     //Launch the Kernel
-    krnl_mmult(cl::EnqueueArgs(q,cl::NDRange(1,1,1), cl::NDRange(1,1,1)),
-            buffer_a,buffer_b,buffer_c, dim);
-
+    OCL_CHECK(err, err = q.enqueueTask(krnl_mmult));
+    
     std::vector<cl::Memory> readBufVec;
     readBufVec.push_back(buffer_c);
     //Copy Result from Device Global Memory to Host Local Memory

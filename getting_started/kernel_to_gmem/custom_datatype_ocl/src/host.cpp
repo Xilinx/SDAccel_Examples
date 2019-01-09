@@ -80,6 +80,7 @@ int main(int argc, char* argv[])
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
+    OCL_CHECK(err, cl::Kernel krnl_rgb2hsv(program,"rgb_to_hsv", &err));
     
     //Allocate Buffer in Global Memory
     OCL_CHECK(err, cl::Buffer buffer_rgbImage(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
@@ -95,16 +96,12 @@ int main(int argc, char* argv[])
     //Copy input RGB Image to device global memory
     OCL_CHECK(err, err = q.enqueueMigrateMemObjects(rgbBufVec,0/* 0 means from host*/));
   
-    //Make the Kernel Functor
-    auto krnl_rgb2hsv = cl::KernelFunctor<cl::Buffer&, cl::Buffer&, int>(program, "rgb_to_hsv", &err);
-
-    if (err != CL_SUCCESS) {
-          printf("Error calling Kernel Functor: Error code is: %d\n", err);
-          exit(EXIT_FAILURE);
-        }
+    OCL_CHECK(err, err = krnl_rgb2hsv.setArg(0, buffer_rgbImage));
+    OCL_CHECK(err, err = krnl_rgb2hsv.setArg(1, buffer_hsvImage));
+    OCL_CHECK(err, err = krnl_rgb2hsv.setArg(2, image_size));
 
     //Launch the Kernel
-    krnl_rgb2hsv(cl::EnqueueArgs(q,cl::NDRange(1,1,1), cl::NDRange(1,1,1)), buffer_rgbImage, buffer_hsvImage, image_size);
+    OCL_CHECK(err, err = q.enqueueTask(krnl_rgb2hsv));
 
     //Copy Result from Device Global Memory to Host Local Memory
     OCL_CHECK(err, err = q.enqueueMigrateMemObjects(hsvBufVec,CL_MIGRATE_MEM_OBJECT_HOST));

@@ -62,6 +62,7 @@ int main(int argc, char** argv)
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
+    OCL_CHECK(err, cl::Kernel krnl_add(program,"vadd", &err));
 
     //Allocate Buffer in Global Memory
     std::vector<cl::Memory> bufferVec;
@@ -72,16 +73,12 @@ int main(int argc, char** argv)
     //Copy input data to device global memory
     OCL_CHECK(err, err = q.enqueueMigrateMemObjects(bufferVec,0/* 0 means from host*/));
 
-    //Make the Kernel Functor
-    auto krnl_add = cl::KernelFunctor<cl::Buffer&, int, int>(program, "vadd", &err);
-
-    if (err != CL_SUCCESS) {
-          printf("Error calling Kernel Functor: Error code is: %d\n", err);
-          exit(EXIT_FAILURE);
-        }
+    OCL_CHECK(err, err = krnl_add.setArg(0, buffer_rw));
+    OCL_CHECK(err, err = krnl_add.setArg(1, size));
+    OCL_CHECK(err, err = krnl_add.setArg(2, inc_value));
 
     //Launch the Kernel
-    krnl_add(cl::EnqueueArgs(q,cl::NDRange(1,1,1), cl::NDRange(1,1,1)), buffer_rw, size, inc_value);
+    OCL_CHECK(err, err = q.enqueueTask(krnl_add));
 
     //Copy Result from Device Global Memory to Host Local Memory
     OCL_CHECK(err, err = q.enqueueMigrateMemObjects(bufferVec,CL_MIGRATE_MEM_OBJECT_HOST));
