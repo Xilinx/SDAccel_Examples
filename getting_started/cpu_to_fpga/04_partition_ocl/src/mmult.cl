@@ -50,10 +50,12 @@ void mmult( __global int* in1,  //Read-only input matrix1
 
     //Burst reads on input matrices from DDR memory
     //Burst read for matrix local_in1 and local_in2
+    __attribute__((xcl_pipeline_loop(1)))
     read_in1: for(int iter = 0, i = 0, j = 0; iter < dim * dim; iter++, j++){
         if(j == dim){ j = 0; i++; }
         local_in1[i][j] = in1[iter];
     }
+    __attribute__((xcl_pipeline_loop(1)))
     read_in2: for(int iter = 0, i = 0, j = 0; iter < dim * dim; iter++, j++){
         if(j == dim){ j = 0; i++; }
         local_in2[i][j] = in2[iter];
@@ -65,7 +67,7 @@ void mmult( __global int* in1,  //Read-only input matrix1
     //"loop_3" must be unrolled, to unroll the size cannot be dynamic.
     //It gives better throughput with usage of additional resources. 
     loop_1: for(int i = 0; i < dim; i++){
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         loop_2: for(int j = 0; j < dim; j++){
             local_out[i][j] = 0;
             __attribute__((opencl_unroll_hint))
@@ -76,6 +78,7 @@ void mmult( __global int* in1,  //Read-only input matrix1
     }    
 
     //Burst write from local_out to DDR memory
+    __attribute__((xcl_pipeline_loop(1)))
     write_out: for(int iter = 0, i = 0, j = 0; iter < dim * dim; iter++, j++){
         if(j == dim){ j = 0; i++; }
         out[iter] = local_out[i][j];

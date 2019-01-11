@@ -123,13 +123,13 @@ void cnn_BAD(
     int wgt_lcl[WOutChan * WInChan * WSize * WSize];
     
     // Burst Read Image
-    __attribute__((xcl_pipeline_loop))
+    __attribute__((xcl_pipeline_loop(1)))
     readImg: for(int i = 0; i < i_chan * ISize * ISize; i++){
         img_lcl[i] = image[i];
     }
    
     // Burst Read Weights
-    __attribute__((xcl_pipeline_loop))
+    __attribute__((xcl_pipeline_loop(1)))
     readWt: 
     // To avoid automatic loop unrolling
     #pragma nounroll
@@ -149,7 +149,7 @@ void cnn_BAD(
                     // Runs over filter window in Y-direction
                     convILoop: for(int i = 0; i < WSize; i++) {
                         // Runs over filter windows in X-direction
-                        __attribute__((xcl_pipeline_loop))
+                        __attribute__((xcl_pipeline_loop(1)))
                         convJLoop: for(int j = 0; j < WSize; j++) {
                             // Calculates padding boundaries in X & Y direction
                             int xVal = x*Stride + j-Padding, yVal = y*Stride + i-Padding;
@@ -169,7 +169,7 @@ void cnn_BAD(
     }
     
     // Burst write output
-    __attribute__((xcl_pipeline_loop))
+    __attribute__((xcl_pipeline_loop(1)))
     writeOut: for(int i = 0; i < o_chan * OSize * OSize; i++) {
         out[i] = out_lcl[i];
     }

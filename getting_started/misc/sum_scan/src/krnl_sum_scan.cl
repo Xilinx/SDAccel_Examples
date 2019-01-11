@@ -140,7 +140,7 @@ krnl_sum_scan(
 
 	uint n = M(length);
 
-	__attribute__((xcl_pipeline_loop))
+	__attribute__((xcl_pipeline_loop(1)))
 	for(uint i = 0; i < n; i++){
 		float sum;
 

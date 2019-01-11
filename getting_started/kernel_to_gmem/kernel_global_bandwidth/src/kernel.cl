@@ -38,7 +38,7 @@ void bandwidth(__global uint16  * __restrict input0,
 #endif
                ulong num_blocks)
 {
-    __attribute__((xcl_pipeline_loop))
+    __attribute__((xcl_pipeline_loop(1)))
     for (ulong blockindex = 0; blockindex < num_blocks; blockindex++) {
         uint16 temp0 = input0[blockindex];
         output0[blockindex] = temp0;

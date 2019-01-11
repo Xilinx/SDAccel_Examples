@@ -80,7 +80,7 @@ void get_coef(
 	short coef_buf[FILTER_HEIGHT*FILTER_WIDTH]
 ) {
 #ifdef __xilinx__
-	__attribute__((xcl_pipeline_loop))
+	__attribute__((xcl_pipeline_loop(1)))
 #endif
 	for(int i = 0; i < M(FILTER_WIDTH*FILTER_HEIGHT); i++) {
 		short tmp[B];
@@ -116,7 +116,7 @@ void filter(
 		;
 
 #ifdef __xilinx__
-	__attribute__((xcl_pipeline_loop))
+	__attribute__((xcl_pipeline_loop(1)))
 #endif
 	for(size_t i = 0; i < M(IMAGE_WIDTH*IMAGE_HEIGHT); i++) {
 		short input_buf[B];

@@ -47,7 +47,7 @@ void matmul(const __global int *in1,  // Read-Only Matrix 1
 
     // Burst reads on input matrices from global memory
     // Burst read for matrix A
-    __attribute__((xcl_pipeline_loop))
+    __attribute__((xcl_pipeline_loop(1)))
     readA:
     for (int itr = 0, i = 0, j = 0; itr < size * size; itr++, j++) {
         if (j == size) {
@@ -58,7 +58,7 @@ void matmul(const __global int *in1,  // Read-Only Matrix 1
     }
 
     // Burst read for matrix B
-    __attribute__((xcl_pipeline_loop))
+    __attribute__((xcl_pipeline_loop(1)))
     readB:
     for (int itr = 0, i = 0, j = 0; itr < size * size; itr++, j++) {
         if (j == size) {
@@ -88,7 +88,7 @@ void matmul(const __global int *in1,  // Read-Only Matrix 1
 
     // Burst write from output matrices to global memory
     // Burst write from matrix C
-    __attribute__((xcl_pipeline_loop))
+    __attribute__((xcl_pipeline_loop(1)))
     writeC:
     for (int itr = 0, i = 0, j = 0; itr < size * size; itr++, j++) {
         if (j == size) {
@@ -121,7 +121,7 @@ void matmul_partition(const __global int *in1,  // Read-Only Matrix 1
 
     // Burst reads on input matrices from global memory
     // Burst read for matrix A
-    __attribute__((xcl_pipeline_loop))
+    __attribute__((xcl_pipeline_loop(1)))
     readA:
     for (int itr = 0, i = 0, j = 0; itr < size * size; itr++, j++) {
         if (j == size) {
@@ -132,7 +132,7 @@ void matmul_partition(const __global int *in1,  // Read-Only Matrix 1
     }
 
     // Burst read for matrix B
-    __attribute__((xcl_pipeline_loop))
+    __attribute__((xcl_pipeline_loop(1)))
     readB:
     for (int itr = 0, i = 0, j = 0; itr < size * size; itr++, j++) {
         if (j == size) {
@@ -148,7 +148,7 @@ void matmul_partition(const __global int *in1,  // Read-Only Matrix 1
     // and write results into local buffer for C
     arraypart1:
     for (int i = 0; i < size; i++) {
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         arraypart2 :
         for (int k = 0; k < size; k++) {
             arraypart3:
@@ -163,7 +163,7 @@ void matmul_partition(const __global int *in1,  // Read-Only Matrix 1
 
     // Burst write from output matrices to global memory
     // Burst write from matrix C
-    __attribute__((xcl_pipeline_loop))
+    __attribute__((xcl_pipeline_loop(1)))
     writeC:
     for (int itr = 0, i = 0, j = 0; itr < size * size; itr++, j++) {
         if (j == size) {

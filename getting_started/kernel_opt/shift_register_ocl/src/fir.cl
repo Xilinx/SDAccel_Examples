@@ -81,7 +81,7 @@ void fir_naive(__global int* restrict output,
     for (int j = 0; j < signal_length; j++) {
         int acc = 0;
         shift_loop:
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         for (int i = min(j,N_COEFF-1); i >= 0; i--) {
             acc += signal[j-i] * coeff_reg[i];
         }

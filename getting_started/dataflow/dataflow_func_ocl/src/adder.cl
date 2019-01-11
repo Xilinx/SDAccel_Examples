@@ -70,6 +70,7 @@ Description:
 static void read_input(__global int *in, int * buffer_in,
         int size)
 {
+    __attribute__((xcl_pipeline_loop(1)))
     for (int i = 0 ; i < size ; i++){
         buffer_in[i] =  in[i];
     }
@@ -79,6 +80,7 @@ static void read_input(__global int *in, int * buffer_in,
 static void compute_add(int * buffer_in , int * buffer_out
         , int inc, int size)
 {
+    __attribute__((xcl_pipeline_loop(1)))
     for (int i = 0 ; i < size ; i++){
         buffer_out[i] = buffer_in[i] + inc;
     }
@@ -88,6 +90,7 @@ static void compute_add(int * buffer_in , int * buffer_out
 static void write_result(__global int *out, int* buffer_out,
         int size)
 {
+    __attribute__((xcl_pipeline_loop(1)))
     for (int i = 0 ; i < size ; i++){
         out[i] = buffer_out[i];
     }

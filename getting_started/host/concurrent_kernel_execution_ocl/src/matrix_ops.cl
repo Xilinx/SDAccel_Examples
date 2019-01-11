@@ -47,9 +47,17 @@ void madd(global int *c, global const int *a, global const int *b,
     int matA[MAX_DIM * MAX_DIM];
     int matB[MAX_DIM * MAX_DIM];
 
-    madd_readA:  for (int i = 0; i < dim0 * dim1; ++i) matA[i] = a[i];
-    madd_readB:  for (int i = 0; i < dim0 * dim1; ++i) matB[i] = b[i];
-    madd_writeC: for (int i = 0; i < dim0 * dim1; ++i) c[i] =  matA[i] + matB[i];
+    __attribute__((xcl_pipeline_loop(1)))
+    madd_readA:  for (int i = 0; i < dim0 * dim1; ++i) {
+                    matA[i] = a[i]; }
+
+    __attribute__((xcl_pipeline_loop(1)))
+    madd_readB:  for (int i = 0; i < dim0 * dim1; ++i) {
+                    matB[i] = b[i]; }
+
+    __attribute__((xcl_pipeline_loop(1)))
+    madd_writeC: for (int i = 0; i < dim0 * dim1; ++i) {
+                    c[i] =  matA[i] + matB[i]; }
 }
 
 kernel __attribute__((reqd_work_group_size(1, 1, 1)))
@@ -57,9 +65,16 @@ void mmult(global int *c, global const int *a, global const int *b,
            const int dim0, const int dim1) {
     int matA[MAX_DIM * MAX_DIM];
     int matB[MAX_DIM * MAX_DIM];
-    madd_readA:  for (int i = 0; i < dim0 * dim1; ++i) matA[i] = a[i];
-    madd_readB:  for (int i = 0; i < dim0 * dim1; ++i) matB[i] = b[i];
 
+    __attribute__((xcl_pipeline_loop(1)))
+    mmult_readA:  for (int i = 0; i < dim0 * dim1; ++i) {
+                    matA[i] = a[i]; }
+
+    __attribute__((xcl_pipeline_loop(1)))
+    mmult_readB:  for (int i = 0; i < dim0 * dim1; ++i) {
+                    matB[i] = b[i]; }
+
+    __attribute__((xcl_pipeline_loop(1)))
     for (int j = 0; j < dim1; ++j) {
         for (int i = 0; i < dim0; ++i) {
             int temp = 0;

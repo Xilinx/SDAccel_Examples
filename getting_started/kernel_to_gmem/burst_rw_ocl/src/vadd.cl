@@ -50,8 +50,8 @@ void vadd(__global int *a, int size, int inc_value){
             chunk_size = size - i;
 
 #ifndef USE_ASYNC_API  //Burst Read using For loop (Xilinx recommended)
-        //read data from global memory into local buffer, the sequential read in a for loop can be inferred to a memory burst access automatically
-        __attribute__((xcl_pipeline_loop))
+        //read data from global memory into local buffer, the sequential read in a for loop can be inferred to a memory burst access 
+        __attribute__((xcl_pipeline_loop(1)))
         read_buf: for (int j = 0; j < chunk_size; j++) {
             burstbuffer[j] = a[i+j];
         }
@@ -63,8 +63,8 @@ void vadd(__global int *a, int size, int inc_value){
        // will not as efficient as 'for' loop based implementation. async_work_group_copy() may creates pipeline design 
        //larger number of pipeline stages
 #endif
-        //calculate and write results to global memory, the sequential write in a for loop can be inferred to a memory burst access automatically
-        __attribute__((xcl_pipeline_loop))
+        //calculate and write results to global memory, the sequential write in a for loop can be inferred to a memory burst access
+        __attribute__((xcl_pipeline_loop(1)))
         calc_write: for(int j = 0; j < chunk_size; j++){
             burstbuffer[j] = burstbuffer[j] + inc_value;
             a[i+j] = burstbuffer[j];

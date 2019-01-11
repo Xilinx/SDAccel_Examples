@@ -50,11 +50,13 @@ void krnl_vadd(
         if (i + size > n_elements) size = n_elements - i; 
 
         //Burst reading A
+        __attribute__((xcl_pipeline_loop(1)))
         readA: for (int j = 0 ; j < size ; j++) 
             arrayA[j] = a[i+j];
 
         //Burst reading B and calculating C and Burst writing 
         // to  Global memory
+        __attribute__((xcl_pipeline_loop(1)))
         vadd_wrteC: for (int j = 0 ; j < size ; j++) 
             c[i+j] = arrayA[j] + b[i+j];
     }

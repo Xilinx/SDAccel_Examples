@@ -108,7 +108,7 @@ void __attribute__((always_inline)) copy_weight(__global int *weight, int wgt_lc
     int stride = output * WInChan * WSize * WSize;
     
     // Each work_item copies its weight data from DDR to local buffers
-    __attribute__((xcl_pipeline_loop))
+    __attribute__((xcl_pipeline_loop(1)))
     readWt: 
     // To avoid automatic loop unrolling
     #pragma nounroll
@@ -124,7 +124,7 @@ void __attribute__((always_inline)) copy_output(__global int *out, int out_lcl[O
     int stride = output * OSize * OSize;
     
     // Work_item updates output filter/image in DDR
-    __attribute__((xcl_pipeline_loop))
+    __attribute__((xcl_pipeline_loop(1)))
     writeOut: for(int itr = 0; itr < OSize * OSize; itr++) {
         out[stride + itr] = out_lcl[itr];
     }
@@ -143,7 +143,7 @@ void __attribute__((always_inline))
 
     // Runs over filter window    
     convYaxis: for(int i = 0; i < WSize; i++,yVal++){
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         // Runs over filter window
         convXaxis: for(int j = 0, xVal = xVal_base ; j < WSize; j++, xVal++){
             // Runs over each of the input channels
@@ -164,7 +164,7 @@ void __attribute__((always_inline))
     // Summation of temporary accumulator buffer
     short sum = 0;
     accJ: for(int j = 0; j < WSize;j++)
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         accK: for(int k = 0; k < WSize; k++)
             accI: for(int i = 0; i < i_chan; i++)
                 sum += acc[i][j][k];
@@ -196,7 +196,7 @@ void cnn_GOOD(
     int wgt_lcl[WInChan][WSize * WSize] __attribute__((xcl_array_partition(complete,1)));
     
     // Copy image data from DDR to local buffer per work group (Burst Mode)
-    __attribute__((xcl_pipeline_loop))
+    __attribute__((xcl_pipeline_loop(1)))
     imgcopy:for(int itr = 0, i = 0, j = 0; itr < i_chan * ISize * ISize; itr++, j++){
         if(j == ISize * ISize) {j = 0; i++;}
             img_lcl[i][j] = image[itr];

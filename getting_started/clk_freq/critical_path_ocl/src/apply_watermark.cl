@@ -81,7 +81,7 @@ void apply_watermark(__global const TYPE * __restrict input, __global TYPE * __r
 
 
     // Process the whole image 
-    __attribute__((xcl_pipeline_loop))
+    __attribute__((xcl_pipeline_loop(1)))
     image_traverse: for (uint idx = 0, x = 0 , y = 0  ; idx < size ; ++idx)
     {
       // Read the next 16 Pixels

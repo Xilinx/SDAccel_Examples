@@ -45,14 +45,14 @@ void matmul_naive(
     local int C[MAX_DIM * MAX_DIM];
 
     // Burst read for matrix A
-    __attribute__((xcl_pipeline_loop))
+    __attribute__((xcl_pipeline_loop(1)))
     readA:
     for (int i = 0 ; i < dim * dim; i++) {
         A[i]  = in1[i];
     }
 
     // Burst read for matrix B
-    __attribute__((xcl_pipeline_loop))
+    __attribute__((xcl_pipeline_loop(1)))
     readB:
     for (int i = 0 ; i < dim * dim; i++) {
         B[i]  = in2[i];
@@ -63,7 +63,7 @@ void matmul_naive(
         lreorder2 :
         for (int j = 0; j < MAX_DIM; j++) {
             int result = 0;
-            __attribute__((xcl_pipeline_loop))
+            __attribute__((xcl_pipeline_loop(1)))
             lreorder3:
             for (int k = 0; k < dim; k++) {
                 result += A[i * dim +  k] * B[k * dim + j];
@@ -73,7 +73,7 @@ void matmul_naive(
     }
 
     // Burst write from matrix C
-    __attribute__((xcl_pipeline_loop))
+    __attribute__((xcl_pipeline_loop(1)))
     writeC:
     for (int i = 0; i < dim * dim; i++) {
         out[i] = C[i];
@@ -97,7 +97,7 @@ void matmul_partition(const __global int *in1,  // Read-Only Matrix 1
     // into local Array in MATRIX[MAX_DIM * MAX_DIM] format
 
     // Burst read for matrix A
-    __attribute__((xcl_pipeline_loop))
+    __attribute__((xcl_pipeline_loop(1)))
     readA:
     for (int itr = 0, i = 0, j = 0; itr < dim * dim; itr++, j++) {
         if (j == dim) { j = 0; i++; }
@@ -105,7 +105,7 @@ void matmul_partition(const __global int *in1,  // Read-Only Matrix 1
     }
 
     // Burst read for matrix B
-    __attribute__((xcl_pipeline_loop))
+    __attribute__((xcl_pipeline_loop(1)))
     readB:
     for (int itr = 0, i = 0, j = 0; itr < dim * dim; itr++, j++) {
         if (j == dim) { j = 0; i++; }
@@ -116,7 +116,7 @@ void matmul_partition(const __global int *in1,  // Read-Only Matrix 1
     for (int i = 0; i < dim; i++) {
         //As A and B are partition correctly so loop pipelining is applied
         // at 2nd level loop and which will eventually unroll the lower loop
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         lreorder2 :
         for (int j = 0; j < dim ; j++) {
             int result = 0;
@@ -130,7 +130,7 @@ void matmul_partition(const __global int *in1,  // Read-Only Matrix 1
 
     // Burst write from output matrices to global memory
     // Burst write from matrix C
-    __attribute__((xcl_pipeline_loop))
+    __attribute__((xcl_pipeline_loop(1)))
     writeC:
     for (int itr = 0, i = 0, j = 0; itr < dim * dim; itr++, j++) {
         if (j == dim) { j = 0; i++; }

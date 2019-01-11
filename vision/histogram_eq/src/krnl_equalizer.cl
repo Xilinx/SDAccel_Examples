@@ -101,11 +101,12 @@ kernel void krnl_equalizer(
 	global uint16 *eqimage
 	) {
 
+    __attribute__((xcl_pipeline_loop(1)))
 	for(uint n = 0; n < IMAGE_HEIGHT_PIXELS/32; n++) {
 		ushort line[32][IMAGE_WIDTH_PIXELS] __attribute__((xcl_array_partition(complete, 1)));
 		ushort hist[32][HISTOGRAM_DEPTH] __attribute__((xcl_array_partition(complete, 1)));
 
-		__attribute__((xcl_pipeline_loop))
+		__attribute__((xcl_pipeline_loop(1)))
 		for(uint i = 0; i < HISTOGRAM_DEPTH; i++) {
 			for(uint k = 0; k < 32; k++) {
 				hist[k][i] = 0;
@@ -171,7 +172,7 @@ kernel void krnl_equalizer(
 		}
 
 		/* Match */
-		__attribute__((xcl_pipeline_loop))
+		__attribute__((xcl_pipeline_loop(1)))
 		for (uint i = 0; i < IMAGE_WIDTH_PIXELS; i++) {
 			ushort bucket_out[32] __attribute__((xcl_array_partition(complete,1)));
 
