@@ -29,6 +29,5 @@
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
         }
-    ],
-    "sdx_gui": false
+    ]
 }
