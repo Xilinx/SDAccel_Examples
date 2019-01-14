@@ -51,130 +51,130 @@ typedef uint bus_t;
 #endif
 
 typedef union {
-	bus_t b;
-	short s[B];
+    bus_t b;
+    short s[B];
 } bus_to_short_t;
 
 void bus_to_short(bus_t in, short out[B]) {
-	bus_to_short_t val;
+    bus_to_short_t val;
 
-	val.b = in;
+    val.b = in;
 
-	for(int i = 0; i < B; i++) {
-		out[i] = val.s[i];
-	}
+    for(int i = 0; i < B; i++) {
+        out[i] = val.s[i];
+    }
 }
 
 bus_t short_to_bus(short in[B]) {
-	bus_to_short_t val;
+    bus_to_short_t val;
 
-	for(int i = 0; i < B; i++) {
-		val.s[i] = in[i];
-	}
+    for(int i = 0; i < B; i++) {
+        val.s[i] = in[i];
+    }
 
-	return val.b;
+    return val.b;
 }
 
 void get_coef(
-	__global bus_t *coef,
-	short coef_buf[FILTER_HEIGHT*FILTER_WIDTH]
+    __global bus_t *coef,
+    short coef_buf[FILTER_HEIGHT*FILTER_WIDTH]
 ) {
 #ifdef __xilinx__
-	__attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_pipeline_loop(1)))
 #endif
-	for(int i = 0; i < M(FILTER_WIDTH*FILTER_HEIGHT); i++) {
-		short tmp[B];
-		bus_to_short(coef[i], tmp);
+    for(int i = 0; i < M(FILTER_WIDTH*FILTER_HEIGHT); i++) {
+        short tmp[B];
+        bus_to_short(coef[i], tmp);
 
-		for(int j = 0; j < B; j++) {
-			int k = i*B + j;
-			if (k < FILTER_HEIGHT*FILTER_WIDTH) {
-				coef_buf[k] = tmp[j];
-			}
-		}
-	}
+        for(int j = 0; j < B; j++) {
+            int k = i*B + j;
+            if (k < FILTER_HEIGHT*FILTER_WIDTH) {
+                coef_buf[k] = tmp[j];
+            }
+        }
+    }
 }
 
 void filter(
-	short coef_buf[FILTER_HEIGHT*FILTER_WIDTH],
-	global bus_t* input, global bus_t* output
+    short coef_buf[FILTER_HEIGHT*FILTER_WIDTH],
+    global bus_t* input, global bus_t* output
 ) {
 
-	/* Pad registers to align line_buf read/write */
-	short line_reg[FILTER_HEIGHT][REG_WIDTH]
+    /* Pad registers to align line_buf read/write */
+    short line_reg[FILTER_HEIGHT][REG_WIDTH]
 #ifdef __xilinx__
-		__attribute__((xcl_array_partition(complete,1)))
-		__attribute__((xcl_array_partition(complete,2)))
+        __attribute__((xcl_array_partition(complete,1)))
+        __attribute__((xcl_array_partition(complete,2)))
 #endif
-		;
-	/* Line buffers to store values */
-	short line_buf[FILTER_HEIGHT-1][M(IMAGE_WIDTH-REG_WIDTH)*B]
+        ;
+    /* Line buffers to store values */
+    short line_buf[FILTER_HEIGHT-1][M(IMAGE_WIDTH-REG_WIDTH)*B]
 #ifdef __xilinx__
-		__attribute__((xcl_array_partition(complete, 1)))
-		__attribute__((xcl_array_partition(cyclic, B, 2)))
+        __attribute__((xcl_array_partition(complete, 1)))
+        __attribute__((xcl_array_partition(cyclic, B, 2)))
 #endif 
-		;
+        ;
 
 #ifdef __xilinx__
-	__attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_pipeline_loop(1)))
 #endif
-	for(size_t i = 0; i < M(IMAGE_WIDTH*IMAGE_HEIGHT); i++) {
-		short input_buf[B];
+    for(size_t i = 0; i < M(IMAGE_WIDTH*IMAGE_HEIGHT); i++) {
+        short input_buf[B];
 
-		/* Read pixels from the input image */
-		bus_to_short(input[i], input_buf);
+        /* Read pixels from the input image */
+        bus_to_short(input[i], input_buf);
 
-		/* Rotate Buffers */
-		for(size_t y = 0; y < FILTER_HEIGHT-1; y++) {
-			/* Move the line reg B pixels at a time */
-			for(size_t x = 0; x < REG_WIDTH - B; x++) {
-				line_reg[y][x] = line_reg[y][x+B];
-			}
-			/* Add values from line_buf to end of regs */
-			for(size_t j = 0; j < B; j++) {
-				line_reg[y][(REG_WIDTH - B) + j] = line_buf[y][j + B*(i % (M(IMAGE_WIDTH-REG_WIDTH)))];
-			}
-			/* Write values from the start of the next line to the line_buf */
-			for(size_t j = 0; j < B; j++) {
-				line_buf[y][j + B*(i % (M(IMAGE_WIDTH-REG_WIDTH)))] = line_reg[y+1][j];
-			}
-		}
-		/* On last line rotate regs */
-		for(size_t x = 0; x < ((M(FILTER_WIDTH+B)-1)*B); x++) {
-			line_reg[FILTER_HEIGHT-1][x] = line_reg[FILTER_HEIGHT-1][x+B];
-		}
-		/* Add the new input data to the end */
-		for(size_t j = 0; j < B; j++) {
-			line_reg[FILTER_HEIGHT-1][(REG_WIDTH - B) + j] = input_buf[j];
-		}
+        /* Rotate Buffers */
+        for(size_t y = 0; y < FILTER_HEIGHT-1; y++) {
+            /* Move the line reg B pixels at a time */
+            for(size_t x = 0; x < REG_WIDTH - B; x++) {
+                line_reg[y][x] = line_reg[y][x+B];
+            }
+            /* Add values from line_buf to end of regs */
+            for(size_t j = 0; j < B; j++) {
+                line_reg[y][(REG_WIDTH - B) + j] = line_buf[y][j + B*(i % (M(IMAGE_WIDTH-REG_WIDTH)))];
+            }
+            /* Write values from the start of the next line to the line_buf */
+            for(size_t j = 0; j < B; j++) {
+                line_buf[y][j + B*(i % (M(IMAGE_WIDTH-REG_WIDTH)))] = line_reg[y+1][j];
+            }
+        }
+        /* On last line rotate regs */
+        for(size_t x = 0; x < ((M(FILTER_WIDTH+B)-1)*B); x++) {
+            line_reg[FILTER_HEIGHT-1][x] = line_reg[FILTER_HEIGHT-1][x+B];
+        }
+        /* Add the new input data to the end */
+        for(size_t j = 0; j < B; j++) {
+            line_reg[FILTER_HEIGHT-1][(REG_WIDTH - B) + j] = input_buf[j];
+        }
 
-		short filter_sums[B];
+        short filter_sums[B];
 
-		for(size_t j = 0; j < B; j++) {
-			int sum = 0;
+        for(size_t j = 0; j < B; j++) {
+            int sum = 0;
 
-			for(size_t y = 0; y < FILTER_HEIGHT; y++) {
-				for(size_t x = 0; x < FILTER_WIDTH; x++) {
-					const size_t offset = REG_WIDTH - FILTER_WIDTH - B + 1;
-					short val = line_reg[y][offset + x + j];
+            for(size_t y = 0; y < FILTER_HEIGHT; y++) {
+                for(size_t x = 0; x < FILTER_WIDTH; x++) {
+                    const size_t offset = REG_WIDTH - FILTER_WIDTH - B + 1;
+                    short val = line_reg[y][offset + x + j];
 
-					sum += (int) coef_buf[y*FILTER_WIDTH + x] *
-					       (int) val;
-				}
-			}
+                    sum += (int) coef_buf[y*FILTER_WIDTH + x] *
+                           (int) val;
+                }
+            }
 
-			/* Handle Saturation */
-			if (sum > SHRT_MAX) {
-				sum = SHRT_MAX;
-			} else if (sum < SHRT_MIN) {
-				sum = SHRT_MIN;
-			}
+            /* Handle Saturation */
+            if (sum > SHRT_MAX) {
+                sum = SHRT_MAX;
+            } else if (sum < SHRT_MIN) {
+                sum = SHRT_MIN;
+            }
 
-			filter_sums[j] = sum;
-		}
+            filter_sums[j] = sum;
+        }
 
-		output[i] = short_to_bus(filter_sums);
-	}
+        output[i] = short_to_bus(filter_sums);
+    }
 }
 
 __attribute__((reqd_work_group_size(1,1,1)))
@@ -183,13 +183,13 @@ __kernel void krnl_convolve(
    __global bus_t *img_input,
    __global bus_t *img_output
 ) {
-	short coef_buf[FILTER_HEIGHT*FILTER_WIDTH]
+    short coef_buf[FILTER_HEIGHT*FILTER_WIDTH]
 #ifdef __xilinx__
-		__attribute__((xcl_array_partition(complete, 1)))
+        __attribute__((xcl_array_partition(complete, 1)))
 #endif
-		;
+        ;
 
-	get_coef(coef, coef_buf);
+    get_coef(coef, coef_buf);
 
-	filter(coef_buf, img_input, img_output);
+    filter(coef_buf, img_input, img_output);
 }

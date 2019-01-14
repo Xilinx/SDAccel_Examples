@@ -158,14 +158,14 @@ int main(int argc, char** argv) {
     }
 
     //Compare the device results with software results
-	bool match = true;
-	for (int i = 0; i < size; i++) {
-	    if (sw_results[i] != hw_results[i]){
-	        printf("%d a = %d b = %d \t sw = %d \t hw = %d\n", i, h_a[i], h_b[i], sw_results[i], hw_results[i]);
-	        match = false;
+    bool match = true;
+    for (int i = 0; i < size; i++) {
+        if (sw_results[i] != hw_results[i]){
+            printf("%d a = %d b = %d \t sw = %d \t hw = %d\n", i, h_a[i], h_b[i], sw_results[i], hw_results[i]);
+            match = false;
             break;
-	    }
-	}
+        }
+    }
 
     std::cout << "TEST" << (match ? "PASSED" : "FAILED") << std::endl;
     return (match ? EXIT_SUCCESS : EXIT_FAILURE);

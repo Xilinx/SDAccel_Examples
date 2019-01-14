@@ -33,9 +33,9 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fstream>
 #include "logger.h"
 #ifdef WINDOWS
-		#include <direct.h>
+        #include <direct.h>
 #else
-	#include <unistd.h>
+    #include <unistd.h>
 #endif
 
 using namespace std;
@@ -44,37 +44,37 @@ namespace sda {
 
 ///////////////////////////////////////////////////////////////////////
 string GetApplicationPath() {
-	#ifdef WINDOWS
-		#define GetCurrentDir _getcwd
-	#else
-		#define GetCurrentDir getcwd
-	#endif
+    #ifdef WINDOWS
+        #define GetCurrentDir _getcwd
+    #else
+        #define GetCurrentDir getcwd
+    #endif
 
-	char strCurrentPath[FILENAME_MAX];
+    char strCurrentPath[FILENAME_MAX];
 
-	if (!GetCurrentDir(strCurrentPath, sizeof(strCurrentPath))) {
-		return string("");
-	}
+    if (!GetCurrentDir(strCurrentPath, sizeof(strCurrentPath))) {
+        return string("");
+    }
 
-	/* not really required */
-	strCurrentPath[sizeof(strCurrentPath) - 1] = '\0';
-	return string(strCurrentPath);
+    /* not really required */
+    strCurrentPath[sizeof(strCurrentPath) - 1] = '\0';
+    return string(strCurrentPath);
 }
 
 string ToLower(const string& s) {
-	string result = s;
-	std::transform(result.begin(), result.end(), result.begin(), ::tolower);
-	return result;
+    string result = s;
+    std::transform(result.begin(), result.end(), result.begin(), ::tolower);
+    return result;
 }
 
 string ToUpper(const string& s) {
-	string result = s;
-	std::transform(result.begin(), result.end(), result.begin(), ::toupper);
-	return result;
+    string result = s;
+    std::transform(result.begin(), result.end(), result.begin(), ::toupper);
+    return result;
 }
 
 string GetTimeStamp() {
-	return "";
+    return "";
 }
 
 
@@ -92,109 +92,109 @@ string& rtrim(std::string &s) {
 
 // trim from both ends
 string& trim(std::string &s) {
-	return ltrim(rtrim(s));
+    return ltrim(rtrim(s));
 }
 
 string GetFileExt(const string& s) {
-	string strext = s.substr(s.find_last_of(".") + 1);
-	return strext;
+    string strext = s.substr(s.find_last_of(".") + 1);
+    return strext;
 }
 
 string GetFileTitleOnly(const string& s) {
 
-	string temp = s;
-	string::size_type d = temp.find_last_of("//");
-	if(d == string::npos)
-		d = temp.find_last_of("\\");
-	if(d != string::npos)
-		temp = temp.substr(d + 1);
+    string temp = s;
+    string::size_type d = temp.find_last_of("//");
+    if(d == string::npos)
+        d = temp.find_last_of("\\");
+    if(d != string::npos)
+        temp = temp.substr(d + 1);
 
-	d = temp.find_last_of(".");
-	if(d != string::npos)
-		temp = temp.substr(0, d);
+    d = temp.find_last_of(".");
+    if(d != string::npos)
+        temp = temp.substr(0, d);
 
-	return temp;
+    return temp;
 }
 
 
 void LogWrapper(int etype, const char* file, int line, const char* desc, ...) {
 
-	//crop file name from full path
-	string strFileLoc(file);
-	strFileLoc = strFileLoc.substr(strFileLoc.find_last_of("\\/") + 1);
+    //crop file name from full path
+    string strFileLoc(file);
+    strFileLoc = strFileLoc.substr(strFileLoc.find_last_of("\\/") + 1);
 
-	string strHeader = "";
-	{
-		char header[512];
-		//source
-		switch(etype) {
-			case(sda::etError): {
-				snprintf(header, sizeof(header), "ERROR: [%s:%d]", strFileLoc.c_str(), line);
-				break;
-			}
-			case(sda::etInfo): {
-				snprintf(header, sizeof(header), "INFO: [%s:%d]", strFileLoc.c_str(), line);
-				break;
-			}
-			case(sda::etWarning): {
-				snprintf(header, sizeof(header), "WARN: [%s:%d]", strFileLoc.c_str(), line);
-				break;
-			}
-		}
-		strHeader = string(header);
-	}
+    string strHeader = "";
+    {
+        char header[512];
+        //source
+        switch(etype) {
+            case(sda::etError): {
+                snprintf(header, sizeof(header), "ERROR: [%s:%d]", strFileLoc.c_str(), line);
+                break;
+            }
+            case(sda::etInfo): {
+                snprintf(header, sizeof(header), "INFO: [%s:%d]", strFileLoc.c_str(), line);
+                break;
+            }
+            case(sda::etWarning): {
+                snprintf(header, sizeof(header), "WARN: [%s:%d]", strFileLoc.c_str(), line);
+                break;
+            }
+        }
+        strHeader = string(header);
+    }
 
-	//time
-	string strTime = "";
+    //time
+    string strTime = "";
 #ifdef ENABLE_LOG_TIME
-	{
-		time_t rawtime;
-		time (&rawtime);
-	#ifdef ENABLE_SECURE_API
-		char buffer[64];
-		struct tm timeinfo;
-		localtime_s(&timeinfo, &rawtime);
-		asctime_s(timeinfo, buffer, sizeof(buffer))
-		snprintf(buffer, sizeof(buffer), "TIME: [%s]", asctime(timeinfo));
-		strTime = string(buffer);
-	#else
-		char buffer[64];
-		struct tm * timeinfo = localtime ( &rawtime );
-		string temp = string(asctime(timeinfo));
-		temp = trim(temp);
+    {
+        time_t rawtime;
+        time (&rawtime);
+    #ifdef ENABLE_SECURE_API
+        char buffer[64];
+        struct tm timeinfo;
+        localtime_s(&timeinfo, &rawtime);
+        asctime_s(timeinfo, buffer, sizeof(buffer))
+        snprintf(buffer, sizeof(buffer), "TIME: [%s]", asctime(timeinfo));
+        strTime = string(buffer);
+    #else
+        char buffer[64];
+        struct tm * timeinfo = localtime ( &rawtime );
+        string temp = string(asctime(timeinfo));
+        temp = trim(temp);
 
-//		strftime(buffer, sizeof(buffer), "TIME: []")
-		snprintf(buffer, sizeof(buffer), "TIME: [%s]", temp.c_str());
-		strTime = string(buffer);
-	#endif
-	}
+//        strftime(buffer, sizeof(buffer), "TIME: []")
+        snprintf(buffer, sizeof(buffer), "TIME: [%s]", temp.c_str());
+        strTime = string(buffer);
+    #endif
+    }
 #endif
 
-	//format the message itself
-	string strMsg = "";
-	{
-		char msg[512];
-		va_list args;
-		va_start(args, desc);
-		vsnprintf(msg, sizeof(msg), desc, args);
-		va_end(args);
-		strMsg = string(msg);
-	}
+    //format the message itself
+    string strMsg = "";
+    {
+        char msg[512];
+        va_list args;
+        va_start(args, desc);
+        vsnprintf(msg, sizeof(msg), desc, args);
+        va_end(args);
+        strMsg = string(msg);
+    }
 
-	//combine
-	string strOut = strHeader + string(" ") + strTime + string(" ") + strMsg + string("\n");
+    //combine
+    string strOut = strHeader + string(" ") + strTime + string(" ") + strMsg + string("\n");
 
-	//display
-	cout << strOut;
+    //display
+    cout << strOut;
 
-	//store
+    //store
 #ifdef ENABLE_LOG_TOFILE
-	std::ofstream outfile;
-	outfile.open("benchapp.log", std::ios_base::app);
-	outfile << strOut;
+    std::ofstream outfile;
+    outfile.open("benchapp.log", std::ios_base::app);
+    outfile << strOut;
 #endif
 
-	return;
+    return;
 }
 
 }

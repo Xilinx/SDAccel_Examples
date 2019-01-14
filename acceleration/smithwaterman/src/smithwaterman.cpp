@@ -34,9 +34,9 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "sw.h"
 
 #if defined(__linux__) || defined(linux)
-	#include "sys/time.h"
+    #include "sys/time.h"
 #elif defined(WIN32)
-	#include "windows.h"
+    #include "windows.h"
 #endif
 
 //ROUNDS <= 10 valid
@@ -50,28 +50,28 @@ unsigned int* generatePackedNReadRefPair(int N, int readSize, int refSize, unsig
 
 /////////////////////////////////////////////////////////////////////////////////
 static double timestamp() {
-	double ms = 0.0;
-	#if  defined(__linux__) || defined(linux)
-		timeval time;
-		gettimeofday(&time, NULL);
-		ms = (time.tv_sec * 1000.0) + (time.tv_usec / 1000.0);
-	#elif defined(WIN32)
-		SYSTEMTIME time;
-		GetSystemTime(&time);
-		ms = (time.wSeconds * 1000) + time.wMilliseconds;
-	#endif
-	return ms;
+    double ms = 0.0;
+    #if  defined(__linux__) || defined(linux)
+        timeval time;
+        gettimeofday(&time, NULL);
+        ms = (time.tv_sec * 1000.0) + (time.tv_usec / 1000.0);
+    #elif defined(WIN32)
+        SYSTEMTIME time;
+        GetSystemTime(&time);
+        ms = (time.wSeconds * 1000) + time.wMilliseconds;
+    #endif
+    return ms;
 }
 
 static double computeEventDurationInMS(const cl::Event& event) {
-	cl_ulong ts_start = 0, ts_end = 0;
-	cl_int err;
-	double duration = 0;
-	OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START, &ts_start));
-	OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END, &ts_end));
-	duration += (cl_double)(ts_end-ts_start)*(cl_double)(1e-06);
+    cl_ulong ts_start = 0, ts_end = 0;
+    cl_int err;
+    double duration = 0;
+    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START, &ts_start));
+    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END, &ts_end));
+    duration += (cl_double)(ts_end-ts_start)*(cl_double)(1e-06);
 
-	return duration;
+    return duration;
 }
 
 static int getToken(FILE* fp, char* tok)
@@ -295,13 +295,13 @@ bool SmithWatermanApp::invoke_kernel_blocking(
     for (int iter = 0; iter < numIter; ++iter) {
         //copy input dataset to OpenCL buffer
         //cout << "In iteration" << iter << "\n";
-	
-	OCL_CHECK(err, err = q.enqueueWriteBuffer(mem_input, CL_TRUE, 0, sz_input, (input + iter * (sz_input / sizeof(unsigned int))), NULL, &events[evtHostWrite]));
-	OCL_CHECK(err, err = q.enqueueWriteBuffer(mem_sz_sz, CL_TRUE, 0, sz_sz, iterNum, NULL, NULL));
-	
+    
+    OCL_CHECK(err, err = q.enqueueWriteBuffer(mem_input, CL_TRUE, 0, sz_input, (input + iter * (sz_input / sizeof(unsigned int))), NULL, &events[evtHostWrite]));
+    OCL_CHECK(err, err = q.enqueueWriteBuffer(mem_sz_sz, CL_TRUE, 0, sz_sz, iterNum, NULL, NULL));
+    
         //finish all memory writes
         OCL_CHECK(err, err = q.finish());
-    	
+        
         //call once to guarantee that all buffers are migrated to device memory
         OCL_CHECK(err, err = q.enqueueTask(kernel, NULL, &events[evtKernelExec]));
 
@@ -361,7 +361,7 @@ bool SmithWatermanApp::invoke_kernel_doublebuffered(
         if (numIter > 1) {
             OCL_CHECK(err, err = q.enqueueWriteBuffer(mem_input_pong, CL_FALSE, 0, sz_input, (input + (sz_input / sizeof(unsigned int))), NULL, &pong[evtHostWrite]));
         }
-	std::vector<cl::Event> vec_evt1 = {ping[evtHostRead], ping[evtKernelExec]};
+    std::vector<cl::Event> vec_evt1 = {ping[evtHostRead], ping[evtKernelExec]};
         OCL_CHECK(err, err = q.enqueueTask(kernel, NULL, &ping[evtKernelExec]));
         OCL_CHECK(err, err = q.enqueueReadBuffer(mem_output_ping, CL_FALSE, 0, sz_output, output, &vec_evt1, NULL));
     }
@@ -379,9 +379,9 @@ bool SmithWatermanApp::invoke_kernel_doublebuffered(
         OCL_CHECK(err, err = q.enqueueTask(kernel, NULL, &pong[evtKernelExec]));
 
         //read output size
-	std::vector<cl::Event> vec_evt2 = {pong[evtHostRead], pong[evtKernelExec]};        
+    std::vector<cl::Event> vec_evt2 = {pong[evtHostRead], pong[evtKernelExec]};        
         OCL_CHECK(err, err = q.enqueueReadBuffer(mem_output_pong, CL_FALSE, 0, sz_output, (output + (sz_output / sizeof(unsigned int))), &vec_evt2, NULL));
-	}
+    }
 
     for (int iter = 2; iter < numIter; ++iter) {
         //copy input dataset to OpenCL buffer
@@ -510,14 +510,14 @@ bool SmithWatermanApp::run(int idevice, int nruns)
         durations[i] += computeEventDurationInMS(events[i]);
     }
 
-	double totaltime = timestamp() - startMS;
+    double totaltime = timestamp() - startMS;
     //set stats to valid data
-	LogInfo("nruns = %u", nruns);
-	LogInfo("total [ms] = %.3f", totaltime);
-	LogInfo("Host write [ms] = %.3f", eTotal[evtHostWrite]);
-	LogInfo("Krnl exec [ms] = %.3f", eTotal[evtKernelExec]);
-	LogInfo("Host read [ms] = %.3f", eTotal[evtHostRead]);
-	
+    LogInfo("nruns = %u", nruns);
+    LogInfo("total [ms] = %.3f", totaltime);
+    LogInfo("Host write [ms] = %.3f", eTotal[evtHostWrite]);
+    LogInfo("Krnl exec [ms] = %.3f", eTotal[evtKernelExec]);
+    LogInfo("Host read [ms] = %.3f", eTotal[evtHostRead]);
+    
     
     float gcups = (float)(totalSamples / (eTotal[evtKernelExec]));
     gcups = gcups / (1024 * 1024 * 1.024);
@@ -537,8 +537,8 @@ bool SmithWatermanApp::run(int idevice, int nruns)
 
         //mega-bits per second
         tmp = tmp / (1024.0 * 1024.0);
-	
-		LogInfo("Host2Device rate [mbps] = %f", tmp);
+    
+        LogInfo("Host2Device rate [mbps] = %f", tmp);
     }
 
     //compute transfer rate for host read
@@ -550,7 +550,7 @@ bool SmithWatermanApp::run(int idevice, int nruns)
 
         //mega-bits per second
         tmp = tmp / (1024.0 * 1024.0);
-		LogInfo("Device2Host rate [mbps] = %f", tmp);
+        LogInfo("Device2Host rate [mbps] = %f", tmp);
     }
 
     if (m_verifyMode) {

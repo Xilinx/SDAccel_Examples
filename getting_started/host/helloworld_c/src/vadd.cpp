@@ -83,10 +83,10 @@ void vadd(
         if ((i + BUFFER_SIZE) > size) 
             chunk_size = size - i;
 
-	// Transferring data in bursts hides the memory access latency as well as improves bandwidth utilization and efficiency of the memory controller.
-	// It is recommended to infer burst transfers from successive requests of data from consecutive address locations.
-	// A local memory vl_local is used for buffering the data from a single burst. The entire input vector is read in multiple bursts.
-	// The choice of LOCAL_MEM_SIZE depends on the specific applications and available on-chip memory on target FPGA. 
+    // Transferring data in bursts hides the memory access latency as well as improves bandwidth utilization and efficiency of the memory controller.
+    // It is recommended to infer burst transfers from successive requests of data from consecutive address locations.
+    // A local memory vl_local is used for buffering the data from a single burst. The entire input vector is read in multiple bursts.
+    // The choice of LOCAL_MEM_SIZE depends on the specific applications and available on-chip memory on target FPGA. 
         // burst read of v1 and v2 vector from global memory
         for (int j = 0 ; j < chunk_size ; j++){
             v1_buffer[j] = in1[i + j];
@@ -95,8 +95,8 @@ void vadd(
             v2_buffer[j] = in2[i + j];
         }
 
-	// PIPELINE pragma reduces the initiation interval for loop by allowing the
-	// concurrent executions of operations
+    // PIPELINE pragma reduces the initiation interval for loop by allowing the
+    // concurrent executions of operations
         vadd: for (int j = 0 ; j < chunk_size; j ++){
         #pragma HLS PIPELINE II=1
             //perform vector addition

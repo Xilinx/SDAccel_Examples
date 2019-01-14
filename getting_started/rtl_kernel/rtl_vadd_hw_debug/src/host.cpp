@@ -73,17 +73,17 @@ int main(int argc, char** argv)
 
 
     std::string binaryFile = xcl::find_binary_file(device_name,"vadd");
-	
+    
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel krnl_vadd(program,"krnl_vadd_rtl", &err));
 
-	//if (interactive == true)
-		//wait_for_enter("\nPress ENTER to continue after setting up ILA trigger...");
-	//else
-		// call script/socket to invoke Vivado, connect to server, XVC target, set probe files, setup ILA triggers and arm ILA 
-		//invokeVivadoDebugScript();
+    //if (interactive == true)
+        //wait_for_enter("\nPress ENTER to continue after setting up ILA trigger...");
+    //else
+        // call script/socket to invoke Vivado, connect to server, XVC target, set probe files, setup ILA triggers and arm ILA 
+        //invokeVivadoDebugScript();
 
     //Allocate Buffer in Global Memory
     std::vector<cl::Memory> inBufVec, outBufVec;

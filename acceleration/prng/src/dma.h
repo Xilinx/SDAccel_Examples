@@ -52,7 +52,7 @@ const int nofPRNG = 16;  // don't go beyond 16, to limit number of bits to 512
 typedef   ap_uint<nofPRNG*32>  dout_t;
 
 extern "C" {
-	void dma (dout_t *mem_out, data_t *mem_in, int nofBlock);
+    void dma (dout_t *mem_out, data_t *mem_in, int nofBlock);
 }
 
 #endif

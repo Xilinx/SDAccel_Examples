@@ -134,13 +134,13 @@ int main(int argc, char* argv[])
 
     const std::unique_ptr<MatchArray> pMatchInfo(new MatchArray(totalSz, MAXROW, MAXCOL, &publisher));
 #else
-	const std::unique_ptr<MatchArray> pMatchInfo(new MatchArray(totalSz, MAXROW, MAXCOL));
+    const std::unique_ptr<MatchArray> pMatchInfo(new MatchArray(totalSz, MAXROW, MAXCOL));
 #endif
 
     //SWAN Execution 
     if (strPlatformName == string("intel")) {
         for (int r = 0; r < nRuns; r++) {
-            //SWAN-CPU Intel Intrinsic flow	
+            //SWAN-CPU Intel Intrinsic flow    
             intelImpl(nBlocks, blkSz, nThreads, writeMatchArray, pMatchInfo.get());
         }
     } else {

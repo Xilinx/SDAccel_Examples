@@ -1,6 +1,6 @@
 /*  main.c
  *  Created by Mengyao Zhao on 06/23/11.
- *	Version 0.1.5
+ *    Version 0.1.5
  *  Last revision by Mengyao Zhao on 06/27/14.
  */
 
@@ -79,11 +79,11 @@ void freeSeq(kseq_t *seq) {
 }
 
 static void ssw_write (const s_align* a,
-		       const kseq_t* ref_seq,
-		       const kseq_t* read,
-		       const char* read_seq,	// strand == 0: original read; strand == 1: reverse complement read
-		       const int8_t* table,
-		       int8_t strand) {	// 0: forward aligned ; 1: reverse complement aligned
+               const kseq_t* ref_seq,
+               const kseq_t* read,
+               const char* read_seq,    // strand == 0: original read; strand == 1: reverse complement read
+               const int8_t* table,
+               int8_t strand) {    // 0: forward aligned ; 1: reverse complement aligned
   
   //fprintf(stdout, "target_name: %s\nquery_name: %s\noptimal_alignment_score: %d\t", ref_seq->name.s, read->name.s, a->score1);
   //if (a->score2 > 0) fprintf(stdout, "suboptimal_alignment_score: %d\t", a->score2);
@@ -102,67 +102,67 @@ static void ssw_write (const s_align* a,
       int32_t p = pb;
       fprintf(stdout, "Target: %8d    ", q + 1);
       for (c = e; c < a->cigarLen; ++c) {
-	char letter = cigar_int_to_op(a->cigar[c]);
-	uint32_t length = cigar_int_to_len(a->cigar[c]);
-	uint32_t l = (count == 0 && left > 0) ? left: length;
-	for (i = 0; i < l; ++i) {
-	  if (letter == 'I') fprintf(stdout, "-");
-	  else {
-	    fprintf(stdout, "%c", *(ref_seq->seq.s + q));
-	    ++ q;
-	  }
-	  ++ count;
-	  if (count == 60) goto step2;
-	}
+    char letter = cigar_int_to_op(a->cigar[c]);
+    uint32_t length = cigar_int_to_len(a->cigar[c]);
+    uint32_t l = (count == 0 && left > 0) ? left: length;
+    for (i = 0; i < l; ++i) {
+      if (letter == 'I') fprintf(stdout, "-");
+      else {
+        fprintf(stdout, "%c", *(ref_seq->seq.s + q));
+        ++ q;
+      }
+      ++ count;
+      if (count == 60) goto step2;
+    }
       }
     step2:
       fprintf(stdout, "    %d\n                    ", q);
       q = qb;
       count = 0;
       for (c = e; c < a->cigarLen; ++c) {
-	char letter = cigar_int_to_op(a->cigar[c]);
-	uint32_t length = cigar_int_to_len(a->cigar[c]);
-	uint32_t l = (count == 0 && left > 0) ? left: length;
-	for (i = 0; i < l; ++i){
-	  if (letter == 'M') {
-	    if (table[(int)*(ref_seq->seq.s + q)] == table[(int)*(read_seq + p)])fprintf(stdout, "|");
-	    else fprintf(stdout, "*");
-	    ++q;
-	    ++p;
-	  } else {
-	    fprintf(stdout, " ");
-	    if (letter == 'I') ++p;
-	    else ++q;
-	  }
-	  ++ count;
-	  if (count == 60) {
-	    qb = q;
-	    goto step3;
-	  }
-	}
+    char letter = cigar_int_to_op(a->cigar[c]);
+    uint32_t length = cigar_int_to_len(a->cigar[c]);
+    uint32_t l = (count == 0 && left > 0) ? left: length;
+    for (i = 0; i < l; ++i){
+      if (letter == 'M') {
+        if (table[(int)*(ref_seq->seq.s + q)] == table[(int)*(read_seq + p)])fprintf(stdout, "|");
+        else fprintf(stdout, "*");
+        ++q;
+        ++p;
+      } else {
+        fprintf(stdout, " ");
+        if (letter == 'I') ++p;
+        else ++q;
+      }
+      ++ count;
+      if (count == 60) {
+        qb = q;
+        goto step3;
+      }
+    }
       }
     step3:
       p = pb;
       fprintf(stdout, "\nQuery:  %8d    ", p + 1);
       count = 0;
       for (c = e; c < a->cigarLen; ++c) {
-	char letter = cigar_int_to_op(a->cigar[c]);
-	uint32_t length = cigar_int_to_len(a->cigar[c]);
-	uint32_t l = (count == 0 && left > 0) ? left: length;
-	for (i = 0; i < l; ++i) {
-	  if (letter == 'D') fprintf(stdout, "-");
-	  else {
-	    fprintf(stdout, "%c", *(read_seq + p));
-	    ++p;
-	  }
-	  ++ count;
-	  if (count == 60) {
-	    pb = p;
-	    left = l - i - 1;
-	    e = (left == 0) ? (c + 1) : c;
-	    goto end;
-	  }
-	}
+    char letter = cigar_int_to_op(a->cigar[c]);
+    uint32_t length = cigar_int_to_len(a->cigar[c]);
+    uint32_t l = (count == 0 && left > 0) ? left: length;
+    for (i = 0; i < l; ++i) {
+      if (letter == 'D') fprintf(stdout, "-");
+      else {
+        fprintf(stdout, "%c", *(read_seq + p));
+        ++p;
+      }
+      ++ count;
+      if (count == 60) {
+        pb = p;
+        left = l - i - 1;
+        e = (left == 0) ? (c + 1) : c;
+        goto end;
+      }
+    }
       }
       e = c;
       left = 0;
@@ -182,7 +182,7 @@ void genSSWData(int niter, int numsample, kseq_t **read, kseq_t **ref){
   kseq_t *testref = (kseq_t *)malloc(sizeof(kseq_t)*niter*numsample);
   int ii;
   for(ii =0; ii < niter*numsample; ++ii){
-    genSeq(&testread[ii], &testref[ii]);	  
+    genSeq(&testread[ii], &testref[ii]);      
   }
   *read = testread;
   *ref = testref;
@@ -228,7 +228,7 @@ float SSW(int numsample, int tid, kseq_t *read, kseq_t *ref, unsigned int *maxr,
   
   // initialize scoring matrix for genome sequences
   for (l = k = 0; LIKELY(l < 4); ++l) {
-    for (m = 0; LIKELY(m < 4); ++m) mata[k++] = l == m ? match : -mismatch;	/* weight_match : -weight_mismatch */
+    for (m = 0; LIKELY(m < 4); ++m) mata[k++] = l == m ? match : -mismatch;    /* weight_match : -weight_mismatch */
     mata[k++] = 0; // ambiguous base
   }
   for (m = 0; LIKELY(m < 5); ++m) mata[k++] = 0;
@@ -247,32 +247,32 @@ float SSW(int numsample, int tid, kseq_t *read, kseq_t *ref, unsigned int *maxr,
       int32_t maskLen = readLen / 2;
       
       while (readLen >= s2) {
-	++s2;
-	kroundup32(s2);
-	num = (int8_t*)realloc(num, s2);
+    ++s2;
+    kroundup32(s2);
+    num = (int8_t*)realloc(num, s2);
       }
       for (m = 0; m < readLen; ++m) num[m] = table[(int)read_seq->seq.s[m]];
       p = ssw_init(num, readLen, mat, n, 2);
       
       {
-	s_align* result, *result_rc = 0;
-	int32_t refLen = ref_seq->seq.l;
-	int8_t flag = 0;
-	while (refLen > s1) {
-	  ++s1;
-	  kroundup32(s1);
-	  ref_num = (int8_t*)realloc(ref_num, s1);
-	}
-	for (m = 0; m < refLen; ++m) ref_num[m] = table[(int)ref_seq->seq.s[m]];
-	if (path == 1) flag = 2;
-	result = ssw_align (p, ref_num, refLen, gap_open, gap_extension, flag, filter, 0, maskLen, &total_cups, &maxr[ii], &maxc[ii], &maxv[ii]);
-	if (result_rc && result_rc->score1 > result->score1 && result_rc->score1 >= filter) {
-	  ssw_write (result_rc, ref_seq, read_seq, read_rc, table, 1);
-	}else if (result && result->score1 >= filter){
-	  ssw_write(result, ref_seq, read_seq, read_seq->seq.s, table, 0);
-	} else if (! result) return 1;
-	if (result_rc) align_destroy(result_rc);
-	align_destroy(result);
+    s_align* result, *result_rc = 0;
+    int32_t refLen = ref_seq->seq.l;
+    int8_t flag = 0;
+    while (refLen > s1) {
+      ++s1;
+      kroundup32(s1);
+      ref_num = (int8_t*)realloc(ref_num, s1);
+    }
+    for (m = 0; m < refLen; ++m) ref_num[m] = table[(int)ref_seq->seq.s[m]];
+    if (path == 1) flag = 2;
+    result = ssw_align (p, ref_num, refLen, gap_open, gap_extension, flag, filter, 0, maskLen, &total_cups, &maxr[ii], &maxc[ii], &maxv[ii]);
+    if (result_rc && result_rc->score1 > result->score1 && result_rc->score1 >= filter) {
+      ssw_write (result_rc, ref_seq, read_seq, read_rc, table, 1);
+    }else if (result && result->score1 >= filter){
+      ssw_write(result, ref_seq, read_seq, read_seq->seq.s, table, 0);
+    } else if (! result) return 1;
+    if (result_rc) align_destroy(result_rc);
+    align_destroy(result);
       }
       
       init_destroy(p);

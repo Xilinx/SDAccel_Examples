@@ -38,13 +38,13 @@ void vconv_sw(int *in, int *out, int height, int width)
         for(int row = 0; row < width ; ++row) {
             int in_val = in[col * width + row];
             int out_val = 0;
-	        for(int i = 0; i < K; i++) {
+            for(int i = 0; i < K; i++) {
                 int vwin_val = i < (K - 1) ? linebuf[i][row] : in_val;
                 out_val += vwin_val * vcoeff[i];
-		
+        
                 if (i > 0)
                     linebuf[i-1][row] = vwin_val;
-	        }
+            }
             out[outIdx++]  =  out_val;
         }
     }
@@ -62,14 +62,14 @@ int main(int argc, char** argv)
     std::vector<int,aligned_allocator<int>> source_input(test_size_bytes);
     std::vector<int,aligned_allocator<int>> source_hw_results(test_size_bytes);
     std::vector<int,aligned_allocator<int>> source_sw_results(test_size_bytes);
-	
+    
     // Create the test data and Software Result 
     for(int i = 0 ; i < testSize; i++){
         source_input[i] = rand() % testSize;
         source_sw_results[i] = 0;
         source_hw_results[i] = 0;
     }
-	
+    
     //Running software vconv
     vconv_sw(source_input.data(),source_sw_results.data(), testHeight, testWidth);
 
@@ -113,7 +113,7 @@ int main(int argc, char** argv)
     
     // Compare the results of the Device to the simulation
     bool match = true;
-	
+    
     std::cout << "Result = " << std::endl;
     for (int i = 0 ; i < testSize ; i++){
         if (source_hw_results[i] != source_sw_results[i]){

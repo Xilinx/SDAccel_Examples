@@ -67,7 +67,7 @@ Description:
     Example to demonstrate how memory coalescing issue can be handled.
 *******************************************************************************/
 #include <string.h>
-			
+            
 #define LENGTH 8
 #define ITERATION 64
 extern "C" {

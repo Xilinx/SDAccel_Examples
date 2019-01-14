@@ -170,9 +170,9 @@ void convolution_operation(int img_lcl[IChan][ISize * ISize], int wgt_lcl[WInCha
             accI: for(int i = 0; i < i_chan; i++) {
             #pragma HLS LOOP_TRIPCOUNT min=c_ichan max=c_ichan
               sum += acc[i][j][k];
-		}
-	    }
-	}
+        }
+        }
+    }
 
     // Update output pixel
     out_lcl[y * OSize + x] = sum;

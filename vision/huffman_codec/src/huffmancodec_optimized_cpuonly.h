@@ -32,10 +32,10 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "huffmancodec_naive.h"
 
 #ifdef __ECLIPSE__
-	#define kernel
-	#define global
-	#define __kernel
-	#define __global
+    #define kernel
+    #define global
+    #define __kernel
+    #define __global
 #endif
 
 
@@ -48,39 +48,39 @@ namespace sda {
 
 class HuffmanOptimizedCPUOnly : public ICodec {
 public:
-	HuffmanOptimizedCPUOnly() {
-	}
+    HuffmanOptimizedCPUOnly() {
+    }
 
-	virtual ~HuffmanOptimizedCPUOnly() {
-	}
+    virtual ~HuffmanOptimizedCPUOnly() {
+    }
 
-	/*!
-	 * Encodes canonical huffman
-	 */
-	int enc(const vector<u8>& in_data, vector<u8>& out_data) {
-		u32 size_out_data = 0;
-		encode(const_cast<u8 *>(&in_data[0]), in_data.size(), &out_data[0], &size_out_data, true);
+    /*!
+     * Encodes canonical huffman
+     */
+    int enc(const vector<u8>& in_data, vector<u8>& out_data) {
+        u32 size_out_data = 0;
+        encode(const_cast<u8 *>(&in_data[0]), in_data.size(), &out_data[0], &size_out_data, true);
 
-		//resize output array
-		out_data.resize(size_out_data);
-		encode(const_cast<u8 *>(&in_data[0]), in_data.size(), &out_data[0], &size_out_data, false);
+        //resize output array
+        out_data.resize(size_out_data);
+        encode(const_cast<u8 *>(&in_data[0]), in_data.size(), &out_data[0], &size_out_data, false);
 
-		return (int)size_out_data;
-	}
+        return (int)size_out_data;
+    }
 
-	/*!
-	 * Decodes canonical huffman
-	 */
-	int dec(const vector<u8>& in_data, vector<u8>& out_data) {
-		u32 size_out_data = 0;
-		decode(const_cast<u8*>(&in_data[0]), in_data.size(), &out_data[0], &size_out_data, true);
+    /*!
+     * Decodes canonical huffman
+     */
+    int dec(const vector<u8>& in_data, vector<u8>& out_data) {
+        u32 size_out_data = 0;
+        decode(const_cast<u8*>(&in_data[0]), in_data.size(), &out_data[0], &size_out_data, true);
 
-		//resize output array
-		out_data.resize(size_out_data);
-		decode(const_cast<u8*>(&in_data[0]), in_data.size(), &out_data[0], &size_out_data, false);
+        //resize output array
+        out_data.resize(size_out_data);
+        decode(const_cast<u8*>(&in_data[0]), in_data.size(), &out_data[0], &size_out_data, false);
 
-		return (int)size_out_data;
-	}
+        return (int)size_out_data;
+    }
 
 };
 

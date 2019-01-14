@@ -46,36 +46,36 @@ namespace sda {
 
 class HuffmanOptimized : public ICodec {
 public:
-	HuffmanOptimized();
-	HuffmanOptimized(string& strBitmapFP);
-	virtual ~HuffmanOptimized();
+    HuffmanOptimized();
+    HuffmanOptimized(string& strBitmapFP);
+    virtual ~HuffmanOptimized();
 
-	enum EvBreakDown {evtHostWrite = 0, evtKernelExec = 1, evtHostRead = 2, evtCount = 3};
+    enum EvBreakDown {evtHostWrite = 0, evtKernelExec = 1, evtHostRead = 2, evtCount = 3};
 
-	//overide interface funcs
-	int enc(const vector<u8>& in_data, vector<u8>& out_data);
-	int dec(const vector<u8>& in_data, vector<u8>& out_data);
+    //overide interface funcs
+    int enc(const vector<u8>& in_data, vector<u8>& out_data);
+    int dec(const vector<u8>& in_data, vector<u8>& out_data);
 
-	bool run(int idevice, int nruns);
-	bool invoke_kernel(cl::Kernel krnl, const vector<u8>& vec_input, vector<u8>& vec_output, cl::Event events[evtCount]);
+    bool run(int idevice, int nruns);
+    bool invoke_kernel(cl::Kernel krnl, const vector<u8>& vec_input, vector<u8>& vec_output, cl::Event events[evtCount]);
 
 
-	static double timestamp();
-	static double computeEventDurationInMS(const cl::Event& event);
+    static double timestamp();
+    static double computeEventDurationInMS(const cl::Event& event);
 
 protected:
-	void cleanup();
-	bool releaseMemObject(cl::Memory &obj);
+    void cleanup();
+    bool releaseMemObject(cl::Memory &obj);
 
 private:
-	string m_strBitmapFP;
-	cl_int err;
+    string m_strBitmapFP;
+    cl_int err;
 
-	cl::Context context;
-	cl::CommandQueue q;
-	cl::Program m_program;
-	cl::Kernel m_clKernelHuffmanEncoder;
-	cl::Kernel m_clKernelHuffmanDecoder;
+    cl::Context context;
+    cl::CommandQueue q;
+    cl::Program m_program;
+    cl::Kernel m_clKernelHuffmanEncoder;
+    cl::Kernel m_clKernelHuffmanDecoder;
 };
 
 }

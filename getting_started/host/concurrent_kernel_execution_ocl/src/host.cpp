@@ -167,7 +167,7 @@ void verify_results(const vector<int> &C, const vector<int> &F) {
 void multiple_command_queues(cl::Context &context, cl::Device &device, cl::Kernel &kernel_mscale,
                              cl::Kernel &kernel_madd, cl::Kernel &kernel_mmult,
                              cl::Buffer &buffer_a, cl::Buffer &buffer_b, cl::Buffer &buffer_c,
-			     cl::Buffer &buffer_d, cl::Buffer &buffer_e, cl::Buffer &buffer_f,
+                 cl::Buffer &buffer_d, cl::Buffer &buffer_e, cl::Buffer &buffer_f,
                              size_t size_in_bytes) {
   cl_int err;
   OCL_CHECK(err, cl::CommandQueue ordered_queue1(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
@@ -243,7 +243,7 @@ void multiple_command_queues(cl::Context &context, cl::Device &device, cl::Kerne
 void out_of_order_queue(cl::Context &context, cl::Device &device, cl::Kernel &kernel_mscale,
                         cl::Kernel &kernel_madd, cl::Kernel &kernel_mmult,
                         cl::Buffer &buffer_a, cl::Buffer &buffer_b, cl::Buffer &buffer_c,
-						cl::Buffer &buffer_d, cl::Buffer &buffer_e, cl::Buffer &buffer_f,
+                        cl::Buffer &buffer_d, cl::Buffer &buffer_e, cl::Buffer &buffer_f,
                         size_t size_in_bytes) {
   cl_int err;
   vector<cl::Event> ooo_events(6);
@@ -251,7 +251,7 @@ void out_of_order_queue(cl::Context &context, cl::Device &device, cl::Kernel &ke
 
   // We are creating an out of order queue here.
   OCL_CHECK(err, cl::CommandQueue ooo_queue(context, device,
-		  CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err));
+          CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err));
 
   // Clear values in the result buffers
   {
@@ -296,7 +296,7 @@ void out_of_order_queue(cl::Context &context, cl::Device &device, cl::Kernel &ke
   kernel_wait_events.push_back(ooo_events[0]);
 
   OCL_CHECK(err, err = ooo_queue.enqueueNDRangeKernel(kernel_madd, offset, global, local,
-		  	  	  	  	  	  	  &kernel_wait_events, // Event from previous call
+                                              &kernel_wait_events, // Event from previous call
                                    &ooo_events[1]));
   set_callback(ooo_events[1], "addition");
 
@@ -312,7 +312,7 @@ void out_of_order_queue(cl::Context &context, cl::Device &device, cl::Kernel &ke
   // parallel to the previous calls.
   printf("[OOO Queue]: Enqueueing matrix multiplication kernel\n");
   OCL_CHECK(err, err = ooo_queue.enqueueNDRangeKernel(kernel_mmult, offset, global, local,
-								   nullptr, // Does not depend on previous call
+                                   nullptr, // Does not depend on previous call
                                    &ooo_events[2]));
   set_callback(ooo_events[2], "matrix multiplication");
 

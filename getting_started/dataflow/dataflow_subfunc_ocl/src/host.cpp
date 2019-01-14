@@ -36,7 +36,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 int main(int argc, char** argv)
 {
     //Allocate Memory in Host Memory
-	cl_int err;
+    cl_int err;
     size_t vector_size_bytes = sizeof(int) * DATA_SIZE;
     std::vector<int,aligned_allocator<int>> source_input     (DATA_SIZE);
     std::vector<int,aligned_allocator<int>> source_hw_results(DATA_SIZE);

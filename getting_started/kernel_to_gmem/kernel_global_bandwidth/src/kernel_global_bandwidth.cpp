@@ -167,27 +167,27 @@ int main(int argc, char** argv) {
             ext_buffer[i].obj = NULL;
             ext_buffer[i].param = krnl;
 
-	        buffer[i] = new cl::Buffer(context,
-		                           CL_MEM_READ_WRITE | CL_MEM_EXT_PTR_XILINX, 
-                    			   globalbuffersize, 
-            		    		   &ext_buffer[i], 
-			                	   &err);
+            buffer[i] = new cl::Buffer(context,
+                                   CL_MEM_READ_WRITE | CL_MEM_EXT_PTR_XILINX, 
+                                   globalbuffersize, 
+                                   &ext_buffer[i], 
+                                   &err);
             if(err != CL_SUCCESS) {
                 printf("Error: Failed to allocate buffer in DDR bank %zu\n", globalbuffersize);
                 return EXIT_FAILURE;
             }
         } /* End for (i < ddr_banks) */
     #else
-	     OCL_CHECK(err, buffer[0] = new cl::Buffer(context,
-         				            CL_MEM_READ_WRITE, 
-                    				globalbuffersize, 
-        			            	NULL, 
-                    				&err));
-    	 OCL_CHECK(err, buffer[1] = new cl::Buffer(context,
-        			            	CL_MEM_READ_WRITE, 
-                    				globalbuffersize, 
-        			            	NULL, 
-                    				&err));
+         OCL_CHECK(err, buffer[0] = new cl::Buffer(context,
+                                     CL_MEM_READ_WRITE, 
+                                    globalbuffersize, 
+                                    NULL, 
+                                    &err));
+         OCL_CHECK(err, buffer[1] = new cl::Buffer(context,
+                                    CL_MEM_READ_WRITE, 
+                                    globalbuffersize, 
+                                    NULL, 
+                                    &err));
     #endif
 
     cl_ulong num_blocks = globalbuffersize/64;
@@ -199,13 +199,13 @@ int main(int argc, char** argv) {
     /* Map input buffer for PCIe write */
     unsigned char *map_input_buffer0;
     OCL_CHECK(err, map_input_buffer0 = (unsigned char *) q.enqueueMapBuffer(*(buffer[0]),
-							                                 CL_FALSE, 
-                            							     CL_MAP_WRITE_INVALIDATE_REGION, 
-                            							     0, 
-                               							     globalbuffersize, 
-                            							     NULL, 
-							                                 NULL, 
-                            							     &err));
+                                                             CL_FALSE, 
+                                                             CL_MAP_WRITE_INVALIDATE_REGION, 
+                                                             0, 
+                                                                globalbuffersize, 
+                                                             NULL, 
+                                                             NULL, 
+                                                             &err));
     OCL_CHECK(err, err = q.finish());
 
     /* prepare data to be written to the device */
@@ -213,29 +213,29 @@ int main(int argc, char** argv) {
         map_input_buffer0[i] = input_host[i];
     }
     OCL_CHECK(err, err = q.enqueueUnmapMemObject(*(buffer[0]),
-                				  map_input_buffer0));
+                                  map_input_buffer0));
 
     OCL_CHECK(err, err = q.finish());
 
     #if NDDR_BANKS > 3
         unsigned char *map_input_buffer1;
-     	OCL_CHECK(err, map_input_buffer1 = (unsigned char *) q.enqueueMapBuffer(*(buffer[2]),
-	                                							 CL_FALSE, 
-                                								 CL_MAP_WRITE_INVALIDATE_REGION, 
-                                    							 0, 
-                                								 globalbuffersize, 
-                                								 NULL, 
-                                								 NULL, 
-                                								 &err));
-    	OCL_CHECK(err, err = q.finish());
+         OCL_CHECK(err, map_input_buffer1 = (unsigned char *) q.enqueueMapBuffer(*(buffer[2]),
+                                                                 CL_FALSE, 
+                                                                 CL_MAP_WRITE_INVALIDATE_REGION, 
+                                                                 0, 
+                                                                 globalbuffersize, 
+                                                                 NULL, 
+                                                                 NULL, 
+                                                                 &err));
+        OCL_CHECK(err, err = q.finish());
 
         /* Prepare data to be written to the device */
         for(size_t i = 0; i < globalbuffersize; i++) {
             map_input_buffer1[i] = input_host[i];
         }
 
-	    OCL_CHECK(err, err = q.enqueueUnmapMemObject(*(buffer[2]),
-		                		      map_input_buffer1));
+        OCL_CHECK(err, err = q.enqueueUnmapMemObject(*(buffer[2]),
+                                      map_input_buffer1));
         OCL_CHECK(err, err = q.finish());
     #endif
 
@@ -266,13 +266,13 @@ int main(int argc, char** argv) {
     /* Copy results back from OpenCL buffer */
     unsigned char *map_output_buffer0;
     OCL_CHECK(err, map_output_buffer0 = (unsigned char *) q.enqueueMapBuffer(*(buffer[1]),
-                            							      CL_FALSE, 
-                            							      CL_MAP_READ, 
-                            							      0, 
-                            							      globalbuffersize, 
-                            							      NULL, 
-                            							      NULL, 
-                            							      &err));
+                                                              CL_FALSE, 
+                                                              CL_MAP_READ, 
+                                                              0, 
+                                                              globalbuffersize, 
+                                                              NULL, 
+                                                              NULL, 
+                                                              &err));
     OCL_CHECK(err, err = q.finish());
 
     std::cout << "Kernel Duration..." << nsduration << " ns" <<std::endl;
@@ -286,14 +286,14 @@ int main(int argc, char** argv) {
     }
     #if NDDR_BANKS == 3
         unsigned char *map_output_buffer1;
-  	    OCL_CHECK(err, map_output_buffer1 = (unsigned char *) q.enqueueMapBuffer(*(buffer[2]),
-								                                  CL_FALSE, 
-                                                				  CL_MAP_READ, 
-                                								  0, 
-                                								  globalbuffersize, 
-                                								  NULL, 
-                                								  NULL, 
-                                								  &err));
+          OCL_CHECK(err, map_output_buffer1 = (unsigned char *) q.enqueueMapBuffer(*(buffer[2]),
+                                                                  CL_FALSE, 
+                                                                  CL_MAP_READ, 
+                                                                  0, 
+                                                                  globalbuffersize, 
+                                                                  NULL, 
+                                                                  NULL, 
+                                                                  &err));
         OCL_CHECK(err, err = q.finish());
 
         /* Check the results of output1 */
@@ -307,14 +307,14 @@ int main(int argc, char** argv) {
 
     #if NDDR_BANKS > 3
         unsigned char *map_output_buffer1;
-  	    OCL_CHECK(err, map_output_buffer1 = (unsigned char *) q.enqueueMapBuffer(*(buffer[3]),
-                                								  CL_FALSE, 
-                                								  CL_MAP_READ, 
-                                								  0, 
-                                								  globalbuffersize, 
-                                								  NULL, 
-                                								  NULL, 
-                                								  &err));
+          OCL_CHECK(err, map_output_buffer1 = (unsigned char *) q.enqueueMapBuffer(*(buffer[3]),
+                                                                  CL_FALSE, 
+                                                                  CL_MAP_READ, 
+                                                                  0, 
+                                                                  globalbuffersize, 
+                                                                  NULL, 
+                                                                  NULL, 
+                                                                  &err));
         OCL_CHECK(err, err = q.finish());
 
         /* Check the results of output1 */
@@ -329,11 +329,11 @@ int main(int argc, char** argv) {
     #if NDDR_BANKS > 1
     for(int i = 0; i < ddr_banks; i++)
      {
-	delete(buffer[i]);
+    delete(buffer[i]);
      }
     #else
-	delete(buffer[0]);
-	delete(buffer[1]);
+    delete(buffer[0]);
+    delete(buffer[1]);
     #endif
 
     /* Profiling information */

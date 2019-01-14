@@ -159,8 +159,8 @@ void event_cb(cl_event event1, cl_int cmd_status, void *data) {
 
 // Sets the callback for a particular event
 void set_callback(cl::Event event, const char *queue_name) {
-	cl_int err;
-	OCL_CHECK(err, err = event.setCallback(CL_COMPLETE, event_cb, (void *)queue_name));
+    cl_int err;
+    OCL_CHECK(err, err = event.setCallback(CL_COMPLETE, event_cb, (void *)queue_name));
 }
 
 int main(int argc, char **argv) {
@@ -213,7 +213,7 @@ int main(int argc, char **argv) {
     int flag = iteration_idx % 2;
 
     if (iteration_idx >= 2) {
- 	OCL_CHECK(err, err = read_events[flag].wait());
+     OCL_CHECK(err, err = read_events[flag].wait());
     }
 
   // Allocate Buffer in Global Memory
@@ -221,11 +221,11 @@ int main(int argc, char **argv) {
   // Device-to-host communication
   std::cout << "Creating Buffers..." << std::endl;
   OCL_CHECK(err, buffer_a[flag] = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
-		  bytes_per_iteration, &A[iteration_idx * elements_per_iteration], &err));
+          bytes_per_iteration, &A[iteration_idx * elements_per_iteration], &err));
   OCL_CHECK(err, buffer_b[flag] = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
-		  bytes_per_iteration, &B[iteration_idx * elements_per_iteration], &err));
+          bytes_per_iteration, &B[iteration_idx * elements_per_iteration], &err));
   OCL_CHECK(err, buffer_c[flag] = cl::Buffer(context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
-		  bytes_per_iteration, &device_result[iteration_idx * elements_per_iteration], &err));
+          bytes_per_iteration, &device_result[iteration_idx * elements_per_iteration], &err));
 
   vector<cl::Event> write_event(1);
 

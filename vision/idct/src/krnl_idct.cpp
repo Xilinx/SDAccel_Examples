@@ -61,9 +61,9 @@ idct behavior.
 
 *************************************************************************** */
 void idct(const int16_t block[64], 
-	  const uint16_t q[64], 
-	  int16_t outp[64], 
-	  bool ignore_dc) {
+      const uint16_t q[64], 
+      int16_t outp[64], 
+      bool ignore_dc) {
   #pragma HLS INLINE
 
   int32_t intermed[64];
@@ -88,7 +88,7 @@ void idct(const int16_t block[64],
   for (int y = 0; y < 8; ++y) {
     int y8 = y * 8;
     int32_t x0 = (((ignore_dc && y == 0)
-		   ? 0 : (block[y8 + 0] * q[y8 + 0]) << 11)) + 128;
+           ? 0 : (block[y8 + 0] * q[y8 + 0]) << 11)) + 128;
     int32_t x1 = (block[y8 + 4] * q[y8 + 4]) << 11;
     int32_t x2 = block[y8 + 6] * q[y8 + 6];
     int32_t x3 = block[y8 + 2] * q[y8 + 2];
@@ -239,10 +239,10 @@ ii=2 for the 8x8 data elements.
 
 *************************************************************************** */
 void execute(hls::stream<int512_t> &iblock, 
-	     hls::stream<uint512_t> &iq, 
-	     hls::stream<int512_t> &ivoutp, 
-	     bool ignore_dc, 
-	     unsigned int blocks) {
+         hls::stream<uint512_t> &iq, 
+         hls::stream<int512_t> &ivoutp, 
+         bool ignore_dc, 
+         unsigned int blocks) {
   for(unsigned int i = 0; i < blocks; i++) {
     /* Use II=2 here as we this will equalize all the dataflow processes and
      * save resources */
@@ -255,11 +255,11 @@ void execute(hls::stream<int512_t> &iblock,
 
     for(short j = 0; j < 64/32; j++) {
       if(i==0) {
-	ap_uint<512> tmp;
-	tmp = iq.read();
-	for(short k = 0; k < 32; k++) {
-	  iiq[j*32+k] = tmp(16*(k+1)-1, 16*k);
-	}
+    ap_uint<512> tmp;
+    tmp = iq.read();
+    for(short k = 0; k < 32; k++) {
+      iiq[j*32+k] = tmp(16*(k+1)-1, 16*k);
+    }
       }
     }
     
@@ -267,7 +267,7 @@ void execute(hls::stream<int512_t> &iblock,
       ap_int<512> tmp;
       tmp = iblock.read();
       for(short k = 0; k < 32; k++) {
-	iiblock[j*32+k] = tmp(16*(k+1)-1, 16*k);
+    iiblock[j*32+k] = tmp(16*(k+1)-1, 16*k);
       }
     }
     
@@ -276,7 +276,7 @@ void execute(hls::stream<int512_t> &iblock,
     for(short j = 0; j < 64/32; j++) {
       ap_int<512> tmp;
       for(short k = 0; k < 32; k++) {
-	tmp(16*(k+1)-1, 16*k) = iivoutp[j*32+k];
+    tmp(16*(k+1)-1, 16*k) = iivoutp[j*32+k];
       }
       ivoutp.write(tmp);
     }
@@ -312,10 +312,10 @@ dataflow blocks.
 
 *************************************************************************** */
 void krnl_idct_dataflow(const ap_int<512> *block, 
-			const ap_uint<512> *q, 
-			ap_int<512> *voutp, 
-			int ignore_dc, 
-			unsigned int blocks) {
+            const ap_uint<512> *q, 
+            ap_int<512> *voutp, 
+            int ignore_dc, 
+            unsigned int blocks) {
   #pragma HLS DATAFLOW
 
   hls::stream<int512_t> iblock("input_stream1");
@@ -343,10 +343,10 @@ Kernel idct interface definition.
 *************************************************************************** */
 extern "C" {
 void krnl_idct(const ap_int<512> *block, 
-	       const ap_uint<512> *q, 
-	       ap_int<512> *voutp, 
-	       int ignore_dc, 
-	       unsigned int blocks) {
+           const ap_uint<512> *q, 
+           ap_int<512> *voutp, 
+           int ignore_dc, 
+           unsigned int blocks) {
   #pragma HLS INTERFACE m_axi     port=block     offset=slave bundle=gmem0
   #pragma HLS INTERFACE s_axilite port=block                  bundle=control
   #pragma HLS INTERFACE m_axi     port=q         offset=slave bundle=gmem1

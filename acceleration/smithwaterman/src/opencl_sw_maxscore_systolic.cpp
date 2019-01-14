@@ -47,10 +47,10 @@ typedef struct _pe{
 
 void initPE(pe *pex){
 #pragma HLS PIPELINE II=1
-	for(int i = 0; i < MAXPE; i++){
-		pex[i].d = 0;
-		pex[i].p = 0;
-	}
+    for(int i = 0; i < MAXPE; i++){
+        pex[i].d = 0;
+        pex[i].p = 0;
+    }
 }
 
 #ifdef _COMPUTE_FULL_MATRIX
@@ -113,10 +113,10 @@ template <int FACTOR>
 void swCoreB(uint2_t *d, uint2_t *q, short *maxr, short *maxc, short *maxv, short *iterB, pe *myPE, short stripe, short rows){
 #pragma HLS inline
 #pragma HLS array partition variable=d cyclic factor=FACTOR
-	int i, loop;
+    int i, loop;
     short w = 0; // Initial condition at the start of a row
     d+= stripe*MAXPE;
-	initPE(myPE);
+    initPE(myPE);
     for(loop = 0; loop < rows; ++loop){
     #pragma HLS PIPELINE II=1
         short rowmaxv = MINVAL;
@@ -130,9 +130,9 @@ void swCoreB(uint2_t *d, uint2_t *q, short *maxr, short *maxc, short *maxv, shor
             }else{
                 executePE(loop,i,&myPE[i], &myPE[i-1], d, q);
             }
-			if(i == MAXPE-1){
+            if(i == MAXPE-1){
                 iterB[loop] = myPE[i].p;
-			}
+            }
             if (myPE[i].p > rowmaxv){
                 rowmaxv = myPE[i].p;
                 rowmaxpe = i;
@@ -154,70 +154,70 @@ short iterB[MAXROW];
 #pragma HLS inline 
 #pragma HLS RESOURCE variable=iterB core=RAM_S2P_LUTRAM
 #pragma HLS RESOURCE variable=q core=RAM_S2P_LUTRAM
-	*maxc = MINVAL;
-	*maxv = MINVAL;
-	*maxr = MINVAL;
+    *maxc = MINVAL;
+    *maxv = MINVAL;
+    *maxr = MINVAL;
     short stripes = MAXCOL / MAXPE;
     assert(stripes <= (MAXCOL+MAXPE-1)/MAXPE);
     assert(rows <= MAXROW);
 #pragma HLS array partition variable=myPE
-	for(short stripe = 0; stripe < stripes; stripe = stripe + 1){
+    for(short stripe = 0; stripe < stripes; stripe = stripe + 1){
 #ifdef _COMPUTE_FULL_MATRIX
-		colIter = stripe;
+        colIter = stripe;
 #endif
         swCoreB<MAXPE>(d, q, maxr, maxc, maxv, iterB, myPE, stripe, rows);
-	}
+    }
 
 }
 
 
 void simpleSW(uint2_t refSeq[MAXCOL], uint2_t readSeq[MAXROW], short *maxr, short *maxc, short *maxv){
 #pragma HLS inline region off
-	*maxv = MINVAL;
+    *maxv = MINVAL;
     int row, col;
     short mat[MAXROW][MAXCOL];
-	for(col = 0; col < MAXCOL; col++){
-		short d = refSeq[col];
-		for(row = 0; row < MAXROW; ++row){
-			short n, nw, w;
-			 if (row == 0){
-				 n = 0;
-			 }else{
-			     n = mat[row-1][col];
-			 }
-			 if(col == 0){
-				 w = 0;
-			 }else{
-				 w = mat[row][col-1];
-			 }
+    for(col = 0; col < MAXCOL; col++){
+        short d = refSeq[col];
+        for(row = 0; row < MAXROW; ++row){
+            short n, nw, w;
+             if (row == 0){
+                 n = 0;
+             }else{
+                 n = mat[row-1][col];
+             }
+             if(col == 0){
+                 w = 0;
+             }else{
+                 w = mat[row][col-1];
+             }
 
-			 if(row > 0 && col > 0){
-				 nw = mat[row-1][col-1];
-			 }else{
-				 nw = 0;
-			 }
+             if(row > 0 && col > 0){
+                 nw = mat[row-1][col-1];
+             }else{
+                 nw = 0;
+             }
 
-			 short q = readSeq[row];
-			 short max = 0;
-			 short match = (d == q) ? MATCH : MISS_MATCH;
-			 short t1 = (nw + match > max) ? nw + match : max;
-			 short t2 = (n + GAP > w + GAP) ? n + GAP : w + GAP;
-			 max = t1 > t2 ? t1 : t2;
-			 mat[row][col] = max;
-			 if(max > *maxv){
-				 *maxv = max;
-				 *maxr = row;
-				 *maxc = col;
-			 }
-		}
-	}
+             short q = readSeq[row];
+             short max = 0;
+             short match = (d == q) ? MATCH : MISS_MATCH;
+             short t1 = (nw + match > max) ? nw + match : max;
+             short t2 = (n + GAP > w + GAP) ? n + GAP : w + GAP;
+             max = t1 > t2 ? t1 : t2;
+             mat[row][col] = max;
+             if(max > *maxv){
+                 *maxv = max;
+                 *maxr = row;
+                 *maxc = col;
+             }
+        }
+    }
 
 
 }
 
 void sw(uint2_t d[MAXCOL], uint2_t q[MAXROW], short *maxr, short *maxc, short *maxv){
 #pragma HLS inline region off
-	swSystolicBlocking(d, q, maxr, maxc, maxv, MAXROW, MAXCOL);
+    swSystolicBlocking(d, q, maxr, maxc, maxv, MAXROW, MAXCOL);
 }
 
 template <int BUFFERSZ>
@@ -244,11 +244,11 @@ void swInt(unsigned int *readRefPacked, short *maxr, short *maxc, short *maxv){
 }
 
 void swMaxScore(unsigned int readRefPacked[NUMPACKED][PACKEDSZ], short out[NUMPACKED][3]){
-	/*instantiate NUMPACKED PE*/
-	for(int i = 0; i < NUMPACKED;++i){
-	#pragma HLS UNROLL
-		swInt<MAXPE>(readRefPacked[i], &out[i][0], &out[i][1], &out[i][2]);
-	}
+    /*instantiate NUMPACKED PE*/
+    for(int i = 0; i < NUMPACKED;++i){
+    #pragma HLS UNROLL
+        swInt<MAXPE>(readRefPacked[i], &out[i][0], &out[i][1], &out[i][2]);
+    }
 }
 //#ifndef HLS_COMPILE
 extern "C" {

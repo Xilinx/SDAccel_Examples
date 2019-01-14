@@ -32,7 +32,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 int main(int argc, char* argv[])
 {
-	cl_int err;
+    cl_int err;
     if (argc < 2 || argc > 3)
     {
         std::cout << "Usage: " << argv[0] << " <input bitmap> <golden bitmap(optional)>" << std::endl;
@@ -115,26 +115,26 @@ int main(int argc, char* argv[])
     if(argc == 3)
     { 
         std::string goldenFilename = argv[2];
-    	//Read the golden bit map file into memory
-	BitmapInterface goldenImage(goldenFilename.data());
-    	result = goldenImage.readBitmapFile() ;
-    	if (!result)
-	 {
+        //Read the golden bit map file into memory
+    BitmapInterface goldenImage(goldenFilename.data());
+        result = goldenImage.readBitmapFile() ;
+        if (!result)
+     {
            std::cout << "ERROR:Unable to Read Golden Bitmap File " << goldenFilename.data() << std::endl;
            return EXIT_FAILURE ;
-    	 }
-    	if ( image.getHeight() != goldenImage.getHeight() || image.getWidth() != goldenImage.getWidth()){
-        	match = 0;
-    	}else{
-        	int* goldImgPtr = goldenImage.bitmap();
-        	for (unsigned int i = 0 ; i < image.numPixels(); i++){
-            	if (outImage[i] != goldImgPtr[i]){
-               		match = 0;
-	                printf ("Pixel %d Mismatch Output %x and Expected %x \n", i, outImage[i], goldImgPtr[i]);
-        	        break;
-               	   }	
+         }
+        if ( image.getHeight() != goldenImage.getHeight() || image.getWidth() != goldenImage.getWidth()){
+            match = 0;
+        }else{
+            int* goldImgPtr = goldenImage.bitmap();
+            for (unsigned int i = 0 ; i < image.numPixels(); i++){
+                if (outImage[i] != goldImgPtr[i]){
+                       match = 0;
+                    printf ("Pixel %d Mismatch Output %x and Expected %x \n", i, outImage[i], goldImgPtr[i]);
+                    break;
+                      }    
                 }
-    	     }
+             }
     }
     // Write the final image to disk
     image.writeBitmapFile(outImage.data());

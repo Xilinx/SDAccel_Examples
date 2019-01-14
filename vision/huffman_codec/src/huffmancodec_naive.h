@@ -42,18 +42,18 @@ namespace sda {
 
 class ICodec {
 public:
-	virtual int enc(const vector<u8>& in_data, vector<u8>& out_data) = 0;
-	virtual int dec(const vector<u8>& in_data, vector<u8>& out_data) = 0;
+    virtual int enc(const vector<u8>& in_data, vector<u8>& out_data) = 0;
+    virtual int dec(const vector<u8>& in_data, vector<u8>& out_data) = 0;
 
-	int enc_str(const string& in_str, vector<u8>& out_data);
-	int dec_str(const vector<u8>& in_data, string& out_str);
+    int enc_str(const string& in_str, vector<u8>& out_data);
+    int dec_str(const vector<u8>& in_data, string& out_str);
 
-	//utils
-	static void vector_to_string(const vector<u8>& in_vec, string& out_str);
-	static void string_to_vector(const string& in_str, vector<u8>& out_vec);
+    //utils
+    static void vector_to_string(const vector<u8>& in_vec, string& out_str);
+    static void string_to_vector(const string& in_str, vector<u8>& out_vec);
 
-	static string binary_string(u8 value);
-	static int bit_length(u8 value);
+    static string binary_string(u8 value);
+    static int bit_length(u8 value);
 };
 
 /*!
@@ -61,75 +61,75 @@ public:
  */
 class HuffmanNaiveImpl : public ICodec {
 public:
-	HuffmanNaiveImpl();
-	virtual ~HuffmanNaiveImpl();
+    HuffmanNaiveImpl();
+    virtual ~HuffmanNaiveImpl();
 
-	//HTree<data, weight, code>
-	typedef u8 Symbol;
-	typedef u32 BitCodeType;
-	typedef vector<Symbol> VecSymbols;
+    //HTree<data, weight, code>
+    typedef u8 Symbol;
+    typedef u32 BitCodeType;
+    typedef vector<Symbol> VecSymbols;
 
-	//bitlen = [0..255]
-	//code can be up to 32 bits
-	struct BitCode {
-		BitCodeType code;
-		u8 bitlen;
-	};
+    //bitlen = [0..255]
+    //code can be up to 32 bits
+    struct BitCode {
+        BitCodeType code;
+        u8 bitlen;
+    };
 
-	//HTree<data, weight, code>
-	template <typename SymbolsContainerType, typename WeightType>
-	struct TreeNode {
-		TreeNode* left;
-		TreeNode* right;
-		BitCode bitcode;
-		SymbolsContainerType symbols;
-		WeightType weight;
-	};
+    //HTree<data, weight, code>
+    template <typename SymbolsContainerType, typename WeightType>
+    struct TreeNode {
+        TreeNode* left;
+        TreeNode* right;
+        BitCode bitcode;
+        SymbolsContainerType symbols;
+        WeightType weight;
+    };
 
-	//Combinatorial types
-	typedef TreeNode<VecSymbols, float> HTreeNode;
-	typedef std::map<Symbol, BitCode> CodeBook;
+    //Combinatorial types
+    typedef TreeNode<VecSymbols, float> HTreeNode;
+    typedef std::map<Symbol, BitCode> CodeBook;
 
-	struct LessThanByWeight {
-		bool operator()(const HTreeNode* lhs, const HTreeNode* rhs) const {
-			return lhs->weight < rhs->weight;
-		}
-	};
+    struct LessThanByWeight {
+        bool operator()(const HTreeNode* lhs, const HTreeNode* rhs) const {
+            return lhs->weight < rhs->weight;
+        }
+    };
 
-	struct GreaterThanByWeight {
-		bool operator()(const HTreeNode* lhs, const HTreeNode* rhs) const {
-			return lhs->weight > rhs->weight;
-		}
-	};
-
-
-	/*!
-	 * Encodes canonical huffman
-	 */
-	int enc(const vector<u8>& in_data, vector<u8>& out_data);
-
-	/*!
-	 * Decodes canonical huffman
-	 */
-	int dec(const vector<u8>& in_data, vector<u8>& out_data);
-
-	//verbose
-	void set_verbose(bool enable) { m_verbose = true;}
-	bool verbose() const { return m_verbose;}
+    struct GreaterThanByWeight {
+        bool operator()(const HTreeNode* lhs, const HTreeNode* rhs) const {
+            return lhs->weight > rhs->weight;
+        }
+    };
 
 
-	static void print_huffman_tree(const HTreeNode* root);
+    /*!
+     * Encodes canonical huffman
+     */
+    int enc(const vector<u8>& in_data, vector<u8>& out_data);
+
+    /*!
+     * Decodes canonical huffman
+     */
+    int dec(const vector<u8>& in_data, vector<u8>& out_data);
+
+    //verbose
+    void set_verbose(bool enable) { m_verbose = true;}
+    bool verbose() const { return m_verbose;}
+
+
+    static void print_huffman_tree(const HTreeNode* root);
 protected:
-	static int compute_huffmancodes_recursive(HTreeNode* parent);
-	static string htree_symbols_tostring(const HTreeNode* pnode, bool inhex= true);
-	static void print_codebook(const CodeBook& book);
-	static string bitcode_to_string(const BitCode& code);
-	static int htree_depth_recursive(const HTreeNode* root, int current_depth);
+    static int compute_huffmancodes_recursive(HTreeNode* parent);
+    static string htree_symbols_tostring(const HTreeNode* pnode, bool inhex= true);
+    static void print_codebook(const CodeBook& book);
+    static string bitcode_to_string(const BitCode& code);
+    static int htree_depth_recursive(const HTreeNode* root, int current_depth);
 
 
 protected:
-	vector<HTreeNode*> m_leaves;
-	bool m_verbose;
+    vector<HTreeNode*> m_leaves;
+    bool m_verbose;
 
 };
 

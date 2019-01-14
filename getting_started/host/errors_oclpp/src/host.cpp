@@ -116,11 +116,11 @@ const char *error_string(cl_int error_code) {
 
 // This example just prints out string description for given OpenCL error code.
 int main(int argc, char **argv){
-	if(argc!=2){
-		std::cout << "Usage: %s ./xclbin/vector_addition.<emulation_mode>.<dsa>.xclbin\n" << argv[0] << std::endl;
-		return EXIT_FAILURE;
-	}
-	static const int elements = 128;
+    if(argc!=2){
+        std::cout << "Usage: %s ./xclbin/vector_addition.<emulation_mode>.<dsa>.xclbin\n" << argv[0] << std::endl;
+        return EXIT_FAILURE;
+    }
+    static const int elements = 128;
     vector<int, aligned_allocator<int>> A(elements, 32);
     vector<int, aligned_allocator<int>> B(elements, 10);
     vector<int, aligned_allocator<int>> C(elements);
@@ -135,8 +135,8 @@ int main(int argc, char **argv){
     OCL_CHECK(err, err = cl::Platform::get(&platforms));
     size_t num_platforms = platforms.size();
     if (num_platforms == 0) {
-        std::cout 	<<"No platforms were found. This could be caused because the OpenCL "
-        			"icd was not installed in the /etc/OpenCL/vendors directory." << std::endl;
+        std::cout     <<"No platforms were found. This could be caused because the OpenCL "
+                    "icd was not installed in the /etc/OpenCL/vendors directory." << std::endl;
         std::cout << "TEST FAILED" << std::endl;
         exit(EXIT_FAILURE);
     }
@@ -155,17 +155,17 @@ int main(int argc, char **argv){
     }
     if (i == platforms.size()) {
         std::cout << "Error: Failed to find Xilinx platform" << std::endl;
-		exit(EXIT_FAILURE);
-	}
+        exit(EXIT_FAILURE);
+    }
 
      std::vector<cl::Device> devices;
      if ((err = platform.getDevices(CL_DEVICE_TYPE_CPU, &devices))){
          std::cout <<"\nRecoverable Error calling cl::Platform::getDevices(): " << error_string(err) << std::endl
-        		   <<"This error appears when we try to create a device and no devices "
-				   "are found on the platform. In this case we passed "
-				   "CL_DEVICE_TYPE_CPU as the device type which is not available on "
-				   "the" << platformName.c_str() << "platform. We intentionally threw this error so we will not "
-				   "be exiting the program.\n" << std::endl;
+                   <<"This error appears when we try to create a device and no devices "
+                   "are found on the platform. In this case we passed "
+                   "CL_DEVICE_TYPE_CPU as the device type which is not available on "
+                   "the" << platformName.c_str() << "platform. We intentionally threw this error so we will not "
+                   "be exiting the program.\n" << std::endl;
      }
 
      //Getting ACCELERATOR Devices and selecting 1st such device
@@ -179,11 +179,11 @@ int main(int argc, char **argv){
       {
       cl::Context context(0, props, NULL, NULL, &err);
       if (err) {
-          std::cout	<<"Recoverable Error calling cl::Context::Context(): " << error_string(err) << std::endl
-            		<<"\tMost cl::Context* calls accept error codes as their last parameter "
-            		  "instead of returning the error value. This error occurred because "
-            		  "we passed zero(0) for the devices variable. We intentionally threw "
-            		  "this error so we will not be exiting the program.\n" << std::endl;
+          std::cout    <<"Recoverable Error calling cl::Context::Context(): " << error_string(err) << std::endl
+                    <<"\tMost cl::Context* calls accept error codes as their last parameter "
+                      "instead of returning the error value. This error occurred because "
+                      "we passed zero(0) for the devices variable. We intentionally threw "
+                      "this error so we will not be exiting the program.\n" << std::endl;
       }
       }
 
@@ -205,11 +205,11 @@ int main(int argc, char **argv){
       {
       cl::Program program(context, devices, invalid_bin, NULL, &err);
       if (err) {
-          std::cout	<<"\nRecoverable Error calling cl::Program::Program(): " << error_string(err) << std::endl
-            		<<"\tMost cl::Program* calls accept error codes as their last parameter "
-            		  "instead of returning the error value. This error occurred because "
-            		  "we passed an invalid_bin for the bins variable. We intentionally threw "
-            		  "this error so we will not be exiting the program.\n" << std::endl;
+          std::cout    <<"\nRecoverable Error calling cl::Program::Program(): " << error_string(err) << std::endl
+                    <<"\tMost cl::Program* calls accept error codes as their last parameter "
+                      "instead of returning the error value. This error occurred because "
+                      "we passed an invalid_bin for the bins variable. We intentionally threw "
+                      "this error so we will not be exiting the program.\n" << std::endl;
       }
       }
 
@@ -219,10 +219,10 @@ int main(int argc, char **argv){
       cl::Kernel kernel(program, "InvalidKernelName", &err);
       if (err) {
            std::cout   <<"Recoverable Error calling cl::Kernel::Kernel(): " << error_string(err) << std::endl
-        		   	   <<"Errors calling cl::Kernel are usually caused if the name "
-        		   	   "passed into the function does not match a kernel in the binary. "
-        		   	   "We intentionally caused this error so we will not be exiting the "
-        		   	   "program.\n" << std::endl;
+                          <<"Errors calling cl::Kernel are usually caused if the name "
+                          "passed into the function does not match a kernel in the binary. "
+                          "We intentionally caused this error so we will not be exiting the "
+                          "program.\n" << std::endl;
       }
       }
 
@@ -234,25 +234,25 @@ int main(int argc, char **argv){
       {
       cl::Buffer buffer_a(context, CL_MEM_READ_ONLY, 0, nullptr, &err);
       if (err) {
-          std::cout	<<"Recoverable Error calling clCreateBuffer: " << error_string(err) << std::endl
-        		<<"There can be several reasons for buffer creation to fail. It "
-			"could be because device could not allocate enough memory for this "
-			"buffer. The pointer could be null and either CL_MEM_USE_HOST_PTR "
-			"or CL_MEM_COPY_HOST_PTR are passed into the flags parameter. In "
-			"this case we passed zero(0) as the size of the buffer. We "
-			"intentionally caused this error so we will not be exiting the "
-			"program.\n" << std::endl;
+          std::cout    <<"Recoverable Error calling clCreateBuffer: " << error_string(err) << std::endl
+                <<"There can be several reasons for buffer creation to fail. It "
+            "could be because device could not allocate enough memory for this "
+            "buffer. The pointer could be null and either CL_MEM_USE_HOST_PTR "
+            "or CL_MEM_COPY_HOST_PTR are passed into the flags parameter. In "
+            "this case we passed zero(0) as the size of the buffer. We "
+            "intentionally caused this error so we will not be exiting the "
+            "program.\n" << std::endl;
       }
       }
 
       size_t size = elements * sizeof(int);
       std::cout << "Creating Buffers..." <<std::endl;
        OCL_CHECK(err, cl::Buffer buffer_a(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-       		size, A.data(), &err));
+               size, A.data(), &err));
        OCL_CHECK(err, cl::Buffer buffer_b(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-       		size, B.data(), &err));
+               size, B.data(), &err));
        OCL_CHECK(err, cl::Buffer buffer_result(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-       		size, C.data(), &err));
+               size, C.data(), &err));
 
        // Copy input data to device global memory
        std::cout << "Copying data..." << std::endl;

@@ -36,50 +36,50 @@ typedef ap_uint<1> uint1_t;
 
 void simpleSW(uint2_t refSeq[MAXCOL], uint2_t readSeq[MAXROW], short *maxr, short *maxc, short *maxv){
 #pragma HLS inline region off
-	*maxv = MINVAL;
+    *maxv = MINVAL;
     int row, col;
     short mat[MAXROW][MAXCOL];
-	for(col = 0; col < MAXCOL; col++){
-		short d = refSeq[col];
-		for(row = 0; row < MAXROW; ++row){
-			short n, nw, w;
-			 if (row == 0){
-				 n = 0;
-			 }else{
-			     n = mat[row-1][col];
-			 }
-			 if(col == 0){
-				 w = 0;
-			 }else{
-				 w = mat[row][col-1];
-			 }
+    for(col = 0; col < MAXCOL; col++){
+        short d = refSeq[col];
+        for(row = 0; row < MAXROW; ++row){
+            short n, nw, w;
+             if (row == 0){
+                 n = 0;
+             }else{
+                 n = mat[row-1][col];
+             }
+             if(col == 0){
+                 w = 0;
+             }else{
+                 w = mat[row][col-1];
+             }
 
-			 if(row > 0 && col > 0){
-				 nw = mat[row-1][col-1];
-			 }else{
-				 nw = 0;
-			 }
+             if(row > 0 && col > 0){
+                 nw = mat[row-1][col-1];
+             }else{
+                 nw = 0;
+             }
 
-			 short q = readSeq[row];
-			 short max = 0;
-			 short match = (d == q) ? MATCH : MISS_MATCH;
-			 short t1 = (nw + match > max) ? nw + match : max;
-			 short t2 = (n + GAP > w + GAP) ? n + GAP : w + GAP;
-			 max = t1 > t2 ? t1 : t2;
-			 mat[row][col] = max;
-			 if(max > *maxv){
-				 *maxv = max;
-				 *maxr = row;
-				 *maxc = col;
-			 }
-		}
-	}
+             short q = readSeq[row];
+             short max = 0;
+             short match = (d == q) ? MATCH : MISS_MATCH;
+             short t1 = (nw + match > max) ? nw + match : max;
+             short t2 = (n + GAP > w + GAP) ? n + GAP : w + GAP;
+             max = t1 > t2 ? t1 : t2;
+             mat[row][col] = max;
+             if(max > *maxv){
+                 *maxv = max;
+                 *maxr = row;
+                 *maxc = col;
+             }
+        }
+    }
 
 }
 
 void sw(uint2_t d[MAXCOL], uint2_t q[MAXROW], short *maxr, short *maxc, short *maxv){
 #pragma HLS inline region off
-    	simpleSW(d, q, maxr, maxc, maxv);
+        simpleSW(d, q, maxr, maxc, maxv);
 }
 
 template <int BUFFERSZ>
@@ -106,11 +106,11 @@ void swInt(unsigned int *readRefPacked, short *maxr, short *maxc, short *maxv){
 }
 
 void swMaxScore(unsigned int readRefPacked[NUMPACKED][PACKEDSZ], short out[NUMPACKED][3]){
-	/*instantiate NUMPACKED PE*/
-	for(int i = 0; i < NUMPACKED;++i){
-	#pragma HLS UNROLL
-		swInt<MAXPE>(readRefPacked[i], &out[i][0], &out[i][1], &out[i][2]);
-	}
+    /*instantiate NUMPACKED PE*/
+    for(int i = 0; i < NUMPACKED;++i){
+    #pragma HLS UNROLL
+        swInt<MAXPE>(readRefPacked[i], &out[i][0], &out[i][1], &out[i][2]);
+    }
 }
 //#ifndef HLS_COMPILE
 extern "C" {

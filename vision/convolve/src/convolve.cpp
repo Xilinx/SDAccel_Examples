@@ -48,18 +48,18 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <xcl2.hpp>
 
 short getAbsMax(cv::Mat mat, size_t rows, size_t cols) {
-	short max = 0;
+    short max = 0;
 
-	for(size_t r = 0; r < rows; r++) {
-		for(size_t c = 0; c < cols; c++) {
-			short tmp = std::abs(mat.at<short>(r,c));
-			if(tmp > max) {
-				max = tmp;
-			}
-		}
-	}
+    for(size_t r = 0; r < rows; r++) {
+        for(size_t c = 0; c < cols; c++) {
+            short tmp = std::abs(mat.at<short>(r,c));
+            if(tmp > max) {
+                max = tmp;
+            }
+        }
+    }
 
-	return max;
+    return max;
 }
 
 cv::Mat readTxtFile(std::string fileName, size_t rows, size_t cols) {
@@ -103,8 +103,8 @@ cv::Mat readFloatTxtFile(std::string fileName, size_t rows, size_t cols) {
 }
 
 int main(int argc, char* argv[]) {
-	cl_int err;
-	cl::Event event;
+    cl_int err;
+    cl::Event event;
 
     if(argc != 3 && argc != 4)
     {
@@ -171,11 +171,11 @@ int main(int argc, char* argv[]) {
     // Device-to-host communication
     std::cout << "Creating Buffers..." <<std::endl;
     OCL_CHECK(err, cl::Buffer devCoef(context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY,
-    		((FILTER_HEIGHT*FILTER_WIDTH-1)/32 + 1)*sizeof(cl_uint16), coef.data, &err));
+            ((FILTER_HEIGHT*FILTER_WIDTH-1)/32 + 1)*sizeof(cl_uint16), coef.data, &err));
     OCL_CHECK(err, cl::Buffer devInput(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-    		((IMAGE_HEIGHT*IMAGE_WIDTH-1)/32 + 1)*sizeof(cl_uint16), vecInput.data(), &err));
+            ((IMAGE_HEIGHT*IMAGE_WIDTH-1)/32 + 1)*sizeof(cl_uint16), vecInput.data(), &err));
     OCL_CHECK(err, cl::Buffer devOutput(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-    		((IMAGE_HEIGHT*IMAGE_WIDTH-1)/32 + 1)*sizeof(cl_uint16), vecOutput.data(), &err));
+            ((IMAGE_HEIGHT*IMAGE_WIDTH-1)/32 + 1)*sizeof(cl_uint16), vecOutput.data(), &err));
 
     // Copy input data to device global memory
     std::cout << "Copying data..." << std::endl;

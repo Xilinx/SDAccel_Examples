@@ -153,11 +153,11 @@ int sizeof_array(T (&)[N]) {
 std::string field(1024, '\0');
 
 void print_platform_info(cl::Platform platform) {
-	cl_int err;
-	for (int i = 0; i < sizeof_array(platform_info); i++) {
-		OCL_CHECK(err, err = platform.getInfo(platform_info[i].first, &field));
-		printf("platform %-11s: %s\n", platform_info[i].second, field.c_str());
-		}
+    cl_int err;
+    for (int i = 0; i < sizeof_array(platform_info); i++) {
+        OCL_CHECK(err, err = platform.getInfo(platform_info[i].first, &field));
+        printf("platform %-11s: %s\n", platform_info[i].second, field.c_str());
+        }
 }
 
 template <typename T>
@@ -166,9 +166,9 @@ T convert(const char* data) {
 }
 
 void print_device_info(cl::Device device) {
-	cl_int err;
+    cl_int err;
     for (int i = 0; i < sizeof_array(device_info); i++) {
-    	OCL_CHECK(err, err = device.getInfo(device_info[i].first, &field));
+        OCL_CHECK(err, err = device.getInfo(device_info[i].first, &field));
 
         printf("  device %-32s: ", device_info[i].second);
         switch (device_info[i].first) {
@@ -240,7 +240,7 @@ void print_device_info(cl::Device device) {
             case CL_DEVICE_MAX_WORK_ITEM_SIZES: {
                 size_t max_dim = 0;
                 OCL_CHECK(err, err = device.getInfo(CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, &max_dim));
-		printf("[  ");
+        printf("[  ");
                 for (int i = 0; i < (int)max_dim; i++) {
                     printf("\b%zu  ",
                            convert<size_t>(&field[i * sizeof(size_t)]));
@@ -335,7 +335,7 @@ void print_device_info(cl::Device device) {
             break;
             case CL_DEVICE_PLATFORM: {
                 auto platform = convert<cl::Platform>(field.data());
-		OCL_CHECK(err, err = platform.getInfo(CL_PLATFORM_NAME, &field));
+        OCL_CHECK(err, err = platform.getInfo(CL_PLATFORM_NAME, &field));
                 printf("%s\n", field.c_str());
             } break;
             default:
@@ -349,7 +349,7 @@ void print_device_info(cl::Device device) {
 // This example prints devices available on this machine and their
 // corresponding capabilities.
 int main(int argc, char** argv) {
-	// The following call retrieves the total number of platforms available
+    // The following call retrieves the total number of platforms available
     cl_uint platform_count;
     cl_int err;
     std::vector<cl::Platform> platforms;
@@ -364,7 +364,7 @@ int main(int argc, char** argv) {
         device_count = devices.size();
 
         for (int d = 0; d < (int)device_count; ++d) {
-        	OCL_CHECK(err, err = devices[d].getInfo(CL_DEVICE_NAME, &field));
+            OCL_CHECK(err, err = devices[d].getInfo(CL_DEVICE_NAME, &field));
             printf("Device %d: %s\n", d, field.c_str());
             print_device_info(devices[d]);
             continue;

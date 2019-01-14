@@ -436,7 +436,7 @@ int main(int argc, char **argv) {
     clReleaseKernel(kernel);
     clReleaseProgram(program);
     clReleaseCommandQueue(command_queue);
-	clReleaseContext(context);
+    clReleaseContext(context);
 
     printf("TEST %s\n", (failed ? "FAILED" : "PASSED"));
     return (failed? EXIT_FAILURE :  EXIT_SUCCESS);

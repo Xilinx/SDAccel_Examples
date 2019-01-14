@@ -67,7 +67,7 @@ Kernel Description (Bad Example) :
         1. Output Filters  = 256 (Size = 27 x 27) 
         2. Work Groups     = 1
         3. Work Items      = 1     ( One per each Work_Group )
-	
+    
         -----------------------------------------------------
         | Parameter     | Value |   Description             |
         -----------------------------------------------------
@@ -155,7 +155,7 @@ void cnn_BAD(
                             int xVal = x*Stride + j-Padding, yVal = y*Stride + i-Padding;
                             
                             if(yVal >= 0 && yVal < ISize && xVal >= 0 && xVal < ISize) {
-                                acc +=	(short) img_lcl[(input*ISize + yVal)*ISize + xVal] * 
+                                acc +=    (short) img_lcl[(input*ISize + yVal)*ISize + xVal] * 
                                         (short) wgt_lcl[((output*i_chan + input)*WSize + i)*WSize + j];
                             }
                         }

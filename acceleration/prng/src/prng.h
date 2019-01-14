@@ -36,22 +36,22 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 template <int CYCLE, typename T >
 class randCMWC {
 
-	T        Q[CYCLE];
-	uint32_t c;       // must be limited with CMWC_C_MAX
-	uint16_t i_cycle;
+    T        Q[CYCLE];
+    uint32_t c;       // must be limited with CMWC_C_MAX
+    uint16_t i_cycle;
 
 public:
 
 //_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-	void init ( T* Q_init ) {
+    void init ( T* Q_init ) {
 
-	for (int idx=0; idx<CYCLE; idx++) {
-    	#pragma HLS PIPELINE II=1
-	    Q[idx] = Q_init[idx];  // set to rand() in Wikipedia source
+    for (int idx=0; idx<CYCLE; idx++) {
+        #pragma HLS PIPELINE II=1
+        Q[idx] = Q_init[idx];  // set to rand() in Wikipedia source
     }
 
-	i_cycle = CYCLE - 1;
-	c = 362436;  // should be a variable setting, set to rand() in Wikipedia source
+    i_cycle = CYCLE - 1;
+    c = 362436;  // should be a variable setting, set to rand() in Wikipedia source
 }
 
 
@@ -63,33 +63,33 @@ T makeOne ( void ) {
 #pragma HLS RESOURCE   variable=Q core = RAM_T2P_BRAM
 //#pragma HLS dependence variable=Q inter false
 
-	const  uint64_t a = 18782;
-	const  uint32_t m = 0xfffffffe;
+    const  uint64_t a = 18782;
+    const  uint32_t m = 0xfffffffe;
 
-	uint64_t t;
-	uint32_t x;
+    uint64_t t;
+    uint32_t x;
 
-	i_cycle = (i_cycle+1)% CYCLE;
-	t = a * Q[i_cycle] + c;
-	c = t >> 32;
-	x = t + c;
-	if (x < c) {
-		x++;
-		c++;
-	}
-	T tmp = m - x;
-	Q[i_cycle] = tmp;
+    i_cycle = (i_cycle+1)% CYCLE;
+    t = a * Q[i_cycle] + c;
+    c = t >> 32;
+    x = t + c;
+    if (x < c) {
+        x++;
+        c++;
+    }
+    T tmp = m - x;
+    Q[i_cycle] = tmp;
 
-	return tmp;
+    return tmp;
 }
 
 
 //_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 void make ( T* dout, const unsigned int nofSample ) {
 
-	for (int idx=0; idx<nofSample; idx++) {
-    	#pragma HLS PIPELINE II=1
-	    dout[idx] = makeOne();
+    for (int idx=0; idx<nofSample; idx++) {
+        #pragma HLS PIPELINE II=1
+        dout[idx] = makeOne();
 }
 
 }

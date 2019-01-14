@@ -139,11 +139,11 @@ int FPGA_KMEANS::fpga_kmeans_compute(
            int     n_points,
            int     n_clusters,
            int    *membership,
-		   float **clusters,
+           float **clusters,
            int     *new_centers_len,
            float  **new_centers)
 {
-	cl_int err;
+    cl_int err;
     int delta = 0;
     int i, j;
     cl::Event wait_event;
@@ -151,7 +151,7 @@ int FPGA_KMEANS::fpga_kmeans_compute(
     DATA_TYPE* temp_clusters = re_align_clusters(clusters,n_clusters, N_Features,n_features);
 
     OCL_CHECK(err, err = g_q.enqueueWriteBuffer(d_cluster, CL_TRUE, 0,
-    							n_clusters * N_Features * sizeof(DATA_TYPE), temp_clusters, NULL, NULL));
+                                n_clusters * N_Features * sizeof(DATA_TYPE), temp_clusters, NULL, NULL));
     g_q.finish();
     free(temp_clusters);
 
@@ -175,7 +175,7 @@ int FPGA_KMEANS::fpga_kmeans_compute(
     g_iteration++;
  
     OCL_CHECK(err, err = g_q.enqueueReadBuffer(d_membership, CL_TRUE, 0, n_points * sizeof(INT_DATA_TYPE),
-    											g_membership_OCL, NULL, NULL));
+                                                g_membership_OCL, NULL, NULL));
     g_q.finish();
     
     delta = 0;
@@ -329,26 +329,26 @@ int FPGA_KMEANS::fpga_kmeans_init()
 {
     cl_int err;
 
-	std::vector<cl::Device> devices = xcl::get_xil_devices();
-	cl::Device device = devices[0];
+    std::vector<cl::Device> devices = xcl::get_xil_devices();
+    cl::Device device = devices[0];
 
-	OCL_CHECK(err, g_context = cl::Context(device, NULL, NULL, NULL, &err));
-	OCL_CHECK(err, g_q = cl::CommandQueue(g_context, device, CL_QUEUE_PROFILING_ENABLE, &err));
-	OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
+    OCL_CHECK(err, g_context = cl::Context(device, NULL, NULL, NULL, &err));
+    OCL_CHECK(err, g_q = cl::CommandQueue(g_context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
-	std::string binaryFile = xcl::find_binary_file(device_name,"kmeans");
+    std::string binaryFile = xcl::find_binary_file(device_name,"kmeans");
 
-	cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
-	devices.resize(1);
-	OCL_CHECK(err, g_prog = cl::Program(g_context, devices, bins, NULL, &err));
-	OCL_CHECK(err, g_kernel_kmeans = cl::Kernel(g_prog,"kmeans", &err));
+    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    devices.resize(1);
+    OCL_CHECK(err, g_prog = cl::Program(g_context, devices, bins, NULL, &err));
+    OCL_CHECK(err, g_kernel_kmeans = cl::Kernel(g_prog,"kmeans", &err));
 
     return 0;
 }
 
 int FPGA_KMEANS::fpga_kmeans_allocate(int n_points, int n_features, int n_clusters, float **feature)
 {
-	cl_int err;
+    cl_int err;
     DATA_TYPE* temp_feature;
 #if USE_DATA_TYPE == INT_DT
     calculate_scale_factor(feature[0], n_points * n_features);
@@ -358,13 +358,13 @@ int FPGA_KMEANS::fpga_kmeans_allocate(int n_points, int n_features, int n_cluste
     temp_feature = re_align_features(feature,N_Features, NPoints, n_features, n_points ,g_vector_size );
 
     OCL_CHECK(err, d_feature = cl::Buffer(g_context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_WRITE,
-    						NPoints * n_features * sizeof(DATA_TYPE), temp_feature, &err));
+                            NPoints * n_features * sizeof(DATA_TYPE), temp_feature, &err));
 
     OCL_CHECK(err, d_cluster = cl::Buffer(g_context, CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE,
-    						n_clusters * N_Features * sizeof(DATA_TYPE), NULL, &err));
+                            n_clusters * N_Features * sizeof(DATA_TYPE), NULL, &err));
 
     OCL_CHECK(err, d_membership = cl::Buffer(g_context, CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE,
-    						NPoints * sizeof(INT_DATA_TYPE), NULL, &err));
+                            NPoints * sizeof(INT_DATA_TYPE), NULL, &err));
 
     free(temp_feature);
 
