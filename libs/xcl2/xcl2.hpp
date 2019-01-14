@@ -111,7 +111,8 @@ std::vector<cl::Device> get_devices(const std::string& vendor_name);
  *   An opencl program Binaries object that was created from xclbin_name file.
  */
 std::string find_binary_file(const std::string& _device_name, const std::string& xclbin_name);
-cl::Program::Binaries import_binary_file(std::string xclbin_file_name); 
+cl::Program::Binaries import_binary_file(std::string xclbin_file_name);
+char* read_binary_file(const std::string &xclbin_file_name, unsigned &nb);
 bool is_emulation () ;
 bool is_hw_emulation () ;
 bool is_xpr_device (const char *device_name);
