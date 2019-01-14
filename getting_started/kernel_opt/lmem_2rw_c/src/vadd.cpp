@@ -103,7 +103,7 @@ void vadd(
         //Which means two iterations of loop will be executed together and as a result 
         // it will double the performance.
         vadd: for (int j = 0 ; j < chunk_size; j ++){
-        #pragma HLS PIPELINE
+        #pragma HLS PIPELINE II=1
         #pragma HLS UNROLL FACTOR=2
         #pragma HLS LOOP_TRIPCOUNT min=c_chunk_sz max=c_chunk_sz
             //perform vector addition

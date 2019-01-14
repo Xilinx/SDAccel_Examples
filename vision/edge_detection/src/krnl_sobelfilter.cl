@@ -113,7 +113,7 @@ void krnl_sobel(global bus_t* in_pixels, global bus_t* out_pixels) {
 #endif
 
 	// loop over height and width and compute min and max gradients
-	__attribute__((xcl_pipeline_loop))
+	__attribute__((xcl_pipeline_loop(1)))
 	for(size_t y=0; y < M(IMAGE_HEIGHT*IMAGE_WIDTH); y++) {
 		u8 input_buf[B];
 

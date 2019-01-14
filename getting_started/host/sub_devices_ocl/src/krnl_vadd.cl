@@ -51,10 +51,17 @@ void krnl_vadd(__global const int *a,
 
         int length = BUFFER_SIZE;
         if(i + length > size) length = size - i;
+        
+        __attribute__((xcl_pipeline_loop(1)))
+        readA:for(int j = 0 ; j < length ; j++) {
+                arrayA[j] = a[i+j]; }
 
-        readA:for(int j = 0 ; j < length ; j++) arrayA[j] = a[i+j];
-        readB:for(int j = 0 ; j < length ; j++) arrayB[j] = b[i+j];
+        __attribute__((xcl_pipeline_loop(1)))
+        readB:for(int j = 0 ; j < length ; j++) {
+                arrayB[j] = b[i+j]; }
 
-        writeC: for(int j = 0 ; j < length ; j++) c[i+j] = arrayA[j] + arrayB[j];
+        __attribute__((xcl_pipeline_loop(1)))
+        writeC: for(int j = 0 ; j < length ; j++) {
+                c[i+j] = arrayA[j] + arrayB[j]; }
     }
 }

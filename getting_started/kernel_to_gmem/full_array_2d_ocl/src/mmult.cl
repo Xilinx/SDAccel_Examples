@@ -50,8 +50,8 @@ void mmult(__global int *a, __global int *b, __global int *c, int dim){
     int matrix_size = dim * dim;
   
     // Read data from global memory and write into local buffer
-    // Loop pipeline will be automatically inferred
     int x = 0, y = 0;
+    __attribute__((xcl_pipeline_loop(1)))
     read_data_a: for (int i = 0 ; i < matrix_size ; i++){
         int tmpData_a = a[i];
         bufa[x][y] = tmpData_a;
@@ -64,7 +64,7 @@ void mmult(__global int *a, __global int *b, __global int *c, int dim){
     }
   
     // Read data from global memory and write into local buffer
-    // Loop pipeline will be automatically inferred
+    __attribute__((xcl_pipeline_loop(1)))
     read_data_b: for (int i = 0, x = 0, y = 0; i < matrix_size ; i++){
         int tmpData_b = b[i];
         bufb[x][y] = tmpData_b;
@@ -81,7 +81,7 @@ void mmult(__global int *a, __global int *b, __global int *c, int dim){
     matrix_mult: for (int row = 0; row < dim; row++) {
         for (int col = 0; col < dim; col++) {
             int result = 0;
-            __attribute__((xcl_pipeline_loop))
+            __attribute__((xcl_pipeline_loop(1)))
             for (int k = 0; k < dim; k++) {
                 result += bufa[row][k] * bufb[k][col];
             }
@@ -90,8 +90,8 @@ void mmult(__global int *a, __global int *b, __global int *c, int dim){
     }
   
     // Write results from local buffer to global memory
-    // Loop pipeline will be automatically inferred
     int m = 0, n = 0;
+    __attribute__((xcl_pipeline_loop(1)))
     write_data: for (int i = 0 ; i < matrix_size ; i++){
         int tmpData_c = bufc[m][n];
         c[i] = tmpData_c;

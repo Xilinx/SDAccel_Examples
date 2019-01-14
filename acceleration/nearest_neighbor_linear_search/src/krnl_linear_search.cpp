@@ -121,7 +121,7 @@ void linear_search_compute(
 			size_t t = i / QUERY_BLOCKS;
 			size_t q = i % QUERY_BLOCKS;
 #endif
-			#pragma HLS PIPELINE II=1
+            		#pragma HLS PIPELINE II=1
 #ifndef __SYNTHESIS__
 			if(t % 1000 == 0 && q % 1000 == 0) {
 				printf("COMPUTE [ %d, %d ]\n", q, t);
@@ -216,7 +216,7 @@ void linear_search(
 #endif
 
 	QUERIES_LOOP: for(size_t i = 0; i < QUERIES * DIMS; i++) {
-		#pragma HLS PIPELINE
+	#pragma HLS PIPELINE II=1
 		size_t x = i % DIMS;
 		size_t y = (i / DIMS) % COMPUTE_QUERIES;
 		size_t z = i / DIMS / COMPUTE_QUERIES;
@@ -239,7 +239,7 @@ void linear_search(
 #endif
 
 	TARGETS_LOOP: for(size_t i = 0; i < TARGETS * DIMS; i++) {
-		#pragma HLS PIPELINE
+ 	#pragma HLS PIPELINE II=1
 		size_t x = i % DIMS;
 		size_t y = (i / DIMS) % COMPUTE_TARGETS;
 		size_t z = i / DIMS / COMPUTE_TARGETS;
@@ -267,7 +267,7 @@ void linear_search(
 #endif
 
 	INDICES_LOOP: for(size_t i = 0; i < QUERIES; i++) {
-		#pragma HLS PIPELINE
+	#pragma HLS PIPELINE II=1
 		size_t x = i % COMPUTE_QUERIES;
 		size_t y = i / COMPUTE_QUERIES;
 		indices[i] = indices_buf[y][x];

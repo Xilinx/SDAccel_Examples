@@ -101,6 +101,7 @@ int main(int argc, char** argv)
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
+    OCL_CHECK(err, cl::Kernel krnl_systolic_array(program,"mmult", &err));
 
     //Allocate Buffer in Global Memory
     OCL_CHECK(err, cl::Buffer buffer_in1   (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
@@ -121,13 +122,15 @@ int main(int argc, char** argv)
     int a_col = DATA_SIZE;
     int b_col = DATA_SIZE;
 
-    auto krnl_systolic_array= cl::KernelFunctor<cl::Buffer&, cl::Buffer&,
-             cl::Buffer&, int, int, int>(program,"mmult", &err);
+    OCL_CHECK(err, err = krnl_systolic_array.setArg(0, buffer_in1));
+    OCL_CHECK(err, err = krnl_systolic_array.setArg(1, buffer_in2));
+    OCL_CHECK(err, err = krnl_systolic_array.setArg(2, buffer_output));
+    OCL_CHECK(err, err = krnl_systolic_array.setArg(3, a_row));
+    OCL_CHECK(err, err = krnl_systolic_array.setArg(4, a_col));
+    OCL_CHECK(err, err = krnl_systolic_array.setArg(5, b_col));
 
     //Launch the Kernel
-    krnl_systolic_array(cl::EnqueueArgs(q,cl::NDRange(1,1,1), cl::NDRange(1,1,1)),
-                buffer_in1, buffer_in2, buffer_output, a_row, a_col,b_col);
-    
+    OCL_CHECK(err, err = q.enqueueTask(krnl_systolic_array));
     q.finish();
 
     //Copy Result from Device Global Memory to Host Local Memory

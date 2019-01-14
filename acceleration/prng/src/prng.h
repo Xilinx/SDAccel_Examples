@@ -46,8 +46,8 @@ public:
 	void init ( T* Q_init ) {
 
 	for (int idx=0; idx<CYCLE; idx++) {
-#pragma HLS pipeline
-		Q[idx] = Q_init[idx];  // set to rand() in Wikipedia source
+    	#pragma HLS PIPELINE II=1
+	    Q[idx] = Q_init[idx];  // set to rand() in Wikipedia source
     }
 
 	i_cycle = CYCLE - 1;
@@ -88,8 +88,8 @@ T makeOne ( void ) {
 void make ( T* dout, const unsigned int nofSample ) {
 
 	for (int idx=0; idx<nofSample; idx++) {
-#pragma HLS pipeline
-		dout[idx] = makeOne();
+    	#pragma HLS PIPELINE II=1
+	    dout[idx] = makeOne();
 }
 
 }

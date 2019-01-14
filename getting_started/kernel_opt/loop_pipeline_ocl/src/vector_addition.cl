@@ -89,7 +89,7 @@ void vadd_pipelined(global       int* restrict c,
         // Pipelining loops that access only one variable is the ideal way to
         // increase the global memory bandwidth.
         read_a:
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         for (int x=0; x<N; ++x) {
             result[x] = a[i*N+x];
         }
@@ -99,7 +99,7 @@ void vadd_pipelined(global       int* restrict c,
             result[x] += b[i*N+x];
         }
         write:
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         for (int x=0; x<N; ++x) {
             c[i*N+x] = result[x];
         }

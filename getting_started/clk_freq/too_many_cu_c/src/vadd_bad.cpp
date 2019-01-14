@@ -122,13 +122,13 @@ extern "C"
             
             // Burst read for in1_lcl
             readIn1: for(int j = 0 ; j < BUFFER_SIZE; j++){
-            #pragma HLS PIPELINE
+            #pragma HLS PIPELINE II=1
                 in1_lcl[j] = in1[global_id*BUFFER_SIZE + offset + j]; 
             }
             
             // Burst read for in2_lcl
             readIn2: for(int j = 0 ; j < BUFFER_SIZE; j++){
-            #pragma HLS PIPELINE
+            #pragma HLS PIPELINE II=1
                 in2_lcl[j] = in2[global_id*BUFFER_SIZE + offset + j]; 
             }
             
@@ -144,7 +144,7 @@ extern "C"
 
             // Pipeline Operations
             vadd: for(int i = 0; i < BUFFER_SIZE; i++){
-            #pragma HLS PIPELINE
+            #pragma HLS PIPELINE II=1
                 out_lcl[i] = in1_lcl[i] + in2_lcl[i];
             }
 
@@ -154,7 +154,7 @@ extern "C"
             
             // Burst write from out_lcl
             writeOut: for(int j = 0 ; j < BUFFER_SIZE; j++){
-            #pragma HLS PIPELINE
+            #pragma HLS PIPELINE II=1
                 out[global_id*BUFFER_SIZE + offset + j] = out_lcl[j];
             }
         }

@@ -41,7 +41,7 @@ Description:
 static void read_input(int *in, hls::stream<int> &inStream, int size)
 {
     mem_rd: for (int i = 0 ; i < size ; i++){
-    #pragma HLS pipeline
+    #pragma HLS PIPELINE II=1
     #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
     	//Blocking write command to inStream 
     	inStream << in[i];
@@ -89,7 +89,7 @@ static void vconv_compute(hls::stream<int> &inStream ,
 static void write_result(int *out, hls::stream<int> &outStream , int size)
 {
     mem_wr: for (int i = 0 ; i < size ; i++){
-    #pragma HLS pipeline
+    #pragma HLS PIPELINE II=1
     #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
     	//Blocking read command to outStream
     	out[i] = outStream.read();

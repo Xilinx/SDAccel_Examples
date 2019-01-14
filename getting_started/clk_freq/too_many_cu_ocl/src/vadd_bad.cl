@@ -100,13 +100,13 @@ void vadd_BAD(
             chunk_size = size - offset;
         
         // Burst read for in1_lcl
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         readIn1: for(int j = 0 ; j < chunk_size; j++){
             in1_lcl[j] = in1[global_id*BUFFER_SIZE + offset + j]; 
         }
         
         // Burst read for in2_lcl
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         readIn2: for(int j = 0 ; j < chunk_size; j++){
             in2_lcl[j] = in2[global_id*BUFFER_SIZE + offset + j]; 
         }
@@ -122,7 +122,7 @@ void vadd_BAD(
         // present in the kernel specification.
 
         // Pipeline Operations
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         vadd: for(int i = 0; i < BUFFER_SIZE; i++){
             out_lcl[i] = in1_lcl[i] + in2_lcl[i];
         }
@@ -132,7 +132,7 @@ void vadd_BAD(
         // based on Work_Group which it belongs to.
         
         // Burst write from out_lcl
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         writeOut: for(int j = 0 ; j < chunk_size; j++){
             out[global_id*BUFFER_SIZE + offset + j] = out_lcl[j];
         }

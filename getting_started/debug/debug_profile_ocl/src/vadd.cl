@@ -50,7 +50,7 @@ krnl_vadd(
         int size = BUFFER_SIZE;
         if (i + size > length) size = length - i;
 
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         readA: for (int j = 0; j < 4 * size; j++) {
             int tmpValue =  a[i+j];
             switch (j % 4) {
@@ -60,6 +60,7 @@ krnl_vadd(
                 case 3:  arrayD[j/4] = tmpValue; break;
             }
         }
+        __attribute__((xcl_pipeline_loop(1)))
         vadd_writeC: for (int j = 0; j < size; j++) 
             e[j] = arrayA[j] + arrayB[j] + arrayC[j] + arrayD[j];
     }

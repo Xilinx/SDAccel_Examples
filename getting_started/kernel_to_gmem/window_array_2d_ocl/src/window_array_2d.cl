@@ -46,14 +46,14 @@ void read_data(__global int *inx) {
     rd_loop_i: for(int i = 0; i < TILE_PER_COLUMN; ++i) {
         rd_loop_j: for (int j = 0; j < TILE_PER_ROW; ++j) {
             rd_buf_loop_m: for (int m = 0; m < TILE_HEIGHT; ++m) {
-                __attribute__((xcl_pipeline_loop))
+                __attribute__((xcl_pipeline_loop(1)))
                 rd_buf_loop_n: for (int n = 0; n < TILE_WIDTH; ++n) {
                     // should burst TILE_WIDTH in WORD beat
                     tile[m][n] = inx[TILE_HEIGHT*TILE_PER_ROW*TILE_WIDTH*i+TILE_PER_ROW*TILE_WIDTH*m+TILE_WIDTH*j+n];
                 }
             }
             rd_loop_m: for (int m = 0; m < TILE_HEIGHT; ++m) {
-                __attribute__((xcl_pipeline_loop))
+                __attribute__((xcl_pipeline_loop(1)))
                 rd_loop_n: for (int n = 0; n < TILE_WIDTH; ++n) {
                     write_pipe_block(infifo, &tile[m][n]);
                 }
@@ -69,14 +69,14 @@ void write_data(__global int *outx) {
     wr_loop_i: for(int i = 0; i < TILE_PER_COLUMN; ++i) {
         wr_loop_j: for (int j = 0; j < TILE_PER_ROW; ++j) {
             wr_buf_loop_m: for (int m = 0; m < TILE_HEIGHT; ++m) {
-                __attribute__((xcl_pipeline_loop))
+                __attribute__((xcl_pipeline_loop(1)))
                 wr_buf_loop_n: for (int n = 0; n < TILE_WIDTH; ++n) {
                     // should burst TILE_WIDTH in WORD beat
                     read_pipe_block(outfifo, &tile[m][n]);
                 }
             }
             wr_loop_m: for (int m = 0; m < TILE_HEIGHT; ++m) {
-                __attribute__((xcl_pipeline_loop))
+                __attribute__((xcl_pipeline_loop(1)))
                 wr_loop_n: for (int n = 0; n < TILE_WIDTH; ++n) {
                     outx[TILE_HEIGHT*TILE_PER_ROW*TILE_WIDTH*i+TILE_PER_ROW*TILE_WIDTH*m+TILE_WIDTH*j+n] = tile[m][n];
                 }
@@ -90,7 +90,7 @@ kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
 void compute(int alpha) {
     for(int i = 0; i < TILE_PER_COLUMN*TILE_HEIGHT; ++i) {
         for (int jj = 0; jj < TILE_PER_ROW; ++jj) {
-            __attribute__((xcl_pipeline_loop))
+            __attribute__((xcl_pipeline_loop(1)))
             for (int m = 0; m < TILE_WIDTH; ++m) {
                 int inTmp;
                 read_pipe_block(infifo, &inTmp);

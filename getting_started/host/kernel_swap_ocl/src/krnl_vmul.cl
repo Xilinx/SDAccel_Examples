@@ -42,8 +42,16 @@ krnl_vmul(
        {
             int size = N;
             if (i + size > length) size = length -i;
-            readA: for (int j = 0; j < size; j++) arrayA[j] = a[i+j];
-            readB: for (int j = 0; j < size; j++) arrayB[j] = b[i+j];
-            vadd_writeC: for (int j = 0; j < size; j++) c[i+j] = arrayA[j] * arrayB[j];                            
+            __attribute__((xcl_pipeline_loop(1)))
+            readA: for (int j = 0; j < size; j++) {
+                    arrayA[j] = a[i+j]; }
+
+            __attribute__((xcl_pipeline_loop(1)))
+            readB: for (int j = 0; j < size; j++) {
+                    arrayB[j] = b[i+j]; }
+
+            __attribute__((xcl_pipeline_loop(1)))
+            vmul_writeC: for (int j = 0; j < size; j++) {
+                    c[i+j] = arrayA[j] * arrayB[j]; }                           
         }
 }

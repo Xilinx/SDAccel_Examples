@@ -100,7 +100,7 @@ void input_stage(int *input, hls::stream<uint> &boost_in, hls::stream<uint> &med
     // Burst Read on input and write to boost_in & med_in streams.
     readInput: for (int i = 0 ; i < size ; i++){
     #pragma HLS LOOP_TRIPCOUNT min=c_width*c_height max=c_width*c_height
-    #pragma HLS PIPELINE
+    #pragma HLS PIPELINE II=1
         int in_lcl = input[i];
         boost_in << in_lcl;
         med_in << in_lcl;
@@ -125,14 +125,14 @@ void boost_stage(hls::stream<uint> &boost_in, hls::stream<uint> &boost_out, int 
     // Fetch first lines
     fetchBoostLine1: for(int i = 0; i < width; i++){
     #pragma HLS LOOP_TRIPCOUNT min=c_width max=c_width
-    #pragma HLS PIPELINE
+    #pragma HLS PIPELINE II=1
         boost_in >> linebuf[0][i];
         linebuf[1][i] = linebuf[0][i];
     }
 
     fetchBoostLine2: for(int i = 0; i < width; i++){
     #pragma HLS LOOP_TRIPCOUNT min=c_width max=c_width
-    #pragma HLS PIPELINE
+    #pragma HLS PIPELINE II=1
         boost_in >> linebuf[2][i];
     }
     
@@ -186,14 +186,14 @@ void median_stage(hls::stream<uint> &med_in, hls::stream<uint> &med_out, int wid
     // Fetch first lines
     fetchMedianLine1: for(int i = 0; i < width; i++){
     #pragma HLS LOOP_TRIPCOUNT min=c_width max=c_width
-    #pragma HLS PIPELINE
+    #pragma HLS PIPELINE II=1
         med_in >> linebuf[0][i];
         linebuf[1][i] = linebuf[0][i];
     }
 
     fetchMedianLine2: for(int i = 0; i < width; i++){
     #pragma HLS LOOP_TRIPCOUNT min=c_width max=c_width
-    #pragma HLS PIPELINE
+    #pragma HLS PIPELINE II=1
         med_in >> linebuf[2][i];
     }
     
@@ -238,7 +238,7 @@ void sketch_stage(hls::stream<uint> &boost_out, hls::stream<uint> &med_out, hls:
     // getSketch() is defined in kernels/sketch_helper.h
     sketchLoop: for(int i = 0; i < size; i++){
     #pragma HLS LOOP_TRIPCOUNT min=c_width*c_height max=c_width*c_height
-    #pragma HLS PIPELINE
+    #pragma HLS PIPELINE II=1
         boost_out >> boost_input;
         med_out >> median_input;
         sketch_out << getSketch(boost_input, median_input); // Sketch Operation
@@ -258,14 +258,14 @@ void output_stage(int *output, hls::stream<uint> &sketch_out, int width, int hei
         // Reads from sketch_out stream and flip the row
         flipOutput: for(int j = width; j > 0; j--){
         #pragma HLS LOOP_TRIPCOUNT min=c_width max=c_width
-        #pragma HLS PIPELINE
+        #pragma HLS PIPELINE II=1
             sketch_out >> result[j - 1];
         }
 
         // Burst write output
         writeOutput2: for(int k = 0; k < width; k++){
         #pragma HLS LOOP_TRIPCOUNT min=c_width max=c_width
-        #pragma HLS PIPELINE
+        #pragma HLS PIPELINE II=1
             output[i*width + k] = result[k];
         }
     }

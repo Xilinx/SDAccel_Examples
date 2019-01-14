@@ -85,7 +85,7 @@ pipe int p1 __attribute__((xcl_reqd_pipe_depth(32)));
 kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
 void input_stage(__global int *input, int size)
 {
-    __attribute__((xcl_pipeline_loop)) 
+    __attribute__((xcl_pipeline_loop(1))) 
     mem_rd: for (int i = 0 ; i < size ; i++)
     {
         //blocking Write command to pipe P0
@@ -98,7 +98,7 @@ void input_stage(__global int *input, int size)
 kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
 void adder_stage(int inc, int size)
 {
-    __attribute__((xcl_pipeline_loop))
+    __attribute__((xcl_pipeline_loop(1)))
     execute: for(int i = 0 ; i < size ;  i++)
     {
         int input_data, output_data;
@@ -116,7 +116,7 @@ void adder_stage(int inc, int size)
 kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
 void output_stage(__global int *output, int size)
 {
-    __attribute__((xcl_pipeline_loop))
+    __attribute__((xcl_pipeline_loop(1)))
     mem_wr: for (int i = 0 ; i < size ; i++)
     {
         //blocking read command to Pipe P1

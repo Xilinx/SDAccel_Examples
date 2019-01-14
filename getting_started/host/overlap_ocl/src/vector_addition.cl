@@ -45,8 +45,17 @@ void vadd(global int* c,
     {
         int size = BUFFER_SIZE;
         if (i + size > elements) size = elements - i;
-        readA: for (int j = 0 ; j < size ; j++) arrayA[j] = a[i+j];
-        readB: for (int j = 0 ; j < size ; j++) arrayB[j] = b[i+j];
-        vadd_writeC: for (int j = 0 ; j < size ; j++) c[i+j] = arrayA[j] + arrayB[j];
+
+        __attribute__((xcl_pipeline_loop(1)))
+        readA: for (int j = 0 ; j < size ; j++) {
+                arrayA[j] = a[i+j]; }
+
+        __attribute__((xcl_pipeline_loop(1)))
+        readB: for (int j = 0 ; j < size ; j++) {
+                arrayB[j] = b[i+j]; }
+
+        __attribute__((xcl_pipeline_loop(1)))
+        vadd_writeC: for (int j = 0 ; j < size ; j++) {
+                c[i+j] = arrayA[j] + arrayB[j]; }
     }
 }

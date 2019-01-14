@@ -48,7 +48,7 @@ nearest_neighbor(global int *out, global const int *points,
     int best_dist = INT_MAX;
     int s_point[MAX_DIMS];
 
-    __attribute__((xcl_pipeline_loop))
+    __attribute__((xcl_pipeline_loop(1)))
     for (int d = 0; d < dim; ++d) {
         s_point[d] = search_point[d];
     }
@@ -58,7 +58,7 @@ nearest_neighbor(global int *out, global const int *points,
         int dist = 0;
 
         // Calculate the distance in a n-dimensional space
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         dist_calc:
         for (int c = 0; c < dim; ++c) {
             int dx = points[dim * p + c] - s_point[c];
@@ -71,7 +71,7 @@ nearest_neighbor(global int *out, global const int *points,
         }
     }
 
-    __attribute__((xcl_pipeline_loop))
+    __attribute__((xcl_pipeline_loop(1)))
     write_best:
     for (int c = 0; c < dim; ++c) {
         out[c] = points[best_i * dim + c];
@@ -88,7 +88,7 @@ nearest_neighbor_loop_fusion(global int *out, global const int *points,
     int best_dist = INT_MAX;
     int s_point[MAX_DIMS];
 
-    __attribute__((xcl_pipeline_loop))
+    __attribute__((xcl_pipeline_loop(1)))
     for (int d = 0; d < dim; ++d) {
         s_point[d] = search_point[d];
     }
@@ -100,7 +100,7 @@ nearest_neighbor_loop_fusion(global int *out, global const int *points,
     // The combined loop performs the same number of iterations as the previous
     // implementation but this approach give the compiler more opportunity to
     // optimize the operations.
-    __attribute__((xcl_pipeline_loop))
+    __attribute__((xcl_pipeline_loop(1)))
     find_best:
     for (int p = 0, c = 0, itr = 0; itr < iterations; itr++) {
         int dx = points[dim * p + c] - s_point[c];
@@ -119,7 +119,7 @@ nearest_neighbor_loop_fusion(global int *out, global const int *points,
             c++;
         }
     }
-    __attribute__((xcl_pipeline_loop))
+    __attribute__((xcl_pipeline_loop(1)))
     write_best:
     for (int c = 0; c < dim; ++c) {
         out[c] = points[best_i * dim + c];

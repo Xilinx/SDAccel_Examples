@@ -98,7 +98,7 @@ void vadd(
 	// PIPELINE pragma reduces the initiation interval for loop by allowing the
 	// concurrent executions of operations
         vadd: for (int j = 0 ; j < chunk_size; j ++){
-            #pragma HLS PIPELINE
+        #pragma HLS PIPELINE II=1
             //perform vector addition
             vout_buffer[j] = v1_buffer[j] + v2_buffer[j]; 
         }

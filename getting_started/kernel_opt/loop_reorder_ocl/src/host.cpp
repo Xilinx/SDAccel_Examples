@@ -101,6 +101,7 @@ int main(int argc, char** argv)
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
+    OCL_CHECK(err, cl::Kernel krnl_loop_reorder(program,"mmult", &err));
 
     //Allocate Buffer in Global Memory
     std::vector<cl::Memory> inBufVec, outBufVec;
@@ -119,20 +120,14 @@ int main(int argc, char** argv)
 
     int size = DATA_SIZE;
 
-    auto krnl_loop_reorder = cl::KernelFunctor<cl::Buffer&, cl::Buffer&,
-                     cl::Buffer&, int>(program,"mmult", &err);
-
-    if (err != CL_SUCCESS) {
-                     printf("Error calling Kernel Functor: Error code is: %d\n", err);
-                     exit(EXIT_FAILURE);
-             }
+    OCL_CHECK(err, err = krnl_loop_reorder.setArg(0, buffer_in1));
+    OCL_CHECK(err, err = krnl_loop_reorder.setArg(1, buffer_in2));
+    OCL_CHECK(err, err = krnl_loop_reorder.setArg(2, buffer_output));
+    OCL_CHECK(err, err = krnl_loop_reorder.setArg(3, size));
 
     //Launch the Kernel
-    krnl_loop_reorder(cl::EnqueueArgs(q,cl::NDRange(1,1,1), cl::NDRange(1,1,1)),
-                        buffer_in1, buffer_in2, buffer_output, size);
-    
+    OCL_CHECK(err, err = q.enqueueTask(krnl_loop_reorder));
     q.finish();
-
 
     //Copy Result from Device Global Memory to Host Local Memory
     OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));

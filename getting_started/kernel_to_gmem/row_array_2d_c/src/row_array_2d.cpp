@@ -41,7 +41,7 @@ typedef hls::stream<DTYPE> my_data_fifo;
 void read_data(DTYPE *inx, my_data_fifo &inFifo) {
     read_loop_i: for(int i = 0; i < NUM_ROWS; ++i) {
         read_loop_jj: for (int jj = 0; jj < WORD_PER_ROW; ++jj) {
-#pragma HLS PIPELINE
+        #pragma HLS PIPELINE II=1
             inFifo << inx[WORD_PER_ROW*i+jj];;
         }
     }
@@ -51,7 +51,7 @@ void read_data(DTYPE *inx, my_data_fifo &inFifo) {
 void write_data(DTYPE *outx, my_data_fifo &outFifo) {
     write_loop_i: for(int i = 0; i < NUM_ROWS; ++i) {
         write_loop_jj: for (int jj = 0; jj < WORD_PER_ROW; ++jj) {
-#pragma HLS PIPELINE
+        #pragma HLS PIPELINE II=1
             outFifo >> outx[WORD_PER_ROW*i+jj];
         }
     }
@@ -61,7 +61,7 @@ void write_data(DTYPE *outx, my_data_fifo &outFifo) {
 void compute(my_data_fifo &inFifo, my_data_fifo &outFifo, int alpha) {
     compute_loop_i: for(int i = 0; i < NUM_ROWS; ++i) {
         compute_loop_jj: for (int jj = 0; jj < WORD_PER_ROW; ++jj) {
-#pragma HLS PIPELINE
+        #pragma HLS PIPELINE II=1
             DTYPE inTmp;
             inFifo >> inTmp;
             DTYPE outTmp = inTmp * alpha;

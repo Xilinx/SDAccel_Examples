@@ -90,7 +90,7 @@ void fir_naive(int *output,
         int acc = 0;
         shift_loop:
         for (int i = min(j,N_COEFF-1); i >= 0; i--) {
-        #pragma HLS PIPELINE
+        #pragma HLS PIPELINE II=1
             acc += signal[j-i] * coeff_reg[i];
         }
         output[j] = acc;

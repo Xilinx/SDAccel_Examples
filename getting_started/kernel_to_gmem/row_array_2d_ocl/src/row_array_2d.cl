@@ -39,7 +39,7 @@ OpenCL Kernel Example using AXI4-master interface to access row of data from 2D 
 void read_data(__global int* inx, int* buffer_in) 
 {
     for(int i = 0; i < NUM_ROWS; ++i) {
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         for (int j = 0; j < WORD_PER_ROW; ++j) {
             buffer_in[WORD_PER_ROW*i+j] = inx[WORD_PER_ROW*i+j];
         }
@@ -50,7 +50,7 @@ void read_data(__global int* inx, int* buffer_in)
 void write_data(__global int* outx, int* buffer_out) 
 {
     for(int i = 0; i < NUM_ROWS; ++i) {
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         for (int j = 0; j < WORD_PER_ROW; ++j) {
             outx[WORD_PER_ROW*i+j] = buffer_out[WORD_PER_ROW*i+j];
         }
@@ -61,7 +61,7 @@ void write_data(__global int* outx, int* buffer_out)
 void compute(int alpha, int* buffer_in, int* buffer_out) 
 {
     for(int i = 0; i < NUM_ROWS; ++i) {
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         for (int j = 0; j < WORD_PER_ROW; ++j) {
             int inTmp = buffer_in[WORD_PER_ROW*i+j];
             int outTmp = inTmp * alpha;

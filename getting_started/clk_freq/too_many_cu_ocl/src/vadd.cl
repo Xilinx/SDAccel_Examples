@@ -101,14 +101,14 @@ void vadd_GOOD(
             chunk_size = size - offset;
 
         // Burst read for in1_lcl
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         readIn1: for(int itr = 0 , i = 0 , j =0; itr < chunk_size; itr++, j++){
             if(j == BUFFER_SIZE) { j = 0 ; i++; }
             in1_lcl[i][j] = in1[global_id*BUFFER_SIZE + offset + itr];
         }
         
         // Burst read for in2_lcl
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         readIn2: for(int itr = 0 , i = 0 , j =0; itr < chunk_size; itr++, j++){
             if(j == BUFFER_SIZE) { j = 0 ; i++; }
             in2_lcl[i][j] = in2[global_id*BUFFER_SIZE + offset + itr];
@@ -130,7 +130,7 @@ void vadd_GOOD(
         // Note that the loop order is changed. This is done since the design
         // is to do 8 (NUM_CU) operations and compute 8 results in parallel.
         
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         vadd1: for(int i = 0; i < BUFFER_SIZE; i++){
             vadd2: for(int j = 0; j < NUM_CU; j++){
                 out_lcl[j][i] = in1_lcl[j][i] + in2_lcl[j][i];
@@ -142,7 +142,7 @@ void vadd_GOOD(
         // based on Work_Group which it belongs to.
         
         // Burst write from out_lcl
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         writeOut: for(int itr = 0 , i = 0 , j =0; itr < chunk_size; itr++, j++){
             if(j == BUFFER_SIZE) { j = 0 ; i++; }
             out[global_id*BUFFER_SIZE + offset + itr] = out_lcl[i][j];

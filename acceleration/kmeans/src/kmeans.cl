@@ -111,7 +111,7 @@ void kmeans(
     {
         VDATA_TYPE vValue;
         vValue = clusters[i];
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         cluster_read_l2:for(int vid = 0 ; (vid < VECTOR_SIZE ) && (fIdx < nfeatures) ; vid ++, fIdx ++)
         {
             cluster_features[clusterIdx] = vValue[vid];
@@ -146,7 +146,7 @@ void kmeans(
         int fIdx = 0;
         int pIdx = 0;
         //Reading Features of point into local memory
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         read_features:for (int i = 0 ; i < total_points * nfeatures; i++, fIdx++)
         {
             VDATA_TYPE vValue = feature[start_point_id * nfeatures + i];
@@ -173,7 +173,7 @@ void kmeans(
         int cfIdx = 0;
         fIdx = 0;
         int total_loop_count = ( (nfeatures -1) / PARALLEL_FEATURES + 1 )  * nclusters;
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         kmeans_ops:for (int i = 0; i < total_loop_count ; i ++) 
         {
             VDATA_TYPE vPoint[PARALLEL_FEATURES][PARALLEL_POINTS]__attribute__((xcl_array_partition(complete,0)));
@@ -238,7 +238,7 @@ void kmeans(
         }
 
         //Writing membership 
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         membership_write:for ( int i = 0 ; i < total_points; i++)
         {
             membership[start_point_id + i] = vIndex[i];

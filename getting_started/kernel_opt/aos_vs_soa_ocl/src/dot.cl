@@ -46,17 +46,17 @@ void dot_aos(global       int*  restrict result,
 
     int iterations = num_vertices / N;
     for (int i = 0; i < iterations; i++) {
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         load_pts:
         for (int j = 0; j < N; j++)
             lpts[j] = points[i*N+j];
 
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         compute:
         for (int j = 0; j < N; j++)
             out[j] = lpts[j].x * lpts[j].x + lpts[j].y * lpts[j].y + lpts[j].z * lpts[j].z;
 
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         store_r:
         for (int j = 0; j < N; j++)
             result[i*N+j] = out[j];
@@ -88,17 +88,17 @@ void dot_soa(global       int16 * restrict result,
 
   int iterations = num_vertices / (16*N);
   for (int i = 0; i < iterations; i++) {
-      __attribute__((xcl_pipeline_loop))
+      __attribute__((xcl_pipeline_loop(1)))
       load_x: for(int j = 0; j < N; j++) lx[j] = X[i*N+j];
-      __attribute__((xcl_pipeline_loop))
+      __attribute__((xcl_pipeline_loop(1)))
       load_y: for(int j = 0; j < N; j++) ly[j] = Y[i*N+j];
-      __attribute__((xcl_pipeline_loop))
+      __attribute__((xcl_pipeline_loop(1)))
       load_z: for(int j = 0; j < N; j++) lz[j] = Z[i*N+j];
 
-      __attribute__((xcl_pipeline_loop))
+      __attribute__((xcl_pipeline_loop(1)))
       compute: for(int j = 0; j < N; j++) out[j] = lx[j] * lx[j] + ly[j] * ly[j] + lz[j] * lz[j];
 
-      __attribute__((xcl_pipeline_loop))
+      __attribute__((xcl_pipeline_loop(1)))
       store_r: for(int j = 0; j < N; j++) result[i*N+j] = out[j];
   }
 }

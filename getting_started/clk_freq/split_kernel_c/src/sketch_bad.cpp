@@ -131,7 +131,7 @@ extern "C"
         
         readImg: for(int i = 0; i < width*height; i++){
         #pragma HLS LOOP_TRIPCOUNT min=c_width*c_height max=c_width*c_height 
-        #pragma HLS PIPELINE
+        #pragma HLS PIPELINE II=1
             image[i] = input[i];
         }
         
@@ -141,7 +141,7 @@ extern "C"
         #pragma HLS LOOP_TRIPCOUNT min=height max=height
             boostWidth: for(int col = 0; col < width; col++){
             #pragma HLS LOOP_TRIPCOUNT min=c_width max=c_width
-            #pragma HLS PIPELINE
+            #pragma HLS PIPELINE II
                 getWindow(image, rgbWindow, row, col, width, height);   // Get pixels within 3x3 aperture
                 
                 // Boost Value of the 3x3 rgbWindow
@@ -171,7 +171,7 @@ extern "C"
         // Write the result back into temp_res.
         sketchLoop: for(int i = 0; i < width*height; i++) {
         #pragma HLS LOOP_TRIPCOUNT min=c_width*c_height max=c_width*c_height
-        #pragma HLS PIPELINE
+        #pragma HLS PIPELINE II=1
             // Sketch operation on the current pixel of boost and median outputs
             // Boost operation output is in temp_res and
             // Median operation output is in med_out.
@@ -186,7 +186,7 @@ extern "C"
             // Reads from temp_res and flip the row and burst write output
             flipOutput2: for(int col = 0; col < width; col++){
             #pragma HLS LOOP_TRIPCOUNT min=c_width max=c_width
-            #pragma HLS PIPELINE
+            #pragma HLS PIPELINE II=1
                 output[row*width + col] = temp_res[row*width + width-col-1];
             }
         }

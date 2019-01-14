@@ -80,8 +80,8 @@ static void read_input(unsigned int *in, hls::stream<unsigned int> &inStream,
         int size)
 {
     mem_rd: for (int i = 0 ; i < size ; i++){
-#pragma HLS pipeline
-#pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
+    #pragma HLS PIPELINE II=1
+    #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
         //Blocking write command to inStream 
         inStream << in[i];
     }
@@ -92,8 +92,8 @@ static void compute_add(hls::stream<unsigned int> &inStream ,
         hls::stream<unsigned int> &outStream, int inc, int size)
 {
     execute: for (int i = 0 ; i < size ; i++){
-#pragma HLS pipeline
-#pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
+    #pragma HLS PIPELINE II=1
+    #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
         //Blocking read command from inStream and Blocking write command 
         //to outStream 
         outStream << (inStream.read() + inc);
@@ -105,8 +105,8 @@ static void write_result(unsigned int *out, hls::stream<unsigned int>
         &outStream , int size)
 {
     mem_wr: for (int i = 0 ; i < size ; i++){
-#pragma HLS pipeline
-#pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
+    #pragma HLS PIPELINE II=1
+    #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
         //Blocking read command to inStream 
         out[i] = outStream.read();
     }

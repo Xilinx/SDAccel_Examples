@@ -37,9 +37,10 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //______________________________________________________________________________
 void initQ (data_t *Q, data_t* din, int j) {
 
-	L_copy:  for (int i=0;i<CMWC_CYCLE;i++)
-#pragma HLS pipeline
-					 Q[i] = din[j*CMWC_CYCLE+i];
+    L_copy: 
+    for (int i=0;i<CMWC_CYCLE;i++)
+    #pragma HLS PIPELINE II=1
+        Q[i] = din[j*CMWC_CYCLE+i];
 }
 
 //______________________________________________________________________________
@@ -108,11 +109,12 @@ void dma (dout_t *mem_out, data_t *mem_in, int nofBlock) {
 	initQ(Q15,mem_in, 15); R15.init(Q15);
 
 // generate sequence one at a time
-	L_output: for (int i=0; i<nofBlock*maxSizeOfBlock; i++ ) {
-#pragma HLS LOOP_TRIPCOUNT min= minNofSample max = maxNofSample
-#pragma HLS pipeline II=1
+    L_output: 
+    for (int i=0; i<nofBlock*maxSizeOfBlock; i++ ) {
+    #pragma HLS LOOP_TRIPCOUNT min= minNofSample max = maxNofSample
+    #pragma HLS PIPELINE II=1
 
-		data_t t0  = R0.makeOne( );
+	    data_t t0  = R0.makeOne( );
 		data_t t1  = R1.makeOne( );
 		data_t t2  = R2.makeOne( );
 		data_t t3  = R3.makeOne( );

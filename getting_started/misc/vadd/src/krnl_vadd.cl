@@ -43,12 +43,12 @@ krnl_vadd(
     {
       int j;
       read_a:
-          __attribute__((xcl_pipeline_loop))
+          __attribute__((xcl_pipeline_loop(1)))
           for(j=0; j < N; j++)
             result[j] = a[i*N+j];
 
       read_b_write_c:	// simultaneously both read and write are supported
-            __attribute__((xcl_pipeline_loop))
+            __attribute__((xcl_pipeline_loop(1)))
             for(j=0; j < N; j++)
               c[i*N+j] = result[j] + b[i*N+j];
     }

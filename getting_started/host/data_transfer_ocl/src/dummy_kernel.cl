@@ -33,7 +33,8 @@ void dummy_kernel(__global uint *buffer0, __global uint *buffer1, uint size)
 {
     //Intentional empty kernel as this example doesn't require actual
     //kernel to work.
-
+    
+    __attribute__((xcl_pipeline_loop(1)))
     for(uint i = 0; i < size ; i++)
      {
        buffer0[i] = buffer1[i];

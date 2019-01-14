@@ -102,7 +102,7 @@ Kernel Description (Good Example) :
 void input_stage(__global int *input, int *boost_in, int *med_in, int size)
 {
     // Burst Read on input and write to boost_in & med_in streams.
-    __attribute__((xcl_pipeline_loop))
+    __attribute__((xcl_pipeline_loop(1)))
     for(int i = 0; i < size; i++){
         int in_lcl = input[i];
         boost_in[i] = in_lcl;
@@ -127,7 +127,7 @@ void boost_stage(int *boost_in, int *boost_out, int width, int height)
     // Fetch first lines 
     int initial_rows = 2;
     for(int i = 0; i < initial_rows; i++){
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         for(int j = 0; j < width; j++){
             if(i == 0){
                 linebuf[0][j] = boost_in[i * width + j];
@@ -189,7 +189,7 @@ void median_stage(int *med_in, int *med_out, int width, int height)
     // Fetch first lines
     int initial_rows = 2;
     for(int i = 0; i < initial_rows; i++){
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         for(int j = 0; j < width; j++){
             if(i == 0){
                 linebuf[0][j] = med_in[i * width + j];
@@ -240,7 +240,7 @@ void sketch_stage(int *boost_out, int *med_out, int *sketch_out, int size)
     // Read inputs from the boost_out and med_out streams.
     // Do Sketch Operation and write into sketch_out stream.
     // getSketch() is defined in kernels/sketch_helper.h
-    __attribute__((xcl_pipeline_loop))
+    __attribute__((xcl_pipeline_loop(1)))
     for(int i = 0; i < size; i++){
         boost_input   = boost_out[i];
         median_input  = med_out[i];
@@ -258,14 +258,14 @@ void output_stage(__global int *output, int *sketch_out, int width, int height)
     for(int i = 0 ; i < height; i++){
 
         // Reads from sketch_out stream and flip the row
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         for(int j = width; j > 0; j--){
             result[j - 1] = sketch_out[i * width + count];
             count++;
         }
         count = 0;
         // Burst write output
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         for(int k = 0; k < width; k++){
             output[i * width + k] = result[k];
         }

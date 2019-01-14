@@ -88,7 +88,7 @@ void sketch_BAD( const __global int *input,     // Input image
     // Holds the rows/lines from which the data is to be picked
     int lineAddr[WINDOW] __attribute__((xcl_array_partition(complete, 1)));
     
-    __attribute__((xcl_pipeline_loop)) 
+    __attribute__((xcl_pipeline_loop(1))) 
     readImg: for(int i = 0; i < width*height; i++){
         image[i] = input[i];
     }
@@ -169,7 +169,7 @@ void sketch_BAD( const __global int *input,     // Input image
     // Do sketch operation on boost and median outputs.
     // Boost outputs are present in temp_res
     // Write the result back into temp_res.
-    __attribute__((xcl_pipeline_loop)) 
+    __attribute__((xcl_pipeline_loop(1))) 
     sketchLoop: for(int i = 0; i < width*height; i++) {
         // Sketch operation on the current pixel of boost and median outputs
         // Boost operation output is in temp_res and
@@ -182,7 +182,7 @@ void sketch_BAD( const __global int *input,     // Input image
     // Burst write back results onto output
     flipOutput1: for(int row = 0 ; row < height ; row++){
         // Reads from temp_res and flip the row and burst write output
-        __attribute__((xcl_pipeline_loop)) 
+        __attribute__((xcl_pipeline_loop(1))) 
         flipOutput2: for(int col = 0; col < width; col++){
             output[row*width + col] = temp_res[row*width + width-col-1];
         }

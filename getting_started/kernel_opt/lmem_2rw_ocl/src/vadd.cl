@@ -66,7 +66,10 @@ void vadd(
             chunk_size = size - i;
 
         // burst read of v1 and v2 vector from global memory
+        __attribute__((xcl_pipeline_loop(1)))
         for (int j = 0 ; j < chunk_size; j++) v1_buffer[j] = in1[i+j];
+
+        __attribute__((xcl_pipeline_loop(1)))
         for (int j = 0 ; j < chunk_size; j++) v2_buffer[j] = in2[i+j];
 
         //FPGA implementation, local array is mostly implemented as BRAM Memory block. 
@@ -80,13 +83,14 @@ void vadd(
         //Which means two iterations of loop will be executed together and as a result 
         // it will double the performance.
         __attribute__((opencl_unroll_hint(2)))
-        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_pipeline_loop(1)))
         vadd: for (int j = 0 ; j < chunk_size; j ++){
             //perform vector addition
             vout_buffer[j] = v1_buffer[j] + v2_buffer[j]; 
         }
 
         //burst write the result
+        __attribute__((xcl_pipeline_loop(1)))
         for (int j = 0 ; j < chunk_size; j++) out[i+j] = vout_buffer[j];
     }
 }
