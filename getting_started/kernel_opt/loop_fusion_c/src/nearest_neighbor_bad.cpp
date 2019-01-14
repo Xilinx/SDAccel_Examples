@@ -59,7 +59,7 @@ void nearest_neighbor(int *out, const int *points,
     int s_point[MAX_DIMS];
 
     for (int d = 0; d < dim; ++d) {
-    #pragma HLS PIPELINE
+    #pragma HLS PIPELINE II=1
         s_point[d] = search_point[d];
     }
 
@@ -70,7 +70,7 @@ void nearest_neighbor(int *out, const int *points,
         // Calculate the distance in a n-dimensional space
         dist_calc:
         for (int c = 0; c < dim; ++c) {
-        #pragma HLS PIPELINE
+        #pragma HLS PIPELINE II=1
             int dx = points[dim * p + c] - s_point[c];
             dist += dx * dx;
         }
@@ -83,7 +83,7 @@ void nearest_neighbor(int *out, const int *points,
 
     write_best:
     for (int c = 0; c < dim; ++c) {
-    #pragma HLS PIPELINE
+    #pragma HLS PIPELINE II=1
         out[c] = points[best_i * dim + c];
     }
 }

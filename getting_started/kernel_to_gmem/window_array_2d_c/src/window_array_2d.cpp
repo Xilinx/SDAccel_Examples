@@ -44,17 +44,17 @@ void read_data(DTYPE *inx, my_data_fifo &inFifo) {
     DTYPE tile[TILE_HEIGHT][TILE_WIDTH];
     rd_loop_i: for(int i = 0; i < TILE_PER_COLUMN; ++i) {
         rd_loop_j: for (int j = 0; j < TILE_PER_ROW; ++j) {
-#pragma HLS DATAFLOW
+        #pragma HLS DATAFLOW
             rd_buf_loop_m: for (int m = 0; m < TILE_HEIGHT; ++m) {
                 rd_buf_loop_n: for (int n = 0; n < TILE_WIDTH; ++n) {
-#pragma HLS PIPELINE
+                #pragma HLS PIPELINE II=1
                     // should burst TILE_WIDTH in WORD beat
                     tile[m][n] = inx[TILE_HEIGHT*TILE_PER_ROW*TILE_WIDTH*i+TILE_PER_ROW*TILE_WIDTH*m+TILE_WIDTH*j+n];
                 }
             }
             rd_loop_m: for (int m = 0; m < TILE_HEIGHT; ++m) {
                 rd_loop_n: for (int n = 0; n < TILE_WIDTH; ++n) {
-#pragma HLS PIPELINE
+                #pragma HLS PIPELINE II=1
                     inFifo << tile[m][n];
                 }
             }
@@ -67,17 +67,17 @@ void write_data(DTYPE *outx, my_data_fifo &outFifo) {
     DTYPE tile[TILE_HEIGHT][TILE_WIDTH];
     wr_loop_i: for(int i = 0; i < TILE_PER_COLUMN; ++i) {
         wr_loop_j: for (int j = 0; j < TILE_PER_ROW; ++j) {
-#pragma HLS DATAFLOW
+        #pragma HLS DATAFLOW
             wr_buf_loop_m: for (int m = 0; m < TILE_HEIGHT; ++m) {
                 wr_buf_loop_n: for (int n = 0; n < TILE_WIDTH; ++n) {
-#pragma HLS PIPELINE
+                #pragma HLS PIPELINE II=1
                     // should burst TILE_WIDTH in WORD beat
                     outFifo >> tile[m][n];
                 }
             }
             wr_loop_m: for (int m = 0; m < TILE_HEIGHT; ++m) {
                 wr_loop_n: for (int n = 0; n < TILE_WIDTH; ++n) {
-#pragma HLS PIPELINE
+                #pragma HLS PIPELINE II=1
                     outx[TILE_HEIGHT*TILE_PER_ROW*TILE_WIDTH*i+TILE_PER_ROW*TILE_WIDTH*m+TILE_WIDTH*j+n] = tile[m][n];
                 }
             }
@@ -90,7 +90,7 @@ void compute(my_data_fifo &inFifo, my_data_fifo &outFifo, int alpha) {
     compute_loop_i: for(int i = 0; i < TILE_PER_COLUMN*TILE_HEIGHT; ++i) {
         compute_loop_j: for (int j = 0; j < TILE_PER_ROW; ++j) {
             compute_loop_m: for (int m = 0; m < TILE_WIDTH; ++m) {
-#pragma HLS PIPELINE
+            #pragma HLS PIPELINE II=1
                 DTYPE inTmp;
                 inFifo >> inTmp;
                 DTYPE outTmp = inTmp * alpha;

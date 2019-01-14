@@ -89,8 +89,8 @@ const unsigned int c_size = DATA_SIZE;
 static void read_input(int *input, hls::stream<int> &inStream , int size)
 {
     mem_rd: for (int i = 0 ; i < size ; i++){
-#pragma HLS pipeline
-#pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
+    #pragma HLS PIPELINE II=1
+    #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
         //Blocking write command to inStream 
         inStream << input[i];
     }
@@ -100,8 +100,8 @@ static void read_input(int *input, hls::stream<int> &inStream , int size)
 static void adder(hls::stream<int> &inStream , hls::stream<int> &outStream, int incr, int size)
 {
     execute: for (int i = 0 ; i < size ; i ++){
-#pragma HLS pipeline
-#pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
+    #pragma HLS PIPELINE II=1
+    #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
         int inVar = inStream.read();
         int adderedVal = inVar + incr;
         //Blocking read command from inStream and Blocking write command 
@@ -114,8 +114,8 @@ static void adder(hls::stream<int> &inStream , hls::stream<int> &outStream, int 
 static void write_result(int *output, hls::stream<int> &outStream , int size)
 {
     mem_wr: for (int i = 0 ; i < size ; i++){
-#pragma HLS pipeline
-#pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
+    #pragma HLS PIPELINE II=1
+    #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
         //Blocking read command from OutStream  
         output[i] = outStream.read();
     }

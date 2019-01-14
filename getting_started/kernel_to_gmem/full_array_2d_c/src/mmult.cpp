@@ -94,7 +94,7 @@ extern "C" {
                 int result = 0;
                 for (int k = 0; k < dim; k++) {
                 #pragma HLS LOOP_TRIPCOUNT min=c_dim_min max=c_dim_max
-                #pragma HLS pipeline
+                #pragma HLS PIPELINE II=1
                     result += bufa[row][k] * bufb[k][col];
                 }
                 bufc[row][col] = result;

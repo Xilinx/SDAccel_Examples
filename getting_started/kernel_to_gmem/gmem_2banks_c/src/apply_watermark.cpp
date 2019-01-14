@@ -107,10 +107,9 @@ void apply_watermark(TYPE *input, TYPE *output, int width, int height) {
 
 
     // Process the whole image 
-    image_traverse: for (int idx = 0, x = 0 , y = 0  ; idx < size ; ++idx, x+= DATA_SIZE)
-    {
-      #pragma HLS LOOP_TRIPCOUNT min=c_image_size max=c_image_size
-      #pragma HLS pipeline II=1
+    image_traverse: for (int idx = 0, x = 0 , y = 0  ; idx < size ; ++idx, x+= DATA_SIZE) {
+    #pragma HLS LOOP_TRIPCOUNT min=c_image_size max=c_image_size
+    #pragma HLS PIPELINE II=1
       // Read the next 16 Pixels
       TYPE tmp = input[idx];
 
@@ -121,8 +120,7 @@ void apply_watermark(TYPE *input, TYPE *output, int width, int height) {
       }
 
       //Unrolling below loop to process all 16 pixels concurrently
-      watermark: for ( int i = 0 ; i < DATA_SIZE ; i++)
-      {
+      watermark: for ( int i = 0 ; i < DATA_SIZE ; i++) {
       #pragma HLS unroll
           int tmp_x = x + i;
           int tmp_y = y;

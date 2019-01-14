@@ -161,8 +161,8 @@ extern "C"{
         // Burst write from output matrices to global memory
         // Burst write from matrix C
         writeC: for(int itr = 0 , i = 0, j = 0; itr < size * size; itr++, j++) {
-            #pragma HLS PIPELINE II=1
-            #pragma HLS LOOP_TRIPCOUNT min=c_size*c_size max=c_size*c_size
+        #pragma HLS PIPELINE II=1
+        #pragma HLS LOOP_TRIPCOUNT min=c_size*c_size max=c_size*c_size
             if(j == size) { j = 0 ; i++; }
             out[itr] = C[i][j];
         }

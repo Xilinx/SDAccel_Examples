@@ -71,10 +71,10 @@ void vadd(int *a, int size, int inc_value){
         //memcpy requires a local buffer to store the results of the memory transaction
         memcpy(burstbuffer,&a[i],chunk_size * sizeof (int));
         
-        //calculate and write results to global memory, the sequential write in a for loop can be inferred to a memory burst access automatically
+        //calculate and write results to global memory, the sequential write in a for loop can be inferred to a memory burst access 
         calc_write: for(int j=0; j < chunk_size; j++){
         #pragma HLS LOOP_TRIPCOUNT min=c_size_max max=c_chunk_sz
-        #pragma HLS PIPELINE
+        #pragma HLS PIPELINE II=1
             burstbuffer[j] = burstbuffer[j] + inc_value;
             a[i+j] = burstbuffer[j];
         }

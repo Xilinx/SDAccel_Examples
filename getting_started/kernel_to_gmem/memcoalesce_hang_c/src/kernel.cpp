@@ -101,9 +101,8 @@ void dummy_op(int *din1,int *din2,int *din3,int *dout)
         memcpy(din2_buf_0,&din2[i*LENGTH], LENGTH * sizeof (int));
         memcpy(din1_buf_0,&din1[i*LENGTH], LENGTH * sizeof (int));
         int sum = 0;
-        LOWER_LOOP:for (int j = 0; j <  LENGTH; j++) 
-        {
-         #pragma HLS pipeline II=1
+        LOWER_LOOP:for (int j = 0; j <  LENGTH; j++) {
+        #pragma HLS PIPELINE II=1
           int Si = din1_buf_0[j] + din2_buf_0[j] + din3[j];
           sum += Si;
         }

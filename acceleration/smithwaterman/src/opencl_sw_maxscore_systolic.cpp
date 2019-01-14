@@ -46,7 +46,7 @@ typedef struct _pe{
 }pe;
 
 void initPE(pe *pex){
-#pragma HLS PIPELINE
+#pragma HLS PIPELINE II=1
 	for(int i = 0; i < MAXPE; i++){
 		pex[i].d = 0;
 		pex[i].p = 0;
@@ -60,7 +60,7 @@ static short  colIter = 0;
 
 
 void updatePE(pe *pex, uint2_t d, uint2_t q, short n, short nw, short w, short r, short c){
-#pragma HLS PIPELINE
+#pragma HLS PIPELINE II=1
     short max = 0;
     short match = (d == q) ? MATCH : MISS_MATCH;
     short x1 = nw+match;
@@ -79,7 +79,7 @@ void updatePE(pe *pex, uint2_t d, uint2_t q, short n, short nw, short w, short r
 
 
 void executePE(short r,short c,pe *pex, pe*ppex, uint2_t *d, uint2_t *q){
-#pragma HLS PIPELINE
+#pragma HLS PIPELINE II=1
     short nw, w, n;
 
     if (r == 0){
@@ -96,7 +96,7 @@ void executePE(short r,short c,pe *pex, pe*ppex, uint2_t *d, uint2_t *q){
 }
 
 void executeFirstPE(short r,short c,pe *p, uint2_t *d, uint2_t *q, short nw, short w){
-#pragma HLS PIPELINE
+#pragma HLS PIPELINE II=1
     short  n;
     if (r == 0){
         n = 0;
@@ -118,11 +118,11 @@ void swCoreB(uint2_t *d, uint2_t *q, short *maxr, short *maxc, short *maxv, shor
     d+= stripe*MAXPE;
 	initPE(myPE);
     for(loop = 0; loop < rows; ++loop){
-#pragma HLS PIPELINE
+    #pragma HLS PIPELINE II=1
         short rowmaxv = MINVAL;
         short rowmaxpe = 0;
         for(i = 0; i < MAXPE; i++){
-#pragma HLS inline region recursive
+        #pragma HLS inline region recursive
             if(i == 0){
                 short nw = w;
                 w = (stripe == 0) ? 0 : iterB[loop];
@@ -223,7 +223,7 @@ void sw(uint2_t d[MAXCOL], uint2_t q[MAXROW], short *maxr, short *maxc, short *m
 template <int BUFFERSZ>
 void intTo2bit(unsigned int *buffer, uint2_t *buffer2b){
  int i, j;
-#pragma HLS PIPELINE
+#pragma HLS PIPELINE II=1
  for(i = 0; i < BUFFERSZ; ++i){
         for(j = 0; j < 16; ++j){
             buffer2b[16*i+j] = (buffer[i] & (3 << (2*j)))>>(2*j);
@@ -279,7 +279,7 @@ extern "C" {
             swMaxScore(readRefPacked, out);
             /*PE OUT to outbuf*/
             for(int i = 0; i < NUMPACKED; ++i){
-#pragma HLS PIPELINE
+            #pragma HLS PIPELINE
                 outbuf[3*i] = out[i][0];
                 outbuf[3*i+1] = out[i][1];
                 outbuf[3*i+2] = out[i][2];

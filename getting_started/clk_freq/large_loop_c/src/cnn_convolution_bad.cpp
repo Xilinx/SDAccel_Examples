@@ -136,14 +136,14 @@ extern "C"
         // Burst Read Image
         readImg: for(int i = 0; i < i_chan * ISize * ISize; i++){
         #pragma HLS LOOP_TRIPCOUNT min=c_ichan*c_isize*c_isize max=c_ichan*c_isize*c_isize
-        #pragma HLS PIPELINE
+        #pragma HLS PIPELINE II=1
             img_lcl[i] = image[i];
         }
 
         // Burst Read Weights
         readWt: for(int i = 0; i < o_chan * WInChan * WSize * WSize; i++) {
         #pragma HLS LOOP_TRIPCOUNT min=c_ochan*c_ichan*c_wsize*c_wsize max=c_ochan*c_ichan*c_wsize*c_wsize
-        #pragma HLS PIPELINE
+        #pragma HLS PIPELINE II=1
             wgt_lcl[i] = weights[i];
         }
 
@@ -162,7 +162,7 @@ extern "C"
                         convILoop: for(int i = 0; i < WSize; i++) {
                             // Runs over filter windows in X-direction
                             convJLoop: for(int j = 0; j < WSize; j++) {
-                            #pragma HLS PIPELINE
+                            #pragma HLS PIPELINE II=1
                                 // Calculates padding boundaries in X & Y direction
                                 int xVal = x*Stride + j-Padding, yVal = y*Stride + i-Padding;
                                 
@@ -183,7 +183,7 @@ extern "C"
         // Burst write output
         writeOut: for(int i = 0; i < o_chan * OSize * OSize; i++) {
         #pragma HLS LOOP_TRIPCOUNT min=c_ichan*c_osize*c_osize max=c_ochan*c_osize*c_osize
-        #pragma HLS PIPELINE
+        #pragma HLS PIPELINE II=1
             out[i] = out_lcl[i];
         }
 
