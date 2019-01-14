@@ -35,6 +35,8 @@ int main(int argc, char** argv)
 {
     size_t vector_size_bytes = sizeof(int) * DATA_SIZE;
     cl_int err;
+    char* fileBuf;
+    unsigned fileBufSize;
     // Allocate Memory in Host Memory
     // When creating a buffer with user pointer (CL_MEM_USE_HOST_PTR), under the hood user ptr 
     // is used if it is properly aligned. when not aligned, runtime had no choice but to create
@@ -68,9 +70,11 @@ int main(int argc, char** argv)
     // targeted mode (sw_emu/hw_emu/hw) and for targeted platforms.
     std::string binaryFile = xcl::find_binary_file(device_name,"vadd");
 
-    // import_binary_file() ia a utility API which will load the binaryFile
+    // read_binary_file() ia a utility API which will load the binaryFile
     // and will return Binaries.
-    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
+
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel krnl_vector_add(program,"vadd", &err));
@@ -115,6 +119,8 @@ int main(int argc, char** argv)
             break;
         }
     }
+
+    delete[] fileBuf;
 
     std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl; 
     return (match ? EXIT_SUCCESS : EXIT_FAILURE);
