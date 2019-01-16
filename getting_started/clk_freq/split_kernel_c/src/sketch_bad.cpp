@@ -141,7 +141,7 @@ extern "C"
         #pragma HLS LOOP_TRIPCOUNT min=height max=height
             boostWidth: for(int col = 0; col < width; col++){
             #pragma HLS LOOP_TRIPCOUNT min=c_width max=c_width
-            #pragma HLS PIPELINE II
+            #pragma HLS PIPELINE
                 getWindow(image, rgbWindow, row, col, width, height);   // Get pixels within 3x3 aperture
                 
                 // Boost Value of the 3x3 rgbWindow
