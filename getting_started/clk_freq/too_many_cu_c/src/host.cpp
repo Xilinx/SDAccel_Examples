@@ -79,9 +79,9 @@ bool run_opencl_vadd(
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     cl::Kernel krnl_vector_add;
     if (good) {
-	OCL_CHECK(err, krnl_vector_add = cl::Kernel(program,"vadd_GOOD", &err));
+    OCL_CHECK(err, krnl_vector_add = cl::Kernel(program,"vadd_GOOD", &err));
     } else {
-	OCL_CHECK(err, krnl_vector_add = cl::Kernel(program, "vadd_BAD", &err));
+    OCL_CHECK(err, krnl_vector_add = cl::Kernel(program, "vadd_BAD", &err));
     }
 
     std::cout << "Starting " << (good ? "GOOD" : "BAD") << " Kernel" << std::endl;

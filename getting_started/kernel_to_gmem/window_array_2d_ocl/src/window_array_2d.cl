@@ -31,7 +31,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Description: 
 OpenCL Kernel Example using AXI4-master interface to access window of data from 2D array
 *******************************************************************************/
-    			      
+                      
 //Includes 
 #include "host.h"
 

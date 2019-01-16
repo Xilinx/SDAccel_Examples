@@ -76,8 +76,8 @@ int main(int argc, char* argv[])
     cv::Mat inputImage;
     inputImageRaw.convertTo(inputImage, CV_16U, 255);
 
-	size_t image_size_bytes = sizeof(unsigned short) * IMAGE_WIDTH_PIXELS * IMAGE_HEIGHT_PIXELS;
-	cl_int err;
+    size_t image_size_bytes = sizeof(unsigned short) * IMAGE_WIDTH_PIXELS * IMAGE_HEIGHT_PIXELS;
+    cl_int err;
     // The get_xil_devices will return vector of Xilinx Devices
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
     std::vector<unsigned short,aligned_allocator<unsigned short>> image(image_size_bytes, 16);
     
     for(int i = 0; i < IMAGE_HEIGHT_PIXELS/32; i++) {
-    	for(int j = 0; j < IMAGE_WIDTH_PIXELS; j++) {
+        for(int j = 0; j < IMAGE_WIDTH_PIXELS; j++) {
             for(int k = 0; k < 32; k++) {
                image[i*IMAGE_WIDTH_PIXELS*32 + j*32 + k] = inputImage.at<ushort>(i*32 + k,j);
             }
@@ -142,7 +142,7 @@ int main(int argc, char* argv[])
     /* Copy image to mat */
     cv::Mat result_eq;
     result_eq.create(inputImage.rows,inputImage.cols,CV_16U);
-	OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
     q.finish();
 
     OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart));

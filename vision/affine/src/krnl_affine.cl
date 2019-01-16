@@ -102,7 +102,7 @@ void affine_kernel(__global unsigned short *image1,
    {
 
 
-		__attribute__((xcl_pipeline_loop(1)))
+        __attribute__((xcl_pipeline_loop(1)))
       for (x = 0; x < X_SIZE; x++)
       {
          x_new    = i_beta[0] + i_affine[0][0]*(x-X_SIZE/2.0f) + i_affine[0][1]*(y-Y_SIZE/2.0f) + X_SIZE/2.0f;
@@ -116,7 +116,7 @@ void affine_kernel(__global unsigned short *image1,
       
          if ((m >= 0) && (m + 1 < X_SIZE) && (n >= 0) && (n+1 < Y_SIZE))
          {
-		      gray_new = (1.0f - y_frac) * ((1.0f - x_frac) * (image1[(n * X_SIZE) + m])       + x_frac * (image1[(n * X_SIZE) + m + 1])) + 
+              gray_new = (1.0f - y_frac) * ((1.0f - x_frac) * (image1[(n * X_SIZE) + m])       + x_frac * (image1[(n * X_SIZE) + m + 1])) + 
                                y_frac  * ((1.0f - x_frac) * (image1[((n + 1) * X_SIZE) + m]) + x_frac * (image1[((n + 1) * X_SIZE) + m + 1]));
 
             output_buffer[x] = (unsigned short)gray_new;

@@ -33,7 +33,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 
 #ifdef PUB_ZMQ
-	#include "zmq.hpp"
+    #include "zmq.hpp"
 #endif
 
 using namespace std;
@@ -41,31 +41,31 @@ using namespace std;
 class MatchArray {
 public:
 #ifdef PUB_ZMQ
-	MatchArray(int numSamples, int readSz, int refSz, const zmq::socket_t* ppub);
+    MatchArray(int numSamples, int readSz, int refSz, const zmq::socket_t* ppub);
 #else
-	MatchArray(int numSamples, int readSz, int refSz);
+    MatchArray(int numSamples, int readSz, int refSz);
 #endif
 
-	~MatchArray();
-	void populateArray(unsigned int *pairs, unsigned int *maxval);
-	void populateArray(char **rd, char **rf, unsigned int *mr, unsigned int *mc,
-			unsigned int *mv);
-	void dumpArray();
+    ~MatchArray();
+    void populateArray(unsigned int *pairs, unsigned int *maxval);
+    void populateArray(char **rd, char **rf, unsigned int *mr, unsigned int *mc,
+            unsigned int *mv);
+    void dumpArray();
 
 private:
 #ifdef PUB_ZMQ
-	zmq::socket_t* m_ppub;
+    zmq::socket_t* m_ppub;
 #endif
 
-	int m_counter;
+    int m_counter;
 
-	char **readStrings;
-	char **refStrings;
-	short *maxv;
-	short *maxc;
-	short *maxr;
-	int numSamples;
-	int readSize;
-	int refSize;
+    char **readStrings;
+    char **refStrings;
+    short *maxv;
+    short *maxc;
+    short *maxr;
+    int numSamples;
+    int readSize;
+    int refSize;
 };
 #endif

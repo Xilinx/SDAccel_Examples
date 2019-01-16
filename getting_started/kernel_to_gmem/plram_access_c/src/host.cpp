@@ -95,7 +95,7 @@ void mmult_fpga (
     // Need to use cl_mem_ext_ptr_t with the new Kernel and Argument Index scheme
     // for PLRAMs
     cl_mem_ext_ptr_t buffer_in1_ext = {0};
-	buffer_in1_ext.obj = NULL;
+    buffer_in1_ext.obj = NULL;
     cl_mem_ext_ptr_t buffer_output_ext = {0};
     buffer_output_ext.obj = NULL;
 

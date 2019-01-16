@@ -46,8 +46,8 @@ cl::Program load_cl2_binary(cl::Program::Binaries, cl::Device device,
 // This example demonstrates how to split work among multiple devices.
 int main(int argc, char **argv) {
     if (argc != 2) {
-        std::cout << 	"The program expects only one argument which is the full path to "
-        				"the OpenCL kernel binary (xclbin file)\n" << std::endl;
+        std::cout <<     "The program expects only one argument which is the full path to "
+                        "the OpenCL kernel binary (xclbin file)\n" << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -107,11 +107,11 @@ int main(int argc, char **argv) {
         size_t offset = d * elements_per_device;
         std::cout << "Creating Buffers[" << d << "]..." <<std::endl;
         OCL_CHECK(err, buffer_a[d] =
-        		cl::Buffer(contexts[d], CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, size_per_device, &A[offset], &err));
+                cl::Buffer(contexts[d], CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, size_per_device, &A[offset], &err));
         OCL_CHECK(err, buffer_b[d] =
-        		cl::Buffer(contexts[d], CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, size_per_device, &B[offset], &err));
+                cl::Buffer(contexts[d], CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, size_per_device, &B[offset], &err));
         OCL_CHECK(err, buffer_result[d] =
-        		cl::Buffer(contexts[d], CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, size_per_device, &C[offset], &err));
+                cl::Buffer(contexts[d], CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, size_per_device, &C[offset], &err));
     }
 
     vector<cl::Event> events(device_count);
@@ -156,8 +156,8 @@ int main(int argc, char **argv) {
  }
 cl::Program load_cl2_binary(cl::Program::Binaries bins, cl::Device device,
                           cl::Context context) {
-	cl_int err;
-	std::vector<cl::Device> devices(1, device);
-	OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
-	return program;
+    cl_int err;
+    std::vector<cl::Device> devices(1, device);
+    OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
+    return program;
 }

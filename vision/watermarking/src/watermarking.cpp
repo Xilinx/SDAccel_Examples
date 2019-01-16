@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
     cl_mem_ext_ptr_t inExt, outExt;  // Declaring two extensions for both buffers
     inExt.flags  = 0; // argument index ( 0 means that this buffer will be passed to argument 0 of the kernel )
     outExt.flags = 1; // argument index ( 1 means that this buffer will be passed to argument 1 of the kernel )
-    inExt.obj 	 = inputImage.data();
+    inExt.obj      = inputImage.data();
     outExt.obj   = outImage.data(); 
     // Setting kernel handle to Param
     inExt.param  = krnl ; outExt.param = krnl;
@@ -101,9 +101,9 @@ int main(int argc, char* argv[])
     // Device-to-host communication
     std::cout << "Creating Buffers..." << std::endl;
     OCL_CHECK(err, cl::Buffer buffer_inImage(context, CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR,
-    		image_size_bytes, &inExt, &err));
+            image_size_bytes, &inExt, &err));
     OCL_CHECK(err, cl::Buffer buffer_outImage(context, CL_MEM_WRITE_ONLY | CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR,
-    		image_size_bytes, &outExt, &err));
+            image_size_bytes, &outExt, &err));
 
     // Copy input data to device global memory
     std::cout<< "Copying data..." << std::endl;

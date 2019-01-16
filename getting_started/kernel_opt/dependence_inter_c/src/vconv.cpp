@@ -43,8 +43,8 @@ static void read_input(int *in, hls::stream<int> &inStream, int size)
     mem_rd: for (int i = 0 ; i < size ; i++){
     #pragma HLS PIPELINE II=1
     #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
-    	//Blocking write command to inStream 
-    	inStream << in[i];
+        //Blocking write command to inStream 
+        inStream << in[i];
     }
 }
 
@@ -58,27 +58,27 @@ static void vconv_compute(hls::stream<int> &inStream ,
         VConvW:for(int row = 0; row < width; ++row) {
         #pragma HLS DEPENDENCE variable=linebuf inter WAR false
         #pragma HLS PIPELINE
-        	// HLS Dependence pragma provides extra dependency information to compiler.
-        	// For example here linebuf has false inter dependency. Which means
-        	// each iteration of loop is independent for linebuf access. 
-        	// The dependency on the specified direction WAR (Write-After-Read), 
-        	// which states the read instruction gets a value that is
-        	// overwritten by the write instruction, has also been removed.
-        	// It allows compiler to ignore dependency of linebuf and generate
-        	// a pipeline with lower II count. 
+            // HLS Dependence pragma provides extra dependency information to compiler.
+            // For example here linebuf has false inter dependency. Which means
+            // each iteration of loop is independent for linebuf access. 
+            // The dependency on the specified direction WAR (Write-After-Read), 
+            // which states the read instruction gets a value that is
+            // overwritten by the write instruction, has also been removed.
+            // It allows compiler to ignore dependency of linebuf and generate
+            // a pipeline with lower II count. 
         
-        	// If user does not provide this pragma, by default compiler assumes
-        	// dependency exists on linebuf between iterations. As a result, 
-        	// compiler schedules unoptimized design with larger II factor
-        	// which in turn leads to slow performance.
-        	int in_val  = inStream.read();
-        	int out_val = 0;
-        	VConv:for(int i = 0; i < K; i++) {
-			    int vwin_val = i < (K - 1) ? linebuf[i][row] : in_val;
+            // If user does not provide this pragma, by default compiler assumes
+            // dependency exists on linebuf between iterations. As a result, 
+            // compiler schedules unoptimized design with larger II factor
+            // which in turn leads to slow performance.
+            int in_val  = inStream.read();
+            int out_val = 0;
+            VConv:for(int i = 0; i < K; i++) {
+                int vwin_val = i < (K - 1) ? linebuf[i][row] : in_val;
                 out_val += vwin_val * vcoeff[i];
-		
-            	if (i > 0)
-				    linebuf[i-1][row] = vwin_val;
+        
+                if (i > 0)
+                    linebuf[i-1][row] = vwin_val;
             } 
             outStream << out_val;
         }
@@ -91,8 +91,8 @@ static void write_result(int *out, hls::stream<int> &outStream , int size)
     mem_wr: for (int i = 0 ; i < size ; i++){
     #pragma HLS PIPELINE II=1
     #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
-    	//Blocking read command to outStream
-    	out[i] = outStream.read();
+        //Blocking read command to outStream
+        out[i] = outStream.read();
     }
 }
                                          

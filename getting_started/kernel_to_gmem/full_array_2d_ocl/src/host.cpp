@@ -99,7 +99,7 @@ int main(int argc, char** argv)
 
     //Allocate Buffer in Global Memory
     OCL_CHECK(err, cl::Buffer buffer_a(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-    			matrix_size_in_bytes, source_input_a.data(), &err));
+                matrix_size_in_bytes, source_input_a.data(), &err));
     OCL_CHECK(err, cl::Buffer buffer_b(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
             matrix_size_in_bytes, source_input_b.data(), &err));
     OCL_CHECK(err, cl::Buffer buffer_c(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,

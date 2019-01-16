@@ -38,8 +38,8 @@ using namespace sda;
 using namespace std;
 
 #ifdef PUB_ZMQ
-	#include <jsonxx.h>
-	using namespace jsonxx;
+    #include <jsonxx.h>
+    using namespace jsonxx;
 #endif
 
 
@@ -128,27 +128,27 @@ void MatchArray::dumpArray(){
     jsonxx::Array root;
 
     for(int i = 0; i < numSamples; ++i){
-    	jsonxx::Object current;
+        jsonxx::Object current;
 
-    	std::ostringstream ss;
+        std::ostringstream ss;
 
-    	ss << "V" << i;
-    	current << ss.str();
-    	ss.str(std::string());
-
-    	ss << maxv[i];
+        ss << "V" << i;
         current << ss.str();
-    	ss.str(std::string());
-    	
+        ss.str(std::string());
+
+        ss << maxv[i];
+        current << ss.str();
+        ss.str(std::string());
+        
         //add to root
         root << current;
     }
 
     //convert to string and dump the object
-	std::string str = root.json();
-	m_ppub->send((const void*) str.c_str(), str.length());
+    std::string str = root.json();
+    m_ppub->send((const void*) str.c_str(), str.length());
 
-	m_counter++;
-	std::cout << m_counter << ", ";
+    m_counter++;
+    std::cout << m_counter << ", ";
 #endif
 }

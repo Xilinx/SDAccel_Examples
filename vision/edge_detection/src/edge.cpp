@@ -44,26 +44,26 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "edge.h"
 
 short getAbsMax(cv::Mat mat) {
-	short max = 0;
+    short max = 0;
 
-	size_t rows = mat.rows;
-	size_t cols = mat.cols;
+    size_t rows = mat.rows;
+    size_t cols = mat.cols;
 
-	for(size_t r = 0; r < rows; r++) {
-		for(size_t c = 0; c < cols; c++) {
-			uchar tmp = std::abs(mat.at<uchar>(r,c));
-			if(tmp > max) {
-				max = tmp;
-			}
-		}
-	}
+    for(size_t r = 0; r < rows; r++) {
+        for(size_t c = 0; c < cols; c++) {
+            uchar tmp = std::abs(mat.at<uchar>(r,c));
+            if(tmp > max) {
+                max = tmp;
+            }
+        }
+    }
 
-	return max;
+    return max;
 }
 
 int main(int argc, char* argv[]) {
-	cl_int err;
-	cl::Event event;
+    cl_int err;
+    cl::Event event;
     if(argc != 2) {
         std::cout << "Usage: " << argv[0] << "<input>" << std::endl;
         return EXIT_FAILURE;
@@ -129,9 +129,9 @@ int main(int argc, char* argv[]) {
     // Device-to-host communication
     std::cout << "Creating Buffers..." << std::endl;
     OCL_CHECK(err, cl::Buffer devInput(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-    		((img_size-1)/32 + 1)*sizeof(cl_uint16), image.data() , &err));
+            ((img_size-1)/32 + 1)*sizeof(cl_uint16), image.data() , &err));
     OCL_CHECK(err, cl::Buffer devOutput(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-    		((img_size-1)/32 + 1)*sizeof(cl_uint16), outimage.data(), &err));
+            ((img_size-1)/32 + 1)*sizeof(cl_uint16), outimage.data(), &err));
 
     // Copy input data to device global memory
     std::cout << "Copying Buffers to device..." <<std::endl;

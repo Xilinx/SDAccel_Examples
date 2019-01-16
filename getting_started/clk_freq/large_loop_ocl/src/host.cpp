@@ -129,7 +129,7 @@ uint64_t run_opencl_cnn(
     if (good) {
         OCL_CHECK(err, krnl_cnn_conv = cl::Kernel(program,"cnn_GOOD", &err));
     } else {
-	OCL_CHECK(err, krnl_cnn_conv = cl::Kernel(program, "cnn_BAD", &err));
+    OCL_CHECK(err, krnl_cnn_conv = cl::Kernel(program, "cnn_BAD", &err));
     }
 
     std::cout << "Starting " << (good ? "GOOD" : "BAD") << " Kernel" << std::endl;

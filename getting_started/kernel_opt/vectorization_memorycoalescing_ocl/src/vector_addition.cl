@@ -74,8 +74,8 @@ void vec_add(
     //In this case the size(t_size) is 32. Since 256 work group items are there,
     //multiply by 32 gives 8192 operations corresponds to the total array size.
     for(int i = 0; i < t_size; i++) {
-	    index =  i*lsize0*lsize1 + tid1*lsize0 + tid0;
-	    out[index] = in1[index] + in2[index];
+        index =  i*lsize0*lsize1 + tid1*lsize0 + tid0;
+        out[index] = in1[index] + in2[index];
     }
 }
 

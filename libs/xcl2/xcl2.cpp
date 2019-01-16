@@ -50,8 +50,8 @@ std::vector<cl::Device> get_devices(const std::string& vendor_name) {
     }
     if (i == platforms.size()) {
         std::cout << "Error: Failed to find Xilinx platform" << std::endl;
-		exit(EXIT_FAILURE);
-	}
+        exit(EXIT_FAILURE);
+    }
    
     //Getting ACCELERATOR Devices and selecting 1st such device 
     std::vector<cl::Device> devices;
@@ -60,17 +60,17 @@ std::vector<cl::Device> get_devices(const std::string& vendor_name) {
 }
    
 std::vector<cl::Device> get_xil_devices() {
-	return get_devices("Xilinx");
+    return get_devices("Xilinx");
 }
 
 cl::Program::Binaries import_binary_file(std::string xclbin_file_name) 
 {
     std::cout << "INFO: Importing " << xclbin_file_name << std::endl;
 
-	if(access(xclbin_file_name.c_str(), R_OK) != 0) {
-		printf("ERROR: %s xclbin not available please build\n", xclbin_file_name.c_str());
-		exit(EXIT_FAILURE);
-	}
+    if(access(xclbin_file_name.c_str(), R_OK) != 0) {
+        printf("ERROR: %s xclbin not available please build\n", xclbin_file_name.c_str());
+        exit(EXIT_FAILURE);
+    }
     //Loading XCL Bin into char buffer 
     std::cout << "Loading: '" << xclbin_file_name.c_str() << "'\n";
     std::ifstream bin_file(xclbin_file_name.c_str(), std::ifstream::binary);
@@ -109,28 +109,28 @@ find_binary_file(const std::string& _device_name, const std::string& xclbin_name
 {
     std::cout << "XCLBIN File Name: " << xclbin_name.c_str() << std::endl;
     char *xcl_mode = getenv("XCL_EMULATION_MODE");
-	char *xcl_target = getenv("XCL_TARGET");
+    char *xcl_target = getenv("XCL_TARGET");
     std::string mode;
 
-	/* Fall back mode if XCL_EMULATION_MODE is not set is "hw" */
-	if(xcl_mode == NULL) {
-		mode = "hw";
-	} else {
-		/* if xcl_mode is set then check if it's equal to true*/
-		if(strcmp(xcl_mode,"true") == 0) {
-			/* if it's true, then check if xcl_target is set */
-			if(xcl_target == NULL) {
-				/* default if emulation but not specified is software emulation */
-				mode = "sw_emu";
-			} else {
-				/* otherwise, it's what ever is specified in XCL_TARGET */
-				mode = xcl_target;
-			}
-		} else {
-			/* if it's not equal to true then it should be whatever
-			 * XCL_EMULATION_MODE is set to */
-			mode = xcl_mode;
-		}
+    /* Fall back mode if XCL_EMULATION_MODE is not set is "hw" */
+    if(xcl_mode == NULL) {
+        mode = "hw";
+    } else {
+        /* if xcl_mode is set then check if it's equal to true*/
+        if(strcmp(xcl_mode,"true") == 0) {
+            /* if it's true, then check if xcl_target is set */
+            if(xcl_target == NULL) {
+                /* default if emulation but not specified is software emulation */
+                mode = "sw_emu";
+            } else {
+                /* otherwise, it's what ever is specified in XCL_TARGET */
+                mode = xcl_target;
+            }
+        } else {
+            /* if it's not equal to true then it should be whatever
+             * XCL_EMULATION_MODE is set to */
+            mode = xcl_mode;
+        }
     }
     char *xcl_bindir = getenv("XCL_BINDIR");
 
@@ -144,7 +144,7 @@ find_binary_file(const std::string& _device_name, const std::string& xclbin_name
     };
     const char **search_dirs = dirs;
     if (xcl_bindir == NULL) {
-    	search_dirs++;
+        search_dirs++;
     }
 
     char *device_name = strdup(_device_name.c_str());
@@ -219,8 +219,8 @@ find_binary_file(const std::string& _device_name, const std::string& xclbin_name
                         exit(EXIT_FAILURE);
                     }
                     if (*xclbin_file_name && sb.st_ino != aws_ino) {
-                    	printf("Error: multiple xclbin files discovered:\n %s\n %s\n", file_name, xclbin_file_name);
-                    	exit(EXIT_FAILURE);
+                        printf("Error: multiple xclbin files discovered:\n %s\n %s\n", file_name, xclbin_file_name);
+                        exit(EXIT_FAILURE);
                     }
                     aws_ino = sb.st_ino;
                     strncpy(xclbin_file_name, file_name, PATH_MAX);
@@ -245,8 +245,8 @@ find_binary_file(const std::string& _device_name, const std::string& xclbin_name
                             exit(EXIT_FAILURE);
                         }
                         if (*xclbin_file_name && sb.st_ino != ino) {
-                    	    printf("Error: multiple xclbin files discovered:\n %s\n %s\n", file_name, xclbin_file_name);
-                    	    exit(EXIT_FAILURE);
+                            printf("Error: multiple xclbin files discovered:\n %s\n %s\n", file_name, xclbin_file_name);
+                            exit(EXIT_FAILURE);
                         }
                         ino = sb.st_ino;
                         strncpy(xclbin_file_name, file_name, PATH_MAX);

@@ -35,12 +35,12 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define COMPUTE_UNITS 1
 
-typedef unsigned char		u8;
-typedef unsigned short		u16;
-typedef unsigned int		u32;
-typedef			 char		i8;
-typedef			 short		i16;
-typedef			 int		i32;
+typedef unsigned char        u8;
+typedef unsigned short        u16;
+typedef unsigned int        u32;
+typedef             char        i8;
+typedef             short        i16;
+typedef             int        i32;
 
 
 
@@ -83,8 +83,8 @@ typedef			 int		i32;
         bool m_writeMatchArray; //true == writeMatchArray
         cl::Program m_program;
         cl::Kernel m_clKernelSmithWaterman;
-     	cl::CommandQueue q;
-	cl::Context context;
+         cl::CommandQueue q;
+    cl::Context context;
 
         MatchArray* m_pMatchInfo;
     };

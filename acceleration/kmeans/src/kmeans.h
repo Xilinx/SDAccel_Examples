@@ -78,7 +78,7 @@ public:
             int     n_points,
             int     n_clusters,
             int    *membership,
-		        float **clusters,
+            float **clusters,
             int     *new_centers_len,
             float  **new_centers);
 
@@ -88,7 +88,7 @@ public:
         int fpga_kmeans_deallocateMemory();
         int fpga_kmeans_print_report();
 private:
-        cl::Context 	 g_context;
+        cl::Context      g_context;
         cl::CommandQueue g_q;
         cl::Program      g_prog;
         INT_DATA_TYPE   *g_membership_OCL;

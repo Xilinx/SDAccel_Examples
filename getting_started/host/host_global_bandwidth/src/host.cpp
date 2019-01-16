@@ -137,8 +137,8 @@ int main(int argc, char** argv)
         std::vector<cl::Memory> mems(buff_cnt);
 
         for(int i=buff_cnt - 1; i>=0; i--){
-        	OCL_CHECK(err, mems[i] = cl::Buffer(context, CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, nxtcnt, NULL, &err));
-            	OCL_CHECK(err, err = command_queue.enqueueFillBuffer<int>((cl::Buffer&)mems[i], i, 0, nxtcnt, 0, 0));
+            OCL_CHECK(err, mems[i] = cl::Buffer(context, CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, nxtcnt, NULL, &err));
+                OCL_CHECK(err, err = command_queue.enqueueFillBuffer<int>((cl::Buffer&)mems[i], i, 0, nxtcnt, 0, 0));
         }
         if (err != CL_SUCCESS) {
             break;

@@ -126,10 +126,10 @@ int main(int argc, char** argv)
         }
         std::cout << "i = " << i << " Software result = " << source_sw_results[i]
             << " Device result = " << source_hw_results[i] 
-	    << " input1 = " << source_input1[i]
-	    << " input2 = " << source_input2[i]
-	    << " krnl0_output = " << source_krnl0_output[i]
-	    << " input3 = " << source_input3[i] << std::endl; 
+        << " input1 = " << source_input1[i]
+        << " input2 = " << source_input2[i]
+        << " krnl0_output = " << source_krnl0_output[i]
+        << " input3 = " << source_input3[i] << std::endl; 
     }
 
     std::cout << "TEST " << (match ? "FAILED" : "PASSED") << std::endl; 

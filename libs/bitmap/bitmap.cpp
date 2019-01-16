@@ -104,7 +104,7 @@ bool BitmapInterface::readBitmapFile()
 
   return true ;
 }
-		    
+            
 bool BitmapInterface::writeBitmapFile(int* otherImage)
 {
   int fd ;

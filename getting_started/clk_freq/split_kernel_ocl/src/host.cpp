@@ -181,10 +181,10 @@ void run_opencl_sketch
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     cl::Kernel krnl_process_image;
     if (good) {
-	OCL_CHECK(err, krnl_process_image = cl::Kernel(program,"sketch_GOOD", &err));
+    OCL_CHECK(err, krnl_process_image = cl::Kernel(program,"sketch_GOOD", &err));
     }
     else {
-	OCL_CHECK(err, krnl_process_image = cl::Kernel(program, "sketch_BAD", &err));
+    OCL_CHECK(err, krnl_process_image = cl::Kernel(program, "sketch_BAD", &err));
     }
 
     //Allocate Buffer in Global Memory

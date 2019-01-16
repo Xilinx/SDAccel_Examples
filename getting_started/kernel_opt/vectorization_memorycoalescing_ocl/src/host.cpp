@@ -53,8 +53,8 @@ void softwareGold(
         )
 {
     //Performs Vector Addition out = in1 + in2
-	for(int i = 0; i < size; i++) {
-		out[i] = in1[i] + in2[i];
+    for(int i = 0; i < size; i++) {
+        out[i] = in1[i] + in2[i];
     }
 }
 
@@ -124,16 +124,16 @@ int main(int argc, char* argv[]) {
     softwareGold(source_in1.data(), source_in2.data(), source_sw_results.data(), size);
 
     //Compare the results of device to the software
-	bool match = true;
-	for (int i = 0; i < DATA_SIZE; i++) {
-	    if (source_sw_results[i] != source_hw_results[i]){
-		    printf("Mismatch: %d in1 = %d  in2 = %d \t sw_res = %d \t hw_res = %d\n",
+    bool match = true;
+    for (int i = 0; i < DATA_SIZE; i++) {
+        if (source_sw_results[i] != source_hw_results[i]){
+            printf("Mismatch: %d in1 = %d  in2 = %d \t sw_res = %d \t hw_res = %d\n",
                     i, source_in1[i], source_in2[i], source_sw_results[i], 
                     source_hw_results[i]);
-	    	match = false;
+            match = false;
             break;
-	    }
-	  }
+        }
+      }
 
     std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl;
     return (match ? EXIT_SUCCESS : EXIT_FAILURE);

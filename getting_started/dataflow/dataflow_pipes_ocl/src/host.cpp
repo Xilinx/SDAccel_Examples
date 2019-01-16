@@ -92,9 +92,9 @@ int main(int argc, char** argv)
     // Device-to-host communication
     std::cout << "Creating Buffers..." <<std::endl;
     OCL_CHECK(err, cl::Buffer buffer_input(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-    		vector_size_bytes, source_input.data(), &err));
+            vector_size_bytes, source_input.data(), &err));
     OCL_CHECK(err, cl::Buffer buffer_output(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-    		vector_size_bytes, source_hw_results.data(), &err));
+            vector_size_bytes, source_hw_results.data(), &err));
 
     // Copy input data to device global memory
     std::cout << "Copying data..." << std::endl;

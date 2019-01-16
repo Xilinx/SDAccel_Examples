@@ -70,11 +70,11 @@ const unsigned int c_size = MAX_SIZE;
 // C = AxB, where A, B and C are square matrices of dimension (sizexsize)
 extern "C"{
     void mmult(
-				    const int *in1,     // Read-Only Matrix 1
-				    const int *in2,     // Read-Only Matrix 2
-				    int *out,           // Output Result
-				    int size            // Size of one dimension of the matrices
-				    )
+                    const int *in1,     // Read-Only Matrix 1
+                    const int *in2,     // Read-Only Matrix 2
+                    int *out,           // Output Result
+                    int size            // Size of one dimension of the matrices
+                    )
     {
     #pragma HLS INTERFACE m_axi port=in1 offset=slave bundle=gmem
     #pragma HLS INTERFACE m_axi port=in2 offset=slave bundle=gmem
