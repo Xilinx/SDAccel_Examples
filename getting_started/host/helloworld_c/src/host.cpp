@@ -33,6 +33,12 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 int main(int argc, char** argv)
 {
+    if (argc != 2) {
+        std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
+		return EXIT_FAILURE;
+	}
+
+    std::string binaryFile = argv[1];
     size_t vector_size_bytes = sizeof(int) * DATA_SIZE;
     cl_int err;
     char* fileBuf;
@@ -64,11 +70,6 @@ int main(int argc, char** argv)
 
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
-    OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err)); 
-
-    // find_binary_file() is a utility API which will search the xclbin file for
-    // targeted mode (sw_emu/hw_emu/hw) and for targeted platforms.
-    std::string binaryFile = xcl::find_binary_file(device_name,"vadd");
 
     // read_binary_file() ia a utility API which will load the binaryFile
     // and will return Binaries.

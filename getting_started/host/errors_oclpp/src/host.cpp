@@ -117,7 +117,7 @@ const char *error_string(cl_int error_code) {
 // This example just prints out string description for given OpenCL error code.
 int main(int argc, char **argv){
     if(argc!=2){
-        std::cout << "Usage: %s ./xclbin/vector_addition.<emulation_mode>.<dsa>.xclbin\n" << argv[0] << std::endl;
+        std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
         return EXIT_FAILURE;
     }
     static const int elements = 128;
