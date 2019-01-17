@@ -50,6 +50,7 @@ README.md
 data/input1.txt
 data/input2.txt
 description.json
+qor.json
 sdaccel.ini
 src/host.cpp
 src/vector_addition.cl
