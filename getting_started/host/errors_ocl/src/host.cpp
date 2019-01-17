@@ -135,9 +135,7 @@ vector<unsigned char> readBinary(const std::string &fileName) {
 // This example just prints out string description for given OpenCL error code.
 int main(int argc, char **argv) {
     if (argc != 2) {
-        printf("Usage: %s "
-               "./xclbin/vector_addition.<emulation_mode>.<dsa>.xclbin\n",
-               argv[0]);
+        printf("Usage: %s <XCLBIN File>\n", argv[0]);
         return EXIT_FAILURE;
     }
     static const int elements = 128;
