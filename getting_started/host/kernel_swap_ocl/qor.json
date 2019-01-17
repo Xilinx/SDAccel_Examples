@@ -23,7 +23,12 @@
                             "pipelineII": "1"
                         }
                     ]
-                },
+                }
+            ]
+        },
+        { 
+            "meet_system_timing": "true",
+            "accelerators": [
                 {
                     "name": "krnl_vmul",
                     "check_timing": "true",
