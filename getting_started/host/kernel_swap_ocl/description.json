@@ -14,31 +14,32 @@
     ],
     "host_exe": "vmulvadd",
     "containers": [
-	{
-	"name": "krnl_vmul",
-	"accelerators": [
         {
-            "name": "krnl_vmul", 
-            "location": "src/krnl_vmul.cl", 
-            "container": "krnl_vmul"
-        }
-	]
-	}, 
+            "name": "krnl_vmul",
+            "accelerators": [
+                {
+                    "name": "krnl_vmul", 
+                    "location": "src/krnl_vmul.cl", 
+                    "container": "krnl_vmul"
+                }
+            ]
+        }, 
         {
-	"name": "krnl_vadd",
-	"accelerators": [
-	{
-            "name": "krnl_vadd", 
-            "location": "src/krnl_vadd.cl", 
-            "container": "krnl_vadd"
+            "name": "krnl_vadd",
+            "accelerators": [
+                {
+                    "name": "krnl_vadd", 
+                    "location": "src/krnl_vadd.cl", 
+                    "container": "krnl_vadd"
+                }
+            ]
         }
-    	]
-	}
     ],
     "contributors" : [
         {
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
         }
-    ]
+    ],
+    "match_makefile": "false"
 }

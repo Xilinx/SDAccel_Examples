@@ -35,6 +35,9 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
+BUILD_DIR_krnl_vadd = $(BUILD_DIR)/krnl_vadd
+BUILD_DIR_krnl_vmul = $(BUILD_DIR)/krnl_vmul
+
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
@@ -54,7 +57,7 @@ CXXFLAGS += -fmessage-length=0
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps
 
 
 
@@ -78,16 +81,16 @@ exe: $(EXECUTABLE)
 # Building kernel
 $(XCLBIN)/krnl_vmul.$(TARGET).$(DSA).xo: src/krnl_vmul.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k krnl_vmul -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_vmul) -c -k krnl_vmul -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/krnl_vadd.$(TARGET).$(DSA).xo: src/krnl_vadd.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k krnl_vadd -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_vadd) -c -k krnl_vadd -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/krnl_vmul.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_vmul_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk krnl_vmul:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_vmul) -l $(LDCLFLAGS) --nk krnl_vmul:1 -o'$@' $(+)
 $(XCLBIN)/krnl_vadd.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_vadd_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk krnl_vadd:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_vadd) -l $(LDCLFLAGS) --nk krnl_vadd:1 -o'$@' $(+)
 
 # Building Host
 $(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
