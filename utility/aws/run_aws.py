@@ -29,4 +29,4 @@ if s3_bucket == "" or s3_dcp_key == "" or s3_logs_keys == "":
 
 krnl_name = krnl_name.replace('.xclbin', '')
 string = os.environ["SDACCEL_DIR"]
-os.system(string + "/SDAccel/tools/create_sdaccel_afi.sh -s3_bucket=" + s3_bucket + " -s3_dcp_key=" + s3_dcp_key + " -s3_logs_key=" + s3_logs_key + " -xclbin=" + krnl_name + ".xclbin -o=" + krnl_name)
+os.system(string + "/tools/create_sdaccel_afi.sh -s3_bucket=" + s3_bucket + " -s3_dcp_key=" + s3_dcp_key + " -s3_logs_key=" + s3_logs_key + " -xclbin=" + krnl_name + ".xclbin -o=" + krnl_name)
