@@ -64,6 +64,7 @@ short getAbsMax(cv::Mat mat) {
 int main(int argc, char* argv[]) {
     cl_int err;
     cl::Event event;
+    unsigned fileBufSize;
     if(argc != 2) {
         std::cout << "Usage: " << argv[0] << "<input>" << std::endl;
         return EXIT_FAILURE;
@@ -117,9 +118,10 @@ int main(int argc, char* argv[]) {
     // targeted mode (sw_emu/hw_emu/hw) and for targeted platforms.
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_edge");
 
-    // import_binary_file() is a utility API which will load the binaryFile
-    // and will return Binaries.
-    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    // read_binary_file() is a utility API which will load the binaryFile
+    // and will return pointer to file buffer.
+    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program (context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel krnl_sobel(program, "krnl_sobel", &err));
@@ -169,6 +171,8 @@ int main(int argc, char* argv[]) {
 
     cv::imwrite("input.bmp", input);
     cv::imwrite("output.bmp", output);
+
+    delete[] fileBuf;
 
     std::cout << "Completed Successfully" << std::endl;
 

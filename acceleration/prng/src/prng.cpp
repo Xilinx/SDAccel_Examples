@@ -134,6 +134,7 @@ int main(int argc, char** argv) {
     std::cout << "Creating context..." << std::endl;
 
     cl_int err;
+    unsigned fileBufSize;
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
@@ -143,7 +144,8 @@ int main(int argc, char** argv) {
 
     std::string binaryFile = xcl::find_binary_file(device_name,"dma");
 
-    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel krnl(program,"dma", &err));
@@ -182,6 +184,8 @@ int main(int argc, char** argv) {
 
 // check results
     checkResults( Dout_hw.data(), Dout_sw.data());
+
+    delete[] fileBuf;
 
     std::cout << "Completed Successfully" << std::endl;
 

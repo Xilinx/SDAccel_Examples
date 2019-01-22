@@ -70,6 +70,8 @@ protected:
 private:
     string m_strBitmapFP;
     cl_int err;
+    unsigned fileBufSize;
+    char* fileBuf;
 
     cl::Context context;
     cl::CommandQueue q;

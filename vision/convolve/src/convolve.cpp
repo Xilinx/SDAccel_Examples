@@ -105,6 +105,7 @@ cv::Mat readFloatTxtFile(std::string fileName, size_t rows, size_t cols) {
 int main(int argc, char* argv[]) {
     cl_int err;
     cl::Event event;
+    unsigned fileBufSize;
 
     if(argc != 3 && argc != 4)
     {
@@ -159,9 +160,10 @@ int main(int argc, char* argv[]) {
     // targeted mode (sw_emu/hw_emu/hw) and for targeted platforms.
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_convolve");
 
-    // import_binary_file() ia a utility API which will load the binaryFile
-    // and will return Binaries.
-    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    // read_binary_file() ia a utility API which will load the binaryFile
+    // and will return pointer to file buffer.
+    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program (context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel krnl_convolve(program, "krnl_convolve", &err));
@@ -221,6 +223,8 @@ int main(int argc, char* argv[]) {
 
         cv::imwrite("golden.bmp", golden);
     }
+
+    delete[] fileBuf;
 
     std::cout << "Completed Successfully" << std::endl;
     return EXIT_SUCCESS;

@@ -87,6 +87,7 @@ int main(int argc, char* argv[])
   // Set up OpenCL hardware and software constructs
   std::cout << "Setting up OpenCL hardware and software...\n";
   cl_int err = 0 ;
+  unsigned fileBufSize;
 
   // The get_xil_devices will return vector of Xilinx Devices
   std::vector<cl::Device> devices = xcl::get_xil_devices();
@@ -98,10 +99,11 @@ int main(int argc, char* argv[])
   std::string device_name = device.getInfo<CL_DEVICE_NAME>();
   std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
-  // import_binary() command will find the OpenCL binary file created using the 
-  // xocc compiler load into OpenCL Binary and return as Binaries
+  // read_binary_file() command will find the OpenCL binary file created using the 
+  // xocc compiler load into OpenCL Binary and return pointer to file buffer.
   std::string binaryFile = xcl::find_binary_file(device_name,"krnl_median");
-  cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+  char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+  cl::Program::Binaries bins{{fileBuf, fileBufSize}};
   devices.resize(1);
   cl::Program program(context, devices, bins);
 
@@ -171,6 +173,8 @@ int main(int argc, char* argv[])
           }
       }
   }
+
+  delete[] fileBuf;
 
   // Write the final image to disk
   printf("Writing RAW Image \n");

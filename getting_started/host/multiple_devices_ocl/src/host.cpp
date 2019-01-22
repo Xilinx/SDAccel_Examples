@@ -52,6 +52,7 @@ int main(int argc, char **argv) {
     }
 
     cl_int err = CL_SUCCESS;
+    unsigned fileBufSize;
 
 //OPENCL HOST CODE AREA START
     // get_xil_devices() is a utility API which will find the Xilinx
@@ -79,6 +80,7 @@ int main(int argc, char **argv) {
     vector<std::string> binaryFile(device_count);
     vector<cl::Program::Binaries> bins(device_count);
     vector<cl::Platform> platform;
+    char* fileBuf[device_count];
     OCL_CHECK(err, err = cl::Platform::get(&platform));
 
     size_t size_per_device = elements_per_device * sizeof(int);
@@ -95,9 +97,10 @@ int main(int argc, char **argv) {
         // targeted mode (sw_emu/hw_emu/hw) and for targeted platforms.
         binaryFile[d] = xcl::find_binary_file(device_name[d], "vector_addition");
 
-        // import_binary_file() ia a utility API which will load the binaryFile
-        // and will return Binaries.
-        bins[d] = xcl::import_binary_file(binaryFile[d]);
+        // read_binary_file() ia a utility API which will load the binaryFile
+        // and will return pointer to file buffer.
+        fileBuf[d] = xcl::read_binary_file(binaryFile[d], fileBufSize);
+        bins[d].push_back({fileBuf[d], fileBufSize});
         programs[d] = load_cl2_binary(bins[d], devices[d], contexts[d]);
         OCL_CHECK(err, kernels[d] = cl::Kernel(programs[d], "vadd", &err));
 
@@ -140,6 +143,8 @@ int main(int argc, char **argv) {
       OCL_CHECK(err, err = queue.flush());
       OCL_CHECK(err, err = queue.finish());
     }
+
+    for (int d = 0; d < (int)device_count; d++) delete[] fileBuf[d];
 //OPENCL HOST CODE AREA ENDS
     bool match = true;
      for (int i = 0; i < elements; i++) {
@@ -154,6 +159,7 @@ int main(int argc, char **argv) {
      std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl;
      return (match ? EXIT_SUCCESS :  EXIT_FAILURE);
  }
+
 cl::Program load_cl2_binary(cl::Program::Binaries bins, cl::Device device,
                           cl::Context context) {
     cl_int err;

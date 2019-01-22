@@ -78,6 +78,7 @@ int main(int argc, char* argv[])
 
     size_t image_size_bytes = sizeof(unsigned short) * IMAGE_WIDTH_PIXELS * IMAGE_HEIGHT_PIXELS;
     cl_int err;
+    unsigned fileBufSize;
     // The get_xil_devices will return vector of Xilinx Devices
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
@@ -88,9 +89,10 @@ int main(int argc, char* argv[])
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
-    //import_binary() command will find the OpenCL binary file
+    //find_binary() command will find the OpenCL binary file
     std::string xclBinaryFile = xcl::find_binary_file(device_name, "krnl_equalizer");
-    cl::Program::Binaries bins  = xcl::import_binary_file(xclBinaryFile);
+    char* fileBuf = xcl::read_binary_file(xclBinaryFile, fileBufSize);
+    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     
@@ -156,6 +158,8 @@ int main(int argc, char* argv[])
             }
         }
     }
+
+    delete[] fileBuf;
 
     std::cout << "Kernel Duration: " << duration << " ns" << std::endl;
 

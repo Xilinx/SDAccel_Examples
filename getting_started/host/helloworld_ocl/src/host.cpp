@@ -42,6 +42,7 @@ int main(int argc, char **argv) {
     // compute the size of array in bytes
     size_t size_in_bytes = DATA_SIZE * sizeof(int);
     cl_int err;
+    unsigned fileBufSize;
 
     // Creates a vector of DATA_SIZE elements with an initial value of 10 and 32
     vector<int,aligned_allocator<int>> source_a(DATA_SIZE, 10);
@@ -59,12 +60,13 @@ int main(int argc, char **argv) {
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err)); 
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
-    // import_binary() command will find the OpenCL binary file created using the 
-    // xocc compiler load into OpenCL Binary and return as Binaries
-    // OpenCL and it can contain many functions which can be executed on the
+    // read_binary() command will find the OpenCL binary file created using the 
+    // xocc compiler load into OpenCL Binary and return a pointer to file buffer
+    // and it can contain many functions which can be executed on the
     // device.
     std::string binaryFile = xcl::find_binary_file(device_name,"vector_addition");
-    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
 
@@ -126,6 +128,8 @@ int main(int argc, char **argv) {
           if (((i + 1) % 16) == 0) printf("\n");
         }
     }
+
+    delete[] fileBuf;
 
     std::cout << "TEST " << (match ? "FAILED" : "PASSED") << std::endl; 
     return (match ? EXIT_FAILURE :  EXIT_SUCCESS);

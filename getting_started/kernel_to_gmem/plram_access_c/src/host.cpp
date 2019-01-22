@@ -74,6 +74,7 @@ void mmult_fpga (
     int size = dim;    
     size_t matrix_size_bytes = sizeof(int) * size * size;
 
+    unsigned fileBufSize;
     //The get_xil_devices will return vector of Xilinx Devices 
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
@@ -84,7 +85,8 @@ void mmult_fpga (
     std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
 
     std::string binaryFile = xcl::find_binary_file(device_name,"mmult");
-    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     cl::Program program(context, devices, bins);
 
@@ -133,6 +135,8 @@ void mmult_fpga (
 
     q.enqueueMigrateMemObjects({buffer_output},CL_MIGRATE_MEM_OBJECT_HOST);
     q.finish();
+
+    delete[] fileBuf;
 }
 
 int main(int argc, char** argv)

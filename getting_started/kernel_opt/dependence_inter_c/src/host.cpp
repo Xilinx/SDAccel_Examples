@@ -57,6 +57,7 @@ int main(int argc, char** argv)
     int testSize = testHeight * testWidth;
 
     cl_int err;
+    unsigned fileBufSize;
     //Allocate Memory in Host Memory
     size_t test_size_bytes = sizeof(int) * testSize;
     std::vector<int,aligned_allocator<int>> source_input(test_size_bytes);
@@ -83,7 +84,8 @@ int main(int argc, char** argv)
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
     std::string binaryFile = xcl::find_binary_file(device_name,"vconv");
-    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel krnl_vconv(program,"vconv", &err));
@@ -124,6 +126,8 @@ int main(int argc, char** argv)
             break;
         }
     }
+
+    delete[] fileBuf;
 
     std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl; 
     return (match ? EXIT_SUCCESS :  EXIT_FAILURE);

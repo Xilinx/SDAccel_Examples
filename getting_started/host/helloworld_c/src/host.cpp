@@ -41,7 +41,6 @@ int main(int argc, char** argv)
     std::string binaryFile = argv[1];
     size_t vector_size_bytes = sizeof(int) * DATA_SIZE;
     cl_int err;
-    char* fileBuf;
     unsigned fileBufSize;
     // Allocate Memory in Host Memory
     // When creating a buffer with user pointer (CL_MEM_USE_HOST_PTR), under the hood user ptr 
@@ -71,9 +70,9 @@ int main(int argc, char** argv)
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
 
-    // read_binary_file() ia a utility API which will load the binaryFile
-    // and will return Binaries.
-    fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    // read_binary_file() is a utility API which will load the binaryFile
+    // and will return the pointer to file buffer.
+    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
 
     devices.resize(1);

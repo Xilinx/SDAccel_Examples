@@ -167,6 +167,7 @@ void run_opencl_sketch
  )
  {
     cl_int err;
+    unsigned fileBufSize;
     std::string binaryFile;
     size_t image_size_bytes = sizeof(int) * size;
 
@@ -176,7 +177,8 @@ void run_opencl_sketch
        binaryFile = xcl::find_binary_file(device_name,"sketch_BAD");
 
 
-    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     cl::Kernel krnl_process_image;
@@ -219,6 +221,7 @@ void run_opencl_sketch
     //Copy Result from Device Global Memory to Host Local Memory
     OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());
+    delete[] fileBuf;
 
   }
 

@@ -60,6 +60,7 @@ int main(int argc, char** argv)
     // compute the size of array in bytes
     size_t size_in_bytes = DATA_SIZE * sizeof(int);
     cl_int err;
+    unsigned fileBufSize;
 
     // Creates a vector of DATA_SIZE elements with an initial value of 10 and 32
     vector<int,aligned_allocator<int>> source_a(DATA_SIZE);
@@ -78,7 +79,8 @@ int main(int argc, char** argv)
 
     //Create Program 
     std::string binaryFile = xcl::find_binary_file(device_name,"vector_addition");
-    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
 
@@ -149,6 +151,8 @@ int main(int argc, char** argv)
     OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
     q.finish();
     verify(gold, source_results);
+
+    delete[] fileBuf;
 
     printf("TEST PASSED.\n");
     return EXIT_SUCCESS;

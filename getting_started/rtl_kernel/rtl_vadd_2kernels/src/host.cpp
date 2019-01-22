@@ -35,6 +35,7 @@ int main(int argc, char** argv)
 {
     int size = DATA_SIZE;
     cl_int err;
+    unsigned fileBufSize;
     //Allocate Memory in Host Memory
     size_t vector_size_bytes = sizeof(int) * size;
     std::vector<int,aligned_allocator<int>> source_input1        (size);
@@ -64,7 +65,8 @@ int main(int argc, char** argv)
     std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
 
     std::string binaryFile = xcl::find_binary_file(device_name,"vadd");
-    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel krnl_vadd_0(program,"krnl_vadd_rtl_0", &err));
@@ -131,6 +133,8 @@ int main(int argc, char** argv)
         << " krnl0_output = " << source_krnl0_output[i]
         << " input3 = " << source_input3[i] << std::endl; 
     }
+
+    delete[] fileBuf;
 
     std::cout << "TEST " << (match ? "FAILED" : "PASSED") << std::endl; 
     return (match ? EXIT_FAILURE :  EXIT_SUCCESS);

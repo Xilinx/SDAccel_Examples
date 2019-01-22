@@ -87,6 +87,7 @@ int main(int argc, char **argv) {
     static const int columns = 16;
     static const int rows = 16;
     cl_int err;
+    unsigned fileBufSize;
     
     vector<int,aligned_allocator<int>> A(columns * rows);
     vector<int,aligned_allocator<int>> B(columns * rows);
@@ -112,7 +113,8 @@ int main(int argc, char **argv) {
 
     //Create Program 
     std::string binaryFile = xcl::find_binary_file(device_name,"matmul");
-    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     
@@ -172,6 +174,8 @@ int main(int argc, char **argv) {
     auto matmul_partition_time = nstimeend-nstimestart;
 
     verify(gold, C);
+
+    delete[] fileBuf;
 
     printf("| %-23s | %23lu |\n", "matmul: partition", matmul_partition_time);
 

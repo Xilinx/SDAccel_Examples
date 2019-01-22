@@ -52,6 +52,7 @@ int main(int argc, char** argv)
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
     cl_int err;
+    unsigned fileBufSize;
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
     // For this example, command queue with out of order is needed to run kernel
     // concurrently.
@@ -61,7 +62,8 @@ int main(int argc, char** argv)
 
     //Create Program and Kernel
     std::string binaryFile = xcl::find_binary_file(device_name,"window_array_2d");
-    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel krnl_read_data (program,"read_data", &err));
@@ -108,6 +110,8 @@ int main(int argc, char** argv)
               << " hw " << c[i] << " index " << i << std::endl;
       }
     }
+
+    delete[] fileBuf;
     
     // Print a brief summary detailing the results
     std::cout << "Computed '" << correct << "/" 

@@ -48,6 +48,7 @@ Description:
 int main(int argc, char** argv) {
     cl_int err;
     int size;
+    unsigned fileBufSize;
     const char *xcl_emu = getenv("XCL_EMULATION_MODE");
     if(xcl_emu && !strcmp(xcl_emu, "hw_emu")) {
         //Original dataset is reduced for faster execution of hardware 
@@ -87,7 +88,8 @@ int main(int argc, char** argv) {
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
     std::string vaddBinaryFile = xcl::find_binary_file(device_name,"krnl_vadd");
-    cl::Program::Binaries vadd_bins = xcl::import_binary_file(vaddBinaryFile);
+    char* fileBuf = xcl::read_binary_file(vaddBinaryFile, fileBufSize);
+    cl::Program::Binaries vadd_bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, vadd_bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel krnl_vadd(program, "krnl_vadd", &err));
@@ -166,6 +168,8 @@ int main(int argc, char** argv) {
             break;
         }
     }
+
+    delete[] fileBuf;
 
     std::cout << "TEST" << (match ? "PASSED" : "FAILED") << std::endl;
     return (match ? EXIT_SUCCESS : EXIT_FAILURE);

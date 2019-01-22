@@ -354,6 +354,7 @@ void out_of_order_queue(cl::Context &context, cl::Device &device, cl::Kernel &ke
 int main(int argc, char **argv) {
 
   cl_int err;
+  unsigned fileBufSize;
   const size_t array_size = MAT_DIM0 * MAT_DIM1;
   const size_t size_in_bytes = array_size * sizeof(int);
 
@@ -376,9 +377,10 @@ int main(int argc, char **argv) {
   // targeted mode (sw_emu/hw_emu/hw) and for targeted platforms.
   std::string binaryFile = xcl::find_binary_file(device_name,"matrix_ops");
 
-  // import_binary_file() ia a utility API which will load the binaryFile
-  // and will return Binaries.
-  cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+  // read_binary_file() is a utility API which will load the binaryFile
+  // and will return pointer to file buffer.
+  char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+  cl::Program::Binaries bins{{fileBuf, fileBufSize}};
   devices.resize(1);
   OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
 
@@ -411,6 +413,8 @@ int main(int argc, char **argv) {
   out_of_order_queue(context, device, kernel_mscale, kernel_madd, kernel_mmult, buffer_a,
                      buffer_b, buffer_c, buffer_d, buffer_e, buffer_f,
                      size_in_bytes);
+
+  delete[] fileBuf;
 
   printf(
       "View the timeline trace in SDx for a visual overview of the\n"

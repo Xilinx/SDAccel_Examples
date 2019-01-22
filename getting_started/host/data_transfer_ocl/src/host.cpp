@@ -58,6 +58,7 @@ void verify(cl::CommandQueue &q, cl::Buffer &buffer, const int value) {
 // between host and device
 int main(int argc, char **argv) {
     cl_int err;
+    unsigned fileBufSize;
     std::vector<int, aligned_allocator<int>> host_memory(elements, 42);
     std::vector<int, aligned_allocator<int>> host_memory2(elements, 15);
 
@@ -76,7 +77,8 @@ int main(int argc, char **argv) {
     //dummy kernel is required to create xclbin, which is a must 
     //to create xclbin
     std::string binaryFile = xcl::find_binary_file(device_name,"dummy_kernel");
-    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
 
@@ -199,6 +201,8 @@ int main(int argc, char **argv) {
     OCL_CHECK(err, err = q.finish());
 
     verify(q, buffer_mem, 15);
+
+    delete[] fileBuf;
 
     printf("TEST PASSED\n");
 
