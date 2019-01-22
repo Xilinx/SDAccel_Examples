@@ -33,6 +33,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 int main(int argc, char* argv[])
 {
     cl_int err;
+    unsigned fileBufSize;
     if (argc < 2 || argc > 3)
     {
         std::cout << "Usage: " << argv[0] << " <input bitmap> <golden bitmap(optional)>" << std::endl;
@@ -71,7 +72,8 @@ int main(int argc, char* argv[])
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     std::string binaryFile = xcl::find_binary_file(device_name,"apply_watermark");
-    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel krnl_applyWatermark(program,"apply_watermark", &err));
@@ -139,6 +141,8 @@ int main(int argc, char* argv[])
     // Write the final image to disk
     image.writeBitmapFile(outImage.data());
     
+    delete[] fileBuf;
+
     std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl; 
     return (match ? EXIT_SUCCESS : EXIT_FAILURE);
 }

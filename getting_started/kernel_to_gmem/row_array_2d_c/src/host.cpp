@@ -52,13 +52,15 @@ int main(int argc, char** argv)
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
     cl_int err;
+    unsigned fileBufSize;
 
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     std::string binaryFile = xcl::find_binary_file(device_name,"row_array_2d");
-    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel krnl_row_array_2d(program,"row_array_2d", &err));
@@ -100,6 +102,8 @@ int main(int argc, char** argv)
               << " hw " << c[i] << " index " << i << std::endl;
       }
     }
+
+    delete[] fileBuf;
     
     // Print a brief summary detailing the results
     std::cout << "Computed '" << correct << "/" << BLOCK_SIZE 

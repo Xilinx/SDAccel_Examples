@@ -165,6 +165,7 @@ void set_callback(cl::Event event, const char *queue_name) {
 
 int main(int argc, char **argv) {
   cl_int err;
+  unsigned fileBufSize;
 
 // OPENCL HOST CODE AREA START
   // get_xil_devices() is a utility API which will find the xilinx
@@ -183,9 +184,10 @@ int main(int argc, char **argv) {
   // targeted mode (sw_emu/hw_emu/hw) and for targeted platforms.
   std::string binaryFile = xcl::find_binary_file(device_name, "vector_addition");
 
-  // import_binary_file() is a utility API which will load the binaryFile
-  // and will return Binaries.
-  cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+  // read_binary_file() is a utility API which will load the binaryFile
+  // and will return the pointer to file buffer.
+  char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+  cl::Program::Binaries bins{{fileBuf, fileBufSize}};
   devices.resize(1);
   OCL_CHECK(err, cl::Program program (context, devices, bins, NULL, &err));
 
@@ -284,6 +286,8 @@ int main(int argc, char **argv) {
       break;
     }
   }
+
+  delete[] fileBuf;
 
   printf("TEST %s\n", (match ? "PASSED" : "FAILED"));
   return (match ? EXIT_SUCCESS :  EXIT_FAILURE);

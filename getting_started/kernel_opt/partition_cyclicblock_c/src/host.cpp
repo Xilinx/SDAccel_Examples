@@ -87,6 +87,7 @@ void verify(vector<int,aligned_allocator<int>> &gold,
 int main(int argc, char **argv) {
     static const int dims = 16;
     cl_int err;
+    unsigned fileBufSize;
 
     /* less iteration for emulation mode */
     int iteration = xcl::is_emulation() ? 2: 100; 
@@ -115,7 +116,8 @@ int main(int argc, char **argv) {
 
     //Create Program 
     std::string binaryFile = xcl::find_binary_file(device_name,"matmul");
-    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
 
@@ -172,6 +174,8 @@ int main(int argc, char **argv) {
         matmul_partition_time += nstimeend-nstimestart;
         verify(gold, C);
     }
+
+    delete[] fileBuf;
 
     printf("|-------------------------+-------------------------|\n"
            "| Kernel(%3d iterations)  |    Wall-Clock Time (ns) |\n"

@@ -40,6 +40,7 @@ static const std::string error_message =
 // buffer copy from one buffer to another
 int main(int argc, char **argv) {
     cl_int err;
+    unsigned fileBufSize;
     size_t size_in_bytes = DATA_SIZE * sizeof(int);
 
     vector<int,aligned_allocator<int>> source_a(DATA_SIZE, 13);
@@ -55,7 +56,8 @@ int main(int argc, char **argv) {
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
     std::string binaryFile = xcl::find_binary_file(device_name,"vector_addition");
-    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
 
@@ -99,6 +101,8 @@ int main(int argc, char **argv) {
           if (((i + 1) % 16) == 0) printf("\n");
         }
     }
+
+    delete[] fileBuf;
 
     std::cout << "TEST " << (match ? "FAILED" : "PASSED") << std::endl; 
     return (match ? EXIT_FAILURE :  EXIT_SUCCESS);

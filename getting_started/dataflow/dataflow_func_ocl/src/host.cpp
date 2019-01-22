@@ -37,6 +37,7 @@ int main(int argc, char** argv)
 {
     //Allocate Memory in Host Memory
     cl_int err;
+    unsigned fileBufSize;
     size_t vector_size_bytes = sizeof(int) * DATA_SIZE;
     std::vector<int,aligned_allocator<int>> source_input     (DATA_SIZE);
     std::vector<int,aligned_allocator<int>> source_hw_results(DATA_SIZE);
@@ -59,7 +60,8 @@ int main(int argc, char** argv)
 
     //Create Program and Kernel
     std::string binaryFile = xcl::find_binary_file(device_name,"adder");
-    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel krnl_adder(program,"adder", &err));
@@ -105,6 +107,8 @@ int main(int argc, char** argv)
             break;
         }
     }
+
+    delete[] fileBuf;
 
     std::cout << "TEST " << (match ? "FAILED" : "PASSED") << std::endl; 
     return (match ? EXIT_FAILURE :  EXIT_SUCCESS);

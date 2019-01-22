@@ -84,6 +84,7 @@ uint64_t mmult_fpga (
 )
 {
     cl_int err;
+    unsigned fileBufSize;
     int size = dim;    
     size_t matrix_size_bytes = sizeof(int) * size * size;
 
@@ -96,12 +97,13 @@ uint64_t mmult_fpga (
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
 
-    //import_binary() command will find the OpenCL binary file created using the 
-    //xocc compiler load into OpenCL Binary and return as Binaries
-    //OpenCL and it can contain many functions which can be executed on the
+    //read_binary() command will find the OpenCL binary file created using the 
+    //xocc compiler load into OpenCL Binary and return a pointer to file buffer
+    //and it can contain many functions which can be executed on the
     //device.
     std::string binaryFile = xcl::find_binary_file(device_name,"mmult");
-    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
 
@@ -145,6 +147,7 @@ uint64_t mmult_fpga (
     //buffer_output cl_mem object to the source_fpga_results vector
     OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_output},CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());
+    delete[] fileBuf;
 
     kernel_duration = get_duration_ns(event);
 

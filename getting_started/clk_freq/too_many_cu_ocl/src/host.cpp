@@ -63,6 +63,7 @@ bool run_opencl_vadd(
 {
     std::string binaryFile;
     cl_int err;
+    unsigned fileBufSize;
 
     if(good){
         binaryFile = xcl::find_binary_file(device_name,"vadd_GOOD");
@@ -75,7 +76,8 @@ bool run_opencl_vadd(
         }
     }
 
-    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     cl::Kernel krnl_vector_add;
@@ -137,6 +139,7 @@ bool run_opencl_vadd(
         OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
         OCL_CHECK(err, err = q.finish());
     }
+    delete[] fileBuf;
     return true;
 }
 

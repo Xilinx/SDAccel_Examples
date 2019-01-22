@@ -73,6 +73,7 @@ int main(int argc, char** argv)
     std::vector<int,aligned_allocator<int>> source_hw_results(matrix_size);
     std::vector<int,aligned_allocator<int>> source_sw_results(matrix_size);
     cl_int err;
+    unsigned fileBufSize;
 
     // Create the test data and Software Result 
     for(int i = 0 ; i < matrix_size ; i++){
@@ -92,7 +93,8 @@ int main(int argc, char** argv)
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     std::string binaryFile = xcl::find_binary_file(device_name,"mmult");
-    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel krnl_mmult(program,"mmult", &err));
@@ -137,6 +139,8 @@ int main(int argc, char** argv)
             break;
         }
     }
+
+    delete[] fileBuf;
 
     std::cout << "TEST " << (match ? "FAILED" : "PASSED") << std::endl; 
     return (match ? EXIT_FAILURE :  EXIT_SUCCESS);

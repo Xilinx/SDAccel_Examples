@@ -196,10 +196,12 @@ int main(int argc, char **argv){
       // targeted mode (sw_emu/hw_emu/hw) and for targeted platforms.
       std::string binaryFile = xcl::find_binary_file(device_name, "vector_addition");
 
-      // import_binary_file() is a utility API which will load the binaryFile
-      // and will return Binaries.
+      // read_binary_file() is a utility API which will load the binaryFile
+      // and will return pointer to file buffer.
+      unsigned fileBufSize;
+      char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+      cl::Program::Binaries bins{{fileBuf, fileBufSize}};
       cl::Program::Binaries invalid_bin;
-      cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
       devices.resize(1);
 
       {
@@ -284,6 +286,9 @@ int main(int argc, char **argv){
                break;
            }
        }
+
+       delete[] fileBuf;
+
        std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl;
        return (match ? EXIT_SUCCESS :  EXIT_FAILURE);
    }

@@ -32,6 +32,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 int main(int argc, char* argv[]) {
     cl_int err;
+    unsigned fileBufSize;
     int nhalf = NPOINTS >> 1;
     size_t input_size_bytes = sizeof(int) * NPOINTS;
     size_t output_size_bytes = sizeof(int) * nhalf;
@@ -65,7 +66,8 @@ int main(int argc, char* argv[]) {
     std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
 
     std::string binaryFile = xcl::find_binary_file(device_name,"krnl_vdotprod");
-    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel krnl(program,"krnl_vdotprod", &err));
@@ -115,6 +117,8 @@ int main(int argc, char* argv[]) {
             printf("Result Match: i = %d CPU result = %d Krnl Result = %d\n", i, result_sim[i], result_krnl[i]);
         }
     }
+
+    delete[] fileBuf;
 
     std::cout << "TEST " << (krnl_match ? "FAILED" : "PASSED") << std::endl; 
     return (krnl_match ? EXIT_FAILURE :  EXIT_SUCCESS);

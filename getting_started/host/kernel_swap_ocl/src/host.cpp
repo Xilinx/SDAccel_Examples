@@ -34,6 +34,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 int main(int argc, char** argv)
 {
     cl_int err;
+    unsigned fileBufSize;
     std::vector<int,aligned_allocator<int>> h_a(LENGTH);//host memory for a vector
     std::vector<int,aligned_allocator<int>> h_b(LENGTH);//host memory for b vector
     std::vector<int,aligned_allocator<int>> h_temp(LENGTH);//host memory for temp vector
@@ -68,7 +69,8 @@ int main(int argc, char** argv)
     {
         printf("INFO: loading vmul kernel\n");
         std::string vmulBinaryFile = xcl::find_binary_file(device_name,"krnl_vmul");
-        cl::Program::Binaries vmul_bins = xcl::import_binary_file(vmulBinaryFile);
+        char* fileBuf = xcl::read_binary_file(vmulBinaryFile, fileBufSize);
+        cl::Program::Binaries vmul_bins{{fileBuf, fileBufSize}};
         devices.resize(1);
         OCL_CHECK(err, cl::Program program(context, devices, vmul_bins, NULL, &err));
         OCL_CHECK(err, cl::Kernel krnl_vmul(program, "krnl_vmul", &err));
@@ -101,12 +103,14 @@ int main(int argc, char** argv)
                 break;
             }
         }
+        delete[] fileBuf;
     }
 
     if(match){
         printf("INFO: loading vadd_krnl\n");
         std::string vaddBinaryFile = xcl::find_binary_file(device_name,"krnl_vadd");
-        cl::Program::Binaries vadd_bins = xcl::import_binary_file(vaddBinaryFile);
+        char* fileBuf = xcl::read_binary_file(vaddBinaryFile, fileBufSize);
+        cl::Program::Binaries vadd_bins{{fileBuf, fileBufSize}};
         cl::Program program(context, devices, vadd_bins);
         cl::Kernel krnl_vadd(program, "krnl_vadd");
    
@@ -137,8 +141,9 @@ int main(int argc, char** argv)
                 break;
             }
         }
+        delete[] fileBuf;
     }
-
+    
     std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl; 
     return (match ? EXIT_SUCCESS :  EXIT_FAILURE);
 }

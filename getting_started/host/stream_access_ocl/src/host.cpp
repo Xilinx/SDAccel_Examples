@@ -119,6 +119,7 @@ int main(int argc, char **argv) {
     std::string in1Filename = argv[1];
     std::string in2Filename = argv[2];
     cl_int err;
+    unsigned fileBufSize;
     std::string in1_data, in2_data;
 
     std::ifstream in1_stream(in1Filename);
@@ -150,7 +151,8 @@ int main(int argc, char **argv) {
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
 
     std::string binaryFile = xcl::find_binary_file(device_name,"vector_addition");
-    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
 
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
@@ -302,6 +304,8 @@ int main(int argc, char **argv) {
     in1_stream.close();
     in2_stream.close();
     out_stream.close();
+
+    delete[] fileBuf;
 
     std::cout << "TEST " <<  ((match) ? "PASSED" : "FAILED") << std::endl;;
     return ((match) ? EXIT_SUCCESS :  EXIT_FAILURE);

@@ -105,6 +105,7 @@ int main(int argc, char** argv) {
     }
 
     cl_int err;
+    unsigned fileBufSize;
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
@@ -114,7 +115,8 @@ int main(int argc, char** argv) {
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_kernel_global");
-    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel krnl_global_bandwidth(program, "bandwidth", &err));
@@ -335,6 +337,8 @@ int main(int argc, char** argv) {
     delete(buffer[0]);
     delete(buffer[1]);
     #endif
+
+    delete[] fileBuf;
 
     /* Profiling information */
     double dnsduration = ((double)nsduration);

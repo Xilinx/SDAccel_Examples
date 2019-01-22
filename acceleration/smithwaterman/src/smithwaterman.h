@@ -75,6 +75,7 @@ typedef             int        i32;
 
     private:
         string m_strSampleFP;
+        char* fileBuf;
         bool m_useDoubleBuffered;
         int m_numSamples;
         int m_numBlocks;

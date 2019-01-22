@@ -93,6 +93,7 @@ void verify (const vector<int,aligned_allocator<int>>& gold,
 int main(int argc, char **argv) {
 
   cl_int err;
+  unsigned fileBufSize;
 // allocate memory on host to store input arrays and the output array
   vector<int,aligned_allocator<int>> results(VERTEX_COUNT);
 
@@ -122,7 +123,8 @@ int main(int argc, char **argv) {
   std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
   std::string binaryFile = xcl::find_binary_file(device_name,"dot");
-  cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+  char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+  cl::Program::Binaries bins{{fileBuf, fileBufSize}};
   devices.resize(1);
   OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
  
@@ -201,6 +203,7 @@ int main(int argc, char **argv) {
   OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
   q.finish();
   verify(gold, results);
+  delete[] fileBuf;
 
   printf("|-------------------------+-------------------------|\n");
   printf("Note: Wall Clock Time is meaningful for real hardware execution only, not for emulation.\n");

@@ -40,7 +40,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 #endif
 
-
+char* fileBuf;
 void linear_search_read_datafile(char* filename, float* data, size_t size) {
     FILE* fp = fopen(filename, "r");
     if( fp == NULL) {
@@ -59,6 +59,7 @@ void linear_search_init( cl::Context *context, cl::CommandQueue *q, cl::Program 
             float *targets, float *queries, unsigned int *indices)
 {
     cl_int err;
+    unsigned fileBufSize;
     // get_xil_devices() is a utility API which will find the xilinx
     // platforms and will return list of devices connected to Xilinx platform
     std::vector<cl::Device> devices = xcl::get_xil_devices();
@@ -72,9 +73,10 @@ void linear_search_init( cl::Context *context, cl::CommandQueue *q, cl::Program 
     // targeted mode (sw_emu/hw_emu/hw) and for targeted platforms.
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_nearest");
 
-    // import_binary_file() is a utility API which will load the binaryFile
-    // and will return Binaries.
-    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    // read_binary_file() is a utility API which will load the binaryFile
+    // and will return pointer to file buffer.
+    fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
 
     OCL_CHECK(err, *program = cl::Program(*context, devices, bins, NULL, &err));
@@ -96,7 +98,7 @@ void linear_search_init( cl::Context *context, cl::CommandQueue *q, cl::Program 
 unsigned long linear_search_exec(cl::Context *context, cl::CommandQueue *q, cl::Program *program, cl::Kernel *krnl,
         cl::Buffer* dev_targets, cl::Buffer* dev_queries, cl::Buffer* dev_indices, unsigned int *indices)
 {
-        cl_int err;    
+    cl_int err;    
     cl::Event event;
 
     OCL_CHECK(err, err = krnl->setArg(0, *dev_targets));
@@ -113,6 +115,7 @@ unsigned long linear_search_exec(cl::Context *context, cl::CommandQueue *q, cl::
 
     OCL_CHECK(err, err = q->enqueueReadBuffer(*dev_indices, CL_TRUE, 0, (QUERIES) * sizeof(unsigned int), (void*)indices, NULL, NULL));
     q->finish();
+    delete[] fileBuf;
     return duration;
 }
 

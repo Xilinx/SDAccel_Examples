@@ -34,6 +34,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 int main(int argc, char** argv)
 {
     cl_int err;
+    unsigned fileBufSize;
     int size = DATA_SIZE;
     //Allocate Memory in Host Memory
     size_t vector_size_bytes = sizeof(int) * size;
@@ -60,7 +61,8 @@ int main(int argc, char** argv)
     std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
 
     std::string binaryFile = xcl::find_binary_file(device_name,"vadd");
-    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel krnl_vadd(program,"krnl_vadd_rtl", &err));
@@ -106,6 +108,8 @@ int main(int argc, char** argv)
             break;
         }
     }
+
+    delete[] fileBuf;
 
     std::cout << "TEST " << (match ? "FAILED" : "PASSED") << std::endl; 
     return (match ? EXIT_FAILURE :  EXIT_SUCCESS);

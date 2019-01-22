@@ -77,6 +77,7 @@ int main(int argc, char* argv[])
 //OPENCL HOST CODE AREA START
 
     int err;
+    unsigned fileBufSize;
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
@@ -85,7 +86,8 @@ int main(int argc, char* argv[])
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err)); 
 
     std::string binaryFile = xcl::find_binary_file(device_name,binaryName.c_str());
-    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel kernel(program,"apply_watermark", &err));
@@ -130,6 +132,7 @@ int main(int argc, char* argv[])
     
     // Write the final image to disk
     image.writeBitmapFile(outImage.data());
+    delete[] fileBuf;
 
     std::cout << "TEST " << (match ? "FAILED" : "PASSED") << std::endl; 
     return (match ? EXIT_FAILURE :  EXIT_SUCCESS);

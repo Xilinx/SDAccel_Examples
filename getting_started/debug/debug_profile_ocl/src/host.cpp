@@ -49,6 +49,7 @@ int main(int argc, char* argv[])
 
 // OPENCL HOST CODE AREA START
     cl_int err;
+    unsigned fileBufSize;
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
@@ -57,7 +58,8 @@ int main(int argc, char* argv[])
     std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
 
     std::string binaryFile = xcl::find_binary_file(device_name,"vadd");
-    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel krnl(program,"krnl_vadd", &err));
@@ -109,6 +111,8 @@ int main(int argc, char* argv[])
             ; // nothing...Or you could print additional debug message with result matched
         }
     }
+
+    delete[] fileBuf;
 
     std::cout << "TEST " << (krnl_match ? "FAILED" : "PASSED") << std::endl; 
     return (krnl_match ? EXIT_FAILURE :  EXIT_SUCCESS);

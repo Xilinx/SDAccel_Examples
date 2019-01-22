@@ -110,6 +110,7 @@ int main(int argc, char** argv)
                          {536870912,2}};
 
     cl_int err;
+    unsigned fileBufSize;
     // The get_xil_devices will return vector of Xilinx Devices
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
@@ -120,9 +121,10 @@ int main(int argc, char** argv)
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
-    // import_binary() command will find the OpenCL binary file
+    // read_binary() command will find the OpenCL binary file
     std::string binaryFile = xcl::find_binary_file(device_name,"krnl_host_global");
-    cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
 
@@ -156,6 +158,8 @@ int main(int argc, char** argv)
             break;
         }
     }
+
+    delete[] fileBuf;
 
     printf("\nTEST PASSED\n");
     // Shutdown and cleanup
