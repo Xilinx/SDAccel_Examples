@@ -59,7 +59,7 @@ CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR
 CLFLAGS += --max_memory_ports apply_watermark
 
 # Kernel linker flags
-LDCLFLAGS += --sp apply_watermark_1.m_axi_gmem0:bank0 --sp apply_watermark_1.m_axi_gmem1:bank1
+LDCLFLAGS += --sp apply_watermark_1.m_axi_gmem0:DDR[0] --sp apply_watermark_1.m_axi_gmem1:DDR[1]
 
 EXECUTABLE = watermark
 CMD_ARGS = ./data/inputImage.bmp ./data/golden.bmp
