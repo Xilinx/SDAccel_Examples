@@ -101,7 +101,6 @@ kernel void krnl_equalizer(
     global uint16 *eqimage
     ) {
 
-    __attribute__((xcl_pipeline_loop(1)))
     for(uint n = 0; n < IMAGE_HEIGHT_PIXELS/32; n++) {
         ushort line[32][IMAGE_WIDTH_PIXELS] __attribute__((xcl_array_partition(complete, 1)));
         ushort hist[32][HISTOGRAM_DEPTH] __attribute__((xcl_array_partition(complete, 1)));

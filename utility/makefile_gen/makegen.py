@@ -438,7 +438,7 @@ def run_nimbix(target, data):
     	target.write("\t$(COMMON_REPO)/utility/nimbix/run_nimbix.py $(EXECUTABLE) $(DSA)\n\n")	
     
 def aws_build(target):
-    target.write("aws_build: all check-aws_repo\n")
+    target.write("aws_build: check-aws_repo $(BINARY_CONTAINERS)\n")
     target.write("\t$(COMMON_REPO)/utility/aws/run_aws.py $(BINARY_CONTAINERS)\n\n")
 
 def mk_help(target):

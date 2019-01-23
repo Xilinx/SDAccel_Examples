@@ -4,7 +4,7 @@ import sys
 import json
 
 sys.dont_write_bytecode = True
-krnl_name = sys.argv[1]
+krnl_names = sys.argv[1:]
 
 try:
 	s3_bucket = os.environ['S3_BUCKET']
@@ -27,6 +27,8 @@ if s3_bucket == "" or s3_dcp_key == "" or s3_logs_keys == "":
 		print "ERROR: Must have ~/.aws_creds.json file"
 		sys.exit(-1)
 
-krnl_name = krnl_name.replace('.xclbin', '')
+length = len(krnl_names)
 string = os.environ["SDACCEL_DIR"]
-os.system(string + "/tools/create_sdaccel_afi.sh -s3_bucket=" + s3_bucket + " -s3_dcp_key=" + s3_dcp_key + " -s3_logs_key=" + s3_logs_key + " -xclbin=" + krnl_name + ".xclbin -o=" + krnl_name)
+for i in range(0, length):
+    krnl_name = krnl_names[i].replace('.xclbin', '')
+    os.system(string + "/tools/create_sdaccel_afi.sh -s3_bucket=" + s3_bucket + " -s3_dcp_key=" + s3_dcp_key + " -s3_logs_key=" + s3_logs_key + " -xclbin=" + krnl_name + ".xclbin -o=" + krnl_name)

@@ -45,6 +45,14 @@ make DEVICES=<.xpfm file path> all
 Application code is located in the src directory. Accelerator binary files will be compiled to the xclbin directory. The xclbin directory is required by the Makefile and its contents will be filled during compilation. A listing of all the files in this example is shown below
 
 ```
+Makefile
+README.md
+description.json
+sdaccel.ini
+src/host.cpp
+src/matmul.cpp
+src/matmul_partition.cpp
+utils.mk
 ```
 
 ## 5. COMPILATION AND EXECUTION
