@@ -99,6 +99,9 @@ endif
 ifeq ($(findstring xilinx_vcu1525_dynamic_6_0, $(DEVICE)), xilinx_vcu1525_dynamic_6_0)
 $(error Nothing to be done for make)
 endif
+ifeq ($(findstring xilinx_u200_xdma-gen3x4_201830_2, $(DEVICE)), xilinx_u200_xdma-gen3x4_201830_2)
+$(error Nothing to be done for make)
+endif
 
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .

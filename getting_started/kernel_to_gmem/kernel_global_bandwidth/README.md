@@ -44,6 +44,7 @@ Application code is located in the src directory. Accelerator binary files will 
 .gitignore
 Makefile
 README.md
+config.mk
 description.json
 sdaccel.ini
 src/kernel.cl
