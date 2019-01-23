@@ -108,7 +108,7 @@ endif
 run_nimbix: all
 	$(COMMON_REPO)/utility/nimbix/run_nimbix.py $(EXECUTABLE) $(CMD_ARGS) $(DSA)
 
-aws_build: all check-aws_repo
+aws_build: check-aws_repo $(BINARY_CONTAINERS)
 	$(COMMON_REPO)/utility/aws/run_aws.py $(BINARY_CONTAINERS)
 
 # Cleaning stuff
