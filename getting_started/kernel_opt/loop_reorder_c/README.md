@@ -50,6 +50,7 @@ Makefile
 README.md
 data/hls_config.tcl
 description.json
+qor.json
 sdaccel.ini
 src/host.cpp
 src/mmult.cpp

@@ -50,6 +50,7 @@ Makefile
 README.md
 config.mk
 description.json
+qor.json
 scripts/gen_xo.tcl
 scripts/package_kernel.tcl
 sdaccel.ini

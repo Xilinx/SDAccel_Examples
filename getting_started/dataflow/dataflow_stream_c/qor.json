@@ -1,0 +1,30 @@
+{
+    "containers": [
+        { 
+            "meet_system_timing": "true",
+            "accelerators": [
+                {
+                    "name": "adder",
+                    "check_timing": "true",
+                    "pipelinetype": "dataflow",
+                    "check_latency": "true",
+                    "check_warning": "true",
+                    "loops": [   
+                        {
+                            "name": "mem_rd",
+                            "pipelineII": "1"                     
+                        },
+                        {
+                            "name": "execute",
+                            "pipelineII": "1"
+                        },
+                        {
+                            "name": "mem_wr",
+                            "pipelineII": "1"
+                        }
+                    ]
+                }   
+            ]
+        }
+    ]
+}

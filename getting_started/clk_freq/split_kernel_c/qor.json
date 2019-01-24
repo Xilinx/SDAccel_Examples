@@ -1,0 +1,76 @@
+{
+    "containers": [
+        { 
+            "meet_system_timing": "true",
+            "accelerators": [
+                {
+                    "name": "sketch_GOOD",
+                    "check_timing": "true",
+                    "pipelinetype": "dataflow",
+                    "check_latency": "true",
+                    "check_warning": "true",
+                    "loops": [   
+                        {
+                            "name": "readInput",
+                            "pipelineII": "1"                     
+                        },
+                        {
+                            "name": "fetchBoostLine1",
+                            "pipelineII": "1"
+                        },
+                        {
+                            "name": "fetchBoostLine2",
+                            "pipelineII": "1"
+                        },
+                        {
+                            "name": "fetchMedianLine1",
+                            "pipelineII": "1"
+                        },
+                        {
+                            "name": "fetchMedianLine2",
+                            "pipelineII": "1"
+                        },
+                        {
+                            "name": "sketchLoop",
+                            "pipelineII": "1"
+                        },
+                        {
+                            "name": "flipOutput",
+                            "pipelineII": "1"
+                        },
+                        {
+                            "name": "writeOutput2",
+                            "pipelineII": "1"
+                        }
+                    ]
+                }   
+            ]
+        },
+        { 
+            "meet_system_timing": "true",
+            "accelerators": [
+                {
+                    "name": "sketch_BAD",
+                    "check_timing": "true",
+                    "pipelinetype": "none",
+                    "check_latency": "true",
+                    "check_warning": "true",
+                    "loops": [   
+                        {
+                            "name": "readImg",
+                            "pipelineII": "1"                     
+                        },
+                        {
+                            "name": "sketchLoop",
+                            "pipelineII": "1"
+                        },
+                        {
+                            "name": "flipOutput1_flipOutput2",
+                            "pipelineII": "1"
+                        }                    
+                    ]
+                }   
+            ]
+        }
+    ]
+}
