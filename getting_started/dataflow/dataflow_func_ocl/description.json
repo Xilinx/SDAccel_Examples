@@ -13,6 +13,7 @@
         "xcl2"
     ],
     "host_exe": "host",
+    "cmd_args": "BUILD/adder.xclbin",
     "nboard":["xilinx_kcu1500_dynamic"],
     "containers" : [
         {
