@@ -58,7 +58,7 @@ CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR
 
 
 EXECUTABLE = stream_access
-CMD_ARGS = ./data/input1.txt ./data/input2.txt
+CMD_ARGS = $(XCLBIN)/vector_addition.$(TARGET).$(DSA).xclbin ./data/input1.txt ./data/input2.txt
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
@@ -94,9 +94,9 @@ $(EMCONFIG_DIR)/emconfig.json:
 check: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) ./data/input1.txt ./data/input2.txt
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/vector_addition.$(TARGET).$(DSA).xclbin ./data/input1.txt ./data/input2.txt
 else
-	 ./$(EXECUTABLE) ./data/input1.txt ./data/input2.txt
+	 ./$(EXECUTABLE) $(XCLBIN)/vector_addition.$(TARGET).$(DSA).xclbin ./data/input1.txt ./data/input2.txt
 endif
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 

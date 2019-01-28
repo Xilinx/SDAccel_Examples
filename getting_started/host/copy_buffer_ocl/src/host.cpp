@@ -39,6 +39,13 @@ static const std::string error_message =
 // This example illustrates the simple OpenCL example that performs
 // buffer copy from one buffer to another
 int main(int argc, char **argv) {
+
+    if (argc != 2) {
+        std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    std::string binaryFile = argv[1];
     cl_int err;
     unsigned fileBufSize;
     size_t size_in_bytes = DATA_SIZE * sizeof(int);
@@ -55,7 +62,6 @@ int main(int argc, char **argv) {
     std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
-    std::string binaryFile = xcl::find_binary_file(device_name,"vector_addition");
     char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);

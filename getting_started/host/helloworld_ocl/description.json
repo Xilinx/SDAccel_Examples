@@ -12,6 +12,7 @@
         "xcl2"
     ],
     "host_exe": "helloworld",
+    "cmd_args": "BUILD/vector_addition.xclbin",
     "containers": [
     {
         "name": "vector_addition",    

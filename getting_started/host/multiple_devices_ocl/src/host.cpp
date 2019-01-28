@@ -45,12 +45,14 @@ cl::Program load_cl2_binary(cl::Program::Binaries, cl::Device device,
                           cl::Context context);
 // This example demonstrates how to split work among multiple devices.
 int main(int argc, char **argv) {
+
     if (argc != 2) {
-        std::cout <<     "The program expects only one argument which is the full path to "
-                        "the OpenCL kernel binary (xclbin file)\n" << std::endl;
+        std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
         return EXIT_FAILURE;
     }
 
+    std::string binaryFile = argv[1];
+    
     cl_int err = CL_SUCCESS;
     unsigned fileBufSize;
 
@@ -77,7 +79,6 @@ int main(int argc, char **argv) {
     vector<cl::Buffer> buffer_a(device_count);
     vector<cl::Buffer> buffer_b(device_count);
     vector<cl::Buffer> buffer_result(device_count);
-    vector<std::string> binaryFile(device_count);
     vector<cl::Program::Binaries> bins(device_count);
     vector<cl::Platform> platform;
     char* fileBuf[device_count];
@@ -93,13 +94,9 @@ int main(int argc, char **argv) {
         OCL_CHECK(err, queues[d] = cl::CommandQueue(contexts[d], devices[d], CL_QUEUE_PROFILING_ENABLE, &err));
         OCL_CHECK(err, device_name[d] = devices[d].getInfo<CL_DEVICE_NAME>(&err));
 
-        // find_binary_file() is a utility API which will search the xclbin file for
-        // targeted mode (sw_emu/hw_emu/hw) and for targeted platforms.
-        binaryFile[d] = xcl::find_binary_file(device_name[d], "vector_addition");
-
         // read_binary_file() ia a utility API which will load the binaryFile
         // and will return pointer to file buffer.
-        fileBuf[d] = xcl::read_binary_file(binaryFile[d], fileBufSize);
+        fileBuf[d] = xcl::read_binary_file(binaryFile, fileBufSize);
         bins[d].push_back({fileBuf[d], fileBufSize});
         programs[d] = load_cl2_binary(bins[d], devices[d], contexts[d]);
         OCL_CHECK(err, kernels[d] = cl::Kernel(programs[d], "vadd", &err));

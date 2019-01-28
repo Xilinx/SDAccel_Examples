@@ -353,6 +353,13 @@ void out_of_order_queue(cl::Context &context, cl::Device &device, cl::Kernel &ke
 
 int main(int argc, char **argv) {
 
+  if (argc != 2) {
+      std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
+      return EXIT_FAILURE;
+  }
+
+  std::string binaryFile = argv[1];
+
   cl_int err;
   unsigned fileBufSize;
   const size_t array_size = MAT_DIM0 * MAT_DIM1;
@@ -372,10 +379,6 @@ int main(int argc, char **argv) {
 
   OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
   OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
-
-  // find_binary_file() is a utility API which will search the xclbin file for
-  // targeted mode (sw_emu/hw_emu/hw) and for targeted platforms.
-  std::string binaryFile = xcl::find_binary_file(device_name,"matrix_ops");
 
   // read_binary_file() is a utility API which will load the binaryFile
   // and will return pointer to file buffer.

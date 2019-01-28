@@ -8,6 +8,7 @@
         "Linux"
     ],
     "host_exe": "host_global",
+    "cmd_args": "BUILD/krnl_host_global.xclbin",
     "libs": [
         "xcl2"
     ],

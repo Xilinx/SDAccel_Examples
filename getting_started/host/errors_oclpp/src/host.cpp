@@ -116,10 +116,14 @@ const char *error_string(cl_int error_code) {
 
 // This example just prints out string description for given OpenCL error code.
 int main(int argc, char **argv){
-    if(argc!=2){
+
+    if (argc != 2) {
         std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
         return EXIT_FAILURE;
     }
+
+    std::string binaryFile = argv[1];
+    
     static const int elements = 128;
     vector<int, aligned_allocator<int>> A(elements, 32);
     vector<int, aligned_allocator<int>> B(elements, 10);
@@ -191,10 +195,6 @@ int main(int argc, char **argv){
       OCL_CHECK(err, cl::Context context(device, props, NULL, NULL, &err));
       OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
       OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
-
-      // find_binary_file() is a utility API which will search the xclbin file for
-      // targeted mode (sw_emu/hw_emu/hw) and for targeted platforms.
-      std::string binaryFile = xcl::find_binary_file(device_name, "vector_addition");
 
       // read_binary_file() is a utility API which will load the binaryFile
       // and will return pointer to file buffer.
