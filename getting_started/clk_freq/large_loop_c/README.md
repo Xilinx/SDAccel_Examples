@@ -49,6 +49,7 @@ Application code is located in the src directory. Accelerator binary files will 
 Makefile
 README.md
 description.json
+qor.json
 sdaccel.ini
 src/cnn_convolution.cpp
 src/cnn_convolution_bad.cpp

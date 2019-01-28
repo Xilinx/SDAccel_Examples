@@ -24,6 +24,7 @@
      }
     ],
     "host_exe": "host",
+    "cmd_args": "BUILD/vector_addition.xclbin",
     "contributors" : [
         {
             "group": "Xilinx",

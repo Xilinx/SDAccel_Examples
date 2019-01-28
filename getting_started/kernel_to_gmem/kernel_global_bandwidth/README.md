@@ -46,6 +46,7 @@ Makefile
 README.md
 config.mk
 description.json
+qor.json
 sdaccel.ini
 src/kernel.cl
 src/kernel_global_bandwidth.cpp

@@ -1,0 +1,51 @@
+{
+    "containers": [
+        { 
+            "meet_system_timing": "true",
+            "accelerators": [
+                {
+                    "name": "dot_aos",
+                    "check_timing": "true",
+                    "pipelinetype": "none",
+                    "check_latency": "false",
+                    "check_warning": "true",
+                    "loops": [   
+                        {
+                            "name": "compute",
+                            "pipelineII": "1"                     
+                        }                    
+                    ]
+                },
+                {
+                    "name": "dot_soa",
+                    "check_timing": "true",
+                    "pipelinetype": "none",
+                    "check_latency": "false",
+                    "check_warning": "true",
+                    "loops": [   
+                        {
+                            "name": "load_x",
+                            "pipelineII": "1"                     
+                        },
+                        {
+                            "name": "load_y",
+                            "pipelineII": "1"                     
+                        },
+                        {
+                            "name": "load_z",
+                            "pipelineII": "1"                     
+                        },
+                        {
+                            "name": "compute",
+                            "pipelineII": "1"                     
+                        },
+                        {
+                            "name": "store_r",
+                            "pipelineII": "1"                     
+                        }                    
+                    ]
+                }   
+            ]
+        }
+    ]
+}

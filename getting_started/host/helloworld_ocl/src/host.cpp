@@ -39,6 +39,13 @@ static const std::string error_message =
 // This example illustrates the very simple OpenCL example that performs
 // an addition on two vectors
 int main(int argc, char **argv) {
+
+    if (argc != 2) {
+        std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    std::string binaryFile = argv[1];
     // compute the size of array in bytes
     size_t size_in_bytes = DATA_SIZE * sizeof(int);
     cl_int err;
@@ -64,7 +71,6 @@ int main(int argc, char **argv) {
     // xocc compiler load into OpenCL Binary and return a pointer to file buffer
     // and it can contain many functions which can be executed on the
     // device.
-    std::string binaryFile = xcl::find_binary_file(device_name,"vector_addition");
     char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);

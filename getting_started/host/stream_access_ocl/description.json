@@ -10,7 +10,7 @@
         "Linux"
     ],
     "host_exe": "stream_access",
-    "cmd_args": "PROJECT/data/input1.txt PROJECT/data/input2.txt",
+    "cmd_args": "BUILD/vector_addition.xclbin PROJECT/data/input1.txt PROJECT/data/input2.txt",
     "libs": [
         "xcl2"
     ],

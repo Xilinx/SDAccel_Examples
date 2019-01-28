@@ -46,6 +46,13 @@ Description:
 #define DATA_SIZE (MB*N)
 
 int main(int argc, char** argv) {
+
+    if (argc != 2) {
+        std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    std::string vaddBinaryFile = argv[1];
     cl_int err;
     int size;
     unsigned fileBufSize;
@@ -87,7 +94,6 @@ int main(int argc, char** argv) {
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
-    std::string vaddBinaryFile = xcl::find_binary_file(device_name,"krnl_vadd");
     char* fileBuf = xcl::read_binary_file(vaddBinaryFile, fileBufSize);
     cl::Program::Binaries vadd_bins{{fileBuf, fileBufSize}};
     devices.resize(1);

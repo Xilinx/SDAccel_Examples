@@ -1,0 +1,30 @@
+{
+    "containers": [
+        { 
+            "meet_system_timing": "true",
+            "accelerators": [
+                {
+                    "name": "vadd",
+                    "check_timing": "true",
+                    "pipelinetype": "none",
+                    "check_latency": "false",
+                    "check_warning": "true",
+                    "loops": [   
+                        {
+                            "name": "v1_rd",
+                            "pipelineII": "1"                     
+                        },
+                        {
+                            "name": "v2_rd_add",
+                            "pipelineII": "1"
+                        },
+                        {
+                            "name": "out_wr",
+                            "pipelineII": "1"
+                        }
+                    ]
+                }   
+            ]
+        }
+    ]
+}

@@ -33,6 +33,11 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 int main(int argc, char** argv)
 {
+    if (argc != 3) {
+        std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
+		return EXIT_FAILURE;
+	}
+
     cl_int err;
     unsigned fileBufSize;
     std::vector<int,aligned_allocator<int>> h_a(LENGTH);//host memory for a vector
@@ -68,7 +73,7 @@ int main(int argc, char** argv)
     //are automatically released once the block ends
     {
         printf("INFO: loading vmul kernel\n");
-        std::string vmulBinaryFile = xcl::find_binary_file(device_name,"krnl_vmul");
+        std::string vmulBinaryFile = argv[1];
         char* fileBuf = xcl::read_binary_file(vmulBinaryFile, fileBufSize);
         cl::Program::Binaries vmul_bins{{fileBuf, fileBufSize}};
         devices.resize(1);
@@ -108,7 +113,7 @@ int main(int argc, char** argv)
 
     if(match){
         printf("INFO: loading vadd_krnl\n");
-        std::string vaddBinaryFile = xcl::find_binary_file(device_name,"krnl_vadd");
+        std::string vaddBinaryFile = argv[2];
         char* fileBuf = xcl::read_binary_file(vaddBinaryFile, fileBufSize);
         cl::Program::Binaries vadd_bins{{fileBuf, fileBufSize}};
         cl::Program program(context, devices, vadd_bins);

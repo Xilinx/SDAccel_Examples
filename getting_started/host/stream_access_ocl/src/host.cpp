@@ -111,13 +111,15 @@ bool verify( int *in1,
 }
 
 int main(int argc, char **argv) {
-    if (argc != 3){
-        std::cout << "Usage: " << argv[0] << " <Input File1>" << " <Input File2>" << std::endl;
+
+    if (argc != 4){
+        std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << " <Input File1>" << " <Input File2>" << std::endl;
         return EXIT_FAILURE ;
     }
 
-    std::string in1Filename = argv[1];
-    std::string in2Filename = argv[2];
+    std::string binaryFile = argv[1];
+    std::string in1Filename = argv[2];
+    std::string in2Filename = argv[3];
     cl_int err;
     unsigned fileBufSize;
     std::string in1_data, in2_data;
@@ -150,7 +152,6 @@ int main(int argc, char **argv) {
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err));
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
 
-    std::string binaryFile = xcl::find_binary_file(device_name,"vector_addition");
     char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);

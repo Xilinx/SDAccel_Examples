@@ -1,0 +1,42 @@
+{
+    "containers": [
+        { 
+            "meet_system_timing": "true",
+            "accelerators": [
+                {
+                    "name": "N_stage_Adders",
+                    "check_timing": "true",
+                    "pipelinetype": "dataflow",
+                    "check_latency": "true",
+                    "check_warning": "true",
+                    "loops": [   
+                        {
+                            "name": "mem_rd",
+                            "pipelineII": "1"                     
+                        },
+                        {
+                            "name": "execute",
+                            "pipelineII": "1"
+                        },
+                        {
+                            "name": "execute",
+                            "pipelineII": "1"
+                        },
+                        {
+                            "name": "execute",
+                            "pipelineII": "1"
+                        },
+                        {
+                            "name": "execute",
+                            "pipelineII": "1"
+                        },
+                        {
+                            "name": "mem_wr",
+                            "pipelineII": "1"
+                        }
+                    ]
+                }   
+            ]
+        }
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "containers": [
+        { 
+            "meet_system_timing": "true",
+            "accelerators": [
+                {
+                    "name": "vconv",
+                    "check_timing": "true",
+                    "pipelinetype": "dataflow",
+                    "check_latency": "false",
+                    "check_warning": "true",
+                    "loops": [   
+                        {
+                            "name": "mem_rd",
+                            "pipelineII": "1"                     
+                        },
+                        {
+                            "name": "memset_linebuf",
+                            "pipelineII": "1"
+                        },
+                        {
+                            "name": "mem_wr",
+                            "pipelineII": "1"
+                        }
+                    ]
+                }   
+            ]
+        }
+    ]
+}

@@ -91,6 +91,13 @@ static int dev_to_host(cl::CommandQueue commands, int buff_size, std::vector<cl:
 
 int main(int argc, char** argv)
 {
+    if (argc != 2) {
+        std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    std::string binaryFile = argv[1];
+
     //Variable-------------------------------------------------------------------------------
 
     int buff_tab[][2] = {{64,1024},
@@ -122,7 +129,6 @@ int main(int argc, char** argv)
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
     // read_binary() command will find the OpenCL binary file
-    std::string binaryFile = xcl::find_binary_file(device_name,"krnl_host_global");
     char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);

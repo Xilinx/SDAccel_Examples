@@ -13,6 +13,7 @@
         "xcl2"
     ],
     "host_exe": "vmulvadd",
+    "cmd_args": "BUILD/krnl_vmul.xclbin BUILD/krnl_vadd.xclbin",
     "containers": [
         {
             "name": "krnl_vmul",
@@ -40,6 +41,5 @@
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
         }
-    ],
-    "match_makefile": "false"
+    ] 
 }

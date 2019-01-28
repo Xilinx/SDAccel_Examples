@@ -99,7 +99,7 @@ emconfigutil --platform 'xilinx_vcu1525_dynamic' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./stream_access ./data/input1.txt ./data/input2.txt
+./stream_access ./xclbin/vector_addition.<emulation target>.<device name>.xclbin ./data/input1.txt ./data/input2.txt
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card

@@ -13,6 +13,7 @@
         "xcl2"
     ],
     "host_exe": "sub_devices",
+    "cmd_args": "BUILD/krnl_vadd.xclbin",
     "containers": [
         {
             "name" : "krnl_vadd",

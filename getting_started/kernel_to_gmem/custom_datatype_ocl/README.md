@@ -50,6 +50,7 @@ Makefile
 README.md
 data/input.bmp
 description.json
+qor.json
 sdaccel.ini
 src/host.cpp
 src/rgb_to_hsv.cl

@@ -13,6 +13,7 @@
         "xcl2"
     ],
     "host_exe": "concurrent_execution",
+    "cmd_args": "BUILD/matrix_ops.xclbin",
     "containers": [	
 	{
 	"name": "matrix_ops", 

@@ -57,6 +57,13 @@ void verify(cl::CommandQueue &q, cl::Buffer &buffer, const int value) {
 // This example illustrates how to transfer data back and forth
 // between host and device
 int main(int argc, char **argv) {
+
+    if (argc != 2) {
+        std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    std::string binaryFile = argv[1];
     cl_int err;
     unsigned fileBufSize;
     std::vector<int, aligned_allocator<int>> host_memory(elements, 42);
@@ -74,9 +81,6 @@ int main(int argc, char **argv) {
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
     printf("Allocating and transferring data to %s\n", device_name.c_str());
 
-    //dummy kernel is required to create xclbin, which is a must 
-    //to create xclbin
-    std::string binaryFile = xcl::find_binary_file(device_name,"dummy_kernel");
     char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);

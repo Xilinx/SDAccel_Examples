@@ -48,6 +48,7 @@ README.md
 data/golden.bmp
 data/input.bmp
 description.json
+qor.json
 sdaccel.ini
 src/apply_watermark.cl
 src/host.cpp

@@ -48,6 +48,7 @@ Makefile
 README.md
 config.mk
 description.json
+qor.json
 scripts/gen_adder_xo.tcl
 scripts/gen_input_xo.tcl
 scripts/gen_output_xo.tcl
