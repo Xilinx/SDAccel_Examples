@@ -8,6 +8,7 @@
         "Linux"
     ],
     "host_exe": "vdotprod",
+    "cmd_args": "BUILD/krnl_vdotprod.xclbin",
     "libs": [
         "xcl2"
     ], 

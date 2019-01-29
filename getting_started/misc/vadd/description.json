@@ -8,6 +8,7 @@
         "Linux"
     ],
     "host_exe": "vadd",
+    "cmd_args": "BUILD/krnl_vadd.xclbin",
     "libs": [
         "xcl2"
     ], 
