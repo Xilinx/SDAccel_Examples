@@ -13,6 +13,7 @@
         "xcl2"
     ],
     "host_exe": "host",
+    "cmd_args": "BUILD/fir.xclbin",
     "containers": [
     {
         "name": "fir",        

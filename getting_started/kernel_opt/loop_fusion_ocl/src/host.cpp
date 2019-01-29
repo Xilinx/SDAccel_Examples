@@ -77,6 +77,13 @@ void print_point(vector<int,aligned_allocator<int>>& point) {
 // point (x, y) from a list of points.
 int main(int argc, char **argv) {
 
+  if (argc != 2) {
+      std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
+      return EXIT_FAILURE;
+  }
+
+  std::string binaryFile = argv[1];
+
   static const int num_points = 512;
   static const int num_dims = 2;
   cl_int err;
@@ -107,7 +114,6 @@ int main(int argc, char **argv) {
   OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err)); 
 
   //Create Program 
-  std::string binaryFile = xcl::find_binary_file(device_name,"nearest_neighbor");
   char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
   cl::Program::Binaries bins{{fileBuf, fileBufSize}};
   devices.resize(1);

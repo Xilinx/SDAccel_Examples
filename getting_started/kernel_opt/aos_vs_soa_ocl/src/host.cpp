@@ -92,6 +92,13 @@ void verify (const vector<int,aligned_allocator<int>>& gold,
 // Array of Structures.
 int main(int argc, char **argv) {
 
+  if (argc != 2) {
+      std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
+      return EXIT_FAILURE;
+  }
+
+  std::string binaryFile = argv[1];
+
   cl_int err;
   unsigned fileBufSize;
 // allocate memory on host to store input arrays and the output array
@@ -122,7 +129,6 @@ int main(int argc, char **argv) {
   OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
   std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
-  std::string binaryFile = xcl::find_binary_file(device_name,"dot");
   char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
   cl::Program::Binaries bins{{fileBuf, fileBufSize}};
   devices.resize(1);

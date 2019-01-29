@@ -12,6 +12,7 @@
         "xcl2"
     ],
     "host_exe": "aos_vs_soa",
+    "cmd_args": "BUILD/dot.xclbin",
     "containers": [
        {
             "name" : "dot",
