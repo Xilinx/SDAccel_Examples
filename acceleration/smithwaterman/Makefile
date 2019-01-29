@@ -55,7 +55,7 @@ HOST_SRCS += ./src/main.cpp ./src/genseq.cpp ./src/matcharray.cpp ./src/smithwat
 HOST_HDRS += ./src/matcharray.h ./src/smithwaterman.h ./src/sw.h ./src/intel/ssw.h ./src/intel/kseq.h
 
 # Host compiler global settings
-CXXFLAGS += -fmessage-length=0 -DFPGA_DEVICE -I./src/ -I $(XILINX_VIVADO)/include/
+CXXFLAGS += -fmessage-length=0 -DFPGA_DEVICE -I./src/
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
