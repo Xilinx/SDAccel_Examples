@@ -19,7 +19,7 @@ elif "u200" in device:
 	node = "nx5u"
 	name = "xilinx-sdx_2018_2_xdf"
 elif "u250" in device:
-	node = "nx5u"
+	node = "nx6u"
 	name = "xilinx-sdx_2018_2_xdf"
 else:
 	exit("Error: DEVICE not supported. Please select the DEVICE properly and rerun.")

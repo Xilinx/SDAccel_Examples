@@ -112,11 +112,6 @@ def add_host_flags(target, data):
     if "compiler" in data:
 	if "options" in data["compiler"]:
 	    target.write(data["compiler"]["options"])
-    if "host_exe" in data:
-	if "prng" in data["host_exe"]:
-	    target.write(" -I $(XILINX_VIVADO)/include/")
-	if "smithwaterman" in data["host_exe"]:
-	    target.write(" -I $(XILINX_VIVADO)/include/")
     target.write("\n")	
     target.write("LDFLAGS += ")
     target.write("-lrt -lstdc++ ")

@@ -216,7 +216,7 @@ user %s %s
 rm -rf /data/automated_test/%s
 mkdir -p /data/automated_test/%s
 cd /data/automated_test/%s
-mirror -R -X _xocc_*/ -X .Xil/ .
+mirror -R -X _xocc_*/ -X src/* -X .run/* -X _x.*/* -X .Xil/ .
 cache flush
 bye
 """ % (username, apikey, testid, testid, testid)

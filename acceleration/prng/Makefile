@@ -51,7 +51,7 @@ HOST_SRCS += src/prng.cpp
 HOST_HDRS += src/prng.h
 
 # Host compiler global settings
-CXXFLAGS += -fmessage-length=0 -I $(XILINX_VIVADO)/include/
+CXXFLAGS += -fmessage-length=0
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
