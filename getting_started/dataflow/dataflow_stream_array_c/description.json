@@ -13,6 +13,7 @@
         "xcl2"
     ],
     "host_exe": "host",
+    "cmd_args": "BUILD/N_stage_Adders.xclbin",
     "containers": [
         {
             "name": "N_stage_Adders",
