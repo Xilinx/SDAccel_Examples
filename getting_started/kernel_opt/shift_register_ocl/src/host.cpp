@@ -63,6 +63,13 @@ void print_summary(std::string k1, std::string k2, uint64_t t1, uint64_t t2, int
 int gen_random();
 
 int main(int argc, char **argv) {
+
+    if (argc != 2) {
+        std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    std::string binaryFile = argv[1];
     size_t signal_size = xcl::is_emulation() ? SIGNAL_SIZE_IN_EMU : SIGNAL_SIZE; 
     vector<int,aligned_allocator<int>> signal(signal_size);
     vector<int,aligned_allocator<int>> out(signal_size);
@@ -86,7 +93,6 @@ int main(int argc, char **argv) {
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     //Create Program 
-    std::string binaryFile = xcl::find_binary_file(device_name,"fir");
     char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);

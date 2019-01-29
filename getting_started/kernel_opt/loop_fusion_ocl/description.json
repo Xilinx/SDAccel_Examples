@@ -13,6 +13,7 @@
         "xcl2"
     ],
     "host_exe": "loop_fusion",
+    "cmd_args": "BUILD/nearest_neighbor.xclbin",
     "containers": [
     {
         "name": "nearest_neighbor",        
