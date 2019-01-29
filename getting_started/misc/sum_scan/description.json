@@ -8,6 +8,7 @@
         "Linux"
     ],
     "host_exe": "sum_scan",
+    "cmd_args": "BUILD/krnl_sum_scan.xclbin",
     "libs": [
         "xcl2"
     ], 

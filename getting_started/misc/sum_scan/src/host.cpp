@@ -48,25 +48,28 @@ float get_rand() {
 }
 
 int main(int argc, char* argv[]) {
-    if(argc != 1 && argc != 2 && argc !=3 && argc !=4) {
-        printf("Usage: %s [length] [max relative error] [rand seed]\n", argv[0]);
+
+    if(argc < 2 || argc > 5) {
+        printf("Usage: %s <XCLBIN File> [length] [max relative error] [rand seed]\n", argv[0]);
         return EXIT_FAILURE;
     }
+
+    std::string binaryFile = argv[1];
 
     unsigned length = 1000;
     unsigned seed = 0;
     float max_relative_error =  0.05;
 
-    if(argc > 1) {
-        length = atoi(argv[1]);
-    }
-
-    if (argc > 2) {
-        max_relative_error = atof(argv[2]);
+    if(argc > 2) {
+        length = atoi(argv[2]);
     }
 
     if(argc > 3) {
-        seed = atoi(argv[3]);
+        max_relative_error = atof(argv[3]);
+    }
+
+    if(argc > 4) {
+        seed = atoi(argv[4]);
     }
 
     printf("length = %d\n", length);
@@ -100,7 +103,6 @@ int main(int argc, char* argv[]) {
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
 
-    std::string binaryFile = xcl::find_binary_file(device_name,"krnl_sum_scan");
     char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
