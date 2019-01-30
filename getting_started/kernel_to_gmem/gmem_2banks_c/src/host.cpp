@@ -89,34 +89,18 @@ int main(int argc, char* argv[])
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     
     OCL_CHECK(err, cl::Kernel krnl_applyWatermark(program, "apply_watermark", &err));
-    cl_kernel krnl = krnl_applyWatermark.get();
-
-    // For Allocating Buffer to specific Global Memory Bank, user has to use cl_mem_ext_ptr_t
-    // and provide the Banks
-    //
-    cl_mem_ext_ptr_t inExt, outExt;  // Declaring two extensions for both buffers
-    inExt.flags  = 0; // argument index ( 0 means that this buffer will be passed to argument 0 of the kernel )
-    outExt.flags = 1; // argument index ( 1 means that this buffer will be passed to argument 1 of the kernel )
-    // Setting input and output objects
-    inExt.obj = inputImage.data(); // pointer to data
-    outExt.obj = outImage.data();
     
-    // Setting kernel handle to param 
-    inExt.param = krnl ; outExt.param = krnl; 
+    OCL_CHECK(err, cl::Buffer buffer_inImage(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
+            image_size_bytes, inputImage.data(), &err));
+    
+    OCL_CHECK(err, cl::Buffer buffer_outImage(context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
+            image_size_bytes, outImage.data(), &err));
 
-    //Allocate Buffer in Bank0 of Global Memory for Input Image using Xilinx Extension
-    OCL_CHECK(err, cl::Buffer buffer_inImage(context, CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR,
-            image_size_bytes, &inExt, &err));
-    //Allocate Buffer in Bank1 of Global Memory for Input Image using Xilinx Extension
-    OCL_CHECK(err, cl::Buffer buffer_outImage(context, CL_MEM_WRITE_ONLY | CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR,
-            image_size_bytes, &outExt, &err));
-
-    std::vector<cl::Memory> inBufVec, outBufVec;
-    inBufVec.push_back(buffer_inImage);
-    outBufVec.push_back(buffer_outImage);
-
-    //Copy input Image to device global memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(inBufVec, 0 /* 0 means from host*/));
+    /* 
+     * Using setArg(), i.e. setting kernel arguments, explicitly before enqueueMigrateMemObjects(), 
+     * i.e. copying host memory to device memory,  allowing runtime to associate buffer with correct
+     * DDR banks automatically. 
+    */
 
     // Set the kernel arguments
     int arg_index = 0;
@@ -125,11 +109,14 @@ int main(int argc, char* argv[])
     OCL_CHECK(err, err = krnl_applyWatermark.setArg(arg_index++, width));
     OCL_CHECK(err, err = krnl_applyWatermark.setArg(arg_index++, height));
 
+    //Copy input Image to device global memory
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_inImage}, 0 /* 0 means from host*/));
+
     //Launch the Kernel
     OCL_CHECK(err, err = q.enqueueTask(krnl_applyWatermark));
 
     //Copy Result from Device Global Memory to Host Local Memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec, CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_outImage}, CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());
 //OPENCL HOST CODE AREA END
 

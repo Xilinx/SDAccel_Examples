@@ -91,32 +91,22 @@ void mmult_fpga (
     cl::Program program(context, devices, bins);
 
     cl::Kernel kernel(program,"mmult");
-    cl_kernel mykernel = kernel.get();
 
     cl_int err;
-    // Need to use cl_mem_ext_ptr_t with the new Kernel and Argument Index scheme
-    // for PLRAMs
-    cl_mem_ext_ptr_t buffer_in1_ext = {0};
-    buffer_in1_ext.obj = NULL;
-    cl_mem_ext_ptr_t buffer_output_ext = {0};
-    buffer_output_ext.obj = NULL;
-
-    buffer_in1_ext.flags = 0; // argument index (0 means that this buffer will be passed as argument 0 of the kernel)
-    buffer_in1_ext.obj = source_in1.data(); // Pointer to data
-    buffer_in1_ext.param = mykernel; // kernel handle returned by clCreateKernel
-
-    buffer_output_ext.flags = 2; // argument index
-    buffer_output_ext.obj = source_fpga_results.data(); // Pointer to data
-    buffer_output_ext.param = mykernel; // kernel handle
-
-    cl::Buffer buffer_in1(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX,
-            matrix_size_bytes,&buffer_in1_ext,&err);
+    cl::Buffer buffer_in1(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+        matrix_size_bytes,source_in1.data(),&err);
+    
     cl::Buffer buffer_in2(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-            matrix_size_bytes,source_in2.data());
-    cl::Buffer buffer_output(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY | CL_MEM_EXT_PTR_XILINX,
-          matrix_size_bytes,&buffer_output_ext,&err);
+        matrix_size_bytes,source_in2.data());
+    
+    cl::Buffer buffer_output(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+        matrix_size_bytes,source_fpga_results.data(),&err);
 
-    q.enqueueMigrateMemObjects({buffer_in1, buffer_in2},0/* 0 means from host*/);
+    /* 
+     * Using setArg(), i.e. setting kernel arguments, explicitly before enqueueMigrateMemObjects(), 
+     * i.e. copying host memory to device memory,  allowing runtime to associate buffer with correct
+     * DDR banks automatically. 
+    */
 
     int a_row = DATA_SIZE;
     int a_col = DATA_SIZE;
@@ -129,6 +119,8 @@ void mmult_fpga (
     kernel.setArg(narg++, a_row);
     kernel.setArg(narg++, a_col);
     kernel.setArg(narg++, b_col);
+
+    q.enqueueMigrateMemObjects({buffer_in1, buffer_in2},0/* 0 means from host*/);
     
     //Launch the kernel
     q.enqueueTask(kernel);

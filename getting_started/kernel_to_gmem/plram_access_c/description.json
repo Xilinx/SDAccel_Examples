@@ -5,7 +5,7 @@
         "This example shows the usage of PLRAM and how to use it with simple matrix multiplication (Row x Col)."
     ],
     "key_concepts": ["SDx Memory Hierarchy", "PLRAMs"],
-    "keywords": ["cl_mem_ext_ptr_t", "cl_mem_ext_ptr_t:param", "cl_mem_ext_ptr_t:flags", "cl_mem_ext_ptr_t:obj", "CL_MEM_EXT_PTR_XILINX", "PLRAM"],
+    "keywords": ["PLRAM"],
     "os": [
         "Linux"
     ],

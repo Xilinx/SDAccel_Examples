@@ -120,7 +120,6 @@ int main(int argc, char** argv) {
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel krnl_global_bandwidth(program, "bandwidth", &err));
-    cl_kernel krnl = krnl_global_bandwidth.get();
 
     size_t globalbuffersize = 1024*1024*1024;    /* 1GB */
 
@@ -154,25 +153,13 @@ int main(int argc, char** argv) {
      * buffer[3] is output1 */
     cl::Buffer *buffer[num_buffers];
 
-    /* As per latest Bank association mechanism, User has to provide Kernel name in param field of buffer 
-     * extension and should provide respective argument numbers in flags fields. 
-     * This allows runtime to associate buffer with correct DDR banks and will make host code more portable.
-     * 
-     * Note: This is applicable only if "param" was not set to nullptr initially */
-
-    cl_mem_ext_ptr_t ext_buffer[num_buffers];
-
     #if NDDR_BANKS > 1
 
         for (int i = 0; i < ddr_banks; i++) {
-            ext_buffer[i].flags = i; 
-            ext_buffer[i].obj = NULL;
-            ext_buffer[i].param = krnl;
-
             buffer[i] = new cl::Buffer(context,
-                                   CL_MEM_READ_WRITE | CL_MEM_EXT_PTR_XILINX, 
+                                   CL_MEM_READ_WRITE, 
                                    globalbuffersize, 
-                                   &ext_buffer[i], 
+                                   NULL, 
                                    &err);
             if(err != CL_SUCCESS) {
                 printf("Error: Failed to allocate buffer in DDR bank %zu\n", globalbuffersize);
@@ -192,7 +179,27 @@ int main(int argc, char** argv) {
                                     &err));
     #endif
 
+    /* 
+     * Using setArg(), i.e. setting kernel arguments, explicitly before copying host 
+     * memory to device memory allowing runtime to associate buffer with correct
+     * DDR banks automatically. 
+    */
+
+    /* Set the kernel arguments */
+    int arg_index = 0;
+    int buffer_index = 0;
     cl_ulong num_blocks = globalbuffersize/64;
+
+    OCL_CHECK(err, err = krnl_global_bandwidth.setArg(arg_index++, *(buffer[buffer_index++])));
+    OCL_CHECK(err, err = krnl_global_bandwidth.setArg(arg_index++, *(buffer[buffer_index++])));
+    #if NDDR_BANKS == 3        
+       OCL_CHECK(err, err = krnl_global_bandwidth.setArg(arg_index++, *(buffer[buffer_index++])));
+    #elif NDDR_BANKS > 3
+       OCL_CHECK(err, err = krnl_global_bandwidth.setArg(arg_index++, *(buffer[buffer_index++])));
+       OCL_CHECK(err, err = krnl_global_bandwidth.setArg(arg_index++, *(buffer[buffer_index++])));
+    #endif
+    OCL_CHECK(err, err = krnl_global_bandwidth.setArg(arg_index++, num_blocks));
+
     double dbytes = globalbuffersize;
     double dmbytes = dbytes / (((double)1024) * ((double)1024));
     printf("Starting kernel to read/write %.0lf MB bytes from/to global memory... \n", dmbytes);
@@ -240,20 +247,6 @@ int main(int argc, char** argv) {
                                       map_input_buffer1));
         OCL_CHECK(err, err = q.finish());
     #endif
-
-    /* Set the kernel arguments */
-    int arg_index = 0;
-    int buffer_index = 0;
-
-    OCL_CHECK(err, err = krnl_global_bandwidth.setArg(arg_index++, *(buffer[buffer_index++])));
-    OCL_CHECK(err, err = krnl_global_bandwidth.setArg(arg_index++, *(buffer[buffer_index++])));
-    #if NDDR_BANKS == 3        
-       OCL_CHECK(err, err = krnl_global_bandwidth.setArg(arg_index++, *(buffer[buffer_index++])));
-    #elif NDDR_BANKS > 3
-       OCL_CHECK(err, err = krnl_global_bandwidth.setArg(arg_index++, *(buffer[buffer_index++])));
-       OCL_CHECK(err, err = krnl_global_bandwidth.setArg(arg_index++, *(buffer[buffer_index++])));
-    #endif
-    OCL_CHECK(err, err = krnl_global_bandwidth.setArg(arg_index++, num_blocks));
 
     unsigned long start, end, nsduration;
     cl::Event event;

@@ -352,7 +352,7 @@ module add proxy
 	throw e
 } finally {
 	stage('post-check') {
-		step([$class: 'Mailer', notifyEveryUnstableBuild: true, recipients: 'sdausr@xilinx.com', sendToIndividuals: false])
+		step([$class: 'Mailer', notifyEveryUnstableBuild: true, recipients: 'sdx_examples@xilinx.com', sendToIndividuals: false])
 	}
 	stage('cleanup') {
 		// Cleanup .Xil Files after run
