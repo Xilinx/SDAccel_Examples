@@ -14,7 +14,9 @@ Welcome to the SDAccel example repository. This repository contains the latest e
 
 ### 1. GETTING STARTED
 
-Collection of examples geared at teaching the user best practices in how to use different features of SDAccel and start on their own application. 
+Collection of examples geared at teaching the user best practices in how to use different features of SDAccel and start on their own application.
+
+It is primarily recommended to start with [Hello World][] example which makes the new users aware about the basic structure of an SDAccel based Application. 
 
 ### 2. ACCELERATION
 
@@ -42,7 +44,7 @@ For more information check here:
 For questions and to get help on this project or your own projects, visit the [SDAccel Forums][].
 
 
-
+[Hello World]: getting_started/host/helloworld_c/
 [SDAccel Forums]: https://forums.xilinx.com/t5/SDAccel/bd-p/SDx
 [SDAccel User Guides]: http://www.xilinx.com/support/documentation-navigation/development-tools/software-development/sdaccel.html?resultsTablePreSelect=documenttype:SeeAll#documentation
 
