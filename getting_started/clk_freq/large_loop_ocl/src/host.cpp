@@ -100,6 +100,7 @@ uint64_t run_opencl_cnn(
     cl::CommandQueue &q,
     cl::Context &context,
     std::string &device_name,
+    std::string &binaryFile,
     bool good,
     int size,
     std::vector<int, aligned_allocator<int>> &weight,
@@ -108,20 +109,8 @@ uint64_t run_opencl_cnn(
     int i_chan,
     int o_chan
 ) {
-    std::string binaryFile;
     cl_int err;
     unsigned fileBufSize;
-
-    if (good) {
-        binaryFile = xcl::find_binary_file(device_name, "cnn_GOOD");
-    } 
-    else {
-        binaryFile = xcl::find_binary_file(device_name,"cnn_BAD");
-        if(access(binaryFile.c_str(), R_OK) != 0) {
-            std::cout << "WARNING: vadd_BAD xclbin not built" << std::endl;
-            return false;
-        }
-    }
 
     char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
@@ -197,8 +186,15 @@ uint64_t run_opencl_cnn(
     std::cout << "Finished " << (good ? "GOOD" : "BAD") << " Kernel" << std::endl;
     return duration;
 }
+
 int main(int argc, char** argv)
 {
+    if (argc != 3) {
+        std::cout << "Usage: " << argv[0] << " <GOOD XCLBIN File>" 
+                    << " <BAD XCLBIN File>" << std::endl;
+        return EXIT_FAILURE;
+    }
+
     cl_int err;
     int i_chan = IChan;
     int o_chan = OChan;
@@ -248,11 +244,14 @@ int main(int argc, char** argv)
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
+    std::string binaryFile;
 
-    uint64_t bad_duration = run_opencl_cnn(devices, q, context, device_name,
+    binaryFile = argv[2];
+    uint64_t bad_duration = run_opencl_cnn(devices, q, context, device_name, binaryFile,
             false, size, weight, image, source_bad_hw_results, i_chan, o_chan);
 
-    uint64_t good_duration = run_opencl_cnn(devices, q, context, device_name, 
+    binaryFile = argv[1];
+    uint64_t good_duration = run_opencl_cnn(devices, q, context, device_name, binaryFile, 
             true, size, weight, image, source_good_hw_results, i_chan, o_chan);
 //OPENCL HOST CODE AREA END
 

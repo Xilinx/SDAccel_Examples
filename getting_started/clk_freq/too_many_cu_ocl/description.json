@@ -13,6 +13,7 @@
         "xcl2"
     ],
     "host_exe": "host",
+    "cmd_args": "BUILD/vadd_GOOD.xclbin BUILD/vadd_BAD.xclbin",
     "containers": [
         {
             "name": "vadd_GOOD",

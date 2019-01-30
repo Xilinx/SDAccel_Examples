@@ -60,7 +60,7 @@ CLFLAGS += -DBAD_DESIGN=0
 
 
 EXECUTABLE = host
-CMD_ARGS = apply_watermark_GOOD ./data/input.bmp ./data/golden.bmp
+CMD_ARGS = $(XCLBIN)/apply_watermark_GOOD.$(TARGET).$(DSA).xclbin ./data/input.bmp ./data/golden.bmp
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
@@ -96,9 +96,9 @@ $(EMCONFIG_DIR)/emconfig.json:
 check: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) apply_watermark_GOOD ./data/input.bmp ./data/golden.bmp
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/apply_watermark_GOOD.$(TARGET).$(DSA).xclbin ./data/input.bmp ./data/golden.bmp
 else
-	 ./$(EXECUTABLE) apply_watermark_GOOD ./data/input.bmp ./data/golden.bmp
+	 ./$(EXECUTABLE) $(XCLBIN)/apply_watermark_GOOD.$(TARGET).$(DSA).xclbin ./data/input.bmp ./data/golden.bmp
 endif
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 
