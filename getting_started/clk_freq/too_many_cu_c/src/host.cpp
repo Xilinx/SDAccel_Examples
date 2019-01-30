@@ -53,6 +53,7 @@ bool run_opencl_vadd(
   cl::CommandQueue &q,
   cl::Context &context,
   std::string &device_name,
+  std::string &binaryFile,
   bool good,
   int size,
   std::vector<int, aligned_allocator<int>> &source_in1,
@@ -60,20 +61,8 @@ bool run_opencl_vadd(
   std::vector<int, aligned_allocator<int>> &source_hw_results
 )
 {
-    std::string binaryFile;
     cl_int err;
     unsigned fileBufSize;
-
-    if(good){
-        binaryFile = xcl::find_binary_file(device_name,"vadd_GOOD");
-    }
-    else{
-        binaryFile = xcl::find_binary_file(device_name,"vadd_BAD");
-        if(access(binaryFile.c_str(), R_OK) != 0) {
-            std::cout << "WARNING: vadd_BAD xclbin not built" << std::endl;
-            return false;
-        }
-    }
 
     char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
@@ -148,6 +137,13 @@ bool run_opencl_vadd(
     return true;
 }
 int main(int argc, char** argv) {
+
+    if (argc != 3) {
+        std::cout << "Usage: " << argv[0] << " <GOOD XCLBIN File>"
+                    << " <BAD XCLBIN File>" << std::endl;
+        return EXIT_FAILURE;
+    }
+
     //Amount of vector data to be processed by kernel
     int size = DATA_SIZE;
     cl_int err;
@@ -175,9 +171,12 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE | CL_QUEUE_PROFILING_ENABLE, &err));
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
+    std::string binaryFile;
 
-    run_opencl_vadd(devices,q,context,device_name, true, size, source_in1, source_in2, source_hw_good_results);
-    bool bad_return = run_opencl_vadd(devices,q,context,device_name, false, size, source_in1, source_in2, source_hw_bad_results);
+    binaryFile = argv[1];
+    run_opencl_vadd(devices,q,context,device_name, binaryFile, true, size, source_in1, source_in2, source_hw_good_results);
+    binaryFile = argv[2];
+    bool bad_return = run_opencl_vadd(devices,q,context,device_name, binaryFile, false, size, source_in1, source_in2, source_hw_bad_results);
 
 //OPENCL HOST CODE AREA END
     

@@ -10,7 +10,7 @@
         "Linux"
     ],
     "host_exe": "host",
-    "cmd_args": "PROJECT/data/car_128x128.bmp",
+    "cmd_args": "BUILD/sketch_GOOD.xclbin BUILD/sketch_BAD.xclbin PROJECT/data/car_128x128.bmp",
     "output_files": "output.bmp",        
     "libs": [
         "xcl2", 

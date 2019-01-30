@@ -32,13 +32,14 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 int main(int argc, char* argv[])
 {
-    if (argc != 3)
+    if (argc != 4)
     {
-        std::cout << "Usage: " << argv[0] << " <input bitmap> <golden bitmap>" << std::endl;
+        std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << " <input bitmap> <golden bitmap>" << std::endl;
         return EXIT_FAILURE ;
     }
-    std::string bitmapFilename = argv[1];
-    std::string goldenFilename = argv[2];
+    std::string binaryFile = argv[1];
+    std::string bitmapFilename = argv[2];
+    std::string goldenFilename = argv[3];
     cl_int err;
     unsigned fileBufSize;
     //Read the input bit map file into memory
@@ -82,7 +83,6 @@ int main(int argc, char* argv[])
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
-    std::string binaryFile = xcl::find_binary_file(device_name,"apply_watermark");
     char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);

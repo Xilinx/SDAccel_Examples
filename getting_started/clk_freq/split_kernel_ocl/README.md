@@ -105,7 +105,7 @@ emconfigutil --platform 'xilinx_vcu1525_dynamic' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./host ./data/car_128x128.bmp
+./host ./xclbin/sketch_GOOD.<emulation target>.<device name>.xclbin ./xclbin/sketch_BAD.<emulation target>.<device name>.xclbin ./data/car_128x128.bmp
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card

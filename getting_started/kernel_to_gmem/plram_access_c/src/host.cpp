@@ -44,6 +44,9 @@ memory resources managed by the SDx memory subsystem.
 //Array Size to access 
 #define DATA_SIZE 8
 
+//Binary File string
+std::string binaryFile;
+
 //CPU implementation of Matrix Multiplication
 //The inputs are of the size (DATA_SIZE x DATA_SIZE)
 void mmult_cpu (
@@ -84,7 +87,6 @@ void mmult_fpga (
     cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
     std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
 
-    std::string binaryFile = xcl::find_binary_file(device_name,"mmult");
     char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
@@ -133,6 +135,13 @@ void mmult_fpga (
 
 int main(int argc, char** argv)
 {
+    if (argc != 2) {
+        std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    binaryFile = argv[1];
+
     //Allocate Memory in Host Memory
     int size = DATA_SIZE;    
     size_t matrix_size_bytes = sizeof(int) * size * size;

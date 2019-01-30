@@ -61,7 +61,7 @@ CLFLAGS += --xp param:compiler.xclDataflowFifoDepth=16
 
 
 EXECUTABLE = host
-CMD_ARGS = ./data/car_128x128.bmp
+CMD_ARGS = $(XCLBIN)/sketch_GOOD.$(TARGET).$(DSA).xclbin $(XCLBIN)/sketch_BAD.$(TARGET).$(DSA).xclbin ./data/car_128x128.bmp
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
@@ -105,9 +105,9 @@ $(EMCONFIG_DIR)/emconfig.json:
 check: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) ./data/car_128x128.bmp
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/sketch_GOOD.$(TARGET).$(DSA).xclbin $(XCLBIN)/sketch_BAD.$(TARGET).$(DSA).xclbin ./data/car_128x128.bmp
 else
-	 ./$(EXECUTABLE) ./data/car_128x128.bmp
+	 ./$(EXECUTABLE) $(XCLBIN)/sketch_GOOD.$(TARGET).$(DSA).xclbin $(XCLBIN)/sketch_BAD.$(TARGET).$(DSA).xclbin ./data/car_128x128.bmp
 endif
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 
