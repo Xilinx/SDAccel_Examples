@@ -89,11 +89,35 @@ static int dev_to_host(cl::CommandQueue commands, int buff_size, std::vector<cl:
     return CL_SUCCESS;
 }
 
+static int bidirectional(cl::CommandQueue commands, int buff_size, std::vector<cl::Memory> &mems1, std::vector<cl::Memory> &mems2, std::ostream &strm)
+{
+    cl_int err;
+    //Writing to avoid read-without-write case in DDR
+    OCL_CHECK(err, err = commands.enqueueMigrateMemObjects(mems2, 0/* 0 means from host*/));
+    commands.finish();
+
+    Timer timer;
+    OCL_CHECK(err, err = commands.enqueueMigrateMemObjects(mems1, 0/* 0 means from host*/));
+    OCL_CHECK(err, err = commands.enqueueMigrateMemObjects(mems2, CL_MIGRATE_MEM_OBJECT_HOST));
+
+    commands.finish();
+
+    long long timer_stop2 = timer.stop();
+    double throput = (double)(buff_size * (mems1.size() + mems2.size()));
+    throput *= 1000000; // convert us to s;
+    throput /= 1024 * 1024; // convert to MB
+    throput /= timer_stop2;
+    std::cout << "OpenCL migration BW " << " overall:" << throput << " MB/s for buffer size " << buff_size << " with " << mems1.size()<< " buffers\n";
+    strm << "Card to Host, " << buff_size << ", " << mems1.size() << ", " << throput << "\n";
+    return CL_SUCCESS;
+}
+
+
 int main(int argc, char** argv)
 {
-    if (argc != 2) {
+    if (argc !=2){
         std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
-        return EXIT_FAILURE;
+        return EXIT_FAILURE;        
     }
 
     std::string binaryFile = argv[1];
@@ -145,8 +169,8 @@ int main(int argc, char** argv)
         std::vector<cl::Memory> mems(buff_cnt);
 
         for(int i=buff_cnt - 1; i>=0; i--){
-            OCL_CHECK(err, mems[i] = cl::Buffer(context, CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, nxtcnt, NULL, &err));
-                OCL_CHECK(err, err = command_queue.enqueueFillBuffer<int>((cl::Buffer&)mems[i], i, 0, nxtcnt, 0, 0));
+        	OCL_CHECK(err, mems[i] = cl::Buffer(context, CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, nxtcnt, NULL, &err));
+            	OCL_CHECK(err, err = command_queue.enqueueFillBuffer<int>((cl::Buffer&)mems[i], i, 0, nxtcnt, 0, 0));
         }
         if (err != CL_SUCCESS) {
             break;
@@ -165,8 +189,32 @@ int main(int argc, char** argv)
         }
     }
 
-    delete[] fileBuf;
+    printf("\nThe bandwidth numbers for bidirectional case:\n");
+    for(int buff_size_1 = 0; buff_size_1 < dim1; buff_size_1++) {
+        int nxtcnt = buff_tab[buff_size_1][0];
+        int buff_cnt = buff_tab[buff_size_1][1];
+        std::vector<cl::Memory> mems1(buff_cnt);
+        std::vector<cl::Memory> mems2(buff_cnt);
 
+        for(int i=buff_cnt - 1; i>=0; i--){
+        	OCL_CHECK(err, mems1[i] = cl::Buffer(context, CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, nxtcnt, NULL, &err));
+            OCL_CHECK(err, err = command_queue.enqueueFillBuffer<int>((cl::Buffer&)mems1[i], i, 0, nxtcnt, 0, 0));
+        	OCL_CHECK(err, mems2[i] = cl::Buffer(context, CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, nxtcnt, NULL, &err));
+            OCL_CHECK(err, err = command_queue.enqueueFillBuffer<int>((cl::Buffer&)mems2[i], i, 0, nxtcnt, 0, 0));
+        }
+        if (err != CL_SUCCESS) {
+            break;
+        }
+
+        command_queue.finish();
+        //printf("\nThe bandwidth numbers for bidirectional case:\n");
+        err = bidirectional(command_queue, nxtcnt, mems1, mems2, handle);
+        if (err != CL_SUCCESS) {
+            break;
+        }
+    }
+    
+    delete[] fileBuf;
     printf("\nTEST PASSED\n");
     // Shutdown and cleanup
     handle.close();
