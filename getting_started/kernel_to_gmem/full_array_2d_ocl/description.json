@@ -12,6 +12,7 @@
         "xcl2"
     ],
     "host_exe": "host",
+    "cmd_args": "BUILD/mmult.xclbin",
     "containers": [
     {
         "name": "mmult",        

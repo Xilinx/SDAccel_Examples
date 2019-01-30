@@ -62,6 +62,7 @@ CLFLAGS += --slr vadd_1:SLR1
 LDCLFLAGS += --slr vmult_1:SLR0 --slr vadd_1:SLR1
 
 EXECUTABLE = host
+CMD_ARGS = $(XCLBIN)/vmult_vadd.$(TARGET).$(DSA).xclbin
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
@@ -100,14 +101,14 @@ $(EMCONFIG_DIR)/emconfig.json:
 check: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/vmult_vadd.$(TARGET).$(DSA).xclbin
 else
-	 ./$(EXECUTABLE)
+	 ./$(EXECUTABLE) $(XCLBIN)/vmult_vadd.$(TARGET).$(DSA).xclbin
 endif
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 
 run_nimbix: all
-	$(COMMON_REPO)/utility/nimbix/run_nimbix.py $(EXECUTABLE) $(DSA)
+	$(COMMON_REPO)/utility/nimbix/run_nimbix.py $(EXECUTABLE) $(CMD_ARGS) $(DSA)
 
 aws_build: check-aws_repo $(BINARY_CONTAINERS)
 	$(COMMON_REPO)/utility/aws/run_aws.py $(BINARY_CONTAINERS)

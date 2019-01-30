@@ -99,10 +99,12 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 int main(int argc, char** argv) {
 
-    if(argc != 1) {
-        printf("Usage: %s\n", argv[0]);
-        return EXIT_FAILURE;
-    }
+    if (argc != 2) {
+        std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
+		return EXIT_FAILURE;
+	}
+
+    std::string binaryFile = argv[1];
 
     cl_int err;
     unsigned fileBufSize;
@@ -114,7 +116,6 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
-    std::string binaryFile = xcl::find_binary_file(device_name, "krnl_kernel_global");
     char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);

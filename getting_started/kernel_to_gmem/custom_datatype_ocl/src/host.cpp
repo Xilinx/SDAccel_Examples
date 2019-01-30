@@ -40,15 +40,17 @@ int compareImages(int *in, int *out, size_t image_size);
 
 int main(int argc, char* argv[])
 {
-    if (argc != 2)
-    {
-        std::cout << "Usage: " << argv[0] << " <input bitmap>" << std::endl;
-        return EXIT_FAILURE ;
+    if (argc != 3) {
+        std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << " <input bitmap>" << std::endl;
+        return EXIT_FAILURE;
     }
+
+    std::string binaryFile = argv[1];
+    std::string bitmapFilename = argv[2];
+    
     cl_int err;
     unsigned fileBufSize;
-    std::string bitmapFilename = argv[1];
- 
+    
     //Read the bit map file into memory
     BitmapInterface image(bitmapFilename.data());
     bool result = image.readBitmapFile() ;
@@ -77,7 +79,6 @@ int main(int argc, char* argv[])
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
-    std::string binaryFile = xcl::find_binary_file(device_name,"rgb_to_hsv");
     char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);

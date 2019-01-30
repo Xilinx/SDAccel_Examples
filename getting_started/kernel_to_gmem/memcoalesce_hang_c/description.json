@@ -9,7 +9,7 @@
     "os": [
         "Linux"
     ],
-    "cmd_args" : "kernel_GOOD",
+    "cmd_args" : "BUILD/kernel_GOOD.xclbin",
     "libs": [
         "xcl2"
     ],

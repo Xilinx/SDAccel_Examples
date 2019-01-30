@@ -59,7 +59,7 @@ CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR
 
 
 EXECUTABLE = host
-CMD_ARGS = ./data/input.bmp
+CMD_ARGS = $(XCLBIN)/rgb_to_hsv.$(TARGET).$(DSA).xclbin ./data/input.bmp
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
@@ -95,9 +95,9 @@ $(EMCONFIG_DIR)/emconfig.json:
 check: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) ./data/input.bmp
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/rgb_to_hsv.$(TARGET).$(DSA).xclbin ./data/input.bmp
 else
-	 ./$(EXECUTABLE) ./data/input.bmp
+	 ./$(EXECUTABLE) $(XCLBIN)/rgb_to_hsv.$(TARGET).$(DSA).xclbin ./data/input.bmp
 endif
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 

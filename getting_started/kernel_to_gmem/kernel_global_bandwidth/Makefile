@@ -61,6 +61,7 @@ CLFLAGS +=  --max_memory_ports bandwidth
 
 
 EXECUTABLE = kernel_global
+CMD_ARGS = $(XCLBIN)/krnl_kernel_global.$(TARGET).$(DSA).xclbin
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
@@ -105,14 +106,14 @@ endif
 
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/krnl_kernel_global.$(TARGET).$(DSA).xclbin
 else
-	 ./$(EXECUTABLE)
+	 ./$(EXECUTABLE) $(XCLBIN)/krnl_kernel_global.$(TARGET).$(DSA).xclbin
 endif
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 
 run_nimbix: all
-	$(COMMON_REPO)/utility/nimbix/run_nimbix.py $(EXECUTABLE) $(DSA)
+	$(COMMON_REPO)/utility/nimbix/run_nimbix.py $(EXECUTABLE) $(CMD_ARGS) $(DSA)
 
 aws_build: check-aws_repo $(BINARY_CONTAINERS)
 	$(COMMON_REPO)/utility/aws/run_aws.py $(BINARY_CONTAINERS)

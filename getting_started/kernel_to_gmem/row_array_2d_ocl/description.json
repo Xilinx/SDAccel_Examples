@@ -13,6 +13,7 @@
         "xcl2"
     ],
     "host_exe": "host",
+    "cmd_args": "BUILD/row_array_2d.xclbin",
     "containers": [
     {
         "name": "row_array_2d",        

@@ -48,12 +48,11 @@ void dummy_op(  std::vector<int,aligned_allocator<int>> & din1,
 int main(int argc, char* argv[]) {
 
     if (argc != 2) {
-        printf("Usage: %s "
-               "<dummy_op_GOOD/dummy_op_BAD>\n",
-               argv[0]);
+        std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
         return EXIT_FAILURE;
     }
-    std::string binary_name = argv[1];
+
+    std::string binaryFile = argv[1];
 
     size_t total_size = (LENGTH) * (ITERATION);
     //Allocate Memory in Host Memory
@@ -83,7 +82,6 @@ int main(int argc, char* argv[]) {
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
-    std::string binaryFile = xcl::find_binary_file(device_name,binary_name.c_str());
     char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);

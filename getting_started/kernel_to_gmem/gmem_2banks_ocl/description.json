@@ -14,7 +14,7 @@
         "xcl2","bitmap"
     ],
     "host_exe": "host",
-    "cmd_args" : "PROJECT/data/input.bmp PROJECT/data/golden.bmp",
+    "cmd_args" : "BUILD/apply_watermark.xclbin PROJECT/data/input.bmp PROJECT/data/golden.bmp",
     "output_files": "output.bmp",        
     "containers": [
         {

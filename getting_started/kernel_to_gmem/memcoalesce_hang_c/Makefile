@@ -59,7 +59,7 @@ CLFLAGS += -DDEADLOCK=0
 
 
 EXECUTABLE = host
-CMD_ARGS = kernel_GOOD
+CMD_ARGS = $(XCLBIN)/kernel_GOOD.$(TARGET).$(DSA).xclbin
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
@@ -94,9 +94,9 @@ $(EMCONFIG_DIR)/emconfig.json:
 check: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) kernel_GOOD
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/kernel_GOOD.$(TARGET).$(DSA).xclbin
 else
-	 ./$(EXECUTABLE) kernel_GOOD
+	 ./$(EXECUTABLE) $(XCLBIN)/kernel_GOOD.$(TARGET).$(DSA).xclbin
 endif
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 
