@@ -1089,11 +1089,11 @@
                             "keywords": [
                                 "max_memory_ports", 
                                 "misc:map_connect", 
-                                "cl_mem_ext_ptr_t", 
+                                "cl_mem_ext_ptr_t",
                                 "XCL_MEM_DDR_BANK0", 
                                 "XCL_MEM_DDR_BANK1", 
-                                "XCL_MEM_DDR_BANKx", 
-                                "CL_MEM_EXT_PTR_XILINX", 
+                                "XCL_MEM_DDR_BANKx",
+                                "CL_MEM_EXT_PTR_XILINX",
                                 "HLS Interface m_axi bundle"
                             ], 
                             "key_concepts": [
@@ -1111,11 +1111,11 @@
                             "displayName": "Global Memory Two Banks (CL)", 
                             "keywords": [
                                 "max_memory_ports", 
-                                "misc:map_connect", 
-                                "cl_mem_ext_ptr_t", 
+                                "misc:map_connect",
+                                "cl_mem_ext_ptr_t",
                                 "XCL_MEM_DDR_BANK0", 
                                 "XCL_MEM_DDR_BANK1", 
-                                "XCL_MEM_DDR_BANKx", 
+                                "XCL_MEM_DDR_BANKx",
                                 "CL_MEM_EXT_PTR_XILINX"
                             ], 
                             "key_concepts": [

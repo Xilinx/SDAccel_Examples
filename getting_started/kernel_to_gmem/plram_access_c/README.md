@@ -19,7 +19,7 @@ This example shows the usage of PLRAM and how to use it with simple matrix multi
 
 ***KEY CONCEPTS:*** SDx Memory Hierarchy, PLRAMs
 
-***KEYWORDS:*** cl_mem_ext_ptr_t, cl_mem_ext_ptr_t:param, cl_mem_ext_ptr_t:flags, cl_mem_ext_ptr_t:obj, CL_MEM_EXT_PTR_XILINX, PLRAM
+***KEYWORDS:*** PLRAM
 
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:

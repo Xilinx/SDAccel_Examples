@@ -189,10 +189,6 @@ private:
   cl_mem            *mOutBuffer;
   int               m_dev_ignore_dc;   
   
-  cl_mem_ext_ptr_t  mBlockExt;
-  cl_mem_ext_ptr_t  mQExt;
-  cl_mem_ext_ptr_t  mOutExt;
-
   cl_event          inEvVec[NUM_SCHED];
   cl_event          runEvVec[NUM_SCHED];
   cl_event          outEvVec[NUM_SCHED];
@@ -239,27 +235,10 @@ void oclDct::init(cl_context   context,
   mDevice  = device;
   mKernel  = krnl;
   mQ       = q;
-  mBlockExt={0};
-  mQExt    ={0};
-  mOutExt  ={0};
   
   mNumBlocks64 = numBlocks64;
   
   assert(mNumBlocks64 == numBlocks64); // check that there was not a truncation
-  
-  mBlockExt.flags = XCL_MEM_DDR_BANK0;
-  mQExt.flags = XCL_MEM_DDR_BANK0;
-  mOutExt.flags = XCL_MEM_DDR_BANK1;
-  
-  mBlockExt.obj = nullptr;
-  mBlockExt.param = 0;
-  
-  mQExt.obj = nullptr; 
-  mQExt.param = 0;
-  
-  mOutExt.obj = nullptr; 
-  mOutExt.param = 0;
-  
   mInit = true;
   mCount = 0;
   mHasRun = false;
@@ -309,33 +288,27 @@ void oclDct::write(
 
   cl_int err;
   // Move Buffer over input vector
-  mBlockExt.obj = blocks->data() + mNumBlocks64*64*start; 
-  mQExt.obj     = q->data();
   mInBuffer[0] = clCreateBuffer(mContext, 
-                CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
                 mNumBlocks64*64*sizeof(int16_t), 
-                &mBlockExt,
+                blocks->data() + mNumBlocks64*64*start,
                 &err);
 
   mInBuffer[1] = clCreateBuffer(mContext, 
-                CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
                 64*sizeof(uint16_t), 
-                &mQExt,
+                q->data(),
                 &err);
   
   // Move Buffer over output vector
-  mOutExt.obj = out->data() + mNumBlocks64*64*start; 
   mOutBuffer[0] =clCreateBuffer(mContext, 
-                CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
                 mNumBlocks64*64*sizeof(int16_t), 
-                &mOutExt,
+                out->data() + mNumBlocks64*64*start,
                 &err);
   
   // Prepare Kernel to run
   m_dev_ignore_dc = ignore_dc ? 1 : 0;
-
-  // Schedule actual writing of data
-  clEnqueueMigrateMemObjects(mQ, 2, mInBuffer, 0, 0, nullptr, &inEvVec[mCount]);
   
 }
 
@@ -355,6 +328,9 @@ void oclDct::run() {
   clSetKernelArg(mKernel, 2, sizeof(cl_mem), &mOutBuffer[0]);
   clSetKernelArg(mKernel, 3, sizeof(int), &m_dev_ignore_dc);
   clSetKernelArg(mKernel, 4, sizeof(unsigned int), &mNumBlocks64);
+
+  // Schedule actual writing of data
+  clEnqueueMigrateMemObjects(mQ, 2, mInBuffer, 0, 0, nullptr, &inEvVec[mCount]);
 
   clEnqueueTask(mQ, mKernel, 1, &inEvVec[mCount], &runEvVec[mCount]);
 }

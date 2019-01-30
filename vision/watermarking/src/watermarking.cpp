@@ -87,35 +87,29 @@ int main(int argc, char* argv[])
     devices.resize(1);
     OCL_CHECK(err, cl::Program program (context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel apply_watermark(program, "apply_watermark", &err));
-    cl_kernel krnl=apply_watermark.get();
-
-    // For Allocating Buffer to specific Global Memory Bank, user has to use cl_mem_ext_ptr_t
-    cl_mem_ext_ptr_t inExt, outExt;  // Declaring two extensions for both buffers
-    inExt.flags  = 0; // argument index ( 0 means that this buffer will be passed to argument 0 of the kernel )
-    outExt.flags = 1; // argument index ( 1 means that this buffer will be passed to argument 1 of the kernel )
-    inExt.obj      = inputImage.data();
-    outExt.obj   = outImage.data(); 
-    // Setting kernel handle to Param
-    inExt.param  = krnl ; outExt.param = krnl;
-
+   
     // Allocate Buffer in Global Memory
-    // Buffers are allocated using CL_MEM_USE_HOST_PTR for efficient memory and
-    // Device-to-host communication
     std::cout << "Creating Buffers..." << std::endl;
-    OCL_CHECK(err, cl::Buffer buffer_inImage(context, CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR,
-            image_size_bytes, &inExt, &err));
-    OCL_CHECK(err, cl::Buffer buffer_outImage(context, CL_MEM_WRITE_ONLY | CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR,
-            image_size_bytes, &outExt, &err));
+    OCL_CHECK(err, cl::Buffer buffer_inImage(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
+            image_size_bytes, inputImage.data(), &err));
+    OCL_CHECK(err, cl::Buffer buffer_outImage(context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
+            image_size_bytes, outImage.data(), &err));
 
-    // Copy input data to device global memory
-    std::cout<< "Copying data..." << std::endl;
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_inImage}, 0/*0 means from host*/));
+    /* 
+     * Using setArg(), i.e. setting kernel arguments, explicitly before enqueueMigrateMemObjects(), 
+     * i.e. copying host memory to device memory, makes runtime handle the allocation of 
+     * DDR banks automatically. 
+    */
 
     std::cout<< "Setting arguments..." <<std::endl;
     OCL_CHECK(err, err = apply_watermark.setArg(0, buffer_inImage));
     OCL_CHECK(err, err = apply_watermark.setArg(1, buffer_outImage));
     OCL_CHECK(err, err = apply_watermark.setArg(2, width));
     OCL_CHECK(err, err = apply_watermark.setArg(3, height));
+
+    // Copy input data to device global memory
+    std::cout<< "Copying data..." << std::endl;
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_inImage}, 0/*0 means from host*/));
 
     // Launch the Kernel
     // For HLS kernels global and local size is always (1,1,1). So, it is recommended

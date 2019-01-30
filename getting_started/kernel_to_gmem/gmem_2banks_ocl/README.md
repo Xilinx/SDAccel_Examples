@@ -19,7 +19,7 @@ This example of 2ddr to demonstrate on how to use 2ddr DSA. How to create buffer
 
 ***KEY CONCEPTS:*** Multiple Banks
 
-***KEYWORDS:*** max_memory_ports, misc:map_connect, cl_mem_ext_ptr_t, XCL_MEM_DDR_BANK0, XCL_MEM_DDR_BANK1, XCL_MEM_DDR_BANKx, CL_MEM_EXT_PTR_XILINX
+***KEYWORDS:*** max_memory_ports, misc:map_connect, XCL_MEM_DDR_BANK0, XCL_MEM_DDR_BANK1, XCL_MEM_DDR_BANKx
 
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
