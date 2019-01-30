@@ -40,10 +40,10 @@ int main(int argc, char** argv)
 
     //Allocate Memory in Host Memory
     size_t vector_size_bytes = sizeof(int) * DATA_SIZE;
-    std::vector<int,aligned_allocator<int>> source_in1       (DATA_SIZE);
-    std::vector<int,aligned_allocator<int>> source_in2       (DATA_SIZE);
-    std::vector<int,aligned_allocator<int>> source_hw_results(DATA_SIZE);
-    std::vector<int,aligned_allocator<int>> source_sw_results(DATA_SIZE);
+    std::vector<unsigned int,aligned_allocator<unsigned int>> source_in1       (DATA_SIZE);
+    std::vector<unsigned int,aligned_allocator<unsigned int>> source_in2       (DATA_SIZE);
+    std::vector<unsigned int,aligned_allocator<unsigned int>> source_hw_results(DATA_SIZE);
+    std::vector<unsigned int,aligned_allocator<unsigned int>> source_sw_results(DATA_SIZE);
 
     // Create the test data and Software Result 
     for(int i = 0 ; i < DATA_SIZE ; i++){
