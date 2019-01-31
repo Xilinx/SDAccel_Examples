@@ -47,12 +47,22 @@
                     ]
                 }, 
                 {
-                    "name": "mscale", 
-                    "check_timing": "true", 
-                    "PipelineType": "none", 
-                    "check_latency": "false", 
-                    "check_warning": "true"
-                }
+                    "name": "mscale",
+                    "check_timing": "true",
+                    "pipelinetype": "none",
+                    "check_latency": "false",
+                    "check_warning": "true",
+                    "loops": [   
+                        {
+                            "name": "mscale",
+                            "pipelineII": "1"                     
+                        },
+                        {
+                            "name": "mscale_write",
+                            "pipelineII": "1"
+                        }
+                    ]
+                }   
             ]
         }
     ]

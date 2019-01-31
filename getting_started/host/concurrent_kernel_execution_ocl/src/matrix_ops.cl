@@ -38,7 +38,13 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 kernel __attribute__((reqd_work_group_size(1, 1, 1)))
 void mscale(global int *inout, const int scale, const int dim0, const int dim1) {
-    mscale: for (int i = 0; i < dim0 * dim1; ++i) inout[i] = inout[i] * scale;
+    int temp[MAX_DIM * MAX_DIM];
+
+    __attribute__((xcl_pipeline_loop(1)))
+    mscale:  for (int i = 0; i < dim0 * dim1; ++i) temp[i] = inout[i] * scale;
+
+    __attribute__((xcl_pipeline_loop(1)))
+    mscale_write:  for (int i = 0; i < dim0 * dim1; ++i) inout[i] = temp[i];
 }
 
 kernel __attribute__((reqd_work_group_size(1, 1, 1)))
