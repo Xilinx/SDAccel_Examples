@@ -46,7 +46,7 @@ function.
 #include <vector>
 
 //Array Size to access 
-#define DATA_SIZE 64 
+#define DATA_SIZE 64
 
 uint64_t get_duration_ns (const cl::Event &event) {
     cl_int err;
@@ -80,7 +80,8 @@ uint64_t mmult_fpga (
     std::vector<int,aligned_allocator<int>>& source_in1,   //Input Matrix 1
     std::vector<int,aligned_allocator<int>>& source_in2,   //Input Matrix 2
     std::vector<int,aligned_allocator<int>>& source_fpga_results,    //Output Matrix
-    int dim                                                //One dimension of matrix
+    int dim,                                               //One dimension of matrix
+    std::string &binaryFile                                 //Binary file string
 )
 {
     cl_int err;
@@ -101,7 +102,6 @@ uint64_t mmult_fpga (
     //xocc compiler load into OpenCL Binary and return a pointer to file buffer
     //and it can contain many functions which can be executed on the
     //device.
-    std::string binaryFile = xcl::find_binary_file(device_name,"mmult");
     char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
@@ -156,6 +156,12 @@ uint64_t mmult_fpga (
 
 int main(int argc, char** argv)
 {
+    if (argc != 2) {
+        std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    std::string binaryFile = argv[1];
     //Allocate Memory in Host Memory
     int size = DATA_SIZE;    
     size_t matrix_size_bytes = sizeof(int) * size * size;
@@ -188,7 +194,7 @@ int main(int argc, char** argv)
     mmult_cpu(source_in1.data(), source_in2.data(), source_cpu_results.data(), size);
 
     //Compute FPGA Results
-    kernel_duration = mmult_fpga(source_in1, source_in2, source_fpga_results, size);
+    kernel_duration = mmult_fpga(source_in1, source_in2, source_fpga_results, size, binaryFile);
 
     //Compare the results of FPGA to CPU 
     bool match = true;
