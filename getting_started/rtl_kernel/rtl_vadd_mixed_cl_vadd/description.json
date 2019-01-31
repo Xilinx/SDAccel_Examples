@@ -15,6 +15,7 @@
     "host_srcs": "src/host.cpp",
     "runtime": ["OpenCL"],
     "host_exe": "host",
+    "cmd_args": "BUILD/vadd.xclbin",
     "targets": ["hw", "hw_emu"],
     "containers": [
 	{

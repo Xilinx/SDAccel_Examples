@@ -14,6 +14,7 @@
     "output_files": "tmp_kernel_pack* packaged_kernel*",
     "host_srcs": "src/host.cpp",
     "host_exe": "host",
+    "cmd_args": "BUILD/vadd.xclbin",
     "runtime": ["OpenCL"],
     "targets": ["hw", "hw_emu"],
     "containers": [
