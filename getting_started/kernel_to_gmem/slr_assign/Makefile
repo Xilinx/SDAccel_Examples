@@ -35,6 +35,8 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
+BUILD_DIR_vmult_vadd = $(BUILD_DIR)/vmult_vadd
+
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
@@ -54,7 +56,7 @@ CXXFLAGS += -fmessage-length=0
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 CLFLAGS += --slr vmult_1:SLR0
 CLFLAGS += --slr vadd_1:SLR1
 
@@ -81,13 +83,13 @@ exe: $(EXECUTABLE)
 # Building kernel
 $(XCLBIN)/vmult.$(TARGET).$(DSA).xo: src/kernel.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k vmult -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_vmult_vadd) -c -k vmult -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/vadd.$(TARGET).$(DSA).xo: src/kernel.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k vadd -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_vmult_vadd) -c -k vadd -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/vmult_vadd.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_vmult_vadd_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk vmult:1 --nk vadd:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_vmult_vadd) -l $(LDCLFLAGS) --nk vmult:1 --nk vadd:1 -o'$@' $(+)
 
 # Building Host
 $(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)

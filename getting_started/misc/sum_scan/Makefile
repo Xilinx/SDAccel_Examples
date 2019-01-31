@@ -35,6 +35,8 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
+BUILD_DIR_krnl_sum_scan = $(BUILD_DIR)/krnl_sum_scan
+
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
@@ -54,7 +56,7 @@ CXXFLAGS += -fmessage-length=0
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 CLFLAGS += --kernel_frequency 235
 
 
@@ -77,10 +79,10 @@ exe: $(EXECUTABLE)
 # Building kernel
 $(XCLBIN)/krnl_sum_scan.$(TARGET).$(DSA).xo: src/krnl_sum_scan.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k krnl_sum_scan -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_sum_scan) -c -k krnl_sum_scan -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/krnl_sum_scan.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_sum_scan_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk krnl_sum_scan:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_sum_scan) -l $(LDCLFLAGS) --nk krnl_sum_scan:1 -o'$@' $(+)
 
 # Building Host
 $(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)

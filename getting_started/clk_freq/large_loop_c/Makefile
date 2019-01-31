@@ -35,6 +35,9 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
+BUILD_DIR_cnn_GOOD = $(BUILD_DIR)/cnn_GOOD
+BUILD_DIR_cnn_BAD = $(BUILD_DIR)/cnn_BAD
+
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
@@ -54,7 +57,7 @@ CXXFLAGS += -fmessage-length=0
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 
 
 
@@ -79,16 +82,16 @@ exe: $(EXECUTABLE)
 # Building kernel
 $(XCLBIN)/cnn_GOOD.$(TARGET).$(DSA).xo: src/cnn_convolution.cpp
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k cnn_GOOD -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_cnn_GOOD) -c -k cnn_GOOD -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/cnn_BAD.$(TARGET).$(DSA).xo: src/cnn_convolution_bad.cpp
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k cnn_BAD -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_cnn_BAD) -c -k cnn_BAD -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/cnn_GOOD.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_cnn_GOOD_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk cnn_GOOD:4 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_cnn_GOOD) -l $(LDCLFLAGS) --nk cnn_GOOD:4 -o'$@' $(+)
 $(XCLBIN)/cnn_BAD.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_cnn_BAD_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk cnn_BAD:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_cnn_BAD) -l $(LDCLFLAGS) --nk cnn_BAD:1 -o'$@' $(+)
 
 # Building Host
 $(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)

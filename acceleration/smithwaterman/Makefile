@@ -35,6 +35,8 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
+BUILD_DIR_krnl_smithwaterman = $(BUILD_DIR)/krnl_smithwaterman
+
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
@@ -59,7 +61,7 @@ CXXFLAGS += -fmessage-length=0 -DFPGA_DEVICE -I./src/
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 CLFLAGS += -I./src/ --kernel_frequency 235
 
 
@@ -82,10 +84,10 @@ exe: $(EXECUTABLE)
 # Building kernel
 $(XCLBIN)/opencl_sw_maxscore.$(TARGET).$(DSA).xo: src/opencl_sw_maxscore_systolic.cpp
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k opencl_sw_maxscore -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_smithwaterman) -c -k opencl_sw_maxscore -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/krnl_smithwaterman.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_smithwaterman_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk opencl_sw_maxscore:2 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_smithwaterman) -l $(LDCLFLAGS) --nk opencl_sw_maxscore:2 -o'$@' $(+)
 
 # Building Host
 $(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)

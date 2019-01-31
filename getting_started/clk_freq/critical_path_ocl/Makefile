@@ -35,6 +35,8 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
+BUILD_DIR_apply_watermark_GOOD = $(BUILD_DIR)/apply_watermark_GOOD
+
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
@@ -55,7 +57,7 @@ CXXFLAGS += -fmessage-length=0
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 CLFLAGS += -DBAD_DESIGN=0
 
 
@@ -79,10 +81,10 @@ exe: $(EXECUTABLE)
 # Building kernel
 $(XCLBIN)/apply_watermark.$(TARGET).$(DSA).xo: src/apply_watermark.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k apply_watermark -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_apply_watermark_GOOD) -c -k apply_watermark -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/apply_watermark_GOOD.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_apply_watermark_GOOD_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk apply_watermark:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_apply_watermark_GOOD) -l $(LDCLFLAGS) --nk apply_watermark:1 -o'$@' $(+)
 
 # Building Host
 $(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
