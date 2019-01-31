@@ -1,50 +1,51 @@
 {
     "containers": [
-        { 
-            "meet_system_timing": "true",
+        {
+            "name": "vmult_vadd",
+            "meet_system_timing": "true", 
             "accelerators": [
                 {
-                    "name": "vmult",
-                    "check_timing": "true",
-                    "pipelinetype": "none",
-                    "check_latency": "false",
-                    "check_warning": "true",
-                    "loops": [   
+                    "name": "vmult", 
+                    "check_timing": "true", 
+                    "PipelineType": "none", 
+                    "check_latency": "false", 
+                    "check_warning": "true", 
+                    "loops": [
                         {
-                            "name": "readA",
-                            "pipelineII": "1"                     
-                        },
+                            "name": "readA", 
+                            "PipelineII": "1"
+                        }, 
                         {
-                            "name": "readB",
-                            "pipelineII": "1"
-                        },
+                            "name": "readB", 
+                            "PipelineII": "1"
+                        }, 
                         {
-                            "name": "vmult_writeC",
-                            "pipelineII": "1"
+                            "name": "vmult_writeC", 
+                            "PipelineII": "1"
                         }
                     ]
-                },
+                }, 
                 {
-                    "name": "vadd",
-                    "check_timing": "true",
-                    "pipelinetype": "none",
-                    "check_latency": "false",
-                    "check_warning": "true",
-                    "loops": [   
+                    "name": "vadd", 
+                    "check_timing": "true", 
+                    "PipelineType": "none", 
+                    "check_latency": "false", 
+                    "check_warning": "true", 
+                    "loops": [
                         {
-                            "name": "readD",
-                            "pipelineII": "1"                     
-                        },
+                            "name": "readD", 
+                            "PipelineII": "1"
+                        }, 
                         {
-                            "name": "readE",
-                            "pipelineII": "1"
-                        },
+                            "name": "readE", 
+                            "PipelineII": "1"
+                        }, 
                         {
-                            "name": "vadd_writeF",
-                            "pipelineII": "1"
+                            "name": "vadd_writeF", 
+                            "PipelineII": "1"
                         }
                     ]
-                }   
+                }
             ]
         }
     ]

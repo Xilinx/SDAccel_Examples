@@ -1,22 +1,23 @@
 {
     "containers": [
-        { 
-            "meet_system_timing": "true",
+        {
+            "name": "vector_addition",
+            "meet_system_timing": "true", 
             "accelerators": [
                 {
-                    "name": "vadd",
-                    "check_timing": "true",
-                    "pipelinetype": "none",
-                    "check_latency": "false",
+                    "name": "vadd", 
+                    "check_timing": "true", 
+                    "PipelineType": "none", 
+                    "check_latency": "false", 
                     "check_warning": "true"
-                },
+                }, 
                 {
-                    "name": "vadd_pipelined",
-                    "check_timing": "true",
-                    "pipelinetype": "none",
-                    "check_latency": "false",
+                    "name": "vadd_pipelined", 
+                    "check_timing": "true", 
+                    "PipelineType": "none", 
+                    "check_latency": "false", 
                     "check_warning": "true"
-                }   
+                }
             ]
         }
     ]

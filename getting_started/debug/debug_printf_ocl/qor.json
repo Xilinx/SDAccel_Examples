@@ -1,15 +1,16 @@
 {
     "containers": [
-        { 
-            "meet_system_timing": "true",
+        {
+            "name": "vadd",
+            "meet_system_timing": "true", 
             "accelerators": [
                 {
-                    "name": "krnl_vadd",
-                    "check_timing": "true",
-                    "pipelinetype": "none",
-                    "check_latency": "true",
+                    "name": "krnl_vadd", 
+                    "check_timing": "true", 
+                    "PipelineType": "none", 
+                    "check_latency": "true", 
                     "check_warning": "true"
-                }   
+                }
             ]
         }
     ]

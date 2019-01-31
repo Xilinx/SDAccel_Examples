@@ -1,33 +1,34 @@
 {
     "containers": [
-        { 
-            "meet_system_timing": "true",
+        {
+            "name": "mmult",
+            "meet_system_timing": "true", 
             "accelerators": [
                 {
-                    "name": "mmult",
-                    "check_timing": "true",
-                    "pipelinetype": "none",
-                    "check_latency": "false",
-                    "check_warning": "true",
-                    "loops": [   
+                    "name": "mmult", 
+                    "check_timing": "true", 
+                    "PipelineType": "none", 
+                    "check_latency": "false", 
+                    "check_warning": "true", 
+                    "loops": [
                         {
-                            "name": "readA",
-                            "pipelineII": "1"                     
-                        },
+                            "name": "readA", 
+                            "PipelineII": "1"
+                        }, 
                         {
-                            "name": "readB",
-                            "pipelineII": "1"
-                        },
+                            "name": "readB", 
+                            "PipelineII": "1"
+                        }, 
                         {
-                            "name": "systolic1",
-                            "pipelineII": "1"
-                        },
+                            "name": "systolic1", 
+                            "PipelineII": "1"
+                        }, 
                         {
-                            "name": "writeC",
-                            "pipelineII": "1"
+                            "name": "writeC", 
+                            "PipelineII": "1"
                         }
                     ]
-                }   
+                }
             ]
         }
     ]

@@ -1,21 +1,22 @@
 {
     "containers": [
-        { 
-            "meet_system_timing": "true",
+        {
+            "name": "dummy_kernel",
+            "meet_system_timing": "true", 
             "accelerators": [
                 {
-                    "name": "dummy_kernel",
-                    "check_timing": "true",
-                    "pipelinetype": "none",
-                    "check_latency": "false",
-                    "check_warning": "true",
-                    "loops": [   
+                    "name": "dummy_kernel", 
+                    "check_timing": "true", 
+                    "PipelineType": "none", 
+                    "check_latency": "false", 
+                    "check_warning": "true", 
+                    "loops": [
                         {
-                            "name": "Loop1",
-                            "pipelineII": "1"                     
-                        }                  
+                            "name": "Loop1", 
+                            "PipelineII": "1"
+                        }
                     ]
-                }  
+                }
             ]
         }
     ]

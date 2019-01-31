@@ -1,29 +1,30 @@
 {
     "containers": [
-        { 
-            "meet_system_timing": "true",
+        {
+            "name": "row_array_2d",
+            "meet_system_timing": "true", 
             "accelerators": [
                 {
-                    "name": "row_array_2d",
-                    "check_timing": "true",
-                    "pipelinetype": "dataflow",
-                    "check_latency": "true",
-                    "check_warning": "true",
-                    "loops": [   
+                    "name": "row_array_2d", 
+                    "check_timing": "true", 
+                    "PipelineType": "dataflow", 
+                    "check_latency": "true", 
+                    "check_warning": "true", 
+                    "loops": [
                         {
-                            "name": "Loop1",
-                            "pipelineII": "1"                     
-                        },
+                            "name": "Loop1", 
+                            "PipelineII": "1"
+                        }, 
                         {
-                            "name": "Loop1",
-                            "pipelineII": "1"
-                        },
+                            "name": "Loop1", 
+                            "PipelineII": "1"
+                        }, 
                         {
-                            "name": "Loop1",
-                            "pipelineII": "1"
+                            "name": "Loop1", 
+                            "PipelineII": "1"
                         }
                     ]
-                }   
+                }
             ]
         }
     ]

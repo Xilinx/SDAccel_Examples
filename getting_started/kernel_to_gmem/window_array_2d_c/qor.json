@@ -1,37 +1,38 @@
 {
     "containers": [
-        { 
-            "meet_system_timing": "true",
+        {
+            "name": "window_array_2d",
+            "meet_system_timing": "true", 
             "accelerators": [
                 {
-                    "name": "window_array_2d",
-                    "check_timing": "true",
-                    "pipelinetype": "dataflow",
-                    "check_latency": "true",
-                    "check_warning": "true",
-                    "loops": [   
+                    "name": "window_array_2d", 
+                    "check_timing": "true", 
+                    "PipelineType": "dataflow", 
+                    "check_latency": "true", 
+                    "check_warning": "true", 
+                    "loops": [
                         {
-                            "name": "rd_buf_loop_m_rd_buf_loop_n",
-                            "pipelineII": "1"                     
-                        },
+                            "name": "rd_buf_loop_m_rd_buf_loop_n", 
+                            "PipelineII": "1"
+                        }, 
                         {
-                            "name": "rd_loop_m_rd_loop_n",
-                            "pipelineII": "1"
-                        },
+                            "name": "rd_loop_m_rd_loop_n", 
+                            "PipelineII": "1"
+                        }, 
                         {
-                            "name": "compute_loop_i_compute_loop_j_compute_loop_m",
-                            "pipelineII": "1"
-                        },
+                            "name": "compute_loop_i_compute_loop_j_compute_loop_m", 
+                            "PipelineII": "1"
+                        }, 
                         {
-                            "name": "wr_buf_loop_m_wr_buf_loop_n",
-                            "pipelineII": "1"
-                        },
+                            "name": "wr_buf_loop_m_wr_buf_loop_n", 
+                            "PipelineII": "1"
+                        }, 
                         {
-                            "name": "wr_loop_m_wr_loop_n",
-                            "pipelineII": "1"
+                            "name": "wr_loop_m_wr_loop_n", 
+                            "PipelineII": "1"
                         }
                     ]
-                }   
+                }
             ]
         }
     ]
