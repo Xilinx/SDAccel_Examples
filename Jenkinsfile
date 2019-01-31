@@ -11,7 +11,8 @@ devices = []
 devices += ['xilinx_vcu1525_dynamic_5_1']
 devices += ['xilinx_kcu1500_dynamic_5_0']
 
-version = '2018.2'
+version = '2018.3'
+env.VERSION = version
 
 precheck_status = 'FAILURE'
 sw_status = 'FAILURE'
@@ -26,10 +27,12 @@ cd ${workdir}
 . /tools/local/bin/modinit.sh > /dev/null 2>&1
 module use.own /proj/picasso/modulefiles
 
-module add sdaccel/${version}_daily
+module add sdaccel/version_daily
 module add opencv/sdaccel
 
 cd ${dir}
+
+. /proj/xbuilds/${VERSION}_daily_latest/xbb/xrt/packages/setenv.sh
 
 echo
 echo "-----------------------------------------------"
@@ -67,8 +70,8 @@ cd ${workdir}
 . /tools/local/bin/modinit.sh > /dev/null 2>&1
 module use.own /proj/picasso/modulefiles
 
-module add vivado/${version}_daily
-module add sdaccel/${version}_daily
+module add vivado/version_daily
+module add sdaccel/version_daily
 module add opencv/sdaccel
 
 module add lsf
@@ -134,8 +137,8 @@ cd ${workdir}
 . /tools/local/bin/modinit.sh > /dev/null 2>&1
 module use.own /proj/picasso/modulefiles
 
-module add vivado/${version}_daily
-module add sdaccel/${version}_daily
+module add vivado/version_daily
+module add sdaccel/version_daily
 module add opencv/sdaccel
 
 module add proxy
@@ -221,8 +224,8 @@ try {
 . /tools/local/bin/modinit.sh > /dev/null 2>&1
 module use.own /proj/picasso/modulefiles
 
-module add vivado/${version}_daily
-module add sdaccel/${version}_daily
+module add vivado/version_daily
+module add sdaccel/version_daily
 module add opencv/sdaccel
 
 module add proxy
@@ -351,9 +354,9 @@ module add proxy
 	currentBuild.result = "FAILED"
 	throw e
 } finally {
-	stage('post-check') {
-		step([$class: 'Mailer', notifyEveryUnstableBuild: true, recipients: 'sdx_examples@xilinx.com', sendToIndividuals: false])
-	}
+	//stage('post-check') {
+	//	step([$class: 'Mailer', notifyEveryUnstableBuild: true, recipients: 'sdx_examples@xilinx.com', sendToIndividuals: false])
+	//}
 	stage('cleanup') {
 		// Cleanup .Xil Files after run
 		sh 'find . -name .Xil | xargs rm -rf'
