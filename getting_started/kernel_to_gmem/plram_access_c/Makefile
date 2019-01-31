@@ -59,7 +59,7 @@ LDFLAGS += -lrt -lstdc++
 CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 
 # Kernel linker flags
-LDCLFLAGS += --sp mmult_1.a:PLRAM[0] --sp mmult_1.b:bank0 --sp mmult_1.c:PLRAM[1]
+LDCLFLAGS += --sp mmult_1.a:PLRAM[0] --sp mmult_1.b:DDR[0] --sp mmult_1.c:PLRAM[1]
 
 EXECUTABLE = host
 CMD_ARGS = $(XCLBIN)/mmult.$(TARGET).$(DSA).xclbin

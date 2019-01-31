@@ -42,8 +42,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *     a. --max_memory_ports all 
 *  3.<SDx Project> > Properties > C/C++ Build > Settings > SDx XOCC Kernel Linker
 *                  > Miscellaneous > Other flags
-*     a. --sp bandwidth_1.m_axi_gmem0:bank0
-*     b. --sp bandwidth_1.m_axi_gmem1:bank1 
+*     a. --sp bandwidth_1.m_axi_gmem0:DDR[0]
+*     b. --sp bandwidth_1.m_axi_gmem1:DDR[1] 
 *
 * *****************************************************************************************
 *  DSA  (3DDR):
@@ -54,9 +54,9 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *     a. --max_memory_ports all 
 *  3.<SDx Project> > Properties > C/C++ Build > Settings > SDx XOCC Kernel Linker
 *                  > Miscellaneous > Other flags
-*     a. --sp bandwidth_1.m_axi_gmem0:bank0
-*     b. --sp bandwidth_1.m_axi_gmem1:bank1 
-*     c. --sp bandwidth_1.m_axi_gmem2:bank2
+*     a. --sp bandwidth_1.m_axi_gmem0:DDR[0]
+*     b. --sp bandwidth_1.m_axi_gmem1:DDR[1] 
+*     c. --sp bandwidth_1.m_axi_gmem2:DDR[2]
 *  4.Define NDDR_BANKS 3 in kernel "#define NDDR_BANKS 3" at the top of kernel.cl 
 * 
 * *****************************************************************************************
@@ -70,10 +70,10 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *     a. --max_memory_ports all 
 *  3.<SDx Project> > Properties > C/C++ Build > Settings > SDx XOCC Kernel Linker
 *                  > Miscellaneous > Other flags
-*     a. --sp bandwidth_1.m_axi_gmem0:bank0
-*     b. --sp bandwidth_1.m_axi_gmem1:bank1 
-*     c. --sp bandwidth_1.m_axi_gmem2:bank2
-*     d. --sp bandwidth_1.m_axi_gmem3:bank3 
+*     a. --sp bandwidth_1.m_axi_gmem0:DDR[0]
+*     b. --sp bandwidth_1.m_axi_gmem1:DDR[1] 
+*     c. --sp bandwidth_1.m_axi_gmem2:DDR[2]
+*     d. --sp bandwidth_1.m_axi_gmem3:DDR[3] 
 *  4.Define NDDR_BANKS 4 in kernel "#define NDDR_BANKS 4" at the top of kernel.cl 
 * 
 * *****************************************************************************************
