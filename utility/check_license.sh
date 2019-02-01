@@ -1,19 +1,26 @@
 #!/bin/bash
 
+# Check if LICENSE.txt is provided as an argument
+
+if [ $# -eq 0 ]; then
+    echo "ERROR: LICENSE.txt not found"
+    exit 1
+fi
+
 # Check if all source files have the correct license
 
 LICENSE=$1
 TYPES="c cpp h cl"
 IGNORE=$(cat .LICENSE_IGNORE.txt)
 
-LICENSE_LEN=$(cat LICENSE.txt | wc -l)
+LICENSE_LEN=$(cat $LICENSE | wc -l)
 
 echo "-------------------------------------"
 echo "--  CHECKING LICENSE of all $TYPES --"
 echo "-------------------------------------"
-echo "-- IGNORING "
+echo "-- IGNORING --"
 echo "$IGNORE"
-echo "-----------"
+echo "--------------"
 
 FAIL=0
 

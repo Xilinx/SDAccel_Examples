@@ -35,6 +35,9 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
+BUILD_DIR_sketch_GOOD = $(BUILD_DIR)/sketch_GOOD
+BUILD_DIR_sketch_BAD = $(BUILD_DIR)/sketch_BAD
+
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
@@ -55,7 +58,7 @@ CXXFLAGS += -fmessage-length=0
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 CLFLAGS += --xp param:compiler.xclDataflowFifoDepth=16
 
 
@@ -82,16 +85,16 @@ exe: $(EXECUTABLE)
 # Building kernel
 $(XCLBIN)/sketch_GOOD.$(TARGET).$(DSA).xo: src/sketch.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k sketch_GOOD -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_sketch_GOOD) -c -k sketch_GOOD -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/sketch_BAD.$(TARGET).$(DSA).xo: src/sketch_bad.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k sketch_BAD -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_sketch_BAD) -c -k sketch_BAD -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/sketch_GOOD.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_sketch_GOOD_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk sketch_GOOD:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_sketch_GOOD) -l $(LDCLFLAGS) --nk sketch_GOOD:1 -o'$@' $(+)
 $(XCLBIN)/sketch_BAD.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_sketch_BAD_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk sketch_BAD:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_sketch_BAD) -l $(LDCLFLAGS) --nk sketch_BAD:1 -o'$@' $(+)
 
 # Building Host
 $(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)

@@ -35,6 +35,8 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
+BUILD_DIR_rgb_to_hsv = $(BUILD_DIR)/rgb_to_hsv
+
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
@@ -55,7 +57,7 @@ CXXFLAGS += -fmessage-length=0
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 
 
 EXECUTABLE = host
@@ -78,10 +80,10 @@ exe: $(EXECUTABLE)
 # Building kernel
 $(XCLBIN)/rgb_to_hsv.$(TARGET).$(DSA).xo: src/rgb_to_hsv.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k rgb_to_hsv -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_rgb_to_hsv) -c -k rgb_to_hsv -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/rgb_to_hsv.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_rgb_to_hsv_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk rgb_to_hsv:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_rgb_to_hsv) -l $(LDCLFLAGS) --nk rgb_to_hsv:1 -o'$@' $(+)
 
 # Building Host
 $(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)

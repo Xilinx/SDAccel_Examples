@@ -1,47 +1,48 @@
 {
     "containers": [
-        { 
-            "meet_system_timing": "true",
+        {
+            "name": "adder",
+            "meet_system_timing": "true", 
             "accelerators": [
                 {
-                    "name": "adder_stage",
-                    "check_timing": "true",
-                    "pipelinetype": "none",
-                    "check_latency": "false",
-                    "check_warning": "true",
-                    "loops": [   
+                    "name": "adder_stage", 
+                    "check_timing": "true", 
+                    "PipelineType": "none", 
+                    "check_latency": "false", 
+                    "check_warning": "true", 
+                    "loops": [
                         {
-                            "name": "execute",
-                            "pipelineII": "1"                     
+                            "name": "execute", 
+                            "PipelineII": "1"
                         }
                     ]
-                },
+                }, 
                 {
-                    "name": "input_stage",
-                    "check_timing": "true",
-                    "pipelinetype": "none",
-                    "check_latency": "false",
-                    "check_warning": "true",
-                    "loops": [   
+                    "name": "input_stage", 
+                    "check_timing": "true", 
+                    "PipelineType": "none", 
+                    "check_latency": "false", 
+                    "check_warning": "true", 
+                    "loops": [
                         {
-                            "name": "mem_rd",
-                            "pipelineII": "1"                     
+                            "name": "mem_rd", 
+                            "PipelineII": "1"
                         }
                     ]
-                },
+                }, 
                 {
-                    "name": "output_stage",
-                    "check_timing": "true",
-                    "pipelinetype": "none",
-                    "check_latency": "false",
-                    "check_warning": "true",
-                    "loops": [   
+                    "name": "output_stage", 
+                    "check_timing": "true", 
+                    "PipelineType": "none", 
+                    "check_latency": "false", 
+                    "check_warning": "true", 
+                    "loops": [
                         {
-                            "name": "mem_wr",
-                            "pipelineII": "1"                     
+                            "name": "mem_wr", 
+                            "PipelineII": "1"
                         }
                     ]
-                }   
+                }
             ]
         }
     ]

@@ -35,6 +35,8 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
+BUILD_DIR_matmul = $(BUILD_DIR)/matmul
+
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
@@ -54,7 +56,7 @@ CXXFLAGS += -fmessage-length=0
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 
 
 EXECUTABLE = array_partition
@@ -77,13 +79,13 @@ exe: $(EXECUTABLE)
 # Building kernel
 $(XCLBIN)/matmul_naive.$(TARGET).$(DSA).xo: src/matmul.cpp
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k matmul_naive -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_matmul) -c -k matmul_naive -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/matmul_partition.$(TARGET).$(DSA).xo: src/matmul_partition.cpp
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k matmul_partition -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_matmul) -c -k matmul_partition -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/matmul.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_matmul_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk matmul_naive:1 --nk matmul_partition:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_matmul) -l $(LDCLFLAGS) --nk matmul_naive:1 --nk matmul_partition:1 -o'$@' $(+)
 
 # Building Host
 $(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)

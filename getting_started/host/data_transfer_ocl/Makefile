@@ -35,6 +35,8 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
+BUILD_DIR_dummy_kernel = $(BUILD_DIR)/dummy_kernel
+
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
@@ -54,7 +56,7 @@ CXXFLAGS += -fmessage-length=0
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 
 
 EXECUTABLE = data_transfer
@@ -76,10 +78,10 @@ exe: $(EXECUTABLE)
 # Building kernel
 $(XCLBIN)/dummy_kernel.$(TARGET).$(DSA).xo: src/dummy_kernel.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k dummy_kernel -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_dummy_kernel) -c -k dummy_kernel -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/dummy_kernel.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_dummy_kernel_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk dummy_kernel:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_dummy_kernel) -l $(LDCLFLAGS) --nk dummy_kernel:1 -o'$@' $(+)
 
 # Building Host
 $(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)

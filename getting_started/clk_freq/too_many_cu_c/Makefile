@@ -35,6 +35,9 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
+BUILD_DIR_vadd_GOOD = $(BUILD_DIR)/vadd_GOOD
+BUILD_DIR_vadd_BAD = $(BUILD_DIR)/vadd_BAD
+
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
@@ -54,7 +57,7 @@ CXXFLAGS += -fmessage-length=0
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 
 
 
@@ -79,16 +82,16 @@ exe: $(EXECUTABLE)
 # Building kernel
 $(XCLBIN)/vadd_GOOD.$(TARGET).$(DSA).xo: src/vadd.cpp
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k vadd_GOOD -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_vadd_GOOD) -c -k vadd_GOOD -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/vadd_BAD.$(TARGET).$(DSA).xo: src/vadd_bad.cpp
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k vadd_BAD -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_vadd_BAD) -c -k vadd_BAD -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/vadd_GOOD.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_vadd_GOOD_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk vadd_GOOD:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_vadd_GOOD) -l $(LDCLFLAGS) --nk vadd_GOOD:1 -o'$@' $(+)
 $(XCLBIN)/vadd_BAD.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_vadd_BAD_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk vadd_BAD:8 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_vadd_BAD) -l $(LDCLFLAGS) --nk vadd_BAD:8 -o'$@' $(+)
 
 # Building Host
 $(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)

@@ -35,6 +35,8 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
+BUILD_DIR_matrix_ops = $(BUILD_DIR)/matrix_ops
+
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
@@ -54,7 +56,7 @@ CXXFLAGS += -fmessage-length=0
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 
 
 EXECUTABLE = concurrent_execution
@@ -78,16 +80,16 @@ exe: $(EXECUTABLE)
 # Building kernel
 $(XCLBIN)/madd.$(TARGET).$(DSA).xo: src/matrix_ops.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k madd -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_matrix_ops) -c -k madd -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/mscale.$(TARGET).$(DSA).xo: src/matrix_ops.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k mscale -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_matrix_ops) -c -k mscale -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/mmult.$(TARGET).$(DSA).xo: src/matrix_ops.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k mmult -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_matrix_ops) -c -k mmult -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/matrix_ops.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_matrix_ops_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk madd:1 --nk mscale:1 --nk mmult:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_matrix_ops) -l $(LDCLFLAGS) --nk madd:1 --nk mscale:1 --nk mmult:1 -o'$@' $(+)
 
 # Building Host
 $(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)

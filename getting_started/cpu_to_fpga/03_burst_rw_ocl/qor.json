@@ -1,33 +1,34 @@
 {
     "containers": [
-        { 
-            "meet_system_timing": "true",
+        {
+            "name": "mmult",
+            "meet_system_timing": "true", 
             "accelerators": [
                 {
-                    "name": "mmult",
-                    "check_timing": "true",
-                    "pipelinetype": "none",
-                    "check_latency": "false",
-                    "check_warning": "true",
-                    "loops": [   
+                    "name": "mmult", 
+                    "check_timing": "true", 
+                    "PipelineType": "none", 
+                    "check_latency": "false", 
+                    "check_warning": "true", 
+                    "loops": [
                         {
-                            "name": "read_in1",
-                            "pipelineII": "1"                     
-                        },
+                            "name": "read_in1", 
+                            "PipelineII": "1"
+                        }, 
                         {
-                            "name": "read_in2",
-                            "pipelineII": "1"
-                        },
+                            "name": "read_in2", 
+                            "PipelineII": "1"
+                        }, 
                         {
-                            "name": "write_data",
-                            "pipelineII": "1"
-                        },
+                            "name": "write_data", 
+                            "PipelineII": "1"
+                        }, 
                         {
-                            "name": "write_out",
-                            "pipelineII": "1"
+                            "name": "write_out", 
+                            "PipelineII": "1"
                         }
                     ]
-                }   
+                }
             ]
         }
     ]

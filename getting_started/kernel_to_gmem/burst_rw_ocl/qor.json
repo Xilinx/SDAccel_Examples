@@ -1,25 +1,26 @@
 {
     "containers": [
-        { 
-            "meet_system_timing": "true",
+        {
+            "name": "vadd",
+            "meet_system_timing": "true", 
             "accelerators": [
                 {
-                    "name": "vadd",
-                    "check_timing": "true",
-                    "pipelinetype": "none",
-                    "check_latency": "false",
-                    "check_warning": "true",
-                    "loops": [   
+                    "name": "vadd", 
+                    "check_timing": "true", 
+                    "PipelineType": "none", 
+                    "check_latency": "false", 
+                    "check_warning": "true", 
+                    "loops": [
                         {
-                            "name": "read_buf",
-                            "pipelineII": "1"                     
-                        },
+                            "name": "read_buf", 
+                            "PipelineII": "1"
+                        }, 
                         {
-                            "name": "calc_write",
-                            "pipelineII": "1"
+                            "name": "calc_write", 
+                            "PipelineII": "1"
                         }
                     ]
-                }   
+                }
             ]
         }
     ]

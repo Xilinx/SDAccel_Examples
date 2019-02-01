@@ -35,6 +35,8 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
+BUILD_DIR_window_array_2d = $(BUILD_DIR)/window_array_2d
+
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
@@ -54,7 +56,7 @@ CXXFLAGS += -fmessage-length=0
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 
 
 EXECUTABLE = host
@@ -78,16 +80,16 @@ exe: $(EXECUTABLE)
 # Building kernel
 $(XCLBIN)/read_data.$(TARGET).$(DSA).xo: src/window_array_2d.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k read_data -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_window_array_2d) -c -k read_data -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/compute.$(TARGET).$(DSA).xo: src/window_array_2d.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k compute -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_window_array_2d) -c -k compute -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/write_data.$(TARGET).$(DSA).xo: src/window_array_2d.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k write_data -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_window_array_2d) -c -k write_data -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/window_array_2d.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_window_array_2d_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk read_data:1 --nk compute:1 --nk write_data:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_window_array_2d) -l $(LDCLFLAGS) --nk read_data:1 --nk compute:1 --nk write_data:1 -o'$@' $(+)
 
 # Building Host
 $(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)

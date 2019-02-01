@@ -35,8 +35,8 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
-BUILD_DIR_krnl_vadd = $(BUILD_DIR)/krnl_vadd
 BUILD_DIR_krnl_vmul = $(BUILD_DIR)/krnl_vmul
+BUILD_DIR_krnl_vadd = $(BUILD_DIR)/krnl_vadd
 
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc

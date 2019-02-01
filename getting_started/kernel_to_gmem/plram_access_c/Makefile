@@ -35,6 +35,8 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
+BUILD_DIR_mmult = $(BUILD_DIR)/mmult
+
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
@@ -54,10 +56,10 @@ CXXFLAGS += -fmessage-length=0
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 
 # Kernel linker flags
-LDCLFLAGS += --sp mmult_1.a:PLRAM[0] --sp mmult_1.b:bank0 --sp mmult_1.c:PLRAM[1]
+LDCLFLAGS += --sp mmult_1.a:PLRAM[0] --sp mmult_1.b:DDR[0] --sp mmult_1.c:PLRAM[1]
 
 EXECUTABLE = host
 CMD_ARGS = $(XCLBIN)/mmult.$(TARGET).$(DSA).xclbin
@@ -78,10 +80,10 @@ exe: $(EXECUTABLE)
 # Building kernel
 $(XCLBIN)/mmult.$(TARGET).$(DSA).xo: src/mmult.cpp
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k mmult -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_mmult) -c -k mmult -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/mmult.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_mmult_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk mmult:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_mmult) -l $(LDCLFLAGS) --nk mmult:1 -o'$@' $(+)
 
 # Building Host
 $(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)

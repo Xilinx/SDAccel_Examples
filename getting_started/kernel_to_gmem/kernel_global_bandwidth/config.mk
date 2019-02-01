@@ -3,13 +3,13 @@
 ddr_banks := 2
 
 # Kernel linker flags
-LDCLFLAGS+= --sp bandwidth_1.m_axi_gmem0:bank0 
+LDCLFLAGS+= --sp bandwidth_1.m_axi_gmem0:DDR[0] 
 ifneq ($(strip $(ddr_banks)),1)
-LDCLFLAGS+= --sp bandwidth_1.m_axi_gmem1:bank1
+LDCLFLAGS+= --sp bandwidth_1.m_axi_gmem1:DDR[1]
 ifneq ($(strip $(ddr_banks)),2)
-LDCLFLAGS+= --sp bandwidth_1.m_axi_gmem2:bank2
+LDCLFLAGS+= --sp bandwidth_1.m_axi_gmem2:DDR[2]
 ifneq ($(strip $(ddr_banks)),3)
-LDCLFLAGS+= --sp bandwidth_1.m_axi_gmem3:bank3
+LDCLFLAGS+= --sp bandwidth_1.m_axi_gmem3:DDR[3]
 endif
 endif
 endif

@@ -39,11 +39,12 @@ Description: SDx Vector Addition using Blocking Pipes Operation
 
 int main(int argc, char** argv)
 {
-    if (argc != 1)
-    {
-        std::cout << "Usage: " << argv[0] << std::endl;
+    if (argc != 2) {
+        std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
         return EXIT_FAILURE;
     }
+
+    std::string binaryFile = argv[1];
 
     //Allocate Memory in Host Memory
     size_t vector_size_bytes = sizeof(int) * DATA_SIZE;
@@ -71,7 +72,6 @@ int main(int argc, char** argv)
             CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE | CL_QUEUE_PROFILING_ENABLE, &err));
     std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
 
-    std::string binaryFile = xcl::find_binary_file(device_name,"adder");
     char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
