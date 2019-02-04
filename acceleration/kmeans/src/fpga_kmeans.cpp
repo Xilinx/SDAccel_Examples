@@ -151,11 +151,6 @@ int FPGA_KMEANS::fpga_kmeans_compute(
     int N_Features = ( (n_features -1)/g_vector_size + 1) * g_vector_size;
     DATA_TYPE* temp_clusters = re_align_clusters(clusters,n_clusters, N_Features,n_features);
 
-    OCL_CHECK(err, err = g_q.enqueueWriteBuffer(d_cluster, CL_TRUE, 0,
-                                n_clusters * N_Features * sizeof(DATA_TYPE), temp_clusters, NULL, NULL));
-    g_q.finish();
-    free(temp_clusters);
-
     int narg = 0;
     OCL_CHECK(err, err = g_kernel_kmeans.setArg(narg++, d_feature));
     OCL_CHECK(err, err = g_kernel_kmeans.setArg(narg++, d_cluster));
@@ -163,6 +158,11 @@ int FPGA_KMEANS::fpga_kmeans_compute(
     OCL_CHECK(err, err = g_kernel_kmeans.setArg(narg++, sizeof(cl_int), (void*) &n_points));
     OCL_CHECK(err, err = g_kernel_kmeans.setArg(narg++, sizeof(cl_int), (void*) &n_clusters));
     OCL_CHECK(err, err = g_kernel_kmeans.setArg(narg++, sizeof(cl_int), (void*) &n_features));
+
+    OCL_CHECK(err, err = g_q.enqueueWriteBuffer(d_cluster, CL_TRUE, 0,
+                                n_clusters * N_Features * sizeof(DATA_TYPE), temp_clusters, NULL, NULL));
+    g_q.finish();
+    free(temp_clusters);
 
     OCL_CHECK(err, err = g_q.enqueueNDRangeKernel(g_kernel_kmeans, 0, 1, 1, NULL, &wait_event));
     g_q.finish();

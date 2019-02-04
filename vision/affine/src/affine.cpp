@@ -93,19 +93,15 @@ int main(int argc, char** argv)
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel krnl(program,"affine_kernel", &err));
 
-    std::vector<cl::Memory> inBufVec, outBufVec;
     OCL_CHECK(err, cl::Buffer imageToDevice(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, vector_size_bytes, input_image.data(), &err));
     OCL_CHECK(err, cl::Buffer imageFromDevice(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,vector_size_bytes, output_image.data(), &err));
-
-    inBufVec.push_back(imageToDevice);
-    outBufVec.push_back(imageFromDevice);
-
-    /* Copy input vectors to memory */
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/));
 
     // Set the kernel arguments
     OCL_CHECK(err, err = krnl.setArg(0, imageToDevice));
     OCL_CHECK(err, err = krnl.setArg(1, imageFromDevice));
+
+    /* Copy input vectors to memory */
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({imageToDevice},0/* 0 means from host*/));
 
     // Launch the kernel
     OCL_CHECK(err, err = q.enqueueTask(krnl));
@@ -119,7 +115,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({imageFromDevice},CL_MIGRATE_MEM_OBJECT_HOST));
     q.finish();
 
     delete[] fileBuf;
