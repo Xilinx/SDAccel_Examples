@@ -1,7 +1,7 @@
 {
     "containers": [
         {
-            "name": "adder",
+            "name": "adder", 
             "meet_system_timing": "true", 
             "accelerators": [
                 {
@@ -9,7 +9,7 @@
                     "check_timing": "true", 
                     "PipelineType": "none", 
                     "check_latency": "false", 
-                    "check_warning": "true", 
+                    "check_warning": "false", 
                     "loops": [
                         {
                             "name": "execute", 
@@ -22,7 +22,7 @@
                     "check_timing": "true", 
                     "PipelineType": "none", 
                     "check_latency": "false", 
-                    "check_warning": "true", 
+                    "check_warning": "false", 
                     "loops": [
                         {
                             "name": "mem_rd", 
@@ -35,7 +35,7 @@
                     "check_timing": "true", 
                     "PipelineType": "none", 
                     "check_latency": "false", 
-                    "check_warning": "true", 
+                    "check_warning": "false", 
                     "loops": [
                         {
                             "name": "mem_wr", 

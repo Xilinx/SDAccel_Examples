@@ -1,7 +1,7 @@
 {
     "containers": [
         {
-            "name": "krnl_sum_scan",
+            "name": "krnl_sum_scan", 
             "meet_system_timing": "true", 
             "accelerators": [
                 {
@@ -9,10 +9,10 @@
                     "check_timing": "true", 
                     "PipelineType": "none", 
                     "check_latency": "false", 
-                    "check_warning": "true", 
+                    "check_warning": "false", 
                     "loops": [
                         {
-                            "name": "Loop1", 
+                            "name": "sum_scan1", 
                             "PipelineII": "1"
                         }
                     ]

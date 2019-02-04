@@ -1,7 +1,7 @@
 {
     "containers": [
         {
-            "name": "matrix_ops"
+            "name": "matrix_ops", 
             "meet_system_timing": "true", 
             "accelerators": [
                 {
@@ -9,7 +9,7 @@
                     "check_timing": "true", 
                     "PipelineType": "none", 
                     "check_latency": "false", 
-                    "check_warning": "true", 
+                    "check_warning": "false", 
                     "loops": [
                         {
                             "name": "madd_readA", 
@@ -30,7 +30,7 @@
                     "check_timing": "true", 
                     "PipelineType": "none", 
                     "check_latency": "false", 
-                    "check_warning": "true", 
+                    "check_warning": "false", 
                     "loops": [
                         {
                             "name": "mmult_readA", 
@@ -39,30 +39,26 @@
                         {
                             "name": "mmult_readB", 
                             "PipelineII": "1"
-                        }, 
-                        {
-                            "name": "Loop3.1.1", 
-                            "PipelineII": "1"
                         }
                     ]
                 }, 
                 {
-                    "name": "mscale",
-                    "check_timing": "true",
-                    "pipelinetype": "none",
-                    "check_latency": "false",
-                    "check_warning": "true",
-                    "loops": [   
+                    "name": "mscale", 
+                    "check_timing": "true", 
+                    "pipelinetype": "none", 
+                    "check_latency": "false", 
+                    "check_warning": "false", 
+                    "loops": [
                         {
-                            "name": "mscale",
-                            "pipelineII": "1"                     
-                        },
+                            "name": "mscale", 
+                            "pipelineII": "1"
+                        }, 
                         {
-                            "name": "mscale_write",
+                            "name": "mscale_write", 
                             "pipelineII": "1"
                         }
                     ]
-                }   
+                }
             ]
         }
     ]

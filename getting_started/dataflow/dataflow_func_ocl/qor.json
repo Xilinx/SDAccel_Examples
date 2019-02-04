@@ -1,7 +1,7 @@
 {
     "containers": [
         {
-            "name": "adder",
+            "name": "adder", 
             "meet_system_timing": "true", 
             "accelerators": [
                 {
@@ -9,18 +9,18 @@
                     "check_timing": "true", 
                     "PipelineType": "dataflow", 
                     "check_latency": "false", 
-                    "check_warning": "true", 
+                    "check_warning": "false", 
                     "loops": [
                         {
-                            "name": "Loop1", 
+                            "name": "read", 
                             "PipelineII": "1"
                         }, 
                         {
-                            "name": "Loop1", 
+                            "name": "compute", 
                             "PipelineII": "1"
                         }, 
                         {
-                            "name": "Loop1", 
+                            "name": "write", 
                             "PipelineII": "1"
                         }
                     ]
