@@ -90,25 +90,24 @@ int main(int argc, char* argv[])
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel kernel(program,"apply_watermark", &err));
 
-    std::vector<cl::Memory> inBufVec, outBufVec;
     OCL_CHECK(err, cl::Buffer buffer_inImage(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, 
             image_size_bytes, inImage.data(), &err));
     OCL_CHECK(err, cl::Buffer buffer_outImage(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
             image_size_bytes, outImage.data(), &err));
-    inBufVec.push_back(buffer_inImage);
-    outBufVec.push_back(buffer_outImage);
-
+    
+    OCL_CHECK(err, err = kernel.setArg(0, buffer_inImage));
+    OCL_CHECK(err, err = kernel.setArg(1, buffer_outImage));
+    OCL_CHECK(err, err = kernel.setArg(2, width));
+    OCL_CHECK(err, err = kernel.setArg(3, height));
+    
     //Copy input Image to device global memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/));
-  
-    auto krnl_applyWatermark= cl::KernelFunctor<cl::Buffer&, cl::Buffer& ,int,int>(kernel);
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_inImage},0/* 0 means from host*/));
     
     //Launch the Kernel
-    krnl_applyWatermark(cl::EnqueueArgs(q,cl::NDRange(1,1,1), cl::NDRange(1,1,1)), 
-            buffer_inImage, buffer_outImage, width, height);
+    OCL_CHECK(err, err = q.enqueueNDRangeKernel(kernel, 0, 1, 1, NULL, NULL));
 
     //Copy Result from Device Global Memory to Host Local Memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_outImage},CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());
 //OPENCL HOST CODE AREA END
 

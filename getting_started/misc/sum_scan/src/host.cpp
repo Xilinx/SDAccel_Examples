@@ -109,22 +109,18 @@ int main(int argc, char* argv[]) {
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel krnl(program,"krnl_sum_scan", &err));
 
-    std::vector<cl::Memory> inBufVec, outBufVec;
     OCL_CHECK(err, cl::Buffer dev_in (context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
             vector_size_bytes,in.data(), &err));
     OCL_CHECK(err, cl::Buffer dev_out(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
             vector_size_bytes,out_fpga.data(), &err));
-    inBufVec.push_back(dev_in);
-    outBufVec.push_back(dev_out);
-
     
-    /* Copy input vectors to memory */
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/));
-
     /* Set the kernel arguments */
     OCL_CHECK(err, err = krnl.setArg(0, dev_in));
     OCL_CHECK(err, err = krnl.setArg(1, dev_out));
     OCL_CHECK(err, err = krnl.setArg(2, length));
+
+    /* Copy input vectors to memory */
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({dev_in},0/* 0 means from host*/));
 
     /* Launch the kernel */
     cl::Event event;
@@ -132,7 +128,7 @@ int main(int argc, char* argv[]) {
     OCL_CHECK(err, err = q.finish());
 
      /* Copy result to local buffer */
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({dev_out},CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());
 
     uint64_t nstimestart, nstimeend;

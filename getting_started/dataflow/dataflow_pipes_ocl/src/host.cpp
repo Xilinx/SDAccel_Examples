@@ -101,11 +101,6 @@ int main(int argc, char** argv)
     OCL_CHECK(err, cl::Buffer buffer_output(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
             vector_size_bytes, source_hw_results.data(), &err));
 
-    // Copy input data to device global memory
-    std::cout << "Copying data..." << std::endl;
-    cl::Event write_event;
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_input}, 0/*0 means from host*/, NULL, &write_event));
-   
     //Set the Kernel Arguments
     int size = data_size;
     int inc = INCR_VALUE;
@@ -115,6 +110,11 @@ int main(int argc, char** argv)
     OCL_CHECK(err, err = krnl_adder_stage.setArg(1, size));
     OCL_CHECK(err, err = krnl_output_stage.setArg(0, buffer_output));
     OCL_CHECK(err, err = krnl_output_stage.setArg(1, size));
+
+    // Copy input data to device global memory
+    std::cout << "Copying data..." << std::endl;
+    cl::Event write_event;
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_input}, 0/*0 means from host*/, NULL, &write_event));
 
     // Launch the Kernel
     std::cout << "Launching Kernel..." << std::endl;

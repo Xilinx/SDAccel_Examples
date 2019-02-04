@@ -99,16 +99,16 @@ int main(int argc, char** argv)
     OCL_CHECK(err, cl::Buffer buffer_mul_out   (context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, 
             vector_size_bytes, temp.data(), &err));
 
-    // Copy input data to device global memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_in1, buffer_in2},0/* 0 means from host*/));
-
     OCL_CHECK(err, err = vector_mult.setArg(0, buffer_in1));
     OCL_CHECK(err, err = vector_mult.setArg(1, buffer_in2));
     OCL_CHECK(err, err = vector_mult.setArg(2, buffer_mul_out));
     OCL_CHECK(err, err = vector_mult.setArg(3, size));
 
+    // Copy input data to device global memory
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_in1, buffer_in2},0/* 0 means from host*/));
+
     // Launch the Kernel
-    q.enqueueTask(vector_mult);
+    OCL_CHECK(err, err = q.enqueueTask(vector_mult));
 
     OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_mul_out}, CL_MIGRATE_MEM_OBJECT_HOST));
     q.finish();
@@ -128,14 +128,14 @@ int main(int argc, char** argv)
     OCL_CHECK(err, cl::Buffer buffer_vadd_out(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
             vector_size_bytes, C.data(), &err));
 
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({d_temp},0/* 0 means from host*/));
-
     OCL_CHECK(err, err = vector_add.setArg(0, d_temp));
     OCL_CHECK(err, err = vector_add.setArg(1, d_temp));
     OCL_CHECK(err, err = vector_add.setArg(2, buffer_vadd_out));
     OCL_CHECK(err, err = vector_add.setArg(3, size));
 
-    q.enqueueTask(vector_add);    
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({d_temp},0/* 0 means from host*/));
+
+    OCL_CHECK(err, err = q.enqueueTask(vector_add));    
     OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_vadd_out}, CL_MIGRATE_MEM_OBJECT_HOST));
     q.finish();
     delete[] fileBuf;

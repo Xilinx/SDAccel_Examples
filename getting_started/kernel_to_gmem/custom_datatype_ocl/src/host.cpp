@@ -88,26 +88,22 @@ int main(int argc, char* argv[])
     //Allocate Buffer in Global Memory
     OCL_CHECK(err, cl::Buffer buffer_rgbImage(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
             image_size_bytes,hwRgbImage.data(), &err));
-    std::vector<cl::Memory> rgbBufVec;
-    rgbBufVec.push_back(buffer_rgbImage);
 
     OCL_CHECK(err, cl::Buffer buffer_hsvImage(context, CL_MEM_WRITE_ONLY| CL_MEM_USE_HOST_PTR,
             image_size_bytes,hwHsvImage.data(), &err));
-    std::vector<cl::Memory> hsvBufVec;
-    hsvBufVec.push_back(buffer_hsvImage);
 
-    //Copy input RGB Image to device global memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(rgbBufVec,0/* 0 means from host*/));
-  
     OCL_CHECK(err, err = krnl_rgb2hsv.setArg(0, buffer_rgbImage));
     OCL_CHECK(err, err = krnl_rgb2hsv.setArg(1, buffer_hsvImage));
     OCL_CHECK(err, err = krnl_rgb2hsv.setArg(2, image_size));
+
+    //Copy input RGB Image to device global memory
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_rgbImage},0/* 0 means from host*/));
 
     //Launch the Kernel
     OCL_CHECK(err, err = q.enqueueTask(krnl_rgb2hsv));
 
     //Copy Result from Device Global Memory to Host Local Memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(hsvBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_hsvImage},CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());
 
 //OPENCL HOST CODE AREA END

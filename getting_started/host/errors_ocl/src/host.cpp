@@ -349,6 +349,28 @@ int main(int argc, char **argv) {
     vector<int> B(elements, 10);
     vector<int> C(elements);
 
+    if ((err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &buffer_result))) {
+        printf("Fatal Error calling clSetKernelArg: %s\n", error_string(err));
+        printf("TEST FAILED\n");
+        exit(EXIT_FAILURE);
+    }
+    if ((err = clSetKernelArg(kernel, 1, sizeof(cl_mem), &buffer_a))) {
+        printf("Fatal Error calling clSetKernelArg: %s\n", error_string(err));
+        printf("TEST FAILED\n");
+        exit(EXIT_FAILURE);
+    }
+    if ((err = clSetKernelArg(kernel, 2, sizeof(cl_mem), &buffer_b))) {
+        printf("Fatal Error calling clSetKernelArg: %s\n", error_string(err));
+        printf("TEST FAILED\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if ((err = clSetKernelArg(kernel, 3, sizeof(int), &elements))) {
+        printf("Fatal Error calling clSetKernelArg: %s\n", error_string(err));
+        printf("TEST FAILED\n");
+        exit(EXIT_FAILURE);
+    }
+
     if ((err = clEnqueueWriteBuffer(command_queue, buffer_a, CL_FALSE, 0,
                                     size + 1, A.data(), 0, nullptr, nullptr))) {
         printf(
@@ -374,28 +396,6 @@ int main(int argc, char **argv) {
                                     B.data(), 0, nullptr, nullptr))) {
         printf("Fatal Error calling clEnqueueWriteBuffer: %s\n",
                error_string(err));
-        printf("TEST FAILED\n");
-        exit(EXIT_FAILURE);
-    }
-
-    if ((err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &buffer_result))) {
-        printf("Fatal Error calling clSetKernelArg: %s\n", error_string(err));
-        printf("TEST FAILED\n");
-        exit(EXIT_FAILURE);
-    }
-    if ((err = clSetKernelArg(kernel, 1, sizeof(cl_mem), &buffer_a))) {
-        printf("Fatal Error calling clSetKernelArg: %s\n", error_string(err));
-        printf("TEST FAILED\n");
-        exit(EXIT_FAILURE);
-    }
-    if ((err = clSetKernelArg(kernel, 2, sizeof(cl_mem), &buffer_b))) {
-        printf("Fatal Error calling clSetKernelArg: %s\n", error_string(err));
-        printf("TEST FAILED\n");
-        exit(EXIT_FAILURE);
-    }
-
-    if ((err = clSetKernelArg(kernel, 3, sizeof(int), &elements))) {
-        printf("Fatal Error calling clSetKernelArg: %s\n", error_string(err));
         printf("TEST FAILED\n");
         exit(EXIT_FAILURE);
     }
