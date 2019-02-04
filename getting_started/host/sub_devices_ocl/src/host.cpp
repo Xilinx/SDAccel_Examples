@@ -141,14 +141,14 @@ int main(int argc, char** argv) {
         std::vector<cl::Event> wait_write_event;
         std::vector<cl::Event> wait_task_event;
 
-        //Copy the data to the device memory
-        OCL_CHECK(err, err = sub_q[i].enqueueMigrateMemObjects({*(d_a[i]), *(d_b[i])}, 0, NULL, &write_event));
-
         //Set the kernel arguments
         OCL_CHECK(err, err = krnl_vadd.setArg(0, *(d_a[i])));
         OCL_CHECK(err, err = krnl_vadd.setArg(1, *(d_b[i])));
         OCL_CHECK(err, err = krnl_vadd.setArg(2, *(d_output[i])));
         OCL_CHECK(err, err = krnl_vadd.setArg(3, elements_per_subdevice));
+
+        //Copy the data to the device memory
+        OCL_CHECK(err, err = sub_q[i].enqueueMigrateMemObjects({*(d_a[i]), *(d_b[i])}, 0, NULL, &write_event));
 
         wait_write_event.push_back(write_event);
         //Launch the kernel

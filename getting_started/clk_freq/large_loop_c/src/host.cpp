@@ -131,19 +131,12 @@ uint64_t run_opencl_cnn(
     size_t output_size_bytes = sizeof(int) * o_chan * OSize * OSize;
 
     // Allocate Buffer in Global Memory
-    std::vector<cl::Memory> inBufVec, outBufVec;
     OCL_CHECK(err, cl::Buffer buffer_image (context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
                             image_size_bytes, image.data(), &err));
     OCL_CHECK(err, cl::Buffer buffer_weight(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
                             weight_size_bytes, weight.data(), &err));
     OCL_CHECK(err, cl::Buffer buffer_output(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
                                 output_size_bytes, output.data(), &err));
-
-    inBufVec.push_back(buffer_image);
-    inBufVec.push_back(buffer_weight);
-    outBufVec.push_back(buffer_output);
-
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/));
 
     //Set the Kernel Arguments
     int narg = 0;
@@ -153,6 +146,8 @@ uint64_t run_opencl_cnn(
     OCL_CHECK(err, err = krnl_cnn_conv.setArg(narg++, size));
     OCL_CHECK(err, err = krnl_cnn_conv.setArg(narg++, i_chan));
     OCL_CHECK(err, err = krnl_cnn_conv.setArg(narg++, o_chan));
+
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_image, buffer_weight},0/* 0 means from host*/));
 
     std::cout << "Begin " << (good ? "GOOD" : "BAD") << " Kernel" << std::endl;
 
@@ -187,7 +182,7 @@ uint64_t run_opencl_cnn(
     }
 
     //Copy Result from Device Global Memory to Host Local Memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_output},CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());
     delete[] fileBuf;
 

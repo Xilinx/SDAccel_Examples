@@ -193,6 +193,7 @@ int main(int argc, char **argv) {
   cl::Program::Binaries bins{{fileBuf, fileBufSize}};
   devices.resize(1);
   OCL_CHECK(err, cl::Program program (context, devices, bins, NULL, &err));
+  OCL_CHECK(err, cl::Kernel krnl_vadd(program,"vadd", &err));
 
   // We will break down our problem into multiple iterations. Each iteration
   // will perform computation on a subset of the entire data-set.
@@ -234,6 +235,11 @@ int main(int argc, char **argv) {
 
   vector<cl::Event> write_event(1);
 
+  OCL_CHECK(err, err = krnl_vadd.setArg(0, buffer_c[flag]));
+  OCL_CHECK(err, err = krnl_vadd.setArg(1, buffer_a[flag]));
+  OCL_CHECK(err, err = krnl_vadd.setArg(2, buffer_b[flag]));
+  OCL_CHECK(err, err = krnl_vadd.setArg(3, int(elements_per_iteration)));
+
   // Copy input data to device global memory
   std::cout<< "Copying data (Host to Device)..." << std::endl;
   // Because we are passing the write_event, it returns an event object
@@ -246,18 +252,8 @@ int main(int argc, char **argv) {
   // This event needs to wait for the write buffer operations to complete
   // before executing. We are sending the write_events into its wait list to
   // ensure that the order of operations is correct.
-  // Make the Kernel Functor
-  auto krnl_mmult
-      = cl::KernelFunctor<cl::Buffer&,cl::Buffer&,cl::Buffer&,int>(program, "vadd", &err);
-
-  if (err != CL_SUCCESS) {
-        printf("Error calling Kernel Functor: Error code is: %d\n", err);
-        exit(EXIT_FAILURE);
-      }
-
   //Launch the Kernel
-  kernel_events[flag] = krnl_mmult(cl::EnqueueArgs(q,cl::NDRange(1,1,1), cl::NDRange(1,1,1)),
-          buffer_c[iteration_idx % 2],buffer_a[iteration_idx % 2],buffer_b[iteration_idx % 2], elements_per_iteration);
+  OCL_CHECK(err, err = q.enqueueNDRangeKernel(krnl_vadd, 0, 1, 1, NULL, &kernel_events[flag]));
   set_callback(kernel_events[flag], "ooo_queue");
 
   // Copy Result from Device Global Memory to Host Local Memory

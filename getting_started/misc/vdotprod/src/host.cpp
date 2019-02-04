@@ -78,7 +78,6 @@ int main(int argc, char* argv[]) {
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel krnl(program,"krnl_vdotprod", &err));
 
-    std::vector<cl::Memory> inBufVec, outBufVec;
     OCL_CHECK(err, cl::Buffer buffer_x(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
             input_size_bytes,source_x.data(), &err));
     OCL_CHECK(err, cl::Buffer buffer_y(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
@@ -87,14 +86,7 @@ int main(int argc, char* argv[]) {
             input_size_bytes,source_z.data(), &err));
     OCL_CHECK(err, cl::Buffer buffer_d(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
             output_size_bytes, result_krnl.data(), &err));
-    inBufVec.push_back(buffer_x);
-    inBufVec.push_back(buffer_y);
-    inBufVec.push_back(buffer_z);
-    outBufVec.push_back(buffer_d);
     
-    /* Copy input vectors to memory */
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/));
-
     /* Set the kernel arguments */
     OCL_CHECK(err, err = krnl.setArg( 0, buffer_x));
     OCL_CHECK(err, err = krnl.setArg( 1, buffer_y));
@@ -102,11 +94,14 @@ int main(int argc, char* argv[]) {
     OCL_CHECK(err, err = krnl.setArg( 3, buffer_d));
     OCL_CHECK(err, err = krnl.setArg( 4, nhalf));
 
+    /* Copy input vectors to memory */
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_x, buffer_y, buffer_z},0/* 0 means from host*/));
+
     /* Launch the kernel */
     OCL_CHECK(err, err = q.enqueueTask(krnl));
 
      /* Copy result to local buffer */
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_d},CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());
 
 // OPENCL HOST CODE AREA END

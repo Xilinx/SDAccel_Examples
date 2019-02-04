@@ -67,30 +67,29 @@ int main(int argc, char **argv) {
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
 
-    std::vector<cl::Memory> inBufVec, outBufVec;
     OCL_CHECK(err, cl::Buffer buffer_a(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,  
             size_in_bytes, source_a.data(), &err));
     OCL_CHECK(err, cl::Buffer buffer_result(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
             size_in_bytes,source_results.data(), &err));
     OCL_CHECK(err, cl::Buffer buffer_b(context, CL_MEM_READ_ONLY,  size_in_bytes, NULL, &err));
-    inBufVec.push_back(buffer_a);
-    outBufVec.push_back(buffer_result);
+
+    OCL_CHECK(err, cl::Kernel kernel(program,"vector_add", &err));
+
+    OCL_CHECK(err, err = kernel.setArg(0, buffer_result));
+    OCL_CHECK(err, err = kernel.setArg(1, buffer_a));
+    OCL_CHECK(err, err = kernel.setArg(2, buffer_b));
+    OCL_CHECK(err, err = kernel.setArg(3, DATA_SIZE));
 
     //copy buffer a to device.
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_a},0/* 0 means from host*/));
 
     // This enqueueCopyBuffer() command will copy buffer from buffer_a to buffer_b
     OCL_CHECK(err, err = q.enqueueCopyBuffer(buffer_a, buffer_b,0,0, size_in_bytes));
 
-    OCL_CHECK(err, cl::Kernel kernel(program,"vector_add", &err));
-    auto krnl_vector_add = cl::KernelFunctor<cl::Buffer&, cl::Buffer&, cl::Buffer&, 
-         int>(kernel);
-
     // This function will execute the kernel on the FPGA
-    krnl_vector_add(cl::EnqueueArgs(q, cl::NDRange(1,1,1), cl::NDRange(1,1,1)), 
-            buffer_result, buffer_a,buffer_b,DATA_SIZE);
+    OCL_CHECK(err, err = q.enqueueNDRangeKernel(kernel, 0, 1, 1, NULL, NULL));
 
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_result},CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());
 
 

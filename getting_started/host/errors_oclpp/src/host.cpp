@@ -256,15 +256,15 @@ int main(int argc, char **argv){
        OCL_CHECK(err, cl::Buffer buffer_result(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
                size, C.data(), &err));
 
-       // Copy input data to device global memory
-       std::cout << "Copying data..." << std::endl;
-       OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_a, buffer_b}, 0/*0 means from host*/));
-
        //Set the Kernel Arguments
        OCL_CHECK(err, err = kernel.setArg(0, buffer_result));
        OCL_CHECK(err, err = kernel.setArg(1, buffer_a));
        OCL_CHECK(err, err = kernel.setArg(2, buffer_b));
        OCL_CHECK(err, err = kernel.setArg(3, elements));
+
+       // Copy input data to device global memory
+       std::cout << "Copying data..." << std::endl;
+       OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_a, buffer_b}, 0/*0 means from host*/));
 
        // Launch the Kernel
        std::cout << "Launching Kernel..." << std::endl;

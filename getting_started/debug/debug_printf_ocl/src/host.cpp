@@ -64,9 +64,6 @@ int main(int argc, char* argv[])
             4*vector_size_bytes,source_a.data(), &err));
     OCL_CHECK(err, cl::Buffer buffer_e(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,  
             vector_size_bytes,result_krnl.data(), &err));
-    std::vector<cl::Memory> readbufVec,writebufVec;
-    writebufVec.push_back(buffer_a);
-    readbufVec.push_back(buffer_e);
 
     //Create the test data and run the vector addition locally 
     for(int i=0; i < LENGTH; i++){
@@ -79,16 +76,18 @@ int main(int argc, char* argv[])
 
     }
 
-    // Copy input vectors to memory 
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(writebufVec,0/* 0 means from host*/));
+    OCL_CHECK(err, err = kernel.setArg(0, buffer_a));
+    OCL_CHECK(err, err = kernel.setArg(1, buffer_e));
 
-    auto krnl = cl::KernelFunctor<cl::Buffer&, cl::Buffer&>(kernel);
+    // Copy input vectors to memory 
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_a},0/* 0 means from host*/));
+
     //Launch the Kernel
-    krnl(cl::EnqueueArgs(q,cl::NDRange(LENGTH,1,1), cl::NDRange(WORKGROUP_SIZE,1,1)), 
-            buffer_a, buffer_e);
+    OCL_CHECK(err, err = q.enqueueNDRangeKernel(kernel, 0, cl::NDRange(LENGTH,1,1), 
+                cl::NDRange(WORKGROUP_SIZE,1,1), NULL, NULL));
 
     // Copy result to local buffer 
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(readbufVec,CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_e},CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());
 
 // OPENCL HOST CODE AREA END

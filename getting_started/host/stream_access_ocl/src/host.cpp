@@ -242,18 +242,18 @@ int main(int argc, char **argv) {
             bytes_per_iteration = elements_per_iteration * sizeof(int);
         }
 
+        OCL_CHECK(err, err = kernel.setArg(0, *(buffer_c[flag])));
+        OCL_CHECK(err, err = kernel.setArg(1, *(buffer_a[flag])));
+        OCL_CHECK(err, err = kernel.setArg(2, *(buffer_b[flag])));
+        OCL_CHECK(err, err = kernel.setArg(3, *(buffer_size[flag])));
+        OCL_CHECK(err, err = kernel.setArg(4, elements_per_iteration));
+
         // These calls are asynchronous with respect to the main thread
         OCL_CHECK(err, err = q.enqueueMigrateMemObjects({*(buffer_a[flag])}, 0 /* flags, 0 means from host */,
                                     NULL, &write_events[flag][0]));
 
         OCL_CHECK(err, err = q.enqueueMigrateMemObjects({*(buffer_b[flag])}, 0 /* flags, 0 means from host */,
                                     NULL, &write_events[flag][1]));
-
-        OCL_CHECK(err, err = kernel.setArg(0, *(buffer_c[flag])));
-        OCL_CHECK(err, err = kernel.setArg(1, *(buffer_a[flag])));
-        OCL_CHECK(err, err = kernel.setArg(2, *(buffer_b[flag])));
-        OCL_CHECK(err, err = kernel.setArg(3, *(buffer_size[flag])));
-        OCL_CHECK(err, err = kernel.setArg(4, elements_per_iteration));
 
         // This event needs to wait for the write buffer operations to complete
         // before executing. We are sending the write_events into its wait list to
