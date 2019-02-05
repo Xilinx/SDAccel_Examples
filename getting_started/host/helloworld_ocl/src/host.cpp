@@ -86,18 +86,6 @@ int main(int argc, char **argv) {
             size_in_bytes, source_b.data(), &err));
     OCL_CHECK(err, cl::Buffer buffer_result(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
             size_in_bytes, source_results.data(), &err));
-    //Separate Read/write Buffer vector is needed to migrate data between host/device
-    std::vector<cl::Memory> inBufVec, outBufVec;
-    inBufVec.push_back(buffer_a);
-    inBufVec.push_back(buffer_b);
-    outBufVec.push_back(buffer_result);
-
-
-    // These commands will load the source_a and source_b vectors from the host
-    // application and into the buffer_a and buffer_b cl::Buffer objects. The data
-    // will be be transferred from system memory over PCIe to the FPGA on-board
-    // DDR memory.
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/));
 
     // This call will extract a kernel out of the program we loaded in the
     // previous line. A kernel is an OpenCL function that is executed on the
@@ -111,13 +99,19 @@ int main(int argc, char **argv) {
     OCL_CHECK(err, err = krnl_vector_add.setArg(narg++,buffer_b));
     OCL_CHECK(err, err = krnl_vector_add.setArg(narg++,DATA_SIZE));
 
+    // These commands will load the source_a and source_b vectors from the host
+    // application and into the buffer_a and buffer_b cl::Buffer objects. The data
+    // will be be transferred from system memory over PCIe to the FPGA on-board
+    // DDR memory.
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_a, buffer_b},0/* 0 means from host*/));
+
     //Launch the Kernel
     OCL_CHECK(err, err = q.enqueueTask(krnl_vector_add));
 
     // The result of the previous kernel execution will need to be retrieved in
     // order to view the results. This call will write the data from the
     // buffer_result cl_mem object to the source_results vector
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_result},CL_MIGRATE_MEM_OBJECT_HOST));
     q.finish();
 
 

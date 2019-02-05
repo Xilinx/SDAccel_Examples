@@ -116,14 +116,14 @@ int main(int argc, char **argv) {
 
     vector<cl::Event> events(device_count);
     for (int d = 0; d < (int)device_count; d++) {
-        // Copy input data to device global memory
-        std::cout << "Copying data..." << std::endl;
-        OCL_CHECK(err, err = queues[d].enqueueMigrateMemObjects({buffer_a[d], buffer_b[d]}, 0/*0 means from host*/));
-
         OCL_CHECK(err, err = kernels[d].setArg(0, buffer_result[d]));
         OCL_CHECK(err, err = kernels[d].setArg(1, buffer_a[d]));
         OCL_CHECK(err, err = kernels[d].setArg(2, buffer_b[d]));
         OCL_CHECK(err, err = kernels[d].setArg(3, elements_per_device));
+
+        // Copy input data to device global memory
+        std::cout << "Copying data..." << std::endl;
+        OCL_CHECK(err, err = queues[d].enqueueMigrateMemObjects({buffer_a[d], buffer_b[d]}, 0/*0 means from host*/));
 
         // Launch the Kernel
         std::cout << "Launching Kernel..." << std::endl;

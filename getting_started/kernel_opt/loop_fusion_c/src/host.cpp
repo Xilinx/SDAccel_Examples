@@ -120,20 +120,13 @@ int main(int argc, char **argv) {
   devices.resize(1);
   OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
 
-  std::vector<cl::Memory> inBufVec, outBufVec;
   OCL_CHECK(err, cl::Buffer buffer_out(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
           num_dims * sizeof(int), out.data(), &err));
   OCL_CHECK(err, cl::Buffer buffer_points(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
           array_size_bytes, data.data(), &err));
   OCL_CHECK(err, cl::Buffer buffer_in (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
           num_dims * sizeof(int), input.data(), &err));
-  inBufVec.push_back(buffer_points);
-  inBufVec.push_back(buffer_in);
-  outBufVec.push_back(buffer_out);
-
-  // copy the input arrays to memories allocated on the device
-  q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/);
-
+ 
   printf( "|--------------------------------+-------------------------|\n"
           "| Kernel                         |    Wall-Clock Time (ns) |\n"
           "|--------------------------------+-------------------------|\n");
@@ -148,6 +141,9 @@ int main(int argc, char **argv) {
   OCL_CHECK(err, err = kernel.setArg(3,num_points));
   OCL_CHECK(err, err = kernel.setArg(4,num_dims));
 
+  // copy the input arrays to memories allocated on the device
+  OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_points, buffer_in},0/* 0 means from host*/));
+
   cl::Event event;
   uint64_t nstimestart, nstimeend;
   OCL_CHECK(err, err = q.enqueueTask(kernel,NULL,&event));
@@ -158,7 +154,7 @@ int main(int argc, char **argv) {
   auto simple_time = nstimeend-nstimestart;
   printf("| %-30s | %23lu |\n", "Nearest Neighbor: simple", simple_time);
 
-  OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
+  OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_out},CL_MIGRATE_MEM_OBJECT_HOST));
   q.finish();
   verify(gold, out);
 
@@ -178,7 +174,7 @@ int main(int argc, char **argv) {
   auto loop_time = nstimeend-nstimestart;
   printf("| %-30s | %23lu |\n", "Nearest Neighbor: loop fusion", loop_time);
 
-  OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
+  OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_out},CL_MIGRATE_MEM_OBJECT_HOST));
   q.finish();
 
   verify(gold, out);

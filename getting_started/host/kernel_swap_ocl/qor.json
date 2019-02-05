@@ -1,7 +1,7 @@
 {
     "containers": [
         {
-            "name": "krnl_vmul",
+            "name": "krnl_vmul", 
             "meet_system_timing": "true", 
             "accelerators": [
                 {
@@ -9,7 +9,7 @@
                     "check_timing": "true", 
                     "PipelineType": "none", 
                     "check_latency": "false", 
-                    "check_warning": "true", 
+                    "check_warning": "false", 
                     "loops": [
                         {
                             "name": "readA", 
@@ -28,7 +28,7 @@
             ]
         }, 
         {
-            "name": "krnl_vadd",
+            "name": "krnl_vadd", 
             "meet_system_timing": "true", 
             "accelerators": [
                 {
@@ -36,7 +36,7 @@
                     "check_timing": "true", 
                     "PipelineType": "none", 
                     "check_latency": "false", 
-                    "check_warning": "true", 
+                    "check_warning": "false", 
                     "loops": [
                         {
                             "name": "readA", 

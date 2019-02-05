@@ -35,7 +35,7 @@ void dummy_kernel(__global uint *buffer0, __global uint *buffer1, uint size)
     //kernel to work.
     
     __attribute__((xcl_pipeline_loop(1)))
-    for(uint i = 0; i < size ; i++)
+    dummy: for(uint i = 0; i < size ; i++)
      {
        buffer0[i] = buffer1[i];
      } 

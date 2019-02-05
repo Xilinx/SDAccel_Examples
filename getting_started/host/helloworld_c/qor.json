@@ -1,22 +1,22 @@
 {
     "containers": [
         {
-            "name": "vadd",
+            "name": "vadd", 
             "meet_system_timing": "true", 
             "accelerators": [
                 {
-                    "name": "vector_add", 
+                    "name": "vadd", 
                     "check_timing": "true", 
                     "PipelineType": "none", 
                     "check_latency": "false", 
                     "check_warning": "true", 
                     "loops": [
                         {
-                            "name": "Loop1.1", 
+                            "name": "read1", 
                             "PipelineII": "1"
                         }, 
                         {
-                            "name": "Loop1.2", 
+                            "name": "read2", 
                             "PipelineII": "1"
                         }, 
                         {
@@ -24,7 +24,7 @@
                             "PipelineII": "1"
                         }, 
                         {
-                            "name": "Loop1.4", 
+                            "name": "write", 
                             "PipelineII": "1"
                         }
                     ]

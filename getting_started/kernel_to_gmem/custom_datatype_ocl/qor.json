@@ -1,7 +1,7 @@
 {
     "containers": [
         {
-            "name": "rgb_to_hsv",
+            "name": "rgb_to_hsv", 
             "meet_system_timing": "true", 
             "accelerators": [
                 {
@@ -9,9 +9,9 @@
                     "check_timing": "true", 
                     "PipelineType": "none", 
                     "check_latency": "false", 
-                    "check_warning": "true"
+                    "check_warning": "false"
                 }
-            ] 
+            ]
         }
     ]
 }

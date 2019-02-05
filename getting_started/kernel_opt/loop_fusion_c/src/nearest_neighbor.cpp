@@ -56,6 +56,7 @@ void nearest_neighbor_loop_fusion(int *out, const int *points,
     int best_dist = INT_MAX;
     int s_point[MAX_DIMS];
 
+    read: 
     for (int d = 0; d < dim; ++d) {
     #pragma HLS PIPELINE II=1
         s_point[d] = search_point[d];

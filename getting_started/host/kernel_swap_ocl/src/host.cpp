@@ -87,12 +87,12 @@ int main(int argc, char** argv)
         OCL_CHECK(err, cl::Buffer d_mul(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, 
                    sizeof(int) * LENGTH, h_temp.data(), &err));
 
-        OCL_CHECK(err, err = q.enqueueMigrateMemObjects({d_a, d_b},0/* 0 means from host*/));
-
         OCL_CHECK(err, err = krnl_vmul.setArg(0, d_a));
         OCL_CHECK(err, err = krnl_vmul.setArg(1, d_b));
         OCL_CHECK(err, err = krnl_vmul.setArg(2, d_mul));
         OCL_CHECK(err, err = krnl_vmul.setArg(3,vector_length));
+
+        OCL_CHECK(err, err = q.enqueueMigrateMemObjects({d_a, d_b},0/* 0 means from host*/));
 
         // This function will execute the kernel on the FPGA
         OCL_CHECK(err, err = q.enqueueTask(krnl_vmul));
@@ -125,12 +125,12 @@ int main(int argc, char** argv)
         cl::Buffer d_add(context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, 
                 sizeof(int) * LENGTH, h_c.data());
 
-        q.enqueueMigrateMemObjects({d_temp}, 0/* 0 means from host*/);
-
         krnl_vadd.setArg(0,d_temp);
         krnl_vadd.setArg(1,d_temp);
         krnl_vadd.setArg(2,d_add);
         krnl_vadd.setArg(3,vector_length);
+
+        q.enqueueMigrateMemObjects({d_temp}, 0/* 0 means from host*/);
 
         //This function will execute the kernel on the FPGA
         q.enqueueTask(krnl_vadd);

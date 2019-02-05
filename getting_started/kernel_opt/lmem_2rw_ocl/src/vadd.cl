@@ -67,10 +67,10 @@ void vadd(
 
         // burst read of v1 and v2 vector from global memory
         __attribute__((xcl_pipeline_loop(1)))
-        for (int j = 0 ; j < chunk_size; j++) v1_buffer[j] = in1[i+j];
+        read1: for (int j = 0 ; j < chunk_size; j++) v1_buffer[j] = in1[i+j];
 
         __attribute__((xcl_pipeline_loop(1)))
-        for (int j = 0 ; j < chunk_size; j++) v2_buffer[j] = in2[i+j];
+        read2: for (int j = 0 ; j < chunk_size; j++) v2_buffer[j] = in2[i+j];
 
         //FPGA implementation, local array is mostly implemented as BRAM Memory block. 
         // BRAM Memory Block contains two memory ports which allow two parallel access 
@@ -91,6 +91,6 @@ void vadd(
 
         //burst write the result
         __attribute__((xcl_pipeline_loop(1)))
-        for (int j = 0 ; j < chunk_size; j++) out[i+j] = vout_buffer[j];
+        write: for (int j = 0 ; j < chunk_size; j++) out[i+j] = vout_buffer[j];
     }
 }

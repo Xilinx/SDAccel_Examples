@@ -118,13 +118,7 @@ uint64_t mmult_fpga (
     OCL_CHECK(err, cl::Buffer buffer_in2(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
             matrix_size_bytes,source_in2.data(), &err));
     OCL_CHECK(err, cl::Buffer buffer_output(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
-            matrix_size_bytes,source_fpga_results.data(), &err));
-
-    //These commands will load the source_in1 and source_in2 vectors from the host
-    //application into the buffer_in1 and buffer_in2 cl::Buffer objects. The data
-    //will be be transferred from system memory over PCIe to the FPGA on-board
-    //DDR memory.
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_in1, buffer_in2},0/* 0 means from host*/));
+            matrix_size_bytes,source_fpga_results.data(), &err)); 
 
     //Set the kernel arguments
     int narg = 0;
@@ -132,6 +126,12 @@ uint64_t mmult_fpga (
     OCL_CHECK(err, err = kernel.setArg(narg++, buffer_in2));
     OCL_CHECK(err, err = kernel.setArg(narg++, buffer_output));
     OCL_CHECK(err, err = kernel.setArg(narg++, size));
+
+    //These commands will load the source_in1 and source_in2 vectors from the host
+    //application into the buffer_in1 and buffer_in2 cl::Buffer objects. The data
+    //will be be transferred from system memory over PCIe to the FPGA on-board
+    //DDR memory.
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_in1, buffer_in2},0/* 0 means from host*/));
     
     cl::Event event;
     uint64_t kernel_duration = 0;

@@ -23,6 +23,9 @@ elif "u250" in device:
 	name = "xilinx-sdx_2018_2_xdf"
 else:
 	exit("Error: DEVICE not supported. Please select the DEVICE properly and rerun.")
+# Join Command Line Arguments
 string = ' '.join(executable)
-# Function Call for Nimbix
-os.system("nimbix_run.py " + string + " --type " + node + " --nae " + name)
+# Get the Present Script directory
+pwd = sys.path[0]
+# Function Call for Nimbix Cloud Execution
+os.system(pwd + "/nimbix_run.py " + string + " --type " + node + " --nae " + name)

@@ -70,16 +70,10 @@ int main(int argc, char* argv[])
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel krnl(program,"krnl_vadd", &err));
  
-    std::vector<cl::Memory> inBufVec,outBufVec;
     OCL_CHECK(err, cl::Buffer buffer_a(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
             4*vector_size_bytes,source_a.data(), &err));
     OCL_CHECK(err, cl::Buffer buffer_e(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,  
             vector_size_bytes,result_krnl.data(), &err));
-    inBufVec.push_back(buffer_a);
-    outBufVec.push_back(buffer_e);
-
-    // Copy input vectors to memory 
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/));
 
     // Set the kernel arguments 
     int vector_length = LENGTH;
@@ -87,6 +81,9 @@ int main(int argc, char* argv[])
     OCL_CHECK(err, err = krnl.setArg(0, buffer_a));
     OCL_CHECK(err, err = krnl.setArg(1, buffer_e));
     OCL_CHECK(err, err = krnl.setArg(2, vector_length));
+
+    // Copy input vectors to memory 
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_a},0/* 0 means from host*/));
 
     // Launch the kernel and get profile data (stop-start)
     uint64_t nstimestart, nstimeend;
@@ -99,7 +96,7 @@ int main(int argc, char* argv[])
     std::cout << " **** Duration returned by profile API is " << (duration_nanosec * (1.0e-6) ) << " ms **** " << std::endl;
 
     // Copy result to local buffer 
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_e},CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());
 
 // OPENCL HOST CODE AREA END

@@ -38,9 +38,9 @@ OpenCL Kernel Example using AXI4-master interface to access row of data from 2D 
 // Read data function : Read Data from Global Memory
 void read_data(__global int* inx, int* buffer_in) 
 {
-    for(int i = 0; i < NUM_ROWS; ++i) {
+    read_loop_i: for(int i = 0; i < NUM_ROWS; ++i) {
         __attribute__((xcl_pipeline_loop(1)))
-        for (int j = 0; j < WORD_PER_ROW; ++j) {
+        read_loop_jj: for (int j = 0; j < WORD_PER_ROW; ++j) {
             buffer_in[WORD_PER_ROW*i+j] = inx[WORD_PER_ROW*i+j];
         }
     }
@@ -49,9 +49,9 @@ void read_data(__global int* inx, int* buffer_in)
 // Write data function : Write Results to Global Memory
 void write_data(__global int* outx, int* buffer_out) 
 {
-    for(int i = 0; i < NUM_ROWS; ++i) {
+    write_loop_i: for(int i = 0; i < NUM_ROWS; ++i) {
         __attribute__((xcl_pipeline_loop(1)))
-        for (int j = 0; j < WORD_PER_ROW; ++j) {
+        write_loop_jj: for (int j = 0; j < WORD_PER_ROW; ++j) {
             outx[WORD_PER_ROW*i+j] = buffer_out[WORD_PER_ROW*i+j];
         }
     }
@@ -60,9 +60,9 @@ void write_data(__global int* outx, int* buffer_out)
 // Compute function, currently as simple as possible because this example is focused on efficient memory access pattern.
 void compute(int alpha, int* buffer_in, int* buffer_out) 
 {
-    for(int i = 0; i < NUM_ROWS; ++i) {
+    compute_loop_i: for(int i = 0; i < NUM_ROWS; ++i) {
         __attribute__((xcl_pipeline_loop(1)))
-        for (int j = 0; j < WORD_PER_ROW; ++j) {
+        compute_loop_jj: for (int j = 0; j < WORD_PER_ROW; ++j) {
             int inTmp = buffer_in[WORD_PER_ROW*i+j];
             int outTmp = inTmp * alpha;
             buffer_out[WORD_PER_ROW*i+j] = outTmp;

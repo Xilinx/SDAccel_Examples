@@ -88,10 +88,10 @@ void vadd(
     // A local memory vl_local is used for buffering the data from a single burst. The entire input vector is read in multiple bursts.
     // The choice of LOCAL_MEM_SIZE depends on the specific applications and available on-chip memory on target FPGA. 
         // burst read of v1 and v2 vector from global memory
-        for (int j = 0 ; j < chunk_size ; j++){
+        read1: for (int j = 0 ; j < chunk_size ; j++){
             v1_buffer[j] = in1[i + j];
         }
-        for (int j = 0 ; j < chunk_size ; j++){
+        read2: for (int j = 0 ; j < chunk_size ; j++){
             v2_buffer[j] = in2[i + j];
         }
 
@@ -103,7 +103,7 @@ void vadd(
             vout_buffer[j] = v1_buffer[j] + v2_buffer[j]; 
         }
         //burst write the result
-        for (int j = 0 ; j < chunk_size ; j++){
+        write: for (int j = 0 ; j < chunk_size ; j++){
             out[i + j] = vout_buffer[j];
         }
     }

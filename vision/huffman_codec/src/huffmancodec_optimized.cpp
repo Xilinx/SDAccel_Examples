@@ -141,15 +141,6 @@ bool HuffmanOptimized::invoke_kernel(cl::Kernel krnl,
     OCL_CHECK(err, cl::Buffer mem_sz_output(context, CL_MEM_READ_WRITE,
                 sizeof(u32), NULL, &err));
 
-    LogInfo("Write input data to device buffer");
-
-    //copy input dataset to OpenCL buffer
-    OCL_CHECK(err, err = q.enqueueWriteBuffer(mem_input, CL_TRUE, 0,
-                               sz_input, vec_input.data(), NULL, NULL));
-
-    //finish all memory writes
-    q.finish();
-
     //execute kernel
     /*!
      * void encode(__global uchar* in_data, uint size_in_data,
@@ -169,6 +160,15 @@ bool HuffmanOptimized::invoke_kernel(cl::Kernel krnl,
     //enable fetch size
     u8 fetch_size_only = 1;
     OCL_CHECK(err, err = krnl.setArg(4, sizeof(u8), &fetch_size_only));
+
+    LogInfo("Write input data to device buffer");
+
+    //copy input dataset to OpenCL buffer
+    OCL_CHECK(err, err = q.enqueueWriteBuffer(mem_input, CL_TRUE, 0,
+                               sz_input, vec_input.data(), NULL, NULL));
+
+    //finish all memory writes
+    q.finish();
 
     cl::size_type global;
     cl::size_type local;
@@ -199,12 +199,6 @@ bool HuffmanOptimized::invoke_kernel(cl::Kernel krnl,
     OCL_CHECK(err, cl::Buffer mem_output_sz(context, CL_MEM_READ_WRITE,
                     sz_output, NULL, &err));
 
-    LogInfo("Write output data to device buffer");
-
-    //copy input dataset to OpenCL buffer
-    OCL_CHECK(err, err = q.enqueueWriteBuffer(mem_output_sz, CL_TRUE, 0,
-                               sz_output, vec_output.data(), NULL, NULL));
-
     //set output again
     OCL_CHECK(err, err = krnl.setArg(2, sizeof(cl_mem), &mem_output_sz));
 
@@ -214,6 +208,12 @@ bool HuffmanOptimized::invoke_kernel(cl::Kernel krnl,
     //disable fetch size
     fetch_size_only = 0;
     OCL_CHECK(err, err = krnl.setArg(4, sizeof(u8), &fetch_size_only));
+
+    LogInfo("Write output data to device buffer");
+
+    //copy input dataset to OpenCL buffer
+    OCL_CHECK(err, err = q.enqueueWriteBuffer(mem_output_sz, CL_TRUE, 0,
+                               sz_output, vec_output.data(), NULL, NULL));
 
     LogInfo("EX2: Real execution of the algorithm to fill the output");
 

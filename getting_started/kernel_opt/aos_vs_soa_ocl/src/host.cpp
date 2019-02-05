@@ -144,15 +144,6 @@ int main(int argc, char **argv) {
   OCL_CHECK(err, cl::Buffer buffer_z(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
           soa_vertices.z.size() * sizeof(int), soa_vertices.z.data(), &err));
 
-  // Transfer data from host to the FPGA
-  std::vector<cl::Memory> inBufVec, outBufVec;
-  inBufVec.push_back(buffer_x);
-  inBufVec.push_back(buffer_y);
-  inBufVec.push_back(buffer_z);
-  outBufVec.push_back(buffer_result);
-
-  OCL_CHECK(err, err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/));
-
   printf( "|-------------------------+-------------------------|\n"
           "| Kernel                  |    Wall-Clock Time (ns) |\n"
           "|-------------------------+-------------------------|\n");
@@ -161,11 +152,6 @@ int main(int argc, char **argv) {
   OCL_CHECK(err, cl::Buffer buffer_pts(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
           aos_vertices.size() * sizeof(vertex), aos_vertices.data(), &err));
 
-  // Transfer the entire array to the FPGA
-  inBufVec.clear();
-  inBufVec.push_back(buffer_pts);
-  OCL_CHECK(err, err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/));
-
   cl::Event event;
   uint64_t nstimestart, nstimeend;
   int nargs=0;
@@ -173,6 +159,9 @@ int main(int argc, char **argv) {
   OCL_CHECK(err, err = kernel_aos.setArg(nargs++,buffer_result));
   OCL_CHECK(err, err = kernel_aos.setArg(nargs++,buffer_pts));
   OCL_CHECK(err, err = kernel_aos.setArg(nargs++,VERTEX_COUNT));
+
+  // Transfer the entire array to the FPGA
+  OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_pts},0/* 0 means from host*/));
 
   OCL_CHECK(err, err = q.enqueueTask(kernel_aos,NULL,&event));
 
@@ -185,7 +174,7 @@ int main(int argc, char **argv) {
   printf("| %-22s  | %23lu |\n", "dot: Array of Structs", aos_time);
 
   // Transfer the results back from the FPGA
-  OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
+  OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_result},CL_MIGRATE_MEM_OBJECT_HOST));
   q.finish();
   verify(gold, results);
 
@@ -196,6 +185,10 @@ int main(int argc, char **argv) {
   OCL_CHECK(err, err = kernel_soa.setArg(nargs++,buffer_y));
   OCL_CHECK(err, err = kernel_soa.setArg(nargs++,buffer_z));
   OCL_CHECK(err, err = kernel_soa.setArg(nargs++,VERTEX_COUNT));
+
+  // Transfer data from host to the FPGA
+  OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_x, buffer_y, buffer_z},0/* 0 means from host*/));
+
   OCL_CHECK(err, err = q.enqueueTask(kernel_soa,NULL,&event));
   q.finish();
 
@@ -206,7 +199,7 @@ int main(int argc, char **argv) {
   printf("| %-22s  | %23lu |\n", "dot: Struct of Arrays", soa_time);
 
   // Get the results from the FPGA
-  OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
+  OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_result},CL_MIGRATE_MEM_OBJECT_HOST));
   q.finish();
   verify(gold, results);
   delete[] fileBuf;

@@ -121,19 +121,13 @@ int main(int argc, char* argv[])
     OCL_CHECK(err, cl::Buffer mem_eqimage(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
             image_size_bytes, eqimage.data(), &err));
     
-    //Separate Read/write Buffer vector is needed to migrate data between host/device
-    std::vector<cl::Memory> inBufVec, outBufVec;
-    inBufVec.push_back(mem_image);
-    outBufVec.push_back(mem_eqimage);
-
-
-    /* Copy image to memory */
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/));
-    
     //set the kernel Arguments
     int narg=0;
     OCL_CHECK(err, err = krnl.setArg(narg++,mem_image));
     OCL_CHECK(err, err = krnl.setArg(narg++,mem_eqimage));
+
+    /* Copy image to memory */
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({mem_image},0/* 0 means from host*/));
 
     //Launch the Kernel
     cl::Event event;
@@ -144,7 +138,7 @@ int main(int argc, char* argv[])
     /* Copy image to mat */
     cv::Mat result_eq;
     result_eq.create(inputImage.rows,inputImage.cols,CV_16U);
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({mem_eqimage},CL_MIGRATE_MEM_OBJECT_HOST));
     q.finish();
 
     OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart));

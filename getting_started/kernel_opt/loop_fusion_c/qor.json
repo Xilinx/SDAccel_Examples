@@ -1,7 +1,7 @@
 {
     "containers": [
         {
-            "name": "nearest_neighbor",
+            "name": "nearest_neighbor", 
             "meet_system_timing": "true", 
             "accelerators": [
                 {
@@ -9,10 +9,10 @@
                     "check_timing": "true", 
                     "PipelineType": "none", 
                     "check_latency": "false", 
-                    "check_warning": "true", 
+                    "check_warning": "false", 
                     "loops": [
                         {
-                            "name": "Loop1", 
+                            "name": "read", 
                             "PipelineII": "1"
                         }, 
                         {
@@ -30,10 +30,10 @@
                     "check_timing": "true", 
                     "PipelineType": "none", 
                     "check_latency": "false", 
-                    "check_warning": "true", 
+                    "check_warning": "false", 
                     "loops": [
                         {
-                            "name": "Loop1", 
+                            "name": "read", 
                             "PipelineII": "1"
                         }, 
                         {

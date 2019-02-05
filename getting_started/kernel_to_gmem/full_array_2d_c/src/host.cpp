@@ -107,24 +107,19 @@ int main(int argc, char** argv)
     OCL_CHECK(err, cl::Buffer buffer_c(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
             matrix_size_in_bytes, source_hw_results.data(), &err));
 
-    std::vector<cl::Memory> writeBufVec;
-    writeBufVec.push_back(buffer_a);
-    writeBufVec.push_back(buffer_b);
-    //Migrate  input data to device global memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(writeBufVec,0/* 0 means from host*/));
-
     OCL_CHECK(err, err = krnl_mmult.setArg(0, buffer_a));
     OCL_CHECK(err, err = krnl_mmult.setArg(1, buffer_b));
     OCL_CHECK(err, err = krnl_mmult.setArg(2, buffer_c));
     OCL_CHECK(err, err = krnl_mmult.setArg(3, dim));
 
+    //Migrate  input data to device global memory
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_a, buffer_b},0/* 0 means from host*/));
+
     //Launch the Kernel
     OCL_CHECK(err, err = q.enqueueTask(krnl_mmult));
 
-    std::vector<cl::Memory> readBufVec;
-    readBufVec.push_back(buffer_c);
     //Copy Result from Device Global Memory to Host Local Memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(readBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_c},CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());
 //OPENCL HOST CODE AREA END
     

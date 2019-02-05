@@ -1,4 +1,4 @@
-nimbix-run.py
+nimbix_run.py
 ===============================
 
 This readme file contains these sections:
@@ -72,12 +72,22 @@ EOF
 
 ### Run an application on Nimbix
 ```
-$ nimbix-run.py <prog> <args>
+$ nimbix_run.py <prog> <args> --type <Node> --nae <Name>
 ```
 
 - < prog > is the name of the application to be executed
 - < args >  are the command line arguments required by the application
 
+Here is the table of available nodes and corresponding names.
+
+Node(type) | Name(nae) | Remark
+----------|--------------|--------------------
+nx4a | xilinx-sdx | KCU1500, 17.4_op runtime
+nx4b | xilinx-sdx_2018_2 | KCU1500, 18.2 runtime
+nx5a | xilinx-sdx | VCU1525, 17.4_op runtime
+nx5b | xilinx-sdx_2018_2 | VCU1525, 18.2 runtime
+nx5u | xilinx-sdx_2018_2_xdf | Alveo U200, 18.2_xdf runtime
+nx6u | xilinx-sdx_2018_2_xdf | Alveo U250, 18.2_xdf runtime
 
 ## 4. LAUNCHING APPLICATIONS BEHIND A PROXY
 In cases where the system launching applications to Nimbix is located behind a proxy, the following settings are needed

@@ -114,13 +114,6 @@ int main(int argc, char* argv[])
 
   cl::Event kernel_Event, read_Event, write_Event;
 
-  // These commands will load the input_image and output_image vectors from the host
-  // application into the buffer_input and buffer_output cl::Buffer objects.
-  std::cout << "Writing input image to buffer...\n";
-  err = q.enqueueMigrateMemObjects({buffer_input},0/* 0 means from host*/, NULL, &write_Event);
-
-  checkErrorStatus(err, "Unable to enqueue write buffer") ;
-
   // This call will extract a kernel out of the program we loaded in the previous line
   cl::Kernel krnl_medianFilter(program, "median");
 
@@ -130,6 +123,13 @@ int main(int argc, char* argv[])
   krnl_medianFilter.setArg(1, buffer_output);
   krnl_medianFilter.setArg(2, width);
   krnl_medianFilter.setArg(3, height);
+
+  // These commands will load the input_image and output_image vectors from the host
+  // application into the buffer_input and buffer_output cl::Buffer objects.
+  std::cout << "Writing input image to buffer...\n";
+  err = q.enqueueMigrateMemObjects({buffer_input},0/* 0 means from host*/, NULL, &write_Event);
+
+  checkErrorStatus(err, "Unable to enqueue write buffer") ;
 
   std::vector<cl::Event> eventList;
   eventList.push_back(write_Event);
