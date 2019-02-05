@@ -198,7 +198,7 @@ def buildStatus(context, message, state) {
 timestamps {
 // Always build on the same host so that the workspace is reused
 node('xcoDockerPool') {
-#docker.image('xrt-centos74').inside('--rm -v /proj:/proj -v /tools:/tools'){
+// docker.image('xrt-centos74').inside('--rm -v /proj:/proj -v /tools:/tools'){
 try {
 	stage("checkout") {
 		checkout scm
@@ -372,6 +372,6 @@ module add proxy
 		sh 'find . -name .Xil | xargs rm -rf'
 	}
 } // try
-#} // docker
+//} // docker
 } // node
 } // timestamps
