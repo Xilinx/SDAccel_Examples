@@ -13,6 +13,7 @@ devices += ['xilinx_kcu1500_dynamic_5_0']
 
 version = '2018.3'
 env.VERSION = version
+env.MODULE_FILES_PATH = "/build/devtest2/nassera/modulefiles"
 
 precheck_status = 'FAILURE'
 sw_status = 'FAILURE'
@@ -25,7 +26,7 @@ def setupExample(dir, workdir) {
 cd ${workdir}
 
 . /tools/local/bin/modinit.sh > /dev/null 2>&1
-module use.own /proj/picasso/modulefiles
+module use.own ${MODULE_FILES_PATH}
 
 module add sdaccel/version_daily
 module add opencv/sdaccel
@@ -68,7 +69,7 @@ def buildExample(target, dir, device, workdir) {
 cd ${workdir}
 
 . /tools/local/bin/modinit.sh > /dev/null 2>&1
-module use.own /proj/picasso/modulefiles
+module use.own ${MODULE_FILES_PATH}
 
 module add vivado/version_daily
 module add sdaccel/version_daily
@@ -135,7 +136,7 @@ def runExample(target, dir, device, workdir) {
 cd ${workdir}
 
 . /tools/local/bin/modinit.sh > /dev/null 2>&1
-module use.own /proj/picasso/modulefiles
+module use.own ${MODULE_FILES_PATH}
 
 module add vivado/version_daily
 module add sdaccel/version_daily
@@ -222,7 +223,7 @@ try {
 	stage('pre-check') {
 		sh """
 . /tools/local/bin/modinit.sh > /dev/null 2>&1
-module use.own /proj/picasso/modulefiles
+module use.own ${MODULE_FILES_PATH}
 
 module add vivado/version_daily
 module add sdaccel/version_daily
