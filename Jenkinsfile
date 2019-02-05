@@ -14,6 +14,8 @@ devices += ['xilinx_kcu1500_dynamic_5_0']
 version = '2018.3'
 env.VERSION = version
 env.MODULE_FILES_PATH = "/build/devtest2/nassera/modulefiles"
+env.PLATFORM_REPO_PATHS = "/proj/xbuilds/${VERSION}_daily_latest/xbb/dsadev/opt/xilinx/platforms"
+env.XRT_SETENV_PATH = "/proj/xbuilds/${VERSION}_daily_latest/xbb/xrt/packages/setenv.sh"
 
 precheck_status = 'FAILURE'
 sw_status = 'FAILURE'
@@ -33,7 +35,7 @@ module add opencv/sdaccel
 
 cd ${dir}
 
-. /proj/xbuilds/${VERSION}_daily_latest/xbb/xrt/packages/setenv.sh
+. ${XRT_SETENV_PATH}
 
 echo
 echo "-----------------------------------------------"
@@ -75,7 +77,7 @@ module add vivado/version_daily
 module add sdaccel/version_daily
 module add opencv/sdaccel
 
-module add lsf
+#module add lsf
 
 cd ${dir}
 
@@ -96,12 +98,16 @@ export TMPDIR=\$(mktemp -d -p \$(pwd))
 
 # if rebuild required then use LSF
 if [[ \$rc != 0 ]]; then
-bsub -W ${mins} -I -q ${queue} -R "osdistro=rhel && osver==ws6" -n ${cores} -R "rusage[mem=${mem}] span[ptile=${cores}]" -J "\$(basename ${dir})-${target}" <<EOF
-#!/bin/bash -ex
-export TMPDIR=\$TMPDIR
+
+#bsub -W ${mins} -I -q ${queue} -R "osdistro=rhel && osver==ws6" -n ${cores} -R "rusage[mem=${mem}] span[ptile=${cores}]" -J "\$(basename ${dir})-${target}" <<EOF
+##!/bin/bash -ex
+#export TMPDIR=\$TMPDIR
+
+. ${XRT_SETENV_PATH}
 make -j TARGETS=${target} DEVICES=\"${device}\" all
 rm -rf \$TMPDIR
-EOF
+
+#EOF
 fi
 set +x
 """
@@ -144,7 +150,7 @@ module add opencv/sdaccel
 
 module add proxy
 module add lftp
-module add lsf
+#module add lsf
 
 cd ${dir}
 
@@ -160,12 +166,15 @@ export TMPDIR=\$(mktemp -d -p \$(pwd))
 
 rm -rf \"out/${target}_${devdir}\" && mkdir -p out
 
-bsub -W ${mins} -I -q ${queue} -R "osdistro=rhel && osver==ws6" -n ${cores} -R "rusage[mem=${mem}] span[ptile=${cores}]" -J "\$(basename ${dir})-${target}-run" <<EOF
-#!/bin/bash -ex
-export TMPDIR=\$TMPDIR
+#bsub -W ${mins} -I -q ${queue} -R "osdistro=rhel && osver==ws6" -n ${cores} -R "rusage[mem=${mem}] span[ptile=${cores}]" -J "\$(basename ${dir})-${target}-run" <<EOF
+##!/bin/bash -ex
+#export TMPDIR=\$TMPDIR
+
+. ${XRT_SETENV_PATH}
 make TARGETS=${target} DEVICES=\"${device}\" NIMBIXFLAGS=\"--out out/${target}_${devdir} --queue_timeout=${mins}\" check
 rm -rf \$TMPDIR
-EOF
+
+#EOF
 
 """
 //			}
@@ -189,7 +198,7 @@ def buildStatus(context, message, state) {
 timestamps {
 // Always build on the same host so that the workspace is reused
 node('xcoDockerPool') {
-docker.image('xrt-centos74').inside('--rm -v /proj:/proj -v /tools:/tools'){
+#docker.image('xrt-centos74').inside('--rm -v /proj:/proj -v /tools:/tools'){
 try {
 	stage("checkout") {
 		checkout scm
@@ -363,6 +372,6 @@ module add proxy
 		sh 'find . -name .Xil | xargs rm -rf'
 	}
 } // try
-} // docker
+#} // docker
 } // node
 } // timestamps
