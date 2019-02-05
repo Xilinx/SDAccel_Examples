@@ -216,7 +216,7 @@ user %s %s
 rm -rf /data/automated_test/%s
 mkdir -p /data/automated_test/%s
 cd /data/automated_test/%s
-mirror -R -X _xocc_*/ -X src/* -X .run/* -X _x.*/* -X .Xil/ .
+mirror -R -X _xocc_*/ -X src/* -X .run/* -X _x.*/* -X .Xil/ -X Makefile -X utils.mk -X *.json -X sdaccel.ini -X README.md .
 cache flush
 bye
 """ % (username, apikey, testid, testid, testid)
@@ -272,165 +272,166 @@ def submit_testcase(username, apikey, testid, exe, args, type, nae, tt, dp):
 
 	return job
 
-description = "Application for Running Jobs on Nimbix"
-parser = argparse.ArgumentParser(description=description)
-parser.add_argument("--nae", help="Set Nimbix Application Environment to use (Advanced)", type=str, default="xilinx-sdx")
-parser.add_argument("--type", help="Set Nimbix Node Type to use (nx1, nx2, nx3, nx4)", type=str, default="nx3")
-parser.add_argument("--tt", help="Enable timeline trace", action="store_true", default=False)
-parser.add_argument("--dp", help="Enable device profiling", action="store_true", default=False)
-parser.add_argument("--out", help="Set output directory", type=str, default=".")
-parser.add_argument("--queue_timeout", help="How long to wait for job to run while in queue (minutes)", type=int, default=60)
-parser.add_argument("--exe_timeout", help="How long to wait for job to run on the board (minutes)", type=int, default=5)
-parser.add_argument("-v", "--verbose", help="Print out additional information", action="store_true", default=False)
-
-try:
-	opts, remainder = parser.parse_known_args()
-except:
-	print "ERROR: Could not parse command line options"
-	raise
-
-nae = opts.nae
-type = opts.type
-tt = opts.tt
-dp = opts.dp
-out = opts.out
-
-exe_timeout = opts.exe_timeout
-queue_timeout = opts.queue_timeout
-
-exe = remainder[0]
-args = remainder[1:]
-
-if opts.verbose:
-	print "NAE = " + nae
-	print "TYPE = " + type
-	print "-tt = " + str(tt)
-	print "-dp = " + str(dp)
-	print "exe = " + exe
-	print "args = " + ' '.join(args)
-
-cdir = os.getcwd()
-rundate = datetime.datetime.now();
-
-user = pwd.getpwuid(os.getuid())[0]
-rand = os.urandom(4).encode('hex')
-testid = user + "-" + rundate.strftime("%d%m%y_%S") + "-" + rand
-
-try:
-	nimbix_user = os.environ['NIMBIX_USER']
-	nimbix_apikey = os.environ['NIMBIX_APIKEY']
-except KeyError:
-	nimbix_user = ""
-	nimbix_apikey = ""
-
-if nimbix_user == "" or nimbix_apikey == "":
-	creds_filename = os.path.expanduser("~/.nimbix_creds.json")
-	if os.path.isfile(creds_filename):
-		creds_fp = open(creds_filename)
-		creds = json.load(creds_fp)
-		nimbix_user = creds['username']
-		nimbix_apikey = creds['api-key']
-	else:
-		print "ERROR: Must set NIMBIX_USER or have ~/.nimbix_creds.json file"
-		sys.exit(-1)
-
-if exe == "":
-	print "ERROR: Must define the application executable"
-	sys.exit(-1)
-
-print "Uploading Test Case"
-
-upload_testcase(nimbix_user, nimbix_apikey, testid)
-
-print "Upload Complete"
-print
-print "Testcase: " + exe + " " + ' '.join(args)
-
-# Sleep for 10 seconds before trying to execute as sometimes the uploads are not
-# instantaneous
-time.sleep(10)
-
-job = submit_testcase(nimbix_user, nimbix_apikey,
-                      testid, exe, args,
-                      type, nae, tt, dp)
-
-print "Job: " + str(job['name']) + " #" + str(job['number'])
-
-
-# Wait at maximum 1 hour for test to move to running state
-queue_end_time = datetime.datetime.now() + datetime.timedelta(minutes=queue_timeout)
-
-rc = 127
-exe_end_time = None
-api_fails = 0
-
-while True:
-	# Sleep for 1 seconds before checking again
-	time.sleep(1)
-
+if __name__=="__main__":
+	description = "Application for Running Jobs on Nimbix"
+	parser = argparse.ArgumentParser(description=description)
+	parser.add_argument("--nae", help="Set Nimbix Application Environment to use (Advanced)", type=str, default="xilinx-sdx")
+	parser.add_argument("--type", help="Set Nimbix Node Type to use (nx1, nx2, nx3, nx4)", type=str, default="nx3")
+	parser.add_argument("--tt", help="Enable timeline trace", action="store_true", default=False)
+	parser.add_argument("--dp", help="Enable device profiling", action="store_true", default=False)
+	parser.add_argument("--out", help="Set output directory", type=str, default=".")
+	parser.add_argument("--queue_timeout", help="How long to wait for job to run while in queue (minutes)", type=int, default=60)
+	parser.add_argument("--exe_timeout", help="How long to wait for job to run on the board (minutes)", type=int, default=5)
+	parser.add_argument("-v", "--verbose", help="Print out additional information", action="store_true", default=False)
+	
 	try:
-		current_status = status(nimbix_user, nimbix_apikey, job_number=job['number'])
-	except urllib2.URLError:
-		# If we fail to access the url a couple times then pass on the failure.
-		if api_fails > 5:
-			raise
+		opts, remainder = parser.parse_known_args()
+	except:
+		print "ERROR: Could not parse command line options"
+		raise
+	
+	nae = opts.nae
+	type = opts.type
+	tt = opts.tt
+	dp = opts.dp
+	out = opts.out
+	
+	exe_timeout = opts.exe_timeout
+	queue_timeout = opts.queue_timeout
+	
+	exe = remainder[0]
+	args = remainder[1:]
+	
+	if opts.verbose:
+		print "NAE = " + nae
+		print "TYPE = " + type
+		print "-tt = " + str(tt)
+		print "-dp = " + str(dp)
+		print "exe = " + exe
+		print "args = " + ' '.join(args)
+	
+	cdir = os.getcwd()
+	rundate = datetime.datetime.now();
+	
+	user = pwd.getpwuid(os.getuid())[0]
+	rand = os.urandom(4).encode('hex')
+	testid = user + "-" + rundate.strftime("%d%m%y_%S") + "-" + rand
+	
+	try:
+		nimbix_user = os.environ['NIMBIX_USER']
+		nimbix_apikey = os.environ['NIMBIX_APIKEY']
+	except KeyError:
+		nimbix_user = ""
+		nimbix_apikey = ""
+	
+	if nimbix_user == "" or nimbix_apikey == "":
+		creds_filename = os.path.expanduser("~/.nimbix_creds.json")
+		if os.path.isfile(creds_filename):
+			creds_fp = open(creds_filename)
+			creds = json.load(creds_fp)
+			nimbix_user = creds['username']
+			nimbix_apikey = creds['api-key']
 		else:
-			api_fails += 1
-
-		continue
-
-	state = current_status[str(job['number'])]['job_status'];
-
-	#  First time state = RUNNING set timeout
-	if state == 'RUNNING':
-		if not exe_end_time:
-			exe_end_time = datetime.datetime.now() + datetime.timedelta(minutes=exe_timeout)
-
-		# Test Timeout
-		if datetime.datetime.now() > exe_end_time:
+			print "ERROR: Must set NIMBIX_USER or have ~/.nimbix_creds.json file"
+			sys.exit(-1)
+	
+	if exe == "":
+		print "ERROR: Must define the application executable"
+		sys.exit(-1)
+	
+	print "Uploading Test Case"
+	
+	upload_testcase(nimbix_user, nimbix_apikey, testid)
+	
+	print "Upload Complete"
+	print
+	print "Testcase: " + exe + " " + ' '.join(args)
+	
+	# Sleep for 10 seconds before trying to execute as sometimes the uploads are not
+	# instantaneous
+	time.sleep(10)
+	
+	job = submit_testcase(nimbix_user, nimbix_apikey,
+	                      testid, exe, args,
+	                      type, nae, tt, dp)
+	
+	print "Job: " + str(job['name']) + " #" + str(job['number'])
+	
+	
+	# Wait at maximum 1 hour for test to move to running state
+	queue_end_time = datetime.datetime.now() + datetime.timedelta(minutes=queue_timeout)
+	
+	rc = 127
+	exe_end_time = None
+	api_fails = 0
+	
+	while True:
+		# Sleep for 1 seconds before checking again
+		time.sleep(1)
+	
+		try:
+			current_status = status(nimbix_user, nimbix_apikey, job_number=job['number'])
+		except urllib2.URLError:
+			# If we fail to access the url a couple times then pass on the failure.
+			if api_fails > 5:
+				raise
+			else:
+				api_fails += 1
+	
+			continue
+	
+		state = current_status[str(job['number'])]['job_status'];
+	
+		#  First time state = RUNNING set timeout
+		if state == 'RUNNING':
+			if not exe_end_time:
+				exe_end_time = datetime.datetime.now() + datetime.timedelta(minutes=exe_timeout)
+	
+			# Test Timeout
+			if datetime.datetime.now() > exe_end_time:
+				terminate(nimbix_user, nimbix_apikey,
+				          job_number=job['number'])
+				rc = 140
+				break
+	
+		# Infrastructure Failure or invalid arguments
+		if state == 'ENDED':
+			raise RuntimeError("ERROR: Test entered ENDED state")
+	
+		current_time = datetime.datetime.now()
+	
+		# Infrastructure Failure if queue timeout exceeded
+		if current_time > queue_end_time:
 			terminate(nimbix_user, nimbix_apikey,
-			          job_number=job['number'])
-			rc = 140
+			                  job_number=job['number'])
+			raise RuntimeError("ERROR: Queue timeout exceeded")
+	
+		# Need to determine a way to get better error status from Nimbix
+		if state == 'COMPLETED':
+			rc = 0
 			break
-
-	# Infrastructure Failure or invalid arguments
-	if state == 'ENDED':
-		raise RuntimeError("ERROR: Test entered ENDED state")
-
-	current_time = datetime.datetime.now()
-
-	# Infrastructure Failure if queue timeout exceeded
-	if current_time > queue_end_time:
-		terminate(nimbix_user, nimbix_apikey,
-		                  job_number=job['number'])
-		raise RuntimeError("ERROR: Queue timeout exceeded")
-
-	# Need to determine a way to get better error status from Nimbix
-	if state == 'COMPLETED':
-		rc = 0
-		break
-
-	# Need to determine a way to get better error status from Nimbix
-	if state == 'COMPLETED WITH ERROR':
-		rc = 1
-		break
-
-if rc == 0:
-	rc_str = "Successfully"
-else:
-	rc_str = "with Errors"
-
-print "Job Completed %s" % rc_str
-
-print "Downloading Test Case"
-
-download_testcase(nimbix_user, nimbix_apikey, testid, job['name'], out)
-
-output = output(nimbix_user, nimbix_apikey,
-                        job_number=job['number'])
-print "Download Complete"
-print
-print output
-
-sys.exit(rc)
-
+	
+		# Need to determine a way to get better error status from Nimbix
+		if state == 'COMPLETED WITH ERROR':
+			rc = 1
+			break
+	
+	if rc == 0:
+		rc_str = "Successfully"
+	else:
+		rc_str = "with Errors"
+	
+	print "Job Completed %s" % rc_str
+	
+	print "Downloading Test Case"
+	
+	download_testcase(nimbix_user, nimbix_apikey, testid, job['name'], out)
+	
+	output = output(nimbix_user, nimbix_apikey,
+	                        job_number=job['number'])
+	print "Download Complete"
+	print
+	print output
+	
+	sys.exit(rc)
+			

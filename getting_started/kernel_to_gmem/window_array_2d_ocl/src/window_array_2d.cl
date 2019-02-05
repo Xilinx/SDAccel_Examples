@@ -88,10 +88,10 @@ void write_data(__global int *outx) {
 // Compute kernel, currently as simple as possible because this example is focused on efficient memory access pattern.
 kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
 void compute(int alpha) {
-    for(int i = 0; i < TILE_PER_COLUMN*TILE_HEIGHT; ++i) {
-        for (int jj = 0; jj < TILE_PER_ROW; ++jj) {
+    compute_loop_i: for(int i = 0; i < TILE_PER_COLUMN*TILE_HEIGHT; ++i) {
+        compute_loop_j: for (int jj = 0; jj < TILE_PER_ROW; ++jj) {
             __attribute__((xcl_pipeline_loop(1)))
-            for (int m = 0; m < TILE_WIDTH; ++m) {
+            compute_loop_m: for (int m = 0; m < TILE_WIDTH; ++m) {
                 int inTmp;
                 read_pipe_block(infifo, &inTmp);
                 int outTmp = inTmp * alpha;

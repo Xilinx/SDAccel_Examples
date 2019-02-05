@@ -83,11 +83,11 @@ void vadd(
             chunk_size = size - i;
 
         // burst read of v1 and v2 vector from global memory
-        for (int j = 0 ; j < chunk_size ; j++){
+        read1: for (int j = 0 ; j < chunk_size ; j++){
         #pragma HLS LOOP_TRIPCOUNT min=c_chunk_sz max=c_chunk_sz
             v1_buffer[j] = in1[i + j];
         }
-        for (int j = 0 ; j < chunk_size ; j++){
+        read2: for (int j = 0 ; j < chunk_size ; j++){
         #pragma HLS LOOP_TRIPCOUNT min=c_chunk_sz max=c_chunk_sz
             v2_buffer[j] = in2[i + j];
         }
@@ -111,7 +111,7 @@ void vadd(
         }
 
         //burst write the result
-        for (int j = 0 ; j < chunk_size ; j++){
+        write: for (int j = 0 ; j < chunk_size ; j++){
         #pragma HLS LOOP_TRIPCOUNT min=c_chunk_sz max=c_chunk_sz
             out[i + j] = vout_buffer[j];
         }

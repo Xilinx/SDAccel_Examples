@@ -157,13 +157,13 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, cl::Buffer cmem_output(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
                             sizeof(dout_t) * nofBlock * maxSizeOfBlock, Dout_hw.data(), &err));
 
-    std::cout << "Copying Buffers to device...." << std::endl;
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({cmem_Q}, 0/* 0 means from host*/));
-
     std::cout << "Starting Kernel..." << std::endl;
     OCL_CHECK(err, err = krnl.setArg(0, cmem_output));
     OCL_CHECK(err, err = krnl.setArg(1, cmem_Q));
     OCL_CHECK(err, err = krnl.setArg(2, sizeof(int), &nofBlock));
+
+    std::cout << "Copying Buffers to device...." << std::endl;
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({cmem_Q}, 0/* 0 means from host*/));
 
     cl::Event event;
     unsigned long start = 0, stop = 0;

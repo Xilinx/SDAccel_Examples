@@ -1,7 +1,7 @@
 {
     "containers": [
         {
-            "name": "krnl_host_global",
+            "name": "krnl_host_global", 
             "meet_system_timing": "true", 
             "accelerators": [
                 {
@@ -9,13 +9,7 @@
                     "check_timing": "true", 
                     "PipelineType": "none", 
                     "check_latency": "false", 
-                    "check_warning": "true", 
-                    "loops": [
-                        {
-                            "name": "Loop1", 
-                            "PipelineII": "1"
-                        }
-                    ]
+                    "check_warning": "false"
                 }
             ]
         }

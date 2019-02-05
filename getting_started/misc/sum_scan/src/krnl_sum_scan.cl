@@ -53,7 +53,7 @@ typedef union {
 __attribute__((always_inline)) bus_t array_to_bus(float *in) {
     bus_to_float_t out;
 
-    for(uint i = 0; i < B; i++) {
+    atb: for(uint i = 0; i < B; i++) {
         out.f[i] = in[i];
     }
 
@@ -65,7 +65,7 @@ __attribute__((always_inline)) void bus_to_array(bus_t g_in, float *out) {
 
     in.b = g_in;
 
-    for(uint i = 0; i < B; i++) {
+    bta: for(uint i = 0; i < B; i++) {
         out[i] = in.f[i];
     }
 }
@@ -73,7 +73,7 @@ __attribute__((always_inline)) void bus_to_array(bus_t g_in, float *out) {
 __attribute__((always_inline)) bus_t sum_scan(float *sum, bus_t g_in[HIST_LENGTH+1], uint i) {
     float in[(HIST_LENGTH+1)*B] __attribute__((xcl_array_partition(complete, 0)));
 
-    for(uint j = 0; j < HIST_LENGTH+1; j++) {
+    scan1: for(uint j = 0; j < HIST_LENGTH+1; j++) {
         bus_t tmp;
         if(HIST_LENGTH - j > i)
             tmp = 0.0f;
@@ -84,14 +84,14 @@ __attribute__((always_inline)) bus_t sum_scan(float *sum, bus_t g_in[HIST_LENGTH
     }
 
 #if DEBUG
-    for(uint j = 0; j < (HIST_LENGTH+1)*B; j++) {
+    scan2: for(uint j = 0; j < (HIST_LENGTH+1)*B; j++) {
         printf("%7.3f ", in[B+j]);
     }
     printf("\n");
 #endif
 
     /* Tree based sumation of history */
-    for(uint d = 0; d < LOG2_HIST_LENGTH; d++) {
+    scan3: for(uint d = 0; d < LOG2_HIST_LENGTH; d++) {
         uint o1 = 1<<d;
         uint o2 = 1<<(d+1);
 
@@ -101,13 +101,13 @@ __attribute__((always_inline)) bus_t sum_scan(float *sum, bus_t g_in[HIST_LENGTH
     }
     
     /* Sum Scan for incoming block */
-    for(uint d = 0; d < LOG2_B; d++) {
+    scan4: for(uint d = 0; d < LOG2_B; d++) {
         uint o0 = B*HIST_LENGTH;
         uint o1 = 1<<d;
         uint o2 = 1<<(d+1);
 
-        for(uint k = 1; k <= (1<<(LOG2_B-1-d)); k++) {
-            for(uint j =  0; j < (1<<d); j++) {
+        scan4_1: for(uint k = 1; k <= (1<<(LOG2_B-1-d)); k++) {
+            scan4_2: for(uint j =  0; j < (1<<d); j++) {
                 in[o0+k*o2-j-1] = in[o0+k*o2-j-1] + in[o0+k*o2-o1-1];
             }
         }
@@ -115,11 +115,11 @@ __attribute__((always_inline)) bus_t sum_scan(float *sum, bus_t g_in[HIST_LENGTH
 
     *sum += in[HIST_LENGTH*B-1];
 
-    for(uint j = 0; j < B; j++) {
+    scan5: for(uint j = 0; j < B; j++) {
         in[B*HIST_LENGTH+j] += *sum;
     }
 #ifdef DEBUG
-    for(uint j = 0; j < B; j++) {
+    scan6: for(uint j = 0; j < B; j++) {
         printf("%7.3f ", in[B*HIST_LENGTH+j]);
     }
 
@@ -141,7 +141,7 @@ krnl_sum_scan(
     uint n = M(length);
 
     __attribute__((xcl_pipeline_loop(1)))
-    for(uint i = 0; i < n; i++){
+    sum_scan1: for(uint i = 0; i < n; i++){
         float sum;
 
         if(i < HIST_LENGTH+1) {
@@ -150,7 +150,7 @@ krnl_sum_scan(
             sum = sums[i%(HIST_LENGTH)];
         }
 
-        for(uint j = 0; j < HIST_LENGTH; j++) {
+        sum_scan2: for(uint j = 0; j < HIST_LENGTH; j++) {
             hist[j] = hist[j+1];
         }
         hist[HIST_LENGTH] = in[i];

@@ -49,6 +49,7 @@ nearest_neighbor(global int *out, global const int *points,
     int s_point[MAX_DIMS];
 
     __attribute__((xcl_pipeline_loop(1)))
+    read: 
     for (int d = 0; d < dim; ++d) {
         s_point[d] = search_point[d];
     }
@@ -89,6 +90,7 @@ nearest_neighbor_loop_fusion(global int *out, global const int *points,
     int s_point[MAX_DIMS];
 
     __attribute__((xcl_pipeline_loop(1)))
+    read: 
     for (int d = 0; d < dim; ++d) {
         s_point[d] = search_point[d];
     }

@@ -1,7 +1,7 @@
 {
     "containers": [
         {
-            "name": "vector_addition",
+            "name": "vector_addition", 
             "meet_system_timing": "true", 
             "accelerators": [
                 {
@@ -9,14 +9,14 @@
                     "check_timing": "true", 
                     "PipelineType": "none", 
                     "check_latency": "false", 
-                    "check_warning": "true"
+                    "check_warning": "false"
                 }, 
                 {
                     "name": "vadd_pipelined", 
                     "check_timing": "true", 
                     "PipelineType": "none", 
                     "check_latency": "false", 
-                    "check_warning": "true"
+                    "check_warning": "false"
                 }
             ]
         }

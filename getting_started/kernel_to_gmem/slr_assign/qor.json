@@ -1,7 +1,7 @@
 {
     "containers": [
         {
-            "name": "vmult_vadd",
+            "name": "vmult_vadd", 
             "meet_system_timing": "true", 
             "accelerators": [
                 {
@@ -9,7 +9,7 @@
                     "check_timing": "true", 
                     "PipelineType": "none", 
                     "check_latency": "false", 
-                    "check_warning": "true", 
+                    "check_warning": "false", 
                     "loops": [
                         {
                             "name": "readA", 
@@ -30,7 +30,7 @@
                     "check_timing": "true", 
                     "PipelineType": "none", 
                     "check_latency": "false", 
-                    "check_warning": "true", 
+                    "check_warning": "false", 
                     "loops": [
                         {
                             "name": "readD", 

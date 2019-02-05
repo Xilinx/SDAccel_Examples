@@ -103,7 +103,7 @@ void input_stage(__global int *input, int *boost_in, int *med_in, int size)
 {
     // Burst Read on input and write to boost_in & med_in streams.
     __attribute__((xcl_pipeline_loop(1)))
-    for(int i = 0; i < size; i++){
+    readInput: for(int i = 0; i < size; i++){
         int in_lcl = input[i];
         boost_in[i] = in_lcl;
         med_in[i]   = in_lcl;
@@ -126,9 +126,9 @@ void boost_stage(int *boost_in, int *boost_out, int width, int height)
     
     // Fetch first lines 
     int initial_rows = 2;
-    for(int i = 0; i < initial_rows; i++){
+    fetchBoostLine1: for(int i = 0; i < initial_rows; i++){
         __attribute__((xcl_pipeline_loop(1)))
-        for(int j = 0; j < width; j++){
+        fetchBoostLine2: for(int j = 0; j < width; j++){
             if(i == 0){
                 linebuf[0][j] = boost_in[i * width + j];
                 linebuf[1][j] = linebuf[0][j];
@@ -140,16 +140,16 @@ void boost_stage(int *boost_in, int *boost_out, int width, int height)
     }
     
     __attribute__((opencl_unroll_hint))
-    for(int i = 0; i < BOOST_WINDOW+1; i++) {
+    boostFillRow: for(int i = 0; i < BOOST_WINDOW+1; i++) {
         rowAddr[i] = i;
     }
 
     // Perform boost filtering over the current 3 lines for one entire row
     // getBoost() is defined in kernels/boost_helper.h  
     int count = 2;
-    for (int line = 0; line < height; line++){
+    boostHeight: for (int line = 0; line < height; line++){
         __attribute__((xcl_pipeline_loop))
-        for (int x=0; x < width; x++){
+        boostWidth: for (int x=0; x < width; x++){
             
             // Get pixels within 3x3 aperture
             getBoostWindow(rgbWindow, linebuf, rowAddr, x, width);           
@@ -188,9 +188,9 @@ void median_stage(int *med_in, int *med_out, int width, int height)
     
     // Fetch first lines
     int initial_rows = 2;
-    for(int i = 0; i < initial_rows; i++){
+    fetchMedianLine1: for(int i = 0; i < initial_rows; i++){
         __attribute__((xcl_pipeline_loop(1)))
-        for(int j = 0; j < width; j++){
+        fetchMedianLine2: for(int j = 0; j < width; j++){
             if(i == 0){
                 linebuf[0][j] = med_in[i * width + j];
                 linebuf[1][j] = linebuf[0][j];
@@ -202,16 +202,16 @@ void median_stage(int *med_in, int *med_out, int width, int height)
     }
     
     __attribute__((opencl_unroll_hint))
-    for(int i = 0; i < BOOST_WINDOW+1; i++) {
+    medianFillRow: for(int i = 0; i < BOOST_WINDOW+1; i++) {
         rowAddr[i] = i;
     }
 
     // Perform median filtering over the current 3 lines for one entire row
     // getMedian() is defined in kernels/median_helper.h
     int count = 2;
-    for (int line = 0; line < height; line++){
+    medianHeight: for (int line = 0; line < height; line++){
         __attribute__((xcl_pipeline_loop))
-        for (int x=0; x < width; x++){
+        medianWidth: for (int x=0; x < width; x++){
             
             // Get pixels within 3x3 aperture
             getMedianWindow(rgbWindow, linebuf, rowAddr, x, width);
@@ -223,7 +223,7 @@ void median_stage(int *med_in, int *med_out, int width, int height)
             if(line < height-2) {
                 linebuf[rowAddr[MEDIAN_WINDOW]][x] = med_in[count * width + x];
                 if(x == width-1) {
-                    for(int row = 0; row < MEDIAN_WINDOW+1; row++)
+                    medianUpdateRow: for(int row = 0; row < MEDIAN_WINDOW+1; row++)
                         rowAddr[row] = (rowAddr[row] + 1) % (BOOST_WINDOW + 1);
                 }
             }
@@ -241,7 +241,7 @@ void sketch_stage(int *boost_out, int *med_out, int *sketch_out, int size)
     // Do Sketch Operation and write into sketch_out stream.
     // getSketch() is defined in kernels/sketch_helper.h
     __attribute__((xcl_pipeline_loop(1)))
-    for(int i = 0; i < size; i++){
+    sketchLoop: for(int i = 0; i < size; i++){
         boost_input   = boost_out[i];
         median_input  = med_out[i];
         sketch_out[i] = getSketch(boost_input, median_input);
@@ -255,18 +255,19 @@ void output_stage(__global int *output, int *sketch_out, int width, int height)
     int count = 0;
     // Flips the Image by Reading Output Results from Sketch Stream 
     // Burst write back results onto output
-    for(int i = 0 ; i < height; i++){
-
+    writeOutput1: for(int i = 0 ; i < height; i++){
+        
         // Reads from sketch_out stream and flip the row
         __attribute__((xcl_pipeline_loop(1)))
-        for(int j = width; j > 0; j--){
+        flipOutput: for(int j = width; j > 0; j--){
             result[j - 1] = sketch_out[i * width + count];
             count++;
         }
+
         count = 0;
         // Burst write output
         __attribute__((xcl_pipeline_loop(1)))
-        for(int k = 0; k < width; k++){
+        writeOutput2: for(int k = 0; k < width; k++){
             output[i * width + k] = result[k];
         }
     }

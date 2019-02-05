@@ -1,7 +1,7 @@
 {
     "containers": [
-        { 
-            "meet_system_timing": "true",
+        {
+            "meet_system_timing": "true", 
             "accelerators": []
         }
     ]

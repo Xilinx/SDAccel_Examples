@@ -135,13 +135,13 @@ int main(int argc, char* argv[]) {
     OCL_CHECK(err, cl::Buffer devOutput(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
             ((img_size-1)/32 + 1)*sizeof(cl_uint16), outimage.data(), &err));
 
-    // Copy input data to device global memory
-    std::cout << "Copying Buffers to device..." <<std::endl;
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({devInput}, 0/*0 means from host*/));
-
     std::cout << "Setting Arguments..." << std::endl;
     OCL_CHECK(err, err = krnl_sobel.setArg(0, devInput));
     OCL_CHECK(err, err = krnl_sobel.setArg(1, devOutput));
+
+    // Copy input data to device global memory
+    std::cout << "Copying Buffers to device..." <<std::endl;
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({devInput}, 0/*0 means from host*/));
 
     // Launch the Kernel
     // For HLS kernels global and local size is always (1,1,1). So, it is recommended

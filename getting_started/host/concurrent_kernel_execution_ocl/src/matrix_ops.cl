@@ -81,10 +81,10 @@ void mmult(global int *c, global const int *a, global const int *b,
                     matB[i] = b[i]; }
 
     __attribute__((xcl_pipeline_loop(1)))
-    for (int j = 0; j < dim1; ++j) {
-        for (int i = 0; i < dim0; ++i) {
+    mmult1: for (int j = 0; j < dim1; ++j) {
+        mmult2: for (int i = 0; i < dim0; ++i) {
             int temp = 0;
-            for (int k = 0; k < dim1; ++k)
+            mmult3: for (int k = 0; k < dim1; ++k)
                 temp += matA[k + i * dim0] * matB[j + k * dim0];
 
             c[i + j * dim0] = temp;
