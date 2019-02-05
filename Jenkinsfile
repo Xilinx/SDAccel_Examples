@@ -65,7 +65,7 @@ def buildExample(target, dir, device, workdir) {
 			mins = 12*60
 		}
 
-	retry(3) {
+	retry(1) {
 		sh """#!/bin/bash -e
 
 cd ${workdir}
@@ -135,7 +135,7 @@ def runExample(target, dir, device, workdir) {
 
 		devdir = dirsafe(device)
 
-		retry(3) {
+		retry(1) {
 		//	lock("${dir}") {
 				sh """#!/bin/bash -e
 
