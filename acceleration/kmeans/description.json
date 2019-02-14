@@ -33,7 +33,7 @@
     ],
     "host_srcs": "./src/host.cpp ./src/cluster.c ./src/rmse.c ./src/fpga_kmeans.cpp ./src/kmeans_clustering_cmodel.c",
     "config_make": "config.mk",
-    "cmd_args": "-i PROJECT/data/100 -c PROJECT/data/100.gold_c5 -m 5 -n 5 -g 2",
+    "cmd_args": "-x BUILD/kmeans.xclbin -i PROJECT/data/100 -c PROJECT/data/100.gold_c5 -m 5 -n 5 -g 2",
     "host_exe": "host_kmeans",       
     "output_files": "membership.out",        
     "libs": [

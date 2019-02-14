@@ -54,9 +54,9 @@ void linear_search_read_datafile(char* filename, float* data, size_t size) {
     fclose(fp);
 }
 
-void linear_search_init( cl::Context *context, cl::CommandQueue *q, cl::Program *program, cl::Kernel *krnl,
-        cl::Buffer* dev_targets, cl::Buffer* dev_queries, cl::Buffer* dev_indices,
-            float *targets, float *queries, unsigned int *indices)
+void linear_search_init( cl::Context *context, cl::CommandQueue *q, std::string &binaryFile, 
+        cl::Program *program, cl::Kernel *krnl, cl::Buffer* dev_targets, cl::Buffer* dev_queries, 
+        cl::Buffer* dev_indices, float *targets, float *queries, unsigned int *indices)
 {
     cl_int err;
     unsigned fileBufSize;
@@ -68,10 +68,6 @@ void linear_search_init( cl::Context *context, cl::CommandQueue *q, cl::Program 
     OCL_CHECK(err, *context = cl::Context(device, NULL, NULL, NULL, &err));
     OCL_CHECK(err, *q = cl::CommandQueue(*context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
-
-    // find_binary_file() is a utility API which will search the xclbin file for
-    // targeted mode (sw_emu/hw_emu/hw) and for targeted platforms.
-    std::string binaryFile = xcl::find_binary_file(device_name, "krnl_nearest");
 
     // read_binary_file() is a utility API which will load the binaryFile
     // and will return pointer to file buffer.
@@ -121,18 +117,19 @@ unsigned long linear_search_exec(cl::Context *context, cl::CommandQueue *q, cl::
 
 int main(int argc, char** argv) {
     if (!(argc == 3 || argc == 4)) {
-        printf("usage: %s <queries.txt> <targets.txt> [<ref.txt>]\n", argv[0]);
+        printf("Usage: %s <XCLBIN File> <queries.txt> <targets.txt> [<ref.txt>]\n", argv[0]);
         return EXIT_FAILURE;
     }
 
-    char *queries_filename = argv[1];
-    char *targets_filename = argv[2];
+    std::string binaryFile = argv[1];
+    char *queries_filename = argv[2];
+    char *targets_filename = argv[3];
     char *refs_filename = NULL;
 
     int check_results = 0;
 
-    if (argc == 4) {
-        refs_filename = argv[3];
+    if (argc == 5) {
+        refs_filename = argv[4];
         check_results = 1;
     }
 
@@ -169,7 +166,7 @@ int main(int argc, char** argv) {
     cl::Kernel krnl;
     cl::Buffer dev_targets, dev_queries, dev_indices;
 
-    linear_search_init(&context, &q, &program, &krnl,
+    linear_search_init(&context, &q, binaryFile, &program, &krnl,
         &dev_targets, &dev_queries, &dev_indices, targets.data(), queries.data(), indices.data());
 
     unsigned long duration = linear_search_exec(

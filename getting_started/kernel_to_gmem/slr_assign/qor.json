@@ -8,7 +8,7 @@
                     "name": "vmult", 
                     "check_timing": "true", 
                     "PipelineType": "none", 
-                    "check_latency": "false", 
+                    "check_latency": "true", 
                     "check_warning": "false", 
                     "loops": [
                         {
@@ -29,7 +29,7 @@
                     "name": "vadd", 
                     "check_timing": "true", 
                     "PipelineType": "none", 
-                    "check_latency": "false", 
+                    "check_latency": "true", 
                     "check_warning": "false", 
                     "loops": [
                         {

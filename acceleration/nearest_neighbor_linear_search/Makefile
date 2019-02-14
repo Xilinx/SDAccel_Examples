@@ -60,7 +60,7 @@ CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps
 
 
 EXECUTABLE = nearest
-CMD_ARGS = ./data/queries.txt ./data/targets.txt
+CMD_ARGS = $(XCLBIN)/krnl_nearest.$(TARGET).$(DSA).xclbin ./data/queries.txt ./data/targets.txt
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
@@ -96,9 +96,9 @@ $(EMCONFIG_DIR)/emconfig.json:
 check: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) ./data/queries.txt ./data/targets.txt
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/krnl_nearest.$(TARGET).$(DSA).xclbin ./data/queries.txt ./data/targets.txt
 else
-	 ./$(EXECUTABLE) ./data/queries.txt ./data/targets.txt
+	 ./$(EXECUTABLE) $(XCLBIN)/krnl_nearest.$(TARGET).$(DSA).xclbin ./data/queries.txt ./data/targets.txt
 endif
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 

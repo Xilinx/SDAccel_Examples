@@ -74,6 +74,13 @@ void intelImpl(int nBlocks, int blkSz, int nThreads, int writeMatchArray, MatchA
 //pass cmd line options to select opencl device
 int main(int argc, char* argv[])
 {
+    if (argc != 2) {
+        std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
+		return EXIT_FAILURE;
+    }
+
+    std::string binaryFile = argv[1];
+
     LogInfo("\nXilinx Smith Waterman benchmark started");
     string strKernelFullPath = sda::GetApplicationPath() + "/";
 
@@ -155,7 +162,7 @@ int main(int argc, char* argv[])
         }
 
         SmithWatermanApp smithwaterman(strPlatformName, strDeviceName, idxSelectedDevice,
-            strKernelFullPath, strSampleFP, nBlocks, blkSz,
+            strKernelFullPath, strSampleFP, binaryFile, nBlocks, blkSz,
             doubleBuffered == 0 ? false : true,
             verifyMode == 0 ? false : true,
             writeMatchArray == 0 ? false : true,

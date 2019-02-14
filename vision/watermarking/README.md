@@ -101,7 +101,7 @@ emconfigutil --platform 'xilinx_vcu1525_dynamic' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./watermark ./data/inputImage.bmp ./data/golden.bmp
+./watermark ./xclbin/apply_watermark.<emulation target>.<device name>.xclbin ./data/inputImage.bmp ./data/golden.bmp
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card

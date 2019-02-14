@@ -326,7 +326,7 @@ float** FPGA_KMEANS::fpga_kmeans_clustering(
     return clusters;
 }
 
-int FPGA_KMEANS::fpga_kmeans_init()
+int FPGA_KMEANS::fpga_kmeans_init(std::string &binaryFile)
 {
     cl_int err;
     unsigned fileBufSize;
@@ -337,8 +337,6 @@ int FPGA_KMEANS::fpga_kmeans_init()
     OCL_CHECK(err, g_context = cl::Context(device, NULL, NULL, NULL, &err));
     OCL_CHECK(err, g_q = cl::CommandQueue(g_context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
-
-    std::string binaryFile = xcl::find_binary_file(device_name,"kmeans");
 
     g_fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{g_fileBuf, fileBufSize}};

@@ -8,6 +8,7 @@
     ],
     "host_exe": "prng",
     "host_srcs": "src/prng.cpp",
+    "cmd_args": "BUILD/dma.xclbin",
     "host_hdrs": "src/prng.h",
     "libs" : [
         "xcl2"

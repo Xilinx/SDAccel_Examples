@@ -15,7 +15,7 @@
     "host_exe": "equalizer",  
     "host_srcs": "src/equalizer.cpp",
     "host_hdrs": "src/equalizer.h",      
-    "cmd_args": "PROJECT/data/race_2k.bmp",
+    "cmd_args": "BUILD/krnl_equalizer.xclbin PROJECT/data/race_2k.bmp",
     "output_files": "out.bmp",        
     "libs": [
         "opencv", 

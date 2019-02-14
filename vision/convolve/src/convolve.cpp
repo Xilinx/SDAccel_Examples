@@ -107,19 +107,20 @@ int main(int argc, char* argv[]) {
     cl::Event event;
     unsigned fileBufSize;
 
-    if(argc != 3 && argc != 4)
+    if(argc != 4 && argc != 5)
     {
-        std::cout << "Usage: " << argv[0] <<"<input> <coef> [<golden>]" << std::endl;
+        std::cout << "Usage: " << argv[0] <<" <XCLBIN File> <input> <coef> [<golden>]" << std::endl;
         return EXIT_FAILURE;
     }
 
     std::cout << "Parsing Command Line..." << std::endl;
-    std::string inputFileName(argv[1]);
-    std::string coefFileName(argv[2]);
+    std::string binaryFile = argv[1];
+    std::string inputFileName(argv[2]);
+    std::string coefFileName(argv[3]);
 
     bool validate = false;
 
-    if (argc == 4) {
+    if (argc == 5) {
         validate = true;
     }
 
@@ -155,10 +156,6 @@ int main(int argc, char* argv[]) {
     OCL_CHECK(err, cl::Context context (device, NULL, NULL, NULL, &err));
     OCL_CHECK(err, cl::CommandQueue q (context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
-
-    // find_binary_file() is a utility API which will search the xclbin file for
-    // targeted mode (sw_emu/hw_emu/hw) and for targeted platforms.
-    std::string binaryFile = xcl::find_binary_file(device_name, "krnl_convolve");
 
     // read_binary_file() ia a utility API which will load the binaryFile
     // and will return pointer to file buffer.
@@ -218,7 +215,7 @@ int main(int argc, char* argv[]) {
 
     if(validate) {
         std::cout << "Validate" << std::endl;
-        std::string goldenFileName(argv[3]);
+        std::string goldenFileName(argv[4]);
         cv::Mat golden  = readFloatTxtFile(goldenFileName, IMAGE_HEIGHT, IMAGE_WIDTH);
 
         cv::imwrite("golden.bmp", golden);

@@ -56,6 +56,8 @@ int main(int argc, char* argv[])
     printf("Usage: %s <xclbin> <input bitmap> <golden bitmap(optional)>\n", argv[0]) ;
     return -1 ;
   }
+
+  std::string binaryFile = argv[1];
   
   // Read the input bit map file into memory
   std::cout << "Reading input image...\n";
@@ -101,7 +103,6 @@ int main(int argc, char* argv[])
 
   // read_binary_file() command will find the OpenCL binary file created using the 
   // xocc compiler load into OpenCL Binary and return pointer to file buffer.
-  std::string binaryFile = xcl::find_binary_file(device_name,"krnl_median");
   char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
   cl::Program::Binaries bins{{fileBuf, fileBufSize}};
   devices.resize(1);
