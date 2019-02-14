@@ -46,12 +46,14 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 int main(int argc, char** argv)
 {
 
-    if (argc != 2)
+    if (argc != 3)
     {
-        printf("Usage: %s <image> \n", argv[0]) ;
+        printf("Usage: %s <XCLBIN File> <image> \n", argv[0]) ;
         return -1 ;
     }
    
+    std::string binaryFile = argv[1];
+
     FILE *input_file;
     FILE *output_file;
 
@@ -86,7 +88,6 @@ int main(int argc, char** argv)
     OCL_CHECK(err, cl::CommandQueue q(context, device,CL_QUEUE_PROFILING_ENABLE, &err));
 
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
-    std::string binaryFile = xcl::find_binary_file(device_name,"krnl_affine");
     char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);

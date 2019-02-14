@@ -36,12 +36,13 @@ int main(int argc, char* argv[])
 {
     cl_int err;
     unsigned fileBufSize;
-    if (argc < 2)
+    if (argc < 3)
     {
-        std::cout << "Usage: " << argv[0] << " <input bitmap> <golden bitmap>" << std::endl;
+        std::cout << "Usage: " << argv[0] << " <XCLBIN File> <input bitmap> <golden bitmap>" << std::endl;
         return EXIT_FAILURE ;
     }
-    const char* bitmapFilename = argv[1];
+    std::string binaryFile = argv[1];
+    const char* bitmapFilename = argv[2];
     const char* goldenFilename;
 
     //Read the input bit map file into memory
@@ -75,10 +76,6 @@ int main(int argc, char* argv[])
     OCL_CHECK(err, cl::Context context (device, NULL, NULL, NULL, &err));
     OCL_CHECK(err, cl::CommandQueue q (context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
-
-    // find_binary_file() is a utility API which will search the xclbin file for
-    // targeted mode (sw_emu/hw_emu/hw) and for targeted platforms.
-    std::string binaryFile = xcl::find_binary_file(device_name, "apply_watermark");
 
     // read_binary_file() is a utility API which will load the binaryFile
     // and will return pointer to file buffer.
@@ -124,8 +121,8 @@ int main(int argc, char* argv[])
 //OPENCL HOST CODE AREA ENDS
 
     bool match = true;
-    if (argc > 2){
-        goldenFilename = argv[2];
+    if (argc > 3){
+        goldenFilename = argv[3];
         //Read the golden bit map file into memory
         BitmapInterface goldenImage(goldenFilename);
         result = goldenImage.readBitmapFile() ;

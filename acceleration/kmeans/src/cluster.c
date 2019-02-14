@@ -87,7 +87,8 @@ int cluster(
             float   *min_rmse,              /* out: minimum RMSE */
             int     isRMSE,                 /* calculate RMSE */
             int     nloops,                 /* number of iteration for each number of clusters */
-            const char*   goldenFile
+            std::string &binaryFile,        /* Binary file string */
+            const char*   goldenFile                  
             )
 {    
     int     nclusters;          /* number of clusters k */
@@ -109,7 +110,7 @@ int cluster(
         exit(1);
     }
 
-     fpga->fpga_kmeans_init();
+     fpga->fpga_kmeans_init(binaryFile);
 
     /* sweep k from min to max_nclusters to find the best number of clusters */
     for(nclusters = min_nclusters; nclusters <= max_nclusters; nclusters++)

@@ -66,7 +66,7 @@ CLFLAGS += --xp param:compiler.version=31
 
 
 EXECUTABLE = huffman
-CMD_ARGS = -b ./data/rect_1024.bmp
+CMD_ARGS = $(XCLBIN)/krnl_huffman.$(TARGET).$(DSA).xclbin -b ./data/rect_1024.bmp
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
@@ -106,9 +106,9 @@ $(EMCONFIG_DIR)/emconfig.json:
 check: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) -b ./data/rect_1024.bmp
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/krnl_huffman.$(TARGET).$(DSA).xclbin -b ./data/rect_1024.bmp
 else
-	 ./$(EXECUTABLE) -b ./data/rect_1024.bmp
+	 ./$(EXECUTABLE) $(XCLBIN)/krnl_huffman.$(TARGET).$(DSA).xclbin -b ./data/rect_1024.bmp
 endif
 ifneq ($(TARGET),$(findstring $(TARGET), sw_emu hw))
 $(warning WARNING:Application supports only sw_emu hw TARGET. Please use the target for running the application)

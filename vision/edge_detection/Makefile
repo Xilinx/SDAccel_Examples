@@ -62,7 +62,7 @@ CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps
 
 
 EXECUTABLE = edge
-CMD_ARGS = ./data/input/eiffel.bmp
+CMD_ARGS = $(XCLBIN)/krnl_edge.$(TARGET).$(DSA).xclbin ./data/input/eiffel.bmp
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
@@ -98,9 +98,9 @@ $(EMCONFIG_DIR)/emconfig.json:
 check: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) ./data/input/eiffel.bmp
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/krnl_edge.$(TARGET).$(DSA).xclbin ./data/input/eiffel.bmp
 else
-	 ./$(EXECUTABLE) ./data/input/eiffel.bmp
+	 ./$(EXECUTABLE) $(XCLBIN)/krnl_edge.$(TARGET).$(DSA).xclbin ./data/input/eiffel.bmp
 endif
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 

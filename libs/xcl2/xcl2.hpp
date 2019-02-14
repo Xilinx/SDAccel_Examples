@@ -78,42 +78,8 @@ struct aligned_allocator
 namespace xcl {
 std::vector<cl::Device> get_xil_devices();
 std::vector<cl::Device> get_devices(const std::string& vendor_name);
-/* find_xclbin_file
- *
- *
- * Description:
- *   Find precompiled program (as commonly created by the Xilinx OpenCL
- *   flow). Using search path below.
- *
- *   Search Path:
- *      $XCL_BINDIR/<name>.<target>.<device>.xclbin
- *      $XCL_BINDIR/<name>.<target>.<device_versionless>.xclbin
- *      $XCL_BINDIR/binary_container_1.xclbin
- *      $XCL_BINDIR/<name>.xclbin
- *      xclbin/<name>.<target>.<device>.xclbin
- *      xclbin/<name>.<target>.<device_versionless>.xclbin
- *      xclbin/binary_container_1.xclbin
- *      xclbin/<name>.xclbin
- *      ../<name>.<target>.<device>.xclbin
- *      ../<name>.<target>.<device_versionless>.xclbin
- *      ../binary_container_1.xclbin
- *      ../<name>.xclbin
- *      ./<name>.<target>.<device>.xclbin
- *      ./<name>.<target>.<device_versionless>.xclbin
- *      ./binary_container_1.xclbin
- *      ./<name>.xclbin
- *
- * Inputs:
- *   _device_name - Targeted Device name
- *   xclbin_name - base name of the xclbin to import.
- *
- * Returns:
- *   An opencl program Binaries object that was created from xclbin_name file.
- */
-std::string find_binary_file(const std::string& _device_name, const std::string& xclbin_name);
 char* read_binary_file(const std::string &xclbin_file_name, unsigned &nb);
 bool is_emulation () ;
 bool is_hw_emulation () ;
 bool is_xpr_device (const char *device_name);
-
 }

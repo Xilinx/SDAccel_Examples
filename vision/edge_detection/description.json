@@ -8,7 +8,7 @@
     "host_exe": "edge",
     "host_srcs": "src/edge.cpp",
     "host_hdrs": "src/edge.h",
-    "cmd_args": "PROJECT/data/input/eiffel.bmp",
+    "cmd_args": "BUILD/krnl_edge.xclbin PROJECT/data/input/eiffel.bmp",
     "output_files": "input.bmp output.bmp",
     "libs": [
         "opencv",

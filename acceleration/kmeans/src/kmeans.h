@@ -83,7 +83,7 @@ public:
             float  **new_centers);
 
         int fpga_kmeans_setup(int global_size = 1);
-        int fpga_kmeans_init();
+        int fpga_kmeans_init(std::string &binaryFile);
         int fpga_kmeans_allocate(int n_points, int n_features, int n_clusters, float **feature);
         int fpga_kmeans_deallocateMemory();
         int fpga_kmeans_print_report();
@@ -110,7 +110,7 @@ private:
 float   euclid_dist_2        (float*, float*, int);
 int     find_nearest_point   (float* , int, float**, int);
 float   rms_err(float**, int, int, float**, int);
-int     cluster(FPGA_KMEANS* fpga, int, int, float**, int, int, float, int*, float***, float*, int, int, const char* goldenFile = NULL);
+int     cluster(FPGA_KMEANS* fpga, int, int, float**, int, int, float, int*, float***, float*, int, int, std::string &binaryFile, const char* goldenFile = NULL);
 float** kmeans_clustering_cmodel(float **feature, int nfeatures, int npoints, int nclusters, float threshold, 
         int* iteration, int *membership); 
 

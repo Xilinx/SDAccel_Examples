@@ -61,7 +61,7 @@ CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps
 
 
 EXECUTABLE = affine
-CMD_ARGS = ./data/CT-MONO2-16-brain.raw
+CMD_ARGS = $(XCLBIN)/krnl_affine.$(TARGET).$(DSA).xclbin ./data/CT-MONO2-16-brain.raw
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
@@ -97,9 +97,9 @@ $(EMCONFIG_DIR)/emconfig.json:
 check: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) ./data/CT-MONO2-16-brain.raw
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/krnl_affine.$(TARGET).$(DSA).xclbin ./data/CT-MONO2-16-brain.raw
 else
-	 ./$(EXECUTABLE) ./data/CT-MONO2-16-brain.raw
+	 ./$(EXECUTABLE) $(XCLBIN)/krnl_affine.$(TARGET).$(DSA).xclbin ./data/CT-MONO2-16-brain.raw
 endif
 ifneq ($(TARGET),$(findstring $(TARGET), sw_emu hw))
 $(warning WARNING:Application supports only sw_emu hw TARGET. Please use the target for running the application)

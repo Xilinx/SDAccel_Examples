@@ -47,7 +47,7 @@ namespace sda {
 class HuffmanOptimized : public ICodec {
 public:
     HuffmanOptimized();
-    HuffmanOptimized(string& strBitmapFP);
+    HuffmanOptimized(string& strBitmapFP, string& binaryFile);
     virtual ~HuffmanOptimized();
 
     enum EvBreakDown {evtHostWrite = 0, evtKernelExec = 1, evtHostRead = 2, evtCount = 3};
