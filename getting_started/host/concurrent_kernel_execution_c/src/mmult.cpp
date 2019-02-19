@@ -30,58 +30,42 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /*
   Please see host.cpp
 
-  NOTE: These kernels are not optimized and will not perform well in real world
+  NOTE: This kernel is not optimized and will not perform well in real world
   applications.
 */
 
 #define MAX_DIM 64
 
-kernel __attribute__((reqd_work_group_size(1, 1, 1)))
-void mscale(global int *inout, const int scale, const int dim0, const int dim1) {
-    int temp[MAX_DIM * MAX_DIM];
-
-    __attribute__((xcl_pipeline_loop(1)))
-    mscale:  for (int i = 0; i < dim0 * dim1; ++i) temp[i] = inout[i] * scale;
-
-    __attribute__((xcl_pipeline_loop(1)))
-    mscale_write:  for (int i = 0; i < dim0 * dim1; ++i) inout[i] = temp[i];
-}
-
-kernel __attribute__((reqd_work_group_size(1, 1, 1)))
-void madd(global int *c, global const int *a, global const int *b,
-          const int dim0, const int dim1) {
-    int matA[MAX_DIM * MAX_DIM];
-    int matB[MAX_DIM * MAX_DIM];
-
-    __attribute__((xcl_pipeline_loop(1)))
-    madd_readA:  for (int i = 0; i < dim0 * dim1; ++i) {
-                    matA[i] = a[i]; }
-
-    __attribute__((xcl_pipeline_loop(1)))
-    madd_readB:  for (int i = 0; i < dim0 * dim1; ++i) {
-                    matB[i] = b[i]; }
-
-    __attribute__((xcl_pipeline_loop(1)))
-    madd_writeC: for (int i = 0; i < dim0 * dim1; ++i) {
-                    c[i] =  matA[i] + matB[i]; }
-}
-
-kernel __attribute__((reqd_work_group_size(1, 1, 1)))
-void mmult(global int *c, global const int *a, global const int *b,
+extern "C" {
+void mmult(int *c, int *a, const int *b,
            const int dim0, const int dim1) {
+#pragma HLS INTERFACE m_axi port=c offset=slave bundle=gmem
+#pragma HLS INTERFACE m_axi port=a offset=slave bundle=gmem
+#pragma HLS INTERFACE m_axi port=b offset=slave bundle=gmem
+#pragma HLS INTERFACE s_axilite port=c bundle=control 
+#pragma HLS INTERFACE s_axilite port=a bundle=control 
+#pragma HLS INTERFACE s_axilite port=b bundle=control 
+#pragma HLS INTERFACE s_axilite port=dim0 bundle=control
+#pragma HLS INTERFACE s_axilite port=dim1 bundle=control
+#pragma HLS INTERFACE s_axilite port=return bundle=control
+
     int matA[MAX_DIM * MAX_DIM];
     int matB[MAX_DIM * MAX_DIM];
 
-    __attribute__((xcl_pipeline_loop(1)))
-    mmult_readA:  for (int i = 0; i < dim0 * dim1; ++i) {
-                    matA[i] = a[i]; }
+    mmult_readA:  
+    for (int i = 0; i < dim0 * dim1; ++i) {
+    #pragma HLS PIPELINE II=1
+        matA[i] = a[i]; 
+    }
 
-    __attribute__((xcl_pipeline_loop(1)))
-    mmult_readB:  for (int i = 0; i < dim0 * dim1; ++i) {
-                    matB[i] = b[i]; }
+    mmult_readB:  
+    for (int i = 0; i < dim0 * dim1; ++i) {
+    #pragma HLS PIPELINE II=1
+        matB[i] = b[i]; 
+    }
 
-    __attribute__((xcl_pipeline_loop(1)))
     mmult1: for (int j = 0; j < dim1; ++j) {
+        #pragma HLS PIPELINE II=1
         mmult2: for (int i = 0; i < dim0; ++i) {
             int temp = 0;
             mmult3: for (int k = 0; k < dim1; ++k)
@@ -90,4 +74,5 @@ void mmult(global int *c, global const int *a, global const int *b,
             c[i + j * dim0] = temp;
         }
     }
+}
 }

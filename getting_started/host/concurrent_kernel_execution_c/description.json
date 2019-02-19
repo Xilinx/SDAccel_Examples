@@ -1,6 +1,6 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Concurrent Kernel Execution (CL)",
+    "example": "Concurrent Kernel Execution (HLS C/C++ kernel)",
     "overview": [
         "This example will demonstrate how to use multiple and out of order command queues to simultaneously execute multiple kernels on an FPGA."
     ],
@@ -20,18 +20,15 @@
 	"accelerators": [
         {
             "name": "madd", 
-            "location": "src/matrix_ops.cl",
-            "container": "matrix_ops"
+            "location": "src/madd.cpp"
         },
         {
             "name": "mscale", 
-            "location": "src/matrix_ops.cl",
-            "container": "matrix_ops"
+            "location": "src/mscale.cpp"
         },
         {
             "name": "mmult", 
-            "location": "src/matrix_ops.cl",
-            "container": "matrix_ops"
+            "location": "src/mmult.cpp"
         }
     	]
 	}

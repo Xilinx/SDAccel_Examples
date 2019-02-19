@@ -1,4 +1,4 @@
-Concurrent Kernel Execution (CL)
+Concurrent Kernel Execution (HLS C/C++ kernel)
 ======================
 
 This README file contains the following sections:
@@ -52,7 +52,9 @@ description.json
 qor.json
 sdaccel.ini
 src/host.cpp
-src/matrix_ops.cl
+src/madd.cpp
+src/mmult.cpp
+src/mscale.cpp
 utils.mk
 ```
 
