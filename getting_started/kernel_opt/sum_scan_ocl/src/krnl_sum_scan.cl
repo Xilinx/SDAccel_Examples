@@ -45,6 +45,13 @@ typedef float bus_t;
 #define LOG2_HIST_LENGTH 8
 #define HIST_LENGTH ((1<<LOG2_HIST_LENGTH)/(B))
 
+// Tripcount identifiers
+__constant int c_b = B;
+__constant int c_log2_b = LOG2_B;
+__constant int c_m = M(1000);
+__constant int c_log2_hlen = LOG2_HIST_LENGTH;
+__constant int c_hlen = HIST_LENGTH;
+
 typedef union {
     bus_t b;
     float f[B];
@@ -52,7 +59,7 @@ typedef union {
 
 __attribute__((always_inline)) bus_t array_to_bus(float *in) {
     bus_to_float_t out;
-
+    __attribute__((xcl_loop_tripcount(c_b, c_b)))
     atb: for(uint i = 0; i < B; i++) {
         out.f[i] = in[i];
     }
@@ -64,7 +71,7 @@ __attribute__((always_inline)) void bus_to_array(bus_t g_in, float *out) {
     bus_to_float_t in;
 
     in.b = g_in;
-
+    __attribute__((xcl_loop_tripcount(c_b, c_b)))
     bta: for(uint i = 0; i < B; i++) {
         out[i] = in.f[i];
     }
@@ -72,7 +79,7 @@ __attribute__((always_inline)) void bus_to_array(bus_t g_in, float *out) {
 
 __attribute__((always_inline)) bus_t sum_scan(float *sum, bus_t g_in[HIST_LENGTH+1], uint i) {
     float in[(HIST_LENGTH+1)*B] __attribute__((xcl_array_partition(complete, 0)));
-
+    __attribute__((xcl_loop_tripcount(c_hlen, c_hlen)))
     scan1: for(uint j = 0; j < HIST_LENGTH+1; j++) {
         bus_t tmp;
         if(HIST_LENGTH - j > i)
@@ -84,6 +91,7 @@ __attribute__((always_inline)) bus_t sum_scan(float *sum, bus_t g_in[HIST_LENGTH
     }
 
 #if DEBUG
+    __attribute__((xcl_loop_tripcount(c_hlen, c_hlen)))
     scan2: for(uint j = 0; j < (HIST_LENGTH+1)*B; j++) {
         printf("%7.3f ", in[B+j]);
     }
@@ -91,6 +99,7 @@ __attribute__((always_inline)) bus_t sum_scan(float *sum, bus_t g_in[HIST_LENGTH
 #endif
 
     /* Tree based sumation of history */
+    __attribute__((xcl_loop_tripcount(c_log2_hlen, c_log2_hlen)))
     scan3: for(uint d = 0; d < LOG2_HIST_LENGTH; d++) {
         uint o1 = 1<<d;
         uint o2 = 1<<(d+1);
@@ -101,6 +110,7 @@ __attribute__((always_inline)) bus_t sum_scan(float *sum, bus_t g_in[HIST_LENGTH
     }
     
     /* Sum Scan for incoming block */
+    __attribute__((xcl_loop_tripcount(c_log2_b, c_log2_b)))
     scan4: for(uint d = 0; d < LOG2_B; d++) {
         uint o0 = B*HIST_LENGTH;
         uint o1 = 1<<d;
@@ -114,11 +124,12 @@ __attribute__((always_inline)) bus_t sum_scan(float *sum, bus_t g_in[HIST_LENGTH
     }
 
     *sum += in[HIST_LENGTH*B-1];
-
+    __attribute__((xcl_loop_tripcount(c_b, c_b)))
     scan5: for(uint j = 0; j < B; j++) {
         in[B*HIST_LENGTH+j] += *sum;
     }
 #ifdef DEBUG
+    __attribute__((xcl_loop_tripcount(c_b, c_b)))
     scan6: for(uint j = 0; j < B; j++) {
         printf("%7.3f ", in[B*HIST_LENGTH+j]);
     }
@@ -141,6 +152,7 @@ krnl_sum_scan(
     uint n = M(length);
 
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_m, c_m)))
     sum_scan1: for(uint i = 0; i < n; i++){
         float sum;
 
@@ -149,7 +161,8 @@ krnl_sum_scan(
         } else {
             sum = sums[i%(HIST_LENGTH)];
         }
-
+        
+        __attribute__((xcl_loop_tripcount(c_hlen, c_hlen)))
         sum_scan2: for(uint j = 0; j < HIST_LENGTH; j++) {
             hist[j] = hist[j+1];
         }

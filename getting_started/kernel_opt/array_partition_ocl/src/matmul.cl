@@ -30,6 +30,9 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Maximum Array Size
 #define MAX_SIZE 16
 
+// Tripcount identifiers
+__constant int c_size = MAX_SIZE;
+
 // Naive implementation of matrix multiplication 
 // In this implementation array partition is not done
 // Computes matrix multiply
@@ -48,6 +51,7 @@ void matmul(const __global int *in1,  // Read-Only Matrix 1
     // Burst reads on input matrices from global memory
     // Burst read for matrix A
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_size*c_size, c_size*c_size)))
     readA:
     for (int itr = 0, i = 0, j = 0; itr < size * size; itr++, j++) {
         if (j == size) {
@@ -59,6 +63,7 @@ void matmul(const __global int *in1,  // Read-Only Matrix 1
 
     // Burst read for matrix B
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_size*c_size, c_size*c_size)))
     readB:
     for (int itr = 0, i = 0, j = 0; itr < size * size; itr++, j++) {
         if (j == size) {
@@ -71,11 +76,14 @@ void matmul(const __global int *in1,  // Read-Only Matrix 1
 
     // Calculate matrix multiplication using local data buffer based on input size
     // and write results into local buffer for C
+    __attribute__((xcl_loop_tripcount(c_size, c_size)))
     nopart1:
     for (int i = 0; i < size; i++) {
         __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_loop_tripcount(c_size, c_size)))
         nopart2 :
         for (int k = 0; k < size; k++) {
+            __attribute__((xcl_loop_tripcount(c_size, c_size)))
             nopart3:
             for (int j = 0; j < MAX_SIZE; j++) {
                 int result = (k == 0) ? 0 : temp_sum[j];
@@ -89,6 +97,7 @@ void matmul(const __global int *in1,  // Read-Only Matrix 1
     // Burst write from output matrices to global memory
     // Burst write from matrix C
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_size*c_size, c_size*c_size)))
     writeC:
     for (int itr = 0, i = 0, j = 0; itr < size * size; itr++, j++) {
         if (j == size) {
@@ -122,6 +131,7 @@ void matmul_partition(const __global int *in1,  // Read-Only Matrix 1
     // Burst reads on input matrices from global memory
     // Burst read for matrix A
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_size*c_size, c_size*c_size)))
     readA:
     for (int itr = 0, i = 0, j = 0; itr < size * size; itr++, j++) {
         if (j == size) {
@@ -133,6 +143,7 @@ void matmul_partition(const __global int *in1,  // Read-Only Matrix 1
 
     // Burst read for matrix B
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_size*c_size, c_size*c_size)))
     readB:
     for (int itr = 0, i = 0, j = 0; itr < size * size; itr++, j++) {
         if (j == size) {
@@ -146,11 +157,14 @@ void matmul_partition(const __global int *in1,  // Read-Only Matrix 1
     // in C. All the matrices are square matrices of the form (size x size)
     // Calculate matrix multiplication using local data buffer based on input size
     // and write results into local buffer for C
+    __attribute__((xcl_loop_tripcount(c_size, c_size)))
     arraypart1:
     for (int i = 0; i < size; i++) {
         __attribute__((xcl_pipeline_loop(1)))
+        __attribute__((xcl_loop_tripcount(c_size, c_size)))
         arraypart2 :
         for (int k = 0; k < size; k++) {
+            __attribute__((xcl_loop_tripcount(c_size, c_size)))
             arraypart3:
             for (int j = 0; j < MAX_SIZE; j++) {
                 int result = (k == 0) ? 0 : temp_sum[j];
@@ -164,6 +178,7 @@ void matmul_partition(const __global int *in1,  // Read-Only Matrix 1
     // Burst write from output matrices to global memory
     // Burst write from matrix C
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_size*c_size, c_size*c_size)))
     writeC:
     for (int itr = 0, i = 0, j = 0; itr < size * size; itr++, j++) {
         if (j == size) {

@@ -27,6 +27,10 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 
+// Tripcount identifiers
+__constant int c_min_size = (1024*1024)/64;
+__constant int c_max_size = (1024*1024*1024)/64;
+
 kernel __attribute__ ((reqd_work_group_size(1,1,1)))
 void bandwidth(__global uint16  * __restrict input0,
                __global uint16  * __restrict output0,
@@ -39,6 +43,7 @@ void bandwidth(__global uint16  * __restrict input0,
                ulong num_blocks)
 {
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_min_size, c_max_size)))
     for (ulong blockindex = 0; blockindex < num_blocks; blockindex++) {
         uint16 temp0 = input0[blockindex];
         output0[blockindex] = temp0;

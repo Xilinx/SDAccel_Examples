@@ -34,6 +34,9 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define MAX_SIZE 64
 
+// Tripcount identifiers
+__constant int c_size = MAX_SIZE;
+
 kernel __attribute__((reqd_work_group_size(1, 1, 1)))
 void mmult( __global int* in1,  //Read-only input matrix1
             __global int* in2,  //Read-only input matrix2
@@ -51,11 +54,13 @@ void mmult( __global int* in1,  //Read-only input matrix1
     //Burst reads on input matrices from DDR memory
     //Burst read for matrix local_in1 and local_in2
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_size*c_size, c_size*c_size)))
     read_in1: for(int iter = 0, i = 0, j = 0; iter < dim * dim; iter++, j++){
         if(j == dim){ j = 0; i++; }
         local_in1[i][j] = in1[iter];
     }
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_size*c_size, c_size*c_size)))
     read_in2: for(int iter = 0, i = 0, j = 0; iter < dim * dim; iter++, j++){
         if(j == dim){ j = 0; i++; }
         local_in2[i][j] = in2[iter];
@@ -65,12 +70,15 @@ void mmult( __global int* in1,  //Read-only input matrix1
     //to be executed for "loop_3" must be "dim" size. 
     //But for the pipeline to happen in the "loop_2" the
     //"loop_3" must be unrolled, to unroll the size cannot be dynamic.
-    //It gives better throughput with usage of additional resources. 
+    //It gives better throughput with usage of additional resources.
+    __attribute__((xcl_loop_tripcount(c_size, c_size)))
     loop_1: for(int i = 0; i < dim; i++){
         __attribute__((xcl_pipeline_loop(1)))
+        __attribute__((xcl_loop_tripcount(c_size, c_size)))
         loop_2: for(int j = 0; j < dim; j++){
             local_out[i][j] = 0;
             __attribute__((opencl_unroll_hint))
+            __attribute__((xcl_loop_tripcount(c_size, c_size)))
             loop_3: for(int k = 0; k < MAX_SIZE; k++){
                 local_out[i][j] += local_in1[i][k] * local_in2[k][ j];
             }
@@ -79,6 +87,7 @@ void mmult( __global int* in1,  //Read-only input matrix1
 
     //Burst write from local_out to DDR memory
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_size*c_size, c_size*c_size)))
     write_out: for(int iter = 0, i = 0, j = 0; iter < dim * dim; iter++, j++){
         if(j == dim){ j = 0; i++; }
         out[iter] = local_out[i][j];

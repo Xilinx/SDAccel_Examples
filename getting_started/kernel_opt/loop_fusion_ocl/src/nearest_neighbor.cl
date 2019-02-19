@@ -36,6 +36,9 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define MAX_DIMS 5
 
+// Tripcount identifiers
+__constant int c_len = 512;
+__constant int c_dim = 2;
 
  // This is a simple implementation of a linear search algorithm. We use two
  // loops. The outer loop cycles through each of the search space and the inner
@@ -49,17 +52,20 @@ nearest_neighbor(global int *out, global const int *points,
     int s_point[MAX_DIMS];
 
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_dim, c_dim)))
     read: 
     for (int d = 0; d < dim; ++d) {
         s_point[d] = search_point[d];
     }
 
+    __attribute__((xcl_loop_tripcount(c_len, c_len)))
     find_best:
     for (int p = 0; p < len; ++p) {
         int dist = 0;
 
         // Calculate the distance in a n-dimensional space
         __attribute__((xcl_pipeline_loop(1)))
+        __attribute__((xcl_loop_tripcount(c_dim, c_dim)))
         dist_calc:
         for (int c = 0; c < dim; ++c) {
             int dx = points[dim * p + c] - s_point[c];
@@ -73,6 +79,7 @@ nearest_neighbor(global int *out, global const int *points,
     }
 
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_dim, c_dim)))
     write_best:
     for (int c = 0; c < dim; ++c) {
         out[c] = points[best_i * dim + c];
@@ -90,6 +97,7 @@ nearest_neighbor_loop_fusion(global int *out, global const int *points,
     int s_point[MAX_DIMS];
 
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_dim, c_dim)))
     read: 
     for (int d = 0; d < dim; ++d) {
         s_point[d] = search_point[d];
@@ -103,6 +111,7 @@ nearest_neighbor_loop_fusion(global int *out, global const int *points,
     // implementation but this approach give the compiler more opportunity to
     // optimize the operations.
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_dim*c_len, c_dim*c_len)))
     find_best:
     for (int p = 0, c = 0, itr = 0; itr < iterations; itr++) {
         int dx = points[dim * p + c] - s_point[c];
@@ -122,6 +131,7 @@ nearest_neighbor_loop_fusion(global int *out, global const int *points,
         }
     }
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_dim, c_dim)))
     write_best:
     for (int c = 0; c < dim; ++c) {
         out[c] = points[best_i * dim + c];

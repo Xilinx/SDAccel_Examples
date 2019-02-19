@@ -53,6 +53,11 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   */
 
 #define N 128
+#define DATA_SIZE 1<<10
+
+// Tripcount identifiers
+__constant int c_len = DATA_SIZE;
+__constant int c_n = N;
 
  // This kernel is accessing 2 global variables and storing the result into
  // a third global variable. This type of access does not yield good
@@ -63,6 +68,7 @@ void vadd(global       int* restrict c,
           global const int* restrict b,
                  const int len)
 {
+    __attribute__((xcl_loop_tripcount(c_len, c_len)))
     vadd_loop:
     for (int x=0; x<len; ++x) {
         c[x] = a[x] + b[x];
@@ -84,22 +90,26 @@ void vadd_pipelined(global       int* restrict c,
     // multiple inner loops, the pipelining will fail. We can instead pipeline
     // the inner loops using the xcl_pipeline_loop attribute to guide the
     // compiler.
+    __attribute__((xcl_loop_tripcount(c_len/c_n, c_len/c_n)))
     for(int i = 0; i < iterations; i++) {
 
         // Pipelining loops that access only one variable is the ideal way to
         // increase the global memory bandwidth.
         read_a:
         __attribute__((xcl_pipeline_loop(1)))
+        __attribute__((xcl_loop_tripcount(c_n, c_n)))
         for (int x=0; x<N; ++x) {
             result[x] = a[i*N+x];
         }
         read_b:
         __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_loop_tripcount(c_n, c_n)))
         for (int x=0; x<N; ++x) {
             result[x] += b[i*N+x];
         }
         write:
         __attribute__((xcl_pipeline_loop(1)))
+        __attribute__((xcl_loop_tripcount(c_n, c_n)))
         for (int x=0; x<N; ++x) {
             c[i*N+x] = result[x];
         }

@@ -34,8 +34,13 @@ Description:
     512bit Datawidth using uint16 openCL vector datatype.
 *******************************************************************************/
 
+#define DATA_SIZE 16384
 #define LOCAL_MEM_SIZE 128
 #define VECTOR_SIZE     16 //   using uint16 datatype so vector size is 16
+
+// Tripcount identifiers
+__constant int c_size = LOCAL_MEM_SIZE;
+__constant int c_len = ((DATA_SIZE-1)/VECTOR_SIZE +1)/LOCAL_MEM_SIZE;
 
 /*
     Vector Addition Kernel Implementation using uint16 datatype 
@@ -61,6 +66,7 @@ void vadd(
     int size_in16 = (size-1) / VECTOR_SIZE + 1; 
 
     //Per iteration of this loop perform LOCAL_MEM_SIZE vector addition
+    __attribute__((xcl_loop_tripcount(c_len, c_len)))
     for(int i = 0; i < size_in16;  i += LOCAL_MEM_SIZE)
     {
         int chunk_size = LOCAL_MEM_SIZE;
@@ -71,12 +77,14 @@ void vadd(
 
         //burst read first vector from global memory to local memory
         v1_rd: __attribute__((xcl_pipeline_loop(1)))
+        __attribute__((xcl_loop_tripcount(c_size, c_size)))
         for (int j = 0 ; j <  chunk_size; j++){
             v1_local[j] = in1 [i + j];
         }
 
         //burst read second vector and perform vector addition
         v2_rd_add: __attribute__((xcl_pipeline_loop(1)))
+        __attribute__((xcl_loop_tripcount(c_size, c_size)))
         for (int j = 0 ; j < chunk_size; j++){
             uint16 tmpV1     = v1_local[j];
             uint16 tmpV2     = in2[i+j];
@@ -85,6 +93,7 @@ void vadd(
 
         //burst write the result
         out_wr:__attribute__((xcl_pipeline_loop(1)))
+        __attribute__((xcl_loop_tripcount(c_size, c_size)))
         for (int j = 0 ; j < chunk_size; j++)
             out[i+j] = result_local[j];
     }

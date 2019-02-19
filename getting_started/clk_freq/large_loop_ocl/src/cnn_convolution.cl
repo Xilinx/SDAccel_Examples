@@ -102,6 +102,13 @@ Kernel Description (Good Example) :
 
 #include "defns.h"
 
+// Tripcount identifiers
+__constant int c_wsize = WSize;
+__constant int c_ichan = IChan;
+__constant int c_osize = OSize;
+__constant int c_isize = ISize;
+__constant int c_ochan = OChan;
+
 void __attribute__((always_inline)) copy_weight(__global int *weight, int wgt_lcl[WInChan][WSize * WSize], int output)
 {
     // Calculate each work_item's weight matrix location 
@@ -109,6 +116,7 @@ void __attribute__((always_inline)) copy_weight(__global int *weight, int wgt_lc
     
     // Each work_item copies its weight data from DDR to local buffers
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_ichan*c_wsize*c_wsize, c_ichan*c_wsize*c_wsize)))
     readWt: 
     // To avoid automatic loop unrolling
     #pragma nounroll
@@ -125,6 +133,7 @@ void __attribute__((always_inline)) copy_output(__global int *out, int out_lcl[O
     
     // Work_item updates output filter/image in DDR
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_osize*c_osize, c_osize*c_osize)))
     writeOut: for(int itr = 0; itr < OSize * OSize; itr++) {
         out[stride + itr] = out_lcl[itr];
     }
@@ -141,12 +150,15 @@ void __attribute__((always_inline))
     int xVal_base = x * Stride - Padding;
     int yVal = y * Stride - Padding;
 
-    // Runs over filter window    
+    // Runs over filter window  
+    __attribute__((xcl_loop_tripcount(c_wsize, c_wsize)))
     convYaxis: for(int i = 0; i < WSize; i++,yVal++){
         __attribute__((xcl_pipeline_loop(1)))
         // Runs over filter window
+        __attribute__((xcl_loop_tripcount(c_wsize, c_wsize)))
         convXaxis: for(int j = 0, xVal = xVal_base ; j < WSize; j++, xVal++){
             // Runs over each of the input channels
+            __attribute__((xcl_loop_tripcount(c_ichan, c_ichan)))
             convInchan: for(int input = 0; input < IChan; input++) {
                 
                 // Convolution operation
@@ -163,9 +175,12 @@ void __attribute__((always_inline))
     
     // Summation of temporary accumulator buffer
     short sum = 0;
+    __attribute__((xcl_loop_tripcount(c_wsize, c_wsize)))
     accJ: for(int j = 0; j < WSize;j++)
         __attribute__((xcl_pipeline_loop(1)))
+        __attribute__((xcl_loop_tripcount(c_wsize, c_wsize)))
         accK: for(int k = 0; k < WSize; k++)
+            __attribute__((xcl_loop_tripcount(c_ichan, c_ichan)))
             accI: for(int i = 0; i < i_chan; i++)
                 sum += acc[i][j][k];
 
@@ -197,6 +212,7 @@ void cnn_GOOD(
     
     // Copy image data from DDR to local buffer per work group (Burst Mode)
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_ichan*c_isize*c_isize, c_ichan*c_isize*c_isize)))
     imgcopy:for(int itr = 0, i = 0, j = 0; itr < i_chan * ISize * ISize; itr++, j++){
         if(j == ISize * ISize) {j = 0; i++;}
             img_lcl[i][j] = image[itr];
@@ -223,8 +239,10 @@ void cnn_GOOD(
             
         // Burst read weight data from global to local buffer
         copy_weight(weights, wgt_lcl, output);
-
+        
+        __attribute__((xcl_loop_tripcount(c_osize, c_osize)))
         outYaxis:for(int y = 0; y < OSize; y++) {
+            __attribute__((xcl_loop_tripcount(c_osize, c_osize)))
             outXaxis:for(int x = 0; x < OSize; x++) {
                // Perform convolution for the current 'pixel'
                convolution_operation(img_lcl, wgt_lcl, out_lcl, output, y, x, i_chan);

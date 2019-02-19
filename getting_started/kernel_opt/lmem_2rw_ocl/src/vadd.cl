@@ -35,6 +35,11 @@ Description:
 *******************************************************************************/
 
 #define BUFFER_SIZE 1024
+#define DATA_SIZE 4096
+
+// Tripcount identifiers
+__constant int c_size = DATA_SIZE/BUFFER_SIZE;
+__constant int c_chunk_size = BUFFER_SIZE;
 
 /*
     Vector Addition Kernel Implementation using uint datatype 
@@ -58,6 +63,7 @@ void vadd(
 
 
     //Per iteration of this loop perform BUFFER_SIZE vector addition
+    __attribute__((xcl_loop_tripcount(c_size, c_size)))
     for(int i = 0; i < size;  i += BUFFER_SIZE)
     {
         int chunk_size = BUFFER_SIZE;
@@ -67,9 +73,11 @@ void vadd(
 
         // burst read of v1 and v2 vector from global memory
         __attribute__((xcl_pipeline_loop(1)))
+        __attribute__((xcl_loop_tripcount(c_chunk_size, c_chunk_size)))
         read1: for (int j = 0 ; j < chunk_size; j++) v1_buffer[j] = in1[i+j];
 
         __attribute__((xcl_pipeline_loop(1)))
+        __attribute__((xcl_loop_tripcount(c_chunk_size, c_chunk_size)))
         read2: for (int j = 0 ; j < chunk_size; j++) v2_buffer[j] = in2[i+j];
 
         //FPGA implementation, local array is mostly implemented as BRAM Memory block. 
@@ -84,6 +92,7 @@ void vadd(
         // it will double the performance.
         __attribute__((opencl_unroll_hint(2)))
         __attribute__((xcl_pipeline_loop(1)))
+        __attribute__((xcl_loop_tripcount(c_chunk_size, c_chunk_size)))
         vadd: for (int j = 0 ; j < chunk_size; j ++){
             //perform vector addition
             vout_buffer[j] = v1_buffer[j] + v2_buffer[j]; 
@@ -91,6 +100,7 @@ void vadd(
 
         //burst write the result
         __attribute__((xcl_pipeline_loop(1)))
+        __attribute__((xcl_loop_tripcount(c_chunk_size, c_chunk_size)))
         write: for (int j = 0 ; j < chunk_size; j++) out[i+j] = vout_buffer[j];
     }
 }
