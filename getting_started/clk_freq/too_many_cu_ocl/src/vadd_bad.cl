@@ -62,9 +62,11 @@ Kernel Description (Bad Example) :
         4. Local Buffer = 5120  ( Work_Item Load )
 */
 
-
 // Work load of each Work_Item
 #define BUFFER_SIZE 5120                
+
+// Tripcount identifiers
+__constant int c_size = BUFFER_SIZE;
 
 __kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
 void vadd_BAD(
@@ -101,12 +103,14 @@ void vadd_BAD(
         
         // Burst read for in1_lcl
         __attribute__((xcl_pipeline_loop(1)))
+        __attribute__((xcl_loop_tripcount(c_size, c_size)))
         readIn1: for(int j = 0 ; j < chunk_size; j++){
             in1_lcl[j] = in1[global_id*BUFFER_SIZE + offset + j]; 
         }
         
         // Burst read for in2_lcl
         __attribute__((xcl_pipeline_loop(1)))
+        __attribute__((xcl_loop_tripcount(c_size, c_size)))
         readIn2: for(int j = 0 ; j < chunk_size; j++){
             in2_lcl[j] = in2[global_id*BUFFER_SIZE + offset + j]; 
         }
@@ -123,6 +127,7 @@ void vadd_BAD(
 
         // Pipeline Operations
         __attribute__((xcl_pipeline_loop(1)))
+        __attribute__((xcl_loop_tripcount(c_size, c_size)))
         vadd: for(int i = 0; i < BUFFER_SIZE; i++){
             out_lcl[i] = in1_lcl[i] + in2_lcl[i];
         }
@@ -133,6 +138,7 @@ void vadd_BAD(
         
         // Burst write from out_lcl
         __attribute__((xcl_pipeline_loop(1)))
+        __attribute__((xcl_loop_tripcount(c_size, c_size)))
         writeOut: for(int j = 0 ; j < chunk_size; j++){
             out[global_id*BUFFER_SIZE + offset + j] = out_lcl[j];
         }

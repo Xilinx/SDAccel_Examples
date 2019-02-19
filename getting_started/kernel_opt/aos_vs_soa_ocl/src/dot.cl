@@ -28,6 +28,11 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 
 #define N 32
+#define VERTEX_COUNT 512
+
+// Tripcount identifiers
+__constant int c_iter = VERTEX_COUNT/N;
+__constant int c_n = N;
 
 /* Array of Structure: Regular Implementation*/
 // For dot_aos, memory is organized point by point as below:
@@ -45,18 +50,22 @@ void dot_aos(global       int*  restrict result,
     int out[N];
 
     int iterations = num_vertices / N;
+    __attribute__((xcl_loop_tripcount(c_iter, c_iter)))
     for (int i = 0; i < iterations; i++) {
         __attribute__((xcl_pipeline_loop(1)))
+        __attribute__((xcl_loop_tripcount(c_n, c_n)))
         load_pts:
         for (int j = 0; j < N; j++)
             lpts[j] = points[i*N+j];
 
         __attribute__((xcl_pipeline_loop(1)))
+        __attribute__((xcl_loop_tripcount(c_n, c_n)))
         compute:
         for (int j = 0; j < N; j++)
             out[j] = lpts[j].x * lpts[j].x + lpts[j].y * lpts[j].y + lpts[j].z * lpts[j].z;
 
         __attribute__((xcl_pipeline_loop(1)))
+        __attribute__((xcl_loop_tripcount(c_n, c_n)))
         store_r:
         for (int j = 0; j < N; j++)
             result[i*N+j] = out[j];
@@ -87,18 +96,24 @@ void dot_soa(global       int16 * restrict result,
   int16 out[N];
 
   int iterations = num_vertices / (16*N);
+  __attribute__((xcl_loop_tripcount(c_iter/16, c_iter/16)))
   for (int i = 0; i < iterations; i++) {
       __attribute__((xcl_pipeline_loop(1)))
+      __attribute__((xcl_loop_tripcount(c_n, c_n)))
       load_x: for(int j = 0; j < N; j++) lx[j] = X[i*N+j];
       __attribute__((xcl_pipeline_loop(1)))
+      __attribute__((xcl_loop_tripcount(c_n, c_n)))
       load_y: for(int j = 0; j < N; j++) ly[j] = Y[i*N+j];
       __attribute__((xcl_pipeline_loop(1)))
+      __attribute__((xcl_loop_tripcount(c_n, c_n)))
       load_z: for(int j = 0; j < N; j++) lz[j] = Z[i*N+j];
 
       __attribute__((xcl_pipeline_loop(1)))
+      __attribute__((xcl_loop_tripcount(c_n, c_n)))
       compute: for(int j = 0; j < N; j++) out[j] = lx[j] * lx[j] + ly[j] * ly[j] + lz[j] * lz[j];
 
       __attribute__((xcl_pipeline_loop(1)))
+      __attribute__((xcl_loop_tripcount(c_n, c_n)))
       store_r: for(int j = 0; j < N; j++) result[i*N+j] = out[j];
   }
 }

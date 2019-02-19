@@ -105,7 +105,15 @@ Kernel Description (Bad Example) :
         Link: http://cs231n.github.io/convolutional-networks/
 
 */
+
 #include "defns.h"
+
+// Tripcount identifiers
+__constant int c_wsize = WSize;
+__constant int c_ichan = IChan;
+__constant int c_osize = OSize;
+__constant int c_isize = ISize;
+__constant int c_ochan = OChan;
 
 __kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
 void cnn_BAD(
@@ -124,12 +132,14 @@ void cnn_BAD(
     
     // Burst Read Image
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_ichan*c_isize*c_isize, c_ichan*c_isize*c_isize)))
     readImg: for(int i = 0; i < i_chan * ISize * ISize; i++){
         img_lcl[i] = image[i];
     }
    
     // Burst Read Weights
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_ochan*c_ichan*c_wsize*c_wsize, c_ochan*c_ichan*c_wsize*c_wsize)))
     readWt: 
     // To avoid automatic loop unrolling
     #pragma nounroll
@@ -138,18 +148,24 @@ void cnn_BAD(
     }
     
     // Runs over output filters
+    __attribute__((xcl_loop_tripcount(c_ochan, c_ochan)))
     outputLoop: for(int output = 0, count = 0; output < o_chan; output++) {
         // Runs over Y-Axis of output filter
+        __attribute__((xcl_loop_tripcount(c_osize, c_osize)))
         outYAxis: for(int y = 0; y < OSize; y++) {
             // Runs over X-Axis of output filter
+            __attribute__((xcl_loop_tripcount(c_osize, c_osize)))
             outXAxis: for(int x = 0; x < OSize; x++) {
                 short acc = 0;
                 // Runs over input channel
+                __attribute__((xcl_loop_tripcount(c_ichan, c_ichan)))
                 convInchan: for(int input = 0; input < i_chan; input++) {
                     // Runs over filter window in Y-direction
+                    __attribute__((xcl_loop_tripcount(c_wsize, c_wsize)))
                     convILoop: for(int i = 0; i < WSize; i++) {
                         // Runs over filter windows in X-direction
                         __attribute__((xcl_pipeline_loop(1)))
+                        __attribute__((xcl_loop_tripcount(c_wsize, c_wsize)))
                         convJLoop: for(int j = 0; j < WSize; j++) {
                             // Calculates padding boundaries in X & Y direction
                             int xVal = x*Stride + j-Padding, yVal = y*Stride + i-Padding;
@@ -170,6 +186,7 @@ void cnn_BAD(
     
     // Burst write output
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_ochan*c_osize*c_osize, c_ochan*c_osize*c_osize)))
     writeOut: for(int i = 0; i < o_chan * OSize * OSize; i++) {
         out[i] = out_lcl[i];
     }

@@ -35,8 +35,14 @@ Description:
 
 *******************************************************************************/
 
+// Define array size 
+#define TEST_MATRIX_DIM 256
+
 // Define max local buffer size
 #define MAX_MATRIX_DIM 256
+
+// Tripcount identifiers
+__constant int c_size = TEST_MATRIX_DIM;
 
 __kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
 void mmult(__global int *a, __global int *b, __global int *c, int dim){
@@ -52,6 +58,7 @@ void mmult(__global int *a, __global int *b, __global int *c, int dim){
     // Read data from global memory and write into local buffer
     int x = 0, y = 0;
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_size*c_size, c_size*c_size)))
     read_data_a: for (int i = 0 ; i < matrix_size ; i++){
         int tmpData_a = a[i];
         bufa[x][y] = tmpData_a;
@@ -65,6 +72,7 @@ void mmult(__global int *a, __global int *b, __global int *c, int dim){
   
     // Read data from global memory and write into local buffer
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_size*c_size, c_size*c_size)))
     read_data_b: for (int i = 0, x = 0, y = 0; i < matrix_size ; i++){
         int tmpData_b = b[i];
         bufb[x][y] = tmpData_b;
@@ -78,10 +86,13 @@ void mmult(__global int *a, __global int *b, __global int *c, int dim){
   
     // Calculate matrix multiplication using local data buffer based on 
     // input size and write results into local buffer
+    __attribute__((xcl_loop_tripcount(c_size, c_size)))
     matrix_mult: for (int row = 0; row < dim; row++) {
+        __attribute__((xcl_loop_tripcount(c_size, c_size)))
         for (int col = 0; col < dim; col++) {
             int result = 0;
             __attribute__((xcl_pipeline_loop(1)))
+            __attribute__((xcl_loop_tripcount(c_size, c_size)))
             for (int k = 0; k < dim; k++) {
                 result += bufa[row][k] * bufb[k][col];
             }
@@ -92,6 +103,7 @@ void mmult(__global int *a, __global int *b, __global int *c, int dim){
     // Write results from local buffer to global memory
     int m = 0, n = 0;
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_size*c_size, c_size*c_size)))
     write_data: for (int i = 0 ; i < matrix_size ; i++){
         int tmpData_c = bufc[m][n];
         c[i] = tmpData_c;
