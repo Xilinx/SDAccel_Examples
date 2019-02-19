@@ -78,13 +78,13 @@ all: check-devices $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
 exe: $(EXECUTABLE)
 
 # Building kernel
-$(XCLBIN)/madd.$(TARGET).$(DSA).xo: src/matrix_ops.cl
+$(XCLBIN)/madd.$(TARGET).$(DSA).xo: src/madd.cpp
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_matrix_ops) -c -k madd -I'$(<D)' -o'$@' '$<'
-$(XCLBIN)/mscale.$(TARGET).$(DSA).xo: src/matrix_ops.cl
+$(XCLBIN)/mscale.$(TARGET).$(DSA).xo: src/mscale.cpp
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_matrix_ops) -c -k mscale -I'$(<D)' -o'$@' '$<'
-$(XCLBIN)/mmult.$(TARGET).$(DSA).xo: src/matrix_ops.cl
+$(XCLBIN)/mmult.$(TARGET).$(DSA).xo: src/mmult.cpp
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_matrix_ops) -c -k mmult -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/matrix_ops.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_matrix_ops_OBJS)
