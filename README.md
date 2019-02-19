@@ -44,7 +44,7 @@ For more information check here:
 For questions and to get help on this project or your own projects, visit the [SDAccel Forums][].
 
 
-[Hello World]: getting_started/host/helloworld_c/
+[Hello World]: getting_started/hello_world/
 [SDAccel Forums]: https://forums.xilinx.com/t5/SDAccel/bd-p/SDx
 [SDAccel User Guides]: http://www.xilinx.com/support/documentation-navigation/development-tools/software-development/sdaccel.html?resultsTablePreSelect=documenttype:SeeAll#documentation
 

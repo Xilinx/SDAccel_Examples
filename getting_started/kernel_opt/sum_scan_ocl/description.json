@@ -1,9 +1,11 @@
 {
     "runtime": ["OpenCL"],
-    "example" : "Parallel Prefix Sum",
+    "example" : "Parallel Prefix Sum (CL)",
     "overview" : [
-        "Example of parallel prefix sum"
+        "This is a simple example to explain the usage of pipeline and array partitioning for designing parallel prefix sum "
     ],
+    "key_concepts": [ "Kernel Optimization", "Array Partitioning", "Pipeline"],
+    "keywords": [ "xcl_array_partition", "xcl_pipeline_loop"],
     "os": [
         "Linux"
     ],

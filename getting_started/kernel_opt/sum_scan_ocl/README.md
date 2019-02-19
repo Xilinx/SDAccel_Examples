@@ -1,4 +1,4 @@
-Parallel Prefix Sum
+Parallel Prefix Sum (CL)
 ======================
 
 This README file contains the following sections:
@@ -15,7 +15,11 @@ This README file contains the following sections:
 
 
 ## 1. OVERVIEW
-Example of parallel prefix sum
+This is a simple example to explain the usage of pipeline and array partitioning for designing parallel prefix sum 
+
+***KEY CONCEPTS:*** Kernel Optimization, Array Partitioning, Pipeline
+
+***KEYWORDS:*** xcl_array_partition, xcl_pipeline_loop
 
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
