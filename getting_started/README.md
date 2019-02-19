@@ -18,7 +18,6 @@ S.No.   | Category  | Description
 7 | [clk_freq][]      |Improving Kernel Clock Frequency through Optimized code.
 8 | [debug][]      |Debugging and Profiling of Kernel.
 9 | [rtl_kernel][]      |RTL Kernel Based Examples
-10 | [misc][]      |OpenCL miscellaneous Examples
 
  __Examples Table__ 
 
@@ -77,6 +76,7 @@ Example        | Description           | Key Concepts / Keywords
 [kernel_opt/partition_cyclicblock_ocl/][]|This example shows how to use array block and cyclic partitioning to improve performance of a kernel|__Key__ __Concepts__<br> - Kernel Optimization<br> - Array Partitioning<br> - Block Partition<br> - Cyclic Partition<br>__Keywords__<br> - xcl_array_partition<br> - cyclic<br> - block
 [kernel_opt/shift_register_c/][]|This example demonstrates how to shift values in registers in each clock cycle|__Key__ __Concepts__<br> - Kernel Optimization<br> - Shift Register<br> - FIR<br>__Keywords__<br> - #pragma HLS ARRAY_PARTITION
 [kernel_opt/shift_register_ocl/][]|This example demonstrates how to shift values in registers in each clock cycle|__Key__ __Concepts__<br> - Kernel Optimization<br> - Shift Register<br> - FIR<br>__Keywords__<br> - xcl_array_partition<br> - getprofilingInfo()
+[kernel_opt/sum_scan_ocl/][]|This is a simple example to explain the usage of pipeline and array partitioning for designing parallel prefix sum |__Key__ __Concepts__<br> - Kernel Optimization<br> - Array Partitioning<br> - Pipeline<br>__Keywords__<br> - xcl_array_partition<br> - xcl_pipeline_loop
 [kernel_opt/systolic_array_c/][]|This is a simple example of matrix multiplication (Row x Col) to help developers learn systolic array based algorithm design. Note : Systolic array based algorithm design is well suited for FPGA.|
 [kernel_opt/systolic_array_ocl/][]|This is a simple example of matrix multiplication (Row x Col) to help developers learn systolic array based algorithm design. Note: Systolic array based algorithm design is well suited for FPGA.|
 [kernel_opt/vectorization_memorycoalescing_ocl/][]|This example is a simple OpenCL application which highlights the vectorization concept. It provides a basis for calculating the bandwidth utilization when the compiler looking to vectorize.|__Key__ __Concepts__<br> - Vectorization<br> - Memory Coalescing<br>__Keywords__<br> - vec_type_hint
@@ -100,9 +100,6 @@ Example        | Description           | Key Concepts / Keywords
 [rtl_kernel/rtl_vadd_2kernels/][]|This example has two RTL Kernels. Both Kernel_0 and Kernel_1 perform vector addition. The Kernel_1 reads the output from Kernel_0 as one of two inputs.|__Key__ __Concepts__<br> - Multiple RTL Kernels<br>
 [rtl_kernel/rtl_vadd_hw_debug/][]|This is an example that showcases the Hardware Debug of Vector Addition RTL Kernel in Hardware.|__Key__ __Concepts__<br> - RTL Kernel Debug<br>
 [rtl_kernel/rtl_vadd_mixed_cl_vadd/][]|This example has one RTL kernel and one CL kernel. Both RTL kernel and CL kernel perform vector addition. The CL kernel reads the output from RTL kernel as one of two inputs.|__Key__ __Concepts__<br> - Mixed Kernels<br>
-[misc/sum_scan/][]|Example of parallel prefix sum|
-[misc/vadd/][]|Simple example of vector addition.|
-[misc/vdotprod/][]|Simple example of vector dot-product.|
 
 [hello_world]:hello_world
 [hello_world/helloworld_c/]:hello_world/helloworld_c/
@@ -162,6 +159,7 @@ Example        | Description           | Key Concepts / Keywords
 [kernel_opt/partition_cyclicblock_ocl/]:kernel_opt/partition_cyclicblock_ocl/
 [kernel_opt/shift_register_c/]:kernel_opt/shift_register_c/
 [kernel_opt/shift_register_ocl/]:kernel_opt/shift_register_ocl/
+[kernel_opt/sum_scan_ocl/]:kernel_opt/sum_scan_ocl/
 [kernel_opt/systolic_array_c/]:kernel_opt/systolic_array_c/
 [kernel_opt/systolic_array_ocl/]:kernel_opt/systolic_array_ocl/
 [kernel_opt/vectorization_memorycoalescing_ocl/]:kernel_opt/vectorization_memorycoalescing_ocl/
@@ -189,7 +187,3 @@ Example        | Description           | Key Concepts / Keywords
 [rtl_kernel/rtl_vadd_2kernels/]:rtl_kernel/rtl_vadd_2kernels/
 [rtl_kernel/rtl_vadd_hw_debug/]:rtl_kernel/rtl_vadd_hw_debug/
 [rtl_kernel/rtl_vadd_mixed_cl_vadd/]:rtl_kernel/rtl_vadd_mixed_cl_vadd/
-[misc]:misc
-[misc/sum_scan/]:misc/sum_scan/
-[misc/vadd/]:misc/vadd/
-[misc/vdotprod/]:misc/vdotprod/
