@@ -9,20 +9,23 @@ __Prerequisites__
 
 S.No.   | Category  | Description 
 --------|-----------|-----------------------------------------
-1 | [cpu_to_fpga][]      |Labs to showcase the cpu to fpga conversion with kernel optimizations.
-2 | [host][]      |OpenCL host code for optimized interfacing with Xilinx Devices
-3 | [kernel_to_gmem][]      |Kernel to Global Memory Access Optimization.
-4 | [kernel_opt][]      |Kernel Optimization for performance
-5 | [dataflow][]      |Kernel Optimization through Macro Level Pipelining
-6 | [clk_freq][]      |Improving Kernel Clock Frequency through Optimized code.
-7 | [debug][]      |Debugging and Profiling of Kernel.
-8 | [rtl_kernel][]      |RTL Kernel Based Examples
-9 | [misc][]      |OpenCL miscellaneous Examples
+1 | [hello_world][]      |Hello World examples for new users
+2 | [cpu_to_fpga][]      |Labs to showcase the cpu to fpga conversion with kernel optimizations.
+3 | [host][]      |OpenCL host code for optimized interfacing with Xilinx Devices
+4 | [kernel_to_gmem][]      |Kernel to Global Memory Access Optimization.
+5 | [kernel_opt][]      |Kernel Optimization for performance
+6 | [dataflow][]      |Kernel Optimization through Macro Level Pipelining
+7 | [clk_freq][]      |Improving Kernel Clock Frequency through Optimized code.
+8 | [debug][]      |Debugging and Profiling of Kernel.
+9 | [rtl_kernel][]      |RTL Kernel Based Examples
+10 | [misc][]      |OpenCL miscellaneous Examples
 
  __Examples Table__ 
 
 Example        | Description           | Key Concepts / Keywords 
 ---------------|-----------------------|-------------------------
+[hello_world/helloworld_c/][]|This is simple example of vector addition to describe how to use HLS kernels in Sdx Environment. This example highlights the concepts like PIPELINE which increases the kernel performance |__Key__ __Concepts__<br> - HLS C Kernel<br> - OpenCL Host APIs<br>__Keywords__<br> - gmem<br> - bundle<br> - #pragma HLS INTERFACE<br> - m_axi<br> - s_axi4lite
+[hello_world/helloworld_ocl/][]|This example is a simple OpenCL application. It will highlight the basic flow of an OpenCL application.|__Key__ __Concepts__<br> - OpenCL API<br>
 [cpu_to_fpga/00_cpu/][]|This is a simple example of matrix multiplication (Row x Col).|
 [cpu_to_fpga/01_ocl/][]|This is a simple example of OpenCL matrix multiplication (Row x Col).|__Key__ __Concepts__<br> - OpenCL APIs<br>
 [cpu_to_fpga/02_lmem_ocl/][]|This is a simple example of matrix multiplication (Row x Col) to demonstrate how to reduce number of memory accesses using local memory.|__Key__ __Concepts__<br> - Kernel Optimization<br> - Local Memory<br>
@@ -35,8 +38,6 @@ Example        | Description           | Key Concepts / Keywords
 [host/device_query_oclpp/][]|This Example prints the OpenCL properties of the platform and its devices using OpenCLPP APIs. It also displays the limits and capabilities of the hardware.|__Key__ __Concepts__<br> - OpenCL API<br> - Querying device properties<br>
 [host/errors_ocl/][]|This example discuss the different reasons for errors in OpenCL and how to handle them at runtime.|__Key__ __Concepts__<br> - OpenCL API<br> - Error handling<br>__Keywords__<br> - CL_SUCCESS<br> - CL_DEVICE_NOT_FOUND<br> - CL_DEVICE_NOT_AVAILABLE
 [host/errors_oclpp/][]|This example discuss the different reasons for errors in OpenCL C++ and how to handle them at runtime.|__Key__ __Concepts__<br> - OpenCL C++ API<br> - Error handling<br>__Keywords__<br> - CL_SUCCESS<br> - CL_DEVICE_NOT_FOUND<br> - CL_DEVICE_NOT_AVAILABLE<br> - CL_INVALID_VALUE<br> - CL_INVALID_KERNEL_NAME<br> - CL_INVALID_BUFFER_SIZE
-[host/helloworld_c/][]|This is simple example of vector addition to describe how to use HLS kernels in Sdx Environment. This example highlights the concepts like PIPELINE which increases the kernel performance |__Key__ __Concepts__<br> - HLS C Kernel<br> - OpenCL Host APIs<br>__Keywords__<br> - gmem<br> - bundle<br> - #pragma HLS INTERFACE<br> - m_axi<br> - s_axi4lite
-[host/helloworld_ocl/][]|This example is a simple OpenCL application. It will highlight the basic flow of an OpenCL application.|__Key__ __Concepts__<br> - OpenCL API<br>
 [host/host_global_bandwidth/][]|Host to global memory bandwidth test|
 [host/kernel_swap_ocl/][]|This example shows how host can swap the kernels and share same buffer between two kernels which are exist in separate binary containers. Dynamic platforms does not persist the buffer data so host has to migrate data from device to host memory before swapping the next kernel. After kernel swap, host has to migrate the buffer back to device.|__Key__ __Concepts__<br> - Handling Buffer sharing across multiple binaries<br> - Multiple Kernel Binaries<br>__Keywords__<br> - clEnqueueMigrateMemObjects()<br> - CL_MIGRATE_MEM_OBJECT_HOST
 [host/multiple_devices_ocl/][]|This example show how to take advantage of multiple FPGAs on a system. It will show how to initialized an OpenCL context, allocate memory on the two devices and execute a kernel on each FPGA.|__Key__ __Concepts__<br> - OpenCL API<br> - Multi-FPGA Execution<br> - Event Handling<br>__Keywords__<br> - cl_device_id<br> - clGetDeviceIDs()
@@ -103,6 +104,9 @@ Example        | Description           | Key Concepts / Keywords
 [misc/vadd/][]|Simple example of vector addition.|
 [misc/vdotprod/][]|Simple example of vector dot-product.|
 
+[hello_world]:hello_world
+[hello_world/helloworld_c/]:hello_world/helloworld_c/
+[hello_world/helloworld_ocl/]:hello_world/helloworld_ocl/
 [cpu_to_fpga]:cpu_to_fpga
 [cpu_to_fpga/00_cpu/]:cpu_to_fpga/00_cpu/
 [cpu_to_fpga/01_ocl/]:cpu_to_fpga/01_ocl/
@@ -117,8 +121,6 @@ Example        | Description           | Key Concepts / Keywords
 [host/device_query_oclpp/]:host/device_query_oclpp/
 [host/errors_ocl/]:host/errors_ocl/
 [host/errors_oclpp/]:host/errors_oclpp/
-[host/helloworld_c/]:host/helloworld_c/
-[host/helloworld_ocl/]:host/helloworld_ocl/
 [host/host_global_bandwidth/]:host/host_global_bandwidth/
 [host/kernel_swap_ocl/]:host/kernel_swap_ocl/
 [host/multiple_devices_ocl/]:host/multiple_devices_ocl/
