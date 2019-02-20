@@ -1,6 +1,6 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Copy Buffer (CL)",
+    "example": "Copy Buffer (HLS C/C++ Kernel)",
     "overview": [
         "This Copy Buffer example demonstrate how one buffer can be copied from another buffer."
     ],
@@ -18,7 +18,7 @@
         "accelerators": [
         {
             "name": "vector_add", 
-            "location": "src/vector_addition.cl"
+            "location": "src/vector_addition.cpp"
         }
        ]
      }
