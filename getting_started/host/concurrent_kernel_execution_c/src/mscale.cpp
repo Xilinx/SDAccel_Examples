@@ -27,13 +27,6 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 
-/*
-  Please see host.cpp
-
-  NOTE: This kernel is not optimized and will not perform well in real world
-  applications.
-*/
-
 #define MAX_DIM 64
 
 extern "C" {
