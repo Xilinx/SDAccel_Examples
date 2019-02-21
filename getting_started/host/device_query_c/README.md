@@ -1,4 +1,4 @@
-Data Transfer (CL)
+Device Query (C)
 ======================
 
 This README file contains the following sections:
@@ -15,11 +15,11 @@ This README file contains the following sections:
 
 
 ## 1. OVERVIEW
-This example illustrates several ways to use the OpenCL API to transfer data to and from the FPGA
+This example prints the OpenCL properties of the platform and its devices. It also displays the limits and capabilities of the hardware.
 
-***KEY CONCEPTS:*** OpenCL API, Data Transfer, Write Buffers, Read Buffers, Map Buffers, Async Memcpy
+***KEY CONCEPTS:*** OpenCL API, Querying device properties
 
-***KEYWORDS:*** enqueueWriteBuffer(), enqueueReadBuffer(), enqueueMapBuffer(), enqueueUnmapMemObject(), enqueueMigrateMemObjects()
+***KEYWORDS:*** clGetPlatformIDs(), clGetPlatformInfo(), clGetDeviceIDs(), clGetDeviceInfo()
 
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
@@ -51,7 +51,6 @@ README.md
 description.json
 qor.json
 sdaccel.ini
-src/dummy_kernel.cl
 src/host.cpp
 utils.mk
 ```
@@ -98,7 +97,7 @@ emconfigutil --platform 'xilinx_vcu1525_dynamic' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./data_transfer ./xclbin/dummy_kernel.<emulation target>.<device name>.xclbin
+./device_query
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card

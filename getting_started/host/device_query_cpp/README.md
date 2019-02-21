@@ -1,4 +1,4 @@
-Device Query (OCLPP)
+Device Query (CPP)
 ======================
 
 This README file contains the following sections:
@@ -15,7 +15,7 @@ This README file contains the following sections:
 
 
 ## 1. OVERVIEW
-This Example prints the OpenCL properties of the platform and its devices using OpenCLPP APIs. It also displays the limits and capabilities of the hardware.
+This Example prints the OpenCL properties of the platform and its devices using OpenCL CPP APIs. It also displays the limits and capabilities of the hardware.
 
 ***KEY CONCEPTS:*** OpenCL API, Querying device properties
 

@@ -1,6 +1,6 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Data Transfer (CL)",
+    "example": "Data Transfer (HLS C/C++ Kernel)",
     "overview": [
         "This example illustrates several ways to use the OpenCL API to transfer data to and from the FPGA"
     ],
@@ -20,7 +20,7 @@
             "accelerators": [
                 {
                     "name": "dummy_kernel",
-                    "location": "src/dummy_kernel.cl"
+                    "location": "src/dummy_kernel.cpp"
                 }    
             ]
         }
