@@ -76,7 +76,7 @@ all: check-devices $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
 exe: $(EXECUTABLE)
 
 # Building kernel
-$(XCLBIN)/dummy_kernel.$(TARGET).$(DSA).xo: src/dummy_kernel.cl
+$(XCLBIN)/dummy_kernel.$(TARGET).$(DSA).xo: src/dummy_kernel.cpp
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_dummy_kernel) -c -k dummy_kernel -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/dummy_kernel.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_dummy_kernel_OBJS)

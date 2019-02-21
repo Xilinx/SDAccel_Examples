@@ -1,4 +1,4 @@
-Data Transfer (CL)
+Data Transfer (HLS C/C++ Kernel)
 ======================
 
 This README file contains the following sections:
@@ -51,7 +51,7 @@ README.md
 description.json
 qor.json
 sdaccel.ini
-src/dummy_kernel.cl
+src/dummy_kernel.cpp
 src/host.cpp
 utils.mk
 ```
