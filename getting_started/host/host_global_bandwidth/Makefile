@@ -76,7 +76,7 @@ all: check-devices $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
 exe: $(EXECUTABLE)
 
 # Building kernel
-$(XCLBIN)/bandwidth.$(TARGET).$(DSA).xo: src/kernel.cl
+$(XCLBIN)/bandwidth.$(TARGET).$(DSA).xo: src/kernel.cpp
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_host_global) -c -k bandwidth -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/krnl_host_global.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_host_global_OBJS)

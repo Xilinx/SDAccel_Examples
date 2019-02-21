@@ -26,14 +26,20 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
-__kernel 
-__attribute__ ((reqd_work_group_size(1,1,1)))
-void bandwidth(__global uint *buffer0, __global uint *buffer1)
+
+extern "C" {
+void bandwidth(unsigned int *buffer0, unsigned int *buffer1)
 {
+#pragma HLS INTERFACE m_axi port=buffer0 offset=slave bundle=gmem
+#pragma HLS INTERFACE m_axi port=buffer1 offset=slave bundle=gmem
+
+#pragma HLS INTERFACE s_axilite port=buffer0 bundle=control
+#pragma HLS INTERFACE s_axilite port=buffer1 bundle=control
+#pragma HLS INTERFACE s_axilite port=return bundle=control
 
     //Intentional empty kernel as this example doesn't require actual 
     //kernel to work. 
 
 }
-
+}
 
