@@ -28,30 +28,51 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 
 #define BUFFER_SIZE 256
-kernel __attribute__((reqd_work_group_size(1, 1, 1)))
-void vadd(global int* c, global const int* a, global const int* b, const int len)
+#define DATA_SIZE 1024
+
+//TRIPCOUNT indentifier
+const unsigned int c_len = DATA_SIZE/BUFFER_SIZE;
+const unsigned int c_size = BUFFER_SIZE;
+
+extern "C" {
+void vadd(int* c,
+                int* a,
+                int* b,
+                const int len)
 {
-    // global keyword qualifier indicates that the variable is an array residing in
-    // the global memory storage of the FPGA device
-    //
-    // Array's c, a and b are supposed to be of same length
+#pragma HLS INTERFACE m_axi port=c offset=slave bundle=gmem
+#pragma HLS INTERFACE m_axi port=a offset=slave bundle=gmem
+#pragma HLS INTERFACE m_axi port=b offset=slave bundle=gmem
+
+#pragma HLS INTERFACE s_axilite port=c bundle=control
+#pragma HLS INTERFACE s_axilite port=a bundle=control
+#pragma HLS INTERFACE s_axilite port=b bundle=control
+#pragma HLS INTERFACE s_axilite port=len bundle=control
+#pragma HLS INTERFACE s_axilite port=return bundle=control
 
     int arrayA[BUFFER_SIZE];
     int arrayB[BUFFER_SIZE];
-    for (int i = 0 ; i < len ; i += BUFFER_SIZE)
-    {
+    for (int i = 0 ; i < len ; i += BUFFER_SIZE) {
+    #pragma HLS LOOP_TRIPCOUNT min=c_len max=c_len
         int size = BUFFER_SIZE;
         if (i + size > len) size = len - i;
-        __attribute__((xcl_pipeline_loop(1)))
         readA: for (int j = 0 ; j < size ; j++) {
-                arrayA[j] = a[i+j]; }
+        #pragma HLS PIPELINE II=1
+        #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
+                arrayA[j] = a[i+j]; 
+        }
 
-        __attribute__((xcl_pipeline_loop(1)))
         readB: for (int j = 0 ; j < size ; j++) {
-                arrayB[j] = b[i+j]; }
+        #pragma HLS PIPELINE II=1
+        #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
+                arrayB[j] = b[i+j]; 
+        }
 
-        __attribute__((xcl_pipeline_loop(1)))
         vadd_writeC: for (int j = 0 ; j < size ; j++) {
-                c[i+j] = arrayA[j] + arrayB[j]; }
+        #pragma HLS PIPELINE II=1
+        #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
+                c[i+j] = arrayA[j] + arrayB[j]; 
+        }
     }
+}
 }

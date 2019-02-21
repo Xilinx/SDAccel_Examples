@@ -1,6 +1,6 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Multiple FPGA Devices Execution Concurrently (CL)",
+    "example": "Multiple FPGA Devices Execution Concurrently (HLS C/C++ Kernel)",
     "overview": [
         "This example show how to take advantage of multiple FPGAs on a system. It will show how to initialized an OpenCL context, allocate memory on the two devices and execute a kernel on each FPGA."
     ],
@@ -21,7 +21,7 @@
         "accelerators": [
         {
             "name": "vadd", 
-            "location": "src/vector_addition.cl"
+            "location": "src/vector_addition.cpp"
         }
        ]
      }            

@@ -1,4 +1,4 @@
-Multiple FPGA Devices Execution Concurrently (CL)
+Multiple FPGA Devices Execution Concurrently (HLS C/C++ Kernel)
 ======================
 
 This README file contains the following sections:
@@ -52,7 +52,7 @@ description.json
 qor.json
 sdaccel.ini
 src/host.cpp
-src/vector_addition.cl
+src/vector_addition.cpp
 utils.mk
 ```
 
