@@ -1,4 +1,4 @@
-Device Query (CL)
+Device Query (C)
 ======================
 
 This README file contains the following sections:
