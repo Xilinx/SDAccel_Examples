@@ -51,8 +51,8 @@ description.json
 qor.json
 sdaccel.ini
 src/host.cpp
-src/krnl_vadd.cl
-src/krnl_vmul.cl
+src/krnl_vadd.cpp
+src/krnl_vmul.cpp
 utils.mk
 ```
 

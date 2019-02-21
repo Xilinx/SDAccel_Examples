@@ -20,7 +20,7 @@
             "accelerators": [
                 {
                     "name": "krnl_vmul", 
-                    "location": "src/krnl_vmul.cl", 
+                    "location": "src/krnl_vmul.cpp", 
                     "container": "krnl_vmul"
                 }
             ]
@@ -30,7 +30,7 @@
             "accelerators": [
                 {
                     "name": "krnl_vadd", 
-                    "location": "src/krnl_vadd.cl", 
+                    "location": "src/krnl_vadd.cpp", 
                     "container": "krnl_vadd"
                 }
             ]
