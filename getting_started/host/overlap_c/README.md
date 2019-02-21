@@ -1,4 +1,4 @@
-Overlap Host and OpenCL kernels (CL)
+Overlap Host and HLS kernels (C)
 ======================
 
 This README file contains the following sections:
@@ -52,7 +52,7 @@ description.json
 qor.json
 sdaccel.ini
 src/host.cpp
-src/vector_addition.cl
+src/vector_addition.cpp
 utils.mk
 ```
 

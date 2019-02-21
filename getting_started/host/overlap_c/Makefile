@@ -76,7 +76,7 @@ all: check-devices $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
 exe: $(EXECUTABLE)
 
 # Building kernel
-$(XCLBIN)/vadd.$(TARGET).$(DSA).xo: src/vector_addition.cl
+$(XCLBIN)/vadd.$(TARGET).$(DSA).xo: src/vector_addition.cpp
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_vector_addition) -c -k vadd -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/vector_addition.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_vector_addition_OBJS)
