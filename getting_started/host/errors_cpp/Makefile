@@ -35,7 +35,7 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
-BUILD_DIR_krnl_host_global = $(BUILD_DIR)/krnl_host_global
+BUILD_DIR_vector_addition = $(BUILD_DIR)/vector_addition
 
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
@@ -59,13 +59,13 @@ LDFLAGS += -lrt -lstdc++
 CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 
 
-EXECUTABLE = host_global
-CMD_ARGS = $(XCLBIN)/krnl_host_global.$(TARGET).$(DSA).xclbin
+EXECUTABLE = errors
+CMD_ARGS = $(XCLBIN)/vector_addition.$(TARGET).$(DSA).xclbin
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
-BINARY_CONTAINERS += $(XCLBIN)/krnl_host_global.$(TARGET).$(DSA).xclbin
-BINARY_CONTAINER_krnl_host_global_OBJS += $(XCLBIN)/bandwidth.$(TARGET).$(DSA).xo
+BINARY_CONTAINERS += $(XCLBIN)/vector_addition.$(TARGET).$(DSA).xclbin
+BINARY_CONTAINER_vector_addition_OBJS += $(XCLBIN)/vector_add.$(TARGET).$(DSA).xo
 
 CP = cp -rf
 
@@ -76,12 +76,12 @@ all: check-devices $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
 exe: $(EXECUTABLE)
 
 # Building kernel
-$(XCLBIN)/bandwidth.$(TARGET).$(DSA).xo: src/kernel.cpp
+$(XCLBIN)/vector_add.$(TARGET).$(DSA).xo: src/vector_addition.cpp
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_host_global) -c -k bandwidth -I'$(<D)' -o'$@' '$<'
-$(XCLBIN)/krnl_host_global.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_host_global_OBJS)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_vector_addition) -c -k vector_add -I'$(<D)' -o'$@' '$<'
+$(XCLBIN)/vector_addition.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_vector_addition_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_host_global) -l $(LDCLFLAGS) --nk bandwidth:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_vector_addition) -l $(LDCLFLAGS) --nk vector_add:1 -o'$@' $(+)
 
 # Building Host
 $(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
@@ -93,15 +93,11 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
-ifeq ($(findstring xilinx_u280-es1_xdma, $(DEVICE)), xilinx_u280-es1_xdma)
-$(error Nothing to be done for make)
-endif
-
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/krnl_host_global.$(TARGET).$(DSA).xclbin
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/vector_addition.$(TARGET).$(DSA).xclbin
 else
-	 ./$(EXECUTABLE) $(XCLBIN)/krnl_host_global.$(TARGET).$(DSA).xclbin
+	 ./$(EXECUTABLE) $(XCLBIN)/vector_addition.$(TARGET).$(DSA).xclbin
 endif
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 
@@ -120,4 +116,4 @@ clean:
 cleanall: clean
 	-$(RMDIR) $(XCLBIN)
 	-$(RMDIR) _x.*
-	-$(RMDIR) ./metric1.csv 
+

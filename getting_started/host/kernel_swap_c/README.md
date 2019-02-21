@@ -1,4 +1,4 @@
-host_global
+Vector Add - Vector Multiplication for XPR Devices
 ======================
 
 This README file contains the following sections:
@@ -15,7 +15,11 @@ This README file contains the following sections:
 
 
 ## 1. OVERVIEW
-Host to global memory bandwidth test
+This example shows how host can swap the kernels and share same buffer between two kernels which are exist in separate binary containers. Dynamic platforms does not persist the buffer data so host has to migrate data from device to host memory before swapping the next kernel. After kernel swap, host has to migrate the buffer back to device.
+
+***KEY CONCEPTS:*** Handling Buffer sharing across multiple binaries, Multiple Kernel Binaries
+
+***KEYWORDS:*** clEnqueueMigrateMemObjects(), CL_MIGRATE_MEM_OBJECT_HOST
 
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
@@ -41,14 +45,14 @@ make DEVICES=<.xpfm file path> all
 Application code is located in the src directory. Accelerator binary files will be compiled to the xclbin directory. The xclbin directory is required by the Makefile and its contents will be filled during compilation. A listing of all the files in this example is shown below
 
 ```
-.gitignore
 Makefile
 README.md
 description.json
 qor.json
 sdaccel.ini
 src/host.cpp
-src/kernel.cpp
+src/krnl_vadd.cpp
+src/krnl_vmul.cpp
 utils.mk
 ```
 
@@ -94,7 +98,7 @@ emconfigutil --platform 'xilinx_vcu1525_dynamic' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./host_global ./xclbin/krnl_host_global.<emulation target>.<device name>.xclbin
+./vmulvadd ./xclbin/krnl_vmul.<emulation target>.<device name>.xclbin ./xclbin/krnl_vadd.<emulation target>.<device name>.xclbin
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card

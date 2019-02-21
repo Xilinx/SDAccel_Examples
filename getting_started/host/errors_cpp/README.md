@@ -1,4 +1,4 @@
-host_global
+Error Handling (CPP)
 ======================
 
 This README file contains the following sections:
@@ -15,7 +15,11 @@ This README file contains the following sections:
 
 
 ## 1. OVERVIEW
-Host to global memory bandwidth test
+This example discuss the different reasons for errors in OpenCL C++ and how to handle them at runtime.
+
+***KEY CONCEPTS:*** OpenCL C++ API, Error handling
+
+***KEYWORDS:*** CL_SUCCESS, CL_DEVICE_NOT_FOUND, CL_DEVICE_NOT_AVAILABLE, CL_INVALID_VALUE, CL_INVALID_KERNEL_NAME, CL_INVALID_BUFFER_SIZE
 
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
@@ -41,14 +45,13 @@ make DEVICES=<.xpfm file path> all
 Application code is located in the src directory. Accelerator binary files will be compiled to the xclbin directory. The xclbin directory is required by the Makefile and its contents will be filled during compilation. A listing of all the files in this example is shown below
 
 ```
-.gitignore
 Makefile
 README.md
 description.json
 qor.json
 sdaccel.ini
 src/host.cpp
-src/kernel.cpp
+src/vector_addition.cpp
 utils.mk
 ```
 
@@ -94,7 +97,7 @@ emconfigutil --platform 'xilinx_vcu1525_dynamic' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./host_global ./xclbin/krnl_host_global.<emulation target>.<device name>.xclbin
+./errors ./xclbin/vector_addition.<emulation target>.<device name>.xclbin
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card

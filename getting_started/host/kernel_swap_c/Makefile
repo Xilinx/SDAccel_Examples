@@ -35,7 +35,8 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
-BUILD_DIR_krnl_host_global = $(BUILD_DIR)/krnl_host_global
+BUILD_DIR_krnl_vmul = $(BUILD_DIR)/krnl_vmul
+BUILD_DIR_krnl_vadd = $(BUILD_DIR)/krnl_vadd
 
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
@@ -59,13 +60,16 @@ LDFLAGS += -lrt -lstdc++
 CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 
 
-EXECUTABLE = host_global
-CMD_ARGS = $(XCLBIN)/krnl_host_global.$(TARGET).$(DSA).xclbin
+
+EXECUTABLE = vmulvadd
+CMD_ARGS = $(XCLBIN)/krnl_vmul.$(TARGET).$(DSA).xclbin $(XCLBIN)/krnl_vadd.$(TARGET).$(DSA).xclbin
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
-BINARY_CONTAINERS += $(XCLBIN)/krnl_host_global.$(TARGET).$(DSA).xclbin
-BINARY_CONTAINER_krnl_host_global_OBJS += $(XCLBIN)/bandwidth.$(TARGET).$(DSA).xo
+BINARY_CONTAINERS += $(XCLBIN)/krnl_vmul.$(TARGET).$(DSA).xclbin
+BINARY_CONTAINER_krnl_vmul_OBJS += $(XCLBIN)/krnl_vmul.$(TARGET).$(DSA).xo
+BINARY_CONTAINERS += $(XCLBIN)/krnl_vadd.$(TARGET).$(DSA).xclbin
+BINARY_CONTAINER_krnl_vadd_OBJS += $(XCLBIN)/krnl_vadd.$(TARGET).$(DSA).xo
 
 CP = cp -rf
 
@@ -76,12 +80,18 @@ all: check-devices $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
 exe: $(EXECUTABLE)
 
 # Building kernel
-$(XCLBIN)/bandwidth.$(TARGET).$(DSA).xo: src/kernel.cpp
+$(XCLBIN)/krnl_vmul.$(TARGET).$(DSA).xo: src/krnl_vmul.cpp
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_host_global) -c -k bandwidth -I'$(<D)' -o'$@' '$<'
-$(XCLBIN)/krnl_host_global.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_host_global_OBJS)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_vmul) -c -k krnl_vmul -I'$(<D)' -o'$@' '$<'
+$(XCLBIN)/krnl_vadd.$(TARGET).$(DSA).xo: src/krnl_vadd.cpp
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_host_global) -l $(LDCLFLAGS) --nk bandwidth:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_vadd) -c -k krnl_vadd -I'$(<D)' -o'$@' '$<'
+$(XCLBIN)/krnl_vmul.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_vmul_OBJS)
+	mkdir -p $(XCLBIN)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_vmul) -l $(LDCLFLAGS) --nk krnl_vmul:1 -o'$@' $(+)
+$(XCLBIN)/krnl_vadd.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_vadd_OBJS)
+	mkdir -p $(XCLBIN)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_vadd) -l $(LDCLFLAGS) --nk krnl_vadd:1 -o'$@' $(+)
 
 # Building Host
 $(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
@@ -93,15 +103,11 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
-ifeq ($(findstring xilinx_u280-es1_xdma, $(DEVICE)), xilinx_u280-es1_xdma)
-$(error Nothing to be done for make)
-endif
-
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/krnl_host_global.$(TARGET).$(DSA).xclbin
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/krnl_vmul.$(TARGET).$(DSA).xclbin $(XCLBIN)/krnl_vadd.$(TARGET).$(DSA).xclbin
 else
-	 ./$(EXECUTABLE) $(XCLBIN)/krnl_host_global.$(TARGET).$(DSA).xclbin
+	 ./$(EXECUTABLE) $(XCLBIN)/krnl_vmul.$(TARGET).$(DSA).xclbin $(XCLBIN)/krnl_vadd.$(TARGET).$(DSA).xclbin
 endif
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 
@@ -120,4 +126,4 @@ clean:
 cleanall: clean
 	-$(RMDIR) $(XCLBIN)
 	-$(RMDIR) _x.*
-	-$(RMDIR) ./metric1.csv 
+

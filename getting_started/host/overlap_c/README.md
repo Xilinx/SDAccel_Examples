@@ -1,4 +1,4 @@
-host_global
+Overlap Host and HLS kernels (C)
 ======================
 
 This README file contains the following sections:
@@ -15,7 +15,11 @@ This README file contains the following sections:
 
 
 ## 1. OVERVIEW
-Host to global memory bandwidth test
+This examples demonstrates techniques that allow user to overlap Host(CPU) and FPGA computation in an application. It will cover asynchronous operations and event object.
+
+***KEY CONCEPTS:*** OpenCL API, Synchronize Host and FPGA, Asynchronous Processing, Events, Asynchronous memcpy
+
+***KEYWORDS:*** cl_event, clCreateCommandQueue, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, clEnqueueMigrateMemObjects
 
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
@@ -48,7 +52,7 @@ description.json
 qor.json
 sdaccel.ini
 src/host.cpp
-src/kernel.cpp
+src/vector_addition.cpp
 utils.mk
 ```
 
@@ -94,7 +98,7 @@ emconfigutil --platform 'xilinx_vcu1525_dynamic' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./host_global ./xclbin/krnl_host_global.<emulation target>.<device name>.xclbin
+./overlap ./xclbin/vector_addition.<emulation target>.<device name>.xclbin
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card
