@@ -124,7 +124,7 @@ int main(int argc, char **argv){
 
     std::string binaryFile = argv[1];
     
-    static const int elements = 128;
+    static const int elements = 1024;
     vector<int, aligned_allocator<int>> A(elements, 32);
     vector<int, aligned_allocator<int>> B(elements, 10);
     vector<int, aligned_allocator<int>> C(elements);

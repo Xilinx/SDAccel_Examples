@@ -27,6 +27,7 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 
+#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 #include <CL/cl.h>
 
 #include <cstdio>
@@ -138,7 +139,7 @@ int main(int argc, char **argv) {
         printf("Usage: %s <XCLBIN File>\n", argv[0]);
         return EXIT_FAILURE;
     }
-    static const int elements = 128;
+    static const int elements = 1024;
     char *binary_file_path = argv[1];
 
     // Error handling in OpenCL is performed using the cl_int specifier. OpenCL

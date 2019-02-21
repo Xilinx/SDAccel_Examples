@@ -1,6 +1,6 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Error Handling (CLPP)",
+    "example": "Error Handling (CPP)",
     "overview": [
         "This example discuss the different reasons for errors in OpenCL C++ and how to handle them at runtime."
     ],
@@ -10,7 +10,7 @@
         "Linux"
     ],
     "libs": [
-	"xcl2"
+	    "xcl2"
     ],
     "host_exe": "errors",
     "cmd_args" : "BUILD/vector_addition.xclbin",
@@ -20,7 +20,7 @@
         "accelerators": [
         {
             "name": "vector_add", 
-            "location": "src/vector_addition.cl"
+            "location": "src/vector_addition.cpp"
         }
        ]
      }

@@ -1,6 +1,6 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Error Handling (CL)",
+    "example": "Error Handling (C)",
     "overview": [
         "This example discuss the different reasons for errors in OpenCL and how to handle them at runtime."
     ],
@@ -17,7 +17,7 @@
         "accelerators": [
         {
             "name": "vector_add", 
-            "location": "src/vector_addition.cl"
+            "location": "src/vector_addition.cpp"
         }
        ]
      }
