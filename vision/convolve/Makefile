@@ -61,7 +61,7 @@ CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps
 
 
 EXECUTABLE = convolve
-CMD_ARGS = ./data/input_buffer_raw.txt ./data/filter_buffer_raw.txt ./data/output_buffer_raw.txt
+CMD_ARGS = $(XCLBIN)/krnl_convolve.$(TARGET).$(DSA).xclbin ./data/input_buffer_raw.txt ./data/filter_buffer_raw.txt ./data/output_buffer_raw.txt
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
@@ -101,9 +101,9 @@ endif
 
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) ./data/input_buffer_raw.txt ./data/filter_buffer_raw.txt ./data/output_buffer_raw.txt
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/krnl_convolve.$(TARGET).$(DSA).xclbin ./data/input_buffer_raw.txt ./data/filter_buffer_raw.txt ./data/output_buffer_raw.txt
 else
-	 ./$(EXECUTABLE) ./data/input_buffer_raw.txt ./data/filter_buffer_raw.txt ./data/output_buffer_raw.txt
+	 ./$(EXECUTABLE) $(XCLBIN)/krnl_convolve.$(TARGET).$(DSA).xclbin ./data/input_buffer_raw.txt ./data/filter_buffer_raw.txt ./data/output_buffer_raw.txt
 endif
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 

@@ -6,7 +6,7 @@
     ],
     "host_exe": "nearest",
     "host_srcs": "src/linear_search.cpp",
-    "cmd_args" : "PROJECT/data/queries.txt PROJECT/data/targets.txt",
+    "cmd_args" : "BUILD/krnl_nearest.xclbin PROJECT/data/queries.txt PROJECT/data/targets.txt",
     "libs": [
         "xcl2"
     ],

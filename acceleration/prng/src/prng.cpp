@@ -86,16 +86,16 @@ int nofBlock;
 int nofSample;
 
 void parseArguments(int argc, char** argv) {
-    if (argc==1) {
+    if (argc==2) {
         nofBlock = 1024;
-    } else if (argc==2) {
+    } else if (argc==3) {
         nofBlock = atoi(argv[2]);
         if (nofBlock > maxNofBlock) {
             cout << "max number of block must be < " << maxNofBlock <<endl;
             exit(0);
         }
     } else {
-        cout << "USAGE: ./prng <number of blocks>" <<endl;
+        cout << "USAGE: " << argv[0] << " <XCLBIN File>" << " <number of blocks>" <<endl;
         exit(0);
     }
 
@@ -112,6 +112,7 @@ void checkResults( dout_t* Dout_hw, data_t* Dout_sw);
 int main(int argc, char** argv) {
 
     parseArguments(argc, argv);
+    std::string binaryFile = argv[1];
 
 // seed table    
     std::vector<data_t> Q_sw(nofPRNG*CMWC_CYCLE);
@@ -141,8 +142,6 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
-
-    std::string binaryFile = xcl::find_binary_file(device_name,"dma");
 
     char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};

@@ -67,6 +67,12 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Number of coefficient components
 #define N_COEFF 11
 
+#define SIGNAL_SIZE (1024*1024)
+
+// Tripcount identifiers
+__constant int c_n = N_COEFF;
+__constant int c_size = SIGNAL_SIZE;
+
 // A naive implementation of the Finite Impulse Response filter.
 __kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
 void fir_naive(__global int* restrict output,
@@ -75,8 +81,10 @@ void fir_naive(__global int* restrict output,
                long signal_length) {
 
     int coeff_reg[N_COEFF];
+    __attribute__((xcl_loop_tripcount(c_n, c_n)))
     read_coef: for (int i = 0 ; i < N_COEFF ; i++) coeff_reg[i] = coeff[i];
 
+    __attribute__((xcl_loop_tripcount(c_size, c_size)))
     outer_loop:
     for (int j = 0; j < signal_length; j++) {
         int acc = 0;
@@ -104,6 +112,7 @@ void fir_shift_register(__global int* restrict output,
     // ports available to the array.
     int shift_reg[N_COEFF] __attribute__((xcl_array_partition(complete, 0)));
 
+    __attribute__((xcl_loop_tripcount(c_n, c_n)))
     init_loop:
     for (int i = 0; i < N_COEFF; i++) {
         shift_reg[i] = 0;
@@ -112,6 +121,7 @@ void fir_shift_register(__global int* restrict output,
 
     outer_loop:
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_size, c_size)))
     for(int j = 0; j < signal_length; j++) {
         int acc = 0;
         int x = signal[j];
@@ -121,6 +131,7 @@ void fir_shift_register(__global int* restrict output,
         // performed by the loop. This loop does not require the unroll
         // attribute because the outer loop will be pipelined so
         // the compiler will unroll this loop in the process.
+        __attribute__((xcl_loop_tripcount(c_n, c_n)))
         shift_loop:
         for (int i = N_COEFF-1; i >= 0; i--) {
             if (i == 0) {

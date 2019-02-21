@@ -45,6 +45,8 @@ Description:
 //Per Memory Access getting 16 pixels
 #define DATA_SIZE 16
 
+// Tripcount identifiers
+__constant int c_size = DATA_SIZE;
 
 //function declaration
 int saturatedAdd(int x, int y);
@@ -79,7 +81,6 @@ void apply_watermark(__global const TYPE * __restrict input, __global TYPE * __r
     // Image
     uint size = ( (imageSize-1) / DATA_SIZE ) + 1; 
 
-
     // Process the whole image 
     __attribute__((xcl_pipeline_loop(1)))
     image_traverse: for (uint idx = 0, x = 0 , y = 0  ; idx < size ; ++idx)
@@ -98,6 +99,7 @@ void apply_watermark(__global const TYPE * __restrict input, __global TYPE * __r
       // of loop which will lead to longer critical path and design may not meet
       // timing.
       __attribute__((opencl_unroll_hint))
+      __attribute__((xcl_loop_tripcount(c_size, c_size)))
       watermark: for ( int i = 0 ; i < DATA_SIZE ; i++, x++)
       {
           // Row Boundary Check for x 
@@ -115,6 +117,7 @@ void apply_watermark(__global const TYPE * __restrict input, __global TYPE * __r
       // in each iteration. No changes in "x" variable to reduce the critical path 
       // to improve timing.
       __attribute__((opencl_unroll_hint))
+      __attribute__((xcl_loop_tripcount(c_size, c_size)))
       watermark: for ( int i = 0 ; i < DATA_SIZE ; i++)
       {
           uint tmp_x = x+i;

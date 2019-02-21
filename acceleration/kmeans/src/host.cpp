@@ -100,7 +100,8 @@ int main(int argc, char **argv) {
     CmdLineParser parser;
 
                    //"<Full Arg>",  "<Short Arg>", "<Description>",                "<Default>");
-    parser.addSwitch("--input_file",    "-i",    "input test data flie",               "");
+    parser.addSwitch("--xclbin_file",   "-x",    "input binary file string",           "");
+    parser.addSwitch("--input_file",    "-i",    "input test data file",               "");
     parser.addSwitch("--compare_file",  "-c",    "Compare File to compare result",      "");
     parser.addSwitch("--max_nclusters", "-m",    "maximum number of clusters allowed", "5");
     parser.addSwitch("--min_nclusters", "-n",    "minimum number of clusters allowed", "5");
@@ -110,6 +111,7 @@ int main(int argc, char **argv) {
     parser.parse(argc, argv);
 
     //read settings
+    std::string binaryFile      = parser.value("xclbin_file");
     std::string filename        = parser.value("input_file");   
     std::string goldenfile      = parser.value("compare_file");
     
@@ -224,8 +226,8 @@ int main(int argc, char **argv) {
                     &rmse,              /* Root Mean Squared Error */
                     isRMSE,             /* calculate RMSE */
                     nloops,             /* number of iteration for each number of clusters */
-                    goldenfile.c_str());
-    
+                    binaryFile,         /* Binary file string */
+                    goldenfile.c_str());        
     
     //cluster_timing = omp_get_wtime() - cluster_timing;
     

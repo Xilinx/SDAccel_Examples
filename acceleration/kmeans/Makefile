@@ -64,7 +64,7 @@ CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps
 
 
 EXECUTABLE = host_kmeans
-CMD_ARGS = -i ./data/100 -c ./data/100.gold_c5 -m 5 -n 5 -g 2
+CMD_ARGS = -x $(XCLBIN)/kmeans.$(TARGET).$(DSA).xclbin -i ./data/100 -c ./data/100.gold_c5 -m 5 -n 5 -g 2
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
@@ -100,9 +100,9 @@ $(EMCONFIG_DIR)/emconfig.json:
 check: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) -i ./data/100 -c ./data/100.gold_c5 -m 5 -n 5 -g 2
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) -x $(XCLBIN)/kmeans.$(TARGET).$(DSA).xclbin -i ./data/100 -c ./data/100.gold_c5 -m 5 -n 5 -g 2
 else
-	 ./$(EXECUTABLE) -i ./data/100 -c ./data/100.gold_c5 -m 5 -n 5 -g 2
+	 ./$(EXECUTABLE) -x $(XCLBIN)/kmeans.$(TARGET).$(DSA).xclbin -i ./data/100 -c ./data/100.gold_c5 -m 5 -n 5 -g 2
 endif
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 

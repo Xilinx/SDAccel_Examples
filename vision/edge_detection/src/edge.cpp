@@ -65,12 +65,14 @@ int main(int argc, char* argv[]) {
     cl_int err;
     cl::Event event;
     unsigned fileBufSize;
-    if(argc != 2) {
-        std::cout << "Usage: " << argv[0] << "<input>" << std::endl;
+
+    if(argc != 3) {
+        std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << " <input>" << std::endl;
         return EXIT_FAILURE;
     }
 
-    std::string inputFileName(argv[1]);
+    std::string binaryFile = argv[1];
+    std::string inputFileName(argv[2]);
     cv::Mat inputColor = cv::imread(inputFileName);
 
     // Convert image to grayscale then convert to unsigned 8 bit values
@@ -113,10 +115,6 @@ int main(int argc, char* argv[]) {
     OCL_CHECK(err, cl::Context context (device, NULL, NULL, NULL, &err));
     OCL_CHECK(err, cl::CommandQueue q (context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
-
-    // find_binary_file() is a utility API which will search the xclbin file for
-    // targeted mode (sw_emu/hw_emu/hw) and for targeted platforms.
-    std::string binaryFile = xcl::find_binary_file(device_name, "krnl_edge");
 
     // read_binary_file() is a utility API which will load the binaryFile
     // and will return pointer to file buffer.

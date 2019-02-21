@@ -54,6 +54,8 @@ Description:
 //Per Memory Access getting 16 pixels
 #define DATA_SIZE 16
 
+// Tripcount identifiers
+__constant int c_size = DATA_SIZE;
 
 //function declaration
 int saturatedAdd(int x, int y);
@@ -103,6 +105,7 @@ void apply_watermark(__global const TYPE * __restrict input, __global TYPE * __r
       }
       //Unrolling below loop to process all 16 pixels concurrently
       __attribute__((opencl_unroll_hint))
+      __attribute__((xcl_loop_tripcount(c_size, c_size)))
       watermark: for ( int i = 0 ; i < DATA_SIZE ; i++)
       {
           uint tmp_x = x+i;

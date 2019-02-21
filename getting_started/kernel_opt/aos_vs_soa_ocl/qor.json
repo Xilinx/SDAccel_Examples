@@ -8,7 +8,7 @@
                     "name": "dot_aos", 
                     "check_timing": "true", 
                     "PipelineType": "none", 
-                    "check_latency": "false", 
+                    "check_latency": "true", 
                     "check_warning": "false", 
                     "loops": [
                         {
@@ -21,7 +21,7 @@
                     "name": "dot_soa", 
                     "check_timing": "true", 
                     "PipelineType": "none", 
-                    "check_latency": "false", 
+                    "check_latency": "true", 
                     "check_warning": "false", 
                     "loops": [
                         {

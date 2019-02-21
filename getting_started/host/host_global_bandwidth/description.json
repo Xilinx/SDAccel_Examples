@@ -20,7 +20,7 @@
        "accelerators": [
         {
             "name": "bandwidth", 
-            "location": "src/kernel.cl"
+            "location": "src/kernel.cpp"
         }
        ]
       }           

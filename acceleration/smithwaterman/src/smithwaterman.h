@@ -51,6 +51,7 @@ typedef             int        i32;
             int selected_device,
             const string& strKernelFP,
             const string& strSampleFPi,
+            const string& binaryFile,
             const int numBlocks,
             const int blkSz,
             const bool doubleBuffered,

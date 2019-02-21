@@ -50,15 +50,17 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 int main(int argc, char* argv[])
 {
-    if(argc != 2)
+    if(argc != 3)
     {
-        std::cout << "Usage: " << argv[0] <<" <input_image>" << std::endl;
+        std::cout << "Usage: " << argv[0] << " <XCLBIN File>" <<" <input_image>" << std::endl;
         return -1;
     }
 
+    std::string xclBinaryFile = argv[1];
+
     //Read the input image
     std::cout << "Reading input image..." << std::endl;
-    const char* inputFilename = argv[1];
+    const char* inputFilename = argv[2];
 
     cv::Mat inputImageRaw;
 
@@ -89,8 +91,6 @@ int main(int argc, char* argv[])
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
-    //find_binary() command will find the OpenCL binary file
-    std::string xclBinaryFile = xcl::find_binary_file(device_name, "krnl_equalizer");
     char* fileBuf = xcl::read_binary_file(xclBinaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);

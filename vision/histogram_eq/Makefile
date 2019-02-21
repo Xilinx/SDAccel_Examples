@@ -63,7 +63,7 @@ CLFLAGS += --xp param:compiler.version=31
 
 
 EXECUTABLE = equalizer
-CMD_ARGS = ./data/race_2k.bmp
+CMD_ARGS = $(XCLBIN)/krnl_equalizer.$(TARGET).$(DSA).xclbin ./data/race_2k.bmp
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
@@ -99,9 +99,9 @@ $(EMCONFIG_DIR)/emconfig.json:
 check: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) ./data/race_2k.bmp
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/krnl_equalizer.$(TARGET).$(DSA).xclbin ./data/race_2k.bmp
 else
-	 ./$(EXECUTABLE) ./data/race_2k.bmp
+	 ./$(EXECUTABLE) $(XCLBIN)/krnl_equalizer.$(TARGET).$(DSA).xclbin ./data/race_2k.bmp
 endif
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 

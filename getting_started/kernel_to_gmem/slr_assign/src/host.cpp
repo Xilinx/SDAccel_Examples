@@ -116,7 +116,6 @@ int main(int argc, char** argv)
     }
     {
     printf("loading vadd kernel\n");
-    std::string binaryFile = xcl::find_binary_file(device_name,"vmult_vadd");
     char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);

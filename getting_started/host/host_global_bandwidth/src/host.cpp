@@ -66,8 +66,9 @@ static int host_to_dev(cl::CommandQueue commands, int buff_size, std::vector<cl:
     throput *= 1000000; // convert us to s;
     throput /= 1024 * 1024; // convert to MB
     throput /= timer_stop2;
-    std::cout << "OpenCL migration BW host to device: " << throput << " MB/s" <<" for buffer size "<< buff_size << " with " << mems.size()<< " buffers\n";
-    strm << "Host to Card, " << buff_size << ", " << mems.size() << ", " << throput << "\n";
+    double dbuff_size = (double)(buff_size)/1024; // convert to KB
+    std::cout << "OpenCL migration BW host to device: " << throput << " MB/s" <<" for buffer size "<< dbuff_size << " KB with " << mems.size()<< " buffers\n";
+    strm << "Host to Card, " << dbuff_size << " KB, " << mems.size() << ", " << throput << "\n";
     return CL_SUCCESS;
 }
 
@@ -84,8 +85,9 @@ static int dev_to_host(cl::CommandQueue commands, int buff_size, std::vector<cl:
     throput *= 1000000; // convert us to s;
     throput /= 1024 * 1024; // convert to MB
     throput /= timer_stop2;
-    std::cout << "OpenCL migration BW device to host: " << throput << " MB/s" <<" for buffer size " << buff_size << " with " << mems.size()<< " buffers\n";
-    strm << "Card to Host, " << buff_size << ", " << mems.size() << ", " << throput << "\n";
+    double dbuff_size = (double)(buff_size)/1024; // convert to KB
+    std::cout << "OpenCL migration BW device to host: " << throput << " MB/s" <<" for buffer size " << dbuff_size << " KB with " << mems.size()<< " buffers\n";
+    strm << "Card to Host, " << dbuff_size << " KB, " << mems.size() << ", " << throput << "\n";
     return CL_SUCCESS;
 }
 
@@ -107,8 +109,9 @@ static int bidirectional(cl::CommandQueue commands, int buff_size, std::vector<c
     throput *= 1000000; // convert us to s;
     throput /= 1024 * 1024; // convert to MB
     throput /= timer_stop2;
-    std::cout << "OpenCL migration BW " << " overall:" << throput << " MB/s for buffer size " << buff_size << " with " << mems1.size()<< " buffers\n";
-    strm << "Card to Host, " << buff_size << ", " << mems1.size() << ", " << throput << "\n";
+    double dbuff_size = (double)(buff_size)/1024; // convert to KB
+    std::cout << "OpenCL migration BW " << " overall:" << throput << " MB/s for buffer size " << dbuff_size << " KB with " << mems1.size()<< " buffers\n";
+    strm << "Card to Host, " << dbuff_size << " KB, " << mems1.size() << ", " << throput << "\n";
     return CL_SUCCESS;
 }
 
@@ -169,7 +172,7 @@ int main(int argc, char** argv)
         std::vector<cl::Memory> mems(buff_cnt);
 
         for(int i=buff_cnt - 1; i>=0; i--){
-        	OCL_CHECK(err, mems[i] = cl::Buffer(context, CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, nxtcnt, NULL, &err));
+        	OCL_CHECK(err, mems[i] = cl::Buffer(context, (cl_mem_flags)(CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE), nxtcnt, NULL, &err));
             	OCL_CHECK(err, err = command_queue.enqueueFillBuffer<int>((cl::Buffer&)mems[i], i, 0, nxtcnt, 0, 0));
         }
         if (err != CL_SUCCESS) {
@@ -197,9 +200,9 @@ int main(int argc, char** argv)
         std::vector<cl::Memory> mems2(buff_cnt);
 
         for(int i=buff_cnt - 1; i>=0; i--){
-        	OCL_CHECK(err, mems1[i] = cl::Buffer(context, CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, nxtcnt, NULL, &err));
+        	OCL_CHECK(err, mems1[i] = cl::Buffer(context, (cl_mem_flags)(CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE), nxtcnt, NULL, &err));
             OCL_CHECK(err, err = command_queue.enqueueFillBuffer<int>((cl::Buffer&)mems1[i], i, 0, nxtcnt, 0, 0));
-        	OCL_CHECK(err, mems2[i] = cl::Buffer(context, CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, nxtcnt, NULL, &err));
+        	OCL_CHECK(err, mems2[i] = cl::Buffer(context, (cl_mem_flags)(CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE), nxtcnt, NULL, &err));
             OCL_CHECK(err, err = command_queue.enqueueFillBuffer<int>((cl::Buffer&)mems2[i], i, 0, nxtcnt, 0, 0));
         }
         if (err != CL_SUCCESS) {

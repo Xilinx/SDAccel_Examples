@@ -60,6 +60,9 @@ Kernel Description :
 //Maximum Array Size
 #define MAX_SIZE 64
 
+// Tripcount identifiers
+__constant int c_size = MAX_SIZE;
+
 // Computes matrix multiply
 // C = AxB, where A, B and C are square matrices of dimension (sizexsize)
 kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
@@ -79,6 +82,7 @@ void mmult(
     // Burst reads on input matrices from global memory
     // Burst read for matrix A
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_size*c_size, c_size*c_size)))
     readA: for(int itr = 0, i = 0, j = 0 ; itr < size * size; itr++, j++){
         if(j == size) { j = 0 ; i++; }
         A[i][j] = in1[itr];
@@ -86,6 +90,7 @@ void mmult(
 
     // Burst read for matrix B
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_size*c_size, c_size*c_size)))
     readB: for(int itr = 0, i = 0, j = 0; itr < size * size; itr++, j++) {
         if(j == size) { j = 0 ; i++; }
         B[i][j] = in2[itr];
@@ -122,9 +127,12 @@ void mmult(
     
     // Calculate matrix multiplication using local data buffer based on input size
     // and write results into local buffer for C
+    __attribute__((xcl_loop_tripcount(c_size, c_size)))
     lreorder1: for (int i = 0; i < size; i++) {
         __attribute__((xcl_pipeline_loop(1)))
+        __attribute__((xcl_loop_tripcount(c_size, c_size)))
         lreorder2: for (int k = 0; k < size; k++) {
+            __attribute__((xcl_loop_tripcount(c_size, c_size)))
             lreorder3: for (int j = 0; j < MAX_SIZE; j++) {
                 int result = (k == 0) ? 0 : temp_sum[j];
                 result += A[i][k] * B[k][j];
@@ -137,6 +145,7 @@ void mmult(
     // Burst write from output matrices to global memory
     // Burst write from matrix C
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_size*c_size, c_size*c_size)))
     writeC: for(int itr = 0, i = 0, j = 0; itr < size * size; itr++, j++) {
         if(j == size) { j = 0 ; i++; }
         out[itr] = C[i][j];

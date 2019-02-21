@@ -9,20 +9,22 @@ __Prerequisites__
 
 S.No.   | Category  | Description 
 --------|-----------|-----------------------------------------
-1 | [cpu_to_fpga][]      |Labs to showcase the cpu to fpga conversion with kernel optimizations.
-2 | [host][]      |OpenCL host code for optimized interfacing with Xilinx Devices
-3 | [kernel_to_gmem][]      |Kernel to Global Memory Access Optimization.
-4 | [kernel_opt][]      |Kernel Optimization for performance
-5 | [dataflow][]      |Kernel Optimization through Macro Level Pipelining
-6 | [clk_freq][]      |Improving Kernel Clock Frequency through Optimized code.
-7 | [debug][]      |Debugging and Profiling of Kernel.
-8 | [rtl_kernel][]      |RTL Kernel Based Examples
-9 | [misc][]      |OpenCL miscellaneous Examples
+1 | [hello_world][]      |Hello World examples for new users
+2 | [cpu_to_fpga][]      |Labs to showcase the cpu to fpga conversion with kernel optimizations.
+3 | [host][]      |OpenCL host code for optimized interfacing with Xilinx Devices
+4 | [kernel_to_gmem][]      |Kernel to Global Memory Access Optimization.
+5 | [kernel_opt][]      |Kernel Optimization for performance
+6 | [dataflow][]      |Kernel Optimization through Macro Level Pipelining
+7 | [clk_freq][]      |Improving Kernel Clock Frequency through Optimized code.
+8 | [debug][]      |Debugging and Profiling of Kernel.
+9 | [rtl_kernel][]      |RTL Kernel Based Examples
 
  __Examples Table__ 
 
 Example        | Description           | Key Concepts / Keywords 
 ---------------|-----------------------|-------------------------
+[hello_world/helloworld_c/][]|This is simple example of vector addition to describe how to use HLS kernels in Sdx Environment. This example highlights the concepts like PIPELINE which increases the kernel performance |__Key__ __Concepts__<br> - HLS C Kernel<br> - OpenCL Host APIs<br>__Keywords__<br> - gmem<br> - bundle<br> - #pragma HLS INTERFACE<br> - m_axi<br> - s_axi4lite
+[hello_world/helloworld_ocl/][]|This example is a simple OpenCL application. It will highlight the basic flow of an OpenCL application.|__Key__ __Concepts__<br> - OpenCL API<br>
 [cpu_to_fpga/00_cpu/][]|This is a simple example of matrix multiplication (Row x Col).|
 [cpu_to_fpga/01_ocl/][]|This is a simple example of OpenCL matrix multiplication (Row x Col).|__Key__ __Concepts__<br> - OpenCL APIs<br>
 [cpu_to_fpga/02_lmem_ocl/][]|This is a simple example of matrix multiplication (Row x Col) to demonstrate how to reduce number of memory accesses using local memory.|__Key__ __Concepts__<br> - Kernel Optimization<br> - Local Memory<br>
@@ -35,11 +37,10 @@ Example        | Description           | Key Concepts / Keywords
 [host/device_query_oclpp/][]|This Example prints the OpenCL properties of the platform and its devices using OpenCLPP APIs. It also displays the limits and capabilities of the hardware.|__Key__ __Concepts__<br> - OpenCL API<br> - Querying device properties<br>
 [host/errors_ocl/][]|This example discuss the different reasons for errors in OpenCL and how to handle them at runtime.|__Key__ __Concepts__<br> - OpenCL API<br> - Error handling<br>__Keywords__<br> - CL_SUCCESS<br> - CL_DEVICE_NOT_FOUND<br> - CL_DEVICE_NOT_AVAILABLE
 [host/errors_oclpp/][]|This example discuss the different reasons for errors in OpenCL C++ and how to handle them at runtime.|__Key__ __Concepts__<br> - OpenCL C++ API<br> - Error handling<br>__Keywords__<br> - CL_SUCCESS<br> - CL_DEVICE_NOT_FOUND<br> - CL_DEVICE_NOT_AVAILABLE<br> - CL_INVALID_VALUE<br> - CL_INVALID_KERNEL_NAME<br> - CL_INVALID_BUFFER_SIZE
-[host/helloworld_c/][]|This is simple example of vector addition to describe how to use HLS kernels in Sdx Environment. This example highlights the concepts like PIPELINE which increases the kernel performance |__Key__ __Concepts__<br> - HLS C Kernel<br> - OpenCL Host APIs<br>__Keywords__<br> - gmem<br> - bundle<br> - #pragma HLS INTERFACE<br> - m_axi<br> - s_axi4lite
-[host/helloworld_ocl/][]|This example is a simple OpenCL application. It will highlight the basic flow of an OpenCL application.|__Key__ __Concepts__<br> - OpenCL API<br>
 [host/host_global_bandwidth/][]|Host to global memory bandwidth test|
 [host/kernel_swap_ocl/][]|This example shows how host can swap the kernels and share same buffer between two kernels which are exist in separate binary containers. Dynamic platforms does not persist the buffer data so host has to migrate data from device to host memory before swapping the next kernel. After kernel swap, host has to migrate the buffer back to device.|__Key__ __Concepts__<br> - Handling Buffer sharing across multiple binaries<br> - Multiple Kernel Binaries<br>__Keywords__<br> - clEnqueueMigrateMemObjects()<br> - CL_MIGRATE_MEM_OBJECT_HOST
 [host/multiple_devices_ocl/][]|This example show how to take advantage of multiple FPGAs on a system. It will show how to initialized an OpenCL context, allocate memory on the two devices and execute a kernel on each FPGA.|__Key__ __Concepts__<br> - OpenCL API<br> - Multi-FPGA Execution<br> - Event Handling<br>__Keywords__<br> - cl_device_id<br> - clGetDeviceIDs()
+[host/multiple_process_c/][]|This example will demonstrate how to run multiple processes to utilize multiple kernels simultaneously on an FPGA device.|__Key__ __Concepts__<br> - Concurrent execution<br> - Multiple HLS kernels<br> - Multiple Process Support<br>__Keywords__<br> - PID<br> - fork<br> - XCL_MULTIPROCESS_MODE
 [host/overlap_ocl/][]|This examples demonstrates techniques that allow user to overlap Host(CPU) and FPGA computation in an application. It will cover asynchronous operations and event object.|__Key__ __Concepts__<br> - OpenCL API<br> - Synchronize Host and FPGA<br> - Asynchronous Processing<br> - Events<br> - Asynchronous memcpy<br>__Keywords__<br> - cl_event<br> - clCreateCommandQueue<br> - CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE<br> - clEnqueueMigrateMemObjects
 [host/stream_access_ocl/][]|This is a simple example that demonstrates on how to process an input stream of data for computation in an application. It shows how to perform asynchronous operations and event handling.|__Key__ __Concepts__<br> - OpenCL API<br> - Synchronize Host and FPGA<br> - Asynchronous Processing<br> - Events<br> - Asynchronous Data Transfer<br>__Keywords__<br> - cl::event<br> - CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE
 [host/sub_devices_ocl/][]|This example demonstrates how to create OpenCL subdevices which uses a single kernel multiple times in order to show how to handle each instance independently including independent buffers, command queues and sequencing.|__Key__ __Concepts__<br> - Sub Devices<br>__Keywords__<br> - cl_device_partition_property<br> - createSubDevices<br> - CL_DEVICE_PARTITION_EQUALLY
@@ -76,6 +77,7 @@ Example        | Description           | Key Concepts / Keywords
 [kernel_opt/partition_cyclicblock_ocl/][]|This example shows how to use array block and cyclic partitioning to improve performance of a kernel|__Key__ __Concepts__<br> - Kernel Optimization<br> - Array Partitioning<br> - Block Partition<br> - Cyclic Partition<br>__Keywords__<br> - xcl_array_partition<br> - cyclic<br> - block
 [kernel_opt/shift_register_c/][]|This example demonstrates how to shift values in registers in each clock cycle|__Key__ __Concepts__<br> - Kernel Optimization<br> - Shift Register<br> - FIR<br>__Keywords__<br> - #pragma HLS ARRAY_PARTITION
 [kernel_opt/shift_register_ocl/][]|This example demonstrates how to shift values in registers in each clock cycle|__Key__ __Concepts__<br> - Kernel Optimization<br> - Shift Register<br> - FIR<br>__Keywords__<br> - xcl_array_partition<br> - getprofilingInfo()
+[kernel_opt/sum_scan_ocl/][]|This is a simple example to explain the usage of pipeline and array partitioning for designing parallel prefix sum |__Key__ __Concepts__<br> - Kernel Optimization<br> - Array Partitioning<br> - Pipeline<br>__Keywords__<br> - xcl_array_partition<br> - xcl_pipeline_loop
 [kernel_opt/systolic_array_c/][]|This is a simple example of matrix multiplication (Row x Col) to help developers learn systolic array based algorithm design. Note : Systolic array based algorithm design is well suited for FPGA.|
 [kernel_opt/systolic_array_ocl/][]|This is a simple example of matrix multiplication (Row x Col) to help developers learn systolic array based algorithm design. Note: Systolic array based algorithm design is well suited for FPGA.|
 [kernel_opt/vectorization_memorycoalescing_ocl/][]|This example is a simple OpenCL application which highlights the vectorization concept. It provides a basis for calculating the bandwidth utilization when the compiler looking to vectorize.|__Key__ __Concepts__<br> - Vectorization<br> - Memory Coalescing<br>__Keywords__<br> - vec_type_hint
@@ -99,10 +101,10 @@ Example        | Description           | Key Concepts / Keywords
 [rtl_kernel/rtl_vadd_2kernels/][]|This example has two RTL Kernels. Both Kernel_0 and Kernel_1 perform vector addition. The Kernel_1 reads the output from Kernel_0 as one of two inputs.|__Key__ __Concepts__<br> - Multiple RTL Kernels<br>
 [rtl_kernel/rtl_vadd_hw_debug/][]|This is an example that showcases the Hardware Debug of Vector Addition RTL Kernel in Hardware.|__Key__ __Concepts__<br> - RTL Kernel Debug<br>
 [rtl_kernel/rtl_vadd_mixed_cl_vadd/][]|This example has one RTL kernel and one CL kernel. Both RTL kernel and CL kernel perform vector addition. The CL kernel reads the output from RTL kernel as one of two inputs.|__Key__ __Concepts__<br> - Mixed Kernels<br>
-[misc/sum_scan/][]|Example of parallel prefix sum|
-[misc/vadd/][]|Simple example of vector addition.|
-[misc/vdotprod/][]|Simple example of vector dot-product.|
 
+[hello_world]:hello_world
+[hello_world/helloworld_c/]:hello_world/helloworld_c/
+[hello_world/helloworld_ocl/]:hello_world/helloworld_ocl/
 [cpu_to_fpga]:cpu_to_fpga
 [cpu_to_fpga/00_cpu/]:cpu_to_fpga/00_cpu/
 [cpu_to_fpga/01_ocl/]:cpu_to_fpga/01_ocl/
@@ -117,11 +119,10 @@ Example        | Description           | Key Concepts / Keywords
 [host/device_query_oclpp/]:host/device_query_oclpp/
 [host/errors_ocl/]:host/errors_ocl/
 [host/errors_oclpp/]:host/errors_oclpp/
-[host/helloworld_c/]:host/helloworld_c/
-[host/helloworld_ocl/]:host/helloworld_ocl/
 [host/host_global_bandwidth/]:host/host_global_bandwidth/
 [host/kernel_swap_ocl/]:host/kernel_swap_ocl/
 [host/multiple_devices_ocl/]:host/multiple_devices_ocl/
+[host/multiple_process_c/]:host/multiple_process_c/
 [host/overlap_ocl/]:host/overlap_ocl/
 [host/stream_access_ocl/]:host/stream_access_ocl/
 [host/sub_devices_ocl/]:host/sub_devices_ocl/
@@ -160,6 +161,7 @@ Example        | Description           | Key Concepts / Keywords
 [kernel_opt/partition_cyclicblock_ocl/]:kernel_opt/partition_cyclicblock_ocl/
 [kernel_opt/shift_register_c/]:kernel_opt/shift_register_c/
 [kernel_opt/shift_register_ocl/]:kernel_opt/shift_register_ocl/
+[kernel_opt/sum_scan_ocl/]:kernel_opt/sum_scan_ocl/
 [kernel_opt/systolic_array_c/]:kernel_opt/systolic_array_c/
 [kernel_opt/systolic_array_ocl/]:kernel_opt/systolic_array_ocl/
 [kernel_opt/vectorization_memorycoalescing_ocl/]:kernel_opt/vectorization_memorycoalescing_ocl/
@@ -187,7 +189,3 @@ Example        | Description           | Key Concepts / Keywords
 [rtl_kernel/rtl_vadd_2kernels/]:rtl_kernel/rtl_vadd_2kernels/
 [rtl_kernel/rtl_vadd_hw_debug/]:rtl_kernel/rtl_vadd_hw_debug/
 [rtl_kernel/rtl_vadd_mixed_cl_vadd/]:rtl_kernel/rtl_vadd_mixed_cl_vadd/
-[misc]:misc
-[misc/sum_scan/]:misc/sum_scan/
-[misc/vadd/]:misc/vadd/
-[misc/vdotprod/]:misc/vdotprod/

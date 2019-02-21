@@ -70,6 +70,11 @@ Kernel Description (Bad Example) :
 
 #include "defns.h"
 
+// Tripcount identifiers
+__constant int c_width = MAX_WIDTH;
+__constant int c_height = MAX_HEIGHT;
+__constant int c_window = WINDOW;
+
 __kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
 void sketch_BAD( const __global int *input,     // Input image
                           __global int *output,    // Output image
@@ -89,18 +94,20 @@ void sketch_BAD( const __global int *input,     // Input image
     int lineAddr[WINDOW] __attribute__((xcl_array_partition(complete, 1)));
     
     __attribute__((xcl_pipeline_loop(1))) 
+    __attribute__((xcl_loop_tripcount(c_width*c_height, c_width*c_height)))
     readImg: for(int i = 0; i < width*height; i++){
         image[i] = input[i];
     }
     
     // Boost Stage
     // Do boost filter on the image and write the output to temp_res
+    __attribute__((xcl_loop_tripcount(c_height, c_height)))
     boostHeight: for(int row = 0; row < height; row++){
-        __attribute__((xcl_pipeline_loop)) 
+        __attribute__((xcl_pipeline_loop))
+        __attribute__((xcl_loop_tripcount(c_width, c_width)))
         boostWidth: for(int col = 0; col < width; col++){
             
             // Get pixels within 3x3 aperture
-            
             lineAddr[0] = row - 1;
             lineAddr[1] = row;
             lineAddr[2] = row + 1;
@@ -117,6 +124,7 @@ void sketch_BAD( const __global int *input,     // Input image
             
             // The fillWindow loop is unrolled automatically because it is
             // inlined into a loop that is pipelined.
+            __attribute__((xcl_loop_tripcount(c_window, c_window)))
             fillWindowBoost: for(int i = 0; i < WINDOW; i++){
                 rgbWindow[i*WINDOW + 0] = (col == 0)? image[lineAddr[i]*width + col] : image[lineAddr[i]*width + col-1];
                 rgbWindow[i*WINDOW + 1] = image[lineAddr[i]*width + col];
@@ -131,8 +139,10 @@ void sketch_BAD( const __global int *input,     // Input image
     
     // Median Stage
     // Do median filter on the image and write output to med_out
+    __attribute__((xcl_loop_tripcount(c_height, c_height)))
     medianHeight: for(int row = 0; row < height; row++){
         __attribute__((xcl_pipeline_loop)) 
+        __attribute__((xcl_loop_tripcount(c_width, c_width)))
         medianWidth: for(int col = 0; col < width; col++){
             
             // Get pixels within 3x3 aperture
@@ -153,6 +163,7 @@ void sketch_BAD( const __global int *input,     // Input image
             
             // The fillWindow loop is unrolled automatically because it is
             // inlined into a loop that is pipelined.
+            __attribute__((xcl_loop_tripcount(c_window, c_window)))
             fillWindowMedian: for(int i = 0; i < WINDOW; i++){
                 rgbWindow[i*WINDOW + 0] = (col == 0)? image[lineAddr[i]*width + col] : image[lineAddr[i]*width + col-1];
                 rgbWindow[i*WINDOW + 1] = image[lineAddr[i]*width + col];
@@ -170,6 +181,7 @@ void sketch_BAD( const __global int *input,     // Input image
     // Boost outputs are present in temp_res
     // Write the result back into temp_res.
     __attribute__((xcl_pipeline_loop(1))) 
+    __attribute__((xcl_loop_tripcount(c_width*c_height, c_width*c_height)))
     sketchLoop: for(int i = 0; i < width*height; i++) {
         // Sketch operation on the current pixel of boost and median outputs
         // Boost operation output is in temp_res and
@@ -180,9 +192,11 @@ void sketch_BAD( const __global int *input,     // Input image
     
     // Flips the Image by Reading Output Results from Sketch Output 
     // Burst write back results onto output
+    __attribute__((xcl_loop_tripcount(c_height, c_height)))
     flipOutput1: for(int row = 0 ; row < height ; row++){
         // Reads from temp_res and flip the row and burst write output
         __attribute__((xcl_pipeline_loop(1))) 
+        __attribute__((xcl_loop_tripcount(c_width, c_width)))
         flipOutput2: for(int col = 0; col < width; col++){
             output[row*width + col] = temp_res[row*width + width-col-1];
         }

@@ -30,6 +30,9 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Maximum Matrix Dimension Supported by Kernel
 #define MAX_DIM 64
 
+// Tripcount identifiers
+__constant int c_size = MAX_DIM;
+
 // Computes matrix multiply
 // C = AxB, where A, B and C are square matrices of dimension (dimxdim)
 kernel __attribute__((reqd_work_group_size(1, 1, 1)))
@@ -46,6 +49,7 @@ void matmul_naive(
 
     // Burst read for matrix A
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_size*c_size, c_size*c_size)))
     readA:
     for (int i = 0 ; i < dim * dim; i++) {
         A[i]  = in1[i];
@@ -53,17 +57,21 @@ void matmul_naive(
 
     // Burst read for matrix B
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_size*c_size, c_size*c_size)))
     readB:
     for (int i = 0 ; i < dim * dim; i++) {
         B[i]  = in2[i];
     }
 
+    __attribute__((xcl_loop_tripcount(c_size, c_size)))
     lreorder1:
     for (int i = 0; i < dim; i++) {
+        __attribute__((xcl_loop_tripcount(c_size, c_size)))
         lreorder2 :
         for (int j = 0; j < MAX_DIM; j++) {
             int result = 0;
             __attribute__((xcl_pipeline_loop(1)))
+            __attribute__((xcl_loop_tripcount(c_size, c_size)))
             lreorder3:
             for (int k = 0; k < dim; k++) {
                 result += A[i * dim +  k] * B[k * dim + j];
@@ -74,6 +82,7 @@ void matmul_naive(
 
     // Burst write from matrix C
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_size*c_size, c_size*c_size)))
     writeC:
     for (int i = 0; i < dim * dim; i++) {
         out[i] = C[i];
@@ -98,6 +107,7 @@ void matmul_partition(const __global int *in1,  // Read-Only Matrix 1
 
     // Burst read for matrix A
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_size*c_size, c_size*c_size)))
     readA:
     for (int itr = 0, i = 0, j = 0; itr < dim * dim; itr++, j++) {
         if (j == dim) { j = 0; i++; }
@@ -106,20 +116,24 @@ void matmul_partition(const __global int *in1,  // Read-Only Matrix 1
 
     // Burst read for matrix B
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_size*c_size, c_size*c_size)))
     readB:
     for (int itr = 0, i = 0, j = 0; itr < dim * dim; itr++, j++) {
         if (j == dim) { j = 0; i++; }
         B[i * MAX_DIM + j] = in2[itr];
     }
 
+    __attribute__((xcl_loop_tripcount(c_size, c_size)))
     lreorder1:
     for (int i = 0; i < dim; i++) {
         //As A and B are partition correctly so loop pipelining is applied
         // at 2nd level loop and which will eventually unroll the lower loop
         __attribute__((xcl_pipeline_loop(1)))
+        __attribute__((xcl_loop_tripcount(c_size, c_size)))
         lreorder2 :
         for (int j = 0; j < dim ; j++) {
             int result = 0;
+            __attribute__((xcl_loop_tripcount(c_size, c_size)))
             lreorder3:
             for (int k = 0; k < MAX_DIM; k++) {
                 result += A[i * MAX_DIM +  k] * B[k * MAX_DIM + j];
@@ -131,6 +145,7 @@ void matmul_partition(const __global int *in1,  // Read-Only Matrix 1
     // Burst write from output matrices to global memory
     // Burst write from matrix C
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_size*c_size, c_size*c_size)))
     writeC:
     for (int itr = 0, i = 0, j = 0; itr < dim * dim; itr++, j++) {
         if (j == dim) { j = 0; i++; }
