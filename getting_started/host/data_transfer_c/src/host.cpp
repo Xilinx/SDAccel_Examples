@@ -104,7 +104,11 @@ int main(int argc, char **argv) {
     printf("Writing %.1e elements to buffer using a blocking transfer\n",
          (float)elements);
 
-    // Copying data to the FPGA is done using an enqueue write operation.
+    // enqueueWriteBuffer() API call is a request to enqueue write operation. This API
+    // call does not immediately initiate the data transfer. Data transfer happens when 
+    // a kernel is enqueue which has respective buffer as one of the kernel arguments.
+    // So for such kernel call, runtime first transfer the data from host to device 
+    // and later trigger the kernel call.
     OCL_CHECK(err, err = q.enqueueWriteBuffer(buffer,              // buffer on the FPGA
                          CL_TRUE,             // blocking call
                          0,                   // buffer offset in bytes
@@ -200,6 +204,8 @@ int main(int argc, char **argv) {
     printf("Using host pointer with MigrateMemObjects\n");
     OCL_CHECK(err, cl::Buffer buffer_mem(context, CL_MEM_USE_HOST_PTR,
                      size_in_bytes, host_memory2.data(), &err));
+    // clEnqueueMigrateMemObjects does immediate migration of data without considering 
+    // the fact that data is actually needed or not by kernel operation
     OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_mem}, 0 /* 0 means from host*/ ));
     OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_mem}, CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());

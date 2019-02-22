@@ -1,6 +1,6 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Stream Access (CL)",
+    "example": "Stream Access (HLS C/C++ Kernel)",
     "overview": [
         "This is a simple example that demonstrates on how to process an input stream of data for computation in an application. It shows how to perform asynchronous operations and event handling."
     ],
@@ -10,6 +10,7 @@
         "Linux"
     ],
     "host_exe": "stream_access",
+    "output_files" : "output_vector.txt",
     "cmd_args": "BUILD/vector_addition.xclbin PROJECT/data/input1.txt PROJECT/data/input2.txt",
     "libs": [
         "xcl2"
@@ -20,7 +21,7 @@
        "accelerators": [
         {
             "name": "vec_add", 
-            "location": "src/vector_addition.cl"
+            "location": "src/vector_addition.cpp"
         }
        ]
      }

@@ -28,8 +28,21 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 
 /*******************************************************************************
+
 Description:
     This is a simple to demonstrate Multi Process Support(MPS) using HLS kernels.
+
+Procedure:
+    To enable multi-process support, add the following entry to sdaccel.ini in 
+    the same directory as all the executable(s):
+    
+    [Runtime]
+    multiprocess=true
+
+Limitation:
+    Debug and Profile will not function correctly when multiprocess has been 
+    enabled. 
+    Emulation flow does not have support for multiprocess.
 
 *******************************************************************************/
 
@@ -167,7 +180,8 @@ int main(int argc, char* argv[]) {
         } 
     } 
 
-    wait(NULL);
+    // Need to wait for all child process to complete
+    for(int i=0; i<iter; i++) wait(NULL);
     std::cout << "\n[PID: " << getpid() << "] PARENT WAITS CHILD TO FINISH.\n\n" << std::endl;
 
     std::cout << "TEST " << ((result)? "PASSED" : "FAILED") << std::endl; 
