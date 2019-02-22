@@ -1,4 +1,4 @@
-Stream Access (HLS C/C++ Kernel)
+Stream Access (CL)
 ======================
 
 This README file contains the following sections:
@@ -50,11 +50,10 @@ README.md
 data/input1.txt
 data/input2.txt
 description.json
-output_vector.txt
 qor.json
 sdaccel.ini
 src/host.cpp
-src/vector_addition.cpp
+src/vector_addition.cl
 utils.mk
 ```
 

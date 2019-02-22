@@ -1,6 +1,6 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Stream Access (HLS C/C++ Kernel)",
+    "example": "Stream Access (CL)",
     "overview": [
         "This is a simple example that demonstrates on how to process an input stream of data for computation in an application. It shows how to perform asynchronous operations and event handling."
     ],
@@ -20,7 +20,7 @@
        "accelerators": [
         {
             "name": "vec_add", 
-            "location": "src/vector_addition.cpp"
+            "location": "src/vector_addition.cl"
         }
        ]
      }
