@@ -15,11 +15,11 @@ This README file contains the following sections:
 
 
 ## 1. OVERVIEW
-This example will demonstrate how to run multiple processes to utilize multiple kernels simultaneously on an FPGA device.
+This example will demonstrate how to run multiple processes to utilize multiple kernels simultaneously on an FPGA device. Multiple processes can share access to the same device provided each process uses the same xclbin. Processes share access to all device resources but there is no support for exclusive access to resources by any process.
 
 ***KEY CONCEPTS:*** Concurrent execution, Multiple HLS kernels, Multiple Process Support
 
-***KEYWORDS:*** PID, fork, XCL_MULTIPROCESS_MODE
+***KEYWORDS:*** PID, fork, XCL_MULTIPROCESS_MODE, multiprocess
 
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
@@ -45,14 +45,11 @@ make DEVICES=<.xpfm file path> all
 Application code is located in the src directory. Accelerator binary files will be compiled to the xclbin directory. The xclbin directory is required by the Makefile and its contents will be filled during compilation. A listing of all the files in this example is shown below
 
 ```
-.nfs0000000002cb9ddd00002329
-.nfs000000000c998c3c0000232a
 Makefile
 README.md
 description.json
 qor.json
 sdaccel.ini
-src/.nfs000000000f8b202500002335
 src/host.cpp
 src/krnl_vadd.cpp
 src/krnl_vmul.cpp

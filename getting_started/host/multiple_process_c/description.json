@@ -2,10 +2,10 @@
     "runtime": ["OpenCL"],
     "example": "Multiple Process (HLS C/C++ Kernel)",
     "overview": [
-        "This example will demonstrate how to run multiple processes to utilize multiple kernels simultaneously on an FPGA device."
+        "This example will demonstrate how to run multiple processes to utilize multiple kernels simultaneously on an FPGA device. Multiple processes can share access to the same device provided each process uses the same xclbin. Processes share access to all device resources but there is no support for exclusive access to resources by any process."
     ],
     "key_concepts": [ "Concurrent execution", "Multiple HLS kernels", "Multiple Process Support"],
-    "keywords": [ "PID" , "fork", "XCL_MULTIPROCESS_MODE"],
+    "keywords": [ "PID" , "fork", "XCL_MULTIPROCESS_MODE",  "multiprocess"],
     "os": [
         "Linux"
     ],
