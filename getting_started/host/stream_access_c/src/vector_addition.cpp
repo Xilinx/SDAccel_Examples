@@ -33,34 +33,62 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   See host code for additional details about this example
 */
 
-#define BUFFER_SIZE 256
+#include <stdlib.h>
 
-kernel __attribute__((reqd_work_group_size(1, 1, 1)))
-void vec_add(global int* c,
-          global const int* a,
-          global const int* b,
-          global int* result_size,
-          size_t elements
-          ) {
-    int arrayA[BUFFER_SIZE], arrayB[BUFFER_SIZE];
+#define BUFFER_SIZE 256
+#define DATA_SIZE 1024
+
+//TRIPCOUNT indentifier
+const unsigned int c_len = DATA_SIZE/BUFFER_SIZE;
+const unsigned int c_size = BUFFER_SIZE;
+
+extern "C" {
+void vec_add(int* c,
+                int* a,
+                int* b,
+                int* result_size,
+                size_t elements)
+{
+#pragma HLS INTERFACE m_axi port=c offset=slave bundle=gmem
+#pragma HLS INTERFACE m_axi port=a offset=slave bundle=gmem
+#pragma HLS INTERFACE m_axi port=b offset=slave bundle=gmem
+#pragma HLS INTERFACE m_axi port=result_size offset=slave bundle=gmem
+
+#pragma HLS INTERFACE s_axilite port=c bundle=control
+#pragma HLS INTERFACE s_axilite port=a bundle=control
+#pragma HLS INTERFACE s_axilite port=b bundle=control
+#pragma HLS INTERFACE s_axilite port=result_size bundle=control
+#pragma HLS INTERFACE s_axilite port=elements bundle=control
+#pragma HLS INTERFACE s_axilite port=return bundle=control
+
+    int arrayA[BUFFER_SIZE];
+    int arrayB[BUFFER_SIZE];
     int k = 0;
-    for (int i = 0 ; i < elements ; i += BUFFER_SIZE)
-    {
+    for (int i = 0 ; i < elements ; i += BUFFER_SIZE) {
+    #pragma HLS LOOP_TRIPCOUNT min=c_len max=c_len
         int size = BUFFER_SIZE;
         if (i + size > elements) size = elements - i;
 
-        __attribute__((xcl_pipeline_loop(1)))
         readA: for (int j = 0 ; j < size ; j++) {
-                arrayA[j] = a[i+j]; }
+        #pragma HLS PIPELINE II=1
+        #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
+                arrayA[j] = a[i+j]; 
+        }
 
-        __attribute__((xcl_pipeline_loop(1)))
         readB: for (int j = 0 ; j < size ; j++) {
-                arrayB[j] = b[i+j]; }
+        #pragma HLS PIPELINE II=1
+        #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
+                arrayB[j] = b[i+j]; 
+        }
 
-        __attribute__((xcl_pipeline_loop(1)))
-        writeC: for (int j = 0 ; j < (size-1)/2 + 1 ; j++) c[k+j] = arrayA[2*j] + arrayB[2*j];
+        writeC: for (int j = 0 ; j < (size-1)/2 + 1 ; j++) {
+        #pragma HLS PIPELINE II=1
+        #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
+                c[k+j] = arrayA[2*j] + arrayB[2*j];
+        }
         
         k = k + (size-1)/2 + 1;
     }
-    result_size[0] = k;
+    result_size[0] = k;  
+}
 }

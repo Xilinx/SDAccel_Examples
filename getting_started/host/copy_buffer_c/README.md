@@ -1,4 +1,4 @@
-Copy Buffer (HLS C/C++ Kernel)
+Copy Buffer (C)
 ======================
 
 This README file contains the following sections:

@@ -1,4 +1,4 @@
-Stream Access (CL)
+Sub Devices (C)
 ======================
 
 This README file contains the following sections:
@@ -15,11 +15,11 @@ This README file contains the following sections:
 
 
 ## 1. OVERVIEW
-This is a simple example that demonstrates on how to process an input stream of data for computation in an application. It shows how to perform asynchronous operations and event handling.
+This example demonstrates how to create OpenCL subdevices which uses a single kernel multiple times in order to show how to handle each instance independently including independent buffers, command queues and sequencing.
 
-***KEY CONCEPTS:*** OpenCL API, Synchronize Host and FPGA, Asynchronous Processing, Events, Asynchronous Data Transfer
+***KEY CONCEPTS:*** Sub Devices
 
-***KEYWORDS:*** cl::event, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE
+***KEYWORDS:*** cl_device_partition_property, createSubDevices, CL_DEVICE_PARTITION_EQUALLY
 
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
@@ -47,13 +47,11 @@ Application code is located in the src directory. Accelerator binary files will 
 ```
 Makefile
 README.md
-data/input1.txt
-data/input2.txt
 description.json
 qor.json
 sdaccel.ini
 src/host.cpp
-src/vector_addition.cl
+src/krnl_vadd.cpp
 utils.mk
 ```
 
@@ -99,7 +97,7 @@ emconfigutil --platform 'xilinx_vcu1525_dynamic' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./stream_access ./xclbin/vector_addition.<emulation target>.<device name>.xclbin ./data/input1.txt ./data/input2.txt
+./sub_devices ./xclbin/krnl_vadd.<emulation target>.<device name>.xclbin
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card

@@ -35,7 +35,7 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
-BUILD_DIR_krnl_vadd = $(BUILD_DIR)/krnl_vadd
+BUILD_DIR_vector_addition = $(BUILD_DIR)/vector_addition
 
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
@@ -59,15 +59,16 @@ LDFLAGS += -lrt -lstdc++
 CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 
 
-EXECUTABLE = sub_devices
-CMD_ARGS = $(XCLBIN)/krnl_vadd.$(TARGET).$(DSA).xclbin
+EXECUTABLE = stream_access
+CMD_ARGS = $(XCLBIN)/vector_addition.$(TARGET).$(DSA).xclbin ./data/input1.txt ./data/input2.txt
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
-BINARY_CONTAINERS += $(XCLBIN)/krnl_vadd.$(TARGET).$(DSA).xclbin
-BINARY_CONTAINER_krnl_vadd_OBJS += $(XCLBIN)/krnl_vadd.$(TARGET).$(DSA).xo
+BINARY_CONTAINERS += $(XCLBIN)/vector_addition.$(TARGET).$(DSA).xclbin
+BINARY_CONTAINER_vector_addition_OBJS += $(XCLBIN)/vec_add.$(TARGET).$(DSA).xo
 
 CP = cp -rf
+DATA = ./data
 
 .PHONY: all clean cleanall docs emconfig
 all: check-devices $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
@@ -76,12 +77,12 @@ all: check-devices $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
 exe: $(EXECUTABLE)
 
 # Building kernel
-$(XCLBIN)/krnl_vadd.$(TARGET).$(DSA).xo: src/krnl_vadd.cl
+$(XCLBIN)/vec_add.$(TARGET).$(DSA).xo: src/vector_addition.cpp
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_vadd) -c -k krnl_vadd -I'$(<D)' -o'$@' '$<'
-$(XCLBIN)/krnl_vadd.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_vadd_OBJS)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_vector_addition) -c -k vec_add -I'$(<D)' -o'$@' '$<'
+$(XCLBIN)/vector_addition.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_vector_addition_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_vadd) -l $(LDCLFLAGS) --nk krnl_vadd:8 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_vector_addition) -l $(LDCLFLAGS) --nk vec_add:1 -o'$@' $(+)
 
 # Building Host
 $(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
@@ -95,9 +96,9 @@ $(EMCONFIG_DIR)/emconfig.json:
 check: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/krnl_vadd.$(TARGET).$(DSA).xclbin
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/vector_addition.$(TARGET).$(DSA).xclbin ./data/input1.txt ./data/input2.txt
 else
-	 ./$(EXECUTABLE) $(XCLBIN)/krnl_vadd.$(TARGET).$(DSA).xclbin
+	 ./$(EXECUTABLE) $(XCLBIN)/vector_addition.$(TARGET).$(DSA).xclbin ./data/input1.txt ./data/input2.txt
 endif
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 
@@ -116,4 +117,4 @@ clean:
 cleanall: clean
 	-$(RMDIR) $(XCLBIN)
 	-$(RMDIR) _x.*
-
+	-$(RMDIR) ./output_vector.txt 
