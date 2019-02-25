@@ -1,6 +1,6 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Concurrent Kernel Execution (HLS C/C++ kernel)",
+    "example": "Concurrent Kernel Execution (C)",
     "overview": [
         "This example will demonstrate how to use multiple and out of order command queues to simultaneously execute multiple kernels on an FPGA."
     ],

@@ -1,6 +1,6 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Data Transfer (HLS C/C++ Kernel)",
+    "example": "Data Transfer (C)",
     "overview": [
         "This example illustrates several ways to use the OpenCL API to transfer data to and from the FPGA"
     ],

@@ -35,33 +35,55 @@ Description:
     buffer objects on FPGA DDR memory.
 
 *******************************************************************************/
-#define BUFFER_SIZE 4096 
 
-kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
-void krnl_vadd(__global const int *a,
-                __global const int *b,
-                __global int *c,
-                const size_t size
-              )
+#include <stdlib.h>
+#define BUFFER_SIZE 4096
+#define DATA_SIZE 1024*1024
+
+//TRIPCOUNT indentifier
+const unsigned int c_len_min = DATA_SIZE/BUFFER_SIZE;
+const unsigned int c_len_max = DATA_SIZE/(BUFFER_SIZE*1024);
+const unsigned int c_size = BUFFER_SIZE;
+
+extern "C" {
+void krnl_vadd(int* a,
+                int* b,
+                int* c,
+                const size_t size)
 {
+#pragma HLS INTERFACE m_axi port=a offset=slave bundle=gmem
+#pragma HLS INTERFACE m_axi port=b offset=slave bundle=gmem
+#pragma HLS INTERFACE m_axi port=c offset=slave bundle=gmem
+
+#pragma HLS INTERFACE s_axilite port=a bundle=control
+#pragma HLS INTERFACE s_axilite port=b bundle=control
+#pragma HLS INTERFACE s_axilite port=c bundle=control
+#pragma HLS INTERFACE s_axilite port=size bundle=control
+#pragma HLS INTERFACE s_axilite port=return bundle=control
+
     int arrayA[BUFFER_SIZE];
     int arrayB[BUFFER_SIZE];
-
-    for(int i = 0; i < size; i += BUFFER_SIZE){
-
+    for (int i = 0 ; i < size ; i += BUFFER_SIZE) {
+    #pragma HLS LOOP_TRIPCOUNT min=c_len_min max=c_len_max
         int length = BUFFER_SIZE;
-        if(i + length > size) length = size - i;
-        
-        __attribute__((xcl_pipeline_loop(1)))
-        readA:for(int j = 0 ; j < length ; j++) {
-                arrayA[j] = a[i+j]; }
+        if (i + length > size) length = size - i;
+        readA: for (int j = 0 ; j < length ; j++) {
+        #pragma HLS PIPELINE II=1
+        #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
+                arrayA[j] = a[i+j]; 
+        }
 
-        __attribute__((xcl_pipeline_loop(1)))
-        readB:for(int j = 0 ; j < length ; j++) {
-                arrayB[j] = b[i+j]; }
+        readB: for (int j = 0 ; j < length ; j++) {
+        #pragma HLS PIPELINE II=1
+        #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
+                arrayB[j] = b[i+j]; 
+        }
 
-        __attribute__((xcl_pipeline_loop(1)))
-        writeC: for(int j = 0 ; j < length ; j++) {
-                c[i+j] = arrayA[j] + arrayB[j]; }
+        writeC: for (int j = 0 ; j < length ; j++) {
+        #pragma HLS PIPELINE II=1
+        #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
+                c[i+j] = arrayA[j] + arrayB[j]; 
+        }
     }
+}
 }

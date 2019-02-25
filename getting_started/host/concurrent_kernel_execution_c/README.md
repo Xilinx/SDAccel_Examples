@@ -1,4 +1,4 @@
-Concurrent Kernel Execution (HLS C/C++ kernel)
+Concurrent Kernel Execution (C)
 ======================
 
 This README file contains the following sections:

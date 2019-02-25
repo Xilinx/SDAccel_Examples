@@ -1,4 +1,4 @@
-Sub Devices (CL)
+Sub Devices (C)
 ======================
 
 This README file contains the following sections:
@@ -51,7 +51,7 @@ description.json
 qor.json
 sdaccel.ini
 src/host.cpp
-src/krnl_vadd.cl
+src/krnl_vadd.cpp
 utils.mk
 ```
 

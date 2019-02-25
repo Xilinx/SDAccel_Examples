@@ -486,6 +486,20 @@ def create_mk(target, data):
     mk_clean(target,data)
     return 
 
+def create_utils(target):
+    dirName = os.getcwd()
+    dirNameList = list(dirName.split("/"))
+    dirNameIndex = dirNameList.index("apps")
+    diff = len(dirNameList) - dirNameIndex - 1
+    while diff > 0:
+	    os.chdir('..')
+	    diff -= 1
+    os.chdir("utility")
+    source = open("utils.mk", "r")
+    data = source.read()
+    target.write(data)
+
+
 script, desc_file = argv
 desc = open(desc_file, 'r')
 data = json.load(desc)
@@ -493,9 +507,16 @@ if "match_makefile" in data:
     if data["match_makefile"] == "false":
 	exit("Error:: Makefile Manually Edited:: AutoMakefile Generator Failed\n")
 desc.close()
+
 print "Generating sdaccel.ini file for %s" %data["example"]
 target = open("sdaccel.ini","w+")
 profile_report(target)
+
 target = open("Makefile", "w")
 create_mk(target, data)
+
+print "Generating utils.mk file for %s" %data["example"]
+target = open("utils.mk", "w+")
+create_utils(target)
+
 target.close

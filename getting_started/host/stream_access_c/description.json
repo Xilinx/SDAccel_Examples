@@ -1,6 +1,6 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Stream Access (HLS C/C++ Kernel)",
+    "example": "Stream Access (C)",
     "overview": [
         "This is a simple example that demonstrates on how to process an input stream of data for computation in an application. It shows how to perform asynchronous operations and event handling."
     ],

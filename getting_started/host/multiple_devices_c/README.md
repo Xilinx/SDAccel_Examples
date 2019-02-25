@@ -1,4 +1,4 @@
-Multiple FPGA Devices Execution Concurrently (HLS C/C++ Kernel)
+Multiple FPGA Devices Execution Concurrently (C)
 ======================
 
 This README file contains the following sections:

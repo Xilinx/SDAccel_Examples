@@ -1,6 +1,6 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Multiple FPGA Devices Execution Concurrently (HLS C/C++ Kernel)",
+    "example": "Multiple FPGA Devices Execution Concurrently (C)",
     "overview": [
         "This example show how to take advantage of multiple FPGAs on a system. It will show how to initialized an OpenCL context, allocate memory on the two devices and execute a kernel on each FPGA."
     ],
