@@ -1,4 +1,4 @@
-Data Transfer (HLS C/C++ Kernel)
+Data Transfer (C)
 ======================
 
 This README file contains the following sections:

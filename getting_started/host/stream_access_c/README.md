@@ -1,4 +1,4 @@
-Stream Access (HLS C/C++ Kernel)
+Stream Access (C)
 ======================
 
 This README file contains the following sections:

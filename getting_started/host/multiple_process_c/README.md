@@ -1,4 +1,4 @@
-Multiple Process (HLS C/C++ Kernel)
+Multiple Process (C)
 ======================
 
 This README file contains the following sections:

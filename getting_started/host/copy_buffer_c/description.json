@@ -1,6 +1,6 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Copy Buffer (HLS C/C++ Kernel)",
+    "example": "Copy Buffer (C)",
     "overview": [
         "This Copy Buffer example demonstrate how one buffer can be copied from another buffer."
     ],

@@ -1,4 +1,4 @@
-Sub Devices (HLS C/C++ kernel)
+Sub Devices (C)
 ======================
 
 This README file contains the following sections:
