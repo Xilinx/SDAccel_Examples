@@ -60,6 +60,8 @@ LDFLAGS += -lrt -lstdc++
 # Kernel compiler global settings
 CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 
+# Kernel linker flags
+LDCLFLAGS += --kernel_frequency "0:150|1:250"
 
 EXECUTABLE = host
 CMD_ARGS = $(XCLBIN)/vadd.$(TARGET).$(DSA).xclbin
