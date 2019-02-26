@@ -21,6 +21,7 @@
     "containers": [
     	{
 	"name": "vadd",
+	"ldclflags": "--kernel_frequency \"0:150|1:250\"",
 	"accelerators": [
 	    {
 		"name": "vadd",
