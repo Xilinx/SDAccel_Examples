@@ -17,7 +17,6 @@
     "output_files": "tmp_kernel_pack* packaged_kernel*",
     "host_srcs": "src/host.cpp",
     "cmd_args": "BUILD/vadd.xclbin",
-    "board":["xilinx_kcu1500_dynamic", "xilinx_vcu1525_dynamic"],
     "targets": ["hw", "hw_emu"],
     "xcl": true,
     "host_exe": "host",
