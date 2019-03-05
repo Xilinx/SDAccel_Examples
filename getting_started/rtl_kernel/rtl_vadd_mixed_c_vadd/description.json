@@ -1,7 +1,7 @@
 {
-    "example": "Mixed Kernels (RTL & CL)",
+    "example": "Mixed Kernels (RTL & C)",
     "overview": [
-        "This example has one RTL kernel and one CL kernel. Both RTL kernel and CL kernel perform vector addition. The CL kernel reads the output from RTL kernel as one of two inputs."
+        "This example has one RTL kernel and one C kernel. Both RTL kernel and C kernel perform vector addition. The C kernel reads the output from RTL kernel as one of two inputs."
     ],
     "key_concepts": [ "Mixed Kernels"],
     "os": [
@@ -27,7 +27,7 @@
 		},
 		{
 		    "name": "krnl_vadd",
-		    "location": "src/krnl_vadd.cl"
+		    "location": "src/krnl_vadd.cpp"
 		}
 	    ]
 	}
