@@ -86,7 +86,7 @@ $(XCLBIN)/krnl_median.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_median_OB
 	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_median) -l $(LDCLFLAGS) --nk median:1 -o'$@' $(+)
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
+$(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
 	mkdir -p $(XCLBIN)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 

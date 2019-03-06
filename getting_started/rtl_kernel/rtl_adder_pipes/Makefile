@@ -85,7 +85,7 @@ $(XCLBIN)/adder.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_adder_OBJS)
 	$(XOCC) $(CLFLAGS) $(LDCLFLAGS) -lo $(XCLBIN)/adder.$(TARGET).$(DSA).xclbin $(XCLBIN)/input.$(TARGET).$(DSA).xo $(XCLBIN)/adder.$(TARGET).$(DSA).xo $(XCLBIN)/output.$(TARGET).$(DSA).xo
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
+$(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
 	mkdir -p $(XCLBIN)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 

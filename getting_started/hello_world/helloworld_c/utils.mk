@@ -30,7 +30,7 @@ $(error XILINX_SDX variable is not set, please set correctly and rerun)
 endif
 
 #Checks for XILINX_XRT
-check_xrt:
+check-xrt:
 ifndef XILINX_XRT
 	$(error XILINX_XRT variable is not set, please set correctly and rerun)
 endif

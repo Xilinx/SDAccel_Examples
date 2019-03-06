@@ -85,7 +85,7 @@ $(XCLBIN)/dma.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_dma_OBJS)
 	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_dma) -l $(LDCLFLAGS) --nk dma:1 -o'$@' $(+)
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
+$(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
 	mkdir -p $(XCLBIN)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 

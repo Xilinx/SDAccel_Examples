@@ -29,6 +29,12 @@ ifndef XILINX_SDX
 $(error XILINX_SDX variable is not set, please set correctly and rerun)
 endif
 
+#Checks for XILINX_XRT
+check-xrt:
+ifndef XILINX_XRT
+	$(error XILINX_XRT variable is not set, please set correctly and rerun)
+endif
+
 #   sanitize_dsa - create a filesystem friendly name from dsa name
 #   $(1) - name of dsa
 COLON=:

@@ -70,7 +70,7 @@ exe: $(EXECUTABLE)
 # Building kernel
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
+$(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
 	mkdir -p $(XCLBIN)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 

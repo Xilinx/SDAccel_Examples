@@ -84,7 +84,7 @@ $(XCLBIN)/vadd.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_vadd_OBJS)
 	$(XOCC) $(CLFLAGS) $(LDCLFLAGS) -lo $(XCLBIN)/vadd.$(TARGET).$(DSA).xclbin $(XCLBIN)/rtl_vadd.$(TARGET).$(DSA).xo $(XCLBIN)/krnl_vadd.$(TARGET).$(DSA).xo
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
+$(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
 	mkdir -p $(XCLBIN)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 

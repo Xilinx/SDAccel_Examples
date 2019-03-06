@@ -86,7 +86,7 @@ $(XCLBIN)/rgb_to_hsv.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_rgb_to_hsv_OBJS
 	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_rgb_to_hsv) -l $(LDCLFLAGS) --nk rgb_to_hsv:1 -o'$@' $(+)
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
+$(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
 	mkdir -p $(XCLBIN)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 

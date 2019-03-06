@@ -92,7 +92,7 @@ $(XCLBIN)/adder.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_adder_OBJS)
 	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_adder) -l $(LDCLFLAGS) --nk adder_stage:1 --nk input_stage:1 --nk output_stage:1 -o'$@' $(+)
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
+$(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
 	mkdir -p $(XCLBIN)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 

@@ -88,7 +88,7 @@ $(XCLBIN)/dot.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_dot_OBJS)
 	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_dot) -l $(LDCLFLAGS) --nk dot_aos:1 --nk dot_soa:1 -o'$@' $(+)
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
+$(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
 	mkdir -p $(XCLBIN)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 
