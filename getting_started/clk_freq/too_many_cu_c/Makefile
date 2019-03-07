@@ -94,7 +94,7 @@ $(XCLBIN)/vadd_BAD.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_vadd_BAD_OBJS)
 	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_vadd_BAD) -l $(LDCLFLAGS) --nk vadd_BAD:8 -o'$@' $(+)
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
+$(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
 	mkdir -p $(XCLBIN)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 

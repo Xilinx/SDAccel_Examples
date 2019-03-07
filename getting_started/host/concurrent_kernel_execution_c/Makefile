@@ -92,7 +92,7 @@ $(XCLBIN)/matrix_ops.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_matrix_ops_OBJS
 	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_matrix_ops) -l $(LDCLFLAGS) --nk madd:1 --nk mscale:1 --nk mmult:1 -o'$@' $(+)
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
+$(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
 	mkdir -p $(XCLBIN)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 
