@@ -88,8 +88,7 @@ $(XCLBIN)/nearest_neighbor.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_nearest_n
 	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_nearest_neighbor) -l $(LDCLFLAGS) --nk nearest_neighbor:1 --nk nearest_neighbor_loop_fusion:1 -o'$@' $(+)
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
-	mkdir -p $(XCLBIN)
+$(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 
 emconfig:$(EMCONFIG_DIR)/emconfig.json

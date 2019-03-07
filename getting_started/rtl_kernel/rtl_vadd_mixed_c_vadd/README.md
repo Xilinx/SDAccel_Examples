@@ -1,4 +1,4 @@
-Mixed Kernels (RTL & CL)
+Mixed Kernels (RTL & C)
 ======================
 
 This README file contains the following sections:
@@ -15,7 +15,7 @@ This README file contains the following sections:
 
 
 ## 1. OVERVIEW
-This example has one RTL kernel and one CL kernel. Both RTL kernel and CL kernel perform vector addition. The CL kernel reads the output from RTL kernel as one of two inputs.
+This example has one RTL kernel and one C kernel. Both RTL kernel and C kernel perform vector addition. The C kernel reads the output from RTL kernel as one of two inputs.
 
 ***KEY CONCEPTS:*** Mixed Kernels
 
@@ -60,7 +60,7 @@ src/hdl/krnl_vadd_rtl_counter.sv
 src/hdl/krnl_vadd_rtl_int.sv
 src/host.cpp
 src/kernel.xml
-src/krnl_vadd.cl
+src/krnl_vadd.cpp
 utils.mk
 ```
 

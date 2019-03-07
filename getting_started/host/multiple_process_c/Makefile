@@ -92,8 +92,7 @@ $(XCLBIN)/multi_krnl.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_multi_krnl_OBJS
 	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_multi_krnl) -l $(LDCLFLAGS) --nk krnl_vadd:1 --nk krnl_vmul:1 --nk krnl_vsub:1 -o'$@' $(+)
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
-	mkdir -p $(XCLBIN)
+$(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 
 emconfig:$(EMCONFIG_DIR)/emconfig.json

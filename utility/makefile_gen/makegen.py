@@ -286,8 +286,7 @@ def building_kernel_rtl(target, data):
 
 def building_host(target, data):
     target.write("# Building Host\n")
-    target.write("$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)\n")
-    target.write("\tmkdir -p $(XCLBIN)\n")
+    target.write("$(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)\n")
     target.write("\t$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)\n")
     target.write("\n")
     target.write("emconfig:$(EMCONFIG_DIR)/emconfig.json\n")
@@ -301,8 +300,7 @@ def building_host(target, data):
 
 def building_host_rtl(target, data):
     target.write("# Building Host\n")
-    target.write("$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)\n")
-    target.write("\tmkdir -p $(XCLBIN)\n")
+    target.write("$(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)\n")
     target.write("\t$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)\n")
     target.write("\n")
     target.write("emconfig:emconfig.json\n")

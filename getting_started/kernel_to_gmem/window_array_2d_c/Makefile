@@ -84,8 +84,7 @@ $(XCLBIN)/window_array_2d.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_window_arr
 	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_window_array_2d) -l $(LDCLFLAGS) --nk window_array_2d:1 -o'$@' $(+)
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
-	mkdir -p $(XCLBIN)
+$(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 
 emconfig:$(EMCONFIG_DIR)/emconfig.json

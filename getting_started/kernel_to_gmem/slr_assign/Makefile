@@ -92,8 +92,7 @@ $(XCLBIN)/vmult_vadd.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_vmult_vadd_OBJS
 	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_vmult_vadd) -l $(LDCLFLAGS) --nk vmult:1 --nk vadd:1 -o'$@' $(+)
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
-	mkdir -p $(XCLBIN)
+$(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 
 emconfig:$(EMCONFIG_DIR)/emconfig.json
