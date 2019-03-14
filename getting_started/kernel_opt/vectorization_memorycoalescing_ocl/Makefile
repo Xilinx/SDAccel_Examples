@@ -57,6 +57,7 @@ LDFLAGS += -lrt -lstdc++
 
 # Kernel compiler global settings
 CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
+CLFLAGS +=  --max_memory_ports vec_add
 
 
 EXECUTABLE = host

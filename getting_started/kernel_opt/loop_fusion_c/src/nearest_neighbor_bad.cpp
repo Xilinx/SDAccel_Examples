@@ -42,13 +42,13 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  // loops. The outer loop cycles through each of the search space and the inner
  // loop calculates the distance to a particular point.
 extern "C"{
-void nearest_neighbor(int *out, const int *points,
+void nearest_neighbor(int *out_r, const int *points,
                       const int *search_point, const int len,
                       const int dim) {
-#pragma HLS INTERFACE m_axi port=out  offset=slave bundle=gmem
+#pragma HLS INTERFACE m_axi port=out_r  offset=slave bundle=gmem
 #pragma HLS INTERFACE m_axi port=points offset=slave bundle=gmem
 #pragma HLS INTERFACE m_axi port=search_point offset=slave bundle=gmem
-#pragma HLS INTERFACE s_axilite port=out  bundle=control
+#pragma HLS INTERFACE s_axilite port=out_r  bundle=control
 #pragma HLS INTERFACE s_axilite port=points  bundle=control
 #pragma HLS INTERFACE s_axilite port=search_point  bundle=control
 #pragma HLS INTERFACE s_axilite port=len  bundle=control
@@ -85,7 +85,7 @@ void nearest_neighbor(int *out, const int *points,
     write_best:
     for (int c = 0; c < dim; ++c) {
     #pragma HLS PIPELINE II=1
-        out[c] = points[best_i * dim + c];
+        out_r[c] = points[best_i * dim + c];
     }
 }
 }
