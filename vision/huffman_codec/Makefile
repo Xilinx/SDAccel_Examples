@@ -35,6 +35,8 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
+BUILD_DIR_krnl_huffman = $(BUILD_DIR)/krnl_huffman
+
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
@@ -58,13 +60,13 @@ CXXFLAGS += -fmessage-length=0
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 CLFLAGS += --xp param:compiler.version=31
 CLFLAGS += --xp param:compiler.version=31
 
 
 EXECUTABLE = huffman
-CMD_ARGS = -b ./data/rect_1024.bmp
+CMD_ARGS = $(XCLBIN)/krnl_huffman.$(TARGET).$(DSA).xclbin -b ./data/rect_1024.bmp
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
@@ -84,17 +86,16 @@ exe: $(EXECUTABLE)
 # Building kernel
 $(XCLBIN)/encode.$(TARGET).$(DSA).xo: src/krnl_huffman_singleptr.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k encode -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_huffman) -c -k encode -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/decode.$(TARGET).$(DSA).xo: src/krnl_huffman_singleptr.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k decode -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_huffman) -c -k decode -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/krnl_huffman.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_huffman_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk encode:1 --nk decode:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_huffman) -l $(LDCLFLAGS) --nk encode:1 --nk decode:1 -o'$@' $(+)
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
-	mkdir -p $(XCLBIN)
+$(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 
 emconfig:$(EMCONFIG_DIR)/emconfig.json
@@ -104,9 +105,9 @@ $(EMCONFIG_DIR)/emconfig.json:
 check: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) -b ./data/rect_1024.bmp
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/krnl_huffman.$(TARGET).$(DSA).xclbin -b ./data/rect_1024.bmp
 else
-	 ./$(EXECUTABLE) -b ./data/rect_1024.bmp
+	 ./$(EXECUTABLE) $(XCLBIN)/krnl_huffman.$(TARGET).$(DSA).xclbin -b ./data/rect_1024.bmp
 endif
 ifneq ($(TARGET),$(findstring $(TARGET), sw_emu hw))
 $(warning WARNING:Application supports only sw_emu hw TARGET. Please use the target for running the application)

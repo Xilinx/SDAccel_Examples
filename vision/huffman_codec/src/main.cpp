@@ -154,12 +154,13 @@ int main(int argc, char* argv[]) {
     }
 
     //read settings
+    std::string binaryFile = argv[1];
     string strBitmapFP = parser.value("bitmap");
 
     int nruns = parser.value_to_int("number-of-runs");
   
     LogInfo("Chosen bitmap file is %s",strBitmapFP.c_str());
-    HuffmanOptimized huffman(strBitmapFP);
+    HuffmanOptimized huffman(strBitmapFP, binaryFile);
 
     LogInfo("Perform some unit tests before the actual image decode, encode");
     unit_test_codec(&huffman,&cpuonly);

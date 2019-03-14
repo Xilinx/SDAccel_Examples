@@ -35,6 +35,8 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
+BUILD_DIR_krnl_idct = $(BUILD_DIR)/krnl_idct
+
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
@@ -51,7 +53,7 @@ CXXFLAGS += -fmessage-length=0
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 CLFLAGS += --xp prop:solution.hls_pre_tcl=./src/hls_config.tcl
 
 # Kernel linker flags
@@ -76,14 +78,13 @@ exe: $(EXECUTABLE)
 # Building kernel
 $(XCLBIN)/krnl_idct.$(TARGET).$(DSA).xo: src/krnl_idct.cpp
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k krnl_idct -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_idct) -c -k krnl_idct -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/krnl_idct.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_idct_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk krnl_idct:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_idct) -l $(LDCLFLAGS) --nk krnl_idct:1 -o'$@' $(+)
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
-	mkdir -p $(XCLBIN)
+$(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 
 emconfig:$(EMCONFIG_DIR)/emconfig.json

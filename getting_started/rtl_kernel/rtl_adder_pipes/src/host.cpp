@@ -39,11 +39,12 @@ Description: SDx Vector Addition using Blocking Pipes Operation
 
 int main(int argc, char** argv)
 {
-    if (argc != 1)
-    {
-        std::cout << "Usage: " << argv[0] << std::endl;
+    if (argc != 2) {
+        std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
         return EXIT_FAILURE;
     }
+
+    std::string binaryFile = argv[1];
 
     //Allocate Memory in Host Memory
     size_t vector_size_bytes = sizeof(int) * DATA_SIZE;
@@ -71,7 +72,6 @@ int main(int argc, char** argv)
             CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE | CL_QUEUE_PROFILING_ENABLE, &err));
     std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
 
-    std::string binaryFile = xcl::find_binary_file(device_name,"adder");
     char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
@@ -81,17 +81,10 @@ int main(int argc, char** argv)
     OCL_CHECK(err, cl::Kernel krnl_output_stage(program,"krnl_output_stage_rtl", &err));
     
     //Allocate Buffer in Global Memory
-    std::vector<cl::Memory> inBufVec, outBufVec;
     OCL_CHECK(err, cl::Buffer buffer_input (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
             vector_size_bytes,source_input.data(), &err));
     OCL_CHECK(err, cl::Buffer buffer_output(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
             vector_size_bytes,source_hw_results.data(), &err));
-    inBufVec.push_back(buffer_input);
-    outBufVec.push_back(buffer_output);
-
-    //Copy input data to device global memory
-    cl::Event write_event;
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/,NULL,&write_event));
 
     int inc = INCR_VALUE;
     int size = DATA_SIZE;
@@ -102,6 +95,10 @@ int main(int argc, char** argv)
     OCL_CHECK(err, err = krnl_adder_stage.setArg(1,size));
     OCL_CHECK(err, err = krnl_output_stage.setArg(0,buffer_output));
     OCL_CHECK(err, err = krnl_output_stage.setArg(1,size));
+
+    //Copy input data to device global memory
+    cl::Event write_event;
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_input},0/* 0 means from host*/,NULL,&write_event));
 
     //Launch the Kernel
     std::vector<cl::Event> eventVec;
@@ -114,7 +111,7 @@ int main(int argc, char** argv)
     OCL_CHECK(err, err = q.finish());
 
     //Copy Result from Device Global Memory to Host Local Memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_output},CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());
 
 //OPENCL HOST CODE AREA END

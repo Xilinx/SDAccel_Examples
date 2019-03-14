@@ -34,6 +34,9 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define MAX_SIZE 64
 
+// Tripcount identifiers
+__constant int c_size = MAX_SIZE;
+
 kernel __attribute__((reqd_work_group_size(1, 1, 1)))
 void mmult( __global int* in1,  //Read-only input matrix1
             __global int* in2,  //Read-only input matrix2
@@ -50,6 +53,7 @@ void mmult( __global int* in1,  //Read-only input matrix1
     __local int local_out[MAX_SIZE][MAX_SIZE];
 
     //Read the input data from DDR memory to local memory
+    __attribute__((xcl_loop_tripcount(c_size*c_size, c_size*c_size)))
     read_in1: for(int iter = 0, i = 0, j = 0; iter < dim * dim; iter++, j++){
         if(j == dim){ j = 0; i++; }
         local_in1[i][j] = in1[iter];
@@ -58,9 +62,12 @@ void mmult( __global int* in1,  //Read-only input matrix1
     
     //Reads the input_data from local memory, performs the computations 
     //and writes the data to local memory
+    __attribute__((xcl_loop_tripcount(c_size, c_size)))
     for(int i = 0; i < dim; i++){
+        __attribute__((xcl_loop_tripcount(c_size, c_size)))
         for(int j = 0; j < dim; j++){
             local_out[i][j] = 0;
+            __attribute__((xcl_loop_tripcount(c_size, c_size)))
             write_data: for(int k = 0; k < dim; k++){
                 local_out[i][j] += local_in1[i][k] * local_in2[k][ j];
             }
@@ -68,6 +75,7 @@ void mmult( __global int* in1,  //Read-only input matrix1
     }    
 
     //Write the data from local memory to DDR memory
+    __attribute__((xcl_loop_tripcount(c_size*c_size, c_size*c_size)))
     write_out: for(int iter = 0, i = 0, j = 0; iter < dim * dim; iter++, j++){
         if(j == dim){ j = 0; i++; }
         out[iter] = local_out[i][j];

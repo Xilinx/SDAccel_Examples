@@ -48,23 +48,23 @@ const unsigned int c_size = DATA_SIZE;
     Arguments:
         in1   (input)     --> Input Vector1
         in2   (input)     --> Input Vector2
-        out   (output)    --> Output Vector
+        out_r   (output)    --> Output Vector
         size  (input)     --> Size of Vector in Integer
    */
 extern "C" {
 void vadd(
         const unsigned int *in1, // Read-Only Vector 1
         const unsigned int *in2, // Read-Only Vector 2
-        unsigned int *out,       // Output Result
+        unsigned int *out_r,       // Output Result
         int size                   // Size in integer
         )
 {
 #pragma HLS INTERFACE m_axi port=in1  offset=slave bundle=gmem
 #pragma HLS INTERFACE m_axi port=in2  offset=slave bundle=gmem
-#pragma HLS INTERFACE m_axi port=out offset=slave bundle=gmem
+#pragma HLS INTERFACE m_axi port=out_r offset=slave bundle=gmem
 #pragma HLS INTERFACE s_axilite port=in1  bundle=control
 #pragma HLS INTERFACE s_axilite port=in2  bundle=control
-#pragma HLS INTERFACE s_axilite port=out bundle=control
+#pragma HLS INTERFACE s_axilite port=out_r bundle=control
 #pragma HLS INTERFACE s_axilite port=size bundle=control
 #pragma HLS INTERFACE s_axilite port=return bundle=control
 
@@ -83,11 +83,11 @@ void vadd(
             chunk_size = size - i;
 
         // burst read of v1 and v2 vector from global memory
-        for (int j = 0 ; j < chunk_size ; j++){
+        read1: for (int j = 0 ; j < chunk_size ; j++){
         #pragma HLS LOOP_TRIPCOUNT min=c_chunk_sz max=c_chunk_sz
             v1_buffer[j] = in1[i + j];
         }
-        for (int j = 0 ; j < chunk_size ; j++){
+        read2: for (int j = 0 ; j < chunk_size ; j++){
         #pragma HLS LOOP_TRIPCOUNT min=c_chunk_sz max=c_chunk_sz
             v2_buffer[j] = in2[i + j];
         }
@@ -111,9 +111,9 @@ void vadd(
         }
 
         //burst write the result
-        for (int j = 0 ; j < chunk_size ; j++){
+        write: for (int j = 0 ; j < chunk_size ; j++){
         #pragma HLS LOOP_TRIPCOUNT min=c_chunk_sz max=c_chunk_sz
-            out[i + j] = vout_buffer[j];
+            out_r[i + j] = vout_buffer[j];
         }
     }
 }

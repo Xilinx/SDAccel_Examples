@@ -35,6 +35,8 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
+BUILD_DIR_mmult = $(BUILD_DIR)/mmult
+
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
@@ -54,11 +56,12 @@ CXXFLAGS += -fmessage-length=0
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 CLFLAGS += --xp param:compiler.axiDeadLockFree=no
 
 
 EXECUTABLE = host
+CMD_ARGS = $(XCLBIN)/mmult.$(TARGET).$(DSA).xclbin
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
@@ -76,14 +79,13 @@ exe: $(EXECUTABLE)
 # Building kernel
 $(XCLBIN)/mmult.$(TARGET).$(DSA).xo: src/mmult.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k mmult -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_mmult) -c -k mmult -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/mmult.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_mmult_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk mmult:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_mmult) -l $(LDCLFLAGS) --nk mmult:1 -o'$@' $(+)
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
-	mkdir -p $(XCLBIN)
+$(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 
 emconfig:$(EMCONFIG_DIR)/emconfig.json
@@ -93,14 +95,14 @@ $(EMCONFIG_DIR)/emconfig.json:
 check: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/mmult.$(TARGET).$(DSA).xclbin
 else
-	 ./$(EXECUTABLE)
+	 ./$(EXECUTABLE) $(XCLBIN)/mmult.$(TARGET).$(DSA).xclbin
 endif
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 
 run_nimbix: all
-	$(COMMON_REPO)/utility/nimbix/run_nimbix.py $(EXECUTABLE) $(DSA)
+	$(COMMON_REPO)/utility/nimbix/run_nimbix.py $(EXECUTABLE) $(CMD_ARGS) $(DSA)
 
 aws_build: check-aws_repo $(BINARY_CONTAINERS)
 	$(COMMON_REPO)/utility/aws/run_aws.py $(BINARY_CONTAINERS)

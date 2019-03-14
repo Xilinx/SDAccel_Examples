@@ -105,13 +105,6 @@ int main(int argc, char **argv) {
             coeff_size_in_bytes, coeff.data(), &err));
     OCL_CHECK(err, cl::Buffer buffer_output(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
             size_in_bytes, out.data(), &err));
-    std::vector<cl::Memory> inBufVec, outBufVec;
-    inBufVec.push_back(buffer_signal);
-    inBufVec.push_back(buffer_coeff);
-    outBufVec.push_back(buffer_output);
-
-    //Copy input data to device global memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/));
 
     //Creating Naive Kernel Object and setting args
     OCL_CHECK(err, cl::Kernel fir_naive_kernel(program, "fir_naive", &err));
@@ -121,13 +114,16 @@ int main(int argc, char **argv) {
     OCL_CHECK(err, err = fir_naive_kernel.setArg(2,buffer_coeff));
     OCL_CHECK(err, err = fir_naive_kernel.setArg(3,signal_size));
 
+    //Copy input data to device global memory
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_signal, buffer_coeff},0/* 0 means from host*/));
+
     cl::Event event;
     int iterations = xcl::is_emulation() ? 2 : 100;
     uint64_t fir_naive_time = 0;
     //Running naive kernel iterations times
     for (int i = 0 ; i < iterations ; i++){
         OCL_CHECK(err, err = q.enqueueTask(fir_naive_kernel,NULL,&event));
-        OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
+        OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_output},CL_MIGRATE_MEM_OBJECT_HOST));
         q.finish();
         fir_naive_time += get_duration_ns(event);
         verify(gold, out);
@@ -145,7 +141,7 @@ int main(int argc, char **argv) {
     //Running Shift Register FIR iterations times
     for (int i = 0 ; i < iterations ; i++){
         OCL_CHECK(err, err = q.enqueueTask(fir_sr_kernel,NULL,&event));
-        OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
+        OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_output},CL_MIGRATE_MEM_OBJECT_HOST));
         q.finish();
         fir_sr_time += get_duration_ns(event);
         verify(gold, out);

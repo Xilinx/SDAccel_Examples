@@ -68,16 +68,16 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define N_COEFF 11
 // FIR using shift register
 extern "C"{
-void fir_shift_register(int *output,
-                        int *signal,
+void fir_shift_register(int *output_r,
+                        int *signal_r,
                         int *coeff,
                         long signal_length) 
 {
-#pragma HLS INTERFACE m_axi port=output offset=slave bundle=gmem
-#pragma HLS INTERFACE m_axi port=signal offset=slave bundle=gmem
+#pragma HLS INTERFACE m_axi port=output_r offset=slave bundle=gmem
+#pragma HLS INTERFACE m_axi port=signal_r offset=slave bundle=gmem
 #pragma HLS INTERFACE m_axi port=coeff offset=slave bundle=gmem
-#pragma HLS INTERFACE s_axilite port=output bundle=control 
-#pragma HLS INTERFACE s_axilite port=signal bundle=control 
+#pragma HLS INTERFACE s_axilite port=output_r bundle=control 
+#pragma HLS INTERFACE s_axilite port=signal_r bundle=control 
 #pragma HLS INTERFACE s_axilite port=coeff bundle=control 
 #pragma HLS INTERFACE s_axilite port=signal_length bundle=control
 #pragma HLS INTERFACE s_axilite port=return bundle=control
@@ -94,14 +94,16 @@ void fir_shift_register(int *output,
 
     init_loop:
     for (int i = 0; i < N_COEFF; i++) {
+    #pragma HLS PIPELINE II=1
         shift_reg[i] = 0;
         coeff_reg[i] = coeff[i];
     }
 
     outer_loop:
     for(int j = 0; j < signal_length; j++) {
+    #pragma HLS PIPELINE II=1
         int acc = 0;
-        int x = signal[j];
+        int x = signal_r[j];
 
         // This is the shift register operation. The N_COEFF variable is defined
         // at compile time so the compiler knows the number of operations
@@ -118,7 +120,7 @@ void fir_shift_register(int *output,
                 acc += shift_reg[i] * coeff_reg[i];
             }
         }
-        output[j] = acc;
+        output_r[j] = acc;
     }
 }
 }

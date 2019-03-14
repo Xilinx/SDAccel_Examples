@@ -31,6 +31,12 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //host application. The pointers in kernel parameters with the global 
 //keyword represents cl_mem objects on the FPGA DDR memory.
 
+//Array Size to access 
+#define DATA_SIZE 64
+
+// Tripcount identifiers
+__constant int c_size = DATA_SIZE;
+
 kernel __attribute__((reqd_work_group_size(1, 1, 1)))
 void mmult( __global int* in1,  //Read-only input matrix1
             __global int* in2,  //Read-only input matrix2
@@ -40,9 +46,12 @@ void mmult( __global int* in1,  //Read-only input matrix1
 {
     //Reads the data from DDR, performs the computation
     //and writes back the result to DDR.
+    __attribute__((xcl_loop_tripcount(c_size, c_size)))
     for (int i = 0 ; i < dim ; i++){
+        __attribute__((xcl_loop_tripcount(c_size, c_size)))
         for(int j = 0; j < dim; j++){
             out[i * dim + j] = 0;
+            __attribute__((xcl_loop_tripcount(c_size, c_size)))
             for(int k = 0; k < dim; k++){
                 out[i * dim + j] += in1[i * dim + k] * in2[k * dim + j];
             }

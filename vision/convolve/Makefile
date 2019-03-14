@@ -35,6 +35,8 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
+BUILD_DIR_krnl_convolve = $(BUILD_DIR)/krnl_convolve
+
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
@@ -55,11 +57,11 @@ CXXFLAGS += -fmessage-length=0
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 
 
 EXECUTABLE = convolve
-CMD_ARGS = ./data/input_buffer_raw.txt ./data/filter_buffer_raw.txt ./data/output_buffer_raw.txt
+CMD_ARGS = $(XCLBIN)/krnl_convolve.$(TARGET).$(DSA).xclbin ./data/input_buffer_raw.txt ./data/filter_buffer_raw.txt ./data/output_buffer_raw.txt
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
@@ -78,14 +80,13 @@ exe: $(EXECUTABLE)
 # Building kernel
 $(XCLBIN)/krnl_convolve.$(TARGET).$(DSA).xo: src/krnl_convolve.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k krnl_convolve -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_convolve) -c -k krnl_convolve -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/krnl_convolve.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_convolve_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk krnl_convolve:3 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_convolve) -l $(LDCLFLAGS) --nk krnl_convolve:3 -o'$@' $(+)
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
-	mkdir -p $(XCLBIN)
+$(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 
 emconfig:$(EMCONFIG_DIR)/emconfig.json
@@ -99,9 +100,9 @@ endif
 
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) ./data/input_buffer_raw.txt ./data/filter_buffer_raw.txt ./data/output_buffer_raw.txt
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/krnl_convolve.$(TARGET).$(DSA).xclbin ./data/input_buffer_raw.txt ./data/filter_buffer_raw.txt ./data/output_buffer_raw.txt
 else
-	 ./$(EXECUTABLE) ./data/input_buffer_raw.txt ./data/filter_buffer_raw.txt ./data/output_buffer_raw.txt
+	 ./$(EXECUTABLE) $(XCLBIN)/krnl_convolve.$(TARGET).$(DSA).xclbin ./data/input_buffer_raw.txt ./data/filter_buffer_raw.txt ./data/output_buffer_raw.txt
 endif
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 

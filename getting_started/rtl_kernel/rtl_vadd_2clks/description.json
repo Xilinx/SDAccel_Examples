@@ -16,10 +16,12 @@
     "output_files": "tmp_kernel_pack* packaged_kernel*",
     "host_srcs": "src/host.cpp",
     "host_exe": "host",
+    "cmd_args": "BUILD/vadd.xclbin",
     "targets": ["hw", "hw_emu"],
     "containers": [
     	{
 	"name": "vadd",
+	"ldclflags": "--kernel_frequency \"0:150|1:250\"",
 	"accelerators": [
 	    {
 		"name": "vadd",

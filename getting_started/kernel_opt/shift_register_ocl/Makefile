@@ -35,6 +35,8 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
+BUILD_DIR_fir = $(BUILD_DIR)/fir
+
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
@@ -54,7 +56,7 @@ CXXFLAGS += -fmessage-length=0
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 
 
 EXECUTABLE = shift_register
@@ -77,17 +79,16 @@ exe: $(EXECUTABLE)
 # Building kernel
 $(XCLBIN)/fir_naive.$(TARGET).$(DSA).xo: src/fir.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k fir_naive -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_fir) -c -k fir_naive -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/fir_shift_register.$(TARGET).$(DSA).xo: src/fir.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k fir_shift_register -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_fir) -c -k fir_shift_register -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/fir.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_fir_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk fir_naive:1 --nk fir_shift_register:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_fir) -l $(LDCLFLAGS) --nk fir_naive:1 --nk fir_shift_register:1 -o'$@' $(+)
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
-	mkdir -p $(XCLBIN)
+$(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 
 emconfig:$(EMCONFIG_DIR)/emconfig.json

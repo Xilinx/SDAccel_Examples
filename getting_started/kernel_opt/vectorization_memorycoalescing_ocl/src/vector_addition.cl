@@ -36,12 +36,16 @@ Description:
 ******************************************************************************/
 
 #define WORK_GROUP 256    //Work group size
+#define DATA_SIZE 8192
+
+// Tripcount identifiers
+__constant int c_size = DATA_SIZE/WORK_GROUP;
 
 __kernel __attribute__ ((reqd_work_group_size(16, 16, 1))) __attribute__((vec_type_hint(int)))
 void vec_add(
             __global const int *in1, 
             __global const int *in2, 
-            __global int *out,
+            __global int *out_r,
             const int size
             ) 
 {
@@ -64,7 +68,7 @@ void vec_add(
 
     //With vectorization, from each of the in1 and in2 vectors 16 data read happens
     //to perform addition operation.
-    //Once the vector addition is complete, the result 16 data is burst written to out.
+    //Once the vector addition is complete, the result 16 data is burst written to out_r.
     //Please look at the profile summary report, the number of reads and writes will
     //be less with vectorization compared to without.
     //Work items in the work group access consecutive memory locations which 
@@ -73,9 +77,10 @@ void vec_add(
     //Each work group item performs the 'size' number of operations
     //In this case the size(t_size) is 32. Since 256 work group items are there,
     //multiply by 32 gives 8192 operations corresponds to the total array size.
+    __attribute__((xcl_loop_tripcount(c_size, c_size)))
     for(int i = 0; i < t_size; i++) {
         index =  i*lsize0*lsize1 + tid1*lsize0 + tid0;
-        out[index] = in1[index] + in2[index];
+        out_r[index] = in1[index] + in2[index];
     }
 }
 

@@ -98,14 +98,6 @@ int main(int argc, char* argv[]) {
     OCL_CHECK(err, cl::Buffer buffer_dout  (context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
             sizeof(int) * (ITERATION), result_krnl.data(), &err));
 
-    std::vector<cl::Memory> inBufVec, outBufVec;
-    inBufVec.push_back(buffer_din1);
-    inBufVec.push_back(buffer_din2);
-    inBufVec.push_back(buffer_din3);
-    outBufVec.push_back(buffer_dout);
-    //Copy input RGB Image to device global memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/));
-
     /* Set the kernel arguments */
     int nargs=0;
     OCL_CHECK(err, err = krnl.setArg(nargs++,buffer_din1));
@@ -113,11 +105,14 @@ int main(int argc, char* argv[]) {
     OCL_CHECK(err, err = krnl.setArg(nargs++,buffer_din3));
     OCL_CHECK(err, err = krnl.setArg(nargs++,buffer_dout));
 
+    //Copy input RGB Image to device global memory
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_din1, buffer_din2, buffer_din3},0/* 0 means from host*/));
+
     /* Launch the kernel */
     OCL_CHECK(err, err = q.enqueueTask(krnl));
 
      /* Copy result to local buffer */
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_dout},CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());
 
     /* Compare the results of the kernel to the simulation */

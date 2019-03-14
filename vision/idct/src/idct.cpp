@@ -440,9 +440,7 @@ int main(int argc, char* argv[]) {
   char *xcl_mode = getenv("XCL_EMULATION_MODE");
 
   if (argc != 2) {
-    printf("Usage: %s "
-       "./xclbin/krnl_idct.<emulation_mode>.<dsa>.xclbin\n",
-       argv[0]);
+    printf("Usage: %s <XCLBIN File>\n", argv[0]);
     return EXIT_FAILURE;
   }
 

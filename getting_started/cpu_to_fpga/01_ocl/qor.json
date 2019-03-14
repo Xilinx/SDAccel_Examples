@@ -1,14 +1,15 @@
 {
     "containers": [
-        { 
-            "meet_system_timing": "true",
+        {
+            "name": "mmult", 
+            "meet_system_timing": "true", 
             "accelerators": [
                 {
-                    "name": "mmult",
-                    "check_timing": "true",
-                    "pipelinetype": "none",
-                    "check_latency": "false",
-                    "check_warning": "true"
+                    "name": "mmult", 
+                    "check_timing": "true", 
+                    "PipelineType": "none", 
+                    "check_latency": "true", 
+                    "check_warning": "false"
                 }
             ]
         }

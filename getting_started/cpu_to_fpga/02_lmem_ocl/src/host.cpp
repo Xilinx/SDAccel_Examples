@@ -77,7 +77,8 @@ uint64_t mmult_fpga (
     std::vector<int,aligned_allocator<int>>& source_in1,   //Input Matrix 1
     std::vector<int,aligned_allocator<int>>& source_in2,   //Input Matrix 2
     std::vector<int,aligned_allocator<int>>& source_fpga_results,    //Output Matrix
-    int dim                                         //One dimension of matrix
+    int dim,                                         //One dimension of matrix
+    std::string &binaryFile                          //Binary file string
 )
 {
     cl_int err;
@@ -98,7 +99,6 @@ uint64_t mmult_fpga (
     //xocc compiler load into OpenCL Binary and return a pointer to file buffer
     //and it can contain many functions which can be executed on the
     //device.
-    std::string binaryFile = xcl::find_binary_file(device_name,"mmult");
     char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
@@ -118,13 +118,7 @@ uint64_t mmult_fpga (
     OCL_CHECK(err, cl::Buffer buffer_in2(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
             matrix_size_bytes,source_in2.data(), &err));
     OCL_CHECK(err, cl::Buffer buffer_output(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
-            matrix_size_bytes,source_fpga_results.data(), &err));
-
-    //These commands will load the source_in1 and source_in2 vectors from the host
-    //application into the buffer_in1 and buffer_in2 cl::Buffer objects. The data
-    //will be be transferred from system memory over PCIe to the FPGA on-board
-    //DDR memory.
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_in1, buffer_in2},0/* 0 means from host*/));
+            matrix_size_bytes,source_fpga_results.data(), &err)); 
 
     //Set the kernel arguments
     int narg = 0;
@@ -132,6 +126,12 @@ uint64_t mmult_fpga (
     OCL_CHECK(err, err = kernel.setArg(narg++, buffer_in2));
     OCL_CHECK(err, err = kernel.setArg(narg++, buffer_output));
     OCL_CHECK(err, err = kernel.setArg(narg++, size));
+
+    //These commands will load the source_in1 and source_in2 vectors from the host
+    //application into the buffer_in1 and buffer_in2 cl::Buffer objects. The data
+    //will be be transferred from system memory over PCIe to the FPGA on-board
+    //DDR memory.
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_in1, buffer_in2},0/* 0 means from host*/));
     
     cl::Event event;
     uint64_t kernel_duration = 0;
@@ -153,6 +153,13 @@ uint64_t mmult_fpga (
 
 int main(int argc, char** argv)
 {
+    if (argc != 2) {
+        std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    std::string binaryFile = argv[1];
+
     if (DATA_SIZE > MAX_SIZE) {
         std::cout << "Size is bigger than internal buffer size,"
         << " please use a size smaller than " << MAX_SIZE << "!" << std::endl;
@@ -191,7 +198,7 @@ int main(int argc, char** argv)
     mmult_cpu(source_in1.data(), source_in2.data(), source_cpu_results.data(), size);
 
     //Compute FPGA Results
-    kernel_duration = mmult_fpga(source_in1, source_in2, source_fpga_results, size);
+    kernel_duration = mmult_fpga(source_in1, source_in2, source_fpga_results, size, binaryFile);
 
     //Compare the results of the FPGA to CPU 
     bool match = true;

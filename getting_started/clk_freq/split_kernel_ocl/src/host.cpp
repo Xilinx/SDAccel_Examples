@@ -184,20 +184,14 @@ void run_opencl_sketch
     }
 
     //Allocate Buffer in Global Memory
-    std::vector<cl::Memory> inBufVec, outBufVec;
     OCL_CHECK(err, cl::Buffer buffer_input (context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
                             image_size_bytes,hw_inImage.data(), &err));
  
     OCL_CHECK(err, cl::Buffer buffer_output(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
             image_size_bytes,hw_outImage.data(), &err));
-    inBufVec.push_back(buffer_input);
-    outBufVec.push_back(buffer_output);
-
-    std::cout << "Writing input image to buffer...\n";
-
-    //Copy input data to device global memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/));
     
+    std::cout << "Writing input image to buffer...\n";
+   
     int narg = 0;
 
     //Set the Kernel Arguments
@@ -208,12 +202,15 @@ void run_opencl_sketch
     
     std::cout << "Launching Kernels...." << std::endl;
 
+    //Copy input data to device global memory
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_input},0/* 0 means from host*/));
+
     //Launch the Kernel
     OCL_CHECK(err, err = q.enqueueTask(krnl_process_image));
     std::cout << "Kernel Execution Finished...." << std::endl;
     
     //Copy Result from Device Global Memory to Host Local Memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_output},CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());
     delete[] fileBuf;
 

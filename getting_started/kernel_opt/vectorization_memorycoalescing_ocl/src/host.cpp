@@ -108,13 +108,13 @@ int main(int argc, char* argv[]) {
     OCL_CHECK(err, cl::Buffer buffer_output(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
                     vector_size_bytes, source_hw_results.data(), &err));
 
-    //Copy input data to device global memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_in1, buffer_in2}, 0/*0 means from host*/));
-
     OCL_CHECK(err, err = kernel.setArg(0, buffer_in1));
     OCL_CHECK(err, err = kernel.setArg(1, buffer_in2));
     OCL_CHECK(err, err = kernel.setArg(2, buffer_output));
     OCL_CHECK(err, err = kernel.setArg(3, size));
+
+    //Copy input data to device global memory
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_in1, buffer_in2}, 0/*0 means from host*/));
 
     size_t global = 16;   // global domain size calculation
     size_t local = 16;    // local domain size calculation

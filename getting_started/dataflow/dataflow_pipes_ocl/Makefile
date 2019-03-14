@@ -35,6 +35,8 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
+BUILD_DIR_adder = $(BUILD_DIR)/adder
+
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
@@ -54,7 +56,7 @@ CXXFLAGS += -fmessage-length=0
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 
 
 EXECUTABLE = host
@@ -78,20 +80,19 @@ exe: $(EXECUTABLE)
 # Building kernel
 $(XCLBIN)/adder_stage.$(TARGET).$(DSA).xo: src/adder.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k adder_stage -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_adder) -c -k adder_stage -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/input_stage.$(TARGET).$(DSA).xo: src/adder.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k input_stage -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_adder) -c -k input_stage -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/output_stage.$(TARGET).$(DSA).xo: src/adder.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k output_stage -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_adder) -c -k output_stage -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/adder.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_adder_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk adder_stage:1 --nk input_stage:1 --nk output_stage:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_adder) -l $(LDCLFLAGS) --nk adder_stage:1 --nk input_stage:1 --nk output_stage:1 -o'$@' $(+)
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
-	mkdir -p $(XCLBIN)
+$(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 
 emconfig:$(EMCONFIG_DIR)/emconfig.json

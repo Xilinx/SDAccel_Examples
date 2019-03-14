@@ -151,11 +151,6 @@ int FPGA_KMEANS::fpga_kmeans_compute(
     int N_Features = ( (n_features -1)/g_vector_size + 1) * g_vector_size;
     DATA_TYPE* temp_clusters = re_align_clusters(clusters,n_clusters, N_Features,n_features);
 
-    OCL_CHECK(err, err = g_q.enqueueWriteBuffer(d_cluster, CL_TRUE, 0,
-                                n_clusters * N_Features * sizeof(DATA_TYPE), temp_clusters, NULL, NULL));
-    g_q.finish();
-    free(temp_clusters);
-
     int narg = 0;
     OCL_CHECK(err, err = g_kernel_kmeans.setArg(narg++, d_feature));
     OCL_CHECK(err, err = g_kernel_kmeans.setArg(narg++, d_cluster));
@@ -163,6 +158,11 @@ int FPGA_KMEANS::fpga_kmeans_compute(
     OCL_CHECK(err, err = g_kernel_kmeans.setArg(narg++, sizeof(cl_int), (void*) &n_points));
     OCL_CHECK(err, err = g_kernel_kmeans.setArg(narg++, sizeof(cl_int), (void*) &n_clusters));
     OCL_CHECK(err, err = g_kernel_kmeans.setArg(narg++, sizeof(cl_int), (void*) &n_features));
+
+    OCL_CHECK(err, err = g_q.enqueueWriteBuffer(d_cluster, CL_TRUE, 0,
+                                n_clusters * N_Features * sizeof(DATA_TYPE), temp_clusters, NULL, NULL));
+    g_q.finish();
+    free(temp_clusters);
 
     OCL_CHECK(err, err = g_q.enqueueNDRangeKernel(g_kernel_kmeans, 0, 1, 1, NULL, &wait_event));
     g_q.finish();
@@ -326,7 +326,7 @@ float** FPGA_KMEANS::fpga_kmeans_clustering(
     return clusters;
 }
 
-int FPGA_KMEANS::fpga_kmeans_init()
+int FPGA_KMEANS::fpga_kmeans_init(std::string &binaryFile)
 {
     cl_int err;
     unsigned fileBufSize;
@@ -337,8 +337,6 @@ int FPGA_KMEANS::fpga_kmeans_init()
     OCL_CHECK(err, g_context = cl::Context(device, NULL, NULL, NULL, &err));
     OCL_CHECK(err, g_q = cl::CommandQueue(g_context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
-
-    std::string binaryFile = xcl::find_binary_file(device_name,"kmeans");
 
     g_fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{g_fileBuf, fileBufSize}};

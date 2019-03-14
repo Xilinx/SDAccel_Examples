@@ -172,6 +172,7 @@ SmithWatermanApp::SmithWatermanApp(const string& vendor_name,
     int selected_device,
     const string& strKernelFP,
     const string& strSampleFP,
+    const string& binaryFile,
     const int numBlocks,
     const int blkSz,
     const bool doubleBuffered,
@@ -200,7 +201,6 @@ SmithWatermanApp::SmithWatermanApp(const string& vendor_name,
     OCL_CHECK(err, std::string dev_name = device.getInfo<CL_DEVICE_NAME>(&err));
     std::cout << "Found Device=" << dev_name.c_str() << std::endl;
 
-    std::string binaryFile = xcl::find_binary_file(dev_name, "krnl_smithwaterman");
     fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);

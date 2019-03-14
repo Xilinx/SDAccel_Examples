@@ -20,6 +20,7 @@
         "accelerators": [
         {
             "name": "vec_add", 
+            "max_memory_ports": "true",
             "location": "src/vector_addition.cl"
         }
        ]

@@ -80,12 +80,16 @@ pipe int p1 __attribute__((xcl_reqd_pipe_depth(32)));
 //  This blocking read and write functionality allow designer to synchronize the 
 //  data across multiple kernels
 
+// Tripcount identifiers
+__constant int c_min_size = 1024;
+__constant int c_max_size = 1024*1024;
 
 // Input Stage Kernel : Read Data from Global Memory and write into Pipe P0
 kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
 void input_stage(__global int *input, int size)
 {
     __attribute__((xcl_pipeline_loop(1))) 
+    __attribute__((xcl_loop_tripcount(c_min_size, c_max_size)))
     mem_rd: for (int i = 0 ; i < size ; i++)
     {
         //blocking Write command to pipe P0
@@ -99,6 +103,7 @@ kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
 void adder_stage(int inc, int size)
 {
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_min_size, c_max_size)))
     execute: for(int i = 0 ; i < size ;  i++)
     {
         int input_data, output_data;
@@ -117,6 +122,7 @@ kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
 void output_stage(__global int *output, int size)
 {
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_min_size, c_max_size)))
     mem_wr: for (int i = 0 ; i < size ; i++)
     {
         //blocking read command to Pipe P1

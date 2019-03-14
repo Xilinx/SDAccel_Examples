@@ -40,10 +40,10 @@ Description:
 #include <vector>
 
 //Array Size to access 
-#define DATA_SIZE 64
+#define DATA_SIZE 16
 
 //Maximum Array Size
-#define MAX_SIZE 64
+#define MAX_SIZE 32
 
 // Software implementation of Matrix Multiplication
 // The inputs are of the size (DATA_SIZE x DATA_SIZE)
@@ -111,19 +111,12 @@ int main(int argc, char** argv)
     OCL_CHECK(err, cl::Kernel krnl_loop_reorder(program,"mmult", &err));
 
     //Allocate Buffer in Global Memory
-    std::vector<cl::Memory> inBufVec, outBufVec;
     OCL_CHECK(err, cl::Buffer buffer_in1(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
             matrix_size_bytes,source_in1.data(), &err));
     OCL_CHECK(err, cl::Buffer buffer_in2(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
             matrix_size_bytes,source_in2.data(), &err));
     OCL_CHECK(err, cl::Buffer buffer_output(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
             matrix_size_bytes,source_hw_results.data(), &err));
-    inBufVec.push_back(buffer_in1);
-    inBufVec.push_back(buffer_in2);
-    outBufVec.push_back(buffer_output);
-
-    //Copy input data to device global memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/));
 
     int size = DATA_SIZE;
 
@@ -132,12 +125,15 @@ int main(int argc, char** argv)
     OCL_CHECK(err, err = krnl_loop_reorder.setArg(2, buffer_output));
     OCL_CHECK(err, err = krnl_loop_reorder.setArg(3, size));
 
+    //Copy input data to device global memory
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_in1, buffer_in2},0/* 0 means from host*/));
+
     //Launch the Kernel
     OCL_CHECK(err, err = q.enqueueTask(krnl_loop_reorder));
     q.finish();
 
     //Copy Result from Device Global Memory to Host Local Memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_output},CL_MIGRATE_MEM_OBJECT_HOST));
     q.finish();
 
 //OPENCL HOST CODE AREA END

@@ -1,63 +1,65 @@
 {
     "containers": [
-        { 
-            "meet_system_timing": "true",
+        {
+            "name": "cnn_GOOD", 
+            "meet_system_timing": "true", 
             "accelerators": [
                 {
-                    "name": "cnn_GOOD",
-                    "check_timing": "true",
-                    "pipelinetype": "none",
-                    "check_latency": "false",
-                    "check_warning": "true",
-                    "loops": [   
+                    "name": "cnn_GOOD", 
+                    "check_timing": "true", 
+                    "PipelineType": "none", 
+                    "check_latency": "true", 
+                    "check_warning": "false", 
+                    "loops": [
                         {
-                            "name": "imgcopy",
-                            "pipelineII": "1"                     
-                        },
+                            "name": "imgcopy", 
+                            "PipelineII": "1"
+                        }, 
                         {
-                            "name": "readWt",
-                            "pipelineII": "1"
-                        },
+                            "name": "readWt", 
+                            "PipelineII": "1"
+                        }, 
                         {
-                            "name": "convYaxis_convXaxis",
-                            "pipelineII": "1"
-                        },
+                            "name": "convYaxis_convXaxis", 
+                            "PipelineII": "1"
+                        }, 
                         {
-                            "name": "writeOut",
-                            "pipelineII": "1"
+                            "name": "writeOut", 
+                            "PipelineII": "1"
                         }
                     ]
-                }   
+                }
             ]
-        },
-        { 
-            "meet_system_timing": "true",
+        }, 
+        {
+            "name": "cnn_BAD", 
+            "meet_system_timing": "true", 
             "accelerators": [
                 {
-                    "name": "cnn_BAD",
-                    "check_timing": "true",
-                    "pipelinetype": "none",
-                    "check_latency": "false",
-                    "check_warning": "true",
-                    "loops": [   
+                    "name": "cnn_BAD", 
+                    "check_timing": "true", 
+                    "PipelineType": "none", 
+                    "check_latency": "true", 
+                    "check_warning": "false", 
+                    "loops": [
                         {
-                            "name": "readImg",
-                            "pipelineII": "1"                     
-                        },
+                            "name": "readImg", 
+                            "PipelineII": "1"
+                        }, 
                         {
-                            "name": "readWt",
-                            "pipelineII": "1"
-                        },
+                            "name": "readWt", 
+                            "PipelineII": "1"
+                        }, 
                         {
-                            "name": "convILoop_convJLoop",
-                            "pipelineII": "1"
-                        },
+                            "name": "convILoop_convJLoop", 
+                            "PipelineII": "1"
+                        }, 
                         {
-                            "name": "writeOut",
-                            "pipelineII": "1"
+                            "name": "writeOut", 
+                            "PipelineII": "1"
                         }
                     ]
-                }   
+                }
             ]
         }
     ]

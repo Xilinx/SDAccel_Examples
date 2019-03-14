@@ -33,6 +33,13 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 int main(int argc, char** argv)
 {
+    if (argc != 2) {
+        std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    std::string binaryFile = argv[1];
+
     cl_int err;
     unsigned fileBufSize;
     int size = DATA_SIZE;
@@ -60,7 +67,6 @@ int main(int argc, char** argv)
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
 
-    std::string binaryFile = xcl::find_binary_file(device_name,"vadd");
     char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
@@ -68,19 +74,12 @@ int main(int argc, char** argv)
     OCL_CHECK(err, cl::Kernel krnl_vadd(program,"krnl_vadd_rtl", &err));
 
     //Allocate Buffer in Global Memory
-    std::vector<cl::Memory> inBufVec, outBufVec;
     OCL_CHECK(err, cl::Buffer buffer_r1(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
             vector_size_bytes, source_input1.data(), &err));
     OCL_CHECK(err, cl::Buffer buffer_r2(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
             vector_size_bytes, source_input2.data(), &err));
     OCL_CHECK(err, cl::Buffer buffer_w (context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
             vector_size_bytes, source_hw_results.data(), &err));
-    inBufVec.push_back(buffer_r1);
-    inBufVec.push_back(buffer_r2);
-    outBufVec.push_back(buffer_w);
-
-    //Copy input data to device global memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/));
 
     //Set the Kernel Arguments
     OCL_CHECK(err, err = krnl_vadd.setArg(0,buffer_r1));
@@ -88,11 +87,14 @@ int main(int argc, char** argv)
     OCL_CHECK(err, err = krnl_vadd.setArg(2,buffer_w));
     OCL_CHECK(err, err = krnl_vadd.setArg(3,size));
 
+    //Copy input data to device global memory
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_r1, buffer_r2},0/* 0 means from host*/));
+
     //Launch the Kernel
     OCL_CHECK(err, err = q.enqueueTask(krnl_vadd));
 
     //Copy Result from Device Global Memory to Host Local Memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_w},CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());
 
 //OPENCL HOST CODE AREA END

@@ -1,29 +1,30 @@
 {
     "containers": [
-        { 
-            "meet_system_timing": "true",
+        {
+            "name": "vadd", 
+            "meet_system_timing": "true", 
             "accelerators": [
                 {
-                    "name": "vadd",
-                    "check_timing": "true",
-                    "pipelinetype": "none",
-                    "check_latency": "false",
-                    "check_warning": "true",
-                    "loops": [   
+                    "name": "vadd", 
+                    "check_timing": "true", 
+                    "PipelineType": "none", 
+                    "check_latency": "true", 
+                    "check_warning": "false", 
+                    "loops": [
                         {
-                            "name": "v1_rd",
-                            "pipelineII": "1"                     
-                        },
+                            "name": "v1_rd", 
+                            "PipelineII": "1"
+                        }, 
                         {
-                            "name": "v2_rd_add",
-                            "pipelineII": "1"
-                        },
+                            "name": "v2_rd_add", 
+                            "PipelineII": "1"
+                        }, 
                         {
-                            "name": "out_wr",
-                            "pipelineII": "1"
+                            "name": "out_wr", 
+                            "PipelineII": "1"
                         }
                     ]
-                }   
+                }
             ]
         }
     ]

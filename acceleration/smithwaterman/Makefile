@@ -35,6 +35,8 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
+BUILD_DIR_krnl_smithwaterman = $(BUILD_DIR)/krnl_smithwaterman
+
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
@@ -59,12 +61,13 @@ CXXFLAGS += -fmessage-length=0 -DFPGA_DEVICE -I./src/
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 CLFLAGS += -I./src/ --kernel_frequency 235
 
 
 
 EXECUTABLE = smithwaterman
+CMD_ARGS = $(XCLBIN)/krnl_smithwaterman.$(TARGET).$(DSA).xclbin
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
@@ -82,14 +85,13 @@ exe: $(EXECUTABLE)
 # Building kernel
 $(XCLBIN)/opencl_sw_maxscore.$(TARGET).$(DSA).xo: src/opencl_sw_maxscore_systolic.cpp
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k opencl_sw_maxscore -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_smithwaterman) -c -k opencl_sw_maxscore -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/krnl_smithwaterman.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_smithwaterman_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk opencl_sw_maxscore:2 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_smithwaterman) -l $(LDCLFLAGS) --nk opencl_sw_maxscore:2 -o'$@' $(+)
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
-	mkdir -p $(XCLBIN)
+$(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 
 emconfig:$(EMCONFIG_DIR)/emconfig.json
@@ -99,9 +101,9 @@ $(EMCONFIG_DIR)/emconfig.json:
 check: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/krnl_smithwaterman.$(TARGET).$(DSA).xclbin
 else
-	 ./$(EXECUTABLE)
+	 ./$(EXECUTABLE) $(XCLBIN)/krnl_smithwaterman.$(TARGET).$(DSA).xclbin
 endif
 ifneq ($(TARGET),$(findstring $(TARGET), sw_emu hw))
 $(warning WARNING:Application supports only sw_emu hw TARGET. Please use the target for running the application)
@@ -110,7 +112,7 @@ endif
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 
 run_nimbix: all
-	$(COMMON_REPO)/utility/nimbix/run_nimbix.py $(EXECUTABLE) $(DSA)
+	$(COMMON_REPO)/utility/nimbix/run_nimbix.py $(EXECUTABLE) $(CMD_ARGS) $(DSA)
 
 aws_build: check-aws_repo $(BINARY_CONTAINERS)
 	$(COMMON_REPO)/utility/aws/run_aws.py $(BINARY_CONTAINERS)

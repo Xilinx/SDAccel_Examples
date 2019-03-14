@@ -35,6 +35,8 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
+BUILD_DIR_krnl_edge = $(BUILD_DIR)/krnl_edge
+
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
@@ -56,11 +58,11 @@ CXXFLAGS += -fmessage-length=0
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 
 
 EXECUTABLE = edge
-CMD_ARGS = ./data/input/eiffel.bmp
+CMD_ARGS = $(XCLBIN)/krnl_edge.$(TARGET).$(DSA).xclbin ./data/input/eiffel.bmp
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
@@ -79,14 +81,13 @@ exe: $(EXECUTABLE)
 # Building kernel
 $(XCLBIN)/krnl_sobel.$(TARGET).$(DSA).xo: src/krnl_sobelfilter.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k krnl_sobel -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_edge) -c -k krnl_sobel -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/krnl_edge.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_edge_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk krnl_sobel:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_edge) -l $(LDCLFLAGS) --nk krnl_sobel:1 -o'$@' $(+)
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
-	mkdir -p $(XCLBIN)
+$(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 
 emconfig:$(EMCONFIG_DIR)/emconfig.json
@@ -96,9 +97,9 @@ $(EMCONFIG_DIR)/emconfig.json:
 check: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) ./data/input/eiffel.bmp
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/krnl_edge.$(TARGET).$(DSA).xclbin ./data/input/eiffel.bmp
 else
-	 ./$(EXECUTABLE) ./data/input/eiffel.bmp
+	 ./$(EXECUTABLE) $(XCLBIN)/krnl_edge.$(TARGET).$(DSA).xclbin ./data/input/eiffel.bmp
 endif
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 

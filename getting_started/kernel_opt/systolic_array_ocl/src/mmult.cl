@@ -66,6 +66,9 @@ Kernel Description :
 //Maximum Array Size
 #define MAX_SIZE 12
 
+// Tripcount identifiers
+__constant int c_size = MAX_SIZE;
+
 __kernel __attribute__((reqd_work_group_size(1, 1, 1)))
 void mmult(
             __global int *a,    // Read-Only Matrix A
@@ -90,6 +93,7 @@ void mmult(
     // Burst reads on input matrices from global memory
     // Read Input A
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_size*c_size, c_size*c_size)))
     readA: for(int loc = 0, i = 0, j = 0; loc < a_row*a_col; loc++, j++) {
         if(j == a_col) { i++; j = 0;}
         localA[i][j] = a[loc];
@@ -97,6 +101,7 @@ void mmult(
     
     // Read Input B
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_size*c_size, c_size*c_size)))
     readB: for(int loc = 0, i = 0, j = 0; loc < b_row*b_col; loc++, j++) {
         if(j == b_col) { i++; j = 0; }
         localB[i][j] = b[loc];
@@ -140,10 +145,13 @@ void mmult(
     //       |   |      |   |      |   |      |   |
     //  A3_->|C30| ---- |C31| ---- |C32| ---- |C33|
     //       |___|      |___|      |___|      |___|
-    
+     
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_size, c_size)))
     systolic1: for(int k = 0; k < a_col; k++) {
+        __attribute__((xcl_loop_tripcount(c_size, c_size)))
         systolic2: for(int i = 0; i < MAX_SIZE; i++) {
+            __attribute__((xcl_loop_tripcount(c_size, c_size)))
             systolic3: for(int j = 0; j < MAX_SIZE; j++) {
                 
                 // Get previous sum
@@ -164,6 +172,7 @@ void mmult(
     // Burst write from output matrices to global memory
     // Burst write from matrix C
     __attribute__((xcl_pipeline_loop(1)))
+    __attribute__((xcl_loop_tripcount(c_size*c_size, c_size*c_size)))
     writeC: for(int loc = 0, i = 0, j = 0; loc < c_row*c_col; loc++, j++) {
         if(j == c_col) { i++; j = 0; }
         c[loc] = localC[i][j];

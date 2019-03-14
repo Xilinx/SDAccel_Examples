@@ -131,7 +131,7 @@ emconfigutil --platform 'xilinx_vcu1525_dynamic' --nd 1
 ```
 Once the environment has been configured, the application can be executed by
 ```
-./host_kmeans -i ./data/100 -c ./data/100.gold_c5 -m 5 -n 5 -g 2
+./host_kmeans -x ./xclbin/kmeans.<emulation target>.<device name>.xclbin -i ./data/100 -c ./data/100.gold_c5 -m 5 -n 5 -g 2
 ```
 This is the same command executed by the check makefile rule
 ### Compiling for Application Execution in the FPGA Accelerator Card

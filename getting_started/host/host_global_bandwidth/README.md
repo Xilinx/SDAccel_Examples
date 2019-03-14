@@ -48,7 +48,7 @@ description.json
 qor.json
 sdaccel.ini
 src/host.cpp
-src/kernel.cl
+src/kernel.cpp
 utils.mk
 ```
 

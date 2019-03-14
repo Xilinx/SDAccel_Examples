@@ -35,6 +35,8 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
+BUILD_DIR_nearest_neighbor = $(BUILD_DIR)/nearest_neighbor
+
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
@@ -54,7 +56,7 @@ CXXFLAGS += -fmessage-length=0
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 
 
 EXECUTABLE = loop_fusion
@@ -77,17 +79,16 @@ exe: $(EXECUTABLE)
 # Building kernel
 $(XCLBIN)/nearest_neighbor_loop_fusion.$(TARGET).$(DSA).xo: src/nearest_neighbor.cpp
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k nearest_neighbor_loop_fusion -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_nearest_neighbor) -c -k nearest_neighbor_loop_fusion -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/nearest_neighbor.$(TARGET).$(DSA).xo: src/nearest_neighbor_bad.cpp
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k nearest_neighbor -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_nearest_neighbor) -c -k nearest_neighbor -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/nearest_neighbor.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_nearest_neighbor_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk nearest_neighbor_loop_fusion:1 --nk nearest_neighbor:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_nearest_neighbor) -l $(LDCLFLAGS) --nk nearest_neighbor_loop_fusion:1 --nk nearest_neighbor:1 -o'$@' $(+)
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
-	mkdir -p $(XCLBIN)
+$(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 
 emconfig:$(EMCONFIG_DIR)/emconfig.json

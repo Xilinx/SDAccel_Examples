@@ -35,6 +35,8 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
+BUILD_DIR_vadd = $(BUILD_DIR)/vadd
+
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
@@ -56,10 +58,13 @@ CXXFLAGS += -fmessage-length=0
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 
+# Kernel linker flags
+LDCLFLAGS += --kernel_frequency "0:150|1:250"
 
 EXECUTABLE = host
+CMD_ARGS = $(XCLBIN)/vadd.$(TARGET).$(DSA).xclbin
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
@@ -80,8 +85,7 @@ $(XCLBIN)/vadd.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_vadd_OBJS)
 	$(XOCC) $(CLFLAGS) $(LDCLFLAGS) -lo $(XCLBIN)/vadd.$(TARGET).$(DSA).xclbin $(XCLBIN)/vadd.$(TARGET).$(DSA).xo
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
-	mkdir -p $(XCLBIN)
+$(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 
 emconfig:$(EMCONFIG_DIR)/emconfig.json
@@ -91,9 +95,9 @@ $(EMCONFIG_DIR)/emconfig.json:
 check: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/vadd.$(TARGET).$(DSA).xclbin
 else
-	 ./$(EXECUTABLE)
+	 ./$(EXECUTABLE) $(XCLBIN)/vadd.$(TARGET).$(DSA).xclbin
 endif
 ifneq ($(TARGET),$(findstring $(TARGET), hw hw_emu))
 $(warning WARNING:Application supports only hw hw_emu TARGET. Please use the target for running the application)
@@ -102,7 +106,7 @@ endif
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 
 run_nimbix: all
-	$(COMMON_REPO)/utility/nimbix/run_nimbix.py $(EXECUTABLE) $(DSA)
+	$(COMMON_REPO)/utility/nimbix/run_nimbix.py $(EXECUTABLE) $(CMD_ARGS) $(DSA)
 
 aws_build: check-aws_repo $(BINARY_CONTAINERS)
 	$(COMMON_REPO)/utility/aws/run_aws.py $(BINARY_CONTAINERS)

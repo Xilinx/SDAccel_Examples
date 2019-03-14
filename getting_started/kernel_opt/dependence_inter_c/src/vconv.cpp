@@ -38,13 +38,13 @@ Description:
 #include "vconv.h"
 
 // Read Data from DDR Memory and write into Stream inStream
-static void read_input(int *in, hls::stream<int> &inStream, int size)
+static void read_input(int *in_r, hls::stream<int> &inStream, int size)
 {
     mem_rd: for (int i = 0 ; i < size ; i++){
     #pragma HLS PIPELINE II=1
     #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
         //Blocking write command to inStream 
-        inStream << in[i];
+        inStream << in_r[i];
     }
 }
 
@@ -56,14 +56,11 @@ static void vconv_compute(hls::stream<int> &inStream ,
     #pragma HLS ARRAY_PARTITION variable=linebuf dim=1 complete
     VConvH:for(int col = 0; col < height; ++col) {
         VConvW:for(int row = 0; row < width; ++row) {
-        #pragma HLS DEPENDENCE variable=linebuf inter WAR false
+        #pragma HLS DEPENDENCE variable=linebuf inter false
         #pragma HLS PIPELINE
             // HLS Dependence pragma provides extra dependency information to compiler.
             // For example here linebuf has false inter dependency. Which means
             // each iteration of loop is independent for linebuf access. 
-            // The dependency on the specified direction WAR (Write-After-Read), 
-            // which states the read instruction gets a value that is
-            // overwritten by the write instruction, has also been removed.
             // It allows compiler to ignore dependency of linebuf and generate
             // a pipeline with lower II count. 
         
@@ -79,30 +76,30 @@ static void vconv_compute(hls::stream<int> &inStream ,
         
                 if (i > 0)
                     linebuf[i-1][row] = vwin_val;
-            } 
+            }
             outStream << out_val;
         }
     }
 }
 
 // Read result from outStream and write the result to Global Memory
-static void write_result(int *out, hls::stream<int> &outStream , int size)
+static void write_result(int *out_r, hls::stream<int> &outStream , int size)
 {
     mem_wr: for (int i = 0 ; i < size ; i++){
     #pragma HLS PIPELINE II=1
     #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
         //Blocking read command to outStream
-        out[i] = outStream.read();
+        out_r[i] = outStream.read();
     }
 }
                                          
 extern "C" {
-void vconv(int *in, int *out, int height, int width)
+void vconv(int *in_r, int *out_r, int height, int width)
 {
-    #pragma HLS INTERFACE m_axi port=in  offset=slave bundle=gmem
-    #pragma HLS INTERFACE m_axi port=out offset=slave bundle=gmem
-    #pragma HLS INTERFACE s_axilite port=in  bundle=control
-    #pragma HLS INTERFACE s_axilite port=out bundle=control
+    #pragma HLS INTERFACE m_axi port=in_r  offset=slave bundle=gmem
+    #pragma HLS INTERFACE m_axi port=out_r offset=slave bundle=gmem
+    #pragma HLS INTERFACE s_axilite port=in_r  bundle=control
+    #pragma HLS INTERFACE s_axilite port=out_r bundle=control
     #pragma HLS INTERFACE s_axilite port=height bundle=control
     #pragma HLS INTERFACE s_axilite port=width bundle=control
     #pragma HLS INTERFACE s_axilite port=return bundle=control
@@ -110,17 +107,17 @@ void vconv(int *in, int *out, int height, int width)
     int size = height * width;
 
     //inStream for reading input data
-    hls::stream<int> inStream;
+    static hls::stream<int> inStream;
     #pragma HLS stream variable=inStream depth=32
 
     //outStream for writing data to Global Memory
-    hls::stream<int> outStream;
+    static hls::stream<int> outStream;
     #pragma HLS stream variable=outStream depth=32
 
     #pragma HLS dataflow
     //dataflow pragma instruct compiler to run following three APIs in parallel
-    read_input(in, inStream, size);
+    read_input(in_r, inStream, size);
     vconv_compute(inStream, outStream, height, width);
-    write_result(out, outStream, size);
+    write_result(out_r, outStream, size);
 }
 }

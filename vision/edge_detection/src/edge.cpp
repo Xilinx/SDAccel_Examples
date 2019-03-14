@@ -65,12 +65,14 @@ int main(int argc, char* argv[]) {
     cl_int err;
     cl::Event event;
     unsigned fileBufSize;
-    if(argc != 2) {
-        std::cout << "Usage: " << argv[0] << "<input>" << std::endl;
+
+    if(argc != 3) {
+        std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << " <input>" << std::endl;
         return EXIT_FAILURE;
     }
 
-    std::string inputFileName(argv[1]);
+    std::string binaryFile = argv[1];
+    std::string inputFileName(argv[2]);
     cv::Mat inputColor = cv::imread(inputFileName);
 
     // Convert image to grayscale then convert to unsigned 8 bit values
@@ -114,10 +116,6 @@ int main(int argc, char* argv[]) {
     OCL_CHECK(err, cl::CommandQueue q (context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
-    // find_binary_file() is a utility API which will search the xclbin file for
-    // targeted mode (sw_emu/hw_emu/hw) and for targeted platforms.
-    std::string binaryFile = xcl::find_binary_file(device_name, "krnl_edge");
-
     // read_binary_file() is a utility API which will load the binaryFile
     // and will return pointer to file buffer.
     char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
@@ -135,13 +133,13 @@ int main(int argc, char* argv[]) {
     OCL_CHECK(err, cl::Buffer devOutput(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
             ((img_size-1)/32 + 1)*sizeof(cl_uint16), outimage.data(), &err));
 
-    // Copy input data to device global memory
-    std::cout << "Copying Buffers to device..." <<std::endl;
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({devInput}, 0/*0 means from host*/));
-
     std::cout << "Setting Arguments..." << std::endl;
     OCL_CHECK(err, err = krnl_sobel.setArg(0, devInput));
     OCL_CHECK(err, err = krnl_sobel.setArg(1, devOutput));
+
+    // Copy input data to device global memory
+    std::cout << "Copying Buffers to device..." <<std::endl;
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({devInput}, 0/*0 means from host*/));
 
     // Launch the Kernel
     // For HLS kernels global and local size is always (1,1,1). So, it is recommended

@@ -35,6 +35,8 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
+BUILD_DIR_apply_watermark = $(BUILD_DIR)/apply_watermark
+
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
@@ -55,14 +57,14 @@ CXXFLAGS += -fmessage-length=0
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 CLFLAGS += --max_memory_ports apply_watermark
 
 # Kernel linker flags
 LDCLFLAGS += --sp apply_watermark_1.m_axi_gmem0:DDR[0] --sp apply_watermark_1.m_axi_gmem1:DDR[1]
 
 EXECUTABLE = watermark
-CMD_ARGS = ./data/inputImage.bmp ./data/golden.bmp
+CMD_ARGS = $(XCLBIN)/apply_watermark.$(TARGET).$(DSA).xclbin ./data/inputImage.bmp ./data/golden.bmp
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
@@ -81,14 +83,13 @@ exe: $(EXECUTABLE)
 # Building kernel
 $(XCLBIN)/apply_watermark.$(TARGET).$(DSA).xo: src/krnl_watermarking.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k apply_watermark -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_apply_watermark) -c -k apply_watermark -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/apply_watermark.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_apply_watermark_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk apply_watermark:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_apply_watermark) -l $(LDCLFLAGS) --nk apply_watermark:1 -o'$@' $(+)
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
-	mkdir -p $(XCLBIN)
+$(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 
 emconfig:$(EMCONFIG_DIR)/emconfig.json
@@ -98,9 +99,9 @@ $(EMCONFIG_DIR)/emconfig.json:
 check: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) ./data/inputImage.bmp ./data/golden.bmp
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/apply_watermark.$(TARGET).$(DSA).xclbin ./data/inputImage.bmp ./data/golden.bmp
 else
-	 ./$(EXECUTABLE) ./data/inputImage.bmp ./data/golden.bmp
+	 ./$(EXECUTABLE) $(XCLBIN)/apply_watermark.$(TARGET).$(DSA).xclbin ./data/inputImage.bmp ./data/golden.bmp
 endif
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 

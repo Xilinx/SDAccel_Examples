@@ -35,6 +35,8 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
+BUILD_DIR_N_stage_Adders = $(BUILD_DIR)/N_stage_Adders
+
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
@@ -54,7 +56,7 @@ CXXFLAGS += -fmessage-length=0
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 CLFLAGS += --xp param:compiler.axiDeadLockFree=yes
 
 # Kernel linker flags
@@ -79,14 +81,13 @@ exe: $(EXECUTABLE)
 # Building kernel
 $(XCLBIN)/N_stage_Adders.$(TARGET).$(DSA).xo: src/N_stage_adders.cpp
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k N_stage_Adders -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_N_stage_Adders) -c -k N_stage_Adders -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/N_stage_Adders.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_N_stage_Adders_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk N_stage_Adders:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_N_stage_Adders) -l $(LDCLFLAGS) --nk N_stage_Adders:1 -o'$@' $(+)
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
-	mkdir -p $(XCLBIN)
+$(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 
 emconfig:$(EMCONFIG_DIR)/emconfig.json

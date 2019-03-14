@@ -35,6 +35,8 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
+BUILD_DIR_krnl_kernel_global = $(BUILD_DIR)/krnl_kernel_global
+
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
@@ -56,7 +58,7 @@ CXXFLAGS += -fmessage-length=0
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 CLFLAGS +=  --max_memory_ports bandwidth
 
 
@@ -79,14 +81,13 @@ exe: $(EXECUTABLE)
 # Building kernel
 $(XCLBIN)/bandwidth.$(TARGET).$(DSA).xo: src/kernel.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k bandwidth -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_kernel_global) -c -k bandwidth -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/krnl_kernel_global.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_kernel_global_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk bandwidth:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_kernel_global) -l $(LDCLFLAGS) --nk bandwidth:1 -o'$@' $(+)
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
-	mkdir -p $(XCLBIN)
+$(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 
 emconfig:$(EMCONFIG_DIR)/emconfig.json
@@ -94,16 +95,6 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
-ifeq ($(findstring xilinx_xbb1551_dynamic_5_1, $(DEVICE)), xilinx_xbb1551_dynamic_5_1)
-$(error Nothing to be done for make)
-endif
-ifeq ($(findstring xilinx_vcu1525_dynamic_6_0, $(DEVICE)), xilinx_vcu1525_dynamic_6_0)
-$(error Nothing to be done for make)
-endif
-ifeq ($(findstring xilinx_u200_xdma-gen3x4_201830_2, $(DEVICE)), xilinx_u200_xdma-gen3x4_201830_2)
-$(error Nothing to be done for make)
-endif
-
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/krnl_kernel_global.$(TARGET).$(DSA).xclbin

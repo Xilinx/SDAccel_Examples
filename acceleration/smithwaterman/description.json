@@ -13,6 +13,7 @@
     "host_exe": "smithwaterman",
     "host_srcs": "./src/main.cpp ./src/genseq.cpp ./src/matcharray.cpp ./src/smithwaterman.cpp ./src/intel/ssw.c ./src/intel/sc_demo.c",
     "host_hdrs": "./src/matcharray.h ./src/smithwaterman.h ./src/sw.h ./src/intel/ssw.h ./src/intel/kseq.h", 
+    "cmd_args": "BUILD/krnl_smithwaterman.xclbin",
     "xcl": false,
     "compiler": {
     	"options": " -DFPGA_DEVICE -I./src/" 

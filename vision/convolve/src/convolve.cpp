@@ -107,19 +107,20 @@ int main(int argc, char* argv[]) {
     cl::Event event;
     unsigned fileBufSize;
 
-    if(argc != 3 && argc != 4)
+    if(argc != 4 && argc != 5)
     {
-        std::cout << "Usage: " << argv[0] <<"<input> <coef> [<golden>]" << std::endl;
+        std::cout << "Usage: " << argv[0] <<" <XCLBIN File> <input> <coef> [<golden>]" << std::endl;
         return EXIT_FAILURE;
     }
 
     std::cout << "Parsing Command Line..." << std::endl;
-    std::string inputFileName(argv[1]);
-    std::string coefFileName(argv[2]);
+    std::string binaryFile = argv[1];
+    std::string inputFileName(argv[2]);
+    std::string coefFileName(argv[3]);
 
     bool validate = false;
 
-    if (argc == 4) {
+    if (argc == 5) {
         validate = true;
     }
 
@@ -156,10 +157,6 @@ int main(int argc, char* argv[]) {
     OCL_CHECK(err, cl::CommandQueue q (context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
-    // find_binary_file() is a utility API which will search the xclbin file for
-    // targeted mode (sw_emu/hw_emu/hw) and for targeted platforms.
-    std::string binaryFile = xcl::find_binary_file(device_name, "krnl_convolve");
-
     // read_binary_file() ia a utility API which will load the binaryFile
     // and will return pointer to file buffer.
     char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
@@ -179,14 +176,14 @@ int main(int argc, char* argv[]) {
     OCL_CHECK(err, cl::Buffer devOutput(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
             ((IMAGE_HEIGHT*IMAGE_WIDTH-1)/32 + 1)*sizeof(cl_uint16), vecOutput.data(), &err));
 
-    // Copy input data to device global memory
-    std::cout << "Copying data..." << std::endl;
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({devCoef, devInput}, 0/*0 means from host*/));
-
     std::cout << "Setting Arguments..." << std::endl;
     OCL_CHECK(err, err = krnl_convolve.setArg(0, devCoef));
     OCL_CHECK(err, err = krnl_convolve.setArg(1, devInput));
     OCL_CHECK(err, err = krnl_convolve.setArg(2, devOutput));
+
+    // Copy input data to device global memory
+    std::cout << "Copying data..." << std::endl;
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({devCoef, devInput}, 0/*0 means from host*/));
     
     // Launch the Kernel
     // For HLS kernels global and local size is always (1,1,1). So, it is recommended
@@ -218,7 +215,7 @@ int main(int argc, char* argv[]) {
 
     if(validate) {
         std::cout << "Validate" << std::endl;
-        std::string goldenFileName(argv[3]);
+        std::string goldenFileName(argv[4]);
         cv::Mat golden  = readFloatTxtFile(goldenFileName, IMAGE_HEIGHT, IMAGE_WIDTH);
 
         cv::imwrite("golden.bmp", golden);

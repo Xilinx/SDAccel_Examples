@@ -29,6 +29,14 @@ def create_params(target,data):
     target.write("DSA := $(call device2sandsa, $(DEVICE))\n")
     target.write("BUILD_DIR := ./_x.$(TARGET).$(DSA)\n")
     target.write("\n")
+    if "containers" in data:
+        for con in data["containers"]:
+            target.write("BUILD_DIR_")
+            target.write(con["name"])
+            target.write(" = $(BUILD_DIR)/")
+            target.write(con["name"])
+            target.write("\n")
+    target.write("\n")
 
     target.write("CXX := ")
     target.write("$(XILINX_SDX)/bin/xcpp\n")
@@ -122,7 +130,7 @@ def add_host_flags(target, data):
 def add_kernel_flags(target, data):
     target.write("# Kernel compiler global settings\n")
     target.write("CLFLAGS += ")
-    target.write("-t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) \n")   
+    target.write("-t $(TARGET) --platform $(DEVICE) --save-temps \n")   
 
     if "containers" in data:
         for con in data["containers"]:
@@ -222,21 +230,25 @@ def building_kernel(target, data):
 		    target.write(acc["location"])
 		    target.write("\n")
                     target.write("\tmkdir -p $(XCLBIN)\n")
-                    target.write("\t$(XOCC) $(CLFLAGS) -c -k ")
+                    target.write("\t$(XOCC) $(CLFLAGS) --temp_dir ")
+                    target.write("$(BUILD_DIR_"+ con["name"] +") ")
+                    target.write("-c -k ")
                     target.write(acc["name"])
                     target.write(" -I'$(<D)'")
                     target.write(" -o'$@' '$<'\n")
     if "containers" in data:
-	for con in data["containers"]:
-	    target.write("$(XCLBIN)/")
+        for con in data["containers"]:
+            target.write("$(XCLBIN)/")
             target.write(con["name"])
             target.write(".$(TARGET).$(DSA)")
             target.write(".xclbin:")
-	    target.write(" $(BINARY_CONTAINER_")
+            target.write(" $(BINARY_CONTAINER_")
             target.write(con["name"])
             target.write("_OBJS)\n")
-	    target.write("\tmkdir -p $(XCLBIN)\n")
-	    target.write("\t$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS)")
+            target.write("\tmkdir -p $(XCLBIN)\n")
+            target.write("\t$(XOCC) $(CLFLAGS) --temp_dir ")
+            target.write("$(BUILD_DIR_"+ con["name"] +") ")
+            target.write("-l $(LDCLFLAGS)")
             for acc in con["accelerators"]:
                 target.write(" --nk ")
                 target.write(acc["name"])
@@ -274,8 +286,7 @@ def building_kernel_rtl(target, data):
 
 def building_host(target, data):
     target.write("# Building Host\n")
-    target.write("$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)\n")
-    target.write("\tmkdir -p $(XCLBIN)\n")
+    target.write("$(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)\n")
     target.write("\t$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)\n")
     target.write("\n")
     target.write("emconfig:$(EMCONFIG_DIR)/emconfig.json\n")
@@ -289,8 +300,7 @@ def building_host(target, data):
 
 def building_host_rtl(target, data):
     target.write("# Building Host\n")
-    target.write("$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)\n")
-    target.write("\tmkdir -p $(XCLBIN)\n")
+    target.write("$(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)\n")
     target.write("\t$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)\n")
     target.write("\n")
     target.write("emconfig:emconfig.json\n")
@@ -372,14 +382,6 @@ def mk_check(target, data):
             target.write("$(error Nothing to be done for make)\n")
             target.write("endif\n")
         target.write("\n")
-    if "Emulation" in data:        
-        target1 = open("sdaccel.ini","a+")
-        args = data["Emulation"]
-        target1.write("\n[Emulation]\n")
-        for arg in args:
-            target1.write(arg)
-            target1.write("\n")
-        target1.close
     target.write("ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))\n")
     target.write("\t$(CP) $(EMCONFIG_DIR)/emconfig.json .\n") 
     target.write("\tXCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)")
@@ -474,16 +476,43 @@ def create_mk(target, data):
     mk_clean(target,data)
     return 
 
+def create_utils(target):
+    dirName = os.getcwd()
+    dirNameList = list(dirName.split("/"))
+    dirNameIndex = dirNameList.index("apps")
+    diff = len(dirNameList) - dirNameIndex - 1
+    while diff > 0:
+	    os.chdir('..')
+	    diff -= 1
+    os.chdir("utility")
+    source = open("utils.mk", "r")
+    data = source.read()
+    target.write(data)
+
+
 script, desc_file = argv
 desc = open(desc_file, 'r')
 data = json.load(desc)
-if "match_makefile" in data:
-    if data["match_makefile"] == "false":
-	exit("Error:: Makefile Manually Edited:: AutoMakefile Generator Failed\n")
 desc.close()
-print "Generating sdaccel.ini file for %s" %data["example"]
-target = open("sdaccel.ini","w+")
-profile_report(target)
-target = open("Makefile", "w")
-create_mk(target, data)
+
+err = True
+if "match_ini" in data and data["match_ini"] == "false":
+    print "Error:: sdaccel.ini File Manually Edited:: Auto-file Generator Failed"
+    err = False
+else:
+    print "Generating sdaccel.ini file for %s" %data["example"]
+    target = open("sdaccel.ini","w+")
+    profile_report(target)
+
+if "match_makefile" in data and data["match_makefile"] == "false":
+    print "Error:: Makefile Manually Edited:: AutoMakefile Generator Failed"
+    err = False
+else:
+    target = open("Makefile", "w")
+    create_mk(target, data)
+    print "Generating utils.mk file for %s" %data["example"]
+    target = open("utils.mk", "w+")
+    create_utils(target)
+
+assert err
 target.close

@@ -46,12 +46,14 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 int main(int argc, char** argv)
 {
 
-    if (argc != 2)
+    if (argc != 3)
     {
-        printf("Usage: %s <image> \n", argv[0]) ;
+        printf("Usage: %s <XCLBIN File> <image> \n", argv[0]) ;
         return -1 ;
     }
    
+    std::string binaryFile = argv[1];
+
     FILE *input_file;
     FILE *output_file;
 
@@ -86,26 +88,21 @@ int main(int argc, char** argv)
     OCL_CHECK(err, cl::CommandQueue q(context, device,CL_QUEUE_PROFILING_ENABLE, &err));
 
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
-    std::string binaryFile = xcl::find_binary_file(device_name,"krnl_affine");
     char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel krnl(program,"affine_kernel", &err));
 
-    std::vector<cl::Memory> inBufVec, outBufVec;
     OCL_CHECK(err, cl::Buffer imageToDevice(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, vector_size_bytes, input_image.data(), &err));
     OCL_CHECK(err, cl::Buffer imageFromDevice(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,vector_size_bytes, output_image.data(), &err));
-
-    inBufVec.push_back(imageToDevice);
-    outBufVec.push_back(imageFromDevice);
-
-    /* Copy input vectors to memory */
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(inBufVec,0/* 0 means from host*/));
 
     // Set the kernel arguments
     OCL_CHECK(err, err = krnl.setArg(0, imageToDevice));
     OCL_CHECK(err, err = krnl.setArg(1, imageFromDevice));
+
+    /* Copy input vectors to memory */
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({imageToDevice},0/* 0 means from host*/));
 
     // Launch the kernel
     OCL_CHECK(err, err = q.enqueueTask(krnl));
@@ -119,7 +116,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects(outBufVec,CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({imageFromDevice},CL_MIGRATE_MEM_OBJECT_HOST));
     q.finish();
 
     delete[] fileBuf;

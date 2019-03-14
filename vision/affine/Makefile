@@ -35,6 +35,8 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
+BUILD_DIR_krnl_affine = $(BUILD_DIR)/krnl_affine
+
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
@@ -55,11 +57,11 @@ CXXFLAGS += -fmessage-length=0
 LDFLAGS += -lrt -lstdc++ 
 
 # Kernel compiler global settings
-CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps --temp_dir $(BUILD_DIR) 
+CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 
 
 EXECUTABLE = affine
-CMD_ARGS = ./data/CT-MONO2-16-brain.raw
+CMD_ARGS = $(XCLBIN)/krnl_affine.$(TARGET).$(DSA).xclbin ./data/CT-MONO2-16-brain.raw
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
@@ -78,14 +80,13 @@ exe: $(EXECUTABLE)
 # Building kernel
 $(XCLBIN)/affine_kernel.$(TARGET).$(DSA).xo: src/krnl_affine.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -c -k affine_kernel -I'$(<D)' -o'$@' '$<'
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_affine) -c -k affine_kernel -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/krnl_affine.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_affine_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) -l $(LDCLFLAGS) --nk affine_kernel:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_affine) -l $(LDCLFLAGS) --nk affine_kernel:1 -o'$@' $(+)
 
 # Building Host
-$(EXECUTABLE): $(HOST_SRCS) $(HOST_HDRS)
-	mkdir -p $(XCLBIN)
+$(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
 	$(CXX) $(CXXFLAGS) $(HOST_SRCS) $(HOST_HDRS) -o '$@' $(LDFLAGS)
 
 emconfig:$(EMCONFIG_DIR)/emconfig.json
@@ -95,9 +96,9 @@ $(EMCONFIG_DIR)/emconfig.json:
 check: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) ./data/CT-MONO2-16-brain.raw
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/krnl_affine.$(TARGET).$(DSA).xclbin ./data/CT-MONO2-16-brain.raw
 else
-	 ./$(EXECUTABLE) ./data/CT-MONO2-16-brain.raw
+	 ./$(EXECUTABLE) $(XCLBIN)/krnl_affine.$(TARGET).$(DSA).xclbin ./data/CT-MONO2-16-brain.raw
 endif
 ifneq ($(TARGET),$(findstring $(TARGET), sw_emu hw))
 $(warning WARNING:Application supports only sw_emu hw TARGET. Please use the target for running the application)
