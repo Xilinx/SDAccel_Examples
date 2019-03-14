@@ -39,7 +39,7 @@ kernel __attribute__((reqd_work_group_size(1, 1, 1)))
 void matmul_naive(
             const __global int *in1,  // Read-Only Matrix 1
             const __global int *in2,  // Read-Only Matrix 2
-            __global int *out,        // Output Result
+            __global int *out_r,        // Output Result
             int dim)                  // Matrix Dimension (assuming square matrix)
 {               
   // Local memory is implemented as BRAM memory blocks
@@ -85,14 +85,14 @@ void matmul_naive(
     __attribute__((xcl_loop_tripcount(c_size*c_size, c_size*c_size)))
     writeC:
     for (int i = 0; i < dim * dim; i++) {
-        out[i] = C[i];
+        out_r[i] = C[i];
     }
 }
 
 kernel __attribute__((reqd_work_group_size(1, 1, 1)))
 void matmul_partition(const __global int *in1,  // Read-Only Matrix 1
            const __global int *in2,  // Read-Only Matrix 2
-           __global int *out,        // Output Result
+           __global int *out_r,        // Output Result
            int dim) {                // Matrix Dimension. Assuming Square Matrix 
 
     //Cyclic Partition for A as matrix multiplication needs row-wise parallel access
@@ -149,7 +149,7 @@ void matmul_partition(const __global int *in1,  // Read-Only Matrix 1
     writeC:
     for (int itr = 0, i = 0, j = 0; itr < dim * dim; itr++, j++) {
         if (j == dim) { j = 0; i++; }
-        out[itr] = C[i * MAX_DIM + j];
+        out_r[itr] = C[i * MAX_DIM + j];
     }
 }
 

@@ -34,20 +34,19 @@ def header(target,data):
     target.write(data["example"])
     target.write("\n")
     target.write("======================\n\n")
-    target.write("This README file contains the following sections:\n\n")
-    target.write("1. OVERVIEW\n")
-    target.write("2. HOW TO DOWLOAD THE REPOSITORY\n")
-    target.write("3. SOFTWARE TOOLS AND SYSTEM REQUIREMENTS\n")
-    target.write("4. DESIGN FILE HIERARCHY\n")
-    target.write("5. COMPILATION AND EXECUTION\n")
-    target.write("6. EXECUTION IN CLOUD ENVIRONMENTS\n")
-    target.write("7. SUPPORT\n")
-    target.write("8. LICENSE AND CONTRIBUTING TO THE REPOSITORY\n")
-    target.write("9. ACKNOWLEDGEMENTS\n\n\n")
+    target.write("This file contains the following sections:\n\n")
+    target.write("1. HOW TO DOWLOAD THE REPOSITORY\n")
+    target.write("2. SOFTWARE TOOLS AND SYSTEM REQUIREMENTS\n")
+    target.write("3. DESIGN FILE HIERARCHY\n")
+    target.write("4. COMPILATION AND EXECUTION\n")
+    target.write("5. EXECUTION IN CLOUD ENVIRONMENTS\n")
+    target.write("6. SUPPORT\n")
+    target.write("7. LICENSE AND CONTRIBUTING TO THE REPOSITORY\n")
+    target.write("8. ACKNOWLEDGEMENTS\n\n\n")
     return
 
 def download(target):
-    target.write("## 2. HOW TO DOWNLOAD THE REPOSITORY\n")
+    target.write("## 1. HOW TO DOWNLOAD THE REPOSITORY\n")
     target.write("To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:\n")
     target.write("```\n")
     target.write("git clone https://github.com/Xilinx/SDAccel_Examples examples\n")
@@ -57,7 +56,9 @@ def download(target):
     return
 
 def overview(target,data):
-    target.write("## 1. OVERVIEW\n")
+    target.write(data["example"])
+    target.write("\n")
+    target.write("======================\n\n")
     target.write(('\n').join(data["overview"]))
     target.write("\n\n")
     if 'more_info' in data:
@@ -99,10 +100,16 @@ def overview(target,data):
             if word_count != 0:
                 target.write(", ")
         target.write("\n\n")
+
+    target.write("\nFor more information, please refer: ")
+    target.write("[details.md][]")
+    target.write("\n\n")
+    target.write("[details.md]: details.md")
+    target.write("\n\n")
     return
 
 def requirements(target,data):
-    target.write("## 3. SOFTWARE AND SYSTEM REQUIREMENTS\n")
+    target.write("## 2. SOFTWARE AND SYSTEM REQUIREMENTS\n")
     target.write("Board | Device Name | Software Version\n")
     target.write("------|-------------|-----------------\n")
 
@@ -141,7 +148,7 @@ def requirements(target,data):
     return
 
 def hierarchy(target):
-    target.write("## 4. DESIGN FILE HIERARCHY\n")
+    target.write("## 3. DESIGN FILE HIERARCHY\n")
     target.write("Application code is located in the src directory. ")
     target.write("Accelerator binary files will be compiled to the xclbin directory. ")
     target.write("The xclbin directory is required by the Makefile and its contents will be filled during compilation. A listing of all the files ")
@@ -156,7 +163,7 @@ def hierarchy(target):
     return
 
 def compilation(target,data):
-    target.write("## 5. COMPILATION AND EXECUTION\n")
+    target.write("## 4. COMPILATION AND EXECUTION\n")
     target.write("### Compiling for Application Emulation\n")
     target.write("As part of the capabilities available to an application developer, SDAccel includes environments to test the correctness of an application at both a software functional level and a hardware emulated level.\n")
     target.write("These modes, which are named sw_emu and hw_emu, allow the developer to profile and evaluate the performance of a design before compiling for board execution.\n")
@@ -225,7 +232,7 @@ def compilation(target,data):
     target.write("It is typical for hardware compile times to range from 30 minutes to a couple of hours.\n\n")
 
 def execution(target):
-    target.write("## 6. Execution in Cloud Environments\n")
+    target.write("## 5. Execution in Cloud Environments\n")
     target.write("FPGA acceleration boards have been deployed to the cloud. For information on how to execute the example within a specific cloud, take a look at the following guides.\n");
     target.write("* [AWS F1 Application Execution on Xilinx Virtex UltraScale Devices]\n")
     target.write("* [Nimbix Application Execution on Xilinx Kintex UltraScale Devices]\n")
@@ -306,21 +313,21 @@ def power(target):
     return
 
 def support(target):
-    target.write("\n## 7. SUPPORT\n")
+    target.write("\n## 6. SUPPORT\n")
     target.write("For more information about SDAccel check the [SDAccel User Guides][]\n\n")
     target.write("For questions and to get help on this project or your own projects, visit the [SDAccel Forums][].\n\n")
     target.write("To execute this example using the SDAccel GUI, follow the setup instructions in [SDAccel GUI README][]\n\n")
     return
 
 def license(target):
-    target.write("\n## 8. LICENSE AND CONTRIBUTING TO THE REPOSITORY\n")
+    target.write("\n## 7. LICENSE AND CONTRIBUTING TO THE REPOSITORY\n")
     target.write("The source for this project is licensed under the [3-Clause BSD License][]\n\n")
     target.write("To contribute to this project, follow the guidelines in the [Repository Contribution README][]\n")
 
     return
 
 def ack(target,data):
-    target.write("\n## 9. ACKNOWLEDGEMENTS\n")
+    target.write("\n## 8. ACKNOWLEDGEMENTS\n")
     target.write("This example is written by developers at\n")
     for contributor in data["contributors"]:
         target.write("- [")
@@ -368,20 +375,24 @@ script, desc_file = argv
 
 # load the description file
 print "SDAccel README File Genarator"
-print "Opening the description file '%s'" % desc_file
 desc = open(desc_file,'r')
 
 # load the json data from the file
-print "Parsing the description file"
 data = json.load(desc)
+if "match_readme" in data:
+    if data["match_readme"] == "false":
+        exit("Error:: README Manually Edited:: README Generator Failed\n")
 desc.close()
 
 assert("OpenCL" in data['runtime'])
 
 print "Generating the README for %s" % data["example"]
 target = open("README.md","w")
-header(target,data)
 overview(target,data)
+
+print "Generating the details file for %s" %data["example"]
+target = open("details.md", "w+")
+header(target,data)
 download(target)
 requirements(target,data)
 hierarchy(target)
@@ -393,5 +404,6 @@ support(target)
 license(target)
 ack(target,data)
 footer(target)
+
 target.close
 

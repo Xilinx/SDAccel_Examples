@@ -75,8 +75,8 @@ __constant int c_size = SIGNAL_SIZE;
 
 // A naive implementation of the Finite Impulse Response filter.
 __kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
-void fir_naive(__global int* restrict output,
-               __global int* restrict signal,
+void fir_naive(__global int* restrict output_r,
+               __global int* restrict signal_r,
                __global int* restrict coeff,
                long signal_length) {
 
@@ -91,16 +91,16 @@ void fir_naive(__global int* restrict output,
         shift_loop:
         __attribute__((xcl_pipeline_loop(1)))
         for (int i = min(j,N_COEFF-1); i >= 0; i--) {
-            acc += signal[j-i] * coeff_reg[i];
+            acc += signal_r[j-i] * coeff_reg[i];
         }
-        output[j] = acc;
+        output_r[j] = acc;
     }
 }
 
 // FIR using shift register
 __kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
-void fir_shift_register(__global int* restrict output,
-                        __global int* restrict signal,
+void fir_shift_register(__global int* restrict output_r,
+                        __global int* restrict signal_r,
                         __global int* restrict coeff,
                         long signal_length) {
     int coeff_reg[N_COEFF];
@@ -124,7 +124,7 @@ void fir_shift_register(__global int* restrict output,
     __attribute__((xcl_loop_tripcount(c_size, c_size)))
     for(int j = 0; j < signal_length; j++) {
         int acc = 0;
-        int x = signal[j];
+        int x = signal_r[j];
 
         // This is the shift register operation. The N_COEFF variable is defined
         // at compile time so the compiler knows the number of operations
@@ -142,6 +142,6 @@ void fir_shift_register(__global int* restrict output,
                 acc += shift_reg[i] * coeff_reg[i];
             }
         }
-        output[j] = acc;
+        output_r[j] = acc;
     }
 }

@@ -20,6 +20,10 @@
                             "PipelineII": "1"
                         }, 
                         {
+                            "name": "VConvH_VConvW", 
+                            "PipelineII": "1"
+                        }, 
+                        {
                             "name": "mem_wr", 
                             "PipelineII": "1"
                         }

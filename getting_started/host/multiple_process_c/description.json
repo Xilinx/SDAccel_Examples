@@ -39,5 +39,6 @@
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
         }
-    ]
+    ],
+    "match_ini" : "false"
 }

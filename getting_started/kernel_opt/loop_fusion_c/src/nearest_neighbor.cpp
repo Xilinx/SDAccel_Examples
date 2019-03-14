@@ -39,14 +39,14 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // This implementation fuses the distance calculation and the iteration through
 // the search space into one loop.
 extern "C" {
-void nearest_neighbor_loop_fusion(int *out, const int *points,
+void nearest_neighbor_loop_fusion(int *out_r, const int *points,
                        const int *search_point, const int len,
                        const int dim) {
 
-#pragma HLS INTERFACE m_axi port=out  offset=slave bundle=gmem
+#pragma HLS INTERFACE m_axi port=out_r  offset=slave bundle=gmem
 #pragma HLS INTERFACE m_axi port=points offset=slave bundle=gmem
 #pragma HLS INTERFACE m_axi port=search_point offset=slave bundle=gmem
-#pragma HLS INTERFACE s_axilite port=out  bundle=control
+#pragma HLS INTERFACE s_axilite port=out_r  bundle=control
 #pragma HLS INTERFACE s_axilite port=points  bundle=control
 #pragma HLS INTERFACE s_axilite port=search_point  bundle=control
 #pragma HLS INTERFACE s_axilite port=len  bundle=control
@@ -91,7 +91,7 @@ void nearest_neighbor_loop_fusion(int *out, const int *points,
     write_best:
     for (int c = 0; c < dim; ++c) {
     #pragma HLS PIPELINE II=1
-        out[c] = points[best_i * dim + c];
+        out_r[c] = points[best_i * dim + c];
     }
 }
 }

@@ -145,7 +145,7 @@ void mmult(
     //       |   |      |   |      |   |      |   |
     //  A3_->|C30| ---- |C31| ---- |C32| ---- |C33|
     //       |___|      |___|      |___|      |___|
-    
+     
     __attribute__((xcl_pipeline_loop(1)))
     __attribute__((xcl_loop_tripcount(c_size, c_size)))
     systolic1: for(int k = 0; k < a_col; k++) {

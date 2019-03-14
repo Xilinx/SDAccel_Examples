@@ -49,7 +49,7 @@ Kernel Description :
     
         int *in1   (input)     --> Input  Matrix 1
         int *in2   (input)     --> Input  Matrix 2
-        int *out   (output)    --> Output Matrix
+        int *out_r   (output)    --> Output Matrix
         int  size  (input)     --> Size of one dimension of the matrices
 
     Kernel Configuration :
@@ -58,7 +58,7 @@ Kernel Description :
 */
 
 //Maximum Array Size
-#define MAX_SIZE 64
+#define MAX_SIZE 32
 
 // Tripcount identifiers
 __constant int c_size = MAX_SIZE;
@@ -69,7 +69,7 @@ kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
 void mmult(
         const __global int *in1,    // Read-Only Matrix 1
         const __global int *in2,    // Read-Only Matrix 2
-        __global int *out,          // Output Result
+        __global int *out_r,          // Output Result
         int size
         )
 {    // Local memory to store input and output matrices
@@ -77,7 +77,7 @@ void mmult(
     local int A[MAX_SIZE][MAX_SIZE];
     local int B[MAX_SIZE][MAX_SIZE] __attribute__((xcl_array_partition(complete, 2)));
     local int C[MAX_SIZE][MAX_SIZE] __attribute__((xcl_array_partition(complete, 2)));
-    local int temp_sum[MAX_SIZE] __attribute__((xcl_array_partition(complete, 1)));
+    int temp_sum[MAX_SIZE] __attribute__((xcl_array_partition(complete, 1)));
 
     // Burst reads on input matrices from global memory
     // Burst read for matrix A
@@ -123,7 +123,7 @@ void mmult(
     
     // The above code snippet of the Matrix Multiply kernel in which the loops
     // lreorder2 and lreorder3 are not interchanged, gives a pipeline initiation
-    // interval (II) of 64 
+    // interval (II) of 32 
     
     // Calculate matrix multiplication using local data buffer based on input size
     // and write results into local buffer for C
@@ -148,6 +148,6 @@ void mmult(
     __attribute__((xcl_loop_tripcount(c_size*c_size, c_size*c_size)))
     writeC: for(int itr = 0, i = 0, j = 0; itr < size * size; itr++, j++) {
         if(j == size) { j = 0 ; i++; }
-        out[itr] = C[i][j];
+        out_r[itr] = C[i][j];
     }
 }
