@@ -46,14 +46,14 @@ __constant int c_chunk_size = BUFFER_SIZE;
     Arguments:
         in1   (input)     --> Input Vector1
         in2   (input)     --> Input Vector2
-        out   (output)    --> Output Vector
+        out_r   (output)    --> Output Vector
         size  (input)     --> Size of Vector in Integer
    */
 kernel __attribute__ ((reqd_work_group_size(1, 1, 1)))
 void vadd(
         const __global uint *in1, // Read-Only Vector 1
         const __global uint *in2, // Read-Only Vector 2
-        __global uint *out,       // Output Result
+        __global uint *out_r,       // Output Result
         int size                   // Size in integer
         )
 {
@@ -101,6 +101,6 @@ void vadd(
         //burst write the result
         __attribute__((xcl_pipeline_loop(1)))
         __attribute__((xcl_loop_tripcount(c_chunk_size, c_chunk_size)))
-        write: for (int j = 0 ; j < chunk_size; j++) out[i+j] = vout_buffer[j];
+        write: for (int j = 0 ; j < chunk_size; j++) out_r[i+j] = vout_buffer[j];
     }
 }

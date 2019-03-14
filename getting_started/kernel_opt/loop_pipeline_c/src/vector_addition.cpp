@@ -47,71 +47,64 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
    port. In order to accommodate this design, xocc will need to serialize the
    access to these ports and therefore increase the initiation interval(II)
    and by extension reduce the throughput.
-
-   In this example we will demonstrate ways to improve the throughput of a
-   vector addition kernel using the xcl_pipeline_loop attribute.
   */
 
 #define N 128
 #define DATA_SIZE 1<<10
 
 // Tripcount identifiers
-__constant int c_len = DATA_SIZE;
-__constant int c_n = N;
-
- // This kernel is accessing 2 global variables and storing the result into
- // a third global variable. This type of access does not yield good
- // performance because this kernel has only one global memory port.
-kernel __attribute__((reqd_work_group_size(1, 1, 1)))
-void vadd(global       int* restrict c,
-          global const int* restrict a,
-          global const int* restrict b,
-                 const int len)
-{
-    __attribute__((xcl_loop_tripcount(c_len, c_len)))
-    vadd_loop:
-    for (int x=0; x<len; ++x) {
-        c[x] = a[x] + b[x];
-    }
-}
+const int c_len = DATA_SIZE;
+const int c_n = N;
 
 // This kernel is optimized to access only one global variable in a pipelined
 // loop. This will improve the II and increase throughput of the kernel.
-kernel __attribute__((reqd_work_group_size(1, 1, 1)))
-void vadd_pipelined(global       int* restrict c,
-                    global const int* restrict a,
-                    global const int* restrict b,
-                           const int len)
+
+extern "C" {
+void vadd_pipelined(int* c, const int* a,
+                    const int* b,
+                    const int len)
 {
+#pragma HLS INTERFACE m_axi port=c offset=slave bundle=gmem
+#pragma HLS INTERFACE m_axi port=a offset=slave bundle=gmem
+#pragma HLS INTERFACE m_axi port=b offset=slave bundle=gmem
+#pragma HLS INTERFACE s_axilite port=c  bundle=control
+#pragma HLS INTERFACE s_axilite port=a  bundle=control
+#pragma HLS INTERFACE s_axilite port=b bundle=control
+#pragma HLS INTERFACE s_axilite port=len bundle=control
+#pragma HLS INTERFACE s_axilite port=return bundle=control
+
     int result[N];
     int iterations = len / N;
 
     // Default behavior of xocc will pipeline the outer loop. Since we have
     // multiple inner loops, the pipelining will fail. We can instead pipeline
-    // the inner loops using the xcl_pipeline_loop attribute to guide the
-    // compiler.
-    __attribute__((xcl_loop_tripcount(c_len/c_n, c_len/c_n)))
+    // the inner loops using the HLS PIPELINE pragma to guide the compiler.
+    vadd_pipeline:
     for(int i = 0; i < iterations; i++) {
+    #pragma HLS LOOP_TRIPCOUNT min=c_len/c_n max=c_len/c_n
 
         // Pipelining loops that access only one variable is the ideal way to
         // increase the global memory bandwidth.
         read_a:
-        __attribute__((xcl_pipeline_loop(1)))
-        __attribute__((xcl_loop_tripcount(c_n, c_n)))
         for (int x=0; x<N; ++x) {
+        #pragma HLS LOOP_TRIPCOUNT min=c_n max=c_n
+        #pragma HLS PIPELINE II=1
             result[x] = a[i*N+x];
         }
+        
         read_b:
-        __attribute__((xcl_pipeline_loop))
-        __attribute__((xcl_loop_tripcount(c_n, c_n)))
         for (int x=0; x<N; ++x) {
+        #pragma HLS LOOP_TRIPCOUNT min=c_n max=c_n
+        #pragma HLS PIPELINE II=1
             result[x] += b[i*N+x];
         }
-        write:
-        __attribute__((xcl_pipeline_loop(1)))
-        __attribute__((xcl_loop_tripcount(c_n, c_n)))
+
+        write_c:
         for (int x=0; x<N; ++x) {
+        #pragma HLS LOOP_TRIPCOUNT min=c_n max=c_n
+        #pragma HLS PIPELINE II=1
             c[i*N+x] = result[x];
         }
     }
+}
 }

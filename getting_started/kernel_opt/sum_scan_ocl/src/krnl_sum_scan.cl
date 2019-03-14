@@ -57,28 +57,28 @@ typedef union {
     float f[B];
 } bus_to_float_t;
 
-__attribute__((always_inline)) bus_t array_to_bus(float *in) {
-    bus_to_float_t out;
+__attribute__((always_inline)) bus_t array_to_bus(float *in_r) {
+    bus_to_float_t out_r;
     __attribute__((xcl_loop_tripcount(c_b, c_b)))
     atb: for(uint i = 0; i < B; i++) {
-        out.f[i] = in[i];
+        out_r.f[i] = in_r[i];
     }
 
-    return out.b;
+    return out_r.b;
 }
 
-__attribute__((always_inline)) void bus_to_array(bus_t g_in, float *out) {
-    bus_to_float_t in;
+__attribute__((always_inline)) void bus_to_array(bus_t g_in, float *out_r) {
+    bus_to_float_t in_r;
 
-    in.b = g_in;
+    in_r.b = g_in;
     __attribute__((xcl_loop_tripcount(c_b, c_b)))
     bta: for(uint i = 0; i < B; i++) {
-        out[i] = in.f[i];
+        out_r[i] = in_r.f[i];
     }
 }
 
 __attribute__((always_inline)) bus_t sum_scan(float *sum, bus_t g_in[HIST_LENGTH+1], uint i) {
-    float in[(HIST_LENGTH+1)*B] __attribute__((xcl_array_partition(complete, 0)));
+    float in_r[(HIST_LENGTH+1)*B] __attribute__((xcl_array_partition(complete, 0)));
     __attribute__((xcl_loop_tripcount(c_hlen, c_hlen)))
     scan1: for(uint j = 0; j < HIST_LENGTH+1; j++) {
         bus_t tmp;
@@ -87,13 +87,13 @@ __attribute__((always_inline)) bus_t sum_scan(float *sum, bus_t g_in[HIST_LENGTH
         else
             tmp = g_in[j];
 
-        bus_to_array(tmp, &in[B*j]);
+        bus_to_array(tmp, &in_r[B*j]);
     }
 
 #if DEBUG
     __attribute__((xcl_loop_tripcount(c_hlen, c_hlen)))
     scan2: for(uint j = 0; j < (HIST_LENGTH+1)*B; j++) {
-        printf("%7.3f ", in[B+j]);
+        printf("%7.3f ", in_r[B+j]);
     }
     printf("\n");
 #endif
@@ -105,7 +105,7 @@ __attribute__((always_inline)) bus_t sum_scan(float *sum, bus_t g_in[HIST_LENGTH
         uint o2 = 1<<(d+1);
 
         for(uint k = 1; k <= (1<<(LOG2_HIST_LENGTH-1-d)); k++) {
-            in[k*o2-1] = in[k*o2-1] + in[k*o2-o1-1];
+            in_r[k*o2-1] = in_r[k*o2-1] + in_r[k*o2-o1-1];
         }
     }
     
@@ -118,38 +118,38 @@ __attribute__((always_inline)) bus_t sum_scan(float *sum, bus_t g_in[HIST_LENGTH
 
         scan4_1: for(uint k = 1; k <= (1<<(LOG2_B-1-d)); k++) {
             scan4_2: for(uint j =  0; j < (1<<d); j++) {
-                in[o0+k*o2-j-1] = in[o0+k*o2-j-1] + in[o0+k*o2-o1-1];
+                in_r[o0+k*o2-j-1] = in_r[o0+k*o2-j-1] + in_r[o0+k*o2-o1-1];
             }
         }
     }
 
-    *sum += in[HIST_LENGTH*B-1];
+    *sum += in_r[HIST_LENGTH*B-1];
     __attribute__((xcl_loop_tripcount(c_b, c_b)))
     scan5: for(uint j = 0; j < B; j++) {
-        in[B*HIST_LENGTH+j] += *sum;
+        in_r[B*HIST_LENGTH+j] += *sum;
     }
 #ifdef DEBUG
     __attribute__((xcl_loop_tripcount(c_b, c_b)))
     scan6: for(uint j = 0; j < B; j++) {
-        printf("%7.3f ", in[B*HIST_LENGTH+j]);
+        printf("%7.3f ", in_r[B*HIST_LENGTH+j]);
     }
 
     printf("[%7.3f] (%d)", *sum, i % (HIST_LENGTH+1));
     printf("\n");
 #endif
-    return array_to_bus(&in[B*HIST_LENGTH]);
+    return array_to_bus(&in_r[B*HIST_LENGTH]);
 }
 
 __kernel void __attribute__ ((reqd_work_group_size(1, 1, 1)))
 krnl_sum_scan(
-    __global bus_t *in,
-    __global bus_t *out,
-    uint length
+    __global bus_t *in_r,
+    __global bus_t *out_r,
+    uint length_r
 ) {
     float sums[HIST_LENGTH];
     bus_t hist[HIST_LENGTH + 1] __attribute__((xcl_array_partition(complete, 0)));
 
-    uint n = M(length);
+    uint n = M(length_r);
 
     __attribute__((xcl_pipeline_loop(1)))
     __attribute__((xcl_loop_tripcount(c_m, c_m)))
@@ -166,9 +166,9 @@ krnl_sum_scan(
         sum_scan2: for(uint j = 0; j < HIST_LENGTH; j++) {
             hist[j] = hist[j+1];
         }
-        hist[HIST_LENGTH] = in[i];
+        hist[HIST_LENGTH] = in_r[i];
 
-        out[i] = sum_scan(&sum, hist, i);
+        out_r[i] = sum_scan(&sum, hist, i);
 
         sums[i%(HIST_LENGTH)] = sum;
     }

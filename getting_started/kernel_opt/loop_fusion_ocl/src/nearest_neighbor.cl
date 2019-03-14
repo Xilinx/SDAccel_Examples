@@ -44,7 +44,7 @@ __constant int c_dim = 2;
  // loops. The outer loop cycles through each of the search space and the inner
  // loop calculates the distance to a particular point.
 kernel __attribute__((reqd_work_group_size(1, 1, 1))) void
-nearest_neighbor(global int *out, global const int *points,
+nearest_neighbor(global int *out_r, global const int *points,
                       global const int *search_point, const int len,
                       const int dim) {
     int best_i = 0;
@@ -82,14 +82,14 @@ nearest_neighbor(global int *out, global const int *points,
     __attribute__((xcl_loop_tripcount(c_dim, c_dim)))
     write_best:
     for (int c = 0; c < dim; ++c) {
-        out[c] = points[best_i * dim + c];
+        out_r[c] = points[best_i * dim + c];
     }
 }
 
 // This implementation fuses the distance calculation and the iteration through
 // the search space into one loop.
 kernel __attribute__((reqd_work_group_size(1, 1, 1))) void
-nearest_neighbor_loop_fusion(global int *out, global const int *points,
+nearest_neighbor_loop_fusion(global int *out_r, global const int *points,
                        global const int *search_point, const int len,
                        const int dim) {
     int best_i = 0;
@@ -134,6 +134,6 @@ nearest_neighbor_loop_fusion(global int *out, global const int *points,
     __attribute__((xcl_loop_tripcount(c_dim, c_dim)))
     write_best:
     for (int c = 0; c < dim; ++c) {
-        out[c] = points[best_i * dim + c];
+        out_r[c] = points[best_i * dim + c];
     }
 }

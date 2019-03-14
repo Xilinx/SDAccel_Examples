@@ -13,7 +13,6 @@
     ],
     "host_exe": "host",
     "cmd_args": "BUILD/vadd.xclbin",
-    "Emulation": [ "launch_waveform=batch" ],                    
     "containers": [
     {
         "name": "vadd",        
@@ -31,5 +30,6 @@
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
         }
-    ]
+    ],
+    "match_ini" : "false"
 }

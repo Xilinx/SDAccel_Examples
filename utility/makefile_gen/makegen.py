@@ -382,14 +382,6 @@ def mk_check(target, data):
             target.write("$(error Nothing to be done for make)\n")
             target.write("endif\n")
         target.write("\n")
-    if "Emulation" in data:        
-        target1 = open("sdaccel.ini","a+")
-        args = data["Emulation"]
-        target1.write("\n[Emulation]\n")
-        for arg in args:
-            target1.write(arg)
-            target1.write("\n")
-        target1.close
     target.write("ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))\n")
     target.write("\t$(CP) $(EMCONFIG_DIR)/emconfig.json .\n") 
     target.write("\tXCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE)")
@@ -501,20 +493,26 @@ def create_utils(target):
 script, desc_file = argv
 desc = open(desc_file, 'r')
 data = json.load(desc)
-if "match_makefile" in data:
-    if data["match_makefile"] == "false":
-	exit("Error:: Makefile Manually Edited:: AutoMakefile Generator Failed\n")
 desc.close()
 
-print "Generating sdaccel.ini file for %s" %data["example"]
-target = open("sdaccel.ini","w+")
-profile_report(target)
+err = True
+if "match_ini" in data and data["match_ini"] == "false":
+    print "Error:: sdaccel.ini File Manually Edited:: Auto-file Generator Failed"
+    err = False
+else:
+    print "Generating sdaccel.ini file for %s" %data["example"]
+    target = open("sdaccel.ini","w+")
+    profile_report(target)
 
-target = open("Makefile", "w")
-create_mk(target, data)
+if "match_makefile" in data and data["match_makefile"] == "false":
+    print "Error:: Makefile Manually Edited:: AutoMakefile Generator Failed"
+    err = False
+else:
+    target = open("Makefile", "w")
+    create_mk(target, data)
+    print "Generating utils.mk file for %s" %data["example"]
+    target = open("utils.mk", "w+")
+    create_utils(target)
 
-print "Generating utils.mk file for %s" %data["example"]
-target = open("utils.mk", "w+")
-create_utils(target)
-
+assert err
 target.close

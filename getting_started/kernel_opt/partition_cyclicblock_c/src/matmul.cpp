@@ -39,15 +39,15 @@ extern "C" {
 void matmul_naive(
             const int *in1,  // Read-Only Matrix 1
             const int *in2,  // Read-Only Matrix 2
-            int *out,        // Output Result
+            int *out_r,        // Output Result
             int dim)         // Matrix Dimension (assuming square matrix)
 {               
 #pragma HLS INTERFACE m_axi port=in1  offset=slave bundle=gmem
 #pragma HLS INTERFACE m_axi port=in2  offset=slave bundle=gmem
-#pragma HLS INTERFACE m_axi port=out offset=slave bundle=gmem
+#pragma HLS INTERFACE m_axi port=out_r offset=slave bundle=gmem
 #pragma HLS INTERFACE s_axilite port=in1  bundle=control
 #pragma HLS INTERFACE s_axilite port=in2  bundle=control
-#pragma HLS INTERFACE s_axilite port=out bundle=control
+#pragma HLS INTERFACE s_axilite port=out_r bundle=control
 #pragma HLS INTERFACE s_axilite port=dim bundle=control
 #pragma HLS INTERFACE s_axilite port=return bundle=control
 
@@ -59,6 +59,7 @@ void matmul_naive(
     // Burst read for matrix A
     readA:
     for (int i = 0 ; i < dim * dim; i++) {
+    #pragma HLS LOOP_TRIPCOUNT min=c_dim*c_dim max=c_dim*c_dim
     #pragma HLS PIPELINE II=1
         A[i]  = in1[i];
     }
@@ -66,6 +67,7 @@ void matmul_naive(
     // Burst read for matrix B
     readB:
     for (int i = 0 ; i < dim * dim; i++) {
+    #pragma HLS LOOP_TRIPCOUNT min=c_dim*c_dim max=c_dim*c_dim
     #pragma HLS PIPELINE II=1
         B[i]  = in2[i];
     }
@@ -92,7 +94,7 @@ void matmul_naive(
     for (int i = 0; i < dim * dim; i++) {
     #pragma HLS PIPELINE II=1
     #pragma HLS LOOP_TRIPCOUNT min=c_dim*c_dim max=c_dim*c_dim
-        out[i] = C[i];
+        out_r[i] = C[i];
     }
 }
 }
