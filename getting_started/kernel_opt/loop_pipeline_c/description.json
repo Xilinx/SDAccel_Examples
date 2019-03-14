@@ -1,11 +1,11 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Loop Pipelining (CL)",
+    "example": "Loop Pipelining (C)",
     "overview": [
         "This example demonstrates how loop pipelining can be used to improve the performance of a kernel."
     ],
     "key_concepts": [ "Kernel Optimization", "Loop Pipelining"],
-    "keywords": [ "xcl_pipeline_loop" ],
+    "keywords": [ "pragma HLS PIPELINE" ],
     "os": [
         "Linux"
     ],
@@ -20,12 +20,12 @@
         "accelerators": [
         {
             "name": "vadd", 
-            "location": "src/vector_addition.cl"
+            "location": "src/vector_addition_BAD.cpp"
         },
-	{
-	    "name": "vadd_pipelined",
-	    "location": "src/vector_addition.cl"
-	}
+	    {
+	        "name": "vadd_pipelined",
+	        "location": "src/vector_addition.cpp"
+	    }
        ]
      }
     ],

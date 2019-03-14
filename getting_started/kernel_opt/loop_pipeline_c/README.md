@@ -1,4 +1,4 @@
-Loop Pipelining (CL)
+Loop Pipelining (C)
 ======================
 
 This README file contains the following sections:
@@ -19,7 +19,7 @@ This example demonstrates how loop pipelining can be used to improve the perform
 
 ***KEY CONCEPTS:*** Kernel Optimization, Loop Pipelining
 
-***KEYWORDS:*** xcl_pipeline_loop
+***KEYWORDS:*** pragma HLS PIPELINE
 
 ## 2. HOW TO DOWNLOAD THE REPOSITORY
 To get a local copy of the SDAccel example repository, clone this repository to the local system with the following command:
@@ -52,7 +52,8 @@ description.json
 qor.json
 sdaccel.ini
 src/host.cpp
-src/vector_addition.cl
+src/vector_addition.cpp
+src/vector_addition_BAD.cpp
 utils.mk
 ```
 
