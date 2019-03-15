@@ -23,8 +23,6 @@
 	        "name": "vadd_pipelined",
 	        "location": "src/vector_addition.cpp"
 	    }
-       ]
-     }
     ],
     "contributors" : [
         {
