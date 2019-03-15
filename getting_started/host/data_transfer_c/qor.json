@@ -9,7 +9,7 @@
                     "check_timing": "true", 
                     "PipelineType": "none", 
                     "check_latency": "false", 
-                    "check_warning": "false", 
+                    "check_warning": "true", 
                     "loops": [
                         {
                             "name": "dummy", 
