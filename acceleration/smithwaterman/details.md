@@ -41,6 +41,7 @@ Application code is located in the src directory. Accelerator binary files will 
 Makefile
 README.md
 description.json
+details.md
 sdaccel.ini
 src/genseq.cpp
 src/intel/kseq.h

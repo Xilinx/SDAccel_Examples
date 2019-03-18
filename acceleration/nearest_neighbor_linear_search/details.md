@@ -43,6 +43,7 @@ README.md
 data/queries.txt
 data/targets.txt
 description.json
+details.md
 sdaccel.ini
 src/krnl_linear_search.cpp
 src/linear_search.cpp

@@ -54,6 +54,7 @@ data/rect_512.bmp
 data/rect_64.bmp
 data/sdaccel.bmp
 description.json
+details.md
 sdaccel.ini
 src/bit_io.cpp
 src/bit_io.h

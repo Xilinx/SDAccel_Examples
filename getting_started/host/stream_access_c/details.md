@@ -42,6 +42,7 @@ README.md
 data/input1.txt
 data/input2.txt
 description.json
+details.md
 qor.json
 sdaccel.ini
 src/host.cpp

@@ -42,6 +42,7 @@ Makefile
 README.md
 config.mk
 description.json
+details.md
 qor.json
 sdaccel.ini
 src/kernel.cl

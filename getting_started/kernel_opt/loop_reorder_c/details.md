@@ -42,6 +42,7 @@ Makefile
 README.md
 data/hls_config.tcl
 description.json
+details.md
 qor.json
 sdaccel.ini
 src/host.cpp

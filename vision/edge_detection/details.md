@@ -53,6 +53,7 @@ data/input/lola.bmp
 data/input/vase.bmp
 data/output/lola.bmp
 description.json
+details.md
 sdaccel.ini
 src/edge.cpp
 src/edge.h

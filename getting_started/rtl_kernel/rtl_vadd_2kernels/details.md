@@ -41,6 +41,7 @@ Makefile
 README.md
 config.mk
 description.json
+details.md
 qor.json
 scripts/gen_vadd0_xo.tcl
 scripts/gen_vadd1_xo.tcl

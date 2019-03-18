@@ -44,6 +44,7 @@ data/golden.bmp
 data/inputImage.bmp
 data/inputImage128x128.bmp
 description.json
+details.md
 sdaccel.ini
 src/krnl_watermarking.cl
 src/watermarking.cpp

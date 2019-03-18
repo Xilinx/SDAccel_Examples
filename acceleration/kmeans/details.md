@@ -44,6 +44,7 @@ config.mk
 data/100
 data/100.gold_c5
 description.json
+details.md
 sdaccel.ini
 src/cluster.c
 src/fpga_kmeans.cpp

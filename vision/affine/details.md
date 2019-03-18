@@ -49,6 +49,7 @@ Makefile
 README.md
 data/CT-MONO2-16-brain.raw
 description.json
+details.md
 sdaccel.ini
 src/affine.cpp
 src/krnl_affine.cl

@@ -15,14 +15,19 @@
     "host_exe": "loop_pipeline",
     "cmd_args": "BUILD/vector_addition.xclbin",
     "containers": [
-        {
-            "name": "vadd", 
-            "location": "src/vector_addition_BAD.cpp"
-        },
-	    {
-	        "name": "vadd_pipelined",
-	        "location": "src/vector_addition.cpp"
-	    }
+    {
+        "name": "vector_addition",
+        "accelerators": [
+            {
+                "name": "vadd", 
+                "location": "src/vector_addition_BAD.cpp"
+            },
+	        {
+	            "name": "vadd_pipelined",
+	            "location": "src/vector_addition.cpp"
+	        }
+        ]
+    }
     ],
     "contributors" : [
         {

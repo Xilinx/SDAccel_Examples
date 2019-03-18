@@ -51,6 +51,7 @@ data/filter_buffer_raw.txt
 data/input_buffer_raw.txt
 data/output_buffer_raw.txt
 description.json
+details.md
 sdaccel.ini
 src/convolve.cpp
 src/krnl_convolve.cl

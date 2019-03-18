@@ -41,6 +41,7 @@ Makefile
 README.md
 config.mk
 description.json
+details.md
 qor.json
 scripts/gen_rtl_vadd_xo.tcl
 scripts/package_kernel.tcl

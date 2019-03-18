@@ -43,6 +43,7 @@ README.md
 data/car_128x128.bmp
 data/car_480x640.bmp
 description.json
+details.md
 qor.json
 sdaccel.ini
 src/boost_helper.h

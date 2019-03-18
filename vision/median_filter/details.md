@@ -50,6 +50,7 @@ README.md
 data/goldenImage.bmp
 data/inputImage.bmp
 description.json
+details.md
 sdaccel.ini
 src/krnl_medianFilter.cl
 src/medianFilter.cpp

@@ -49,6 +49,7 @@ Makefile
 README.md
 data/race_2k.bmp
 description.json
+details.md
 sdaccel.ini
 src/equalizer.cpp
 src/equalizer.h
