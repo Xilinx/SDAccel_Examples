@@ -8,10 +8,11 @@ disableConcurrentBuilds()
 days = 10
 
 devices = []
-devices += ['xilinx_vcu1525_dynamic_5_1']
-devices += ['xilinx_kcu1500_dynamic_5_0']
+devices += ['xilinx_vcu1525_dynamic_6_0']
+devices += ['xilinx_u250_xdma_201830_2']
+devices += ['xilinx_u200_xdma_201830_2']
 
-version = '2018.2'
+version = '2018.3'
 
 precheck_status = 'FAILURE'
 sw_status = 'FAILURE'
