@@ -1,7 +1,7 @@
 {
     "containers": [
         {
-            "name": "krnl_vmul", 
+            "name": "krnl_vadd", 
             "meet_system_timing": "true", 
             "accelerators": [
                 {
@@ -28,7 +28,7 @@
             ]
         }, 
         {
-            "name": "krnl_vadd", 
+            "name": "krnl_vmul", 
             "meet_system_timing": "true", 
             "accelerators": [
                 {
