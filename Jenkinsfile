@@ -8,10 +8,15 @@ disableConcurrentBuilds()
 days = 10
 
 devices = []
-devices += ['xilinx_vcu1525_dynamic_5_1']
-devices += ['xilinx_kcu1500_dynamic_5_0']
+devices += ['xilinx_vcu1525_dynamic_6_0']
+devices += ['xilinx_u250_xdma_201830_2']
+devices += ['xilinx_u200_xdma_201830_2']
 
-version = '2018.2'
+version = '2018.3'
+env.VERSION = version
+env.MODULE_FILES_PATH = "/build/devtest2/nassera/modulefiles"
+env.PLATFORM_REPO_PATHS = "/proj/xbuilds/${VERSION}_daily_latest/xbb/dsadev/opt/xilinx/platforms"
+env.XRT_SETENV_PATH = "/proj/xbuilds/${VERSION}_daily_latest/xbb/xrt/packages/setenv.sh"
 
 precheck_status = 'FAILURE'
 sw_status = 'FAILURE'
@@ -24,12 +29,14 @@ def setupExample(dir, workdir) {
 cd ${workdir}
 
 . /tools/local/bin/modinit.sh > /dev/null 2>&1
-module use.own /proj/picasso/modulefiles
+module use.own ${MODULE_FILES_PATH}
 
-module add sdaccel/${version}_daily
+module add sdaccel/version_daily
 module add opencv/sdaccel
 
 cd ${dir}
+
+. ${XRT_SETENV_PATH}
 
 echo
 echo "-----------------------------------------------"
@@ -59,19 +66,19 @@ def buildExample(target, dir, device, workdir) {
 			mins = 12*60
 		}
 
-	retry(3) {
+	retry(1) {
 		sh """#!/bin/bash -e
 
 cd ${workdir}
 
 . /tools/local/bin/modinit.sh > /dev/null 2>&1
-module use.own /proj/picasso/modulefiles
+module use.own ${MODULE_FILES_PATH}
 
-module add vivado/${version}_daily
-module add sdaccel/${version}_daily
+module add vivado/version_daily
+module add sdaccel/version_daily
 module add opencv/sdaccel
 
-module add lsf
+#module add lsf
 
 cd ${dir}
 
@@ -92,12 +99,16 @@ export TMPDIR=\$(mktemp -d -p \$(pwd))
 
 # if rebuild required then use LSF
 if [[ \$rc != 0 ]]; then
-bsub -W ${mins} -I -q ${queue} -R "osdistro=rhel && osver==ws6" -n ${cores} -R "rusage[mem=${mem}] span[ptile=${cores}]" -J "\$(basename ${dir})-${target}" <<EOF
-#!/bin/bash -ex
-export TMPDIR=\$TMPDIR
+
+#bsub -W ${mins} -I -q ${queue} -R "osdistro=rhel && osver==ws6" -n ${cores} -R "rusage[mem=${mem}] span[ptile=${cores}]" -J "\$(basename ${dir})-${target}" <<EOF
+##!/bin/bash -ex
+#export TMPDIR=\$TMPDIR
+
+. ${XRT_SETENV_PATH}
 make -j TARGETS=${target} DEVICES=\"${device}\" all
 rm -rf \$TMPDIR
-EOF
+
+#EOF
 fi
 set +x
 """
@@ -125,22 +136,22 @@ def runExample(target, dir, device, workdir) {
 
 		devdir = dirsafe(device)
 
-		retry(3) {
+		retry(1) {
 		//	lock("${dir}") {
 				sh """#!/bin/bash -e
 
 cd ${workdir}
 
 . /tools/local/bin/modinit.sh > /dev/null 2>&1
-module use.own /proj/picasso/modulefiles
+module use.own ${MODULE_FILES_PATH}
 
-module add vivado/${version}_daily
-module add sdaccel/${version}_daily
+module add vivado/version_daily
+module add sdaccel/version_daily
 module add opencv/sdaccel
 
 module add proxy
 module add lftp
-module add lsf
+#module add lsf
 
 cd ${dir}
 
@@ -156,12 +167,15 @@ export TMPDIR=\$(mktemp -d -p \$(pwd))
 
 rm -rf \"out/${target}_${devdir}\" && mkdir -p out
 
-bsub -W ${mins} -I -q ${queue} -R "osdistro=rhel && osver==ws6" -n ${cores} -R "rusage[mem=${mem}] span[ptile=${cores}]" -J "\$(basename ${dir})-${target}-run" <<EOF
-#!/bin/bash -ex
-export TMPDIR=\$TMPDIR
+#bsub -W ${mins} -I -q ${queue} -R "osdistro=rhel && osver==ws6" -n ${cores} -R "rusage[mem=${mem}] span[ptile=${cores}]" -J "\$(basename ${dir})-${target}-run" <<EOF
+##!/bin/bash -ex
+#export TMPDIR=\$TMPDIR
+
+. ${XRT_SETENV_PATH}
 make TARGETS=${target} DEVICES=\"${device}\" NIMBIXFLAGS=\"--out out/${target}_${devdir} --queue_timeout=${mins}\" check
 rm -rf \$TMPDIR
-EOF
+
+#EOF
 
 """
 //			}
@@ -184,9 +198,9 @@ def buildStatus(context, message, state) {
 
 timestamps {
 // Always build on the same host so that the workspace is reused
-node('rhel6 && xsjrdevl && xsjrdevl110') {
+node('xcoDockerPool') {
+// docker.image('xrt-centos74').inside('--rm -v /proj:/proj -v /tools:/tools'){
 try {
-
 	stage("checkout") {
 		checkout scm
 	}
@@ -219,10 +233,10 @@ try {
 	stage('pre-check') {
 		sh """
 . /tools/local/bin/modinit.sh > /dev/null 2>&1
-module use.own /proj/picasso/modulefiles
+module use.own ${MODULE_FILES_PATH}
 
-module add vivado/${version}_daily
-module add sdaccel/${version}_daily
+module add vivado/version_daily
+module add sdaccel/version_daily
 module add opencv/sdaccel
 
 module add proxy
@@ -351,13 +365,14 @@ module add proxy
 	currentBuild.result = "FAILED"
 	throw e
 } finally {
-	stage('post-check') {
-		step([$class: 'Mailer', notifyEveryUnstableBuild: true, recipients: 'sdx_examples@xilinx.com', sendToIndividuals: false])
-	}
+	//stage('post-check') {
+	//	step([$class: 'Mailer', notifyEveryUnstableBuild: true, recipients: 'sdx_examples@xilinx.com', sendToIndividuals: false])
+	//}
 	stage('cleanup') {
 		// Cleanup .Xil Files after run
 		sh 'find . -name .Xil | xargs rm -rf'
 	}
 } // try
+//} // docker
 } // node
 } // timestamps

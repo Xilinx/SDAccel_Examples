@@ -34,19 +34,19 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     Arguments:
         a           (input)    --> Input Vector1
         b           (input)    --> Input Vector2
-        out         (output)   --> Output Vector
+        out_r         (output)   --> Output Vector
         n_elements  (input)    --> Size of Vector in Integer        
 */
 
 extern "C" {
-void krnl_vsub(int* a, int* b, int* out, const int n_elements)
+void krnl_vsub(int* a, int* b, int* out_r, const int n_elements)
 {
 #pragma HLS INTERFACE m_axi     port=a   offset=slave bundle=gmem
 #pragma HLS INTERFACE s_axilite port=a   bundle=control
 #pragma HLS INTERFACE m_axi     port=b   offset=slave bundle=gmem
 #pragma HLS INTERFACE s_axilite port=b   bundle=control
-#pragma HLS INTERFACE m_axi     port=out offset=slave bundle=gmem
-#pragma HLS INTERFACE s_axilite port=out bundle=control
+#pragma HLS INTERFACE m_axi     port=out_r offset=slave bundle=gmem
+#pragma HLS INTERFACE s_axilite port=out_r bundle=control
 #pragma HLS INTERFACE s_axilite port=n_elements bundle=control
 #pragma HLS INTERFACE s_axilite port=return bundle=control
 
@@ -73,7 +73,7 @@ void krnl_vsub(int* a, int* b, int* out, const int n_elements)
         for (int j = 0 ; j < size ; j++) {
         #pragma HLS PIPELINE II=1
         #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
-            out[i+j] = arrayA[j] - b[i+j];
+            out_r[i+j] = arrayA[j] - b[i+j];
         }
     }
 }
