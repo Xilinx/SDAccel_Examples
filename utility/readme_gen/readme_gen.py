@@ -22,11 +22,6 @@ DEVICES = {
        'version': '5.0',
        'name': 'Xilinx Virtex UltraScale+ VCU1525',
        'nae':  'nx5'
-    },
-	'xilinx_kcu1500_dynamic': {
-       'version': '5.0',
-       'name': 'Xilinx Kintex UltraScale KCU1500',
-       'nae':  'nx5'
     }
 }
 
