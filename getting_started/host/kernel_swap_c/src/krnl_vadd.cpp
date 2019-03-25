@@ -38,7 +38,7 @@ extern "C" {
 void krnl_vadd(int* a,
                 int* b,
                 int* c,
-                const int length)
+                const int length_r)
 {
 #pragma HLS INTERFACE m_axi port=a offset=slave bundle=gmem
 #pragma HLS INTERFACE m_axi port=b offset=slave bundle=gmem
@@ -47,15 +47,15 @@ void krnl_vadd(int* a,
 #pragma HLS INTERFACE s_axilite port=a bundle=control
 #pragma HLS INTERFACE s_axilite port=b bundle=control
 #pragma HLS INTERFACE s_axilite port=c bundle=control
-#pragma HLS INTERFACE s_axilite port=length bundle=control
+#pragma HLS INTERFACE s_axilite port=length_r bundle=control
 #pragma HLS INTERFACE s_axilite port=return bundle=control
 
     int arrayA[BUFFER_SIZE];
     int arrayB[BUFFER_SIZE];
-    for (int i = 0 ; i < length ; i += BUFFER_SIZE) {
+    for (int i = 0 ; i < length_r ; i += BUFFER_SIZE) {
     #pragma HLS LOOP_TRIPCOUNT min=c_len max=c_len
         int size = BUFFER_SIZE;
-        if (i + size > length) size = length - i;
+        if (i + size > length_r) size = length_r - i;
         readA: for (int j = 0 ; j < size ; j++) {
         #pragma HLS PIPELINE II=1
         #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size

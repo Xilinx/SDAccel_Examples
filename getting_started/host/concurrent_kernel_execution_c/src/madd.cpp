@@ -29,6 +29,9 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define MAX_DIM 64
 
+//Tripcount identifiers
+const int c_size = MAX_DIM;
+
 extern "C" {
 void madd(int *c, int *a, int *b,
           const int dim0, const int dim1) {
@@ -48,18 +51,21 @@ void madd(int *c, int *a, int *b,
     madd_readA:  
     for (int i = 0; i < dim0 * dim1; ++i) {
     #pragma HLS PIPELINE II=1
+    #pragma HLS LOOP_TRIPCOUNT min=c_size*c_size max=c_size*c_size
         matA[i] = a[i]; 
     }
 
     madd_readB:  
     for (int i = 0; i < dim0 * dim1; ++i) {
     #pragma HLS PIPELINE II=1
+    #pragma HLS LOOP_TRIPCOUNT min=c_size*c_size max=c_size*c_size
         matB[i] = b[i]; 
     }
 
     madd_writeC: 
     for (int i = 0; i < dim0 * dim1; ++i) {
     #pragma HLS PIPELINE II=1
+    #pragma HLS LOOP_TRIPCOUNT min=c_size*c_size max=c_size*c_size
         c[i] =  matA[i] + matB[i]; 
     }
 }

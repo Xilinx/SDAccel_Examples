@@ -22,11 +22,6 @@ DEVICES = {
        'version': '5.0',
        'name': 'Xilinx Virtex UltraScale+ VCU1525',
        'nae':  'nx5'
-    },
-	'xilinx_kcu1500_dynamic': {
-       'version': '5.0',
-       'name': 'Xilinx Kintex UltraScale KCU1500',
-       'nae':  'nx5'
     }
 }
 
@@ -379,16 +374,9 @@ desc = open(desc_file,'r')
 
 # load the json data from the file
 data = json.load(desc)
-if "match_readme" in data:
-    if data["match_readme"] == "false":
-        exit("Error:: README Manually Edited:: README Generator Failed\n")
 desc.close()
 
 assert("OpenCL" in data['runtime'])
-
-print "Generating the README for %s" % data["example"]
-target = open("README.md","w")
-overview(target,data)
 
 print "Generating the details file for %s" %data["example"]
 target = open("details.md", "w+")
@@ -404,6 +392,13 @@ support(target)
 license(target)
 ack(target,data)
 footer(target)
+
+if "match_readme" in data and data["match_readme"] == "false":
+    print "ERROR:: README Manually Edited:: README Generator Failed\n"
+else:
+    print "Generating the README for %s" % data["example"]
+    target = open("README.md","w")
+    overview(target,data)
 
 target.close
 
