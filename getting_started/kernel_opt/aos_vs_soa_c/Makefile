@@ -77,10 +77,10 @@ all: check-devices $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
 exe: $(EXECUTABLE)
 
 # Building kernel
-$(XCLBIN)/dot_aos.$(TARGET).$(DSA).xo: src/dot.cl
+$(XCLBIN)/dot_aos.$(TARGET).$(DSA).xo: src/dot_aos.cpp
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_dot) -c -k dot_aos -I'$(<D)' -o'$@' '$<'
-$(XCLBIN)/dot_soa.$(TARGET).$(DSA).xo: src/dot.cl
+$(XCLBIN)/dot_soa.$(TARGET).$(DSA).xo: src/dot_soa.cpp
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_dot) -c -k dot_soa -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/dot.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_dot_OBJS)

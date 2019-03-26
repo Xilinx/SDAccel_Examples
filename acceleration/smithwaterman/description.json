@@ -33,7 +33,6 @@
       "accelerators": [
         {
             "name": "opencl_sw_maxscore",
-            "num_compute_units": "2", 
             "clflags": "-I./src/ --kernel_frequency 235",
             "location": "src/opencl_sw_maxscore_systolic.cpp"
         }

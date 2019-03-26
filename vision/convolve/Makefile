@@ -83,7 +83,7 @@ $(XCLBIN)/krnl_convolve.$(TARGET).$(DSA).xo: src/krnl_convolve.cl
 	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_convolve) -c -k krnl_convolve -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/krnl_convolve.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_convolve_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_convolve) -l $(LDCLFLAGS) --nk krnl_convolve:3 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_convolve) -l $(LDCLFLAGS) --nk krnl_convolve:1 -o'$@' $(+)
 
 # Building Host
 $(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)

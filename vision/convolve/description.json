@@ -20,7 +20,6 @@
         "accelerators": [
         {
             "name": "krnl_convolve", 
-            "num_compute_units": "3",
             "location": "src/krnl_convolve.cl"
         }
       ]

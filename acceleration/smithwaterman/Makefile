@@ -88,7 +88,7 @@ $(XCLBIN)/opencl_sw_maxscore.$(TARGET).$(DSA).xo: src/opencl_sw_maxscore_systoli
 	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_smithwaterman) -c -k opencl_sw_maxscore -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/krnl_smithwaterman.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_smithwaterman_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_smithwaterman) -l $(LDCLFLAGS) --nk opencl_sw_maxscore:2 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_smithwaterman) -l $(LDCLFLAGS) --nk opencl_sw_maxscore:1 -o'$@' $(+)
 
 # Building Host
 $(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
