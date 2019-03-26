@@ -16,7 +16,6 @@
         "accelerators": [
         {
             "name": "krnl_linear_search", 
-            "num_compute_units": "2",
             "location": "src/krnl_linear_search.cpp"
         }
       ]
