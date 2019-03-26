@@ -253,7 +253,9 @@ int main(int argc, char **argv) {
   // before executing. We are sending the write_events into its wait list to
   // ensure that the order of operations is correct.
   //Launch the Kernel
-  OCL_CHECK(err, err = q.enqueueNDRangeKernel(krnl_vadd, 0, 1, 1, NULL, &kernel_events[flag]));
+  std::vector<cl::Event> waitList;
+  waitList.push_back(write_event[0]);
+  OCL_CHECK(err, err = q.enqueueNDRangeKernel(krnl_vadd, 0, 1, 1, &waitList, &kernel_events[flag]));
   set_callback(kernel_events[flag], "ooo_queue");
 
   // Copy Result from Device Global Memory to Host Local Memory
@@ -265,8 +267,8 @@ int main(int argc, char **argv) {
   // operations
   OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_c[flag]}, CL_MIGRATE_MEM_OBJECT_HOST, &eventList, &read_events[flag]));
   set_callback(read_events[flag], "ooo_queue");
-
-  OCL_CHECK(err, err = write_event[0].wait());
+  
+  OCL_CHECK(err, err = read_events[flag].wait());
   }
 
   // Wait for all of the OpenCL operations to complete
