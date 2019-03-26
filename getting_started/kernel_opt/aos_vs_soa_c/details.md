@@ -1,4 +1,4 @@
-Array of Structure(AoS) vs Structure of Arrays(SoA) (CL)
+Array of Structure(AoS) vs Structure of Arrays(SoA) (C)
 ======================
 
 This file contains the following sections:
@@ -43,7 +43,8 @@ description.json
 details.md
 qor.json
 sdaccel.ini
-src/dot.cl
+src/dot_aos.cpp
+src/dot_soa.cpp
 src/host.cpp
 utils.mk
 ```
