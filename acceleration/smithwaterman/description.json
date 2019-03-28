@@ -44,5 +44,13 @@
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
         }
-    ]
+    ],
+    "testinfo": {
+        "level_up": [
+        {
+            "hw": "1"
+        }
+        ]
+    }
+
 }
