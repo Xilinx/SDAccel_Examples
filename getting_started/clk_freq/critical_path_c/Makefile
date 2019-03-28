@@ -79,7 +79,7 @@ all: check-devices $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
 exe: $(EXECUTABLE)
 
 # Building kernel
-$(XCLBIN)/apply_watermark.$(TARGET).$(DSA).xo: src/apply_watermark.cl
+$(XCLBIN)/apply_watermark.$(TARGET).$(DSA).xo: src/apply_watermark.cpp
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_apply_watermark_GOOD) -c -k apply_watermark -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/apply_watermark_GOOD.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_apply_watermark_GOOD_OBJS)

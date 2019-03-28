@@ -1,4 +1,4 @@
-Critical Path(CL)
+Critical Path (C)
 ======================
 
 This file contains the following sections:
@@ -44,7 +44,7 @@ description.json
 details.md
 qor.json
 sdaccel.ini
-src/apply_watermark.cl
+src/apply_watermark.cpp
 src/host.cpp
 utils.mk
 ```
