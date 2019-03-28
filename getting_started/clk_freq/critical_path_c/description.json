@@ -1,6 +1,6 @@
 {
     "runtime": ["OpenCL"],
-    "example": "Critical Path(CL)",
+    "example": "Critical Path (C)",
     "overview": [
         "This example shows a normal coding style which could lead to critical path issue and design will give degraded timing.  Example also contains better coding style which can improve design timing."
     ],
@@ -18,7 +18,7 @@
                 {
                     "name": "apply_watermark",      
                     "clflags" : "-DBAD_DESIGN=0",  
-                    "location": "src/apply_watermark.cl"
+                    "location": "src/apply_watermark.cpp"
                 }
             ]
         }

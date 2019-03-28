@@ -35,7 +35,7 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
-BUILD_DIR_dot = $(BUILD_DIR)/dot
+BUILD_DIR_apply_watermark_GOOD = $(BUILD_DIR)/apply_watermark_GOOD
 
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
@@ -43,9 +43,10 @@ XOCC := $(XILINX_SDX)/bin/xocc
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
 include $(ABS_COMMON_REPO)/libs/xcl2/xcl2.mk
-CXXFLAGS += $(xcl2_CXXFLAGS)
-LDFLAGS += $(xcl2_LDFLAGS)
-HOST_SRCS += $(xcl2_SRCS)
+include $(ABS_COMMON_REPO)/libs/bitmap/bitmap.mk
+CXXFLAGS += $(xcl2_CXXFLAGS) $(bitmap_CXXFLAGS)
+LDFLAGS += $(xcl2_LDFLAGS) $(bitmap_LDFLAGS)
+HOST_SRCS += $(xcl2_SRCS) $(bitmap_SRCS)
 CXXFLAGS += $(opencl_CXXFLAGS) -Wall -O0 -g -std=c++14
 LDFLAGS += $(opencl_LDFLAGS)
 
@@ -57,18 +58,19 @@ LDFLAGS += -lrt -lstdc++
 
 # Kernel compiler global settings
 CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
+CLFLAGS += -DBAD_DESIGN=0
 
 
-EXECUTABLE = aos_vs_soa
-CMD_ARGS = $(XCLBIN)/dot.$(TARGET).$(DSA).xclbin
+EXECUTABLE = host
+CMD_ARGS = $(XCLBIN)/apply_watermark_GOOD.$(TARGET).$(DSA).xclbin ./data/input.bmp ./data/golden.bmp
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
-BINARY_CONTAINERS += $(XCLBIN)/dot.$(TARGET).$(DSA).xclbin
-BINARY_CONTAINER_dot_OBJS += $(XCLBIN)/dot_aos.$(TARGET).$(DSA).xo
-BINARY_CONTAINER_dot_OBJS += $(XCLBIN)/dot_soa.$(TARGET).$(DSA).xo
+BINARY_CONTAINERS += $(XCLBIN)/apply_watermark_GOOD.$(TARGET).$(DSA).xclbin
+BINARY_CONTAINER_apply_watermark_GOOD_OBJS += $(XCLBIN)/apply_watermark.$(TARGET).$(DSA).xo
 
 CP = cp -rf
+DATA = ./data
 
 .PHONY: all clean cleanall docs emconfig
 all: check-devices $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
@@ -77,15 +79,12 @@ all: check-devices $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
 exe: $(EXECUTABLE)
 
 # Building kernel
-$(XCLBIN)/dot_aos.$(TARGET).$(DSA).xo: src/dot.cl
+$(XCLBIN)/apply_watermark.$(TARGET).$(DSA).xo: src/apply_watermark.cpp
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_dot) -c -k dot_aos -I'$(<D)' -o'$@' '$<'
-$(XCLBIN)/dot_soa.$(TARGET).$(DSA).xo: src/dot.cl
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_apply_watermark_GOOD) -c -k apply_watermark -I'$(<D)' -o'$@' '$<'
+$(XCLBIN)/apply_watermark_GOOD.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_apply_watermark_GOOD_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_dot) -c -k dot_soa -I'$(<D)' -o'$@' '$<'
-$(XCLBIN)/dot.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_dot_OBJS)
-	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_dot) -l $(LDCLFLAGS) --nk dot_aos:1 --nk dot_soa:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_apply_watermark_GOOD) -l $(LDCLFLAGS) --nk apply_watermark:1 -o'$@' $(+)
 
 # Building Host
 $(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
@@ -98,9 +97,9 @@ $(EMCONFIG_DIR)/emconfig.json:
 check: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/dot.$(TARGET).$(DSA).xclbin
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/apply_watermark_GOOD.$(TARGET).$(DSA).xclbin ./data/input.bmp ./data/golden.bmp
 else
-	 ./$(EXECUTABLE) $(XCLBIN)/dot.$(TARGET).$(DSA).xclbin
+	 ./$(EXECUTABLE) $(XCLBIN)/apply_watermark_GOOD.$(TARGET).$(DSA).xclbin ./data/input.bmp ./data/golden.bmp
 endif
 	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
 
@@ -119,4 +118,4 @@ clean:
 cleanall: clean
 	-$(RMDIR) $(XCLBIN)
 	-$(RMDIR) _x.*
-
+	-$(RMDIR) ./output.bmp 

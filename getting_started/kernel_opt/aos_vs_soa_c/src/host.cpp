@@ -155,6 +155,7 @@ int main(int argc, char **argv) {
   cl::Event event;
   uint64_t nstimestart, nstimeend;
   int nargs=0;
+
   OCL_CHECK(err, cl::Kernel kernel_aos(program,"dot_aos", &err));
   OCL_CHECK(err, err = kernel_aos.setArg(nargs++,buffer_result));
   OCL_CHECK(err, err = kernel_aos.setArg(nargs++,buffer_pts));
@@ -201,7 +202,8 @@ int main(int argc, char **argv) {
   // Get the results from the FPGA
   OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_result},CL_MIGRATE_MEM_OBJECT_HOST));
   q.finish();
-  verify(gold, results);
+  verify(gold, results); 
+
   delete[] fileBuf;
 
   printf("|-------------------------+-------------------------|\n");

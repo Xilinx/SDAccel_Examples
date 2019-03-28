@@ -12,6 +12,10 @@
                     "check_warning": "false", 
                     "loops": [
                         {
+                            "name": "load_pts", 
+                            "PipelineII": "1"
+                        },
+                        {
                             "name": "compute", 
                             "PipelineII": "1"
                         }
