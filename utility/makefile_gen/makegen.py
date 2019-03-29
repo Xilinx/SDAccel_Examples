@@ -508,11 +508,12 @@ if "match_makefile" in data and data["match_makefile"] == "false":
     print "Error:: Makefile Manually Edited:: AutoMakefile Generator Failed"
     err = False
 else:
+    print "Generating Auto-Makefile for %s" %data["example"]
     target = open("Makefile", "w")
     create_mk(target, data)
     print "Generating utils.mk file for %s" %data["example"]
     target = open("utils.mk", "w+")
     create_utils(target)
 
-assert err
+assert err, "Auto-file Generator Failed"
 target.close

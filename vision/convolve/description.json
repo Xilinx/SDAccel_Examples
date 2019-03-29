@@ -7,7 +7,6 @@
     "opencv": true,
     "host_exe": "convolve",
     "host_srcs": "src/convolve.cpp",
-    "nboard":["xilinx_kcu1500_dynamic"],
     "cmd_args": "BUILD/krnl_convolve.xclbin PROJECT/data/input_buffer_raw.txt PROJECT/data/filter_buffer_raw.txt PROJECT/data/output_buffer_raw.txt",
     "output_files": "input.bmp output.bmp coef.bmp golden.bmp",        
     "libs": [

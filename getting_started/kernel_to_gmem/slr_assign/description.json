@@ -12,7 +12,7 @@
     "libs": [
         "xcl2"
     ],
-    "nboard": ["xilinx_kcu1500_dynamic", "xilinx_vcu1525_dynamic"],
+    "nboard": ["xilinx_vcu1525_dynamic"],
     "host_exe": "host",
     "cmd_args": "BUILD/vmult_vadd.xclbin",
     "containers" : [ 
