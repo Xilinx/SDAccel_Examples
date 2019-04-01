@@ -30,5 +30,8 @@
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
         }
-    ]
+    ],
+    "testinfo": {
+        "negative": "true"
+    }
 }
