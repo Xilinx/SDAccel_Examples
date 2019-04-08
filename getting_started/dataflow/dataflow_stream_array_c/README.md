@@ -8,7 +8,7 @@ This is simple example of Multiple Stages Vector Addition to demonstrate Array o
 ***KEYWORDS:*** dataflow, hls::stream<>
 
 
-For more information, please refer: [details.md][]
+For Setup instructions, please refer: [setup.md][]
 
-[details.md]: details.md
+[setup.md]: setup.md
 

@@ -8,7 +8,7 @@ This is a simple example of matrix multiplication (Row x Col) to demonstrate how
 ***KEYWORDS:*** #pragma HLS ARRAY_PARTITION, complete
 
 
-For more information, please refer: [details.md][]
+For Setup instructions, please refer: [setup.md][]
 
-[details.md]: details.md
+[setup.md]: setup.md
 

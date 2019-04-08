@@ -6,7 +6,7 @@ This example demonstrates how data layout can impact the performance of certain 
 ***KEY CONCEPTS:*** Kernel Optimization, Data Layout
 
 
-For more information, please refer: [details.md][]
+For Setup instructions, please refer: [setup.md][]
 
-[details.md]: details.md
+[setup.md]: setup.md
 

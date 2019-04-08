@@ -8,7 +8,7 @@ This Copy Buffer example demonstrate how one buffer can be copied from another b
 ***KEYWORDS:*** cl::CommandQueue::enqueueCopyBuffer()
 
 
-For more information, please refer: [details.md][]
+For Setup instructions, please refer: [setup.md][]
 
-[details.md]: details.md
+[setup.md]: setup.md
 

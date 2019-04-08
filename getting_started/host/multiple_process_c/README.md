@@ -8,7 +8,7 @@ This example will demonstrate how to run multiple processes to utilize multiple 
 ***KEYWORDS:*** PID, fork, XCL_MULTIPROCESS_MODE, multiprocess
 
 
-For more information, please refer: [details.md][]
+For Setup instructions, please refer: [setup.md][]
 
-[details.md]: details.md
+[setup.md]: setup.md
 

@@ -12,7 +12,7 @@ Device to Kernel|46,460,532|195,938,535
 Total Execution|48,244,355|198,330,886
 Frames per Second|21.5|5.1
 
-For more information, please refer: [details.md][]
+For Setup instructions, please refer: [setup.md][]
 
-[details.md]: details.md
+[setup.md]: setup.md
 

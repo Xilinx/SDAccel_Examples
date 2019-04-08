@@ -8,7 +8,7 @@ This is a simple example of accessing each window of data from 2d array
 ***KEYWORDS:*** #pragma HLS DATAFLOW, #pragma HLS PIPELINE, #pragma HLS stream
 
 
-For more information, please refer: [details.md][]
+For Setup instructions, please refer: [setup.md][]
 
-[details.md]: details.md
+[setup.md]: setup.md
 

@@ -8,7 +8,7 @@ This is a simple example that demonstrates on how to process an input stream of 
 ***KEYWORDS:*** cl::event, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE
 
 
-For more information, please refer: [details.md][]
+For Setup instructions, please refer: [setup.md][]
 
-[details.md]: details.md
+[setup.md]: setup.md
 

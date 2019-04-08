@@ -29,7 +29,7 @@ check_file() {
 		pushd . > /dev/null 
 		cd $(dirname $1)
 		mv README.md README.md.check > /dev/null 2>&1
-        mv details.md details.md.check > /dev/null 2>&1
+        mv setup.md setup.md.check > /dev/null 2>&1
 		make README.md 2>/dev/null 1>&2
 		rc=$? 
         if [[ $2 != "false" ]]; then
@@ -50,7 +50,7 @@ check_file() {
         fi
 
         if [[ $1 != */summary.json ]]; then
-            diff details.md details.md.check 2>/dev/null 1>&2 
+            diff setup.md setup.md.check 2>/dev/null 1>&2 
             if [[ $rc == 0 && $? == 0 ]]; then
                 if [[ $VERBOSE == "true" ]]; then
                     echo "PASS"
@@ -58,7 +58,7 @@ check_file() {
             else
                 if [[ $VERBOSE == "true" ]]; then
                     echo "FAIL"
-                    diff details.md details.md.check
+                    diff setup.md setup.md.check
                 else
                     echo "$1"
                 fi
@@ -67,7 +67,7 @@ check_file() {
         fi
 		
         mv README.md.check README.md > /dev/null 2>&1
-        mv details.md.check details.md > /dev/null 2>&1
+        mv setup.md.check setup.md > /dev/null 2>&1
 		popd >/dev/null
 	fi
 }
@@ -92,7 +92,7 @@ if [[ $RFAIL != 0 || $DFAIL != 0 ]]; then
         echo "ERROR: please fix the README.md in these files"
     fi
     if [[ $DFAIL != 0 ]]; then
-        echo "ERROR: please fix the details.md in these files"
+        echo "ERROR: please fix the setup.md in these files"
     fi
 fi
 

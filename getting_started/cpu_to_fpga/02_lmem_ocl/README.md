@@ -6,7 +6,7 @@ This is a simple example of matrix multiplication (Row x Col) to demonstrate how
 ***KEY CONCEPTS:*** Kernel Optimization, Local Memory
 
 
-For more information, please refer: [details.md][]
+For Setup instructions, please refer: [setup.md][]
 
-[details.md]: details.md
+[setup.md]: setup.md
 

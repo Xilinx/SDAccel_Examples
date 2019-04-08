@@ -6,7 +6,7 @@ This example shows a normal coding style which could lead to critical path issue
 ***KEY CONCEPTS:*** Critical Path handling, Improve Timing
 
 
-For more information, please refer: [details.md][]
+For Setup instructions, please refer: [setup.md][]
 
-[details.md]: details.md
+[setup.md]: setup.md
 

@@ -8,7 +8,7 @@ This example will demonstrate how to use multiple and out of order command queue
 ***KEYWORDS:*** CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, clSetEventCallback()
 
 
-For more information, please refer: [details.md][]
+For Setup instructions, please refer: [setup.md][]
 
-[details.md]: details.md
+[setup.md]: setup.md
 

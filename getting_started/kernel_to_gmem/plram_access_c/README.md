@@ -8,7 +8,7 @@ This example shows the usage of PLRAM and how to use it with simple matrix multi
 ***KEYWORDS:*** PLRAM
 
 
-For more information, please refer: [details.md][]
+For Setup instructions, please refer: [setup.md][]
 
-[details.md]: details.md
+[setup.md]: setup.md
 

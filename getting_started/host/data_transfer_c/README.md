@@ -8,7 +8,7 @@ This example illustrates several ways to use the OpenCL API to transfer data to 
 ***KEYWORDS:*** enqueueWriteBuffer(), enqueueReadBuffer(), enqueueMapBuffer(), enqueueUnmapMemObject(), enqueueMigrateMemObjects()
 
 
-For more information, please refer: [details.md][]
+For Setup instructions, please refer: [setup.md][]
 
-[details.md]: details.md
+[setup.md]: setup.md
 

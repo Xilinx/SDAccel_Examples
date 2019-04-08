@@ -8,7 +8,7 @@ This Example demonstrates the HLS pragma 'DEPENDENCE'.Using 'DEPENDENCE' pragma,
 ***KEYWORDS:*** DEPENDENCE, inter, WAR
 
 
-For more information, please refer: [details.md][]
+For Setup instructions, please refer: [setup.md][]
 
-[details.md]: details.md
+[setup.md]: setup.md
 

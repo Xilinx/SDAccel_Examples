@@ -8,7 +8,7 @@ This example demonstrates how to create OpenCL subdevices which uses a single ke
 ***KEYWORDS:*** cl_device_partition_property, createSubDevices, CL_DEVICE_PARTITION_EQUALLY
 
 
-For more information, please refer: [details.md][]
+For Setup instructions, please refer: [setup.md][]
 
-[details.md]: details.md
+[setup.md]: setup.md
 

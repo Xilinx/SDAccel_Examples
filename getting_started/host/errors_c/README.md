@@ -8,7 +8,7 @@ This example discuss the different reasons for errors in OpenCL and how to handl
 ***KEYWORDS:*** CL_SUCCESS, CL_DEVICE_NOT_FOUND, CL_DEVICE_NOT_AVAILABLE
 
 
-For more information, please refer: [details.md][]
+For Setup instructions, please refer: [setup.md][]
 
-[details.md]: details.md
+[setup.md]: setup.md
 

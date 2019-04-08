@@ -9,7 +9,7 @@ Board|Image Size|Frames / Second
 xilinx:adm-pcie-7v3:1ddr|1,024 x 1,024|1,000
 xilinx:adm-pcie-ku3:2ddr-xpr|1,024 x 1,024|1,000
 
-For more information, please refer: [details.md][]
+For Setup instructions, please refer: [setup.md][]
 
-[details.md]: details.md
+[setup.md]: setup.md
 

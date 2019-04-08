@@ -4,7 +4,7 @@ Edge Detection
 Implementation of a Sobel Filter for edge detection.
 
 
-For more information, please refer: [details.md][]
+For Setup instructions, please refer: [setup.md][]
 
-[details.md]: details.md
+[setup.md]: setup.md
 

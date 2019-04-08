@@ -8,7 +8,7 @@ This example show how to take advantage of multiple FPGAs on a system. It will s
 ***KEYWORDS:*** cl_device_id, clGetDeviceIDs()
 
 
-For more information, please refer: [details.md][]
+For Setup instructions, please refer: [setup.md][]
 
-[details.md]: details.md
+[setup.md]: setup.md
 

@@ -8,7 +8,7 @@ This example demonstrates how loop pipelining can be used to improve the perform
 ***KEYWORDS:*** pragma HLS PIPELINE
 
 
-For more information, please refer: [details.md][]
+For Setup instructions, please refer: [setup.md][]
 
-[details.md]: details.md
+[setup.md]: setup.md
 

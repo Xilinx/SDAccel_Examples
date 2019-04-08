@@ -8,7 +8,7 @@ This example demonstrates how to shift values in registers in each clock cycle
 ***KEYWORDS:*** #pragma HLS ARRAY_PARTITION
 
 
-For more information, please refer: [details.md][]
+For Setup instructions, please refer: [setup.md][]
 
-[details.md]: details.md
+[setup.md]: setup.md
 
