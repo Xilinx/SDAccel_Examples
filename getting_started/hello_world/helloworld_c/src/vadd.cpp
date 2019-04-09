@@ -36,37 +36,43 @@ Description:
 
 
 #define BUFFER_SIZE 1024
+#define DATA_SIZE 4096
+
+//TRIPCOUNT indentifier
+const unsigned int c_len = DATA_SIZE/BUFFER_SIZE;
+const unsigned int c_size = BUFFER_SIZE;
 
 /*
     Vector Addition Kernel Implementation 
     Arguments:
         in1   (input)     --> Input Vector1
         in2   (input)     --> Input Vector2
-        out   (output)    --> Output Vector
+        out_r   (output)    --> Output Vector
         size  (input)     --> Size of Vector in Integer
-   */
+*/
+
 extern "C" {
 void vadd(
         const unsigned int *in1, // Read-Only Vector 1
         const unsigned int *in2, // Read-Only Vector 2
-        unsigned int *out,       // Output Result
+        unsigned int *out_r,       // Output Result
         int size                   // Size in integer
         )
 {
 // SDAccel kernel must have one and only one s_axilite interface which will be used by host application to configure the kernel.
-// Here bundle control is defined which is s_axilite interface and associated with all the arguments (in1, in2, out and size),
+// Here bundle control is defined which is s_axilite interface and associated with all the arguments (in1, in2, out_r and size),
 // control interface must also be associated with "return".
-// All the global memory access arguments must be associated to one m_axi(AXI Master Interface). Here all three arguments(in1, in2, out) are 
+// All the global memory access arguments must be associated to one m_axi(AXI Master Interface). Here all three arguments(in1, in2, out_r) are 
 // associated to bundle gmem which means that a AXI master interface named "gmem" will be created in Kernel and all these variables will be 
 // accessing global memory through this interface.
 // Multiple interfaces can also be created based on the requirements. For example when multiple memory accessing arguments need access to
 // global memory simultaneously, user can create multiple master interfaces and can connect to different arguments.
 #pragma HLS INTERFACE m_axi port=in1  offset=slave bundle=gmem
 #pragma HLS INTERFACE m_axi port=in2  offset=slave bundle=gmem
-#pragma HLS INTERFACE m_axi port=out offset=slave bundle=gmem
+#pragma HLS INTERFACE m_axi port=out_r offset=slave bundle=gmem
 #pragma HLS INTERFACE s_axilite port=in1  bundle=control
 #pragma HLS INTERFACE s_axilite port=in2  bundle=control
-#pragma HLS INTERFACE s_axilite port=out bundle=control
+#pragma HLS INTERFACE s_axilite port=out_r bundle=control
 #pragma HLS INTERFACE s_axilite port=size bundle=control
 #pragma HLS INTERFACE s_axilite port=return bundle=control
 
@@ -76,8 +82,8 @@ void vadd(
 
 
     //Per iteration of this loop perform BUFFER_SIZE vector addition
-    for(int i = 0; i < size;  i += BUFFER_SIZE)
-    {
+    for(int i = 0; i < size;  i += BUFFER_SIZE){
+    #pragma HLS LOOP_TRIPCOUNT min=c_len max=c_len
         int chunk_size = BUFFER_SIZE;
         //boundary checks
         if ((i + BUFFER_SIZE) > size) 
@@ -88,23 +94,33 @@ void vadd(
     // A local memory vl_local is used for buffering the data from a single burst. The entire input vector is read in multiple bursts.
     // The choice of LOCAL_MEM_SIZE depends on the specific applications and available on-chip memory on target FPGA. 
         // burst read of v1 and v2 vector from global memory
+
         read1: for (int j = 0 ; j < chunk_size ; j++){
+        #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
+        #pragma HLS PIPELINE II=1
             v1_buffer[j] = in1[i + j];
         }
+
         read2: for (int j = 0 ; j < chunk_size ; j++){
+        #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
+        #pragma HLS PIPELINE II=1
             v2_buffer[j] = in2[i + j];
         }
 
     // PIPELINE pragma reduces the initiation interval for loop by allowing the
     // concurrent executions of operations
         vadd: for (int j = 0 ; j < chunk_size; j ++){
+        #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
         #pragma HLS PIPELINE II=1
             //perform vector addition
             vout_buffer[j] = v1_buffer[j] + v2_buffer[j]; 
         }
+
         //burst write the result
         write: for (int j = 0 ; j < chunk_size ; j++){
-            out[i + j] = vout_buffer[j];
+        #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
+        #pragma HLS PIPELINE II=1
+            out_r[i + j] = vout_buffer[j];
         }
     }
 }
