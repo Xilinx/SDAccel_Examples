@@ -318,7 +318,7 @@ def mk_clean(target, data):
     target.write("# Cleaning stuff\n")
     target.write("clean:\n")
     target.write("\t-$(RMDIR) $(EXECUTABLE) $(XCLBIN)/{*sw_emu*,*hw_emu*} \n")
-    target.write("\t-$(RMDIR) sdaccel_* TempConfig system_estimate.xtxt *.rpt\n")
+    target.write("\t-$(RMDIR) profile_* TempConfig system_estimate.xtxt *.rpt *.csv \n")
     target.write("\t-$(RMDIR) src/*.ll _xocc_* .Xil emconfig.json dltmp* xmltmp* *.log *.jou *.wcfg *.wdb\n")
     target.write("\n")
 
@@ -428,7 +428,7 @@ def mk_check(target, data):
         target.write("\n")
 
     if data["example"] != "00 Matrix Multiplication":
-	target.write("\tsdx_analyze profile -i sdaccel_profile_summary.csv -f html\n")
+	target.write("\tsdx_analyze profile -i profile_summary.csv -f html\n")
     target.write("\n")
 
 def run_nimbix(target, data):

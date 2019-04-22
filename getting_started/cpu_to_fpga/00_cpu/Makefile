@@ -104,7 +104,7 @@ aws_build: check-aws_repo $(BINARY_CONTAINERS)
 # Cleaning stuff
 clean:
 	-$(RMDIR) $(EXECUTABLE) $(XCLBIN)/{*sw_emu*,*hw_emu*} 
-	-$(RMDIR) sdaccel_* TempConfig system_estimate.xtxt *.rpt
+	-$(RMDIR) profile_* TempConfig system_estimate.xtxt *.rpt *.csv 
 	-$(RMDIR) src/*.ll _xocc_* .Xil emconfig.json dltmp* xmltmp* *.log *.jou *.wcfg *.wdb
 
 cleanall: clean
