@@ -66,7 +66,7 @@ def buildExample(target, dir, device, workdir) {
       mins = 12 * 60
     }
 
-    retry(1) {
+    retry(3) {
       sh """#!/bin/bash -e
 cd ${workdir}
 
@@ -196,7 +196,7 @@ def buildStatus(context, message, state) {
 
 timestamps {
   node('xcoCentOS74Pool') {
-    hostname = sh(script: "hostname", returnStdout: true).trim()
+    // hostname = sh(script: "hostname", returnStdout: true).trim()
     ws("/proj/xbb/sdaccel_examples") {
 //      docker.image('sdaccel_examples').inside("-u xbuild -w /proj/xbb/sdaccel_examples --hostname ${hostname} -e VERSION=${VERSION} -v /proj/xbb:/proj/xbb -v /group/xcofarm:/group/xcofarm -v /tools/batonroot:/tools/batonroot -v /tools/dist:/tools/dist -v /proj/xbuilds:/proj/xbuilds") {
         try {
@@ -288,39 +288,39 @@ timestamps {
     }
 */
 
-//        sw_emu_status = buildStatus('ci-sw_emu', 'sw_emu checks passed', 'SUCCESS')
-//
-//        def hwBatches = devices.size() * 2
-//        def hwSteps = []
-//        def hwRunSteps = []
-//
-//        for (int i = 0; i < hwBatches; i++) {
-//          hwSteps[i] = [:]
-//          hwRunSteps[i] = [:]
-//        }
-//
-//        for (int i = 0; i < examples.size(); i++) {
-//          for (int j = 0; j < devices.size(); j++) {
-//            batch = (j * examples.size() + i) % hwBatches
-//            name = "${examples[i]}-${devices[j]}-hw"
-//            hwSteps[batch]["${name}-build"] = buildExample('hw', examples[i], devices[j], workdir)
-//            hwRunSteps[batch]["${name}-run"] = runExample('nimbix', examples[i], devices[j], workdir)
-//          }
-//        }
-//
-//        stage('hw build') {
-//          for (int i = 0; i < hwBatches; i++) {
-//            try {
-//              parallel hwSteps[i]
-//            } catch (e) {
-//              hw_status = buildStatus('ci-hw', 'hw checks failed', 'FAILURE')
-//            }
-//          }
-//        }
-//
-//        if (hw_status == "FAILURE") {
-//          throw RuntimeException("Failed to Build all Hardware Binaries");
-//        }
+        sw_emu_status = buildStatus('ci-sw_emu', 'sw_emu checks passed', 'SUCCESS')
+
+        def hwBatches = devices.size() * 2
+        def hwSteps = []
+        def hwRunSteps = []
+
+        for (int i = 0; i < hwBatches; i++) {
+         hwSteps[i] = [:]
+         hwRunSteps[i] = [:]
+        }
+
+        for (int i = 0; i < examples.size(); i++) {
+         for (int j = 0; j < devices.size(); j++) {
+            batch = (j * examples.size() + i) % hwBatches
+            name = "${examples[i]}-${devices[j]}-hw"
+            hwSteps[batch]["${name}-build"] = buildExample('hw', examples[i], devices[j], workdir)
+            hwRunSteps[batch]["${name}-run"] = runExample('nimbix', examples[i], devices[j], workdir)
+         }
+        }
+
+        stage('hw build') {
+         for (int i = 0; i < hwBatches; i++) {
+            try {
+             parallel hwSteps[i]
+            } catch (e) {
+             hw_status = buildStatus('ci-hw', 'hw checks failed', 'FAILURE')
+            }
+         }
+        }
+
+        if (hw_status == "FAILURE") {
+         throw RuntimeException("Failed to Build all Hardware Binaries");
+        }
 //
 //        stage('hw run') {
 //          lock("only_one_run_stage_at_a_time") {
@@ -359,7 +359,7 @@ timestamps {
 //        }
           stage('cleanup') {
             // Cleanup .Xil Files after run
-//            sh 'find . -name .Xil | xargs rm -rf'
+            sh 'find . -name .Xil | xargs rm -rf'
           }
         } // try
 //      } // docker

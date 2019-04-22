@@ -60,7 +60,9 @@ for f in $VCS_FILES; do
 	if [[ ($f == */description.json) ]]; then
 		if grep -q '"match_makefile": "false"' $f; then
 			echo "Ignoring ::" $f	 		
-		else
+        elif grep -q '"match_ini": "false"' $f; then
+            echo "Ignoring ::" $f
+        else
 			check_file $(readlink -f $f)
 		fi
 	fi

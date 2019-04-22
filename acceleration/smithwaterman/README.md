@@ -9,7 +9,7 @@ The main algorithm characteristics of this application are
 2. Systolic array implementation
 
 
-For more information, please refer: [details.md][]
+For Setup instructions, please refer: [setup.md][]
 
-[details.md]: details.md
+[setup.md]: setup.md
 

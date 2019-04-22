@@ -8,7 +8,7 @@ This example shows Memory Coalesce Deadlock/Hand situation and how to handle it.
 ***KEYWORDS:*** HLS INTERFACE, bundle, m_axi
 
 
-For more information, please refer: [details.md][]
+For Setup instructions, please refer: [setup.md][]
 
-[details.md]: details.md
+[setup.md]: setup.md
 

@@ -8,7 +8,7 @@ This examples demonstrates techniques that allow user to overlap Host(CPU) and F
 ***KEYWORDS:*** cl_event, clCreateCommandQueue, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, clEnqueueMigrateMemObjects
 
 
-For more information, please refer: [details.md][]
+For Setup instructions, please refer: [setup.md][]
 
-[details.md]: details.md
+[setup.md]: setup.md
 

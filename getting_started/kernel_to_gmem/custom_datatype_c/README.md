@@ -8,7 +8,7 @@ This is simple example of RGB to HSV conversion to demonstrate Custom DATA Type 
 ***KEYWORDS:*** struct, #pragma HLS data_pack, #pragma HLS LOOP_TRIPCOUNT
 
 
-For more information, please refer: [details.md][]
+For Setup instructions, please refer: [setup.md][]
 
-[details.md]: details.md
+[setup.md]: setup.md
 

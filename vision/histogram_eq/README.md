@@ -8,7 +8,7 @@ Board|Image Size|Frames per Second
 -----|-----|-----
 xilinx:adm-pcie-7v3:1ddr|2,048 x 1,080|333
 
-For more information, please refer: [details.md][]
+For Setup instructions, please refer: [setup.md][]
 
-[details.md]: details.md
+[setup.md]: setup.md
 

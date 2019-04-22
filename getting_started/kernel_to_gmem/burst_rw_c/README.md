@@ -8,7 +8,7 @@ This is simple example of using AXI4-master interface for burst read and write
 ***KEYWORDS:*** memcpy, max_read_burst_length, max_write_burst_length
 
 
-For more information, please refer: [details.md][]
+For Setup instructions, please refer: [setup.md][]
 
-[details.md]: details.md
+[setup.md]: setup.md
 

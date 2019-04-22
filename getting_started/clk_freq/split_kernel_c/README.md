@@ -8,7 +8,7 @@ This is a multi-filter image processing application to showcase effectiveness of
 ***KEYWORDS:*** #pragma HLS DATAFLOW, hls::stream, #pragma HLS INLINE, #pragma HLS ARRAY_PARTITION, #pragma HLS PIPELINE
 
 
-For more information, please refer: [details.md][]
+For Setup instructions, please refer: [setup.md][]
 
-[details.md]: details.md
+[setup.md]: setup.md
 

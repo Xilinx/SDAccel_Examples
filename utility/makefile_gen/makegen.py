@@ -355,6 +355,10 @@ def mk_build_all(target, data):
     target.write("exe: $(EXECUTABLE)\n")
     target.write("\n")
     
+    target.write(".PHONY: build\n")
+    target.write("build: $(BINARY_CONTAINERS)\n")
+    target.write("\n")
+    
     counter = 0
     if "containers" in data:
 	for con in data["containers"]:
@@ -455,6 +459,9 @@ def mk_help(target):
     target.write("\t$(ECHO) \"  make check TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>\"\n");
     target.write("\t$(ECHO) \"      Command to run application in emulation.\"\n")
     target.write("\t$(ECHO) \"\"\n")
+    target.write("\t$(ECHO) \"  make build TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>\"\n");
+    target.write("\t$(ECHO) \"      Command to build xclbin application.\"\n")
+    target.write("\t$(ECHO) \"\"\n")
     target.write("\t$(ECHO) \"  make run_nimbix DEVICE=<FPGA platform>\"\n");
     target.write("\t$(ECHO) \"      Command to run application on Nimbix Cloud.\"\n")
     target.write("\t$(ECHO) \"\"\n")
@@ -508,11 +515,12 @@ if "match_makefile" in data and data["match_makefile"] == "false":
     print "Error:: Makefile Manually Edited:: AutoMakefile Generator Failed"
     err = False
 else:
+    print "Generating Auto-Makefile for %s" %data["example"]
     target = open("Makefile", "w")
     create_mk(target, data)
     print "Generating utils.mk file for %s" %data["example"]
     target = open("utils.mk", "w+")
     create_utils(target)
 
-assert err
+assert err, "Auto-file Generator Failed"
 target.close

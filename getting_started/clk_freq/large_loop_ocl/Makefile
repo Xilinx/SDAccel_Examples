@@ -14,6 +14,9 @@ help::
 	$(ECHO) "  make check TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
 	$(ECHO) "      Command to run application in emulation."
 	$(ECHO) ""
+	$(ECHO) "  make build TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
+	$(ECHO) "      Command to build xclbin application."
+	$(ECHO) ""
 	$(ECHO) "  make run_nimbix DEVICE=<FPGA platform>"
 	$(ECHO) "      Command to run application on Nimbix Cloud."
 	$(ECHO) ""
@@ -78,6 +81,9 @@ all: check-devices $(EXECUTABLE) $(BINARY_CONTAINERS) emconfig
 
 .PHONY: exe
 exe: $(EXECUTABLE)
+
+.PHONY: build
+build: $(BINARY_CONTAINERS)
 
 # Building kernel
 $(XCLBIN)/cnn_GOOD.$(TARGET).$(DSA).xo: src/cnn_convolution.cl

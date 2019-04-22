@@ -10,7 +10,7 @@ Board|Total Number of Samples|Kernel Duration
 -----|-----|-----
 xilinx:adm-pcie-ku3:2ddr-xpr|16777216|59.1ms
 
-For more information, please refer: [details.md][]
+For Setup instructions, please refer: [setup.md][]
 
-[details.md]: details.md
+[setup.md]: setup.md
 

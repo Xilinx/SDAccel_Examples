@@ -8,7 +8,7 @@ This example prints the OpenCL properties of the platform and its devices. It al
 ***KEYWORDS:*** clGetPlatformIDs(), clGetPlatformInfo(), clGetDeviceIDs(), clGetDeviceInfo()
 
 
-For more information, please refer: [details.md][]
+For Setup instructions, please refer: [setup.md][]
 
-[details.md]: details.md
+[setup.md]: setup.md
 

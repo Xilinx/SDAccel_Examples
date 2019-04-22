@@ -4,7 +4,7 @@ Inverse Discrete Cosine Transform
 Example shows an optimized Inverse Discrete Cosine Transfom. Optimizations are applied to the kernel as well as the host code.
 
 
-For more information, please refer: [details.md][]
+For Setup instructions, please refer: [setup.md][]
 
-[details.md]: details.md
+[setup.md]: setup.md
 
