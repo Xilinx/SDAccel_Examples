@@ -504,11 +504,11 @@ desc.close()
 
 err = True
 if "match_ini" in data and data["match_ini"] == "false":
-    print "Error:: sdaccel.ini File Manually Edited:: Auto-file Generator Failed"
+    print "Error:: xrt.ini File Manually Edited:: Auto-file Generator Failed"
     err = False
 else:
-    print "Generating sdaccel.ini file for %s" %data["example"]
-    target = open("sdaccel.ini","w+")
+    print "Generating xrt.ini file for %s" %data["example"]
+    target = open("xrt.ini","w+")
     profile_report(target)
 
 if "match_makefile" in data and data["match_makefile"] == "false":
