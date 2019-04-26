@@ -1,0 +1,34 @@
+{
+    "runtime": ["OpenCL"],
+    "example": "04 Matrix Multiplication Array Partition and Loop Unroll",
+    "overview": [
+        "This is a simple example of matrix multiplication (Row x Col) to demonstrate how to achieve better performance by array partitioning and loop unrolling."
+    ],
+    "key_concepts": [ "Array Partition", "Loop Unroll"],
+    "keywords": ["pragma HLS PIPELINE", "pragma HLS ARRAY_PARTITION complete", "pragma HLS UNROLL"],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl2"
+    ],
+    "host_exe": "host",
+    "cmd_args": "BUILD/mmult.xclbin",
+    "containers" : [
+    {
+        "name" : "mmult",        
+        "accelerators": [
+        {
+            "name": "mmult", 
+            "location": "src/mmult.cpp"
+        }
+       ]
+      }                
+    ],
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ]
+}

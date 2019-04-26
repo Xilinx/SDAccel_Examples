@@ -27,53 +27,44 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 
-/*
-This is a simple example of Matrix Multiplication.
-*/
+//This function represents an HLS kernel. The kernel will be a call from
+//host application. The pointers in kernel parameters represents cl_mem 
+//objects on the FPGA DDR memory.
 
-#include<iostream>
-#include<stdlib.h>
+//Array Size to access 
+#define DATA_SIZE 64
 
-//Array size to access
-#define DATA_SIZE 64 
+// Tripcount identifiers
+const int c_size = DATA_SIZE;
 
-void mmult_cpu( int *in1,   // Input matrix 1
-                int *in2,   // Input matrix 2
-                int *out,   // Output matrix (out = A x B)
-                int dim     // Matrix size of one dimension
-              )  
+extern "C" {
+void mmult( int* in1,  //Read-only input matrix1
+            int* in2,  //Read-only input matrix2
+            int* out_r,  //Output matrix
+            int dim             //One dimension of the matrix
+          )        
 {
-    //Performs matrix multiplication out = in1 x in2
-    for (int i = 0; i < dim; i++){
-        for (int j = 0; j < dim; j++){
-            for (int k = 0; k < dim; k++){
-                out[i * dim + j] += in1[i * dim + k] * in2[k * dim  + j];
+#pragma HLS INTERFACE m_axi port=in1 offset=slave bundle=gmem
+#pragma HLS INTERFACE m_axi port=in2 offset=slave bundle=gmem
+#pragma HLS INTERFACE m_axi port=out_r offset=slave bundle=gmem
+#pragma HLS INTERFACE s_axilite port=in1 bundle=control
+#pragma HLS INTERFACE s_axilite port=in2 bundle=control
+#pragma HLS INTERFACE s_axilite port=out_r bundle=control
+#pragma HLS INTERFACE s_axilite port=dim bundle=control
+#pragma HLS INTERFACE s_axilite port=return bundle=control
+
+    //Reads the data from DDR, performs the computation
+    //and writes back the result to DDR.
+    loop_1: for (int i = 0 ; i < dim ; i++){
+    #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
+        loop_2: for(int j = 0; j < dim; j++){
+        #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
+            out_r[i * dim + j] = 0;
+            loop_3: for(int k = 0; k < dim; k++){
+            #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
+                out_r[i * dim + j] += in1[i * dim + k] * in2[k * dim + j];
             }
         }
     }
 }
-
-int main(int argc, char** argv)
-{
-    int size = DATA_SIZE;
-    size_t matrix_size_bytes = sizeof(int) * size * size;
-
-    //Allocate memory
-    int *source_in1 = (int *) malloc(matrix_size_bytes);
-    int *source_in2 = (int *) malloc(matrix_size_bytes);
-    int *source_cpu_results = (int *) malloc(matrix_size_bytes);
-
-    //Creates the data
-    for(int index = 0; index < size * size; index++){
-        source_in1[index] = rand() % size;
-        source_in2[index] = rand() % size;
-        source_cpu_results[index] = 0;
-    }
-
-    //Function call to perform matrix multiplication
-    mmult_cpu(source_in1, source_in2, source_cpu_results, size);
-
-    std::cout << "Matrix Multiplication completed." << std::endl;
-
-    return 0;
 }

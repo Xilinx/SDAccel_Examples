@@ -26,10 +26,10 @@ Example        | Description           | Key Concepts / Keywords
 [hello_world/helloworld_c/][]|This is simple example of vector addition to describe how to use HLS kernels in Sdx Environment. This example highlights the concepts like PIPELINE which increases the kernel performance |__Key__ __Concepts__<br> - HLS C Kernel<br> - OpenCL Host APIs<br>__Keywords__<br> - gmem<br> - bundle<br> - #pragma HLS INTERFACE<br> - m_axi<br> - s_axi4lite
 [hello_world/helloworld_ocl/][]|This example is a simple OpenCL application. It will highlight the basic flow of an OpenCL application.|__Key__ __Concepts__<br> - OpenCL API<br>
 [cpu_to_fpga/00_cpu/][]|This is a simple example of matrix multiplication (Row x Col).|
-[cpu_to_fpga/01_ocl/][]|This is a simple example of OpenCL matrix multiplication (Row x Col).|__Key__ __Concepts__<br> - OpenCL APIs<br>
-[cpu_to_fpga/02_lmem_ocl/][]|This is a simple example of matrix multiplication (Row x Col) to demonstrate how to reduce number of memory accesses using local memory.|__Key__ __Concepts__<br> - Kernel Optimization<br> - Local Memory<br>
-[cpu_to_fpga/03_burst_rw_ocl/][]|This is a simple example of matrix multiplication (Row x Col) to demonstrate how to achieve better pipeline with burst read and write to/from local memory from/to DDR.|__Key__ __Concepts__<br> - Kernel Optimization<br> - Burst Read/Write<br>
-[cpu_to_fpga/04_partition_ocl/][]|This is a simple example of matrix multiplication (Row x Col) to demonstrate how to achieve better performance by array partitioning and loop unrolling.|__Key__ __Concepts__<br> - Array Partition<br> - Loop Unroll<br>__Keywords__<br> - xcl_pipeline_loop<br> - xcl_array_partition(complete, dim)<br> - opencl_unroll_hint
+[cpu_to_fpga/01_kernel_c/][]|This is a simple example of HLS matrix multiplication (Row x Col).|__Key__ __Concepts__<br> - OpenCL APIs<br>
+[cpu_to_fpga/02_local_mem_c/][]|This is a simple example of matrix multiplication (Row x Col) to demonstrate how to reduce number of memory accesses using local memory.|__Key__ __Concepts__<br> - Kernel Optimization<br> - Local Memory<br>
+[cpu_to_fpga/03_burst_rw_c/][]|This is a simple example of matrix multiplication (Row x Col) to demonstrate how to achieve better pipeline with burst read and write to/from local memory from/to DDR.|__Key__ __Concepts__<br> - Kernel Optimization<br> - Burst Read/Write<br>
+[cpu_to_fpga/04_partition_c/][]|This is a simple example of matrix multiplication (Row x Col) to demonstrate how to achieve better performance by array partitioning and loop unrolling.|__Key__ __Concepts__<br> - Array Partition<br> - Loop Unroll<br>__Keywords__<br> - pragma HLS PIPELINE<br> - pragma HLS ARRAY_PARTITION complete<br> - pragma HLS UNROLL
 [host/concurrent_kernel_execution_c/][]|This example will demonstrate how to use multiple and out of order command queues to simultaneously execute multiple kernels on an FPGA.|__Key__ __Concepts__<br> - Concurrent execution<br> - Out of Order Command Queues<br> - Multiple Command Queues<br>__Keywords__<br> - CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE<br> - clSetEventCallback()
 [host/copy_buffer_c/][]|This Copy Buffer example demonstrate how one buffer can be copied from another buffer.|__Key__ __Concepts__<br> - Copy Buffer<br>__Keywords__<br> - cl::CommandQueue::enqueueCopyBuffer()
 [host/data_transfer_c/][]|This example illustrates several ways to use the OpenCL API to transfer data to and from the FPGA|__Key__ __Concepts__<br> - OpenCL API<br> - Data Transfer<br> - Write Buffers<br> - Read Buffers<br> - Map Buffers<br> - Async Memcpy<br>__Keywords__<br> - enqueueWriteBuffer()<br> - enqueueReadBuffer()<br> - enqueueMapBuffer()<br> - enqueueUnmapMemObject()<br> - enqueueMigrateMemObjects()
@@ -105,10 +105,10 @@ Example        | Description           | Key Concepts / Keywords
 [hello_world/helloworld_ocl/]:hello_world/helloworld_ocl/
 [cpu_to_fpga]:cpu_to_fpga
 [cpu_to_fpga/00_cpu/]:cpu_to_fpga/00_cpu/
-[cpu_to_fpga/01_ocl/]:cpu_to_fpga/01_ocl/
-[cpu_to_fpga/02_lmem_ocl/]:cpu_to_fpga/02_lmem_ocl/
-[cpu_to_fpga/03_burst_rw_ocl/]:cpu_to_fpga/03_burst_rw_ocl/
-[cpu_to_fpga/04_partition_ocl/]:cpu_to_fpga/04_partition_ocl/
+[cpu_to_fpga/01_kernel_c/]:cpu_to_fpga/01_kernel_c/
+[cpu_to_fpga/02_local_mem_c/]:cpu_to_fpga/02_local_mem_c/
+[cpu_to_fpga/03_burst_rw_c/]:cpu_to_fpga/03_burst_rw_c/
+[cpu_to_fpga/04_partition_c/]:cpu_to_fpga/04_partition_c/
 [host]:host
 [host/concurrent_kernel_execution_c/]:host/concurrent_kernel_execution_c/
 [host/copy_buffer_c/]:host/copy_buffer_c/
