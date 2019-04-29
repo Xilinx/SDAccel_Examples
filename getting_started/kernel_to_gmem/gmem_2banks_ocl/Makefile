@@ -64,7 +64,7 @@ CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps
 CLFLAGS +=  --max_memory_ports apply_watermark
 
 # Kernel linker flags
-LDCLFLAGS += --sp apply_watermark_1.m_axi_gmem0:DDR[0] --sp apply_watermark_1.m_axi_gmem1:DDR[1]
+LDCLFLAGS += --sp apply_watermark_1.m_axi_gmem0:bank0 --sp apply_watermark_1.m_axi_gmem1:bank1
 
 EXECUTABLE = host
 CMD_ARGS = $(XCLBIN)/apply_watermark.$(TARGET).$(DSA).xclbin ./data/input.bmp ./data/golden.bmp
