@@ -9,10 +9,10 @@ This file contains the following sections:
 
 
 ## 1. SUPPORTED PLATFORMS
-Board | Device Name | Software Version
-------|-------------|-----------------
-Xilinx Alveo U250|xilinx_u250_xdma_201820_1|SDx 2018.3
-Xilinx Alveo U200|xilinx_u200_xdma_201820_1|SDx 2018.3
+Board | Software Version
+------|-----------------
+Xilinx Alveo U200|SDx 2018.3
+Xilinx Alveo U250|SDx 2018.3
 
 
 ## 2. DESIGN FILES

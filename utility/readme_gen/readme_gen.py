@@ -8,20 +8,20 @@ import subprocess
 DSA = 'xilinx_vcu1525_dynamic'
 VERSION = 'SDx 2018.3'
 DEVICES = {
-    'xilinx_u200_xdma_201820_1': {
+    'xilinx_u200_xdma_201830_1': {
        'version': '5.0',
        'name': 'Xilinx Alveo U200',
-       'nae':  'nx6'
+       'nae':  'nx5u_xdma_201830_1'
     },
-    'xilinx_u250_xdma_201820_1': {
+    'xilinx_u250_xdma_201830_1': {
        'version': '5.0',
        'name': 'Xilinx Alveo U250',
-       'nae':  'nx7'
+       'nae':  'nx6u_xdma_201830_1'
     },
     'xilinx_vcu1525_dynamic': {
        'version': '5.0',
        'name': 'Xilinx Virtex UltraScale+ VCU1525',
-       'nae':  'nx5'
+       'nae':  'nx5b'
     }
 }
 
@@ -90,8 +90,8 @@ def overview(target,data):
 
 def requirements(target,data):
     target.write("## 1. SUPPORTED PLATFORMS\n")
-    target.write("Board | Device Name | Software Version\n")
-    target.write("------|-------------|-----------------\n")
+    target.write("Board | Software Version\n")
+    target.write("------|-----------------\n")
 
     boards = []
     if 'board' in data:
@@ -105,8 +105,6 @@ def requirements(target,data):
 
     for board in boards:
         target.write(DEVICES[board]['name'])
-        target.write("|")
-        target.write(board)
         target.write("|")
         for version in VERSION:
             target.write(version)
