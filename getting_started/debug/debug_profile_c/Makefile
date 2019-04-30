@@ -83,7 +83,7 @@ exe: $(EXECUTABLE)
 build: $(BINARY_CONTAINERS)
 
 # Building kernel
-$(XCLBIN)/krnl_vadd.$(TARGET).$(DSA).xo: src/vadd.cl
+$(XCLBIN)/krnl_vadd.$(TARGET).$(DSA).xo: src/vadd.cpp
 	mkdir -p $(XCLBIN)
 	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_vadd) -c -k krnl_vadd -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/vadd.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_vadd_OBJS)

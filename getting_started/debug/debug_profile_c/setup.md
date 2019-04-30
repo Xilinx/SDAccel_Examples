@@ -1,4 +1,4 @@
- Printing Profile Data and Dumping Waveform file (CL)
+ Printing Profile Data and Dumping Waveform file (C)
 ======================
 
 This file contains the following sections:
@@ -22,7 +22,7 @@ Application code is located in the src directory. Accelerator binary files will 
 ```
 src/host.cpp
 src/host.h
-src/vadd.cl
+src/vadd.cpp
 ```
 
 ## 3. COMMAND LINE ARGUMENTS
