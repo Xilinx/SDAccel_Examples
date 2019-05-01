@@ -65,11 +65,11 @@ check_file() {
                 (( DFAIL += 1 ))
             fi
         fi
-		
+
         mv README.md.check README.md > /dev/null 2>&1
         mv setup.md.check setup.md > /dev/null 2>&1
-		popd >/dev/null
-	fi
+        popd >/dev/null
+    fi
 }
 
 
@@ -80,7 +80,7 @@ for f in $VCS_FILES; do
     if [[ ($f == */description.json) || ($f == */summary.json) ]]; then  
         if grep -q '"match_readme": "false"' $f; then
             CHECK_MATCH=false 
-			echo "Ignoring README.md ::" $f	 		
+            echo "Ignoring README.md ::" $f	 		
         fi	
         check_file $f $CHECK_MATCH
 	fi

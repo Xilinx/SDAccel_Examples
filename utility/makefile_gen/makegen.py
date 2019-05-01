@@ -502,10 +502,8 @@ desc = open(desc_file, 'r')
 data = json.load(desc)
 desc.close()
 
-err = True
 if "match_ini" in data and data["match_ini"] == "false":
     print "Error:: sdaccel.ini File Manually Edited:: Auto-file Generator Failed"
-    err = False
 else:
     print "Generating sdaccel.ini file for %s" %data["example"]
     target = open("sdaccel.ini","w+")
@@ -513,7 +511,6 @@ else:
 
 if "match_makefile" in data and data["match_makefile"] == "false":
     print "Error:: Makefile Manually Edited:: AutoMakefile Generator Failed"
-    err = False
 else:
     print "Generating Auto-Makefile for %s" %data["example"]
     target = open("Makefile", "w")
@@ -522,5 +519,4 @@ else:
     target = open("utils.mk", "w+")
     create_utils(target)
 
-assert err, "Auto-file Generator Failed"
 target.close
