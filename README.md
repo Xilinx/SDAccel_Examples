@@ -20,11 +20,11 @@ SDAccel Git Examples Assumes that user is familiar with Basic SDAccel Environmen
 
 ## 2. SUPPORTED PLATFORMS
 
-Board | Device Name | Software Version
-------|-------------|-----------------
-Xilinx Alveo U250|xilinx_u250_xdma_201820_1|SDx 2018.3
-Xilinx Virtex UltraScale+ VCU1525|xilinx_vcu1525_dynamic|SDx 2018.3
-Xilinx Alveo U200|xilinx_u200_xdma_201820_1|SDx 2018.3
+Board | Software Version
+------|-----------------
+Xilinx Alveo U250|SDx 2018.3
+Xilinx Virtex UltraScale+ VCU1525|SDx 2018.3
+Xilinx Alveo U200|SDx 2018.3
 
 ## 3. COMPILATION AND EXECUTION
 

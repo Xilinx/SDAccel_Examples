@@ -8,32 +8,22 @@ import subprocess
 DSA = 'xilinx_vcu1525_dynamic'
 VERSION = 'SDx 2018.3'
 DEVICES = {
-    'xilinx_u200_xdma_201820_1': {
+    'xilinx_u200_xdma_201830_1': {
        'version': '5.0',
        'name': 'Xilinx Alveo U200',
-       'nae':  'nx6'
+       'nae':  'nx5u_xdma_201830_1'
     },
-    'xilinx_u250_xdma_201820_1': {
+    'xilinx_u250_xdma_201830_1': {
        'version': '5.0',
        'name': 'Xilinx Alveo U250',
-       'nae':  'nx7'
+       'nae':  'nx6u_xdma_201830_1'
     },
     'xilinx_vcu1525_dynamic': {
        'version': '5.0',
        'name': 'Xilinx Virtex UltraScale+ VCU1525',
-       'nae':  'nx5'
+       'nae':  'nx5b'
     }
 }
-
-def header(target,data):
-    target.write(data["example"])
-    target.write("\n")
-    target.write("======================\n\n")
-    target.write("This file contains the following sections:\n\n")
-    target.write("1. SUPPORTED PLATFORMS\n")
-    target.write("2. DESIGN FILES\n")
-    target.write("3. COMMAND LINE ARGUMENTS\n\n\n")
-    return
 
 def overview(target,data):
     target.write(data["example"])
@@ -80,18 +70,12 @@ def overview(target,data):
             if word_count != 0:
                 target.write(", ")
         target.write("\n\n")
-
-    target.write("\nFor Setup instructions, please refer: ")
-    target.write("[setup.md][]")
-    target.write("\n\n")
-    target.write("[setup.md]: setup.md")
-    target.write("\n\n")
     return
 
 def requirements(target,data):
-    target.write("## 1. SUPPORTED PLATFORMS\n")
-    target.write("Board | Device Name | Software Version\n")
-    target.write("------|-------------|-----------------\n")
+    target.write("## SUPPORTED PLATFORMS\n")
+    target.write("Board | Software Version\n")
+    target.write("------|-----------------\n")
 
     boards = []
     if 'board' in data:
@@ -106,8 +90,6 @@ def requirements(target,data):
     for board in boards:
         target.write(DEVICES[board]['name'])
         target.write("|")
-        target.write(board)
-        target.write("|")
         for version in VERSION:
             target.write(version)
         target.write("\n")
@@ -115,7 +97,7 @@ def requirements(target,data):
     return
 
 def hierarchy(target):
-    target.write("## 2. DESIGN FILES\n")
+    target.write("##  DESIGN FILES\n")
     target.write("Application code is located in the src directory. ")
     target.write("Accelerator binary files will be compiled to the xclbin directory. ")
     target.write("The xclbin directory is required by the Makefile and its contents will be filled during compilation. A listing of all the files ")
@@ -130,7 +112,7 @@ def hierarchy(target):
     return
 
 def commandargs(target,data):
-    target.write("## 3. COMMAND LINE ARGUMENTS\n")
+    target.write("##  COMMAND LINE ARGUMENTS\n")
     target.write("Once the environment has been configured, the application can be executed by\n")
     target.write("```\n")
     if not "cmd_args" in data:
@@ -227,20 +209,15 @@ desc.close()
 
 assert("OpenCL" in data['runtime'])
 
-print "Generating the Setup details file for %s" %data["example"]
-target = open("setup.md", "w+")
-header(target,data)
-requirements(target,data)
-hierarchy(target)
-commandargs(target,data)
-
-
 if "match_readme" in data and data["match_readme"] == "false":
     print "ERROR:: README Manually Edited:: README Generator Failed\n"
 else:
     print "Generating the README for %s" % data["example"]
     target = open("README.md","w")
     overview(target,data)
+    requirements(target,data)
+    hierarchy(target)
+    commandargs(target,data)
 
 target.close
 

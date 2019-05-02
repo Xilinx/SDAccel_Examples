@@ -35,7 +35,7 @@ This is a simple example of Matrix Multiplication.
 #include<stdlib.h>
 
 //Array size to access
-#define DATA_SIZE 32 
+#define DATA_SIZE 64 
 
 void mmult_cpu( int *in1,   // Input matrix 1
                 int *in2,   // Input matrix 2

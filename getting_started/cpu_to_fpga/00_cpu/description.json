@@ -15,12 +15,5 @@
             "url" : "http://www.xilinx.com"
         }
     ],
-    "revision" : [
-        {
-            "date" : "SEPT2017",
-            "version": "1.0",
-            "description": "Initial Xilinx Release"
-        }
-    ],
     "match_ini": "false"
 }
