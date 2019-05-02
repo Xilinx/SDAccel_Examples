@@ -503,12 +503,8 @@ data = json.load(desc)
 desc.close()
 
 if "match_ini" in data and data["match_ini"] == "false":
-<<<<<<< HEAD
     print "Error:: xrt.ini File Manually Edited:: Auto-file Generator Failed"
     err = False
-=======
-    print "Error:: sdaccel.ini File Manually Edited:: Auto-file Generator Failed"
->>>>>>> 41250362da33292a9d0e4875b48dad1752ea69a1
 else:
     print "Generating xrt.ini file for %s" %data["example"]
     target = open("xrt.ini","w+")
