@@ -37,6 +37,7 @@ Example        | Description           | Key Concepts / Keywords
 [host/device_query_cpp/][]|This Example prints the OpenCL properties of the platform and its devices using OpenCL CPP APIs. It also displays the limits and capabilities of the hardware.|__Key__ __Concepts__<br> - OpenCL API<br> - Querying device properties<br>
 [host/errors_c/][]|This example discuss the different reasons for errors in OpenCL and how to handle them at runtime.|__Key__ __Concepts__<br> - OpenCL API<br> - Error handling<br>__Keywords__<br> - CL_SUCCESS<br> - CL_DEVICE_NOT_FOUND<br> - CL_DEVICE_NOT_AVAILABLE
 [host/errors_cpp/][]|This example discuss the different reasons for errors in OpenCL C++ and how to handle them at runtime.|__Key__ __Concepts__<br> - OpenCL C++ API<br> - Error handling<br>__Keywords__<br> - CL_SUCCESS<br> - CL_DEVICE_NOT_FOUND<br> - CL_DEVICE_NOT_AVAILABLE<br> - CL_INVALID_VALUE<br> - CL_INVALID_KERNEL_NAME<br> - CL_INVALID_BUFFER_SIZE
+[host/hbm_simple/][]|This is a simple example of vector addition to describe how to use HLS kernels with HBM (High Bandwidth Memory) for achieving high throughput.|__Key__ __Concepts__<br> - SDx Memory Hierarchy<br> - HBM Banks<br>__Keywords__<br> - HBM<br> - Throughput
 [host/host_global_bandwidth/][]|Host to global memory bandwidth test|
 [host/kernel_swap_c/][]|This example shows how host can swap the kernels and share same buffer between two kernels which are exist in separate binary containers. Dynamic platforms does not persist the buffer data so host has to migrate data from device to host memory before swapping the next kernel. After kernel swap, host has to migrate the buffer back to device.|__Key__ __Concepts__<br> - Handling Buffer sharing across multiple binaries<br> - Multiple Kernel Binaries<br>__Keywords__<br> - clEnqueueMigrateMemObjects()<br> - CL_MIGRATE_MEM_OBJECT_HOST
 [host/multiple_devices_c/][]|This example show how to take advantage of multiple FPGAs on a system. It will show how to initialized an OpenCL context, allocate memory on the two devices and execute a kernel on each FPGA.|__Key__ __Concepts__<br> - OpenCL API<br> - Multi-FPGA Execution<br> - Event Handling<br>__Keywords__<br> - cl_device_id<br> - clGetDeviceIDs()
@@ -117,6 +118,7 @@ Example        | Description           | Key Concepts / Keywords
 [host/device_query_cpp/]:host/device_query_cpp/
 [host/errors_c/]:host/errors_c/
 [host/errors_cpp/]:host/errors_cpp/
+[host/hbm_simple/]:host/hbm_simple/
 [host/host_global_bandwidth/]:host/host_global_bandwidth/
 [host/kernel_swap_c/]:host/kernel_swap_c/
 [host/multiple_devices_c/]:host/multiple_devices_c/
