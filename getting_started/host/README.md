@@ -20,6 +20,8 @@ Example        | Description           | Key Concepts / Keywords
 [multiple_process_c/][]|This example will demonstrate how to run multiple processes to utilize multiple kernels simultaneously on an FPGA device. Multiple processes can share access to the same device provided each process uses the same xclbin. Processes share access to all device resources but there is no support for exclusive access to resources by any process.|__Key__ __Concepts__<br> - Concurrent execution<br> - Multiple HLS kernels<br> - Multiple Process Support<br>__Keywords__<br> - PID<br> - fork<br> - XCL_MULTIPROCESS_MODE<br> - multiprocess
 [overlap_c/][]|This examples demonstrates techniques that allow user to overlap Host(CPU) and FPGA computation in an application. It will cover asynchronous operations and event object.|__Key__ __Concepts__<br> - OpenCL API<br> - Synchronize Host and FPGA<br> - Asynchronous Processing<br> - Events<br> - Asynchronous memcpy<br>__Keywords__<br> - cl_event<br> - clCreateCommandQueue<br> - CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE<br> - clEnqueueMigrateMemObjects
 [stream_access_c/][]|This is a simple example that demonstrates on how to process an input stream of data for computation in an application. It shows how to perform asynchronous operations and event handling.|__Key__ __Concepts__<br> - OpenCL API<br> - Synchronize Host and FPGA<br> - Asynchronous Processing<br> - Events<br> - Asynchronous Data Transfer<br>__Keywords__<br> - cl::event<br> - CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE
+[streaming_multi_cus/][]|This is a simple Vector Add C Kernel design with 2 Stream inputs and 1 Stream output that demonstrates on how to process an input stream of data for computation in an application using multiple compute units.|__Key__ __Concepts__<br> - Read/Write Stream<br> - Create/Release Stream<br>__Keywords__<br> - cl_stream<br> - CL_STREAM_EOT<br> - Multiple Compute Units
+[streaming_vadd/][]|This is a simple Vector Add C Kernel design with 2 Stream inputs and 1 Stream output that demonstrates on how to process an input stream of data for computation in an application.|__Key__ __Concepts__<br> - Read/Write Stream<br> - Create/Release Stream<br>__Keywords__<br> - cl_stream<br> - CL_STREAM_EOT
 [sub_devices_c/][]|This example demonstrates how to create OpenCL subdevices which uses a single kernel multiple times in order to show how to handle each instance independently including independent buffers, command queues and sequencing.|__Key__ __Concepts__<br> - Sub Devices<br>__Keywords__<br> - cl_device_partition_property<br> - createSubDevices<br> - CL_DEVICE_PARTITION_EQUALLY
 
 [.]:.
@@ -37,4 +39,6 @@ Example        | Description           | Key Concepts / Keywords
 [multiple_process_c/]:multiple_process_c/
 [overlap_c/]:overlap_c/
 [stream_access_c/]:stream_access_c/
+[streaming_multi_cus/]:streaming_multi_cus/
+[streaming_vadd/]:streaming_vadd/
 [sub_devices_c/]:sub_devices_c/
