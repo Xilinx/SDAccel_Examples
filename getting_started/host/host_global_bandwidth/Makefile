@@ -61,6 +61,8 @@ LDFLAGS += -lrt -lstdc++
 # Kernel compiler global settings
 CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
 
+# Kernel linker flags
+LDCLFLAGS += --sp bandwidth_1.m_axi_gmem0:DDR[0] --sp bandwidth_1.m_axi_gmem1:DDR[1]
 
 EXECUTABLE = host_global
 CMD_ARGS = $(XCLBIN)/krnl_host_global.$(TARGET).$(DSA).xclbin
