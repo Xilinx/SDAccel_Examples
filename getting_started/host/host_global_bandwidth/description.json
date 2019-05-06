@@ -17,6 +17,7 @@
     "containers": [
     {
        "name": "krnl_host_global",
+       "ldclflags" : "--sp bandwidth_1.m_axi_gmem0:DDR[0] --sp bandwidth_1.m_axi_gmem1:DDR[1]",
        "accelerators": [
         {
             "name": "bandwidth", 
