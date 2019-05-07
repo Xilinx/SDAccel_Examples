@@ -32,7 +32,7 @@
                 "hw_emu" : "1"
             }
         ]
-    }
+    },
     "contributors" : [
         {
             "group": "Xilinx",
