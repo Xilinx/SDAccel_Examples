@@ -38,7 +38,7 @@ include ./utils.mk
 DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
-BUILD_DIR_krnl_vadd = $(BUILD_DIR)/krnl_vadd
+BUILD_DIR_krnl_stream_vadd = $(BUILD_DIR)/krnl_stream_vadd
 
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
@@ -50,11 +50,12 @@ CXXFLAGS += $(xcl2_CXXFLAGS)
 LDFLAGS += $(xcl2_LDFLAGS)
 HOST_SRCS += $(xcl2_SRCS)
 
-CXXFLAGS += -lxilinxopencl
+CXXFLAGS += -lxilinxopencl -pthread
 CXXFLAGS += $(opencl_CXXFLAGS) -Wall -O0 -g -std=c++14
 LDFLAGS += $(opencl_LDFLAGS)
 
-HOST_SRCS += src/host.cpp
+HOST_SRCS += src/host.cpp src/streams_vadd.cpp
+HOST_HDRS += src/streams_vadd.h
 
 # Host compiler global settings
 CXXFLAGS += -fmessage-length=0
@@ -65,12 +66,12 @@ CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps
 
 
 EXECUTABLE = vadd_stream
-CMD_ARGS = $(XCLBIN)/krnl_vadd.$(TARGET).$(DSA).xclbin
+CMD_ARGS = $(XCLBIN)/krnl_stream_vadd.$(TARGET).$(DSA).xclbin
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
-BINARY_CONTAINERS += $(XCLBIN)/krnl_vadd.$(TARGET).$(DSA).xclbin
-BINARY_CONTAINER_krnl_vadd_OBJS += $(XCLBIN)/krnl_vadd.$(TARGET).$(DSA).xo
+BINARY_CONTAINERS += $(XCLBIN)/krnl_stream_vadd.$(TARGET).$(DSA).xclbin
+BINARY_CONTAINER_krnl_stream_vadd_OBJS += $(XCLBIN)/krnl_stream_vadd.$(TARGET).$(DSA).xo
 
 CP = cp -rf
 
@@ -84,12 +85,12 @@ exe: $(EXECUTABLE)
 build: $(BINARY_CONTAINERS)
 
 # Building kernel
-$(XCLBIN)/krnl_vadd.$(TARGET).$(DSA).xo: src/krnl_vadd.cpp
+$(XCLBIN)/krnl_stream_vadd.$(TARGET).$(DSA).xo: src/krnl_stream_vadd.cpp
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_vadd) -c -k krnl_vadd -I'$(<D)' -o'$@' '$<'
-$(XCLBIN)/krnl_vadd.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_vadd_OBJS)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_stream_vadd) -c -k krnl_stream_vadd -I'$(<D)' -o'$@' '$<'
+$(XCLBIN)/krnl_stream_vadd.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_stream_vadd_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_vadd) -l $(LDCLFLAGS) --nk krnl_vadd:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_stream_vadd) -l $(LDCLFLAGS) --nk krnl_stream_vadd:1 -o'$@' $(+)
 
 # Building Host
 $(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
@@ -102,9 +103,9 @@ $(EMCONFIG_DIR)/emconfig.json:
 check: all
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/krnl_vadd.$(TARGET).$(DSA).xclbin
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/krnl_stream_vadd.$(TARGET).$(DSA).xclbin
 else
-	 ./$(EXECUTABLE) $(XCLBIN)/krnl_vadd.$(TARGET).$(DSA).xclbin
+	 ./$(EXECUTABLE) $(XCLBIN)/krnl_stream_vadd.$(TARGET).$(DSA).xclbin
 endif
 	sdx_analyze profile -i profile_summary.csv -f html
 

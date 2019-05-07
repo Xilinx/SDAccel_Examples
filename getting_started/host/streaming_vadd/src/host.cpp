@@ -20,9 +20,7 @@ PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR B
 HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-**********/
 
-/*
   Stream_access Host Code
   There are many applications where all of the data cannot reside in an FPGA.
   For example, the data is too big to fit in an FPGA or the data is being
@@ -38,114 +36,80 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   OpenCL function, the function will return before the operation has completed.
   Asynchronous nature of OpenCL allows you to simultaneously perform tasks on
   the host CPU as well as the FPGA.
- */
-
-#include "xcl2.hpp"
-
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <vector>
-#include <CL/cl_ext_xilinx.h>
-
-auto constexpr DATA_SIZE = 4096;
-
-int main(int argc, char** argv){
-    
-    int size = DATA_SIZE;
-    
-    if (argc != 2) {
-        std::cout << "Usage: " << argv[0] << "XCLBIN File" << std::endl;
-        return EXIT_FAILURE;
-    }
-
-    std::string binaryFile = argv[1];
-    std::cout << "\n Vector Addition of elements " << size << std::endl;
-
-    //Allocate memory in Host Memory
-    int vector_size_bytes = sizeof(int) * size;
-    cl_int err;
-    unsigned fileBufSize;
-
-    std::vector<int,aligned_allocator<int>> h_a(vector_size_bytes);
-    std::vector<int,aligned_allocator<int>> h_b(vector_size_bytes);
-    std::vector<int,aligned_allocator<int>> hw_results(vector_size_bytes);
-    std::vector<int,aligned_allocator<int>> sw_results(vector_size_bytes);
-
+*******************************************************************/
+#include "streams_vadd.h"
+////////////////////RESET FUNCTION//////////////////////////////////
+int reset(int* a, int*b, int* sw_results, int* hw_results, int size)
+{
     //Fill the input vectors with data
     for(int i = 0; i < size; i++)
     {
-        h_a[i] = rand() % size;
-        h_b[i] = rand() % size;
+        a[i] = rand() % size;
+        b[i] = rand() % size;
         hw_results[i] = 0;
-        sw_results[i] = h_a[i] + h_b[i];
+        sw_results[i] = a[i] + b[i];
     }
-
-    auto devices = xcl::get_xil_devices();
-    cl::Device device = devices[0];
-
-    OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
-    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
-    OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
-
-    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
-    cl::Program::Binaries bins{ { fileBuf, fileBufSize } };
-    devices.resize(1);
-    OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
-    OCL_CHECK(err, cl::Kernel krnl_vadd(program, "krnl_vadd"));
-
-    // Streams
-    // Device Connection specification of the stream through extension pointer
-    cl_int ret;
-    cl_mem_ext_ptr_t ext;
-    ext.param = krnl_vadd.get();
-    ext.obj = NULL;
-
-    //Create write stream for argument 0 and 1 of kernel
-    cl_stream write_stream_a, write_stream_b;
-    ext.flags = 0;
-    OCL_CHECK(ret, write_stream_a = clCreateStream(device.get(), CL_STREAM_WRITE_ONLY, CL_STREAM, &ext, &ret));
-    ext.flags = 1;
-    OCL_CHECK(ret, write_stream_b = clCreateStream(device.get(), CL_STREAM_WRITE_ONLY, CL_STREAM, &ext, &ret));
-
-    //Create read stream for argument 2 of kernel
-    cl_stream read_stream;
-    ext.flags = 2;
-    OCL_CHECK(ret, read_stream = clCreateStream(device.get(), CL_STREAM_READ_ONLY, CL_STREAM, &ext, &ret));
-    
-    // Launch the Kernel
-    OCL_CHECK(err, err = q.enqueueTask(krnl_vadd));
-
-    // Initiating the WRITE transfer
-    cl_stream_xfer_req wr_req {0};
-
-    wr_req.flags = CL_STREAM_EOT;
-    wr_req.priv_data = (void*)"write_a";
-    clWriteStream(write_stream_a, h_a.data(), vector_size_bytes, &wr_req, &ret);
-
-    wr_req.priv_data = (void*)"write_b";
-    clWriteStream(write_stream_b, h_b.data(), vector_size_bytes, &wr_req, &ret);
-
-    // Initiating the READ transfer
-    cl_stream_xfer_req rd_req {0};
-    rd_req.flags = CL_STREAM_EOT;
-    rd_req.priv_data = (void*)"read";
-    clReadStream(read_stream, hw_results.data(), vector_size_bytes, &rd_req, &ret);
-
-    // Compare the device results with software results
+    return 0;
+}
+///////////////////VERIFY FUNCTION///////////////////////////////////
+int verify(int* a, int*b, int* sw_results, int* hw_results, int size)
+{
     bool match = true;
     for (int i = 0; i < size; i++){
-        printf("%d a = %d b = %d \t sw = %d \t hw = %d\n", i, h_a[i], h_b[i], sw_results[i], hw_results[i]);
+        std::cout << "i: " << i << "\ta: " << a[i] << "\tb: " << b[i] << "\tsw: " << sw_results[i] << "\thw: " << hw_results[i] << std::endl;
         if(sw_results[i] != hw_results[i]){
             match = false;
             break;
         }
     }
-    
-    clReleaseStream(read_stream);
-    clReleaseStream(write_stream_a);
-    clReleaseStream(write_stream_b);
+    std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl;    
+    return match;
+}
+////////MAIN FUNCTION//////////
+int main(int argc, char** argv)
+{
+    int size = DATA_SIZE;
 
-    std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl;
-    return (match ? EXIT_SUCCESS : EXIT_FAILURE);
+    // I/O Data Vectors
+    std::vector<int,aligned_allocator<int>> h_a(size);
+    std::vector<int,aligned_allocator<int>> h_b(size);
+    std::vector<int,aligned_allocator<int>> hw_results(size);
+    std::vector<int> sw_results(size);
+
+    if (argc != 2) {
+        std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
+		return EXIT_FAILURE;
+	}
+
+    auto binaryFile = argv[1];
+    std::cout << "Vector Addition of elements " << DATA_SIZE << std::endl;
+
+    // Reset the data vectors
+    reset(h_a.data(), h_b.data(), sw_results.data(), hw_results.data(), size);
+
+    // OpenCL Setup: xdevice_vadd is a class that contains all the OpenCL objects, necessary functions and the application.
+    xdevice_vadd x_vadd(binaryFile);
+
+    // Running the Kernel with blocking Stream APIs 
+    std::cout << "############################################################\n";
+    std::cout << "                     Blocking Stream                        \n";
+    std::cout << "############################################################\n";
+    x_vadd.run_blocking(h_a.data(), h_b.data(), hw_results.data());
+
+    // Compare the results
+    verify(h_a.data(), h_b.data(), sw_results.data(), hw_results.data(), size);
+    
+    // Reset the data vectors
+    reset(h_a.data(), h_b.data(), sw_results.data(), hw_results.data(), size);
+
+    //Running the kernel with non-blocking Stream APIs
+    std::cout << "############################################################\n";
+    std::cout << "                  Non-Blocking Stream                       \n";
+    std::cout << "############################################################\n";
+    x_vadd.run_non_blocking(h_a.data(), h_b.data(), hw_results.data());
+
+    // Compare the device results with software results
+    verify(h_a.data(), h_b.data(), sw_results.data(), hw_results.data(), size);
+
+    return 0;
 }

@@ -5,7 +5,7 @@ This is a simple Vector Add C Kernel design with 2 Stream inputs and 1 Stream ou
 
 ***KEY CONCEPTS:*** Read/Write Stream, Create/Release Stream
 
-***KEYWORDS:*** cl_stream, CL_STREAM_EOT
+***KEYWORDS:*** cl_stream, CL_STREAM_EOT, CL_STREAM_NONBLOCKING
 
 ## SUPPORTED PLATFORMS
 Board | Software Version
@@ -17,12 +17,14 @@ Application code is located in the src directory. Accelerator binary files will 
 
 ```
 src/host.cpp
-src/krnl_vadd.cpp
+src/krnl_stream_vadd.cpp
+src/streams_vadd.cpp
+src/streams_vadd.h
 ```
 
 ##  COMMAND LINE ARGUMENTS
 Once the environment has been configured, the application can be executed by
 ```
-./vadd_stream <krnl_vadd XCLBIN>
+./vadd_stream <krnl_stream_vadd XCLBIN>
 ```
 
