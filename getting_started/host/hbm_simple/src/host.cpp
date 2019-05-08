@@ -144,9 +144,9 @@ double run_krnl(cl::Context &context, cl::CommandQueue &q, cl::Kernel &kernel,
     // These commands will allocate memory on the FPGA. The cl::Buffer objects can
     // be used to reference the memory locations on the device.   
     //Creating Buffers
-    OCL_CHECK(err, cl::Buffer buffer_input1 = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR, sizeof(uint32_t)*size, &inBufExt1, &err));
-    OCL_CHECK(err, cl::Buffer buffer_input2 = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR, sizeof(uint32_t)*size, &inBufExt2, &err));
-    OCL_CHECK(err, cl::Buffer buffer_output = cl::Buffer(context, CL_MEM_WRITE_ONLY | CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR, sizeof(uint32_t)*size, &outBufExt, &err));
+    OCL_CHECK(err, cl::Buffer buffer_input1(context, CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR, sizeof(uint32_t)*size, &inBufExt1, &err));
+    OCL_CHECK(err, cl::Buffer buffer_input2(context, CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR, sizeof(uint32_t)*size, &inBufExt2, &err));
+    OCL_CHECK(err, cl::Buffer buffer_output(context, CL_MEM_WRITE_ONLY | CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR, sizeof(uint32_t)*size, &outBufExt, &err));
 
     //Setting the kernel Arguments
     OCL_CHECK(err, err = (kernel).setArg(0, buffer_input1));
