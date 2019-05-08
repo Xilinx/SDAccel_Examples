@@ -38,6 +38,10 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   the host CPU as well as the FPGA.
 *******************************************************************/
 #include "streams_vadd.h"
+
+//auto constexpr c_test_size = 256 * 1024 * 1024; //256 MB data
+auto constexpr c_test_size = 4096; //256 MB data
+
 ////////////////////RESET FUNCTION//////////////////////////////////
 int reset(int* a, int*b, int* sw_results, int* hw_results, int size)
 {
@@ -56,7 +60,6 @@ int verify(int* a, int*b, int* sw_results, int* hw_results, int size)
 {
     bool match = true;
     for (int i = 0; i < size; i++){
-        std::cout << "i: " << i << "\ta: " << a[i] << "\tb: " << b[i] << "\tsw: " << sw_results[i] << "\thw: " << hw_results[i] << std::endl;
         if(sw_results[i] != hw_results[i]){
             match = false;
             break;
@@ -68,8 +71,11 @@ int verify(int* a, int*b, int* sw_results, int* hw_results, int size)
 ////////MAIN FUNCTION//////////
 int main(int argc, char** argv)
 {
-    int size = DATA_SIZE;
-
+    size_t size = c_test_size;
+    if(xcl::is_hw_emulation()){
+        //reducing the data size for hw emulation run in reasonable time
+        size = 4096;
+    }
     // I/O Data Vectors
     std::vector<int,aligned_allocator<int>> h_a(size);
     std::vector<int,aligned_allocator<int>> h_b(size);
@@ -82,7 +88,7 @@ int main(int argc, char** argv)
 	}
 
     auto binaryFile = argv[1];
-    std::cout << "Vector Addition of elements " << DATA_SIZE << std::endl;
+    std::cout << "Vector Addition of elements 0x" << std::hex << size << std::endl;
 
     // Reset the data vectors
     reset(h_a.data(), h_b.data(), sw_results.data(), hw_results.data(), size);
@@ -94,7 +100,7 @@ int main(int argc, char** argv)
     std::cout << "############################################################\n";
     std::cout << "                     Blocking Stream                        \n";
     std::cout << "############################################################\n";
-    x_vadd.run_blocking(h_a.data(), h_b.data(), hw_results.data());
+    x_vadd.run_blocking(h_a.data(), h_b.data(), hw_results.data(),size);
 
     // Compare the results
     verify(h_a.data(), h_b.data(), sw_results.data(), hw_results.data(), size);
@@ -106,7 +112,7 @@ int main(int argc, char** argv)
     std::cout << "############################################################\n";
     std::cout << "                  Non-Blocking Stream                       \n";
     std::cout << "############################################################\n";
-    x_vadd.run_non_blocking(h_a.data(), h_b.data(), hw_results.data());
+    x_vadd.run_non_blocking(h_a.data(), h_b.data(), hw_results.data(),size);
 
     // Compare the device results with software results
     verify(h_a.data(), h_b.data(), sw_results.data(), hw_results.data(), size);

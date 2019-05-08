@@ -31,9 +31,9 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <limits.h>
 #include <sys/stat.h>
 #include "xcl2.hpp"
+
 namespace xcl {
 std::vector<cl::Device> get_devices(const std::string& vendor_name) {
-
     size_t i;
     cl_int err;
     std::vector<cl::Platform> platforms;
@@ -52,7 +52,6 @@ std::vector<cl::Device> get_devices(const std::string& vendor_name) {
         std::cout << "Error: Failed to find Xilinx platform" << std::endl;
         exit(EXIT_FAILURE);
     }
-   
     //Getting ACCELERATOR Devices and selecting 1st such device 
     std::vector<cl::Device> devices;
     OCL_CHECK(err, err = platform.getDevices(CL_DEVICE_TYPE_ACCELERATOR, &devices));
@@ -112,6 +111,4 @@ bool is_xpr_device(const char *device_name) {
         return true;
     }
 }
-
-
 };

@@ -50,11 +50,11 @@ CXXFLAGS += $(xcl2_CXXFLAGS)
 LDFLAGS += $(xcl2_LDFLAGS)
 HOST_SRCS += $(xcl2_SRCS)
 
-CXXFLAGS += -lxilinxopencl -pthread
+CXXFLAGS += -pthread
 CXXFLAGS += $(opencl_CXXFLAGS) -Wall -O0 -g -std=c++14
 LDFLAGS += $(opencl_LDFLAGS)
 
-HOST_SRCS += src/host.cpp src/streams_vadd.cpp
+HOST_SRCS += src/host.cpp
 HOST_HDRS += src/streams_vadd.h
 
 # Host compiler global settings

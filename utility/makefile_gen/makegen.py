@@ -88,8 +88,8 @@ def add_libs2(target, data):
             target.write("_SRCS)")
     target.write("\n")
     if "linker" in data:
+        target.write("\nCXXFLAGS +=")
         if "libraries" in data["linker"]:
-            target.write("\nCXXFLAGS +=")
             for lin in data["linker"]["libraries"]:
                 target.write(" ")
                 target.write("-l")
