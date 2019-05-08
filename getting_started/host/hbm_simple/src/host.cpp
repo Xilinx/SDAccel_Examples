@@ -179,35 +179,10 @@ int main(int argc, char* argv[]) {
         printf("Usage: %s <XCLBIN> \n", argv[0]) ;
         return -1 ;
     }
-    
-    unsigned int dataSize;
-    const char *xcl_emu = getenv("XCL_EMULATION_MODE");
-    if(xcl_emu && (!strcmp(xcl_emu, "sw_emu") || !strcmp(xcl_emu, "hw_emu")) ) {
-        //Original dataset is reduced for faster execution of hardware emulation flow
-        dataSize = 1024;
-    }
-    else {
-        dataSize = 64*1024*1024;
-    }
-
-    std::string binaryFile = argv[1];
     cl_int err;
+    std::string binaryFile = argv[1];
     unsigned fileBufSize;
-  
-    std::vector<int,aligned_allocator<int>> source_in1(dataSize);
-    std::vector<int,aligned_allocator<int>> source_in2(dataSize);
-    std::vector<int,aligned_allocator<int>> source_hw_results(dataSize);
-    std::vector<int,aligned_allocator<int>> source_sw_results(dataSize);    
-
-    // Create the test data 
-    for(size_t i = 0 ; i < dataSize ; i++){
-        source_in1[i] = rand() % dataSize;
-        source_in2[i] = rand() % dataSize;
-        source_sw_results[i] = source_in1[i] + source_in2[i];
-        source_hw_results[i] = 0;
-    }
-  
-// OPENCL HOST CODE AREA START
+   
     // The get_xil_devices will return vector of Xilinx Devices
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
@@ -229,21 +204,43 @@ int main(int argc, char* argv[]) {
     
     OCL_CHECK(err, cl::Kernel kernel_vadd(program, "krnl_vadd", &err));
     
+
+    unsigned int dataSize = 64*1024*1024; 
+    if( xcl::is_emulation())  {
+        dataSize = 1024;
+        std::cout << "Original Dataset is reduced for faster execution on emulation flow. Data size=" << dataSize << std::endl;
+    }
+
+  
+    std::vector<int,aligned_allocator<int>> source_in1(dataSize);
+    std::vector<int,aligned_allocator<int>> source_in2(dataSize);
+    std::vector<int,aligned_allocator<int>> source_hw_results(dataSize);
+    std::vector<int,aligned_allocator<int>> source_sw_results(dataSize);    
+
+    // Create the test data 
+    for(size_t i = 0 ; i < dataSize ; i++){
+        source_in1[i] = rand() % dataSize;
+        source_in2[i] = rand() % dataSize;
+        source_sw_results[i] = source_in1[i] + source_in2[i];
+        source_hw_results[i] = 0;
+    }
+  
+        
     double kernel_time_in_sec = 0, result = 0;
     bool match = true;
     const int numBuf = 3;   // Since three buffers are being used
     int bank_assign[numBuf];
 
-// CASE 1  : Single HBM for all three Buffers
-    if(!xcl_emu) {
-         // As maximum memory of each HBM is 256MB. So to fit 3 buffers inside it, we are picking vector size 16M (64MB= 16Mx4Bytes)
+    std::cout << "Running CASE 1  : Single HBM for all three Buffers " << std::endl;
+    if(!xcl::is_emulation()) {
         dataSize = 16*1024*1024;
+        std::cout << "Picking Buffer size " << dataSize * sizeof(uint32_t) << " so that all three buffer should fit into Single HBM (max 256MB)"<< std::endl;
     }
 
-    // Each buffer is allocated with same HBM bank.
-    // input 1 -> bank 0
-    // input 2 -> bank 0
-    // output  -> bank 0
+    std::cout << "Each buffer is allocated with same HBM bank." << std::endl;
+    std::cout << "input 1 -> bank 0 " << std::endl;
+    std::cout << "input 2 -> bank 0 " << std::endl;
+    std::cout << "output  -> bank 0 " << std::endl;
     for (int j = 0; j < numBuf; j++) {
         bank_assign[j] = bank[0];
     }
@@ -258,17 +255,17 @@ int main(int argc, char* argv[]) {
     
     std::cout << "[CASE 1] THROUGHPUT = " << result << " GB/s" << std::endl;
 
-// CASE 2
-    if(!xcl_emu) {
-        // Now since each buffer will be having different HBM, we are picking
-        // vector size as maximum possible, i.e. 256M (256MB= 256MxBbytes)
+    std::cout << "Running CASE 2: Three Separate Banks for Three Buffers" << std::endl;
+    if(!xcl::is_emulation()) {
+        std::cout << "For This case each buffer will be having different HBM, so buffer size is picked to utilize full HBM" << std::endl;
         dataSize = 64*1024*1024;
+        std::cout << "vector size is " << dataSize * sizeof(uint32_t) << " as maximum possible inside single HBM" << std::endl;
     }
 
-    // Each buffer is allocated with different HBM bank.
-    // input 1 -> bank 1
-    // input 2 -> bank 2
-    // output  -> bank 3
+    std::cout << "Each buffer is allocated with different HBM bank." << std::endl;
+    std::cout << "input 1 -> bank 1 " << std::endl;
+    std::cout << "input 2 -> bank 2 " << std::endl;
+    std::cout << "output  -> bank 3 " << std::endl;
     for (int j = 0; j < numBuf; j++) {
         bank_assign[j] = bank[j+1];
     }
@@ -282,7 +279,6 @@ int main(int argc, char* argv[]) {
     
     std::cout << "[CASE 2] THROUGHPUT = " << result << " GB/s " << std::endl;
 
-//OPENCL HOST CODE AREA ENDS
 
     delete[] fileBuf;
 
