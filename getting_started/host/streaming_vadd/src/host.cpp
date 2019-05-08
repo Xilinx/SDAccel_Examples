@@ -39,8 +39,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************/
 #include "streams_vadd.h"
 
-//auto constexpr c_test_size = 256 * 1024 * 1024; //256 MB data
-auto constexpr c_test_size = 4096; //256 MB data
+auto constexpr c_test_size = 1024 * 1024 * 1024; // 1GB data
 
 ////////////////////RESET FUNCTION//////////////////////////////////
 int reset(int* a, int*b, int* sw_results, int* hw_results, int size)
@@ -73,9 +72,11 @@ int main(int argc, char** argv)
 {
     size_t size = c_test_size;
     if(xcl::is_hw_emulation()){
-        //reducing the data size for hw emulation run in reasonable time
-        size = 4096;
+        size = 4096; // 4KB for HW emulation
+    }else if (xcl::is_emulation()){
+        size = 2 * 1024 * 1024 ; // 4MB for sw emulation
     }
+
     // I/O Data Vectors
     std::vector<int,aligned_allocator<int>> h_a(size);
     std::vector<int,aligned_allocator<int>> h_b(size);
