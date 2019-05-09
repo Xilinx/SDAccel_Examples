@@ -171,9 +171,13 @@ int main(int argc, char** argv)
         int nxtcnt = buff_tab[buff_size_1][0];
         int buff_cnt = buff_tab[buff_size_1][1];
         std::vector<cl::Memory> mems(buff_cnt);
+        cl_mem_ext_ptr_t bufExt[buff_cnt];
 
         for(int i=buff_cnt - 1; i>=0; i--){
-            OCL_CHECK(err, mems[i] = cl::Buffer(context, (cl_mem_flags)(CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE), nxtcnt, NULL, &err));
+            bufExt[i].flags = XCL_MEM_DDR_BANK1;
+            bufExt[i].obj = NULL;
+            bufExt[i].param = 0;
+            OCL_CHECK(err, mems[i] = cl::Buffer(context, (cl_mem_flags)(CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE | CL_MEM_EXT_PTR_XILINX), nxtcnt, &bufExt[i], &err));
             OCL_CHECK(err, err = command_queue.enqueueFillBuffer<int>((cl::Buffer&)mems[i], i, 0, nxtcnt, 0, 0));
         }
 
