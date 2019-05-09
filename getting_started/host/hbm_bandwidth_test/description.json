@@ -1,0 +1,33 @@
+{
+    "runtime": ["OpenCL"],
+    "example": "HBM Bandwidth Test",
+    "overview": [
+        "This is an optimized implementation of an HLS application using HBM(High Bandwidth Memory) targeting execution on an SDAccel supported U280-ES FPGA acceleration card."
+    ],
+    "host_exe": "host",
+    "cmd_args": "BUILD/krnl_vaddmul.xclbin",        
+    "libs": [
+        "xcl2" 
+    ], 
+    "containers": [
+	    {
+	        "name": "krnl_vaddmul",
+            "ldclflags" : "--sp krnl_vaddmul_1.m_axi_gmem0:HBM[0:31] --sp krnl_vaddmul_1.m_axi_gmem1:HBM[0:31] --sp krnl_vaddmul_2.m_axi_gmem0:HBM[0:31] --sp krnl_vaddmul_2.m_axi_gmem1:HBM[0:31] --sp krnl_vaddmul_3.m_axi_gmem0:HBM[0:31] --sp krnl_vaddmul_3.m_axi_gmem1:HBM[0:31] --sp krnl_vaddmul_4.m_axi_gmem0:HBM[0:31] --sp krnl_vaddmul_4.m_axi_gmem1:HBM[0:31] --sp krnl_vaddmul_5.m_axi_gmem0:HBM[0:31] --sp krnl_vaddmul_5.m_axi_gmem1:HBM[0:31] --sp krnl_vaddmul_6.m_axi_gmem0:HBM[0:31] --sp krnl_vaddmul_6.m_axi_gmem1:HBM[0:31] --sp krnl_vaddmul_7.m_axi_gmem0:HBM[0:31] --sp krnl_vaddmul_7.m_axi_gmem1:HBM[0:31] --sp krnl_vaddmul_8.m_axi_gmem0:HBM[0:31] --sp krnl_vaddmul_8.m_axi_gmem1:HBM[0:31]",
+	        "accelerators": [
+            {
+                "name": "krnl_vaddmul", 
+                "num_compute_units": "8",
+                "clflags" : "--kernel_frequency 500",
+                "location": "src/krnl_vaddmul.cpp"
+                
+            }
+	    ]
+	    }
+    ], 
+    "contributors": [
+        {
+            "group": "Xilinx",
+            "url": "http://www.xilinx.com"
+        }
+    ]
+}
