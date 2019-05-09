@@ -101,13 +101,26 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
+ifeq ($(findstring xilinx_u200_xdma, $(DEVICE)), xilinx_u200_xdma)
+$(error Nothing to be done for make)
+endif
+ifeq ($(findstring xilinx_u200_qdma, $(DEVICE)), xilinx_u200_qdma)
+$(error Nothing to be done for make)
+endif
+ifeq ($(findstring xilinx_u250_xdma, $(DEVICE)), xilinx_u250_xdma)
+$(error Nothing to be done for make)
+endif
+ifeq ($(findstring xilinx_vcu1525_dynamic, $(DEVICE)), xilinx_vcu1525_dynamic)
+$(error Nothing to be done for make)
+endif
+
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/krnl_vaddmul.$(TARGET).$(DSA).xclbin
 else
 	 ./$(EXECUTABLE) $(XCLBIN)/krnl_vaddmul.$(TARGET).$(DSA).xclbin
 endif
-	sdx_analyze profile -i sdaccel_profile_summary.csv -f html
+	sdx_analyze profile -i profile_summary.csv -f html
 
 run_nimbix: all
 	$(COMMON_REPO)/utility/nimbix/run_nimbix.py $(EXECUTABLE) $(CMD_ARGS) $(DSA)
@@ -118,7 +131,7 @@ aws_build: check-aws_repo $(BINARY_CONTAINERS)
 # Cleaning stuff
 clean:
 	-$(RMDIR) $(EXECUTABLE) $(XCLBIN)/{*sw_emu*,*hw_emu*} 
-	-$(RMDIR) sdaccel_* TempConfig system_estimate.xtxt *.rpt
+	-$(RMDIR) profile_* TempConfig system_estimate.xtxt *.rpt *.csv 
 	-$(RMDIR) src/*.ll _xocc_* .Xil emconfig.json dltmp* xmltmp* *.log *.jou *.wcfg *.wdb
 
 cleanall: clean
