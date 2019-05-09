@@ -1,0 +1,34 @@
+{
+    "runtime": ["OpenCL"],
+    "example": "HBM Bandwidth",
+    "overview": [
+        "This is a HBM bandwidth check design. Design contains 8 compute units of a kernel which has access to all HBM banks (0:31). Host application allocate buffer into all HBM banks and run these 8 compute units concurrently and measure the overall bandwidth between Kernel and HBM Memory."
+    ],
+    "host_exe": "host",
+    "nboard": ["xilinx_u200_xdma", "xilinx_u200_qdma", "xilinx_u250_xdma", "xilinx_vcu1525_dynamic"],
+    "cmd_args": "BUILD/krnl_vaddmul.xclbin",        
+    "libs": [
+        "xcl2" 
+    ], 
+    "containers": [
+	    {
+	        "name": "krnl_vaddmul",
+            "ldclflags" : "--sp krnl_vaddmul_1.m_axi_gmem0:HBM[0:31] --sp krnl_vaddmul_1.m_axi_gmem1:HBM[0:31] --sp krnl_vaddmul_2.m_axi_gmem0:HBM[0:31] --sp krnl_vaddmul_2.m_axi_gmem1:HBM[0:31] --sp krnl_vaddmul_3.m_axi_gmem0:HBM[0:31] --sp krnl_vaddmul_3.m_axi_gmem1:HBM[0:31] --sp krnl_vaddmul_4.m_axi_gmem0:HBM[0:31] --sp krnl_vaddmul_4.m_axi_gmem1:HBM[0:31] --sp krnl_vaddmul_5.m_axi_gmem0:HBM[0:31] --sp krnl_vaddmul_5.m_axi_gmem1:HBM[0:31] --sp krnl_vaddmul_6.m_axi_gmem0:HBM[0:31] --sp krnl_vaddmul_6.m_axi_gmem1:HBM[0:31] --sp krnl_vaddmul_7.m_axi_gmem0:HBM[0:31] --sp krnl_vaddmul_7.m_axi_gmem1:HBM[0:31] --sp krnl_vaddmul_8.m_axi_gmem0:HBM[0:31] --sp krnl_vaddmul_8.m_axi_gmem1:HBM[0:31]",
+	        "accelerators": [
+            {
+                "name": "krnl_vaddmul", 
+                "num_compute_units": "8",
+                "clflags" : "--kernel_frequency 500",
+                "location": "src/krnl_vaddmul.cpp"
+                
+            }
+	    ]
+	    }
+    ], 
+    "contributors": [
+        {
+            "group": "Xilinx",
+            "url": "http://www.xilinx.com"
+        }
+    ]
+}
