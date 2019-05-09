@@ -100,6 +100,7 @@ xdevice_vadd::xdevice_vadd(const char* binaryFile){
 // Application using blocking Stream APIs 
 void xdevice_vadd::run_blocking(int* a, int*b, int*results, size_t size)
     {
+    size_t vector_size_bytes = size * sizeof(int);
     // Streams
     // Device Connection specification of the stream through extension pointer
     cl_int ret;
@@ -120,12 +121,18 @@ void xdevice_vadd::run_blocking(int* a, int*b, int*results, size_t size)
     OCL_CHECK(ret, b_read_stream = xcl::Stream::createStream(m_device.get(), CL_STREAM_READ_ONLY, CL_STREAM, &ext, &ret));
 
     // Launch the Kernel
-    OCL_CHECK(err, err = m_q.enqueueTask(m_krnl_vadd));
+    cl::Event wait_event;
+    OCL_CHECK(err, err = m_q.enqueueTask(m_krnl_vadd, NULL, &wait_event));
+    unsigned long start, stop;
+
+    OCL_CHECK(err, err = wait_event.getProfilingInfo<unsigned long>(CL_PROFILING_COMMAND_START, &start));
+    OCL_CHECK(err, err = wait_event.getProfilingInfo<unsigned long>(CL_PROFILING_COMMAND_END, &stop));
+    unsigned long duration = stop - start;
+    double d_ns = (double)vector_size_bytes/((double)duration/1E15);
+    std::cout << "[ Case: 1 ] -> Throughput = " << d_ns << " MB/s\n";
 
     // Initiating the WRITE transfer
     cl_stream_xfer_req wr_req {0};
-
-    size_t vector_size_bytes = size * sizeof(int);
 
     wr_req.flags = CL_STREAM_EOT;
     wr_req.priv_data = (void*)"b_write_a";
@@ -160,6 +167,7 @@ void xdevice_vadd::run_blocking(int* a, int*b, int*results, size_t size)
 // Application using non-blocking Stream APIs 
 void xdevice_vadd::run_non_blocking(int* a, int*b, int*results, size_t size)
     {
+    size_t vector_size_bytes = size * sizeof(int);
     // Streams
     // Device Connection specification of the stream through extension pointer
     cl_int ret;
@@ -180,7 +188,15 @@ void xdevice_vadd::run_non_blocking(int* a, int*b, int*results, size_t size)
     OCL_CHECK(ret, nb_read_stream = xcl::Stream::createStream(m_device.get(), CL_STREAM_READ_ONLY, CL_STREAM, &ext, &ret));
 
     // Launch the Kernel
-    OCL_CHECK(err, err = m_q.enqueueTask(m_krnl_vadd));
+    cl::Event wait_event;
+    OCL_CHECK(err, err = m_q.enqueueTask(m_krnl_vadd, NULL, &wait_event));
+    unsigned long start, stop;
+
+    OCL_CHECK(err, err = wait_event.getProfilingInfo<unsigned long>(CL_PROFILING_COMMAND_START, &start));
+    OCL_CHECK(err, err = wait_event.getProfilingInfo<unsigned long>(CL_PROFILING_COMMAND_END, &stop));
+    unsigned long duration = stop - start;
+    double d_ns = (double)vector_size_bytes/((double)duration/1E15);
+    std::cout << "[ Case: 2 ] -> Throughput = " << d_ns << " MB/s\n";
 
     // Initiating the WRITE transfer
     cl_stream_xfer_req wr_req {0};
@@ -188,7 +204,6 @@ void xdevice_vadd::run_non_blocking(int* a, int*b, int*results, size_t size)
     wr_req.flags = CL_STREAM_EOT | CL_STREAM_NONBLOCKING;
     wr_req.priv_data = (void*)"nb_write_a";
 
-    size_t vector_size_bytes = size * sizeof(int);
     // Thread 1 for writing data to input stream 1 independently in case of default blocking transfers.
     OCL_CHECK(ret, xcl::Stream::writeStream(nb_write_stream_a, a, vector_size_bytes, &wr_req, &ret));
 
