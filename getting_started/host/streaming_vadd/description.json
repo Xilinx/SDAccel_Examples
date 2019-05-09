@@ -36,8 +36,5 @@
             "group": "Xilinx",
             "url" : "http://www.xilinx.com"
         }
-    ],
-    "testinfo": {
-        "parkinglot": "true"
-    }
+    ]
 }
