@@ -10,9 +10,10 @@ This example show how to take advantage of multiple FPGAs on a system. It will s
 ## SUPPORTED PLATFORMS
 Board | Software Version
 ------|-----------------
-Xilinx Alveo U200|SDx 2018.3
-Xilinx Virtex UltraScale+ VCU1525|SDx 2018.3
 Xilinx Alveo U250|SDx 2018.3
+Xilinx Alveo U200|SDx 2018.3
+Xilinx Alveo U280 ES|SDx 2018.3
+Xilinx Virtex UltraScale+ VCU1525|SDx 2018.3
 
 
 ##  DESIGN FILES

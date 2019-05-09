@@ -3,9 +3,9 @@ HBM Simple Vector Addition
 
 This is a simple example of vector addition to describe how to use HLS kernels with HBM (High Bandwidth Memory) for achieving high throughput.
 
-***KEY CONCEPTS:*** SDx Memory Hierarchy, HBM Banks
+***KEY CONCEPTS:*** High Bandwidth Memory, Multiple HBM Banks
 
-***KEYWORDS:*** HBM
+***KEYWORDS:*** HBM, XCL_MEM_TOPOLOGY, cl_mem_ext_ptr_t
 
 ## SUPPORTED PLATFORMS
 Board | Software Version

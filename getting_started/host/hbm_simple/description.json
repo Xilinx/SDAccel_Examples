@@ -4,8 +4,8 @@
     "overview": [
         "This is a simple example of vector addition to describe how to use HLS kernels with HBM (High Bandwidth Memory) for achieving high throughput."
     ],
-    "key_concepts": ["SDx Memory Hierarchy", "HBM Banks"],
-    "keywords": ["HBM"],
+    "key_concepts": ["High Bandwidth Memory", "Multiple HBM Banks"],
+    "keywords": ["HBM", "XCL_MEM_TOPOLOGY", "cl_mem_ext_ptr_t" ],
     "os": [
         "Linux"
     ],    

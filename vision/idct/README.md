@@ -6,8 +6,9 @@ Example shows an optimized Inverse Discrete Cosine Transfom. Optimizations are a
 ## SUPPORTED PLATFORMS
 Board | Software Version
 ------|-----------------
-Xilinx Alveo U200|SDx 2018.3
 Xilinx Alveo U250|SDx 2018.3
+Xilinx Alveo U200|SDx 2018.3
+Xilinx Alveo U280 ES|SDx 2018.3
 
 
 ##  DESIGN FILES
