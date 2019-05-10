@@ -60,8 +60,6 @@ LDFLAGS += -lrt -lstdc++
 
 # Kernel compiler global settings
 CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
-CLFLAGS += --slr vmult_1:SLR0
-CLFLAGS += --slr vadd_1:SLR1
 
 # Kernel linker flags
 LDCLFLAGS += --slr vmult_1:SLR0 --slr vadd_1:SLR1
@@ -107,6 +105,9 @@ $(EMCONFIG_DIR)/emconfig.json:
 
 check: all
 ifeq ($(findstring xilinx_vcu1525_dynamic, $(DEVICE)), xilinx_vcu1525_dynamic)
+$(error Nothing to be done for make)
+endif
+ifeq ($(findstring xilinx_u280-es1_xdma, $(DEVICE)), xilinx_u280-es1_xdma)
 $(error Nothing to be done for make)
 endif
 
