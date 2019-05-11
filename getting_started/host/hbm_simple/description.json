@@ -26,7 +26,10 @@
                 }
 	        ]
 	    }
-    ], 
+    ],
+    "testinfo": {
+        "parkinglot": "true"
+    }, 
     "contributors": [
         {
             "group": "Xilinx",
