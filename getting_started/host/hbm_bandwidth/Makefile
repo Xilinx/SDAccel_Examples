@@ -60,7 +60,7 @@ LDFLAGS += -lrt -lstdc++
 
 # Kernel compiler global settings
 CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
-CLFLAGS += --kernel_frequency 500
+CLFLAGS += --kernel_frequency 300
 
 # Kernel linker flags
 LDCLFLAGS += --sp krnl_vaddmul_1.m_axi_gmem0:HBM[0:31] --sp krnl_vaddmul_1.m_axi_gmem1:HBM[0:31] --sp krnl_vaddmul_2.m_axi_gmem0:HBM[0:31] --sp krnl_vaddmul_2.m_axi_gmem1:HBM[0:31] --sp krnl_vaddmul_3.m_axi_gmem0:HBM[0:31] --sp krnl_vaddmul_3.m_axi_gmem1:HBM[0:31] --sp krnl_vaddmul_4.m_axi_gmem0:HBM[0:31] --sp krnl_vaddmul_4.m_axi_gmem1:HBM[0:31] --sp krnl_vaddmul_5.m_axi_gmem0:HBM[0:31] --sp krnl_vaddmul_5.m_axi_gmem1:HBM[0:31] --sp krnl_vaddmul_6.m_axi_gmem0:HBM[0:31] --sp krnl_vaddmul_6.m_axi_gmem1:HBM[0:31] --sp krnl_vaddmul_7.m_axi_gmem0:HBM[0:31] --sp krnl_vaddmul_7.m_axi_gmem1:HBM[0:31] --sp krnl_vaddmul_8.m_axi_gmem0:HBM[0:31] --sp krnl_vaddmul_8.m_axi_gmem1:HBM[0:31]

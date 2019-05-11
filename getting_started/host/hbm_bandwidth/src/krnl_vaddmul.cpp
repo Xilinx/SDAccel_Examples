@@ -38,16 +38,16 @@ extern "C" {
 void krnl_vaddmul(
         const v_dt *in1, // Read-Only Vector 1
         const v_dt *in2, // Read-Only Vector 2
-        v_dt *out_add,   // Output Result for Addition
-        v_dt *out_mul,   // Output Result for Multiplication
+        v_dt *out_add,   // Output Result for ADD
+        v_dt *out_mul,   // Output Result for MUL
         const unsigned int size,   // Size in integer
         const unsigned int num_times
         )
 {
 #pragma HLS INTERFACE m_axi port=in1  offset=slave bundle=gmem0
 #pragma HLS INTERFACE m_axi port=in2  offset=slave bundle=gmem1
-#pragma HLS INTERFACE m_axi port=out_add offset=slave bundle=gmem0
-#pragma HLS INTERFACE m_axi port=out_mul offset=slave bundle=gmem1
+#pragma HLS INTERFACE m_axi port=out_add offset=slave bundle=gmem2
+#pragma HLS INTERFACE m_axi port=out_mul offset=slave bundle=gmem3
 
 #pragma HLS INTERFACE s_axilite port=in1  bundle=control
 #pragma HLS INTERFACE s_axilite port=in2  bundle=control

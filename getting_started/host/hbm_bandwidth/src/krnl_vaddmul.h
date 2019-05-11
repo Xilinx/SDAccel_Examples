@@ -27,12 +27,7 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 
-/*******************************************************************************
-Description: 
-    
-*******************************************************************************/
-
-#define VDATA_SIZE 8
+#define VDATA_SIZE 16
 
 //TRIPCOUNT indentifier
 const unsigned int c_dt_size = VDATA_SIZE;
