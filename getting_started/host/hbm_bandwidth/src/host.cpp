@@ -102,7 +102,7 @@ int main(int argc, char* argv[]) {
     }
     else {
         dataSize = 64*1024*1024;
-        num_times = 64;
+        num_times = 1024;
     }
 
     std::string binaryFile = argv[1];
