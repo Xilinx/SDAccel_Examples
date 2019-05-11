@@ -18,13 +18,16 @@
             {
                 "name": "krnl_vaddmul", 
                 "num_compute_units": "8",
-                "clflags" : "--kernel_frequency 500",
+                "clflags" : "--kernel_frequency 300",
                 "location": "src/krnl_vaddmul.cpp"
                 
             }
 	    ]
 	    }
     ], 
+    "testinfo": {
+        "parkinglot": "true"
+    }, 
     "contributors": [
         {
             "group": "Xilinx",
