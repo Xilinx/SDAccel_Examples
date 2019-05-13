@@ -28,7 +28,9 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 
 /*******************************************************************************
-Description: 
+Description:
+ This a kernel design of performing both vector addition and vector multiplication
+ on input vectors. 
     
 *******************************************************************************/
 
@@ -41,7 +43,7 @@ void krnl_vaddmul(
         v_dt *out_add,   // Output Result for ADD
         v_dt *out_mul,   // Output Result for MUL
         const unsigned int size,   // Size in integer
-        const unsigned int num_times
+        const unsigned int num_times  // Running the same kernel operations num_times
         )
 {
 #pragma HLS INTERFACE m_axi port=in1  offset=slave bundle=gmem0

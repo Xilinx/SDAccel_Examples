@@ -31,8 +31,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * Description:
  * This is host application to test HBM Full bandwidth.
  * Design contains 8 compute units of Kernel. Each compute unit has full access to all HBM 
- * memory (0 to 31). Host application allocate buffers into all 32 HBM Banks. 16 Input buffers
- * and 16 output buffers. Host application runs all 8 compute units together and measure
+ * memory (0 to 31). Host application allocate buffers into all 32 HBM Banks(16 Input buffers
+ * and 16 output buffers). Host application runs all 8 compute units together and measure
  * the overall HBM bandwidth.
  *
  ******************************************************************************************/
@@ -96,6 +96,7 @@ int main(int argc, char* argv[]) {
     //num_times specify, number of times a kernel will execute the same operation. This is needed
     //to keep the kernel busy to test the actual bandwidth of all banks running concurrently.
 
+    //reducing the test data capacity to run faster in emulation mode
     if (xcl::is_emulation()){
         dataSize = 1024;
         num_times = 64;
@@ -236,9 +237,9 @@ int main(int argc, char* argv[]) {
     
     // Multiplying the actual data size by 4 because four buffers are being used. 
     result = 4*(float)dataSize * num_times * sizeof(uint32_t);
-    result /= 1024; // to KB
-    result /= 1024; // to MB
-    result /= 1024; // to GB
+    result /= 1000; // to KB
+    result /= 1000; // to MB
+    result /= 1000; // to GB
     result /= kernel_time_in_sec; // to GBps
     
     std::cout << "THROUGHPUT = " << result << " GB/s" << std::endl;
