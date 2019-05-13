@@ -1,26 +1,18 @@
 {
     "containers": [
         {
-            "name": "krnl_vadd", 
+            "name": "krnl_stream_vadd", 
             "meet_system_timing": "true", 
             "accelerators": [
                 {
-                    "name": "krnl_vadd", 
+                    "name": "krnl_stream_vadd", 
                     "check_timing": "true", 
                     "PipelineType": "none", 
                     "check_latency": "false", 
                     "check_warning": "true", 
                     "loops": [
                         {
-                            "name": "READ_LOOP", 
-                            "PipelineII": "1"
-                        }, 
-                        {
-                            "name": "COMPUTE_LOOP", 
-                            "PipelineII": "1"
-                        }, 
-                        {
-                            "name": "WRITE_LOOP", 
+                            "name": "vadd", 
                             "PipelineII": "1"
                         } 
                     ]

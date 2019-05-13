@@ -10,20 +10,17 @@
         "Linux"
     ],
     "host_exe": "vadd_stream",
-    "cmd_args": "BUILD/krnl_vadd.xclbin",
-    "linker": {
-        "libraries": [ "xilinxopencl" ]
-    },
+    "cmd_args": "BUILD/krnl_stream_vadd.xclbin",
     "libs": [
         "xcl2"
     ],
     "containers": [
     {
-       "name": "krnl_vadd",       
+       "name": "krnl_stream_vadd",       
        "accelerators": [
         {
-            "name": "krnl_vadd", 
-            "location": "src/krnl_vadd.cpp",
+            "name": "krnl_stream_vadd", 
+            "location": "src/krnl_stream_vadd.cpp",
             "num_compute_units": "4"
         }
        ]
