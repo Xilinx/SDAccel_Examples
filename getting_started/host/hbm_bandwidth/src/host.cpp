@@ -237,9 +237,9 @@ int main(int argc, char* argv[]) {
     
     // Multiplying the actual data size by 4 because four buffers are being used. 
     result = 4*(float)dataSize * num_times * sizeof(uint32_t);
-    result /= 1024; // to KB
-    result /= 1024; // to MB
-    result /= 1024; // to GB
+    result /= 1000; // to KB
+    result /= 1000; // to MB
+    result /= 1000; // to GB
     result /= kernel_time_in_sec; // to GBps
     
     std::cout << "THROUGHPUT = " << result << " GB/s" << std::endl;
