@@ -11,8 +11,27 @@ Device to Host|774,714|563,740
 Device to Kernel|46,460,532|195,938,535
 Total Execution|48,244,355|198,330,886
 Frames per Second|21.5|5.1
+## SUPPORTED PLATFORMS
+Board | Software Version
+------|-----------------
+Xilinx Alveo U250|SDx 2018.3
+Xilinx Alveo U200|SDx 2018.3
+Xilinx Alveo U280 ES|SDx 2018.3
+Xilinx Virtex UltraScale+ VCU1525|SDx 2018.3
 
-For Setup instructions, please refer: [setup.md][]
 
-[setup.md]: setup.md
+##  DESIGN FILES
+Application code is located in the src directory. Accelerator binary files will be compiled to the xclbin directory. The xclbin directory is required by the Makefile and its contents will be filled during compilation. A listing of all the files in this example is shown below
+
+```
+data/CT-MONO2-16-brain.raw
+src/affine.cpp
+src/krnl_affine.cl
+```
+
+##  COMMAND LINE ARGUMENTS
+Once the environment has been configured, the application can be executed by
+```
+./affine <krnl_affine XCLBIN> ./data/CT-MONO2-16-brain.raw
+```
 

@@ -12,7 +12,7 @@
     "libs": [
         "xcl2"
     ],
-    "nboard": ["xilinx_vcu1525_dynamic"],
+    "nboard": ["xilinx_vcu1525_dynamic", "xilinx_u280-es1_xdma"],
     "host_exe": "host",
     "cmd_args": "BUILD/vmult_vadd.xclbin",
     "containers" : [ 
@@ -22,13 +22,11 @@
       "accelerators": [
           {          
             "name": "vmult", 
-            "location": "src/kernel.cl",
-            "clflags": "--slr vmult_1:SLR0"
+            "location": "src/kernel.cl"
           },
           {
               "name": "vadd",
-              "location": "src/kernel.cl",
-              "clflags": "--slr vadd_1:SLR1"
+              "location": "src/kernel.cl"
           }
         ]
       }

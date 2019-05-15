@@ -1,0 +1,36 @@
+{
+    "runtime": ["OpenCL"],
+    "example": "HBM Simple Vector Addition",
+    "overview": [
+        "This is a simple example of vector addition to describe how to use HLS kernels with HBM (High Bandwidth Memory) for achieving high throughput."
+    ],
+    "key_concepts": ["High Bandwidth Memory", "Multiple HBM Banks"],
+    "keywords": ["HBM", "XCL_MEM_TOPOLOGY", "cl_mem_ext_ptr_t" ],
+    "os": [
+        "Linux"
+    ],    
+    "libs": [
+        "xcl2"
+    ], 
+    "host_exe": "host",        
+    "cmd_args": "BUILD/krnl_vadd.xclbin",
+    "nboard": ["xilinx_u200_xdma", "xilinx_u200_qdma", "xilinx_u250_xdma", "xilinx_vcu1525_dynamic"],
+    "containers": [
+	    {
+	        "name": "krnl_vadd",
+            "ldclflags" : "--sp krnl_vadd_1.m_axi_gmem0:HBM[0:3] --sp krnl_vadd_1.m_axi_gmem1:HBM[0:3]",
+	        "accelerators": [
+                {
+                    "name": "krnl_vadd", 
+                    "location": "src/krnl_vadd.cpp"
+                }
+	        ]
+	    }
+    ],
+   "contributors": [
+        {
+            "group": "Xilinx",
+            "url": "http://www.xilinx.com"
+        }
+    ]
+}

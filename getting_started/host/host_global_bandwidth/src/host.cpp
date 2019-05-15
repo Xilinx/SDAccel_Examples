@@ -160,6 +160,7 @@ int main(int argc, char** argv)
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
+    OCL_CHECK(err, cl::Kernel krnl_bandwidth(program, "bandwidth", &err));
 
     const int dim1 = sizeof(buff_tab)/(2 * 4);
 
@@ -170,11 +171,16 @@ int main(int argc, char** argv)
         int nxtcnt = buff_tab[buff_size_1][0];
         int buff_cnt = buff_tab[buff_size_1][1];
         std::vector<cl::Memory> mems(buff_cnt);
+        cl_mem_ext_ptr_t bufExt[buff_cnt];
 
         for(int i=buff_cnt - 1; i>=0; i--){
-        	OCL_CHECK(err, mems[i] = cl::Buffer(context, (cl_mem_flags)(CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE), nxtcnt, NULL, &err));
-            	OCL_CHECK(err, err = command_queue.enqueueFillBuffer<int>((cl::Buffer&)mems[i], i, 0, nxtcnt, 0, 0));
+            bufExt[i].flags = XCL_MEM_DDR_BANK1;
+            bufExt[i].obj = NULL;
+            bufExt[i].param = 0;
+            OCL_CHECK(err, mems[i] = cl::Buffer(context, (cl_mem_flags)(CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE | CL_MEM_EXT_PTR_XILINX), nxtcnt, &bufExt[i], &err));
+            OCL_CHECK(err, err = command_queue.enqueueFillBuffer<int>((cl::Buffer&)mems[i], i, 0, nxtcnt, 0, 0));
         }
+
         if (err != CL_SUCCESS) {
             break;
         }
@@ -189,7 +195,7 @@ int main(int argc, char** argv)
         err = dev_to_host(command_queue, nxtcnt, mems, handle);
         if (err != CL_SUCCESS) {
             break;
-        }
+        } 
     }
 
     printf("\nThe bandwidth numbers for bidirectional case:\n");
@@ -198,13 +204,24 @@ int main(int argc, char** argv)
         int buff_cnt = buff_tab[buff_size_1][1];
         std::vector<cl::Memory> mems1(buff_cnt);
         std::vector<cl::Memory> mems2(buff_cnt);
+        cl_mem_ext_ptr_t bufExt1[buff_cnt];
+        cl_mem_ext_ptr_t bufExt2[buff_cnt];
 
         for(int i=buff_cnt - 1; i>=0; i--){
-        	OCL_CHECK(err, mems1[i] = cl::Buffer(context, (cl_mem_flags)(CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE), nxtcnt, NULL, &err));
+            bufExt1[i].flags = XCL_MEM_DDR_BANK0;
+            bufExt1[i].obj = NULL;
+            bufExt1[i].param = 0;
+
+            bufExt2[i].flags = XCL_MEM_DDR_BANK1;
+            bufExt2[i].obj = NULL;
+            bufExt2[i].param = 0;
+
+        	OCL_CHECK(err, mems1[i] = cl::Buffer(context, (cl_mem_flags)(CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE | CL_MEM_EXT_PTR_XILINX), nxtcnt, &bufExt1[i], &err));
             OCL_CHECK(err, err = command_queue.enqueueFillBuffer<int>((cl::Buffer&)mems1[i], i, 0, nxtcnt, 0, 0));
-        	OCL_CHECK(err, mems2[i] = cl::Buffer(context, (cl_mem_flags)(CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE), nxtcnt, NULL, &err));
+        	OCL_CHECK(err, mems2[i] = cl::Buffer(context, (cl_mem_flags)(CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE | CL_MEM_EXT_PTR_XILINX), nxtcnt, &bufExt2[i], &err));
             OCL_CHECK(err, err = command_queue.enqueueFillBuffer<int>((cl::Buffer&)mems2[i], i, 0, nxtcnt, 0, 0));
         }
+
         if (err != CL_SUCCESS) {
             break;
         }
