@@ -197,7 +197,7 @@ def buildStatus(context, message, state) {
 timestamps {
   node('xcoCentOS74Pool') {
     // hostname = sh(script: "hostname", returnStdout: true).trim()
-    ws("/wrk/builds/sdaccel_examples/") {
+    ws("/wrk/builds/sdaccel_examples/${env.BRANCH_NAME}") {
 //      docker.image('sdaccel_examples').inside("-u xbuild -w /proj/xbb/sdaccel_examples --hostname ${hostname} -e VERSION=${VERSION} -v /proj/xbb:/proj/xbb -v /group/xcofarm:/group/xcofarm -v /tools/batonroot:/tools/batonroot -v /tools/dist:/tools/dist -v /proj/xbuilds:/proj/xbuilds") {
         try {
           stage("checkout") {
