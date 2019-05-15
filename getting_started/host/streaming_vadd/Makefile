@@ -101,6 +101,16 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
+ifeq ($(findstring xilinx_u200_xdma, $(DEVICE)), xilinx_u200_xdma)
+$(error Nothing to be done for make)
+endif
+ifeq ($(findstring xilinx_u250_xdma, $(DEVICE)), xilinx_u250_xdma)
+$(error Nothing to be done for make)
+endif
+ifeq ($(findstring xilinx_u280_xdma, $(DEVICE)), xilinx_u280_xdma)
+$(error Nothing to be done for make)
+endif
+
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
 	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/krnl_stream_vadd.$(TARGET).$(DSA).xclbin

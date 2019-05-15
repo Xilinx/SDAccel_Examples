@@ -5,6 +5,7 @@
         "This is a simple streaming Vector Addition C Kernel design with 1 Stream input, 1 memory mapped input to the kernel, and 1 stream output that demonstrates on how to process a stream of data for computation along with OpenCL buffers."
     ],
     "key_concepts": [ "Read/Write Stream", "Create/Release Stream"],
+    "nboard": [ "xilinx_u200_xdma", "xilinx_u250_xdma" , "xilinx_u280_xdma" ],
     "keywords": [ "cl_stream", "CL_STREAM_EOT", "CL_STREAM_BLOCKING"],
     "os": [
         "Linux"
