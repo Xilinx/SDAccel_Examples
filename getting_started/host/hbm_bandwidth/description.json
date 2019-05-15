@@ -24,7 +24,10 @@
             }
 	    ]
 	    }
-    ], 
+    ],
+    "testinfo": {
+        "profile": "no"
+     }, 
     "contributors": [
         {
             "group": "Xilinx",
