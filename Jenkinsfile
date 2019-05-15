@@ -12,7 +12,7 @@ devices += ['xilinx_vcu1525_dynamic_6_0']
 devices += ['xilinx_u250_xdma_201830_2']
 devices += ['xilinx_u200_xdma_201830_2']
 
-env.VERSION = '2018.3'
+env.VERSION = '2019.1'
 
 precheck_status = 'FAILURE'
 sw_status = 'FAILURE'
@@ -38,15 +38,12 @@ def setupExample(dir, workdir) {
     sh """#!/bin/bash -e
 ${setupString}
 cd ${workdir}/${dir}
-
 echo
 echo "-----------------------------------------------"
 echo "PWD: \$(pwd)"
 echo "-----------------------------------------------"
 echo
-
 rsync -rL \$XILINX_SDX/lnx64/tools/opencv/ lib/
-
 make clean exe
 """
   }
@@ -66,38 +63,31 @@ def buildExample(target, dir, device, workdir) {
       mins = 12 * 60
     }
 
-    retry(3) {
+    retry(1) {
       sh """#!/bin/bash -e
 cd ${workdir}
-
 set +e
 python ${workdir}/utility/check_target_device.py ${workdir}/${dir}/description.json ${target} ${device}
 rc=\$?
 set -e
-
 if [[ \$rc == 0 ]]; then
   echo "Nothing to do"
   exit 0
 fi
-
 cd ${workdir}/${dir}
-
 echo
 echo "-----------------------------------------------"
 echo "PWD: \$(pwd)"
 echo "-----------------------------------------------"
 echo
-
 ${setupString}
 export PLATFORM_REPO_PATHS=/proj/xbuilds/\${VERSION}_daily_latest/xbb/dsadev/opt/xilinx/platforms:\$PLATFORM_REPO_PATHS
-
 # Check if a rebuild is necessary
 set -x
 set +e
 make -q TARGETS=${target} DEVICES=\"${device}\" all
 rc=\$?
 set -e
-
 # re build if required
 if [[ \$rc != 0 ]]; then
 export TMPDIR=\$(mktemp -d -p \$(pwd))
@@ -138,34 +128,24 @@ def runExample(target, dir, device, workdir) {
     retry(3) {
       //	lock("${dir}") {
       sh """#!/bin/bash -e
-
 cd ${workdir}
-
 . /tools/local/bin/modinit.sh > /dev/null 2>&1
 module use.own /proj/picasso/modulefiles
-
 module add vivado/${version}_daily
 module add sdaccel/${version}_daily
 module add opencv/sdaccel
-
 module add proxy
 module add lftp
 module add lsf
-
 cd ${dir}
-
 echo
 echo "-----------------------------------------------"
 echo "PWD: \$(pwd)"
 echo "-----------------------------------------------"
 echo
-
 export PYTHONUNBUFFERED=true
-
 export TMPDIR=\$(mktemp -d -p \$(pwd))
-
 rm -rf \"out/${target}_${devdir}\" && mkdir -p out
-
 bsub -W ${mins} -I -q ${queue} -R "osdistro=rhel && osver==ws6" -n ${cores} -R "rusage[mem=${mem}] span[ptile=${
         cores
       }]" -J "\$(basename ${dir})-${target}-run" <<EOF
@@ -174,7 +154,6 @@ export TMPDIR=\$TMPDIR
 make TARGETS=${target} DEVICES=\"${device}\" NIMBIXFLAGS=\"--out out/${target}_${devdir} --queue_timeout=${mins}\" check
 rm -rf \$TMPDIR
 EOF
-
 """
 //			}
     }
@@ -196,8 +175,8 @@ def buildStatus(context, message, state) {
 
 timestamps {
   node('xcoCentOS74Pool') {
-    // hostname = sh(script: "hostname", returnStdout: true).trim()
-    ws("/proj/xbb/sdaccel_examples") {
+    hostname = sh(script: "hostname", returnStdout: true).trim()
+    ws("/wrk/builds/sdaccel_examples/") {
 //      docker.image('sdaccel_examples').inside("-u xbuild -w /proj/xbb/sdaccel_examples --hostname ${hostname} -e VERSION=${VERSION} -v /proj/xbb:/proj/xbb -v /group/xcofarm:/group/xcofarm -v /tools/batonroot:/tools/batonroot -v /tools/dist:/tools/dist -v /proj/xbuilds:/proj/xbuilds") {
         try {
           stage("checkout") {
@@ -295,31 +274,31 @@ timestamps {
         def hwRunSteps = []
 
         for (int i = 0; i < hwBatches; i++) {
-         hwSteps[i] = [:]
-         hwRunSteps[i] = [:]
+          hwSteps[i] = [:]
+          hwRunSteps[i] = [:]
         }
 
         for (int i = 0; i < examples.size(); i++) {
-         for (int j = 0; j < devices.size(); j++) {
+          for (int j = 0; j < devices.size(); j++) {
             batch = (j * examples.size() + i) % hwBatches
             name = "${examples[i]}-${devices[j]}-hw"
             hwSteps[batch]["${name}-build"] = buildExample('hw', examples[i], devices[j], workdir)
             hwRunSteps[batch]["${name}-run"] = runExample('nimbix', examples[i], devices[j], workdir)
-         }
+          }
         }
 
         stage('hw build') {
-         for (int i = 0; i < hwBatches; i++) {
+          for (int i = 0; i < hwBatches; i++) {
             try {
-             parallel hwSteps[i]
+              parallel hwSteps[i]
             } catch (e) {
-             hw_status = buildStatus('ci-hw', 'hw checks failed', 'FAILURE')
+              hw_status = buildStatus('ci-hw', 'hw checks failed', 'FAILURE')
             }
-         }
+          }
         }
 
         if (hw_status == "FAILURE") {
-         throw RuntimeException("Failed to Build all Hardware Binaries");
+          throw RuntimeException("Failed to Build all Hardware Binaries");
         }
 //
 //        stage('hw run') {
@@ -359,7 +338,7 @@ timestamps {
 //        }
           stage('cleanup') {
             // Cleanup .Xil Files after run
-            sh 'find . -name .Xil | xargs rm -rf'
+//            sh 'find . -name .Xil | xargs rm -rf'
           }
         } // try
 //      } // docker
