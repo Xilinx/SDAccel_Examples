@@ -1,0 +1,41 @@
+{
+    "runtime": ["OpenCL"],
+    "example": "Stream Vector Addition with OpenCL Buffers",
+    "overview": [
+        "This is a simple streaming Vector Addition C Kernel design with 1 Stream input, 1 memory mapped input to the kernel, and 1 stream output that demonstrates on how to process a stream of data for computation along with OpenCL buffers."
+    ],
+    "key_concepts": [ "Read/Write Stream", "Create/Release Stream"],
+    "keywords": [ "cl_stream", "CL_STREAM_EOT", "CL_STREAM_BLOCKING"],
+    "os": [
+        "Linux"
+    ],
+    "host_srcs": "src/host.cpp",
+    "linker": {
+        "options": [ "-pthread" ]
+    },
+    "host_exe": "vadd_stream",
+    "cmd_args": "BUILD/krnl_stream_vadd.xclbin",
+    "libs": [
+        "xcl2"
+    ],
+    "containers": [
+    {
+       "name": "krnl_stream_vadd",
+       "accelerators": [
+        {
+            "name": "krnl_stream_vadd", 
+            "location": "src/krnl_stream_vadd.cpp"
+        }
+       ]
+     }
+    ],
+    "testinfo": {
+        "parkinglot": "true"
+    },
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ]
+}
