@@ -27,7 +27,7 @@
     ],
     "testinfo": {
         "parkinglot": "true",
-        "targets" : [
+        "levels" : [
             {
                 "hw_emu" : "1"
             }
