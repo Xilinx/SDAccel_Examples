@@ -8,9 +8,11 @@ properties([
 days = 10
 
 devices = []
-devices += ['xilinx_vcu1525_dynamic_6_0']
-devices += ['xilinx_u250_xdma_201830_2']
+devices += ['xilinx_u200_qdma_201910_1']
 devices += ['xilinx_u200_xdma_201830_2']
+devices += ['xilinx_u250_qdma_201910_1']
+devices += ['xilinx_u250_xdma_201830_2']
+devices += ['xilinx_u280_xdma_201910_1']
 
 env.VERSION = '2019.1'
 
