@@ -55,7 +55,6 @@ CXXFLAGS += $(opencl_CXXFLAGS) -Wall -O0 -g -std=c++14
 LDFLAGS += $(opencl_LDFLAGS)
 
 HOST_SRCS += src/host.cpp
-HOST_HDRS += src/streams_vadd.h
 
 # Host compiler global settings
 CXXFLAGS += -fmessage-length=0

@@ -1,5 +1,5 @@
 /**********
-Copyright (c) 2018, Xilinx, Inc.
+Copyright (c) 2019, Xilinx, Inc.
 All rights reserved.
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -39,7 +39,7 @@ void krnl_stream_vadd(
 {
 #pragma HLS INTERFACE m_axi port=in1  offset=slave bundle=gmem
 #pragma HLS INTERFACE m_axi port=in2  offset=slave bundle=gmem
-#pragma HLS interface axis port=out
+#pragma HLS INTERFACE axis port=out
 #pragma HLS INTERFACE s_axilite port=in1  bundle=control
 #pragma HLS INTERFACE s_axilite port=in2  bundle=control
 #pragma HLS INTERFACE s_axilite port=size bundle=control

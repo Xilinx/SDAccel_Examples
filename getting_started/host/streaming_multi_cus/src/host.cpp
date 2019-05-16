@@ -1,5 +1,5 @@
 /**********
-Copyright (c) 2018, Xilinx, Inc.
+Copyright (c) 2019, Xilinx, Inc.
 All rights reserved.
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -57,6 +57,19 @@ int reset(int* a, int*b, int* sw_results, int* hw_results, unsigned int size)
     }
     return 0;
 }
+///////////////////VERIFY FUNCTION///////////////////////////////////
+bool verify(int* sw_results, int* hw_results, int size)
+{
+    bool match = true;
+    for (int i = 0; i < size; i++){
+        if(sw_results[i] != hw_results[i]){
+            match = false;
+            break;
+        }
+    }
+    std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl;    
+    return match;
+}
 ////////MAIN FUNCTION//////////
 int main(int argc, char** argv)
 {
@@ -65,7 +78,7 @@ int main(int argc, char** argv)
     if(xcl::is_hw_emulation()){
         size = 4096; // 4KB for HW emulation
     }else if (xcl::is_emulation()){
-        size = 2 * 1024 * 1024 ; // 4MB for sw emulation
+        size = 2 * 1024 * 1024 ; // 2MB for sw emulation
     }
     
     // I/O Data Vectors
@@ -89,44 +102,7 @@ int main(int argc, char** argv)
     cl_int err;
     unsigned fileBufSize;
 
-    //Fill the input vectors with data
-    for (unsigned int i = 0; i < size; i++)
-    {
-        h_a[i] = rand() % size;
-        h_b[i] = rand() % size;
-        hw_results[i] = 0;
-        sw_results[i] = h_a[i] + h_b[i];
-    }
-
     int no_of_elem = size/NCU;
-
-    std::vector<int,aligned_allocator<int>> h_a_sp[NCU];
-    std::vector<int,aligned_allocator<int>> h_b_sp[NCU];
-    std::vector<int,aligned_allocator<int>> hw_results_sp[NCU];
-    std::vector<int,aligned_allocator<int>> sw_results_sp[NCU];
-
-    // Dividing  the data-set for multiple CUs.
-    for (int i=0; i < NCU; i++) { 
-        auto start_h_a = std::next(h_a.cbegin(), i*no_of_elem);
-        auto end_h_a   = std::next(h_a.cbegin(), i*no_of_elem + no_of_elem);
-        h_a_sp[i].resize(no_of_elem);
-        std::copy(start_h_a, end_h_a, h_a_sp[i].begin());
-
-        auto start_h_b = std::next(h_b.cbegin(), i*no_of_elem);
-        auto end_h_b   = std::next(h_b.cbegin(), i*no_of_elem + no_of_elem);
-        h_b_sp[i].resize(no_of_elem);
-        std::copy(start_h_b, end_h_b, h_b_sp[i].begin());
-
-        auto start_hw_results = std::next(hw_results.cbegin(), i*no_of_elem);
-        auto end_hw_results   = std::next(hw_results.cbegin(), i*no_of_elem + no_of_elem);
-        hw_results_sp[i].resize(no_of_elem);
-        std::copy(start_hw_results, end_hw_results, hw_results_sp[i].begin());
-
-        auto start_sw_results = std::next(sw_results.cbegin(), i*no_of_elem);
-        auto end_sw_results   = std::next(sw_results.cbegin(), i*no_of_elem + no_of_elem);
-        sw_results_sp[i].resize(no_of_elem);
-        std::copy(start_sw_results, end_sw_results, sw_results_sp[i].begin());
-    }
    
     // get_xil_devices() is a utility API which will find the xilinx
     // platforms and will return list of devices connected to Xilinx platform
@@ -168,9 +144,9 @@ int main(int argc, char** argv)
     }
 
     // Streams
-    std::array<cl_stream, NCU> write_stream_a;
-    std::array<cl_stream, NCU> write_stream_b;
-    std::array<cl_stream, NCU> read_stream;
+    std::vector<cl_stream> write_stream_a(NCU);
+    std::vector<cl_stream> write_stream_b(NCU);
+    std::vector<cl_stream> read_stream(NCU);
     
     cl_int ret;
 
@@ -210,19 +186,19 @@ int main(int argc, char** argv)
         wr_req.priv_data = (void*)write_tag_a.c_str();
 
         std::cout << "\n Writing Stream write_stream_a[" << i << "]";
-        OCL_CHECK(ret, xcl::Stream::writeStream(write_stream_a[i], h_a_sp[i].data(), vector_size_bytes, &wr_req, &ret));
+        OCL_CHECK(ret, xcl::Stream::writeStream(write_stream_a[i], (h_a.data() + i*no_of_elem), vector_size_bytes, &wr_req, &ret));
 
         auto write_tag_b = "write_b_" + std::to_string(i);
         wr_req.priv_data = (void*)write_tag_b.c_str();
 
         std::cout << "\n Writing Stream write_stream_b[" << i << "]";
-        OCL_CHECK(ret, xcl::Stream::writeStream(write_stream_b[i], h_b_sp[i].data(), vector_size_bytes, &wr_req, &ret));
+        OCL_CHECK(ret, xcl::Stream::writeStream(write_stream_b[i], (h_b.data() + i*no_of_elem), vector_size_bytes, &wr_req, &ret));
 
         auto read_tag = "read_" + std::to_string(i);
         rd_req.priv_data = (void*)read_tag.c_str();
 
         std::cout << "\n Reading Stream read_stream[" << i << "]";
-        OCL_CHECK(ret, xcl::Stream::readStream(read_stream[i], hw_results_sp[i].data(), vector_size_bytes, &rd_req, &ret));
+        OCL_CHECK(ret, xcl::Stream::readStream(read_stream[i], (hw_results.data() + i*no_of_elem), vector_size_bytes, &rd_req, &ret));
     }
 
     // Sync for the async streaming 
@@ -236,16 +212,7 @@ int main(int argc, char** argv)
     OCL_CHECK(ret, xcl::Stream::pollStreams(device.get(), poll_req, num_compl, num_compl, &num_compl, 50000, &ret));
 
     // Compare the device results with software results
-    bool match = true;
-    for (int i = 0; i < NCU; i++) {
-        for (int j = 0; j < no_of_elem; j++) {
-            if (sw_results_sp[i][j] != hw_results_sp[i][j]) {
-            match = false;
-            std::cout << "\n Compute Unit: " << i << "Failed for element " << j << " : " << sw_results_sp[i][j] << " and " << hw_results_sp[i][j] << std::endl;
-            break;
-        }
-      }
-    }
+    bool match = verify(sw_results.data(), hw_results.data(), size);
         
     // Releasing all OpenCL objects
     q.finish();
@@ -255,7 +222,5 @@ int main(int argc, char** argv)
         xcl::Stream::releaseStream(write_stream_a[i]);
         xcl::Stream::releaseStream(write_stream_b[i]);
     }
-
-    std::cout << "\n TEST " << (match ? "PASSED" : "FAILED") << std::endl;
-    return (match ? EXIT_SUCCESS : EXIT_FAILURE);
+    return !match;
 }

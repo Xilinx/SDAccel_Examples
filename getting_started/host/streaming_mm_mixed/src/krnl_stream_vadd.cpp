@@ -20,6 +20,14 @@ PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR B
 HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+In this example, we will demonstrate how to use Xilinx Streaming APIs for direct host to device transfer.
+            +----------+                                      +----------+
+            |          |>>>>>>>>>>>> Input Stream 1 >>>>>>>>>>|          |
+            |          |                                      |   VADD   |
+            |   HOST   |---(OpenCL Buffers)----(Device DDR)---|  Kernel  |
+            |          |                                      | (DEVICE) | 
+            |          |<<<<<<<<<<<< Output Stream <<<<<<<<<<<|          |
+            +----------+                                      +----------+
 */
 #include "ap_int.h"
 #include "ap_axi_sdata.h"
@@ -38,21 +46,29 @@ void krnl_stream_vadd(
         )
 {
 #pragma HLS INTERFACE m_axi port=in2  offset=slave bundle=gmem
-#pragma HLS interface axis port=out
-#pragma HLS interface axis port=in1
+#pragma HLS INTERFACE axis port=out
+#pragma HLS INTERFACE axis port=in1
 #pragma HLS INTERFACE s_axilite port=in2  bundle=control
 #pragma HLS INTERFACE s_axilite port=size bundle=control
 #pragma HLS INTERFACE s_axilite port=return bundle=control
 
     vadd: for(int i = 0; i < size; i++) {
     #pragma HLS PIPELINE II=1
+        // Local Packets
         pkt in_buf, out_buf;
+
+        // Reading input stream data into packets
         in_buf = in1.read();
+
+        // vadd operation
         int res = in_buf.get_data() + in2[i];
+
+        // Setting data and configuration to output packet
         out_buf.set_data(res);
         out_buf.set_keep(-1);
-        int last = in_buf.get_last();
-        out_buf.set_last(last);
+        out_buf.set_last(in_buf.get_last());
+
+        // Writing packets to output streams
         out.write(out_buf);
     }
 }

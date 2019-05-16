@@ -7,6 +7,7 @@ RTL Kernel Based Examples
 Example        | Description           | Key Concepts / Keywords 
 ---------------|-----------------------|-------------------------
 [rtl_adder_pipes/][]|This example shows an adder with pipes using 3 RTL kernels.|__Key__ __Concepts__<br> - RTL Kernel<br> - Multiple RTL Kernels<br>
+[rtl_streaming_simple_rw/][]|This is a simple Vector Increment RTL Kernel design with 1 Stream input and 1 Stream output that demonstrates on how to process an input stream of data for computation in an application.|__Key__ __Concepts__<br> - Read/Write Stream<br> - Create/Release Stream<br> - RTL Kernel<br>__Keywords__<br> - cl_stream<br> - CL_STREAM_EOT
 [rtl_vadd/][]|Simple example of vector addition using RTL Kernel|__Key__ __Concepts__<br> - RTL Kernel<br>
 [rtl_vadd_2clks/][]|This example shows vector addition with 2 kernel clocks using RTL Kernel.|__Key__ __Concepts__<br> - RTL Kernel<br> - Multiple Kernel Clocks<br>__Keywords__<br> - --kernel_frequency
 [rtl_vadd_2kernels/][]|This example has two RTL Kernels. Both Kernel_0 and Kernel_1 perform vector addition. The Kernel_1 reads the output from Kernel_0 as one of two inputs.|__Key__ __Concepts__<br> - Multiple RTL Kernels<br>
@@ -15,6 +16,7 @@ Example        | Description           | Key Concepts / Keywords
 
 [.]:.
 [rtl_adder_pipes/]:rtl_adder_pipes/
+[rtl_streaming_simple_rw/]:rtl_streaming_simple_rw/
 [rtl_vadd/]:rtl_vadd/
 [rtl_vadd_2clks/]:rtl_vadd_2clks/
 [rtl_vadd_2kernels/]:rtl_vadd_2kernels/

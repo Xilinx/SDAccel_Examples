@@ -10,7 +10,6 @@
     "os": [
         "Linux"
     ],
-    "host_hdrs": "src/streams_vadd.h",
     "host_srcs": "src/host.cpp",
     "linker": {
         "options": [ "-pthread" ]

@@ -1,5 +1,5 @@
 /**********
-Copyright (c) 2018, Xilinx, Inc.
+Copyright (c) 2019, Xilinx, Inc.
 All rights reserved.
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -20,6 +20,14 @@ PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR B
 HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+In this example, we will demonstrate how to use Xilinx Streaming APIs for direct host to device transfer.
+            +----------+                                      +----------+
+            |          |>>>>>>>>>>>> Input Stream 1 >>>>>>>>>>|          |
+            |          |                                      |   VADD   |
+            |   HOST   |>>>>>>>>>>>> Input Stream 2 >>>>>>>>>>|  Kernel  |
+            |          |                                      |          | 
+            |          |<<<<<<<<<<<< Output Stream <<<<<<<<<<<|          |
+            +----------+                                      +----------+
 */
 #include "ap_int.h"
 #include "ap_axi_sdata.h"
@@ -32,23 +40,39 @@ typedef qdma_axis<DWIDTH, 0, 0, 0> pkt;
 extern "C" {
 void krnl_stream_vadd(hls::stream<pkt> &a, hls::stream<pkt> &b, hls::stream<pkt> &output)
 {
-    #pragma HLS interface axis port=a
-    #pragma HLS interface axis port=b
-    #pragma HLS interface axis port=output
-    #pragma HLS interface s_axilite port=return bundle=control
+    #pragma HLS INTERFACE axis port=a
+    #pragma HLS INTERFACE axis port=b
+    #pragma HLS INTERFACE axis port=output
+    #pragma HLS INTERFACE s_axilite port=return bundle=control
 
-    vadd_top: while (true) {
+    bool eos = false;
+    vadd: do{
     #pragma HLS PIPELINE II=1
+        // Reading a and b streaming into packets
         pkt t1 = a.read();
-        pkt t2 = b.read();
-        pkt t_out;
-        ap_uint<DWIDTH> tmp_out;
-        t_out.set_last(0);
-        t_out.set_data(t1.get_data() + t2.get_data());
-        t_out.set_keep(-1);        
-        if (t2.get_last()) { t_out.set_last(1); }
+        pkt t2 = b.read();  
+        
+        // Packet for output
+        pkt t_out; 
+
+        // Reading data from input packet
+        ap_uint<DWIDTH> in1 = t1.get_data();
+        ap_uint<DWIDTH> in2 = t2.get_data();
+
+        // Vadd operation
+        ap_uint<DWIDTH> tmpOut  = in1 + in2;
+
+        // Setting data and configuration to output packet
+        t_out.set_data(tmpOut);
+        t_out.set_last(t1.get_last());
+        t_out.set_keep(-1) ;          // Enabling all bytes
+
+        // Writing packet to output stream
         output.write(t_out);
-        if(t_out.get_last()) { break; }
-    }
+        
+        if (t1.get_last() || t2.get_last()){
+            eos = true;
+        }
+    }while(eos == false);
 }
 }
