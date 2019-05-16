@@ -87,7 +87,7 @@ $(XCLBIN)/krnl_stream_vadd.$(TARGET).$(DSA).xo: src/krnl_stream_vadd.cpp
 	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_stream_vadd) -c -k krnl_stream_vadd -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/krnl_stream_vadd.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_stream_vadd_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_stream_vadd) -l $(LDCLFLAGS) --nk krnl_stream_vadd:4:krnl_stream_vadd_1.krnl_stream_vadd_2.krnl_stream_vadd_3.krnl_stream_vadd_4 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_stream_vadd) -l $(LDCLFLAGS) --nk krnl_stream_vadd:4:vadd_1.vadd_2.vadd_3.vadd_4 -o'$@' $(+)
 
 # Building Host
 $(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)

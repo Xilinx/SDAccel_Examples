@@ -138,7 +138,7 @@ int main(int argc, char** argv)
     std::vector<cl::Kernel> krnls(NCU);
     for (int i = 0; i < NCU; i++) {
         cu_id = std::to_string(i+1);
-        std::string krnl_name_full = krnl_name + ":{" + krnl_name + "_" + cu_id + "}";
+        std::string krnl_name_full = krnl_name + ":{" + "vadd_" + cu_id + "}";
         printf("Creating a kernel [%s] for CU(%d)\n", krnl_name_full.c_str(), i);
         OCL_CHECK(err, krnls[i] = cl::Kernel(program, krnl_name_full.c_str(), &err));
     }

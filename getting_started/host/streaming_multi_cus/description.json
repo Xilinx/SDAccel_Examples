@@ -22,7 +22,7 @@
         {
             "name": "krnl_stream_vadd", 
             "location": "src/krnl_stream_vadd.cpp",
-            "num_compute_units": "4:krnl_stream_vadd_1.krnl_stream_vadd_2.krnl_stream_vadd_3.krnl_stream_vadd_4"
+            "num_compute_units": "4:vadd_1.vadd_2.vadd_3.vadd_4"
         }
        ]
      }
