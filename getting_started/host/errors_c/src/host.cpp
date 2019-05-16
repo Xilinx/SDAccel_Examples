@@ -127,10 +127,8 @@ vector<unsigned char> readBinary(const std::string &fileName) {
         file.read((char *)buffer.data(), size);
         return buffer;
     } else {
-        fprintf(stderr, "%s not found\n", fileName.c_str());
-        exit(-1);
+        return std::vector<unsigned char>(0);
     }
-    return std::vector<unsigned char>(0);
 }
 
 // This example just prints out string description for given OpenCL error code.
@@ -149,7 +147,7 @@ int main(int argc, char **argv) {
 
     if ((err = clGetPlatformIDs(0, nullptr, nullptr))) {
         printf(
-            "Recoverable Error calling clGetPlatformIDs: %s\n"
+            "Received Expected Error calling clGetPlatformIDs: %s\n"
             "\tThis error is usually caused by a failed OpenCL installation or "
             "if both the platforms and num_platforms parameters are null. In "
             "this case we passed incorrect values to the function. We "
@@ -203,7 +201,7 @@ int main(int argc, char **argv) {
     if ((err = clGetDeviceIDs(platforms[0], CL_DEVICE_TYPE_CPU, 0, nullptr,
                               &num_devices))) {
         printf(
-            "Recoverable Error calling clGetDeviceIDs: %s\n"
+            "Received Expected Error calling clGetDeviceIDs: %s\n"
             "This error appears when we try to create a device and no devices "
             "are found on the platform. In this case we passed "
             "CL_DEVICE_TYPE_CPU as the device type which is not available on "
@@ -235,7 +233,7 @@ int main(int argc, char **argv) {
         clCreateContext(props, 0, &device_id, nullptr, nullptr, &err);
     if (err) {
         printf(
-            "Recoverable Error calling clCreateContext: %s\n"
+            "Received Expected Error calling clCreateContext: %s\n"
             "\tMost clCreate* calls accept error codes as their last parameter "
             "instead of returning the error value. This error occured because "
             "we passed 0 for the num_devices varaible. We intentionally threw "
@@ -257,16 +255,16 @@ int main(int argc, char **argv) {
     }
 
     // Loading the file
-    vector<unsigned char> binary = readBinary(binary_file_path);
-    size_t binary_size = binary.size();
-    size_t incorrect_binary_size = binary.size() - 42;
-    const unsigned char *binary_data = binary.data();
+    std::string wrong_binary_file_path = "XYZ";
+    vector<unsigned char> incorrect_binary = readBinary(wrong_binary_file_path);
+    size_t binary_size = incorrect_binary.size();
+    const unsigned char *incorrect_binary_data = incorrect_binary.data();
     cl_program program = clCreateProgramWithBinary(context, 1, &device_id,
-                                                   &incorrect_binary_size,
-                                                   &binary_data, NULL, &err);
+                                                   &binary_size,
+                                                   &incorrect_binary_data, NULL, &err);
     if (err) {
         printf(
-            "Recoverable Error calling clCreateProgramWithBinary: %s\n"
+            "Received Expected Error calling clCreateProgramWithBinary: %s\n"
             "Errors caused during program creation are usually due to invalid "
             "binaries. The binary may be targeting a different device or dsa. "
             "It may also have been currupted or incorrectly read from disk. We "
@@ -275,6 +273,10 @@ int main(int argc, char **argv) {
             error_string(err));
     }
 
+    std::vector<unsigned char> binary = readBinary(binary_file_path);
+    binary_size = binary.size();
+    const unsigned char *binary_data = binary.data();
+    
     program = clCreateProgramWithBinary(context, 1, &device_id, &binary_size,
                                         &binary_data, NULL, &err);
     if (err) {
@@ -290,7 +292,7 @@ int main(int argc, char **argv) {
     cl_kernel kernel = clCreateKernel(program, "InvalidKernelName", &err);
     if (err) {
         printf(
-            "Recoverable Error calling clCreateKernel: %s\n"
+            "Received Expected Error calling clCreateKernel: %s\n"
             "Errors calling clCreateKernel are usually caused if the name "
             "passed into the function does not match a kernel in the binary. "
             "We intentionally caused this error so we will not be exiting the "
@@ -313,7 +315,7 @@ int main(int argc, char **argv) {
         clCreateBuffer(context, CL_MEM_READ_ONLY, 0, nullptr, &err);
     if (err) {
         printf(
-            "Recoverable Error calling clCreateBuffer: %s\n"
+            "Received Expected Error calling clCreateBuffer: %s\n"
             "There can be several reasons for buffer creation to fail. It "
             "could be because device could not allocate enough memory for this "
             "buffer. The pointer could be null and either CL_MEM_USE_HOST_PTR "
@@ -375,7 +377,7 @@ int main(int argc, char **argv) {
     if ((err = clEnqueueWriteBuffer(command_queue, buffer_a, CL_FALSE, 0,
                                     size + 1, A.data(), 0, nullptr, nullptr))) {
         printf(
-            "Recoverable Error calling clEnqueueWriteBuffer: %s\n"
+            "Received Expected Error calling clEnqueueWriteBuffer: %s\n"
             "Errors calling clEnqueueWriteBuffer tend to occure due to invalid "
             "pointers or invalid size of the transfer. Make sure that the host "
             "pointer is correct and that you are transferring less than the "
