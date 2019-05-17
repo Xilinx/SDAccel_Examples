@@ -4,7 +4,7 @@
     "overview": [
         "This is a simple Vector Add C Kernel design with 2 Stream inputs and 1 Stream output that demonstrates on how to process an input stream of data for computation in an application."
     ],
-    "nboard": [ "xilinx_u200_xdma", "xilinx_u250_xdma" , "xilinx_u280_xdma" ],
+    "nboard": [ "xilinx_u200_xdma", "xilinx_u250_xdma" , "xilinx_u280_xdma", "xilinx_u280-es1_xdma" ],
     "key_concepts": [ "Read/Write Stream", "Create/Release Stream"],
     "keywords": [ "cl_stream", "CL_STREAM_EOT", "CL_STREAM_NONBLOCKING"],
     "os": [

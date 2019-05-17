@@ -108,6 +108,9 @@ endif
 ifeq ($(findstring xilinx_u280_xdma, $(DEVICE)), xilinx_u280_xdma)
 $(error Nothing to be done for make)
 endif
+ifeq ($(findstring xilinx_u280-es1_xdma, $(DEVICE)), xilinx_u280-es1_xdma)
+$(error Nothing to be done for make)
+endif
 
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
@@ -115,6 +118,10 @@ ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 else
 	 ./$(EXECUTABLE) $(XCLBIN)/myadder1.$(TARGET).$(DSA).xclbin
 endif
+ifneq ($(TARGET),$(findstring $(TARGET), hw hw_emu))
+$(warning WARNING:Application supports only hw hw_emu TARGET. Please use the target for running the application)
+endif
+
 	sdx_analyze profile -i profile_summary.csv -f html
 
 run_nimbix: all
