@@ -251,25 +251,25 @@ int main(int argc, char** argv)
     nb_wr_req.flags = CL_STREAM_EOT | CL_STREAM_NONBLOCKING;
     nb_wr_req.priv_data = (void*)"nb_write_a";
 
-    // Thread 1 for writing data to input stream 1 independently in case of default blocking transfers.
+    // Writing data to input stream 1 independently in case of non-blocking transfers.
     OCL_CHECK(ret, xcl::Stream::writeStream(write_stream_a, h_a.data(), vector_size_bytes, &nb_wr_req, &ret));
 
     nb_wr_req.priv_data = (void*)"nb_write_b";
-    // Thread 2 for writing data to input stream 2 independently in case of default blocking transfers.
+    // Writing data to input stream 2 independently in case of non-blocking transfers.
     OCL_CHECK(ret, xcl::Stream::writeStream(write_stream_b, h_b.data(), vector_size_bytes, &nb_wr_req, &ret));
 
     // Initiating the READ transfer
     cl_stream_xfer_req nb_rd_req {0};
     nb_rd_req.flags = CL_STREAM_EOT | CL_STREAM_NONBLOCKING;
     nb_rd_req.priv_data = (void*)"nb_read";
-    // Output thread to read the stream data independently in case of default blocking transfers.
+    // Reading the stream data independently in case of non-blocking transfers.
     OCL_CHECK(ret, xcl::Stream::readStream(read_stream, hw_results.data(), vector_size_bytes, &nb_rd_req, &ret));
 
     // Checking the request completion
     cl_streams_poll_req_completions poll_req[3] {0, 0, 0}; // 3 Requests
     auto num_compl = 3;
     OCL_CHECK(ret, xcl::Stream::pollStreams(device.get(), poll_req, 3, 3, &num_compl, 50000, &ret));
-    // Blocking API, waits for 2 poll request completion or 50000ms, whichever occurs first.
+    // Blocking API, waits for 3 poll request completion or 50000ms, whichever occurs first.
             
     // Ensuring all OpenCL objects are released.
     q.finish();

@@ -34,6 +34,13 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // This file is required for OpenCL C++ wrapper APIs
 #include "xcl2.hpp"
 
+// Declaration of custom stream APIs that binds to Xilinx Streaming APIs.
+decltype(&clCreateStream) xcl::Stream::createStream = nullptr;
+decltype(&clReleaseStream) xcl::Stream::releaseStream = nullptr;
+decltype(&clReadStream) xcl::Stream::readStream = nullptr;
+decltype(&clWriteStream) xcl::Stream::writeStream = nullptr;
+decltype(&clPollStreams) xcl::Stream::pollStreams = nullptr;
+
 auto constexpr c_test_size = 256 * 1024 * 1024; //256 MB data
 
 ////////////////////RESET FUNCTION//////////////////////////////////
@@ -51,7 +58,7 @@ int reset(int* a, int*b, int* c, int* sw_results, int* hw_results, unsigned int 
     return 0;
 }
 ///////////////////VERIFY FUNCTION///////////////////////////////////
-bool verify(int* sw_results, int* hw_results, int size)
+int verify(int* sw_results, int* hw_results, int size)
 {
     bool match = true;
     for (int i = 0; i < size; i++){
@@ -66,14 +73,13 @@ bool verify(int* sw_results, int* hw_results, int size)
 ////////MAIN FUNCTION//////////
 int main(int argc, char** argv)
 {
-    unsigned int size = c_test_size;
-    
+    size_t size = c_test_size;
     if(xcl::is_hw_emulation()){
         size = 4096; // 4KB for HW emulation
     }else if (xcl::is_emulation()){
-        size = 2 * 1024 * 1024 ; // 4MB for sw emulation
+        size = 2 * 1024 * 1024 ; // 2MB for sw emulation
     }
-    
+
     // I/O Data Vectors
     std::vector<int,aligned_allocator<int>> h_a(size);
     std::vector<int,aligned_allocator<int>> h_b(size);
@@ -86,9 +92,13 @@ int main(int argc, char** argv)
 		return EXIT_FAILURE;
 	}
 
-    // OpenCL Host Code Begins.
-    cl_int err;
+    auto binaryFile = argv[1];
+    std::cout << "Vector Addition and Multiplication of elements 0x" << std::hex << size << std::endl;
 
+    // Reset the data vectors
+    reset(h_a.data(), h_b.data(), h_c.data(), sw_results.data(), hw_results.data(), size);
+
+    // OpenCL Setup
     // OpenCL objects
     cl::Device device;
     cl::Context context;
@@ -96,16 +106,21 @@ int main(int argc, char** argv)
     cl::Program program;
     cl::Kernel krnl_vadd;
     cl::Kernel krnl_vmult;
+    
+    // Error Status variable
+    cl_int err;
 
-    auto binaryFile = argv[1];
     unsigned fileBufSize;
-
     // get_xil_devices() is a utility API which will find the xilinx
     // platforms and will return list of devices connected to Xilinx platform
     auto devices = xcl::get_xil_devices();
 
     // Selecting the first available Xilinx device
     device = devices[0];
+    cl_platform_id platform_id = device.getInfo<CL_DEVICE_PLATFORM>(&err); 
+
+    //Initialization of streaming class is needed before using it.
+    xcl::Stream::init(platform_id);
 
     // Creating Context
     OCL_CHECK(err, context = cl::Context(device, NULL, NULL, NULL, &err));
@@ -124,53 +139,77 @@ int main(int argc, char** argv)
     OCL_CHECK(err, program = cl::Program(context, devices, bins, NULL, &err));
 
     // Creating Kernel
-    OCL_CHECK(err, krnl_vadd  = cl::Kernel(program, "krnl_stream_vadd", &err));
+    OCL_CHECK(err, krnl_vadd = cl::Kernel(program, "krnl_stream_vadd", &err));
     OCL_CHECK(err, krnl_vmult = cl::Kernel(program, "krnl_stream_vmult", &err));
 
-    std::cout << "Vector Addition and Multiplication of elements 0x" << std::hex << size << std::endl;
+    size_t vector_size_bytes = size * sizeof(int);
+    
+    // Streams
+    // Device Connection specification of the stream through extension pointer
+    cl_int ret;
+    cl_mem_ext_ptr_t ext1, ext2;
+    ext1.param = krnl_vadd.get();
+    ext2.param = krnl_vmult.get();
+    ext1.obj = NULL;
+    ext2.obj = NULL;
 
-    // Reset the data vectors
-    reset(h_a.data(), h_b.data(), h_c.data(), sw_results.data(), hw_results.data(), size);
+    //Create write stream for argument 0 and 1 of kernel
+    cl_stream write_stream_a, write_stream_b, write_stream_c;
+    ext1.flags = 0;
+    OCL_CHECK(ret, write_stream_a = xcl::Stream::createStream(device.get(), CL_STREAM_WRITE_ONLY, CL_STREAM, &ext1, &ret));
+    ext1.flags = 1;
+    OCL_CHECK(ret, write_stream_b = xcl::Stream::createStream(device.get(), CL_STREAM_WRITE_ONLY, CL_STREAM, &ext1, &ret));
+    ext2.flags = 0;
+    OCL_CHECK(ret, write_stream_c = xcl::Stream::createStream(device.get(), CL_STREAM_WRITE_ONLY, CL_STREAM, &ext2, &ret));
 
-    //Running the kernel
-    unsigned int vector_size_bytes = size * sizeof(int);
+    //Create read stream for argument 2 of kernel
+    cl_stream read_stream;
+    ext2.flags = 2;
+    OCL_CHECK(ret, read_stream = xcl::Stream::createStream(device.get(), CL_STREAM_READ_ONLY, CL_STREAM, &ext2, &ret));
 
-    // Allocate Buffer in Global Memory
-    // Buffers are allocated using CL_MEM_USE_HOST_PTR for efficient memory and 
-    // Device-to-host communication
-    OCL_CHECK(err, cl::Buffer buffer_in1   (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-            vector_size_bytes, h_a.data(), &err));
-    OCL_CHECK(err, cl::Buffer buffer_in2   (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-            vector_size_bytes, h_b.data(), &err));
-    OCL_CHECK(err, cl::Buffer buffer_in3   (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-            vector_size_bytes, h_c.data(), &err));
-    OCL_CHECK(err, cl::Buffer buffer_output(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
-            vector_size_bytes, hw_results.data(), &err));
-
-    // Setting Kernel Arguments
-    OCL_CHECK(err, err = krnl_vadd.setArg(0, buffer_in1));
-    OCL_CHECK(err, err = krnl_vadd.setArg(1, buffer_in2));
-    OCL_CHECK(err, err = krnl_vadd.setArg(3, size));
-
-    OCL_CHECK(err, err = krnl_vmult.setArg(0, buffer_in3));
-    OCL_CHECK(err, err = krnl_vmult.setArg(2, buffer_output));
-    OCL_CHECK(err, err = krnl_vmult.setArg(3, size));
-
-    // Copy input data to device global memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_in1, buffer_in2, buffer_in3}, 0/* 0 means from host*/));
-
-    // Launch the Kernel
     OCL_CHECK(err, err = q.enqueueTask(krnl_vadd));
     OCL_CHECK(err, err = q.enqueueTask(krnl_vmult));
-    q.finish();
 
-    // Copy Result from Device Global Memory to Host Local Memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_output},CL_MIGRATE_MEM_OBJECT_HOST));
+    // Initiating the WRITE transfer
+    cl_stream_xfer_req wr_req {0};
+
+    wr_req.flags = CL_STREAM_EOT | CL_STREAM_NONBLOCKING;
+    wr_req.priv_data = (void*)"write_a";
+
+    // Writing data to input stream 1 independently in case of non-blocking transfers.
+    OCL_CHECK(ret, xcl::Stream::writeStream(write_stream_a, h_a.data(), vector_size_bytes, &wr_req, &ret));
+
+    wr_req.priv_data = (void*)"write_b";
+    // Writing data to input stream 2 independently in case of non-blocking transfers.
+    OCL_CHECK(ret, xcl::Stream::writeStream(write_stream_b, h_b.data(), vector_size_bytes, &wr_req, &ret));
+
+    wr_req.priv_data = (void*)"write_c";
+    // Writing data to input stream 2 independently in case of non-blocking transfers.
+    OCL_CHECK(ret, xcl::Stream::writeStream(write_stream_c, h_c.data(), vector_size_bytes, &wr_req, &ret));
+
+    // Initiating the READ transfer
+    cl_stream_xfer_req rd_req {0};
+    rd_req.flags = CL_STREAM_EOT | CL_STREAM_NONBLOCKING;
+    rd_req.priv_data = (void*)"read";
+    // Read the stream data independently in case of non-blocking transfers.
+    OCL_CHECK(ret, xcl::Stream::readStream(read_stream, hw_results.data(), vector_size_bytes, &rd_req, &ret));
+
+    // Checking the request completion
+    cl_streams_poll_req_completions poll_req[4] {0, 0, 0, 0}; // 4 Requests
+    auto num_compl = 4;
+    OCL_CHECK(ret, xcl::Stream::pollStreams(device.get(), poll_req, 4, 4, &num_compl, 50000, &ret));
+    // Blocking API, waits for 4 poll request completion or 50000ms, whichever occurs first.
+
+    // Ensuring all OpenCL objects are released.
     q.finish();
-    // OpenCL Host Code Ends
 
     // Compare the device results with software results
     bool match = verify(sw_results.data(), hw_results.data(), size);
 
+    // Releasing Streams
+    xcl::Stream::releaseStream(read_stream);
+    xcl::Stream::releaseStream(write_stream_a);
+    xcl::Stream::releaseStream(write_stream_b);
+    xcl::Stream::releaseStream(write_stream_c);
     return (match ? EXIT_SUCCESS : EXIT_FAILURE);
 }

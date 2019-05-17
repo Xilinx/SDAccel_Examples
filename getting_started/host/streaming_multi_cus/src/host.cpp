@@ -222,5 +222,5 @@ int main(int argc, char** argv)
         xcl::Stream::releaseStream(write_stream_a[i]);
         xcl::Stream::releaseStream(write_stream_b[i]);
     }
-    return !match;
+    return (match ? EXIT_SUCCESS : EXIT_FAILURE);
 }

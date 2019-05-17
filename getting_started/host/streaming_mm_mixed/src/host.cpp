@@ -57,7 +57,7 @@ int reset(int* a, int*b, int* sw_results, int* hw_results, unsigned int size)
     return 0;
 }
 ///////////////////VERIFY FUNCTION///////////////////////////////////
-int verify(int* sw_results, int* hw_results, int size)
+bool verify(int* sw_results, int* hw_results, int size)
 {
     bool match = true;
     for (int i = 0; i < size; i++){
@@ -202,7 +202,7 @@ int main(int argc, char** argv)
     // OpenCL Host Code Ends
 
     // Compare the device results with software results
-    verify(sw_results.data(), hw_results.data(), size);
+    bool match = verify(sw_results.data(), hw_results.data(), size);
 
-    return 0;
+    return (match ? EXIT_SUCCESS : EXIT_FAILURE);
 }
