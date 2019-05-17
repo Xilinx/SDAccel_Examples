@@ -17,6 +17,7 @@ Example        | Description           | Key Concepts / Keywords
 [hbm_simple/][]|This is a simple example of vector addition to describe how to use HLS kernels with HBM (High Bandwidth Memory) for achieving high throughput.|__Key__ __Concepts__<br> - High Bandwidth Memory<br> - Multiple HBM Banks<br>__Keywords__<br> - HBM<br> - XCL_MEM_TOPOLOGY<br> - cl_mem_ext_ptr_t
 [host_global_bandwidth/][]|Host to global memory bandwidth test|
 [kernel_swap_c/][]|This example shows how host can swap the kernels and share same buffer between two kernels which are exist in separate binary containers. Dynamic platforms does not persist the buffer data so host has to migrate data from device to host memory before swapping the next kernel. After kernel swap, host has to migrate the buffer back to device.|__Key__ __Concepts__<br> - Handling Buffer sharing across multiple binaries<br> - Multiple Kernel Binaries<br>__Keywords__<br> - clEnqueueMigrateMemObjects()<br> - CL_MIGRATE_MEM_OBJECT_HOST
+[multiple_cus_asymmetrical/][]|This is simple example of vector addition to demonstrate how each compute units are connected to different banks.|__Key__ __Concepts__<br> - Multiple Compute Units<br>__Keywords__<br> - #pragma HLS PIPELINE
 [multiple_devices_c/][]|This example show how to take advantage of multiple FPGAs on a system. It will show how to initialized an OpenCL context, allocate memory on the two devices and execute a kernel on each FPGA.|__Key__ __Concepts__<br> - OpenCL API<br> - Multi-FPGA Execution<br> - Event Handling<br>__Keywords__<br> - cl_device_id<br> - clGetDeviceIDs()
 [multiple_process_c/][]|This example will demonstrate how to run multiple processes to utilize multiple kernels simultaneously on an FPGA device. Multiple processes can share access to the same device provided each process uses the same xclbin. Processes share access to all device resources but there is no support for exclusive access to resources by any process.|__Key__ __Concepts__<br> - Concurrent execution<br> - Multiple HLS kernels<br> - Multiple Process Support<br>__Keywords__<br> - PID<br> - fork<br> - XCL_MULTIPROCESS_MODE<br> - multiprocess
 [overlap_c/][]|This examples demonstrates techniques that allow user to overlap Host(CPU) and FPGA computation in an application. It will cover asynchronous operations and event object.|__Key__ __Concepts__<br> - OpenCL API<br> - Synchronize Host and FPGA<br> - Asynchronous Processing<br> - Events<br> - Asynchronous memcpy<br>__Keywords__<br> - cl_event<br> - clCreateCommandQueue<br> - CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE<br> - clEnqueueMigrateMemObjects
@@ -39,6 +40,7 @@ Example        | Description           | Key Concepts / Keywords
 [hbm_simple/]:hbm_simple/
 [host_global_bandwidth/]:host_global_bandwidth/
 [kernel_swap_c/]:kernel_swap_c/
+[multiple_cus_asymmetrical/]:multiple_cus_asymmetrical/
 [multiple_devices_c/]:multiple_devices_c/
 [multiple_process_c/]:multiple_process_c/
 [overlap_c/]:overlap_c/

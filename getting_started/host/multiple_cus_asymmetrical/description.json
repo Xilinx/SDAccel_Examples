@@ -1,0 +1,35 @@
+{
+    "runtime": ["OpenCL"],
+    "example": "Vector Addition ~ Asymmetrical Multiple Compute Units (C) ",
+    "overview": [
+        "This is simple example of vector addition to demonstrate how to connect each compute unit to different banks and how to use these compute units in host applications"],
+    "key_concepts": [ "Multiple Compute Units"],
+    "keywords": ["#pragma HLS PIPELINE"],
+    "os": [
+        "Linux"
+    ],
+    "libs": [
+        "xcl2"
+    ],
+    "host_exe": "host",
+    "cmd_args": "BUILD/vadd.xclbin",
+    "containers": [
+        {
+            "name": "vadd",
+            "ldclflags": "--sp vadd_1.in1:DDR[0] --sp vadd_1.in2:DDR[0] --sp vadd_1.out:DDR[0] --sp vadd_2.in1:DDR[1] --sp vadd_2.in2:DDR[1] --sp vadd_2.out:DDR[1] --sp vadd_3.in1:DDR[2] --sp vadd_3.in2:DDR[2] --sp vadd_3.out:DDR[2] --sp vadd_4.in1:PLRAM[0] --sp vadd_4.in2:PLRAM[0] --sp vadd_4.out:PLRAM[0]  ",
+            "accelerators" : [
+                {
+                   "name": "vadd",
+                   "location": "src/vadd.cpp",
+                   "num_compute_units": "4:vadd_1.vadd_2.vadd_3.vadd_4"   
+                }
+           ]
+        }
+    ],
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ]
+}
