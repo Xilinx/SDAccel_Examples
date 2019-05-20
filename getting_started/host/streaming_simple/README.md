@@ -8,9 +8,10 @@ This is a simple Vector Add C Kernel design with 2 Stream inputs and 1 Stream ou
 ***KEYWORDS:*** cl_stream, CL_STREAM_EOT, CL_STREAM_NONBLOCKING
 
 ## SUPPORTED PLATFORMS
-Board | Software Version
-------|-----------------
-Xilinx Alveo U200|SDx 2019.1
+Platform | Board             | Software Version
+---------|-------------------|-----------------
+xilinx_u200_qdma|Xilinx Alveo U200|SDx 2019.1
+xilinx_u250_qdma|Xilinx Alveo U250|SDx 2019.1
 
 
 ##  DESIGN FILES
@@ -19,7 +20,6 @@ Application code is located in the src directory. Accelerator binary files will 
 ```
 src/host.cpp
 src/krnl_stream_vadd.cpp
-src/streams_vadd.h
 ```
 
 ##  COMMAND LINE ARGUMENTS

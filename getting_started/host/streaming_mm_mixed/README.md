@@ -8,12 +8,10 @@ This is a simple streaming Vector Addition C Kernel design with 1 Stream input, 
 ***KEYWORDS:*** cl_stream, CL_STREAM_EOT, CL_STREAM_BLOCKING
 
 ## SUPPORTED PLATFORMS
-Board | Software Version
-------|-----------------
-Xilinx Alveo U250|SDx 2018.3
-Xilinx Alveo U200|SDx 2018.3
-Xilinx Alveo U280 ES|SDx 2018.3
-Xilinx Virtex UltraScale+ VCU1525|SDx 2018.3
+Platform | Board             | Software Version
+---------|-------------------|-----------------
+xilinx_u200_qdma|Xilinx Alveo U200|SDx 2019.1
+xilinx_u250_qdma|Xilinx Alveo U250|SDx 2019.1
 
 
 ##  DESIGN FILES

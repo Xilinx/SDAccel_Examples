@@ -5,28 +5,36 @@ import json
 import os
 import subprocess
 
-DSA = 'xilinx_vcu1525_dynamic'
-VERSION = 'SDx 2018.3'
+DSA = 'xilinx_u200_qdma'
+VERSION = 'SDx 2019.1'
 DEVICES = {
-    'xilinx_u280-es1_xdma': {
-       'version': '5.0',
-       'name': 'Xilinx Alveo U280 ES',
-       'nae':  'nx7u_xdma_201830_1'
-    },
-    'xilinx_u200_xdma': {
-       'version': '5.0',
+    'xilinx_u200_qdma': {
+       'version': '201910_1',
        'name': 'Xilinx Alveo U200',
        'nae':  'nx5u_xdma_201830_1'
     },
+    'xilinx_u280_xdma': {
+       'version': '201910_1',
+       'name': 'Xilinx Alveo U280'
+    },
+    'xilinx_u280-es1_xdma': {
+       'version': '201910_1',
+       'name': 'Xilinx Alveo U280',
+       'nae':  'nx7u_xdma_201830_1'
+    },
+    'xilinx_u200_xdma': {
+       'version': '201830_1',
+       'name': 'Xilinx Alveo U200',
+       'nae':  'nx5u_xdma_201830_1'
+    },
+    'xilinx_u250_qdma': {
+       'version': '201910_1',
+       'name': 'Xilinx Alveo U250'
+    },
     'xilinx_u250_xdma': {
-       'version': '5.0',
+       'version': '201830_1',
        'name': 'Xilinx Alveo U250',
        'nae':  'nx6u_xdma_201830_1'
-    },
-    'xilinx_vcu1525_dynamic': {
-       'version': '5.0',
-       'name': 'Xilinx Virtex UltraScale+ VCU1525',
-       'nae':  'nx5b'
     }
 }
 
@@ -79,8 +87,8 @@ def overview(target,data):
 
 def requirements(target,data):
     target.write("## SUPPORTED PLATFORMS\n")
-    target.write("Board | Software Version\n")
-    target.write("------|-----------------\n")
+    target.write("Platform | Board             | Software Version\n")
+    target.write("---------|-------------------|-----------------\n")
 
     boards = []
     if 'board' in data:
@@ -93,10 +101,11 @@ def requirements(target,data):
         boards = [word for word in DEVICES if word not in nboard]
 
     for board in boards:
+        target.write(board)
+        target.write("|")
         target.write(DEVICES[board]['name'])
         target.write("|")
-        for version in VERSION:
-            target.write(version)
+        target.write(VERSION)
         target.write("\n")
     target.write("\n\n") 
     return
@@ -225,4 +234,3 @@ else:
     commandargs(target,data)
 
 target.close
-

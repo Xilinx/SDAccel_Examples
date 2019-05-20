@@ -4,9 +4,10 @@ HBM Bandwidth
 This is a HBM bandwidth check design. Design contains 8 compute units of a kernel which has access to all HBM banks (0:31). Host application allocate buffer into all HBM banks and run these 8 compute units concurrently and measure the overall bandwidth between Kernel and HBM Memory.
 
 ## SUPPORTED PLATFORMS
-Board | Software Version
-------|-----------------
-Xilinx Alveo U280 ES|SDx 2018.3
+Platform | Board             | Software Version
+---------|-------------------|-----------------
+xilinx_u280_xdma|Xilinx Alveo U280|SDx 2019.1
+xilinx_u280-es1_xdma|Xilinx Alveo U280|SDx 2019.1
 
 
 ##  DESIGN FILES

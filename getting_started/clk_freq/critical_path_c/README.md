@@ -6,12 +6,14 @@ This example shows a normal coding style which could lead to critical path issue
 ***KEY CONCEPTS:*** Critical Path handling, Improve Timing
 
 ## SUPPORTED PLATFORMS
-Board | Software Version
-------|-----------------
-Xilinx Alveo U250|SDx 2018.3
-Xilinx Alveo U200|SDx 2018.3
-Xilinx Alveo U280 ES|SDx 2018.3
-Xilinx Virtex UltraScale+ VCU1525|SDx 2018.3
+Platform | Board             | Software Version
+---------|-------------------|-----------------
+xilinx_u200_qdma|Xilinx Alveo U200|SDx 2019.1
+xilinx_u280_xdma|Xilinx Alveo U280|SDx 2019.1
+xilinx_u250_qdma|Xilinx Alveo U250|SDx 2019.1
+xilinx_u200_xdma|Xilinx Alveo U200|SDx 2019.1
+xilinx_u250_xdma|Xilinx Alveo U250|SDx 2019.1
+xilinx_u280-es1_xdma|Xilinx Alveo U280|SDx 2019.1
 
 
 ##  DESIGN FILES

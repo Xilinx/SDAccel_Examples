@@ -8,12 +8,14 @@ This example will demonstrate how to use multiple and out of order command queue
 ***KEYWORDS:*** CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, clSetEventCallback()
 
 ## SUPPORTED PLATFORMS
-Board | Software Version
-------|-----------------
-Xilinx Alveo U250|SDx 2018.3
-Xilinx Alveo U200|SDx 2018.3
-Xilinx Alveo U280 ES|SDx 2018.3
-Xilinx Virtex UltraScale+ VCU1525|SDx 2018.3
+Platform | Board             | Software Version
+---------|-------------------|-----------------
+xilinx_u200_qdma|Xilinx Alveo U200|SDx 2019.1
+xilinx_u280_xdma|Xilinx Alveo U280|SDx 2019.1
+xilinx_u250_qdma|Xilinx Alveo U250|SDx 2019.1
+xilinx_u200_xdma|Xilinx Alveo U200|SDx 2019.1
+xilinx_u250_xdma|Xilinx Alveo U250|SDx 2019.1
+xilinx_u280-es1_xdma|Xilinx Alveo U280|SDx 2019.1
 
 
 ##  DESIGN FILES

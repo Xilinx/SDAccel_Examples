@@ -1,19 +1,21 @@
 Vector Addition ~ Asymmetrical Multiple Compute Units (C) 
 ======================
 
-This is simple example of vector addition to demonstrate how each compute units are connected to different banks.
+This is simple example of vector addition to demonstrate how to connect each compute unit to different banks and how to use these compute units in host applications
 
 ***KEY CONCEPTS:*** Multiple Compute Units
 
 ***KEYWORDS:*** #pragma HLS PIPELINE
 
 ## SUPPORTED PLATFORMS
-Board | Software Version
-------|-----------------
-Xilinx Alveo U250|SDx 2018.3
-Xilinx Alveo U200|SDx 2018.3
-Xilinx Alveo U280 ES|SDx 2018.3
-Xilinx Virtex UltraScale+ VCU1525|SDx 2018.3
+Platform | Board             | Software Version
+---------|-------------------|-----------------
+xilinx_u200_qdma|Xilinx Alveo U200|SDx 2019.1
+xilinx_u280_xdma|Xilinx Alveo U280|SDx 2019.1
+xilinx_u250_qdma|Xilinx Alveo U250|SDx 2019.1
+xilinx_u200_xdma|Xilinx Alveo U200|SDx 2019.1
+xilinx_u250_xdma|Xilinx Alveo U250|SDx 2019.1
+xilinx_u280-es1_xdma|Xilinx Alveo U280|SDx 2019.1
 
 
 ##  DESIGN FILES

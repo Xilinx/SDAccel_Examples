@@ -8,12 +8,10 @@ This is a simple Vector Add C Kernel design with 2 Stream inputs and 1 Stream ou
 ***KEYWORDS:*** cl_stream, CL_STREAM_EOT, Multiple Compute Units
 
 ## SUPPORTED PLATFORMS
-Board | Software Version
-------|-----------------
-Xilinx Alveo U250|SDx 2019.1
-Xilinx Alveo U200|SDx 2019.1
-Xilinx Alveo U280 ES|SDx 2019.1
-Xilinx Virtex UltraScale+ VCU1525|SDx 2019.1
+Platform | Board             | Software Version
+---------|-------------------|-----------------
+xilinx_u200_qdma|Xilinx Alveo U200|SDx 2019.1
+xilinx_u250_qdma|Xilinx Alveo U250|SDx 2019.1
 
 
 ##  DESIGN FILES
