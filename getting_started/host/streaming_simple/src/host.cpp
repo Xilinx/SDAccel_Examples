@@ -85,7 +85,7 @@ bool verify(int* a, int*b, int* sw_results, int* hw_results, int size)
     std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl;    
     return match;
 }
-///////////////////////////Calculte Duration/////////////////////////
+///////////////////////////Calculate Duration///////////////////////
 double calc_throput(cl::Event &wait_event, size_t vector_size_bytes)
 {
     unsigned long start, stop;
@@ -94,7 +94,7 @@ double calc_throput(cl::Event &wait_event, size_t vector_size_bytes)
     OCL_CHECK(err, err = wait_event.getProfilingInfo<unsigned long>(CL_PROFILING_COMMAND_START, &start));
     OCL_CHECK(err, err = wait_event.getProfilingInfo<unsigned long>(CL_PROFILING_COMMAND_END, &stop));
     unsigned long duration = stop - start;
-    double throput = (double)vector_size_bytes/((double)duration/1E15);
+    double throput = (double)vector_size_bytes/(double)duration * 1E3;
     return throput;
 }
 ////////MAIN FUNCTION//////////
@@ -196,9 +196,6 @@ int main(int argc, char** argv)
     cl::Event b_wait_event;
     OCL_CHECK(err, err = q.enqueueTask(krnl_vadd, NULL, &b_wait_event));
     
-    double throput = calc_throput(b_wait_event, vector_size_bytes);
-    std::cout << "[ Case: 1 ] -> Throughput = " << throput << " MB/s\n";
-
     // Initiating the WRITE transfer
     cl_stream_xfer_req b_wr_req {0};
 
@@ -226,6 +223,9 @@ int main(int argc, char** argv)
 
     // Ensuring all OpenCL objects are released.
     q.finish();
+    
+    double throput = calc_throput(b_wait_event, vector_size_bytes);
+    std::cout << "[ Case: 1 ] -> Throughput = " << throput << " MB/s\n";
 
     // Compare the results
     bool b_match = verify(h_a.data(), h_b.data(), sw_results.data(), hw_results.data(), size);
@@ -242,9 +242,6 @@ int main(int argc, char** argv)
     cl::Event nb_wait_event;
     OCL_CHECK(err, err = q.enqueueTask(krnl_vadd, NULL, &nb_wait_event));
     
-    throput = calc_throput(nb_wait_event, vector_size_bytes);
-    std::cout << "[ Case: 2 ] -> Throughput = " << throput << " MB/s\n";
-
     // Initiating the WRITE transfer
     cl_stream_xfer_req nb_wr_req {0};
 
@@ -273,6 +270,9 @@ int main(int argc, char** argv)
             
     // Ensuring all OpenCL objects are released.
     q.finish();
+    
+    throput = calc_throput(nb_wait_event, vector_size_bytes);
+    std::cout << "[ Case: 2 ] -> Throughput = " << throput << " MB/s\n";
 
     // Compare the device results with software results
     bool nb_match = verify(h_a.data(), h_b.data(), sw_results.data(), hw_results.data(), size);
