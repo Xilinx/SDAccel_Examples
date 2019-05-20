@@ -470,6 +470,88 @@ def mk_help(target):
     target.write("\t$(ECHO) \"\"\n")
     target.write("\n")
 
+def report_gen(target, data):
+    target.write("#+-------------------------------------------------------------------------------\n")
+    target.write("# The following parameters are assigned with default values. These parameters can\n")
+    target.write("# be overridden through the make command line\n")
+    target.write("#+-------------------------------------------------------------------------------\n")
+    target.write("\n")
+
+    if "testinfo" in data and "profile" in data["testinfo"] and data["testinfo"]["profile"] == "no":
+        pass
+    else:
+        target.write("PROFILE := no\n")
+        target.write("\n")
+        target.write("#Generates profile summary report\n")
+        target.write("ifeq ($(PROFILE), yes)\n")
+        target.write("LDCLFLAGS += --profile_kernel data:all:all:all\n")
+        target.write("endif\n")
+        target.write("\n")
+    
+    target.write("DEBUG := no\n")
+    target.write("\n")
+    target.write("#Generates debug summary report\n")
+    target.write("ifeq ($(DEBUG), yes)\n")
+    target.write("CLFLAGS += --dk protocol:all:all:all\n")
+    target.write("endif\n")
+    target.write("\n")
+
+def device2dsa_gen(target):
+    target.write("#   sanitize_dsa - create a filesystem friendly name from dsa name\n")
+    target.write("#   $(1) - name of dsa\n")
+    target.write("COLON=:\n")
+    target.write("PERIOD=.\n")
+    target.write("UNDERSCORE=_\n")
+    target.write("sanitize_dsa = $(strip $(subst $(PERIOD),$(UNDERSCORE),$(subst $(COLON),$(UNDERSCORE),$(1))))\n")
+    target.write("\n")
+
+    target.write("device2dsa = $(if $(filter $(suffix $(1)),.xpfm),$(shell $(COMMON_REPO)/utility/parsexpmf.py $(1) dsa 2>/dev/null),$(1))\n")
+    target.write("device2sandsa = $(call sanitize_dsa,$(call device2dsa,$(1)))\n")
+    target.write("device2dep = $(if $(filter $(suffix $(1)),.xpfm),$(dir $(1))/$(shell $(COMMON_REPO)/utility/parsexpmf.py $(1) hw 2>/dev/null) $(1),)\n")
+    target.write("\n")
+
+def util_checks(target):
+    target.write("#Checks for XILINX_SDX\n")
+    target.write("ifndef XILINX_SDX\n")
+    target.write("$(error XILINX_SDX variable is not set, please set correctly and rerun)\n")
+    target.write("endif\n")
+    target.write("\n")
+
+    target.write("#Checks for XILINX_XRT\n")
+    target.write("check-xrt:\n")
+    target.write("ifndef XILINX_XRT\n")
+    target.write("\t$(error XILINX_XRT variable is not set, please set correctly and rerun)\n")
+    target.write("endif\n")
+    target.write("\n")
+
+    target.write("check-devices:\n")
+    target.write("ifndef DEVICE\n")
+    target.write("\t$(error DEVICE not set. Please set the DEVICE properly and rerun. Run \"make help\" for more details.)\n")
+    target.write("endif\n")
+    target.write("\n")
+
+    target.write("check-aws_repo:\n")
+    target.write("ifndef SDACCEL_DIR\n")
+    target.write("\t$(error SDACCEL_DIR not set. Please set it properly and rerun. Run \"make help\" for more details.)\n")
+    target.write("endif\n")
+    target.write("\n")
+
+def clean_util(target):
+    target.write("# Cleaning stuff\n")
+    target.write("RM = rm -f\n")
+    target.write("RMDIR = rm -rf\n")
+    target.write("\n")
+    target.write("ECHO:= @echo\n")
+    target.write("\n")
+    
+def readme_gen(target):
+    target.write("docs: README.md\n")
+    target.write("\n")
+    target.write("README.md: description.json\n")
+    target.write("\t$(ABS_COMMON_REPO)/utility/readme_gen/readme_gen.py description.json")
+    target.write("\n")   
+
+    
 def create_mk(target, data):
     mk_help(target)
     create_params(target,data)
@@ -483,18 +565,12 @@ def create_mk(target, data):
     mk_clean(target,data)
     return 
 
-def create_utils(target):
-    dirName = os.getcwd()
-    dirNameList = list(dirName.split("/"))
-    dirNameIndex = dirNameList.index("apps")
-    diff = len(dirNameList) - dirNameIndex - 1
-    while diff > 0:
-	    os.chdir('..')
-	    diff -= 1
-    os.chdir("utility")
-    source = open("utils.mk", "r")
-    data = source.read()
-    target.write(data)
+def create_utils(target, data): 
+    report_gen(target, data) 
+    util_checks(target)
+    device2dsa_gen(target)
+    clean_util(target)
+    readme_gen(target)
 
 
 script, desc_file = argv
@@ -517,6 +593,6 @@ else:
     create_mk(target, data)
     print "Generating utils.mk file for %s" %data["example"]
     target = open("utils.mk", "w+")
-    create_utils(target)
+    create_utils(target, data)
 
 target.close

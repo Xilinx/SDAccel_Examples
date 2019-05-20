@@ -3,21 +3,7 @@
 # be overridden through the make command line
 #+-------------------------------------------------------------------------------
 
-REPORT := no
-PROFILE := no
 DEBUG := no
-
-#'estimate' for estimate report generation
-#'system' for system report generation
-ifneq ($(REPORT), no)
-CLFLAGS += --report estimate
-CLLDFLAGS += --report system
-endif
-
-#Generates profile summary report
-ifeq ($(PROFILE), yes)
-#LDCLFLAGS += --profile_kernel data:all:all:all
-endif
 
 #Generates debug summary report
 ifeq ($(DEBUG), yes)
@@ -33,6 +19,16 @@ endif
 check-xrt:
 ifndef XILINX_XRT
 	$(error XILINX_XRT variable is not set, please set correctly and rerun)
+endif
+
+check-devices:
+ifndef DEVICE
+	$(error DEVICE not set. Please set the DEVICE properly and rerun. Run "make help" for more details.)
+endif
+
+check-aws_repo:
+ifndef SDACCEL_DIR
+	$(error SDACCEL_DIR not set. Please set it properly and rerun. Run "make help" for more details.)
 endif
 
 #   sanitize_dsa - create a filesystem friendly name from dsa name
@@ -56,13 +52,3 @@ docs: README.md
 
 README.md: description.json
 	$(ABS_COMMON_REPO)/utility/readme_gen/readme_gen.py description.json
-
-check-devices:
-ifndef DEVICE
-	$(error DEVICE not set. Please set the DEVICE properly and rerun. Run "make help" for more details.)
-endif
-
-check-aws_repo:
-ifndef SDACCEL_DIR
-	$(error SDACCEL_DIR not set. Please set it properly and rerun. Run "make help" for more details.)	
-endif
