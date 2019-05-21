@@ -47,7 +47,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define NUM_KERNEL 8
 
-//Number of HBM Banks required
+//HBM Banks requirements
 #define MAX_HBM_BANKCOUNT 32
 #define BANK_NAME(n) n | XCL_MEM_TOPOLOGY
 const int bank[MAX_HBM_BANKCOUNT] = {
@@ -92,18 +92,14 @@ int main(int argc, char* argv[]) {
         return -1 ;
     }
     
-    unsigned int dataSize, num_times;
-    //num_times specify, number of times a kernel will execute the same operation. This is needed
-    //to keep the kernel busy to test the actual bandwidth of all banks running concurrently.
+    unsigned int dataSize = 64*1024*1024; //taking maximum possible data size value for an HBM bank
+    unsigned int num_times = 1024;  //num_times specify, number of times a kernel will execute the same operation. This is needed
+                                    //to keep the kernel busy to test the actual bandwidth of all banks running concurrently.
 
     //reducing the test data capacity to run faster in emulation mode
     if (xcl::is_emulation()){
         dataSize = 1024;
         num_times = 64;
-    }
-    else {
-        dataSize = 64*1024*1024;
-        num_times = 1024;
     }
 
     std::string binaryFile = argv[1];
@@ -131,6 +127,7 @@ int main(int argc, char* argv[]) {
         source_sw_mul_results[i] = source_in1[i] * source_in2[i];
     }
 
+    // Initializing output vectors to zero
     for(size_t i = 0 ; i < NUM_KERNEL ; i++){
         std::fill(source_hw_add_results[i].begin(), source_hw_add_results[i].end(), 0);
         std::fill(source_hw_mul_results[i].begin(), source_hw_mul_results[i].end(), 0);
@@ -141,7 +138,7 @@ int main(int argc, char* argv[]) {
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
-    // Creating Context and Command Queue for selected Device
+    // Creating Context and Command Queue (Out of order) for selected Device
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE | CL_QUEUE_PROFILING_ENABLE, &err));
   
@@ -156,24 +153,46 @@ int main(int argc, char* argv[]) {
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
 
-    cl::Kernel k_vadd;
-    cl_mem_ext_ptr_t inBufExt1[NUM_KERNEL], inBufExt2[NUM_KERNEL], outAddBufExt[NUM_KERNEL], outMulBufExt[NUM_KERNEL];
-    cl::Buffer buffer_input1[NUM_KERNEL], buffer_input2[NUM_KERNEL], buffer_output_add[NUM_KERNEL], buffer_output_mul[NUM_KERNEL]; 
+    // Creating Kernel object using Compute unit names
+    std::string krnl_name = "krnl_vaddmul";
+    std::vector<cl::Kernel> krnls(NUM_KERNEL);
+    
+    for (int i = 0; i < NUM_KERNEL; i++) {
+        std::string cu_id = std::to_string(i+1);
+        std::string krnl_name_full = krnl_name + ":{" + "krnl_vaddmul_" + cu_id + "}";
+        
+        printf("Creating a kernel [%s] for CU(%d)\n", krnl_name_full.c_str(), i+1);
+	    
+        //Here Kernel object is created by specifying kernel name along with compute unit. 
+	    //For such case, this kernel object can only access the specific Compute unit
+        
+        OCL_CHECK(err, krnls[i] = cl::Kernel(program, krnl_name_full.c_str(), &err)); 
+    }
+
+    std::vector<cl_mem_ext_ptr_t> inBufExt1(NUM_KERNEL);
+    std::vector<cl_mem_ext_ptr_t> inBufExt2(NUM_KERNEL);
+    std::vector<cl_mem_ext_ptr_t> outAddBufExt(NUM_KERNEL);
+    std::vector<cl_mem_ext_ptr_t> outMulBufExt(NUM_KERNEL);
+
+    std::vector<cl::Buffer> buffer_input1(NUM_KERNEL);
+    std::vector<cl::Buffer> buffer_input2(NUM_KERNEL); 
+    std::vector<cl::Buffer> buffer_output_add(NUM_KERNEL); 
+    std::vector<cl::Buffer> buffer_output_mul(NUM_KERNEL); 
     
     // For Allocating Buffer to specific Global Memory Bank, user has to use cl_mem_ext_ptr_t
     // and provide the Banks
-    for (int i=0; i<NUM_KERNEL; i++) {
+    for (int i = 0; i<NUM_KERNEL; i++) {
         inBufExt1[i].obj   = source_in1.data();
         inBufExt1[i].param = 0;
         inBufExt1[i].flags = bank[i*4];
 
         inBufExt2[i].obj = source_in2.data();
         inBufExt2[i].param = 0;
-        inBufExt2[i].flags = bank[(i*4)+2];
+        inBufExt2[i].flags = bank[(i*4)+1];
 
         outAddBufExt[i].obj = source_hw_add_results[i].data();    
         outAddBufExt[i].param = 0;
-        outAddBufExt[i].flags = bank[(i*4)+1];
+        outAddBufExt[i].flags = bank[(i*4)+2];
 
         outMulBufExt[i].obj = source_hw_mul_results[i].data();    
         outMulBufExt[i].param = 0;
@@ -183,14 +202,12 @@ int main(int argc, char* argv[]) {
     // These commands will allocate memory on the FPGA. The cl::Buffer objects can
     // be used to reference the memory locations on the device.   
     //Creating Buffers
-    for (int i=0; i<NUM_KERNEL; i++) {
+    for (int i = 0; i<NUM_KERNEL; i++) {
         OCL_CHECK(err, buffer_input1[i] = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR, sizeof(uint32_t)*dataSize, &inBufExt1[i], &err));
         OCL_CHECK(err, buffer_input2[i] = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR, sizeof(uint32_t)*dataSize, &inBufExt2[i], &err));
         OCL_CHECK(err, buffer_output_add[i] = cl::Buffer(context, CL_MEM_WRITE_ONLY | CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR, sizeof(uint32_t)*dataSize, &outAddBufExt[i], &err));
         OCL_CHECK(err, buffer_output_mul[i] = cl::Buffer(context, CL_MEM_WRITE_ONLY | CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR, sizeof(uint32_t)*dataSize, &outMulBufExt[i], &err));
     }
-
-    OCL_CHECK(err, k_vadd = cl::Kernel(program, "krnl_vaddmul", &err)); 
 
     // Copy input data to Device Global Memory
     for (int i=0; i<NUM_KERNEL; i++) {
@@ -205,14 +222,15 @@ int main(int argc, char* argv[]) {
     auto kernel_start = std::chrono::high_resolution_clock::now();
     for (int i=0; i<NUM_KERNEL; i++) {
         //Setting the k_vadd Arguments
-        OCL_CHECK(err, err = k_vadd.setArg(0, buffer_input1[i]));
-        OCL_CHECK(err, err = k_vadd.setArg(1, buffer_input2[i]));
-        OCL_CHECK(err, err = k_vadd.setArg(2, buffer_output_add[i]));
-        OCL_CHECK(err, err = k_vadd.setArg(3, buffer_output_mul[i]));
-        OCL_CHECK(err, err = k_vadd.setArg(4, dataSize));
-        OCL_CHECK(err, err = k_vadd.setArg(5, num_times));
-
-        OCL_CHECK(err, err = q.enqueueTask(k_vadd));
+        OCL_CHECK(err, err = krnls[i].setArg(0, buffer_input1[i]));
+        OCL_CHECK(err, err = krnls[i].setArg(1, buffer_input2[i]));
+        OCL_CHECK(err, err = krnls[i].setArg(2, buffer_output_add[i]));
+        OCL_CHECK(err, err = krnls[i].setArg(3, buffer_output_mul[i]));
+        OCL_CHECK(err, err = krnls[i].setArg(4, dataSize));
+        OCL_CHECK(err, err = krnls[i].setArg(5, num_times));
+        
+        //Invoking the kernel
+        OCL_CHECK(err, err = q.enqueueTask(krnls[i]));
     }
     q.finish();
     auto kernel_end = std::chrono::high_resolution_clock::now();
@@ -228,7 +246,6 @@ int main(int argc, char* argv[]) {
     }
     q.finish();
 
-    
     bool match = true;
     
     for (int i=0; i<NUM_KERNEL; i++) {
@@ -243,7 +260,6 @@ int main(int argc, char* argv[]) {
     result /= kernel_time_in_sec; // to GBps
     
     std::cout << "THROUGHPUT = " << result << " GB/s" << std::endl;
-
 //OPENCL HOST CODE AREA ENDS
 
     delete[] fileBuf;
