@@ -1,0 +1,39 @@
+{
+    "runtime": ["OpenCL"],
+    "example": "Host Streaming Bandwidth (C)",
+    "overview": [
+        "This is a simple Vector Increment C Kernel design with 1 Stream input and 1 Stream output that demonstrates on how to process an input stream of data for computation in an application and the Host to Device streaming bandwidth test."
+    ],
+    "nboard": [ "xilinx_u200_xdma", "xilinx_u250_xdma" , "xilinx_u280_xdma", "xilinx_u280-es1_xdma" ],
+    "key_concepts": [ "Read/Write Stream", "Create/Release Stream"],
+    "keywords": [ "cl_stream", "CL_STREAM_EOT", "CL_STREAM_NONBLOCKING"],
+    "os": [
+        "Linux"
+    ],
+    "host_srcs": "src/host.cpp",
+    "linker": {
+        "options": [ "-pthread" ]
+    },
+    "host_exe": "vadd_stream",
+    "cmd_args": "BUILD/krnl_stream_adder1.xclbin",
+    "libs": [
+        "xcl2"
+    ],
+    "containers": [
+    {
+       "name": "krnl_stream_adder1",       
+       "accelerators": [
+        {
+            "name": "krnl_stream_adder1", 
+            "location": "src/krnl_stream_adder1.cpp"
+        }
+       ]
+     }
+    ],
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ]
+}
