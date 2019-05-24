@@ -32,7 +32,7 @@ In this example, we will demonstrate how each compute unit can be connected to d
 // This file is required for OpenCL C++ wrapper APIs
 #include "xcl2.hpp"
 
-auto constexpr c_test_size = 256 * 1024 * 1024; //256 MB data
+auto constexpr c_test_size = 4 * 1024; //4KB data
 auto constexpr NCU = 4;
 
 ////////////////////RESET FUNCTION//////////////////////////////////////////
@@ -65,12 +65,6 @@ bool verify(int* sw_results, int* hw_results, int size)
 int main(int argc, char** argv)
 {
     unsigned int size = c_test_size;
-    
-    if(xcl::is_hw_emulation()){
-        size = 4096; // 4KB for HW emulation
-    }else if (xcl::is_emulation()){
-        size = 2 * 1024 * 1024 ; // 2MB for sw emulation
-    }
     
     // I/O Data Vectors
     std::vector<int,aligned_allocator<int>> source_in1(size);
@@ -149,8 +143,7 @@ int main(int argc, char** argv)
         int narg = 0;
  
         //Setting Kernel arguments before migrating buffer object. This is must needed for asymetric compute 
-	// units case. Here Asymetric Compute unit means that each Compute unit is connected to Different 
-	// bank.
+	// units case. Here Asymetric Compute unit means that each Compute unit is connected to different bank.
         OCL_CHECK(err, err = krnls[i].setArg(narg++,buffer_in1[i]));
         OCL_CHECK(err, err = krnls[i].setArg(narg++,buffer_in2[i]));
         OCL_CHECK(err, err = krnls[i].setArg(narg++,buffer_output[i]));
