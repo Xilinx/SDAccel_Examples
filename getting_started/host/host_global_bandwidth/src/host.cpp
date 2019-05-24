@@ -151,7 +151,7 @@ int main(int argc, char** argv)
 
     //Creating Context and Command Queue for selected Device
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
-    OCL_CHECK(err, cl::CommandQueue command_queue(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(err, cl::CommandQueue command_queue(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err));
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
