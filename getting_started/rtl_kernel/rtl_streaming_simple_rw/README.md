@@ -18,6 +18,7 @@ xilinx_u250_qdma|Xilinx Alveo U250|SDx 2019.1
 Application code is located in the src directory. Accelerator binary files will be compiled to the xclbin directory. The xclbin directory is required by the Makefile and its contents will be filled during compilation. A listing of all the files in this example is shown below
 
 ```
+src/gen_xo.tcl
 src/host.cpp
 ```
 
