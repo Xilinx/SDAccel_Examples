@@ -102,8 +102,8 @@ Example        | Description           | Key Concepts / Keywords
 [debug/debug_printf_ocl/][]|This is simple example of vector addition and printing of data that is computational result (addition). It is based on vectored addition that demonstrates printing of work item data (integer product in this case)|__Key__ __Concepts__<br> - Use of print statements for debugging<br>__Keywords__<br> - printf<br> - param:compiler.enableAutoPipelining=false
 [debug/debug_profile_c/][]|This is simple example of vector addition and printing profile data (wall clock time taken between start and stop). It also dump a waveform file which can be reloaded to vivado to see the waveform. Run command 'vivado -source ./scripts/open_waveform.tcl -tclargs <device_name>-<kernel_name>.<target>.<device_name>.wdb' to launch waveform viewer. User can also update batch to gui in sdaccel.ini file to see the live waveform while running application.|__Key__ __Concepts__<br> - Use of Profile API<br> - Waveform Dumping and loading<br>
 [rtl_kernel/rtl_adder_pipes/][]|This example shows an adder with pipes using 3 RTL kernels.|__Key__ __Concepts__<br> - RTL Kernel<br> - Multiple RTL Kernels<br>
+[rtl_kernel/rtl_streaming_free_running/][]|This is a simple Vector Increment RTL Kernel design with 1 Stream input and 1 Stream output that demonstrates on how to process an input stream of data for computation in an application.|__Key__ __Concepts__<br> - Read/Write Stream<br> - Create/Release Stream<br> - RTL Kernel<br>__Keywords__<br> - cl_stream<br> - CL_STREAM_EOT
 [rtl_kernel/rtl_streaming_k2k/][]|This is a simple Vector Increment RTL Kernel to Kernel design with 1 Stream input and 1 Stream output that demonstrates on how to process an input stream of data for computation in an application.|__Key__ __Concepts__<br> - Read/Write Stream<br> - Create/Release Stream<br> - RTL Kernel<br>__Keywords__<br> - cl_stream<br> - CL_STREAM_EOT
-[rtl_kernel/rtl_streaming_simple_rw/][]|This is a simple Vector Increment RTL Kernel design with 1 Stream input and 1 Stream output that demonstrates on how to process an input stream of data for computation in an application.|__Key__ __Concepts__<br> - Read/Write Stream<br> - Create/Release Stream<br> - RTL Kernel<br>__Keywords__<br> - cl_stream<br> - CL_STREAM_EOT
 [rtl_kernel/rtl_vadd/][]|Simple example of vector addition using RTL Kernel|__Key__ __Concepts__<br> - RTL Kernel<br>
 [rtl_kernel/rtl_vadd_2clks/][]|This example shows vector addition with 2 kernel clocks using RTL Kernel.|__Key__ __Concepts__<br> - RTL Kernel<br> - Multiple Kernel Clocks<br>__Keywords__<br> - --kernel_frequency
 [rtl_kernel/rtl_vadd_2kernels/][]|This example has two RTL Kernels. Both Kernel_0 and Kernel_1 perform vector addition. The Kernel_1 reads the output from Kernel_0 as one of two inputs.|__Key__ __Concepts__<br> - Multiple RTL Kernels<br>
@@ -198,8 +198,8 @@ Example        | Description           | Key Concepts / Keywords
 [debug/debug_profile_c/]:debug/debug_profile_c/
 [rtl_kernel]:rtl_kernel
 [rtl_kernel/rtl_adder_pipes/]:rtl_kernel/rtl_adder_pipes/
+[rtl_kernel/rtl_streaming_free_running/]:rtl_kernel/rtl_streaming_free_running/
 [rtl_kernel/rtl_streaming_k2k/]:rtl_kernel/rtl_streaming_k2k/
-[rtl_kernel/rtl_streaming_simple_rw/]:rtl_kernel/rtl_streaming_simple_rw/
 [rtl_kernel/rtl_vadd/]:rtl_kernel/rtl_vadd/
 [rtl_kernel/rtl_vadd_2clks/]:rtl_kernel/rtl_vadd_2clks/
 [rtl_kernel/rtl_vadd_2kernels/]:rtl_kernel/rtl_vadd_2kernels/

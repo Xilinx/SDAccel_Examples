@@ -102,7 +102,7 @@ int main(int argc, char** argv)
     cl::Context context;
     cl::CommandQueue q;
     cl::Program program;
-    cl::Kernel krnl_vadd;
+    cl::Kernel krnl_adder1;
 
     auto binaryFile = argv[1];
     unsigned fileBufSize;
@@ -135,9 +135,9 @@ int main(int argc, char** argv)
     OCL_CHECK(err, program = cl::Program(context, devices, bins, NULL, &err));
 
     // Creating Kernel
-    OCL_CHECK(err, krnl_vadd  = cl::Kernel(program, "myadder1:{myadder1_1}", &err));
+    OCL_CHECK(err, krnl_adder1  = cl::Kernel(program, "myadder1:{myadder1_1}", &err));
 
-    std::cout << "Vector Addition of elements 0x" << std::hex << size << std::endl;
+    std::cout << "Vector Increment of elements 0x" << std::hex << size << " by 1" << std::endl;
 
     // Reset the data vectors
     reset(h_a.data(), sw_results.data(), hw_results.data(), size);
@@ -149,7 +149,7 @@ int main(int argc, char** argv)
     // Device Connection specification of the stream through extension pointer
     cl_int ret;
     cl_mem_ext_ptr_t ext;
-    ext.param = krnl_vadd.get();
+    ext.param = krnl_adder1.get();
     ext.obj = NULL;
 
     //Create write stream for argument 0 and 1 of kernel
