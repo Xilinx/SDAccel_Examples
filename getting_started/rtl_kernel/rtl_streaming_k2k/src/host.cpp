@@ -119,7 +119,7 @@ int main(int argc, char** argv)
     OCL_CHECK(err, context = cl::Context(device, NULL, NULL, NULL, &err));
 
     // Creating Command Queue
-    OCL_CHECK(err, q = cl::CommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE , &err));
+    OCL_CHECK(err, q = cl::CommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err));
 
     // read_binary_file() is a utility API which will load the binaryFile
     // and will return the pointer to file buffer.
@@ -171,6 +171,9 @@ int main(int argc, char** argv)
     // Thread 1 for writing data to input stream 1 independently in case of default blocking transfers.
     std::thread thr1(xcl::Stream::writeStream, write_stream_a, h_a.data(), vector_size_bytes, &wr_req, &ret);
 
+    OCL_CHECK(err, err = q.enqueueTask(krnl_adder1));
+    OCL_CHECK(err, err = q.enqueueTask(krnl_adder2));
+
     // Initiating the READ transfer
     cl_stream_xfer_req rd_req {0};
     rd_req.flags = CL_STREAM_EOT;
@@ -181,6 +184,7 @@ int main(int argc, char** argv)
     // Waiting for all the threads to complete their respective operations.
     thr1.join();
     thr2.join();
+    OCL_CHECK(err, err = q.finish());
     // OpenCL Host Code Ends
 
     // Compare the device results with software results
