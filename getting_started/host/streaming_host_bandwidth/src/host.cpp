@@ -94,7 +94,7 @@ double calc_throput(cl::Event &wait_event, size_t vector_size_bytes)
     OCL_CHECK(err, err = wait_event.getProfilingInfo<unsigned long>(CL_PROFILING_COMMAND_START, &start));
     OCL_CHECK(err, err = wait_event.getProfilingInfo<unsigned long>(CL_PROFILING_COMMAND_END, &stop));
     unsigned long duration = stop - start;
-    double throput = (double)vector_size_bytes/(double)duration * 1E3;
+    double throput = (double)vector_size_bytes/(double)duration * 1E3 * 2;
     return throput;
 }
 ////////MAIN FUNCTION//////////
