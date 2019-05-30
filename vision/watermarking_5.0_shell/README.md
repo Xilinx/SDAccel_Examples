@@ -9,15 +9,21 @@ Board|Image Size|Frames / Second
 xilinx:adm-pcie-ku3:2ddr-xpr|1024 x 768|2,658
 xilinx:xil-accel-rd-ku115:4ddr-xpr|1024 x 768|3526
 ## SUPPORTED PLATFORMS
-Board | Software Version
-------|-----------------
-Xilinx Only 5.0 Shell|SDx 2018.3
+Platform | Board             | Software Version
+---------|-------------------|-----------------
+xilinx_u280_xdma|Xilinx Alveo U280|SDx 2019.1
+xilinx_u250_qdma|Xilinx Alveo U250|SDx 2019.1
 
 
 ##  DESIGN FILES
 Application code is located in the src directory. Accelerator binary files will be compiled to the xclbin directory. The xclbin directory is required by the Makefile and its contents will be filled during compilation. A listing of all the files in this example is shown below
 
 ```
+data/golden.bmp
+data/inputImage.bmp
+data/inputImage128x128.bmp
+src/krnl_watermarking.cl
+src/watermarking.cpp
 ```
 
 ##  COMMAND LINE ARGUMENTS

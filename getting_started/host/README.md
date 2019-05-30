@@ -16,6 +16,7 @@ Example        | Description           | Key Concepts / Keywords
 [hbm_bandwidth/][]|This is a HBM bandwidth check design. Design contains 8 compute units of a kernel which has access to all HBM banks (0:31). Host application allocate buffer into all HBM banks and run these 8 compute units concurrently and measure the overall bandwidth between Kernel and HBM Memory.|
 [hbm_simple/][]|This is a simple example of vector addition to describe how to use HLS kernels with HBM (High Bandwidth Memory) for achieving high throughput.|__Key__ __Concepts__<br> - High Bandwidth Memory<br> - Multiple HBM Banks<br>__Keywords__<br> - HBM<br> - XCL_MEM_TOPOLOGY<br> - cl_mem_ext_ptr_t
 [host_global_bandwidth/][]|Host to global memory bandwidth test|
+[host_global_bandwidth_5.0_shell/][]|Host to global memory bandwidth test for 5.0 shell|
 [kernel_swap_c/][]|This example shows how host can swap the kernels and share same buffer between two kernels which are exist in separate binary containers. Dynamic platforms does not persist the buffer data so host has to migrate data from device to host memory before swapping the next kernel. After kernel swap, host has to migrate the buffer back to device.|__Key__ __Concepts__<br> - Handling Buffer sharing across multiple binaries<br> - Multiple Kernel Binaries<br>__Keywords__<br> - clEnqueueMigrateMemObjects()<br> - CL_MIGRATE_MEM_OBJECT_HOST
 [multiple_cus_asymmetrical/][]|This is simple example of vector addition to demonstrate how to connect each compute unit to different banks and how to use these compute units in host applications|__Key__ __Concepts__<br> - Multiple Compute Units<br>__Keywords__<br> - #pragma HLS PIPELINE
 [multiple_devices_c/][]|This example show how to take advantage of multiple FPGAs on a system. It will show how to initialized an OpenCL context, allocate memory on the two devices and execute a kernel on each FPGA.|__Key__ __Concepts__<br> - OpenCL API<br> - Multi-FPGA Execution<br> - Event Handling<br>__Keywords__<br> - cl_device_id<br> - clGetDeviceIDs()
@@ -40,6 +41,7 @@ Example        | Description           | Key Concepts / Keywords
 [hbm_bandwidth/]:hbm_bandwidth/
 [hbm_simple/]:hbm_simple/
 [host_global_bandwidth/]:host_global_bandwidth/
+[host_global_bandwidth_5.0_shell/]:host_global_bandwidth_5.0_shell/
 [kernel_swap_c/]:kernel_swap_c/
 [multiple_cus_asymmetrical/]:multiple_cus_asymmetrical/
 [multiple_devices_c/]:multiple_devices_c/

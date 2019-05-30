@@ -100,7 +100,7 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
-ifeq ($(findstring xilinx_aws-vu9p-f1-04261818_dynamic, $(DEVICE)), xilinx_aws-vu9p-f1-04261818_dynamic)
+ifeq ($(findstring xilinx_aws-vu9p-f1-04261818, $(DEVICE)), xilinx_aws-vu9p-f1-04261818)
 $(error Nothing to be done for make)
 endif
 
