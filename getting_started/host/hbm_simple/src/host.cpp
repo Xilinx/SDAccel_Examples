@@ -200,17 +200,14 @@ int main(int argc, char* argv[]) {
   
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
-    OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
-    
+    OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err)); 
     OCL_CHECK(err, cl::Kernel kernel_vadd(program, "krnl_vadd", &err));
-    
 
     unsigned int dataSize = 64*1024*1024; 
     if( xcl::is_emulation())  {
         dataSize = 1024;
         std::cout << "Original Dataset is reduced for faster execution on emulation flow. Data size=" << dataSize << std::endl;
     }
-
   
     std::vector<int,aligned_allocator<int>> source_in1(dataSize);
     std::vector<int,aligned_allocator<int>> source_in2(dataSize);
@@ -224,8 +221,7 @@ int main(int argc, char* argv[]) {
         source_sw_results[i] = source_in1[i] + source_in2[i];
         source_hw_results[i] = 0;
     }
-  
-        
+
     double kernel_time_in_sec = 0, result = 0;
     bool match = true;
     const int numBuf = 3;   // Since three buffers are being used
@@ -250,7 +246,7 @@ int main(int argc, char* argv[]) {
 
     // Multiplying the actual data size by 3 because three buffers are being used. 
     result = 3*dataSize*sizeof(uint32_t);
-    result /= (1024*1024*1024); // to GB
+    result /= (1000*1000*1000); // to GB
     result /= kernel_time_in_sec; // to GBps
     
     std::cout << "[CASE 1] THROUGHPUT = " << result << " GB/s" << std::endl;
@@ -274,11 +270,10 @@ int main(int argc, char* argv[]) {
     match = verify(source_sw_results, source_hw_results, dataSize);
 
     result = 3*dataSize*sizeof(uint32_t);
-    result /= (1024*1024*1024); // to GB
+    result /= (1000*1000*1000); // to GB
     result /= kernel_time_in_sec; // to GBps
     
     std::cout << "[CASE 2] THROUGHPUT = " << result << " GB/s " << std::endl;
-
 
     delete[] fileBuf;
 
