@@ -1,0 +1,42 @@
+{
+    "runtime": ["OpenCL"],
+    "example" : "host_global_5.0_shell",
+    "overview" : [
+        "Host to global memory bandwidth test for 5.0 shell"
+    ],
+    "os": [
+        "Linux"
+    ],
+    "host_exe": "host_global",
+    "cmd_args": "BUILD/krnl_host_global.xclbin",
+    "output_files": "metric1.csv",
+    "nboard":[
+	"xilinx_u280-es1_xdma",
+	"xilinx_u200_xdma",
+	"xilinx_u200_qdma",
+	"xilinx_u250_xdma",
+	"xilinx_vcu1525_xdma",
+	"xilinx_vcu1525_dynamic"	
+	],
+    "libs": [
+        "xcl2"
+    ],
+    "containers": [
+    {
+       "name": "krnl_host_global",
+       "ldclflags" : "--sp bandwidth_1.m_axi_gmem0:bank0 --sp bandwidth_1.m_axi_gmem1:bank1",
+       "accelerators": [
+        {
+            "name": "bandwidth", 
+            "location": "src/kernel.cpp"
+        }
+       ]
+      }           
+    ],
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ]
+}
