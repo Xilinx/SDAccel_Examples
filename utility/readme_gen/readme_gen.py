@@ -8,6 +8,11 @@ import subprocess
 DSA = 'xilinx_vcu1525_dynamic'
 VERSION = 'SDx 2018.3'
 DEVICES = {
+    'xilinx_aws-vu9p-f1-04261818': {
+       'version': '5.0',
+       'name': 'Xilinx Only 5.0 Shell',
+    },
+
     'xilinx_u280-es1_xdma': {
        'version': '5.0',
        'name': 'Xilinx Alveo U280 ES',

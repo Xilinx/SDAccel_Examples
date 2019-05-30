@@ -8,6 +8,10 @@
     "host_srcs": "src/watermarking.cpp",
     "cmd_args": "BUILD/apply_watermark.xclbin PROJECT/data/inputImage.bmp PROJECT/data/golden.bmp",
     "output_files": "output.bmp",        
+    "nboard": [
+	"xilinx_aws-vu9p-f1-04261818"
+    ],	
+    
     "libs": [
         "xcl2", 
         "bitmap"

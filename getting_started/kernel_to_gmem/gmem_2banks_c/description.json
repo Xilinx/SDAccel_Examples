@@ -6,11 +6,14 @@
     ],
     "key_concepts": [ "Multiple Banks"],
     "keywords": [ "max_memory_ports", "misc:map_connect",
-            "XCL_MEM_DDR_BANK0", "XCL_MEM_DDR_BANK1", "XCL_MEM_DDR_BANKx",
-            "HLS Interface m_axi bundle"],
+                  "HLS Interface m_axi bundle"
+    ],
     "os": [
         "Linux"
     ],
+    "nboard": [
+	"xilinx_aws-vu9p-f1-04261818"
+    ],	
     "libs": [
         "xcl2","bitmap"
     ],

@@ -11,9 +11,9 @@ This example demonstrates how to create OpenCL subdevices which uses a single ke
 Board | Software Version
 ------|-----------------
 Xilinx Alveo U250|SDx 2018.3
-Xilinx Alveo U200|SDx 2018.3
 Xilinx Alveo U280 ES|SDx 2018.3
 Xilinx Virtex UltraScale+ VCU1525|SDx 2018.3
+Xilinx Alveo U200|SDx 2018.3
 
 
 ##  DESIGN FILES

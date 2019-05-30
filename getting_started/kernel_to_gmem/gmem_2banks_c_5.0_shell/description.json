@@ -1,0 +1,48 @@
+{
+    "runtime": ["OpenCL"],
+    "example": "Global Memory Two Banks (C) for 5.0 shell",
+    "overview": [
+        "This example of 2ddr to demonstrate on how to use 2ddr DSA. How to create buffers in each DDR."
+    ],
+    "key_concepts": [ "Multiple Banks"],
+    "keywords": [ "max_memory_ports", "misc:map_connect",
+                        "HLS Interface m_axi bundle"
+    ],
+    "os": [
+        "Linux"
+    ],
+   "nboard":[
+	"xilinx_u280-es1_xdma",
+	"xilinx_u200_xdma",
+	"xilinx_u200_qdma",
+	"xilinx_u250_xdma",
+	"xilinx_vcu1525_xdma",
+	"xilinx_vcu1525_dynamic"	
+	],
+ 
+    "libs": [
+        "xcl2","bitmap"
+    ],
+    "host_exe": "host",
+    "cmd_args" : "BUILD/apply_watermark.xclbin PROJECT/data/input.bmp PROJECT/data/golden.bmp",
+    "output_files": "output.bmp",        
+    "containers": [
+        {
+            "name": "apply_watermark", 
+            "ldclflags" : "--sp apply_watermark_1.m_axi_gmem0:bank0 --sp apply_watermark_1.m_axi_gmem1:bank1",
+            "accelerators": [
+                {
+                    "name": "apply_watermark",
+                    "max_memory_ports": "true", 
+                    "location": "src/apply_watermark.cpp"
+                }
+            ]
+        }
+    ],
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ]
+}
