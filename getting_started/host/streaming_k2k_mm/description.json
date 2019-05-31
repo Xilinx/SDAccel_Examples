@@ -9,6 +9,7 @@
     "os": [
         "Linux"
     ],
+    "nboard": [ "xilinx_aws-vu9p-f1-04261818" ], 	
     "host_srcs": "src/host.cpp",
     "linker": {
         "options": [ "-pthread" ]

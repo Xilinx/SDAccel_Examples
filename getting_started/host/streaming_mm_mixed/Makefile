@@ -112,6 +112,9 @@ endif
 ifeq ($(findstring xilinx_u280-es1_xdma, $(DEVICE)), xilinx_u280-es1_xdma)
 $(error Nothing to be done for make)
 endif
+ifeq ($(findstring xilinx_aws-vu9p-f1-04261818, $(DEVICE)), xilinx_aws-vu9p-f1-04261818)
+$(error Nothing to be done for make)
+endif
 
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .

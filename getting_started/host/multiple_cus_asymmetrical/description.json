@@ -8,6 +8,9 @@
     "os": [
         "Linux"
     ],
+    "nboard":["xilinx_aws-vu9p-f1-04261818","xilinx:aws:vu9p:f1:04261818"  	
+    ],
+ 
     "libs": [
         "xcl2"
     ],
