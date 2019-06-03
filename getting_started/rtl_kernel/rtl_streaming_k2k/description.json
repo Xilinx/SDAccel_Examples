@@ -6,7 +6,7 @@
     ],
     "key_concepts": [ "Read/Write Stream", "Create/Release Stream", "RTL Kernel"],
     "targets": [ "hw", "hw_emu" ],
-    "nboard": [ "xilinx_u200_xdma", "xilinx_u250_xdma" , "xilinx_u280_xdma", "xilinx_u280-es1_xdma"],
+    "nboard": [ "xilinx_u200_xdma", "xilinx_u250_xdma" , "xilinx_u280_xdma", "xilinx_u280-es1_xdma", "xilinx_aws-vu9p-f1-04261818"  ],
     "keywords": [ "cl_stream", "CL_STREAM_EOT" ],
     "os": [
         "Linux"
