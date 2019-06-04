@@ -12,8 +12,13 @@
     "libs": [
         "xcl2"
     ],
-    "nboard": ["xilinx_vcu1525_dynamic", "xilinx_u280-es1_xdma"],
-    "host_exe": "host",
+  "nboard": [
+        "xilinx_vcu1525_dynamic", 
+        "xilinx_u280-es1_xdma", 
+        "xilinx:vcu1525:dynamic", 
+        "xilinx:u280-es1:xdma"
+    ],  
+   "host_exe": "host",
     "cmd_args": "BUILD/vmult_vadd.xclbin",
     "containers" : [ 
      {

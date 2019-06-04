@@ -118,6 +118,24 @@ endif
 ifeq ($(findstring xilinx_aws-vu9p-f1-04261818, $(DEVICE)), xilinx_aws-vu9p-f1-04261818)
 $(error Nothing to be done for make)
 endif
+ifeq ($(findstring xilinx:u200:xdma, $(DEVICE)), xilinx:u200:xdma)
+$(error Nothing to be done for make)
+endif
+ifeq ($(findstring xilinx:u200:qdma, $(DEVICE)), xilinx:u200:qdma)
+$(error Nothing to be done for make)
+endif
+ifeq ($(findstring xilinx:u250:xdma, $(DEVICE)), xilinx:u250:xdma)
+$(error Nothing to be done for make)
+endif
+ifeq ($(findstring xilinx:u250:qdma, $(DEVICE)), xilinx:u250:qdma)
+$(error Nothing to be done for make)
+endif
+ifeq ($(findstring xilinx:vcu1525:dynamic, $(DEVICE)), xilinx:vcu1525:dynamic)
+$(error Nothing to be done for make)
+endif
+ifeq ($(findstring xilinx:aws-vu9p-f1-04261818:dynamic, $(DEVICE)), xilinx:aws-vu9p-f1-04261818:dynamic)
+$(error Nothing to be done for make)
+endif
 
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .

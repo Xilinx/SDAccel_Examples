@@ -8,14 +8,20 @@
         "Linux"
     ],
     "nboard": [
-	"xilinx_u280-es1_xdma",
-	"xilinx_u200_xdma",
-	"xilinx_u200_qdma",
-	"xilinx_u250_xdma",
-	"xilinx_vcu1525_xdma",
-	"xilinx_vcu1525_dynamic"	
-	],
-    "host_exe": "idct",
+        "xilinx_u280-es1_xdma", 
+        "xilinx_u200_xdma", 
+        "xilinx_u200_qdma", 
+        "xilinx_u250_xdma", 
+        "xilinx_vcu1525_xdma", 
+        "xilinx_vcu1525_dynamic", 
+        "xilinx:u280-es1:xdma", 
+        "xilinx:u200:xdma", 
+        "xilinx:u200:qdma", 
+        "xilinx:u250:xdma", 
+        "xilinx:vcu1525:xdma", 
+        "xilinx:vcu1525:dynamic"
+    ],  
+   "host_exe": "idct",
     "host_srcs": "src/idct.cpp",
     "cmd_args" : "BUILD/krnl_idct.xclbin",
     "containers": [
