@@ -7,11 +7,13 @@
     "os": [
         "Linux"
     ],
-    "nboard": [
-	"xilinx_vcu1525_dynamic",
-	"xilinx_aws-vu9p-f1-04261818"		
-    ],
-    "host_exe": "idct",
+   "nboard": [
+        "xilinx_vcu1525_dynamic", 
+        "xilinx_aws-vu9p-f1-04261818", 
+        "xilinx:vcu1525:dynamic", 
+        "xilinx:aws-vu9p-f1-04261818:dynamic"
+    ],  
+   "host_exe": "idct",
     "host_srcs": "src/idct.cpp",
     "cmd_args" : "BUILD/krnl_idct.xclbin",
     "containers": [
