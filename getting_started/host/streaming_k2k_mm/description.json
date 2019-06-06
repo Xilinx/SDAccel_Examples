@@ -9,7 +9,11 @@
     "os": [
         "Linux"
     ],
-    "nboard": [ "xilinx_aws-vu9p-f1-04261818" ], 	
+ "nboard": [
+        "xilinx_aws-vu9p-f1-04261818", 
+        "xilinx:aws-vu9p-f1-04261818:dynamic"
+    ], 
+
     "host_srcs": "src/host.cpp",
     "linker": {
         "options": [ "-pthread" ]
