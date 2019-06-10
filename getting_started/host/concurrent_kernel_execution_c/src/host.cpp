@@ -374,15 +374,15 @@ int main(int argc, char **argv) {
   // Called to set environment variables
   // The get_xil_devices will return vector of Xilinx Devices
   // platforms and will return list of devices connected to Xilinx platform
-  std::vector<cl::Device> devices = xcl::get_xil_devices();
-  cl::Device device = devices[0];
+  auto devices = xcl::get_xil_devices();
+  auto device = devices[0];
 
   OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
   OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
   // read_binary_file() is a utility API which will load the binaryFile
   // and will return pointer to file buffer.
-  char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+  auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
   cl::Program::Binaries bins{{fileBuf, fileBufSize}};
   devices.resize(1);
   OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));

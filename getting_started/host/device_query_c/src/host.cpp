@@ -61,7 +61,7 @@ using std::vector;
         break
 
 #define BITFIELD_SETUP(type)                  \
-    auto value = convert<type>(field.data()); \
+    auto value  = convert<type>(field.data()); \
     printf("[ ")
 
 #define BITFIELD_PRINT(FIELD) \

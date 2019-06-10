@@ -334,7 +334,7 @@ void print_device_info(cl::Device device) {
             }
             break;
             case CL_DEVICE_PLATFORM: {
-                auto platform = convert<cl::Platform>(field.data());
+                auto platform =  convert<cl::Platform>(field.data());
         OCL_CHECK(err, err = platform.getInfo(CL_PLATFORM_NAME, &field));
                 printf("%s\n", field.c_str());
             } break;
