@@ -17,13 +17,15 @@
         "xilinx_u200_qdma", 
         "xilinx_u250_xdma", 
         "xilinx_vcu1525_xdma", 
-        "xilinx_vcu1525_dynamic", 
+        "xilinx_vcu1525_dynamic",
+	"xilinx_u280_xdma", 
         "xilinx:u280-es1:xdma", 
         "xilinx:u200:xdma", 
         "xilinx:u200:qdma", 
         "xilinx:u250:xdma", 
         "xilinx:vcu1525:xdma", 
-        "xilinx:vcu1525:dynamic"
+        "xilinx:vcu1525:dynamic",
+	"xilinx:u280:xdma"
     ], 
     
     "libs": [
