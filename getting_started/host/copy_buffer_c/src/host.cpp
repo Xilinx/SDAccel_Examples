@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
 
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
-    std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+    auto device_name = device.getInfo<CL_DEVICE_NAME>(); 
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
     auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);

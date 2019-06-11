@@ -122,7 +122,7 @@ int main(int argc, char **argv){
         return EXIT_FAILURE;
     }
 
-    std::string binaryFile = argv[1];
+    auto binaryFile = argv[1];
     
     static const int elements = 1024;
     vector<int, aligned_allocator<int>> A(elements, 32);
@@ -137,7 +137,7 @@ int main(int argc, char **argv){
 //OPENCL HOST CODE AREA ENDS
     std::vector<cl::Platform> platforms;
     OCL_CHECK(err, err = cl::Platform::get(&platforms));
-    size_t num_platforms = platforms.size();
+    auto num_platforms = platforms.size();
     if (num_platforms == 0) {
         std::cout     <<"No platforms were found. This could be caused because the OpenCL "
                     "icd was not installed in the /etc/OpenCL/vendors directory." << std::endl;
@@ -174,7 +174,7 @@ int main(int argc, char **argv){
 
      //Getting ACCELERATOR Devices and selecting 1st such device
       OCL_CHECK(err, err = platform.getDevices(CL_DEVICE_TYPE_ALL, &devices));
-      cl::Device device = devices[0];
+      auto device = devices[0];
 
       cl_context_properties props[3] = {CL_CONTEXT_PLATFORM, (cl_context_properties)(platforms[0])(), 0};
 
@@ -199,7 +199,7 @@ int main(int argc, char **argv){
       // read_binary_file() is a utility API which will load the binaryFile
       // and will return pointer to file buffer.
       unsigned fileBufSize;
-      char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+      auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
       cl::Program::Binaries bins{{fileBuf, fileBufSize}};
       cl::Program::Binaries invalid_bin;
       devices.resize(1);

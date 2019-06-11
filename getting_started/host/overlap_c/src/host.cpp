@@ -170,7 +170,7 @@ int main(int argc, char **argv) {
       return EXIT_FAILURE;
   }
 
-  std::string binaryFile = argv[1];
+  auto binaryFile = argv[1];
   cl_int err;
   unsigned fileBufSize;
 
@@ -178,8 +178,8 @@ int main(int argc, char **argv) {
   // get_xil_devices() is a utility API which will find the xilinx
   // platforms and will return list of devices connected to Xilinx platform
   std::cout << "Creating Context..." << std::endl;
-  std::vector<cl::Device> devices = xcl::get_xil_devices();
-  cl::Device device = devices[0];
+  auto devices = xcl::get_xil_devices();
+  auto device = devices[0];
 
   OCL_CHECK(err, cl::Context context (device, NULL, NULL, NULL, &err));
   // This example will use an out of order command queue. The default command
@@ -189,7 +189,7 @@ int main(int argc, char **argv) {
 
   // read_binary_file() is a utility API which will load the binaryFile
   // and will return the pointer to file buffer.
-  char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+  auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
   cl::Program::Binaries bins{{fileBuf, fileBufSize}};
   devices.resize(1);
   OCL_CHECK(err, cl::Program program (context, devices, bins, NULL, &err));

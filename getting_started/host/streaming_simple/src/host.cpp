@@ -142,7 +142,7 @@ int main(int argc, char** argv)
 
     // Selecting the first available Xilinx device
     device = devices[0];
-    cl_platform_id platform_id = device.getInfo<CL_DEVICE_PLATFORM>(&err); 
+    auto platform_id = device.getInfo<CL_DEVICE_PLATFORM>(&err); 
 
     //Initialization of streaming class is needed before using it.
     xcl::Stream::init(platform_id);

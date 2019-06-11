@@ -64,7 +64,7 @@ bool run_opencl_vadd(
     cl_int err;
     unsigned fileBufSize;
 
-    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
@@ -155,12 +155,12 @@ int main(int argc, char** argv)
 
 //OPENCL HOST CODE AREA START
     //Create Program and Kernels
-    std::vector<cl::Device> devices = xcl::get_xil_devices();
-    cl::Device device = devices[0];
+    auto devices = xcl::get_xil_devices();
+    auto device = devices[0];
 
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE | CL_QUEUE_PROFILING_ENABLE));
-    std::string device_name = device.getInfo<CL_DEVICE_NAME>();
+    auto device_name = device.getInfo<CL_DEVICE_NAME>();
     std::string binaryFile;
 
     binaryFile = argv[1];

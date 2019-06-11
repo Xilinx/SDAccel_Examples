@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
-    std::string binaryFile = argv[1];
+    auto binaryFile = argv[1];
     
     cl_int err = CL_SUCCESS;
     unsigned fileBufSize;
@@ -59,8 +59,8 @@ int main(int argc, char **argv) {
 //OPENCL HOST CODE AREA START
     // get_xil_devices() is a utility API which will find the Xilinx
     // platforms and will return list of devices connected to Xilinx platform
-    std::vector<cl::Device> devices = xcl::get_xil_devices();
-    cl_uint device_count = devices.size();
+    auto devices = xcl::get_xil_devices();
+    auto device_count = devices.size();
 
     static const int elements_per_device = 1 << 10;
     static const int elements = elements_per_device * device_count;

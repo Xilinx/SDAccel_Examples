@@ -92,7 +92,7 @@ int main(int argc, char** argv)
 		return EXIT_FAILURE;
 	}
     
-    std::string binaryFile = argv[1];
+    auto binaryFile = argv[1];
     std::cout << "\n Vector Addition of elements " << size << std::endl;
 
     //Bytes per CU Stream
@@ -109,9 +109,9 @@ int main(int argc, char** argv)
     auto devices = xcl::get_xil_devices();
     
     // Selecting the first available Xilinx device
-    cl::Device device = devices[0];
+    auto device = devices[0];
 
-    cl_platform_id platform_id = device.getInfo<CL_DEVICE_PLATFORM>(&err); 
+    auto platform_id = device.getInfo<CL_DEVICE_PLATFORM>(&err); 
 
     //Initialization of streaming class is needed before using it.
     xcl::Stream::init(platform_id);
@@ -138,7 +138,7 @@ int main(int argc, char** argv)
     std::vector<cl::Kernel> krnls(NCU);
     for (int i = 0; i < NCU; i++) {
         cu_id = std::to_string(i+1);
-        std::string krnl_name_full = krnl_name + ":{" + "vadd_" + cu_id + "}";
+        auto krnl_name_full = krnl_name + ":{" + "vadd_" + cu_id + "}";
         printf("Creating a kernel [%s] for CU(%d)\n", krnl_name_full.c_str(), i);
         OCL_CHECK(err, krnls[i] = cl::Kernel(program, krnl_name_full.c_str(), &err));
     }

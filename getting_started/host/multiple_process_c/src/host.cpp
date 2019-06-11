@@ -83,8 +83,8 @@ bool run_kernel(std::string& binaryFile, int krnl_id)
     }
 
 // OPENCL HOST CODE AREA START
-    std::vector<cl::Device> devices = xcl::get_xil_devices();
-    cl::Device device = devices[0];
+    auto devices = xcl::get_xil_devices();
+    auto device = devices[0];
 
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
@@ -92,7 +92,7 @@ bool run_kernel(std::string& binaryFile, int krnl_id)
 
     printf("\n[PID: %d] Read XCLBIN file\n", pid); 
 
-    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     
     devices.resize(1);

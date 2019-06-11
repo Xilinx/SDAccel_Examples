@@ -54,8 +54,8 @@ int main(int argc, char** argv)
         h_c[i] = 0;
     }
 
-    std::vector<cl::Device> devices = xcl::get_xil_devices();
-    cl::Device device = devices[0];
+   auto devices = xcl::get_xil_devices();
+   auto device = devices[0];
 
     //Creating Context and Command Queue for selected Device 
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
@@ -74,7 +74,7 @@ int main(int argc, char** argv)
     {
         printf("INFO: loading vmul kernel\n");
         std::string vmulBinaryFile = argv[1];
-        char* fileBuf = xcl::read_binary_file(vmulBinaryFile, fileBufSize);
+        auto fileBuf = xcl::read_binary_file(vmulBinaryFile, fileBufSize);
         cl::Program::Binaries vmul_bins{{fileBuf, fileBufSize}};
         devices.resize(1);
         OCL_CHECK(err, cl::Program program(context, devices, vmul_bins, NULL, &err));
@@ -113,8 +113,8 @@ int main(int argc, char** argv)
 
     if(match){
         printf("INFO: loading vadd_krnl\n");
-        std::string vaddBinaryFile = argv[2];
-        char* fileBuf = xcl::read_binary_file(vaddBinaryFile, fileBufSize);
+        auto vaddBinaryFile = argv[2];
+        auto fileBuf = xcl::read_binary_file(vaddBinaryFile, fileBufSize);
         cl::Program::Binaries vadd_bins{{fileBuf, fileBufSize}};
         cl::Program program(context, devices, vadd_bins);
         cl::Kernel krnl_vadd(program, "krnl_vadd");

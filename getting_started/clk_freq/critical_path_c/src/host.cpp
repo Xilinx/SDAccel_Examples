@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
             << " <input bitmap> <golden bitmap>" << std::endl;
         return EXIT_FAILURE ;
     }
-    std::string binaryFile = argv[1];
+    auto binaryFile = argv[1];
     std::string bitmapFilename = argv[2];
     std::string goldenFilename = argv[3];
   
@@ -77,14 +77,14 @@ int main(int argc, char* argv[])
 
     int err;
     unsigned fileBufSize;
-    std::vector<cl::Device> devices = xcl::get_xil_devices();
-    cl::Device device = devices[0];
+    auto devices = xcl::get_xil_devices();
+    auto device = devices[0];
 
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err)); 
 
-    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));

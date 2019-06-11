@@ -77,7 +77,7 @@ int main(int argc, char** argv)
 		return EXIT_FAILURE;
 	}
 
-    // OpenCL Host Code Begins.
+   // OpenCL Host Code Begins.
     cl_int err;
 
     // OpenCL objects

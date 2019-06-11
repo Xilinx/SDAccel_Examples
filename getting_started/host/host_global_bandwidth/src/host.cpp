@@ -146,8 +146,8 @@ int main(int argc, char** argv)
     cl_int err;
     unsigned fileBufSize;
     // The get_xil_devices will return vector of Xilinx Devices
-    std::vector<cl::Device> devices = xcl::get_xil_devices();
-    cl::Device device = devices[0];
+    auto devices = xcl::get_xil_devices();
+    auto device = devices[0];
 
     //Creating Context and Command Queue for selected Device
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
@@ -156,7 +156,7 @@ int main(int argc, char** argv)
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
     // read_binary() command will find the OpenCL binary file
-    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));

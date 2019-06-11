@@ -135,8 +135,8 @@ int main(int argc, char* argv[]) {
   
 // OPENCL HOST CODE AREA START
     // The get_xil_devices will return vector of Xilinx Devices
-    std::vector<cl::Device> devices = xcl::get_xil_devices();
-    cl::Device device = devices[0];
+    auto devices = xcl::get_xil_devices();
+    auto device = devices[0];
 
     // Creating Context and Command Queue (Out of order) for selected Device
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
@@ -147,7 +147,7 @@ int main(int argc, char* argv[]) {
 
     // read_binary_file() command will find the OpenCL binary file created using the 
     // xocc compiler load into OpenCL Binary and return pointer to file buffer.
-    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
   
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
