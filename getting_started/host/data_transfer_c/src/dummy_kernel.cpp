@@ -28,23 +28,22 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 
 extern "C" {
-void dummy_kernel(unsigned int *buffer0, unsigned int *buffer1, unsigned int size)
-{
-#pragma HLS INTERFACE m_axi port=buffer0 offset=slave bundle=gmem
-#pragma HLS INTERFACE m_axi port=buffer1 offset=slave bundle=gmem
+void dummy_kernel(unsigned int *buffer0, unsigned int *buffer1, unsigned int size) {
+#pragma HLS INTERFACE m_axi port = buffer0 offset = slave bundle = gmem
+#pragma HLS INTERFACE m_axi port = buffer1 offset = slave bundle = gmem
 
-#pragma HLS INTERFACE s_axilite port=buffer0 bundle=control
-#pragma HLS INTERFACE s_axilite port=buffer1 bundle=control
-#pragma HLS INTERFACE s_axilite port=size bundle=control
-#pragma HLS INTERFACE s_axilite port=return bundle=control
+#pragma HLS INTERFACE s_axilite port = buffer0 bundle = control
+#pragma HLS INTERFACE s_axilite port = buffer1 bundle = control
+#pragma HLS INTERFACE s_axilite port = size bundle = control
+#pragma HLS INTERFACE s_axilite port = return bundle = control
 
     //Intentional empty kernel as this example doesn't require actual
     //kernel to work.
-    
-    dummy: 
-    for(unsigned int i = 0; i < size ; i++) {
-    #pragma HLS PIPELINE II=1
-       buffer0[i] = buffer1[i];
-    } 
+
+dummy:
+    for (unsigned int i = 0; i < size; i++) {
+       #pragma HLS PIPELINE II=1
+        buffer0[i] = buffer1[i];
+    }
 }
 }

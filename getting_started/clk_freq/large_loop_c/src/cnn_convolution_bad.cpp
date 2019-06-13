@@ -105,88 +105,94 @@ Kernel Description (Bad Example) :
 */
 #include "defns.h"
 
-extern "C"
-{
-    void cnn_BAD(
-            int *image,     // Read-Only Image 
-            int *weights,   // Read-Only Weight Matrix
-            int *out,       // Output Filters/Images
-            int size,       // Size of Output Data
-            int i_chan,     // Input Channels
-            int o_chan      // Output Channels
-            )
-    {
-    #pragma HLS INTERFACE m_axi port=image offset=slave bundle=gmem
-    #pragma HLS INTERFACE m_axi port=weights offset=slave bundle=gmem
-    #pragma HLS INTERFACE m_axi port=out offset=slave bundle=gmem
+extern "C" {
+void cnn_BAD(int *image,   // Read-Only Image
+             int *weights, // Read-Only Weight Matrix
+             int *out,     // Output Filters/Images
+             int size,     // Size of Output Data
+             int i_chan,   // Input Channels
+             int o_chan    // Output Channels
+) {
+   #pragma HLS INTERFACE m_axi port=image offset=slave bundle=gmem
+   #pragma HLS INTERFACE m_axi port=weights offset=slave bundle=gmem
+   #pragma HLS INTERFACE m_axi port=out offset=slave bundle=gmem
 
-    #pragma HLS INTERFACE s_axilite port=image bundle=control
-    #pragma HLS INTERFACE s_axilite port=weights bundle=control
-    #pragma HLS INTERFACE s_axilite port=out bundle=control
-    #pragma HLS INTERFACE s_axilite port=size bundle=control
-    #pragma HLS INTERFACE s_axilite port=i_chan bundle=control
-    #pragma HLS INTERFACE s_axilite port=o_chan bundle=control
-    #pragma HLS INTERFACE s_axilite port=return bundle=control
-        
-        // Local buffer to hold image, weight & output
-        int img_lcl[IChan * ISize * ISize];
-        int out_lcl[OChan * OSize * OSize];
-        int wgt_lcl[WOutChan * WInChan * WSize * WSize];
+   #pragma HLS INTERFACE s_axilite port=image bundle=control
+   #pragma HLS INTERFACE s_axilite port=weights bundle=control
+   #pragma HLS INTERFACE s_axilite port=out bundle=control
+   #pragma HLS INTERFACE s_axilite port=size bundle=control
+   #pragma HLS INTERFACE s_axilite port=i_chan bundle=control
+   #pragma HLS INTERFACE s_axilite port=o_chan bundle=control
+   #pragma HLS INTERFACE s_axilite port=return bundle=control
 
-        // Burst Read Image
-        readImg: for(int i = 0; i < i_chan * ISize * ISize; i++){
-        #pragma HLS LOOP_TRIPCOUNT min=c_ichan*c_isize*c_isize max=c_ichan*c_isize*c_isize
-        #pragma HLS PIPELINE II=1
-            img_lcl[i] = image[i];
-        }
+    // Local buffer to hold image, weight & output
+    int img_lcl[IChan * ISize * ISize];
+    int out_lcl[OChan * OSize * OSize];
+    int wgt_lcl[WOutChan * WInChan * WSize * WSize];
 
-        // Burst Read Weights
-        readWt: for(int i = 0; i < o_chan * WInChan * WSize * WSize; i++) {
-        #pragma HLS LOOP_TRIPCOUNT min=c_ochan*c_ichan*c_wsize*c_wsize max=c_ochan*c_ichan*c_wsize*c_wsize
-        #pragma HLS PIPELINE II=1
-            wgt_lcl[i] = weights[i];
-        }
+// Burst Read Image
+readImg:
+    for (int i = 0; i < i_chan * ISize * ISize; i++) {
+       #pragma HLS LOOP_TRIPCOUNT min=c_ichan*c_isize*c_isize max=c_ichan*c_isize*c_isize
+       #pragma HLS PIPELINE II=1
+        img_lcl[i] = image[i];
+    }
 
-        // Runs over output filters
-        outputLoop: for(int output = 0, count = 0; output < o_chan; output++) {
-        #pragma HLS LOOP_TRIPCOUNT min=c_ochan max=c_ochan
-            // Runs over Y-Axis of output filter
-            outYAxis: for(int y = 0; y < OSize; y++) {
-                // Runs over X-Axis of output filter
-                outXAxis: for(int x = 0; x < OSize; x++) {
-                    short acc = 0;
-                    // Runs over input channel
-                    convInchan: for(int input = 0; input < i_chan; input++) {
-                    #pragma HLS LOOP_TRIPCOUNT min=c_ichan max=c_ichan
-                        // Runs over filter window in Y-direction
-                        convILoop: for(int i = 0; i < WSize; i++) {
-                            // Runs over filter windows in X-direction
-                            convJLoop: for(int j = 0; j < WSize; j++) {
-                            #pragma HLS PIPELINE II=1
-                                // Calculates padding boundaries in X & Y direction
-                                int xVal = x*Stride + j-Padding, yVal = y*Stride + i-Padding;
-                                
-                                if(yVal >= 0 && yVal < ISize && xVal >= 0 && xVal < ISize) {
-                                    acc +=    (short) img_lcl[(input*ISize + yVal)*ISize + xVal] * 
-                                            (short) wgt_lcl[((output*i_chan + input)*WSize + i)*WSize + j];
-                                }
+// Burst Read Weights
+readWt:
+    for (int i = 0; i < o_chan * WInChan * WSize * WSize; i++) {
+       #pragma HLS LOOP_TRIPCOUNT min=c_ochan*c_ichan*c_wsize*c_wsize max=c_ochan*c_ichan*c_wsize*c_wsize
+       #pragma HLS PIPELINE II=1
+        wgt_lcl[i] = weights[i];
+    }
+
+// Runs over output filters
+outputLoop:
+    for (int output = 0, count = 0; output < o_chan; output++) {
+       #pragma HLS LOOP_TRIPCOUNT min=c_ochan max=c_ochan
+        // Runs over Y-Axis of output filter
+    outYAxis:
+        for (int y = 0; y < OSize; y++) {
+        // Runs over X-Axis of output filter
+        outXAxis:
+            for (int x = 0; x < OSize; x++) {
+                short acc = 0;
+            // Runs over input channel
+            convInchan:
+                for (int input = 0; input < i_chan; input++) {
+                   #pragma HLS LOOP_TRIPCOUNT min=c_ichan max=c_ichan
+                    // Runs over filter window in Y-direction
+                convILoop:
+                    for (int i = 0; i < WSize; i++) {
+                    // Runs over filter windows in X-direction
+                    convJLoop:
+                        for (int j = 0; j < WSize; j++) {
+                           #pragma HLS PIPELINE II=1
+                            // Calculates padding boundaries in X & Y direction
+                            int xVal = x * Stride + j - Padding, yVal = y * Stride + i - Padding;
+
+                            if (yVal >= 0 && yVal < ISize && xVal >= 0 && xVal < ISize) {
+                                acc += (short)img_lcl[(input * ISize + yVal) * ISize + xVal] *
+                                       (short)wgt_lcl[((output * i_chan + input) * WSize + i) * WSize + j];
                             }
                         }
                     }
-                    
-                    // Updates local output buffer
-                    out_lcl[count++] = acc;
                 }
+
+                // Updates local output buffer
+                out_lcl[count++] = acc;
             }
         }
-       
-        // Burst write output
-        writeOut: for(int i = 0; i < o_chan * OSize * OSize; i++) {
-        #pragma HLS LOOP_TRIPCOUNT min=c_ichan*c_osize*c_osize max=c_ochan*c_osize*c_osize
-        #pragma HLS PIPELINE II=1
-            out[i] = out_lcl[i];
-        }
-
-        return;
     }
+
+// Burst write output
+writeOut:
+    for (int i = 0; i < o_chan * OSize * OSize; i++) {
+       #pragma HLS LOOP_TRIPCOUNT min=c_ichan*c_osize*c_osize max=c_ochan*c_osize*c_osize
+       #pragma HLS PIPELINE II=1
+        out[i] = out_lcl[i];
+    }
+
+    return;
+}
 }

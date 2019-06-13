@@ -33,16 +33,16 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define IMAGE_WIDTH 1024
 #define IMAGE_HEIGHT 1024
 
+#include <cstdlib>
+#include <fstream>
 #include <iostream>
 #include <string>
-#include <fstream>
-#include <cstdlib>
 #include <vector>
 
 // OpenCV includes
 #include <opencv2/core/core.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 // XCL Helper Library
 #include <xcl2.hpp>
@@ -50,10 +50,10 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 short getAbsMax(cv::Mat mat, size_t rows, size_t cols) {
     short max = 0;
 
-    for(size_t r = 0; r < rows; r++) {
-        for(size_t c = 0; c < cols; c++) {
-            short tmp = std::abs(mat.at<short>(r,c));
-            if(tmp > max) {
+    for (size_t r = 0; r < rows; r++) {
+        for (size_t c = 0; c < cols; c++) {
+            short tmp = std::abs(mat.at<short>(r, c));
+            if (tmp > max) {
                 max = tmp;
             }
         }
@@ -68,14 +68,14 @@ cv::Mat readTxtFile(std::string fileName, size_t rows, size_t cols) {
 
     std::ifstream txtFile(fileName.c_str());
 
-    if(!txtFile.is_open()) {
+    if (!txtFile.is_open()) {
         std::cout << "ERROR: Could not open file " << fileName << std::endl;
         abort();
     }
 
-    for(size_t r = 0; r < rows; r++) {
-        for(size_t c = 0; c < cols; c++) {
-            txtFile >> mat.at<short>(r,c);
+    for (size_t r = 0; r < rows; r++) {
+        for (size_t c = 0; c < cols; c++) {
+            txtFile >> mat.at<short>(r, c);
         }
     }
 
@@ -88,28 +88,27 @@ cv::Mat readFloatTxtFile(std::string fileName, size_t rows, size_t cols) {
 
     std::ifstream txtFile(fileName.c_str());
 
-    if(!txtFile.is_open()) {
+    if (!txtFile.is_open()) {
         std::cout << "ERROR: Could not open file " << fileName << std::endl;
         abort();
     }
 
-    for(size_t r = 0; r < rows; r++) {
-        for(size_t c = 0; c < cols; c++) {
-            txtFile >> mat.at<float>(r,c);
+    for (size_t r = 0; r < rows; r++) {
+        for (size_t c = 0; c < cols; c++) {
+            txtFile >> mat.at<float>(r, c);
         }
     }
 
     return mat;
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
     cl_int err;
     cl::Event event;
     unsigned fileBufSize;
 
-    if(argc != 4 && argc != 5)
-    {
-        std::cout << "Usage: " << argv[0] <<" <XCLBIN File> <input> <coef> [<golden>]" << std::endl;
+    if (argc != 4 && argc != 5) {
+        std::cout << "Usage: " << argv[0] << " <XCLBIN File> <input> <coef> [<golden>]" << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -125,56 +124,68 @@ int main(int argc, char* argv[]) {
     }
 
     std::cout << "Reading inputs..." << std::endl;
-    cv::Mat input  = readTxtFile(inputFileName, IMAGE_HEIGHT, IMAGE_WIDTH);
-    cv::Mat coef   = readTxtFile(coefFileName, FILTER_HEIGHT, FILTER_WIDTH);
+    cv::Mat input = readTxtFile(inputFileName, IMAGE_HEIGHT, IMAGE_WIDTH);
+    cv::Mat coef = readTxtFile(coefFileName, FILTER_HEIGHT, FILTER_WIDTH);
 
     input /= 32;
     coef *= 1;
 
     std::vector<double, aligned_allocator<double>> vecInput;
-    vecInput.assign((double*)input.datastart, (double*)input.dataend);
+    vecInput.assign((double *)input.datastart, (double *)input.dataend);
     std::vector<double, aligned_allocator<double>> vecOutput(vecInput.size());
 
     std::cout << "Calculating Max Energy..." << std::endl;
     short inputMax = getAbsMax(input, IMAGE_HEIGHT, IMAGE_WIDTH);
-    short coefMax  = getAbsMax(coef, FILTER_HEIGHT, FILTER_WIDTH);
+    short coefMax = getAbsMax(coef, FILTER_HEIGHT, FILTER_WIDTH);
 
     std::cout << "inputBits = " << ceil(log2(inputMax)) << " coefMax = " << ceil(log2(coefMax)) << std::endl;
-    long long max_bits = (long long) inputMax * coefMax * FILTER_HEIGHT * FILTER_WIDTH;
+    long long max_bits = (long long)inputMax * coefMax * FILTER_HEIGHT * FILTER_WIDTH;
     cv::Mat output(IMAGE_HEIGHT, IMAGE_WIDTH, CV_16S);
     output.reshape(0);
 
     std::cout << "Max Energy = " << ceil(log2(max_bits)) + 1 << " Bits" << std::endl;
 
-// OPENCL HOST CODE AREA START
+    // OPENCL HOST CODE AREA START
     // get_xil_devices() is a utility API which will find the Xilinx
     // platforms and will return list of devices connected to Xilinx platform
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
-    std::cout << "Creating Context..." <<std::endl;
-    OCL_CHECK(err, cl::Context context (device, NULL, NULL, NULL, &err));
-    OCL_CHECK(err, cl::CommandQueue q (context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    std::cout << "Creating Context..." << std::endl;
+    OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
+    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     // read_binary_file() ia a utility API which will load the binaryFile
     // and will return pointer to file buffer.
-    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    char *fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
-    OCL_CHECK(err, cl::Program program (context, devices, bins, NULL, &err));
+    OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel krnl_convolve(program, "krnl_convolve", &err));
 
     // Allocate Buffer in Global Memory
     // Buffers are allocated using CL_MEM_USE_HOST_PTR for efficient memory and
     // Device-to-host communication
-    std::cout << "Creating Buffers..." <<std::endl;
-    OCL_CHECK(err, cl::Buffer devCoef(context, CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY,
-            ((FILTER_HEIGHT*FILTER_WIDTH-1)/32 + 1)*sizeof(cl_uint16), coef.data, &err));
-    OCL_CHECK(err, cl::Buffer devInput(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-            ((IMAGE_HEIGHT*IMAGE_WIDTH-1)/32 + 1)*sizeof(cl_uint16), vecInput.data(), &err));
-    OCL_CHECK(err, cl::Buffer devOutput(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-            ((IMAGE_HEIGHT*IMAGE_WIDTH-1)/32 + 1)*sizeof(cl_uint16), vecOutput.data(), &err));
+    std::cout << "Creating Buffers..." << std::endl;
+    OCL_CHECK(err,
+              cl::Buffer devCoef(context,
+                                 CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY,
+                                 ((FILTER_HEIGHT * FILTER_WIDTH - 1) / 32 + 1) * sizeof(cl_uint16),
+                                 coef.data,
+                                 &err));
+    OCL_CHECK(err,
+              cl::Buffer devInput(context,
+                                  CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                  ((IMAGE_HEIGHT * IMAGE_WIDTH - 1) / 32 + 1) * sizeof(cl_uint16),
+                                  vecInput.data(),
+                                  &err));
+    OCL_CHECK(err,
+              cl::Buffer devOutput(context,
+                                   CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                                   ((IMAGE_HEIGHT * IMAGE_WIDTH - 1) / 32 + 1) * sizeof(cl_uint16),
+                                   vecOutput.data(),
+                                   &err));
 
     std::cout << "Setting Arguments..." << std::endl;
     OCL_CHECK(err, err = krnl_convolve.setArg(0, devCoef));
@@ -183,8 +194,8 @@ int main(int argc, char* argv[]) {
 
     // Copy input data to device global memory
     std::cout << "Copying data..." << std::endl;
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({devCoef, devInput}, 0/*0 means from host*/));
-    
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({devCoef, devInput}, 0 /*0 means from host*/));
+
     // Launch the Kernel
     // For HLS kernels global and local size is always (1,1,1). So, it is recommended
     // to always use enqueueTask() for invoking HLS kernel
@@ -196,27 +207,27 @@ int main(int argc, char* argv[]) {
     OCL_CHECK(err, err = q.enqueueMigrateMemObjects({devOutput}, CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());
     uint64_t nstimestart, nstimeend;
-    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart));
-    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend));
+    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START, &nstimestart));
+    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END, &nstimeend));
 
-    auto duration = nstimeend-nstimestart;
+    auto duration = nstimeend - nstimestart;
 
-    std::cout << "Kernel Duration: " << duration << " ns" <<std::endl;
-//OPENCL HOST CODE AREA ENDS
+    std::cout << "Kernel Duration: " << duration << " ns" << std::endl;
+    //OPENCL HOST CODE AREA ENDS
 
-    std::memcpy(output.data, vecOutput.data(), vecOutput.size()*sizeof(double));
+    std::memcpy(output.data, vecOutput.data(), vecOutput.size() * sizeof(double));
 
-    short outputMax  = getAbsMax(output, IMAGE_HEIGHT, IMAGE_WIDTH);
+    short outputMax = getAbsMax(output, IMAGE_HEIGHT, IMAGE_WIDTH);
     std::cout << "outputBits = " << ceil(log2(outputMax)) << std::endl;
 
     cv::imwrite("input.bmp", input);
     cv::imwrite("output.bmp", output);
     cv::imwrite("coef.bmp", coef);
 
-    if(validate) {
+    if (validate) {
         std::cout << "Validate" << std::endl;
         std::string goldenFileName(argv[4]);
-        cv::Mat golden  = readFloatTxtFile(goldenFileName, IMAGE_HEIGHT, IMAGE_WIDTH);
+        cv::Mat golden = readFloatTxtFile(goldenFileName, IMAGE_HEIGHT, IMAGE_WIDTH);
 
         cv::imwrite("golden.bmp", golden);
     }

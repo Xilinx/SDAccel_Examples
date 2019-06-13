@@ -36,16 +36,16 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 
 using std::ifstream;
+using std::ios;
 using std::streamsize;
 using std::string;
 using std::vector;
-using std::ios;
 
 #define vendor_name "Xilinx"
 
-#define ERROR_CASE(err) \
-    case err:           \
-        return #err;    \
+#define ERROR_CASE(err)                                                                                                \
+    case err:                                                                                                          \
+        return #err;                                                                                                   \
         break
 
 const char *error_string(cl_int error_code) {
@@ -107,15 +107,15 @@ const char *error_string(cl_int error_code) {
         ERROR_CASE(CL_INVALID_COMPILER_OPTIONS);
         ERROR_CASE(CL_INVALID_LINKER_OPTIONS);
         ERROR_CASE(CL_INVALID_DEVICE_PARTITION_COUNT);
-        default:
-            printf("Unknown OpenCL Error (%d)\n", error_code);
-            break;
+    default:
+        printf("Unknown OpenCL Error (%d)\n", error_code);
+        break;
     }
     return nullptr;
 }
 
 // This example just prints out string description for given OpenCL error code.
-int main(int argc, char **argv){
+int main(int argc, char **argv) {
 
     if (argc != 2) {
         std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
@@ -123,7 +123,7 @@ int main(int argc, char **argv){
     }
 
     auto binaryFile = argv[1];
-    
+
     static const int elements = 1024;
     vector<int, aligned_allocator<int>> A(elements, 32);
     vector<int, aligned_allocator<int>> B(elements, 10);
@@ -134,13 +134,14 @@ int main(int argc, char **argv){
     // an error occurred.
     cl_int err;
 
-//OPENCL HOST CODE AREA ENDS
+    //OPENCL HOST CODE AREA ENDS
     std::vector<cl::Platform> platforms;
     OCL_CHECK(err, err = cl::Platform::get(&platforms));
     auto num_platforms = platforms.size();
     if (num_platforms == 0) {
-        std::cout     <<"No platforms were found. This could be caused because the OpenCL "
-                    "icd was not installed in the /etc/OpenCL/vendors directory." << std::endl;
+        std::cout << "No platforms were found. This could be caused because the OpenCL "
+                     "icd was not installed in the /etc/OpenCL/vendors directory."
+                  << std::endl;
         std::cout << "TEST FAILED" << std::endl;
         exit(EXIT_FAILURE);
     }
@@ -148,10 +149,10 @@ int main(int argc, char **argv){
     std::string platformName;
     cl::Platform platform;
     size_t i = 0;
-    for (i  = 0 ; i < platforms.size(); i++){
+    for (i = 0; i < platforms.size(); i++) {
         platform = platforms[i];
         OCL_CHECK(err, platformName = platform.getInfo<CL_PLATFORM_NAME>(&err));
-        if (platformName == vendor_name){
+        if (platformName == vendor_name) {
             std::cout << "Found Platform" << std::endl;
             std::cout << "Platform Name: " << platformName.c_str() << std::endl;
             break;
@@ -162,133 +163,137 @@ int main(int argc, char **argv){
         exit(EXIT_FAILURE);
     }
 
-     std::vector<cl::Device> devices;
-     if ((err = platform.getDevices(CL_DEVICE_TYPE_CPU, &devices))){
-         std::cout <<"\nRecoverable Error calling cl::Platform::getDevices(): " << error_string(err) << std::endl
-                   <<"This error appears when we try to create a device and no devices "
-                   "are found on the platform. In this case we passed "
-                   "CL_DEVICE_TYPE_CPU as the device type which is not available on "
-                   "the" << platformName.c_str() << "platform. We intentionally threw this error so we will not "
-                   "be exiting the program.\n" << std::endl;
-     }
+    std::vector<cl::Device> devices;
+    if ((err = platform.getDevices(CL_DEVICE_TYPE_CPU, &devices))) {
+        std::cout << "\nRecoverable Error calling cl::Platform::getDevices(): " << error_string(err) << std::endl
+                  << "This error appears when we try to create a device and no devices "
+                     "are found on the platform. In this case we passed "
+                     "CL_DEVICE_TYPE_CPU as the device type which is not available on "
+                     "the"
+                  << platformName.c_str()
+                  << "platform. We intentionally threw this error so we will not "
+                     "be exiting the program.\n"
+                  << std::endl;
+    }
 
-     //Getting ACCELERATOR Devices and selecting 1st such device
-      OCL_CHECK(err, err = platform.getDevices(CL_DEVICE_TYPE_ALL, &devices));
-      auto device = devices[0];
+    //Getting ACCELERATOR Devices and selecting 1st such device
+    OCL_CHECK(err, err = platform.getDevices(CL_DEVICE_TYPE_ALL, &devices));
+    auto device = devices[0];
 
-      cl_context_properties props[3] = {CL_CONTEXT_PLATFORM, (cl_context_properties)(platforms[0])(), 0};
+    cl_context_properties props[3] = {CL_CONTEXT_PLATFORM, (cl_context_properties)(platforms[0])(), 0};
 
-      // cl::Context::Context function call returns the object so they return error codes
-      // using pointers to cl_int as their last parameters
-      {
-      cl::Context context(0, props, NULL, NULL, &err);
-      if (err) {
-          std::cout    <<"Recoverable Error calling cl::Context::Context(): " << error_string(err) << std::endl
-                    <<"\tMost cl::Context* calls accept error codes as their last parameter "
-                      "instead of returning the error value. This error occurred because "
-                      "we passed zero(0) for the devices variable. We intentionally threw "
-                      "this error so we will not be exiting the program.\n" << std::endl;
-      }
-      }
+    // cl::Context::Context function call returns the object so they return error codes
+    // using pointers to cl_int as their last parameters
+    {
+        cl::Context context(0, props, NULL, NULL, &err);
+        if (err) {
+            std::cout << "Recoverable Error calling cl::Context::Context(): " << error_string(err) << std::endl
+                      << "\tMost cl::Context* calls accept error codes as their last parameter "
+                         "instead of returning the error value. This error occurred because "
+                         "we passed zero(0) for the devices variable. We intentionally threw "
+                         "this error so we will not be exiting the program.\n"
+                      << std::endl;
+        }
+    }
 
-      std::cout << "Creating Context..." <<std::endl;
-      OCL_CHECK(err, cl::Context context(device, props, NULL, NULL, &err));
-      OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
-      OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
+    std::cout << "Creating Context..." << std::endl;
+    OCL_CHECK(err, cl::Context context(device, props, NULL, NULL, &err));
+    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
-      // read_binary_file() is a utility API which will load the binaryFile
-      // and will return pointer to file buffer.
-      unsigned fileBufSize;
-      auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
-      cl::Program::Binaries bins{{fileBuf, fileBufSize}};
-      cl::Program::Binaries invalid_bin;
-      devices.resize(1);
+    // read_binary_file() is a utility API which will load the binaryFile
+    // and will return pointer to file buffer.
+    unsigned fileBufSize;
+    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
+    cl::Program::Binaries invalid_bin;
+    devices.resize(1);
 
-      {
-      cl::Program program(context, devices, invalid_bin, NULL, &err);
-      if (err) {
-          std::cout    <<"\nRecoverable Error calling cl::Program::Program(): " << error_string(err) << std::endl
-                    <<"\tMost cl::Program* calls accept error codes as their last parameter "
-                      "instead of returning the error value. This error occurred because "
-                      "we passed an invalid_bin for the bins variable. We intentionally threw "
-                      "this error so we will not be exiting the program.\n" << std::endl;
-      }
-      }
+    {
+        cl::Program program(context, devices, invalid_bin, NULL, &err);
+        if (err) {
+            std::cout << "\nRecoverable Error calling cl::Program::Program(): " << error_string(err) << std::endl
+                      << "\tMost cl::Program* calls accept error codes as their last parameter "
+                         "instead of returning the error value. This error occurred because "
+                         "we passed an invalid_bin for the bins variable. We intentionally threw "
+                         "this error so we will not be exiting the program.\n"
+                      << std::endl;
+        }
+    }
 
-      OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
+    OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
 
-      {
-      cl::Kernel kernel(program, "InvalidKernelName", &err);
-      if (err) {
-           std::cout   <<"Recoverable Error calling cl::Kernel::Kernel(): " << error_string(err) << std::endl
-                          <<"Errors calling cl::Kernel are usually caused if the name "
-                          "passed into the function does not match a kernel in the binary. "
-                          "We intentionally caused this error so we will not be exiting the "
-                          "program.\n" << std::endl;
-      }
-      }
+    {
+        cl::Kernel kernel(program, "InvalidKernelName", &err);
+        if (err) {
+            std::cout << "Recoverable Error calling cl::Kernel::Kernel(): " << error_string(err) << std::endl
+                      << "Errors calling cl::Kernel are usually caused if the name "
+                         "passed into the function does not match a kernel in the binary. "
+                         "We intentionally caused this error so we will not be exiting the "
+                         "program.\n"
+                      << std::endl;
+        }
+    }
 
-      OCL_CHECK(err, cl::Kernel kernel(program, "vector_add", &err));
+    OCL_CHECK(err, cl::Kernel kernel(program, "vector_add", &err));
 
-      // Allocate Buffer in Global Memory
-      // Buffers are allocated using CL_MEM_USE_HOST_PTR for efficient memory and
-      // Device-to-host communication
-      {
-      cl::Buffer buffer_a(context, CL_MEM_READ_ONLY, 0, nullptr, &err);
-      if (err) {
-          std::cout    <<"Recoverable Error calling clCreateBuffer: " << error_string(err) << std::endl
-                <<"There can be several reasons for buffer creation to fail. It "
-            "could be because device could not allocate enough memory for this "
-            "buffer. The pointer could be null and either CL_MEM_USE_HOST_PTR "
-            "or CL_MEM_COPY_HOST_PTR are passed into the flags parameter. In "
-            "this case we passed zero(0) as the size of the buffer. We "
-            "intentionally caused this error so we will not be exiting the "
-            "program.\n" << std::endl;
-      }
-      }
+    // Allocate Buffer in Global Memory
+    // Buffers are allocated using CL_MEM_USE_HOST_PTR for efficient memory and
+    // Device-to-host communication
+    {
+        cl::Buffer buffer_a(context, CL_MEM_READ_ONLY, 0, nullptr, &err);
+        if (err) {
+            std::cout << "Recoverable Error calling clCreateBuffer: " << error_string(err) << std::endl
+                      << "There can be several reasons for buffer creation to fail. It "
+                         "could be because device could not allocate enough memory for this "
+                         "buffer. The pointer could be null and either CL_MEM_USE_HOST_PTR "
+                         "or CL_MEM_COPY_HOST_PTR are passed into the flags parameter. In "
+                         "this case we passed zero(0) as the size of the buffer. We "
+                         "intentionally caused this error so we will not be exiting the "
+                         "program.\n"
+                      << std::endl;
+        }
+    }
 
-      size_t size = elements * sizeof(int);
-      std::cout << "Creating Buffers..." <<std::endl;
-       OCL_CHECK(err, cl::Buffer buffer_a(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-               size, A.data(), &err));
-       OCL_CHECK(err, cl::Buffer buffer_b(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-               size, B.data(), &err));
-       OCL_CHECK(err, cl::Buffer buffer_result(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-               size, C.data(), &err));
+    size_t size = elements * sizeof(int);
+    std::cout << "Creating Buffers..." << std::endl;
+    OCL_CHECK(err, cl::Buffer buffer_a(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, size, A.data(), &err));
+    OCL_CHECK(err, cl::Buffer buffer_b(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, size, B.data(), &err));
+    OCL_CHECK(err, cl::Buffer buffer_result(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, size, C.data(), &err));
 
-       //Set the Kernel Arguments
-       OCL_CHECK(err, err = kernel.setArg(0, buffer_result));
-       OCL_CHECK(err, err = kernel.setArg(1, buffer_a));
-       OCL_CHECK(err, err = kernel.setArg(2, buffer_b));
-       OCL_CHECK(err, err = kernel.setArg(3, elements));
+    //Set the Kernel Arguments
+    OCL_CHECK(err, err = kernel.setArg(0, buffer_result));
+    OCL_CHECK(err, err = kernel.setArg(1, buffer_a));
+    OCL_CHECK(err, err = kernel.setArg(2, buffer_b));
+    OCL_CHECK(err, err = kernel.setArg(3, elements));
 
-       // Copy input data to device global memory
-       std::cout << "Copying data..." << std::endl;
-       OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_a, buffer_b}, 0/*0 means from host*/));
+    // Copy input data to device global memory
+    std::cout << "Copying data..." << std::endl;
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_a, buffer_b}, 0 /*0 means from host*/));
 
-       // Launch the Kernel
-       std::cout << "Launching Kernel..." << std::endl;
-       OCL_CHECK(err, err = q.enqueueTask(kernel));
+    // Launch the Kernel
+    std::cout << "Launching Kernel..." << std::endl;
+    OCL_CHECK(err, err = q.enqueueTask(kernel));
 
-       //Copy Result from Device Global Memory to Host Local Memory
-       std::cout << "Getting Results..." << std::endl;
-       OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_result}, CL_MIGRATE_MEM_OBJECT_HOST));
-       OCL_CHECK(err, err = q.finish());
-//OPENCL HOST CODE AREA ENDS
+    //Copy Result from Device Global Memory to Host Local Memory
+    std::cout << "Getting Results..." << std::endl;
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_result}, CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.finish());
+    //OPENCL HOST CODE AREA ENDS
 
-       bool match = true;
-       for (int i = 0; i < elements; i++) {
-           int host_result = A[i] + B[i];
-           if (C[i] != host_result){
-               std::cout << "Error: Result mismatch" << std::endl;
-               std::cout << "i = " << i << " CPU result = " << host_result << " Device result = " << C[i] << std::endl;
-               match = false;
-               break;
-           }
-       }
+    bool match = true;
+    for (int i = 0; i < elements; i++) {
+        int host_result = A[i] + B[i];
+        if (C[i] != host_result) {
+            std::cout << "Error: Result mismatch" << std::endl;
+            std::cout << "i = " << i << " CPU result = " << host_result << " Device result = " << C[i] << std::endl;
+            match = false;
+            break;
+        }
+    }
 
-       delete[] fileBuf;
+    delete[] fileBuf;
 
-       std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl;
-       return (match ? EXIT_SUCCESS :  EXIT_FAILURE);
-   }
+    std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl;
+    return (match ? EXIT_SUCCESS : EXIT_FAILURE);
+}

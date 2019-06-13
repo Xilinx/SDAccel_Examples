@@ -39,41 +39,41 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 extern "C" {
-void krnl_vmul(int* a, int* b, int* out_r, const int n_elements)
-{
-#pragma HLS INTERFACE m_axi     port=a   offset=slave bundle=gmem
-#pragma HLS INTERFACE s_axilite port=a   bundle=control
-#pragma HLS INTERFACE m_axi     port=b   offset=slave bundle=gmem
-#pragma HLS INTERFACE s_axilite port=b   bundle=control
-#pragma HLS INTERFACE m_axi     port=out_r offset=slave bundle=gmem
-#pragma HLS INTERFACE s_axilite port=out_r bundle=control
-#pragma HLS INTERFACE s_axilite port=n_elements bundle=control
-#pragma HLS INTERFACE s_axilite port=return bundle=control
+void krnl_vmul(int *a, int *b, int *out_r, const int n_elements) {
+#pragma HLS INTERFACE m_axi port = a offset = slave bundle = gmem
+#pragma HLS INTERFACE s_axilite port = a bundle = control
+#pragma HLS INTERFACE m_axi port = b offset = slave bundle = gmem
+#pragma HLS INTERFACE s_axilite port = b bundle = control
+#pragma HLS INTERFACE m_axi port = out_r offset = slave bundle = gmem
+#pragma HLS INTERFACE s_axilite port = out_r bundle = control
+#pragma HLS INTERFACE s_axilite port = n_elements bundle = control
+#pragma HLS INTERFACE s_axilite port = return bundle = control
 
     int arrayA[BUFFER_SIZE];
 
-    vmul:
-    for (int i = 0 ; i < n_elements ; i += BUFFER_SIZE) {
-    #pragma HLS LOOP_TRIPCOUNT min=c_len max=c_len
+vmul:
+    for (int i = 0; i < n_elements; i += BUFFER_SIZE) {
+       #pragma HLS LOOP_TRIPCOUNT min=c_len max=c_len
         int size = BUFFER_SIZE;
         //boundary check
-        if (i + size > n_elements) size = n_elements - i; 
+        if (i + size > n_elements)
+            size = n_elements - i;
 
-        //Burst reading A
-        readA: 
-        for (int j = 0 ; j < size ; j++) {
-        #pragma HLS PIPELINE II=1
-        #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size 
-            arrayA[j] = a[i+j];
+    //Burst reading A
+    readA:
+        for (int j = 0; j < size; j++) {
+           #pragma HLS PIPELINE II=1
+           #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
+            arrayA[j] = a[i + j];
         }
 
-        //Burst reading B and calculating C and Burst writing 
-        // to  Global memory
-        vmul_writeC: 
-        for (int j = 0 ; j < size ; j++) {
-        #pragma HLS PIPELINE II=1
-        #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
-            out_r[i+j] = arrayA[j] * b[i+j];
+    //Burst reading B and calculating C and Burst writing
+    // to  Global memory
+    vmul_writeC:
+        for (int j = 0; j < size; j++) {
+           #pragma HLS PIPELINE II=1
+           #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
+            out_r[i + j] = arrayA[j] * b[i + j];
         }
     }
 }

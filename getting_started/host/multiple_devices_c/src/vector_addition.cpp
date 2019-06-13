@@ -31,47 +31,47 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DATA_SIZE 1024
 
 //TRIPCOUNT indentifier
-const unsigned int c_len = DATA_SIZE/BUFFER_SIZE;
+const unsigned int c_len = DATA_SIZE / BUFFER_SIZE;
 const unsigned int c_size = BUFFER_SIZE;
 
 extern "C" {
-void vadd(int* c,
-                int* a,
-                int* b,
-                const int len)
-{
-#pragma HLS INTERFACE m_axi port=c offset=slave bundle=gmem
-#pragma HLS INTERFACE m_axi port=a offset=slave bundle=gmem
-#pragma HLS INTERFACE m_axi port=b offset=slave bundle=gmem
+void vadd(int *c, int *a, int *b, const int len) {
+#pragma HLS INTERFACE m_axi port = c offset = slave bundle = gmem
+#pragma HLS INTERFACE m_axi port = a offset = slave bundle = gmem
+#pragma HLS INTERFACE m_axi port = b offset = slave bundle = gmem
 
-#pragma HLS INTERFACE s_axilite port=c bundle=control
-#pragma HLS INTERFACE s_axilite port=a bundle=control
-#pragma HLS INTERFACE s_axilite port=b bundle=control
-#pragma HLS INTERFACE s_axilite port=len bundle=control
-#pragma HLS INTERFACE s_axilite port=return bundle=control
+#pragma HLS INTERFACE s_axilite port = c bundle = control
+#pragma HLS INTERFACE s_axilite port = a bundle = control
+#pragma HLS INTERFACE s_axilite port = b bundle = control
+#pragma HLS INTERFACE s_axilite port = len bundle = control
+#pragma HLS INTERFACE s_axilite port = return bundle = control
 
     int arrayA[BUFFER_SIZE];
     int arrayB[BUFFER_SIZE];
-    for (int i = 0 ; i < len ; i += BUFFER_SIZE) {
-    #pragma HLS LOOP_TRIPCOUNT min=c_len max=c_len
+    for (int i = 0; i < len; i += BUFFER_SIZE) {
+       #pragma HLS LOOP_TRIPCOUNT min=c_len max=c_len
         int size = BUFFER_SIZE;
-        if (i + size > len) size = len - i;
-        readA: for (int j = 0 ; j < size ; j++) {
-        #pragma HLS PIPELINE II=1
-        #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
-                arrayA[j] = a[i+j]; 
+        if (i + size > len)
+            size = len - i;
+    readA:
+        for (int j = 0; j < size; j++) {
+           #pragma HLS PIPELINE II=1
+           #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
+            arrayA[j] = a[i + j];
         }
 
-        readB: for (int j = 0 ; j < size ; j++) {
-        #pragma HLS PIPELINE II=1
-        #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
-                arrayB[j] = b[i+j]; 
+    readB:
+        for (int j = 0; j < size; j++) {
+           #pragma HLS PIPELINE II=1
+           #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
+            arrayB[j] = b[i + j];
         }
 
-        vadd_writeC: for (int j = 0 ; j < size ; j++) {
-        #pragma HLS PIPELINE II=1
-        #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
-                c[i+j] = arrayA[j] + arrayB[j]; 
+    vadd_writeC:
+        for (int j = 0; j < size; j++) {
+           #pragma HLS PIPELINE II=1
+           #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
+            c[i + j] = arrayA[j] + arrayB[j];
         }
     }
 }

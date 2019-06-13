@@ -41,24 +41,18 @@ Description:
 #include <vector>
 
 //Array size to access
-#define DATA_SIZE 8192 
+#define DATA_SIZE 8192
 
 //Software implementation of Vector Addition
 //Input is of size DATA_SIZE
-void softwareGold(  
-        int *in1, 
-        int *in2, 
-        int *out, 
-        int size
-        )
-{
+void softwareGold(int *in1, int *in2, int *out, int size) {
     //Performs Vector Addition out = in1 + in2
-    for(int i = 0; i < size; i++) {
+    for (int i = 0; i < size; i++) {
         out[i] = in1[i] + in2[i];
     }
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
 
     if (argc != 2) {
         std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
@@ -66,27 +60,27 @@ int main(int argc, char* argv[]) {
     }
 
     std::string binaryFile = argv[1];
-   
+
     //Allocate Memory in Host Memory
     int size = DATA_SIZE;
-    size_t vector_size_bytes = sizeof(int) * DATA_SIZE; 
+    size_t vector_size_bytes = sizeof(int) * DATA_SIZE;
     cl_int err;
     unsigned fileBufSize;
-   
-    std::vector<int, aligned_allocator<int>> source_in1(vector_size_bytes);    
-    std::vector<int, aligned_allocator<int>> source_in2(vector_size_bytes);    
-    std::vector<int, aligned_allocator<int>> source_hw_results(vector_size_bytes);    
-    std::vector<int, aligned_allocator<int>> source_sw_results(vector_size_bytes);    
+
+    std::vector<int, aligned_allocator<int>> source_in1(vector_size_bytes);
+    std::vector<int, aligned_allocator<int>> source_in2(vector_size_bytes);
+    std::vector<int, aligned_allocator<int>> source_hw_results(vector_size_bytes);
+    std::vector<int, aligned_allocator<int>> source_sw_results(vector_size_bytes);
 
     //Create the test data
-    for(int i = 0; i < DATA_SIZE; i++) {
+    for (int i = 0; i < DATA_SIZE; i++) {
         source_in1[i] = i;
-        source_in2[i] = i*2;
+        source_in2[i] = i * 2;
         source_hw_results[i] = 0;
         source_sw_results[i] = 0;
     }
 
-//OPENCL HOST CODE AREA START
+    //OPENCL HOST CODE AREA START
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
@@ -94,19 +88,22 @@ int main(int argc, char* argv[]) {
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
-    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    char *fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel kernel(program, "vec_add", &err));
 
     //Allocate Buffer in Global Memory
-    OCL_CHECK(err, cl::Buffer buffer_in1(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                    vector_size_bytes, source_in1.data(), &err));
-    OCL_CHECK(err, cl::Buffer buffer_in2(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                    vector_size_bytes, source_in2.data(), &err));
-    OCL_CHECK(err, cl::Buffer buffer_output(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-                    vector_size_bytes, source_hw_results.data(), &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_in1(
+                  context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, vector_size_bytes, source_in1.data(), &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_in2(
+                  context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, vector_size_bytes, source_in2.data(), &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_output(
+                  context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, vector_size_bytes, source_hw_results.data(), &err));
 
     OCL_CHECK(err, err = kernel.setArg(0, buffer_in1));
     OCL_CHECK(err, err = kernel.setArg(1, buffer_in2));
@@ -114,10 +111,10 @@ int main(int argc, char* argv[]) {
     OCL_CHECK(err, err = kernel.setArg(3, size));
 
     //Copy input data to device global memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_in1, buffer_in2}, 0/*0 means from host*/));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_in1, buffer_in2}, 0 /*0 means from host*/));
 
-    size_t global = 16;   // global domain size calculation
-    size_t local = 16;    // local domain size calculation
+    size_t global = 16; // global domain size calculation
+    size_t local = 16;  // local domain size calculation
 
     //Launch the Kernel
     OCL_CHECK(err, err = q.enqueueNDRangeKernel(kernel, 0, global, local, NULL, NULL));
@@ -126,7 +123,7 @@ int main(int argc, char* argv[]) {
     OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_output}, CL_MIGRATE_MEM_OBJECT_HOST));
     q.finish();
 
-//OPENCL HOST CODE AREA END
+    //OPENCL HOST CODE AREA END
 
     //Compute Software Results
     softwareGold(source_in1.data(), source_in2.data(), source_sw_results.data(), size);
@@ -134,10 +131,13 @@ int main(int argc, char* argv[]) {
     //Compare the results of device to the software
     bool match = true;
     for (int i = 0; i < DATA_SIZE; i++) {
-        if (source_sw_results[i] != source_hw_results[i]){
+        if (source_sw_results[i] != source_hw_results[i]) {
             printf("Mismatch: %d in1 = %d  in2 = %d \t sw_res = %d \t hw_res = %d\n",
-                    i, source_in1[i], source_in2[i], source_sw_results[i], 
-                    source_hw_results[i]);
+                   i,
+                   source_in1[i],
+                   source_in2[i],
+                   source_sw_results[i],
+                   source_hw_results[i]);
             match = false;
             break;
         }
@@ -148,4 +148,3 @@ int main(int argc, char* argv[]) {
     std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl;
     return (match ? EXIT_SUCCESS : EXIT_FAILURE);
 }
-

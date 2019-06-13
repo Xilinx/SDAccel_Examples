@@ -29,20 +29,19 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "xcl2.hpp"
 
+#include <array>
+#include <map>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <array>
-#include <map>
 #include <vector>
 
 using std::array;
 using std::map;
 using std::vector;
 
-cl::Program load_cl2_binary(cl::Program::Binaries, cl::Device device,
-                          cl::Context context);
+cl::Program load_cl2_binary(cl::Program::Binaries, cl::Device device, cl::Context context);
 // This example demonstrates how to split work among multiple devices.
 int main(int argc, char **argv) {
 
@@ -52,11 +51,11 @@ int main(int argc, char **argv) {
     }
 
     auto binaryFile = argv[1];
-    
+
     cl_int err = CL_SUCCESS;
     unsigned fileBufSize;
 
-//OPENCL HOST CODE AREA START
+    //OPENCL HOST CODE AREA START
     // get_xil_devices() is a utility API which will find the Xilinx
     // platforms and will return list of devices connected to Xilinx platform
     auto devices = xcl::get_xil_devices();
@@ -81,12 +80,12 @@ int main(int argc, char **argv) {
     vector<cl::Buffer> buffer_result(device_count);
     vector<cl::Program::Binaries> bins(device_count);
     vector<cl::Platform> platform;
-    char* fileBuf[device_count];
+    char *fileBuf[device_count];
     OCL_CHECK(err, err = cl::Platform::get(&platform));
 
     size_t size_per_device = elements_per_device * sizeof(int);
     cl_context_properties props[3] = {CL_CONTEXT_PLATFORM, (cl_context_properties)(platform[0])(), 0};
-    std::cout <<"Initializing OpenCL objects" << std::endl;
+    std::cout << "Initializing OpenCL objects" << std::endl;
     for (int d = 0; d < (int)device_count; d++) {
         // In this example. We will create a context for each of the devices
         std::cout << "Creating Context[" << d << "]..." << std::endl;
@@ -105,13 +104,16 @@ int main(int argc, char **argv) {
         // Buffers are allocated using CL_MEM_USE_HOST_PTR for efficient memory and
         // Device-to-host communication
         size_t offset = d * elements_per_device;
-        std::cout << "Creating Buffers[" << d << "]..." <<std::endl;
-        OCL_CHECK(err, buffer_a[d] =
-                cl::Buffer(contexts[d], CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, size_per_device, &A[offset], &err));
-        OCL_CHECK(err, buffer_b[d] =
-                cl::Buffer(contexts[d], CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, size_per_device, &B[offset], &err));
-        OCL_CHECK(err, buffer_result[d] =
-                cl::Buffer(contexts[d], CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, size_per_device, &C[offset], &err));
+        std::cout << "Creating Buffers[" << d << "]..." << std::endl;
+        OCL_CHECK(err,
+                  buffer_a[d] = cl::Buffer(
+                      contexts[d], CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, size_per_device, &A[offset], &err));
+        OCL_CHECK(err,
+                  buffer_b[d] = cl::Buffer(
+                      contexts[d], CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, size_per_device, &B[offset], &err));
+        OCL_CHECK(err,
+                  buffer_result[d] = cl::Buffer(
+                      contexts[d], CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, size_per_device, &C[offset], &err));
     }
 
     vector<cl::Event> events(device_count);
@@ -123,7 +125,7 @@ int main(int argc, char **argv) {
 
         // Copy input data to device global memory
         std::cout << "Copying data..." << std::endl;
-        OCL_CHECK(err, err = queues[d].enqueueMigrateMemObjects({buffer_a[d], buffer_b[d]}, 0/*0 means from host*/));
+        OCL_CHECK(err, err = queues[d].enqueueMigrateMemObjects({buffer_a[d], buffer_b[d]}, 0 /*0 means from host*/));
 
         // Launch the Kernel
         std::cout << "Launching Kernel..." << std::endl;
@@ -135,30 +137,30 @@ int main(int argc, char **argv) {
     }
 
     int dev = 0;
-    for(auto queue : queues) {
-      std::cout << "Waiting for work to finish on device " << dev++ << std::endl;
-      OCL_CHECK(err, err = queue.flush());
-      OCL_CHECK(err, err = queue.finish());
+    for (auto queue : queues) {
+        std::cout << "Waiting for work to finish on device " << dev++ << std::endl;
+        OCL_CHECK(err, err = queue.flush());
+        OCL_CHECK(err, err = queue.finish());
     }
 
-    for (int d = 0; d < (int)device_count; d++) delete[] fileBuf[d];
-//OPENCL HOST CODE AREA ENDS
+    for (int d = 0; d < (int)device_count; d++)
+        delete[] fileBuf[d];
+    //OPENCL HOST CODE AREA ENDS
     bool match = true;
-     for (int i = 0; i < elements; i++) {
-         int host_result = A[i] + B[i];
-         if (C[i] != host_result){
-             std::cout << "Error: Result mismatch" << std::endl;
-             std::cout << "i = " << i << " CPU result = " << host_result << " Device result = " << C[i] << std::endl;
-             match = false;
-             break;
-         }
-     }
-     std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl;
-     return (match ? EXIT_SUCCESS :  EXIT_FAILURE);
- }
+    for (int i = 0; i < elements; i++) {
+        int host_result = A[i] + B[i];
+        if (C[i] != host_result) {
+            std::cout << "Error: Result mismatch" << std::endl;
+            std::cout << "i = " << i << " CPU result = " << host_result << " Device result = " << C[i] << std::endl;
+            match = false;
+            break;
+        }
+    }
+    std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl;
+    return (match ? EXIT_SUCCESS : EXIT_FAILURE);
+}
 
-cl::Program load_cl2_binary(cl::Program::Binaries bins, cl::Device device,
-                          cl::Context context) {
+cl::Program load_cl2_binary(cl::Program::Binaries bins, cl::Device device, cl::Context context) {
     cl_int err;
     std::vector<cl::Device> devices(1, device);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));

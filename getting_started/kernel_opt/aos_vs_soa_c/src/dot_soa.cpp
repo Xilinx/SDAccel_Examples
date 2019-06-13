@@ -31,19 +31,19 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define VERTEX_COUNT 512
 
 // Tripcount identifiers
-const int c_iter = VERTEX_COUNT/N;
+const int c_iter = VERTEX_COUNT / N;
 const int c_n = N;
 
 // Structure for accessing 512bit data
-// Any arrays in the struct are partitioned into individual array elements 
+// Any arrays in the struct are partitioned into individual array elements
 // and placed in the vector from lowest to highest, in order.
 
 typedef struct soa_struct {
-    int var[VERTEX_COUNT/N];
+    int var[VERTEX_COUNT / N];
 } int16;
 
 /* Structure of Array: Optimized version of dot implementation */
-//For dot_soa, three separate memory location is allocated for each 
+//For dot_soa, three separate memory location is allocated for each
 //dimension as below:
 // X_memory : p0x p1x p2x p3x .... pNx
 // Y_memory : p0y p1y p2y p3y .... pNy
@@ -53,71 +53,72 @@ typedef struct soa_struct {
 // to int16 (512bit) which is bigger than int3 (96bit) so will provide faster access.
 
 extern "C" {
-void dot_soa(int16* result,
-             const int16* X,
-             const int16* Y,
-             const int16* Z,
-             const int num_vertices) {
-#pragma HLS INTERFACE m_axi port=result offset=slave bundle=gmem
-#pragma HLS INTERFACE m_axi port=X offset=slave bundle=gmem
-#pragma HLS INTERFACE m_axi port=Y offset=slave bundle=gmem
-#pragma HLS INTERFACE m_axi port=Z offset=slave bundle=gmem
-#pragma HLS INTERFACE s_axilite port=result bundle=control
-#pragma HLS INTERFACE s_axilite port=X bundle=control
-#pragma HLS INTERFACE s_axilite port=Y bundle=control
-#pragma HLS INTERFACE s_axilite port=Z bundle=control
-#pragma HLS INTERFACE s_axilite port=num_vertices  bundle=control
-#pragma HLS INTERFACE s_axilite port=return bundle=control
+void dot_soa(int16 *result, const int16 *X, const int16 *Y, const int16 *Z, const int num_vertices) {
+#pragma HLS INTERFACE m_axi port = result offset = slave bundle = gmem
+#pragma HLS INTERFACE m_axi port = X offset = slave bundle = gmem
+#pragma HLS INTERFACE m_axi port = Y offset = slave bundle = gmem
+#pragma HLS INTERFACE m_axi port = Z offset = slave bundle = gmem
+#pragma HLS INTERFACE s_axilite port = result bundle = control
+#pragma HLS INTERFACE s_axilite port = X bundle = control
+#pragma HLS INTERFACE s_axilite port = Y bundle = control
+#pragma HLS INTERFACE s_axilite port = Z bundle = control
+#pragma HLS INTERFACE s_axilite port = num_vertices bundle = control
+#pragma HLS INTERFACE s_axilite port = return bundle = control
 
-#pragma HLS DATA_PACK variable=result
-#pragma HLS DATA_PACK variable=X
-#pragma HLS DATA_PACK variable=Y
-#pragma HLS DATA_PACK variable=Z
+#pragma HLS DATA_PACK variable = result
+#pragma HLS DATA_PACK variable = X
+#pragma HLS DATA_PACK variable = Y
+#pragma HLS DATA_PACK variable = Z
 
-  // Because consecutive elements in memory we can load 16 values at once. This
-  // improves the global memory bus utilization.
-  int16 lx[N];
-  int16 ly[N];
-  int16 lz[N];
-  int16 out[N];
+    // Because consecutive elements in memory we can load 16 values at once. This
+    // improves the global memory bus utilization.
+    int16 lx[N];
+    int16 ly[N];
+    int16 lz[N];
+    int16 out[N];
 
-  int iterations = num_vertices / (16*N);
+    int iterations = num_vertices / (16 * N);
 
-  for (int i = 0; i < iterations; i++) {
-  #pragma HLS LOOP_TRIPCOUNT min=c_iter max=c_iter
-      
-      load_x: for(int j = 0; j < N; j++) {
-      #pragma HLS LOOP_TRIPCOUNT min=c_n max=c_n
-      #pragma HLS PIPELINE II=1
-            lx[j] = X[i*N+j];
-      }
+    for (int i = 0; i < iterations; i++) {
+       #pragma HLS LOOP_TRIPCOUNT min=c_iter max=c_iter
 
-      load_y: for(int j = 0; j < N; j++) {
-      #pragma HLS LOOP_TRIPCOUNT min=c_n max=c_n 
-      #pragma HLS PIPELINE II=1
-            ly[j] = Y[i*N+j];
-      }
+    load_x:
+        for (int j = 0; j < N; j++) {
+           #pragma HLS LOOP_TRIPCOUNT min=c_n max=c_n
+           #pragma HLS PIPELINE II=1
+            lx[j] = X[i * N + j];
+        }
 
-      load_z: for(int j = 0; j < N; j++) {
-      #pragma HLS LOOP_TRIPCOUNT min=c_n max=c_n
-      #pragma HLS PIPELINE II=1
-            lz[j] = Z[i*N+j];
-      }
+    load_y:
+        for (int j = 0; j < N; j++) {
+           #pragma HLS LOOP_TRIPCOUNT min=c_n max=c_n
+           #pragma HLS PIPELINE II=1
+            ly[j] = Y[i * N + j];
+        }
 
-      compute: for(int j = 0; j < N; j++) {
-      #pragma HLS LOOP_TRIPCOUNT min=c_n max=c_n
-      #pragma HLS PIPELINE II=1
-        compute2: for(int k=0; k < VERTEX_COUNT/N; k++) 
-        #pragma HLS LOOP_TRIPCOUNT min=c_iter max=c_iter
-            out[j].var[k] = lx[j].var[k] * lx[j].var[k] + ly[j].var[k] * ly[j].var[k] 
-                        + lz[j].var[k] * lz[j].var[k];
-      }
+    load_z:
+        for (int j = 0; j < N; j++) {
+           #pragma HLS LOOP_TRIPCOUNT min=c_n max=c_n
+           #pragma HLS PIPELINE II=1
+            lz[j] = Z[i * N + j];
+        }
 
-      store_r: for(int j = 0; j < N; j++) {
-      #pragma HLS LOOP_TRIPCOUNT min=c_n max=c_n     
-      #pragma HLS PIPELINE II=1
-            result[i*N+j] = out[j];
-      }
-  }
+    compute:
+        for (int j = 0; j < N; j++) {
+           #pragma HLS LOOP_TRIPCOUNT min=c_n max=c_n
+           #pragma HLS PIPELINE II=1
+        compute2:
+            for (int k = 0; k < VERTEX_COUNT / N; k++)
+               #pragma HLS LOOP_TRIPCOUNT min=c_iter max=c_iter
+                out[j].var[k] = lx[j].var[k] * lx[j].var[k] + ly[j].var[k] * ly[j].var[k] + lz[j].var[k] * lz[j].var[k];
+        }
+
+    store_r:
+        for (int j = 0; j < N; j++) {
+           #pragma HLS LOOP_TRIPCOUNT min=c_n max=c_n
+           #pragma HLS PIPELINE II=1
+            result[i * N + j] = out[j];
+        }
+    }
 }
 }

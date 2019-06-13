@@ -66,35 +66,32 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Number of coefficient components
 #define N_COEFF 11
-#define min(x,y) ((x) < (y) ? (x) : (y))
+#define min(x, y) ((x) < (y) ? (x) : (y))
 // A naive implementation of the Finite Impulse Response filter.
-extern "C"{
-void fir_naive(int *output_r,
-               int *signal_r,
-               int *coeff,
-               long signal_length) {
-#pragma HLS INTERFACE m_axi port=output_r offset=slave bundle=gmem
-#pragma HLS INTERFACE m_axi port=signal_r offset=slave bundle=gmem
-#pragma HLS INTERFACE m_axi port=coeff offset=slave bundle=gmem
-#pragma HLS INTERFACE s_axilite port=output_r bundle=control 
-#pragma HLS INTERFACE s_axilite port=signal_r bundle=control 
-#pragma HLS INTERFACE s_axilite port=coeff bundle=control 
-#pragma HLS INTERFACE s_axilite port=signal_length bundle=control
-#pragma HLS INTERFACE s_axilite port=return bundle=control
+extern "C" {
+void fir_naive(int *output_r, int *signal_r, int *coeff, long signal_length) {
+#pragma HLS INTERFACE m_axi port = output_r offset = slave bundle = gmem
+#pragma HLS INTERFACE m_axi port = signal_r offset = slave bundle = gmem
+#pragma HLS INTERFACE m_axi port = coeff offset = slave bundle = gmem
+#pragma HLS INTERFACE s_axilite port = output_r bundle = control
+#pragma HLS INTERFACE s_axilite port = signal_r bundle = control
+#pragma HLS INTERFACE s_axilite port = coeff bundle = control
+#pragma HLS INTERFACE s_axilite port = signal_length bundle = control
+#pragma HLS INTERFACE s_axilite port = return bundle = control
 
     int coeff_reg[N_COEFF];
-    read_coef: 
-    for (int i = 0 ; i < N_COEFF ; i++) 
-    #pragma HLS PIPELINE II=1
+read_coef:
+    for (int i = 0; i < N_COEFF; i++)
+       #pragma HLS PIPELINE II=1
         coeff_reg[i] = coeff[i];
 
-    outer_loop:
+outer_loop:
     for (int j = 0; j < signal_length; j++) {
         int acc = 0;
-        shift_loop:
-        for (int i = min(j,N_COEFF-1); i >= 0; i--) {
-        #pragma HLS PIPELINE II=1
-            acc += signal_r[j-i] * coeff_reg[i];
+    shift_loop:
+        for (int i = min(j, N_COEFF - 1); i >= 0; i--) {
+           #pragma HLS PIPELINE II=1
+            acc += signal_r[j - i] * coeff_reg[i];
         }
         output_r[j] = acc;
     }

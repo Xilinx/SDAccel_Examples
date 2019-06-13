@@ -28,15 +28,15 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 
 // Edge Detection Example
+#include <cstdlib>
+#include <fstream>
 #include <iostream>
 #include <string>
-#include <fstream>
-#include <cstdlib>
 
 // OpenCV includes
 #include <opencv2/core/core.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 // XCL Helper Library
 #include "xcl2.hpp"
@@ -49,10 +49,10 @@ short getAbsMax(cv::Mat mat) {
     size_t rows = mat.rows;
     size_t cols = mat.cols;
 
-    for(size_t r = 0; r < rows; r++) {
-        for(size_t c = 0; c < cols; c++) {
-            uchar tmp = std::abs(mat.at<uchar>(r,c));
-            if(tmp > max) {
+    for (size_t r = 0; r < rows; r++) {
+        for (size_t c = 0; c < cols; c++) {
+            uchar tmp = std::abs(mat.at<uchar>(r, c));
+            if (tmp > max) {
                 max = tmp;
             }
         }
@@ -61,13 +61,14 @@ short getAbsMax(cv::Mat mat) {
     return max;
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
     cl_int err;
     cl::Event event;
     unsigned fileBufSize;
 
-    if(argc != 3) {
-        std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << " <input>" << std::endl;
+    if (argc != 3) {
+        std::cout << "Usage: " << argv[0] << " <XCLBIN File>"
+                  << " <input>" << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -83,11 +84,11 @@ int main(int argc, char* argv[]) {
     //Vector IO Buffers are used to avoid unaligned host pointers
     std::vector<uchar, aligned_allocator<uchar>> image;
     if (input.isContinuous()) {
-      image.assign(input.datastart, input.dataend);
+        image.assign(input.datastart, input.dataend);
     } else {
-      for (int i = 0; i < input.rows; ++i) {
-        image.insert(image.end(), input.ptr<uchar>(i), input.ptr<uchar>(i)+input.cols);
-      }
+        for (int i = 0; i < input.rows; ++i) {
+            image.insert(image.end(), input.ptr<uchar>(i), input.ptr<uchar>(i) + input.cols);
+        }
     }
 
     size_t img_size = input.rows * input.cols;
@@ -97,7 +98,7 @@ int main(int argc, char* argv[]) {
     std::cout << "Calculating Max Energy..." << std::endl;
     short inputMax = getAbsMax(input);
     std::cout << "inputBits = " << ceil(log2(inputMax)) << " coefMax = 2" << std::endl;
-    long long max_bits = (long long) inputMax * 2 * 3*3;
+    long long max_bits = (long long)inputMax * 2 * 3 * 3;
     std::cout << "Max Energy = " << ceil(log2(max_bits)) + 1 << " Bits" << std::endl;
 
     std::cout << "Image Dimensions: " << input.cols << "x" << input.rows << std::endl;
@@ -105,65 +106,73 @@ int main(int argc, char* argv[]) {
     assert(input.cols == IMAGE_WIDTH);
     assert(input.rows <= IMAGE_HEIGHT);
 
-// OPENCL HOST CODE AREA START
+    // OPENCL HOST CODE AREA START
     // get_xil_devices() is a utility API which will find the xilinx
     // platforms and will return list of devices connected to Xilinx platform
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
-    std::cout << "Creating Context..." <<std::endl;
-    OCL_CHECK(err, cl::Context context (device, NULL, NULL, NULL, &err));
-    OCL_CHECK(err, cl::CommandQueue q (context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    std::cout << "Creating Context..." << std::endl;
+    OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
+    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     // read_binary_file() is a utility API which will load the binaryFile
     // and will return pointer to file buffer.
-    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    char *fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
-    OCL_CHECK(err, cl::Program program (context, devices, bins, NULL, &err));
+    OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel krnl_sobel(program, "krnl_sobel", &err));
 
     // Allocate Buffer in Global Memory
     // Buffers are allocated using CL_MEM_USE_HOST_PTR for efficient memory and
     // Device-to-host communication
     std::cout << "Creating Buffers..." << std::endl;
-    OCL_CHECK(err, cl::Buffer devInput(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-            ((img_size-1)/32 + 1)*sizeof(cl_uint16), image.data() , &err));
-    OCL_CHECK(err, cl::Buffer devOutput(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-            ((img_size-1)/32 + 1)*sizeof(cl_uint16), outimage.data(), &err));
+    OCL_CHECK(err,
+              cl::Buffer devInput(context,
+                                  CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                  ((img_size - 1) / 32 + 1) * sizeof(cl_uint16),
+                                  image.data(),
+                                  &err));
+    OCL_CHECK(err,
+              cl::Buffer devOutput(context,
+                                   CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                                   ((img_size - 1) / 32 + 1) * sizeof(cl_uint16),
+                                   outimage.data(),
+                                   &err));
 
     std::cout << "Setting Arguments..." << std::endl;
     OCL_CHECK(err, err = krnl_sobel.setArg(0, devInput));
     OCL_CHECK(err, err = krnl_sobel.setArg(1, devOutput));
 
     // Copy input data to device global memory
-    std::cout << "Copying Buffers to device..." <<std::endl;
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({devInput}, 0/*0 means from host*/));
+    std::cout << "Copying Buffers to device..." << std::endl;
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({devInput}, 0 /*0 means from host*/));
 
     // Launch the Kernel
     // For HLS kernels global and local size is always (1,1,1). So, it is recommended
     // to always use enqueueTask() for invoking HLS kernel
-    std::cout << "Launching Kernel..." <<std::endl;
+    std::cout << "Launching Kernel..." << std::endl;
     OCL_CHECK(err, err = q.enqueueTask(krnl_sobel, NULL, &event));
 
     // Copy Result from Device Global Memory to Host Local Memory
-    std::cout<< "Getting Result..." << std::endl;
+    std::cout << "Getting Result..." << std::endl;
     OCL_CHECK(err, err = q.enqueueMigrateMemObjects({devOutput}, CL_MIGRATE_MEM_OBJECT_HOST));
     q.finish();
     uint64_t nstimestart, nstimeend;
-    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart));
-    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend));
+    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START, &nstimestart));
+    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END, &nstimeend));
 
-    auto duration = nstimeend-nstimestart;
+    auto duration = nstimeend - nstimestart;
 
-    std::cout << "Kernel Duration: " << duration << " ns" <<std::endl;
-//OPENCL HOST CODE AREA ENDS
+    std::cout << "Kernel Duration: " << duration << " ns" << std::endl;
+    //OPENCL HOST CODE AREA ENDS
 
     std::memcpy(output.data, outimage.data(), outimage.size());
 
     std::cout << "Calculating Output energy...." << std::endl;
-    short outputMax  = getAbsMax(output);
+    short outputMax = getAbsMax(output);
 
     std::cout << "outputBits = " << ceil(log2(outputMax)) << std::endl;
 

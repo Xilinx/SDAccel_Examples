@@ -29,8 +29,8 @@ In this example, we will demonstrate how to use Xilinx Streaming APIs for direct
             |          |<<<<<<<<<<<< Output Stream <<<<<<<<<<<|          |
             +----------+                                      +----------+
 */
-#include "ap_int.h"
 #include "ap_axi_sdata.h"
+#include "ap_int.h"
 #include "hls_stream.h"
 
 #define DWIDTH 32
@@ -38,41 +38,41 @@ In this example, we will demonstrate how to use Xilinx Streaming APIs for direct
 typedef qdma_axis<DWIDTH, 0, 0, 0> pkt;
 
 extern "C" {
-void krnl_stream_vadd(hls::stream<pkt> &a, hls::stream<pkt> &b, hls::stream<pkt> &output)
-{
-    #pragma HLS INTERFACE axis port=a
-    #pragma HLS INTERFACE axis port=b
-    #pragma HLS INTERFACE axis port=output
-    #pragma HLS INTERFACE s_axilite port=return bundle=control
+void krnl_stream_vadd(hls::stream<pkt> &a, hls::stream<pkt> &b, hls::stream<pkt> &output) {
+   #pragma HLS INTERFACE axis port=a
+   #pragma HLS INTERFACE axis port=b
+   #pragma HLS INTERFACE axis port=output
+   #pragma HLS INTERFACE s_axilite port=return bundle=control
 
     bool eos = false;
-    vadd: do{
-    #pragma HLS PIPELINE II=1
+vadd:
+    do {
+       #pragma HLS PIPELINE II=1
         // Reading a and b streaming into packets
         pkt t1 = a.read();
-        pkt t2 = b.read();  
-        
+        pkt t2 = b.read();
+
         // Packet for output
-        pkt t_out; 
+        pkt t_out;
 
         // Reading data from input packet
         ap_uint<DWIDTH> in1 = t1.get_data();
         ap_uint<DWIDTH> in2 = t2.get_data();
 
         // Vadd operation
-        ap_uint<DWIDTH> tmpOut  = in1 + in2;
+        ap_uint<DWIDTH> tmpOut = in1 + in2;
 
         // Setting data and configuration to output packet
         t_out.set_data(tmpOut);
         t_out.set_last(t1.get_last());
-        t_out.set_keep(-1) ;          // Enabling all bytes
+        t_out.set_keep(-1); // Enabling all bytes
 
         // Writing packet to output stream
         output.write(t_out);
-        
-        if (t1.get_last() || t2.get_last()){
+
+        if (t1.get_last() || t2.get_last()) {
             eos = true;
         }
-    }while(eos == false);
+    } while (eos == false);
 }
 }

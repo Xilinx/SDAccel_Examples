@@ -31,8 +31,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Description: 
     HLS Example using AXI4-master interface for burst read and write 
 *******************************************************************************/
-                      
-//Includes 
+
+//Includes
 #include <stdio.h>
 #include <string.h>
 
@@ -46,37 +46,37 @@ const unsigned int c_size_max = BURSTBUFFERSIZE;
 const unsigned int c_chunk_sz = DATA_SIZE;
 
 extern "C" {
-void vadd(int *a, int size, int inc_value){
+void vadd(int *a, int size, int inc_value) {
     // Map pointer a to AXI4-master interface for global memory access
-    #pragma HLS INTERFACE m_axi port=a  offset=slave bundle=gmem max_read_burst_length=256 max_write_burst_length=256
+   #pragma HLS INTERFACE m_axi port=a  offset=slave bundle=gmem max_read_burst_length=256 max_write_burst_length=256
     // We also need to map a and return to a bundled axilite slave interface
-    #pragma HLS INTERFACE s_axilite port=a bundle=control
-    #pragma HLS INTERFACE s_axilite port=size bundle=control
-    #pragma HLS INTERFACE s_axilite port=inc_value bundle=control
-    #pragma HLS INTERFACE s_axilite port=return bundle=control
-      
+   #pragma HLS INTERFACE s_axilite port=a bundle=control
+   #pragma HLS INTERFACE s_axilite port=size bundle=control
+   #pragma HLS INTERFACE s_axilite port=inc_value bundle=control
+   #pragma HLS INTERFACE s_axilite port=return bundle=control
+
     int burstbuffer[BURSTBUFFERSIZE];
 
     //Per iteration of this loop perform BURSTBUFFERSIZE vector addition
-    for(int i=0; i < size;  i+=BURSTBUFFERSIZE)
-    {
-    #pragma HLS LOOP_TRIPCOUNT min=c_size_min*c_size_min max=c_chunk_sz*c_chunk_sz/(c_size_max*c_size_max)
+    for (int i = 0; i < size; i += BURSTBUFFERSIZE) {
+       #pragma HLS LOOP_TRIPCOUNT min=c_size_min*c_size_min max=c_chunk_sz*c_chunk_sz/(c_size_max*c_size_max)
         int chunk_size = BURSTBUFFERSIZE;
         //boundary checks
-        if ((i + BURSTBUFFERSIZE) > size) 
+        if ((i + BURSTBUFFERSIZE) > size)
             chunk_size = size - i;
-        
+
         //memcpy creates a burst access to memory
         //multiple calls of memcpy cannot be pipelined and will be scheduled sequentially
         //memcpy requires a local buffer to store the results of the memory transaction
-        memcpy(burstbuffer,&a[i],chunk_size * sizeof (int));
-        
-        //calculate and write results to global memory, the sequential write in a for loop can be inferred to a memory burst access 
-        calc_write: for(int j=0; j < chunk_size; j++){
-        #pragma HLS LOOP_TRIPCOUNT min=c_size_max max=c_chunk_sz
-        #pragma HLS PIPELINE II=1
+        memcpy(burstbuffer, &a[i], chunk_size * sizeof(int));
+
+    //calculate and write results to global memory, the sequential write in a for loop can be inferred to a memory burst access
+    calc_write:
+        for (int j = 0; j < chunk_size; j++) {
+           #pragma HLS LOOP_TRIPCOUNT min=c_size_max max=c_chunk_sz
+           #pragma HLS PIPELINE II=1
             burstbuffer[j] = burstbuffer[j] + inc_value;
-            a[i+j] = burstbuffer[j];
+            a[i + j] = burstbuffer[j];
         }
     }
 }

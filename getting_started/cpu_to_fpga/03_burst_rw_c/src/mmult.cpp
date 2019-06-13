@@ -28,7 +28,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 
 //This function represents an OpenCL kernel. The kernel will be call from
-//host application. The pointers in kernel parameters with the global 
+//host application. The pointers in kernel parameters with the global
 //keyword represents cl_mem objects on the FPGA DDR memory. Burst read/write
 //happens from/to DDR to/from local memory which helps in achieving pipeline
 //II=1 for read from DDR to local memory.
@@ -39,63 +39,77 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 const int c_size = MAX_SIZE;
 
 extern "C" {
-void mmult( int* in1,  //Read-only input matrix1
-            int* in2,  //Read-only input matrix2
-            int* out_r,  //Output matrix
-            int dim             //One dimension of the matrix
-          )
-{
-#pragma HLS INTERFACE m_axi port=in1 offset=slave bundle=gmem
-#pragma HLS INTERFACE m_axi port=in2 offset=slave bundle=gmem
-#pragma HLS INTERFACE m_axi port=out_r offset=slave bundle=gmem
-#pragma HLS INTERFACE s_axilite port=in1 bundle=control
-#pragma HLS INTERFACE s_axilite port=in2 bundle=control
-#pragma HLS INTERFACE s_axilite port=out_r bundle=control
-#pragma HLS INTERFACE s_axilite port=dim bundle=control
-#pragma HLS INTERFACE s_axilite port=return bundle=control
-    
+void mmult(int *in1,   //Read-only input matrix1
+           int *in2,   //Read-only input matrix2
+           int *out_r, //Output matrix
+           int dim     //One dimension of the matrix
+) {
+#pragma HLS INTERFACE m_axi port = in1 offset = slave bundle = gmem
+#pragma HLS INTERFACE m_axi port = in2 offset = slave bundle = gmem
+#pragma HLS INTERFACE m_axi port = out_r offset = slave bundle = gmem
+#pragma HLS INTERFACE s_axilite port = in1 bundle = control
+#pragma HLS INTERFACE s_axilite port = in2 bundle = control
+#pragma HLS INTERFACE s_axilite port = out_r bundle = control
+#pragma HLS INTERFACE s_axilite port = dim bundle = control
+#pragma HLS INTERFACE s_axilite port = return bundle = control
+
     //Local memory to store input matrices
     //Local memory is implemented as BRAM memory blocks
     int local_in1[MAX_SIZE][MAX_SIZE];
     int local_in2[MAX_SIZE][MAX_SIZE];
     int local_out[MAX_SIZE][MAX_SIZE];
 
-    //Burst reads on input matrices from DDR memory
-    //Burst read for matrix local_in1 and local_in2
-    read_in1: for(int iter = 0, i = 0, j = 0; iter < dim * dim; iter++, j++){
-    #pragma HLS LOOP_TRIPCOUNT min=c_size*c_size max=c_size*c_size
-    #pragma HLS PIPELINE II=1
-        if(j == dim){ j = 0; i++; }
+//Burst reads on input matrices from DDR memory
+//Burst read for matrix local_in1 and local_in2
+read_in1:
+    for (int iter = 0, i = 0, j = 0; iter < dim * dim; iter++, j++) {
+       #pragma HLS LOOP_TRIPCOUNT min=c_size*c_size max=c_size*c_size
+       #pragma HLS PIPELINE II=1
+        if (j == dim) {
+            j = 0;
+            i++;
+        }
         local_in1[i][j] = in1[iter];
     }
-    
-    read_in2: for(int iter = 0, i = 0, j = 0; iter < dim * dim; iter++, j++){
-    #pragma HLS LOOP_TRIPCOUNT min=c_size*c_size max=c_size*c_size
-    #pragma HLS PIPELINE II=1
-        if(j == dim){ j = 0; i++; }
+
+read_in2:
+    for (int iter = 0, i = 0, j = 0; iter < dim * dim; iter++, j++) {
+       #pragma HLS LOOP_TRIPCOUNT min=c_size*c_size max=c_size*c_size
+       #pragma HLS PIPELINE II=1
+        if (j == dim) {
+            j = 0;
+            i++;
+        }
         local_in2[i][j] = in2[iter];
     }
 
-    //Reads the input_data from local memory, performs the computations 
-    //and writes the data to local memory
-    loop_1: for(int i = 0; i < dim; i++){
-    #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
-        loop_2: for(int j = 0; j < dim; j++){
-        #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
+//Reads the input_data from local memory, performs the computations
+//and writes the data to local memory
+loop_1:
+    for (int i = 0; i < dim; i++) {
+       #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
+    loop_2:
+        for (int j = 0; j < dim; j++) {
+           #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
             local_out[i][j] = 0;
-            loop_3: for(int k = 0; k < dim; k++){
-            #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
-            #pragma HLS PIPELINE
-                local_out[i][j] += local_in1[i][k] * local_in2[k][ j];
+        loop_3:
+            for (int k = 0; k < dim; k++) {
+               #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
+               #pragma HLS PIPELINE
+                local_out[i][j] += local_in1[i][k] * local_in2[k][j];
             }
         }
     }
 
-    //Burst write from local_out to DDR memory
-    write_out: for(int iter = 0, i = 0, j = 0; iter < dim * dim; iter++, j++){
-    #pragma HLS LOOP_TRIPCOUNT min=c_size*c_size max=c_size*c_size
-    #pragma HLS PIPELINE II=1
-        if(j == dim){ j = 0; i++; }
+//Burst write from local_out to DDR memory
+write_out:
+    for (int iter = 0, i = 0, j = 0; iter < dim * dim; iter++, j++) {
+       #pragma HLS LOOP_TRIPCOUNT min=c_size*c_size max=c_size*c_size
+       #pragma HLS PIPELINE II=1
+        if (j == dim) {
+            j = 0;
+            i++;
+        }
         out_r[iter] = local_out[i][j];
     }
 }

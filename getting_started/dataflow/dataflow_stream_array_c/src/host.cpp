@@ -30,12 +30,11 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "xcl2.hpp"
 #include <vector>
 
-#define DATA_SIZE   4096
-#define INCR_VALUE  4
-#define STAGES      4
+#define DATA_SIZE 4096
+#define INCR_VALUE 4
+#define STAGES 4
 
-int main(int argc, char** argv)
-{
+int main(int argc, char **argv) {
     if (argc != 2) {
         std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
         return EXIT_FAILURE;
@@ -50,23 +49,23 @@ int main(int argc, char** argv)
 
     //Allocate Memory in Host Memory
     size_t vector_size_bytes = sizeof(int) * DATA_SIZE;
-    std::vector<int,aligned_allocator<int>> source_input     (DATA_SIZE);
-    std::vector<int,aligned_allocator<int>> source_hw_results(DATA_SIZE);
-    std::vector<int,aligned_allocator<int>> source_sw_results(DATA_SIZE);
+    std::vector<int, aligned_allocator<int>> source_input(DATA_SIZE);
+    std::vector<int, aligned_allocator<int>> source_hw_results(DATA_SIZE);
+    std::vector<int, aligned_allocator<int>> source_sw_results(DATA_SIZE);
 
-    for(int i = 0 ; i < DATA_SIZE ; i++){
+    for (int i = 0; i < DATA_SIZE; i++) {
         source_input[i] = i;
-        source_sw_results[i] = i; //setting the same value of input 
+        source_sw_results[i] = i; //setting the same value of input
         source_hw_results[i] = 0;
     }
     //Calculating the Golden Value
-    for(int i = 0 ; i < STAGES ; i++){
-        for (int j = 0 ; j < DATA_SIZE ; j++){
-            source_sw_results[j] =  source_sw_results[j] + incr;
+    for (int i = 0; i < STAGES; i++) {
+        for (int j = 0; j < DATA_SIZE; j++) {
+            source_sw_results[j] = source_sw_results[j] + incr;
         }
     }
 
-//OPENCL HOST CODE AREA START
+    //OPENCL HOST CODE AREA START
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
@@ -75,43 +74,45 @@ int main(int argc, char** argv)
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     //Create Program and Kernel
-    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    char *fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
-    OCL_CHECK(err, cl::Kernel krnl_adders(program,"N_stage_Adders", &err));
+    OCL_CHECK(err, cl::Kernel krnl_adders(program, "N_stage_Adders", &err));
 
     //Allocate Buffer in Global Memory
-    OCL_CHECK(err, cl::Buffer buffer_input (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-            vector_size_bytes, source_input.data(), &err));
-    OCL_CHECK(err, cl::Buffer buffer_output(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-            vector_size_bytes, source_hw_results.data(), &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_input(
+                  context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, vector_size_bytes, source_input.data(), &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_output(
+                  context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, vector_size_bytes, source_hw_results.data(), &err));
 
     //Set the Kernel Arguments
-    int narg=0;
-    OCL_CHECK(err, err = krnl_adders.setArg(narg++,buffer_input));
-    OCL_CHECK(err, err = krnl_adders.setArg(narg++,buffer_output));
-    OCL_CHECK(err, err = krnl_adders.setArg(narg++,incr));
-    OCL_CHECK(err, err = krnl_adders.setArg(narg++,size));
+    int narg = 0;
+    OCL_CHECK(err, err = krnl_adders.setArg(narg++, buffer_input));
+    OCL_CHECK(err, err = krnl_adders.setArg(narg++, buffer_output));
+    OCL_CHECK(err, err = krnl_adders.setArg(narg++, incr));
+    OCL_CHECK(err, err = krnl_adders.setArg(narg++, size));
 
     //Copy input data to device global memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_input},0/* 0 means from host*/));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_input}, 0 /* 0 means from host*/));
 
     //Launch the Kernel
     OCL_CHECK(err, err = q.enqueueTask(krnl_adders));
 
     //Copy Result from Device Global Memory to Host Local Memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_output},CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_output}, CL_MIGRATE_MEM_OBJECT_HOST));
     q.finish();
-//OPENCL HOST CODE AREA END
-    
+    //OPENCL HOST CODE AREA END
+
     // Compare the results of the Device to the simulation
     int match = 0;
-    for (int i = 0 ; i < DATA_SIZE ; i++){
-        if (source_hw_results[i] != source_sw_results[i]){
+    for (int i = 0; i < DATA_SIZE; i++) {
+        if (source_hw_results[i] != source_sw_results[i]) {
             std::cout << "Error: Result mismatch" << std::endl;
             std::cout << "i = " << i << " CPU result = " << source_sw_results[i]
-                << " Device result = " << source_hw_results[i] << std::endl;
+                      << " Device result = " << source_hw_results[i] << std::endl;
             match = 1;
             break;
         }
@@ -119,6 +120,6 @@ int main(int argc, char** argv)
 
     delete[] fileBuf;
 
-    std::cout << "TEST " << (match ? "FAILED" : "PASSED") << std::endl; 
-    return (match ? EXIT_FAILURE :  EXIT_SUCCESS);
+    std::cout << "TEST " << (match ? "FAILED" : "PASSED") << std::endl;
+    return (match ? EXIT_FAILURE : EXIT_SUCCESS);
 }

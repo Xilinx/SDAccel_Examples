@@ -27,27 +27,22 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <time.h>
-#include <string.h>
-#include <stdlib.h>
 #include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
 #define _COMPUTE_FULL_MATRIX 1
-#include "sw.h"
 #include "matcharray.h"
+#include "sw.h"
 
 float insProb = 0.10;
 float delProb = 0.10;
 float mutProb = 0.10;
 
-typedef enum { BP,
-    MUTATE,
-    INSERT,
-    DELETE } command_e;
+typedef enum { BP, MUTATE, INSERT, DELETE } command_e;
 
-command_e command()
-{
+command_e command() {
     int val = rand() % 100;
     static int insVal = insProb * 100;
     static int delVal = delProb * 100;
@@ -58,18 +53,15 @@ command_e command()
 
     if (val < insLevel) {
         return INSERT;
-    }
-    else if (val < delLevel) {
+    } else if (val < delLevel) {
         return DELETE;
-    }
-    else if (val < mutLevel) {
+    } else if (val < mutLevel) {
         return MUTATE;
     }
     return BP;
 }
 
-void genSeq(int readSize, int refSize, int readLoc, short* readSeq, short* refSeq)
-{
+void genSeq(int readSize, int refSize, int readLoc, short *readSeq, short *refSeq) {
     int readCount = 0;
     int i;
     for (i = 0; i < refSize; ++i) {
@@ -93,8 +85,7 @@ void genSeq(int readSize, int refSize, int readLoc, short* readSeq, short* refSe
     }
 }
 
-void printSeq(int sz, short* d)
-{
+void printSeq(int sz, short *d) {
     int i;
     for (i = 0; i < sz; ++i) {
         printf("%c", bases[d[i]]);
@@ -102,14 +93,12 @@ void printSeq(int sz, short* d)
     printf("\n");
 }
 
-void makeSeq(int readSize, int refSize, short* readSeq, short* refSeq)
-{
+void makeSeq(int readSize, int refSize, short *readSeq, short *refSeq) {
     int loc = rand() % (refSize - readSize + 1);
     genSeq(readSize, refSize, loc, readSeq, refSeq);
 }
 
-void printMatrix(int readSize, int refSize, short** mat, char* msg)
-{
+void printMatrix(int readSize, int refSize, short **mat, char *msg) {
     printf("Weight Matrix: %s\n", msg);
     int row, col;
     for (row = 0; row < readSize; ++row) {
@@ -120,9 +109,8 @@ void printMatrix(int readSize, int refSize, short** mat, char* msg)
     }
 }
 
-void computeMatrix(int readSize, int refSize, short* readSeq,
-    short* refSeq, short** mat, short* maxr, short* maxc, short* maxv)
-{
+void computeMatrix(
+    int readSize, int refSize, short *readSeq, short *refSeq, short **mat, short *maxr, short *maxc, short *maxv) {
     *maxv = MINVAL;
     int row, col;
     for (col = 0; col < refSize; col++) {
@@ -131,21 +119,18 @@ void computeMatrix(int readSize, int refSize, short* readSeq,
             short n, nw, w;
             if (row == 0) {
                 n = 0;
-            }
-            else {
+            } else {
                 n = mat[row - 1][col];
             }
             if (col == 0) {
                 w = 0;
-            }
-            else {
+            } else {
                 w = mat[row][col - 1];
             }
 
             if (row > 0 && col > 0) {
                 nw = mat[row - 1][col - 1];
-            }
-            else {
+            } else {
                 nw = 0;
             }
 
@@ -165,32 +150,28 @@ void computeMatrix(int readSize, int refSize, short* readSeq,
     }
 }
 
-void compareMatrix(int readSize, int refSize, short** matRef, short** matComp)
-{
+void compareMatrix(int readSize, int refSize, short **matRef, short **matComp) {
     int error = 0;
     int row, col;
     for (row = 0; row < readSize; ++row) {
         for (col = 0; col < refSize; col++) {
             if (matRef[row][col] != matComp[row][col]) {
-                printf("Difference at (%d, %d). Ref=%d, Computed=%d\n",
-                    row, col, matRef[row][col], matComp[row][col]);
+                printf("Difference at (%d, %d). Ref=%d, Computed=%d\n", row, col, matRef[row][col], matComp[row][col]);
                 error++;
             }
         }
     }
     if (error) {
         printf("FAIL: %d values do not match\n", error);
-    }
-    else {
+    } else {
         printf("PASS: All values match\n");
     }
 }
 
 //A-0, C-1, G-2, T-3
-short** buildMat(int readSize, int refSize)
-{
-    short** mat;
-    mat = new short*[readSize];
+short **buildMat(int readSize, int refSize) {
+    short **mat;
+    mat = new short *[readSize];
     int r;
     for (r = 0; r < readSize; ++r) {
         mat[r] = new short[refSize];
@@ -198,8 +179,7 @@ short** buildMat(int readSize, int refSize)
     return mat;
 }
 
-void deleteMat(int readSize, int refSize, short*** mat)
-{
+void deleteMat(int readSize, int refSize, short ***mat) {
     int r;
     for (r = 0; r < readSize; ++r) {
         delete[](*mat)[r];
@@ -208,8 +188,7 @@ void deleteMat(int readSize, int refSize, short*** mat)
     delete[] * mat;
 }
 
-void uintTouint2Array(int bufferSz, unsigned int* buffer, short* buffer2b)
-{
+void uintTouint2Array(int bufferSz, unsigned int *buffer, short *buffer2b) {
     int i, j;
     for (i = 0; i < bufferSz * 16; ++i) {
         buffer2b[i] = 0;
@@ -223,8 +202,7 @@ void uintTouint2Array(int bufferSz, unsigned int* buffer, short* buffer2b)
     }
 }
 
-void uint2TouintArray(int buffer2bSz, short* buffer2b, unsigned int* buffer)
-{
+void uint2TouintArray(int buffer2bSz, short *buffer2b, unsigned int *buffer) {
     int i, j;
     for (i = 0; i < buffer2bSz / 16; ++i) {
         buffer[i] = 0;
@@ -240,8 +218,7 @@ void uint2TouintArray(int buffer2bSz, short* buffer2b, unsigned int* buffer)
     }
 }
 
-void compareSeq(int sz, short* seq, short* seqT, char* s)
-{
+void compareSeq(int sz, short *seq, short *seqT, char *s) {
     int fail = 0;
     int i;
     for (i = 0; i < sz; ++i) {
@@ -255,17 +232,17 @@ void compareSeq(int sz, short* seq, short* seqT, char* s)
     }
 }
 
-unsigned int* generatePackedNReadRefPair(int N, int readSize, int refSize, unsigned int** maxVal, int computeOutput = 1)
-{
+unsigned int *
+generatePackedNReadRefPair(int N, int readSize, int refSize, unsigned int **maxVal, int computeOutput = 1) {
     int numInt = READREFUINTSZ(readSize, refSize);
-    unsigned int* pairs = new unsigned int[N * numInt];
-    short* readSeq = new short[readSize];
-    short* refSeq = new short[refSize];
-    short* readSeqT = new short[readSize];
-    short* refSeqT = new short[refSize];
-    unsigned int* readSeqP = new unsigned int[readSize / UINTNUMBP];
-    unsigned int* refSeqP = new unsigned int[refSize / UINTNUMBP];
-    short** matRef = buildMat(readSize, refSize);
+    unsigned int *pairs = new unsigned int[N * numInt];
+    short *readSeq = new short[readSize];
+    short *refSeq = new short[refSize];
+    short *readSeqT = new short[readSize];
+    short *refSeqT = new short[refSize];
+    unsigned int *readSeqP = new unsigned int[readSize / UINTNUMBP];
+    unsigned int *refSeqP = new unsigned int[refSize / UINTNUMBP];
+    short **matRef = buildMat(readSize, refSize);
     *maxVal = new unsigned int[N * 3];
     int i;
     for (i = 0; i < N; ++i) {
@@ -301,13 +278,12 @@ unsigned int* generatePackedNReadRefPair(int N, int readSize, int refSize, unsig
     return pairs;
 }
 
-void writeReadRefFile(char* fname, unsigned int* pairs, unsigned int* maxVals, int N)
-{
-    FILE* fp = fopen(fname, "w");
+void writeReadRefFile(char *fname, unsigned int *pairs, unsigned int *maxVals, int N) {
+    FILE *fp = fopen(fname, "w");
     fprintf(fp, "rdsz,%d\n", MAXROW);
     fprintf(fp, "refsz,%d\n", MAXCOL);
     fprintf(fp, "samples,%d\n", N);
-    for (size_t i = 0; i < (size_t) N; ++i) {
+    for (size_t i = 0; i < (size_t)N; ++i) {
         fprintf(fp, "S%lu,", i);
         for (size_t j = 0; j < PACKEDSZ; ++j) {
             fprintf(fp, "%u,", pairs[i * PACKEDSZ + j]);
@@ -315,8 +291,7 @@ void writeReadRefFile(char* fname, unsigned int* pairs, unsigned int* maxVals, i
         for (size_t j = 0; j < 3; ++j) {
             if (j == 2) {
                 fprintf(fp, "%u\n", maxVals[i * 3 + j]);
-            }
-            else {
+            } else {
                 fprintf(fp, "%u,", maxVals[i * 3 + j]);
             }
         }
@@ -324,8 +299,7 @@ void writeReadRefFile(char* fname, unsigned int* pairs, unsigned int* maxVals, i
     fclose(fp);
 }
 
-int getToken(FILE* fp, char* tok)
-{
+int getToken(FILE *fp, char *tok) {
     int pos = 0;
     char ch;
     while ((ch = (char)(fgetc(fp)))) {
@@ -344,10 +318,9 @@ int getToken(FILE* fp, char* tok)
     return -1;
 }
 
-int readReadRefFile(char* fname, unsigned int** pairs, unsigned int** maxv, int N)
-{
-    FILE* fp = fopen(fname, "r");
-    char* string = new char[1024];
+int readReadRefFile(char *fname, unsigned int **pairs, unsigned int **maxv, int N) {
+    FILE *fp = fopen(fname, "r");
+    char *string = new char[1024];
     int rdSz = 0;
     int refSz = 0;
     int sampleNum = 0;
@@ -390,13 +363,12 @@ int readReadRefFile(char* fname, unsigned int** pairs, unsigned int** maxv, int 
     return numSamples;
 }
 
-void printPackedNReadRefPair(unsigned int* pairs, int N, int readSize, int refSize)
-{
+void printPackedNReadRefPair(unsigned int *pairs, int N, int readSize, int refSize) {
     int numInt = READREFUINTSZ(readSize, refSize);
-    short* readSeq = new short[readSize];
-    short* refSeq = new short[refSize];
-    unsigned int* readSeqP = new unsigned int[readSize / UINTNUMBP];
-    unsigned int* refSeqP = new unsigned int[refSize / UINTNUMBP];
+    short *readSeq = new short[readSize];
+    short *refSeq = new short[refSize];
+    unsigned int *readSeqP = new unsigned int[readSize / UINTNUMBP];
+    unsigned int *refSeqP = new unsigned int[refSize / UINTNUMBP];
 
     int i;
     for (i = 0; i < N; ++i) {
@@ -419,8 +391,7 @@ void printPackedNReadRefPair(unsigned int* pairs, int N, int readSize, int refSi
 }
 
 #define TESTSZ 64
-void testuintConv()
-{
+void testuintConv() {
     short d[TESTSZ];
     short q[TESTSZ];
     short out[TESTSZ];

@@ -40,7 +40,7 @@ Description:
 #include "xcl2.hpp"
 #include <vector>
 
-//Array Size to access 
+//Array Size to access
 #define DATA_SIZE 16
 
 //Maximum Array Size
@@ -48,24 +48,21 @@ Description:
 
 // Software implementation of Matrix Multiplication
 // The inputs are of the size (DATA_SIZE x DATA_SIZE)
-void m_softwareGold(
-                    std::vector<int,aligned_allocator<int>> &in1,   //Input Matrix 1
-                    std::vector<int,aligned_allocator<int>> &in2,   //Input Matrix 2
-                    std::vector<int,aligned_allocator<int>> &out    //Output Matrix
-                   )
-{
+void m_softwareGold(std::vector<int, aligned_allocator<int>> &in1, //Input Matrix 1
+                    std::vector<int, aligned_allocator<int>> &in2, //Input Matrix 2
+                    std::vector<int, aligned_allocator<int>> &out  //Output Matrix
+) {
     //Perform Matrix multiply Out = In1 x In2
-    for(int i = 0; i < DATA_SIZE; i++) {
-        for(int j = 0; j < DATA_SIZE; j++) {
-            for(int k = 0; k < DATA_SIZE; k++) {
+    for (int i = 0; i < DATA_SIZE; i++) {
+        for (int j = 0; j < DATA_SIZE; j++) {
+            for (int k = 0; k < DATA_SIZE; k++) {
                 out[i * DATA_SIZE + j] += in1[i * DATA_SIZE + k] * in2[k * DATA_SIZE + j];
             }
         }
     }
-}  
+}
 
-int main(int argc, char** argv)
-{
+int main(int argc, char **argv) {
     if (argc != 2) {
         std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
         return EXIT_FAILURE;
@@ -75,29 +72,30 @@ int main(int argc, char** argv)
 
     //Allocate Memory in Host Memory
     if (DATA_SIZE > MAX_SIZE) {
-        std::cout << "Size is bigger than internal buffer size, please use a size smaller than " << MAX_SIZE << "!" << std::endl;
+        std::cout << "Size is bigger than internal buffer size, please use a size smaller than " << MAX_SIZE << "!"
+                  << std::endl;
         return EXIT_FAILURE;
     }
-    
-    size_t matrix_size =  DATA_SIZE * DATA_SIZE;
+
+    size_t matrix_size = DATA_SIZE * DATA_SIZE;
     size_t matrix_size_bytes = sizeof(int) * matrix_size;
     cl_int err;
     unsigned fileBufSize;
 
-    std::vector<int,aligned_allocator<int>> source_in1        (matrix_size);
-    std::vector<int,aligned_allocator<int>> source_in2        (matrix_size);
-    std::vector<int,aligned_allocator<int>> source_hw_results (matrix_size);
-    std::vector<int,aligned_allocator<int>> source_sw_results (matrix_size);
+    std::vector<int, aligned_allocator<int>> source_in1(matrix_size);
+    std::vector<int, aligned_allocator<int>> source_in2(matrix_size);
+    std::vector<int, aligned_allocator<int>> source_hw_results(matrix_size);
+    std::vector<int, aligned_allocator<int>> source_sw_results(matrix_size);
 
-    // Create the test data and Software Result 
-    for(size_t i = 0 ; i < matrix_size ; i++){
+    // Create the test data and Software Result
+    for (size_t i = 0; i < matrix_size; i++) {
         source_in1[i] = i % 10;
         source_in2[i] = i % 10;
         source_sw_results[i] = 0;
         source_hw_results[i] = 0;
     }
 
-//OPENCL HOST CODE AREA START
+    //OPENCL HOST CODE AREA START
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
@@ -105,20 +103,23 @@ int main(int argc, char** argv)
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
-    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    char *fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
-    OCL_CHECK(err, cl::Kernel krnl_systolic_array(program,"mmult", &err));
+    OCL_CHECK(err, cl::Kernel krnl_systolic_array(program, "mmult", &err));
 
     //Allocate Buffer in Global Memory
-    OCL_CHECK(err, cl::Buffer buffer_in1   (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-            matrix_size_bytes,source_in1.data(), &err));
-    OCL_CHECK(err, cl::Buffer buffer_in2   (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-            matrix_size_bytes,source_in2.data(), &err));
-    OCL_CHECK(err, cl::Buffer buffer_output(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-            matrix_size_bytes, source_hw_results.data(), &err));
-    
+    OCL_CHECK(err,
+              cl::Buffer buffer_in1(
+                  context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, matrix_size_bytes, source_in1.data(), &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_in2(
+                  context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, matrix_size_bytes, source_in2.data(), &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_output(
+                  context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, matrix_size_bytes, source_hw_results.data(), &err));
+
     int a_row = DATA_SIZE;
     int a_col = DATA_SIZE;
     int b_col = DATA_SIZE;
@@ -131,27 +132,27 @@ int main(int argc, char** argv)
     OCL_CHECK(err, err = krnl_systolic_array.setArg(5, b_col));
 
     //Copy input data to device global memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_in1, buffer_in2},0/* 0 means from host*/));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_in1, buffer_in2}, 0 /* 0 means from host*/));
 
     //Launch the Kernel
     OCL_CHECK(err, err = q.enqueueTask(krnl_systolic_array));
     q.finish();
 
     //Copy Result from Device Global Memory to Host Local Memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_output},CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_output}, CL_MIGRATE_MEM_OBJECT_HOST));
     q.finish();
-//OPENCL HOST CODE AREA END
- 
+    //OPENCL HOST CODE AREA END
+
     // Compute Software Results
     m_softwareGold(source_in1, source_in2, source_sw_results);
-    
+
     // Compare the results of the Device to the simulation
     int match = 0;
-    for (int i = 0 ; i < DATA_SIZE * DATA_SIZE ; i++){
-        if (source_hw_results[i] != source_sw_results[i]){
+    for (int i = 0; i < DATA_SIZE * DATA_SIZE; i++) {
+        if (source_hw_results[i] != source_sw_results[i]) {
             std::cout << "Error: Result mismatch" << std::endl;
             std::cout << "i = " << i << " CPU result = " << source_sw_results[i]
-                << " Device result = " << source_hw_results[i] << std::endl;
+                      << " Device result = " << source_hw_results[i] << std::endl;
             match = 1;
             break;
         }
@@ -159,6 +160,6 @@ int main(int argc, char** argv)
 
     delete[] fileBuf;
 
-    std::cout << "TEST " << (match ? "FAILED" : "PASSED") << std::endl; 
-    return (match ? EXIT_FAILURE :  EXIT_SUCCESS);
+    std::cout << "TEST " << (match ? "FAILED" : "PASSED") << std::endl;
+    return (match ? EXIT_FAILURE : EXIT_SUCCESS);
 }

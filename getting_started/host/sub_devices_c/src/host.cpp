@@ -39,13 +39,13 @@ Description:
 #include <vector>
 
 //Number of sub devices
-#define N 8 
+#define N 8
 
 //Array size
-#define MB (1024*1024)
-#define DATA_SIZE (MB*N)
+#define MB (1024 * 1024)
+#define DATA_SIZE (MB * N)
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
 
     if (argc != 2) {
         std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
@@ -57,34 +57,33 @@ int main(int argc, char** argv) {
     int size;
     unsigned fileBufSize;
     const char *xcl_emu = getenv("XCL_EMULATION_MODE");
-    if(xcl_emu && !strcmp(xcl_emu, "hw_emu")) {
-        //Original dataset is reduced for faster execution of hardware 
+    if (xcl_emu && !strcmp(xcl_emu, "hw_emu")) {
+        //Original dataset is reduced for faster execution of hardware
         //emulation flow
-        size = 1024*N;
-    }
-    else{
+        size = 1024 * N;
+    } else {
         size = DATA_SIZE;
     }
 
     //Allocate memory in Host Memory
-    int vector_size_bytes = sizeof(int) * size; 
+    int vector_size_bytes = sizeof(int) * size;
     size_t elements_per_subdevice = size / N;
     size_t size_per_subdevice = sizeof(int) * elements_per_subdevice;
 
-    std::vector<int,aligned_allocator<int>> h_a(vector_size_bytes);
-    std::vector<int,aligned_allocator<int>> h_b(vector_size_bytes);
-    std::vector<int,aligned_allocator<int>> hw_results(vector_size_bytes);
+    std::vector<int, aligned_allocator<int>> h_a(vector_size_bytes);
+    std::vector<int, aligned_allocator<int>> h_b(vector_size_bytes);
+    std::vector<int, aligned_allocator<int>> hw_results(vector_size_bytes);
     std::vector<int> sw_results(vector_size_bytes);
 
     //Fill the vectors with data
-    for(int i = 0; i < size; i++) {
+    for (int i = 0; i < size; i++) {
         h_a[i] = i;
-        h_b[i] = i*2;
+        h_b[i] = i * 2;
         hw_results[i] = 0;
         sw_results[i] = h_a[i] + h_b[i];
     }
 
-//OPENCL HOST CODE AREA START
+    //OPENCL HOST CODE AREA START
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
@@ -94,20 +93,20 @@ int main(int argc, char** argv) {
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
-    char* fileBuf = xcl::read_binary_file(vaddBinaryFile, fileBufSize);
+    char *fileBuf = xcl::read_binary_file(vaddBinaryFile, fileBufSize);
     cl::Program::Binaries vadd_bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, vadd_bins, NULL, &err));
 
     //Num sub_devices
-    int num_sub_devices= N;
+    int num_sub_devices = N;
     std::vector<cl::Kernel> sub_kernel(num_sub_devices);
 
     //Specify device partition properties
     const cl_device_partition_property device_part_properties[3] = {
-            CL_DEVICE_PARTITION_EQUALLY  ,
-            1, // Use only one compute unit
-            0 //CL_DEVICE_PARTITION_BY_COUNTS_LIST_END
+        CL_DEVICE_PARTITION_EQUALLY,
+        1, // Use only one compute unit
+        0  //CL_DEVICE_PARTITION_BY_COUNTS_LIST_END
     };
 
     //Create sub_devices, sub_context and corresponding queues
@@ -121,23 +120,29 @@ int main(int argc, char** argv) {
     cl::Buffer *d_output[num_sub_devices];
 
     std::string krnl_name = "krnl_vadd";
-    for (int i = 0; i < num_sub_devices; i++ ) {
+    for (int i = 0; i < num_sub_devices; i++) {
         //Determines each sub_devices data offset for a, b and result
         size_t offset = i * elements_per_subdevice;
-        std::string cu_id = std::to_string(i+1);
+        std::string cu_id = std::to_string(i + 1);
         std::string krnl_name_full = krnl_name + ":{" + "krnl_vadd_" + cu_id + "}";
-        
+
         OCL_CHECK(err, sub_context[i] = cl::Context(sub_devices[i], NULL, NULL, NULL, &err))
         OCL_CHECK(err, sub_q[i] = cl::CommandQueue(sub_context[i], device, 0, &err));
         OCL_CHECK(err, sub_kernel[i] = cl::Kernel(program, krnl_name_full.c_str(), &err));
 
         //Allocates memory on the FPGA DDR memory
-        OCL_CHECK(err, d_a[i] = new cl::Buffer(sub_context[i], CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                                        size_per_subdevice, &h_a[offset], &err));
-        OCL_CHECK(err, d_b[i] = new cl::Buffer(sub_context[i], CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                                        size_per_subdevice, &h_b[offset], &err));
-        OCL_CHECK(err, d_output[i] = new cl::Buffer(sub_context[i], CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-                                        size_per_subdevice, &hw_results[offset], &err));
+        OCL_CHECK(err,
+                  d_a[i] = new cl::Buffer(
+                      sub_context[i], CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, size_per_subdevice, &h_a[offset], &err));
+        OCL_CHECK(err,
+                  d_b[i] = new cl::Buffer(
+                      sub_context[i], CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, size_per_subdevice, &h_b[offset], &err));
+        OCL_CHECK(err,
+                  d_output[i] = new cl::Buffer(sub_context[i],
+                                               CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                                               size_per_subdevice,
+                                               &hw_results[offset],
+                                               &err));
 
         cl::Event write_event;
         cl::Event task_event;
@@ -161,10 +166,12 @@ int main(int argc, char** argv) {
         wait_task_event.push_back(task_event);
         //Copy back the result and this call will write the data from the d_output
         //buffer object to the source hw_result vector
-        OCL_CHECK(err, err = sub_q[i].enqueueMigrateMemObjects({*(d_output[i])}, CL_MIGRATE_MEM_OBJECT_HOST, &wait_task_event, NULL));
+        OCL_CHECK(err,
+                  err = sub_q[i].enqueueMigrateMemObjects(
+                      {*(d_output[i])}, CL_MIGRATE_MEM_OBJECT_HOST, &wait_task_event, NULL));
     }
 
-    for(int i = 0; i < num_sub_devices; i++){
+    for (int i = 0; i < num_sub_devices; i++) {
         //Wait for all the commands to finish in the queue
         OCL_CHECK(err, err = sub_q[i].finish());
         delete d_a[i];
@@ -175,7 +182,7 @@ int main(int argc, char** argv) {
     //Compare the device results with software results
     bool match = true;
     for (int i = 0; i < size; i++) {
-        if (sw_results[i] != hw_results[i]){
+        if (sw_results[i] != hw_results[i]) {
             printf("%d a = %d b = %d \t sw = %d \t hw = %d\n", i, h_a[i], h_b[i], sw_results[i], hw_results[i]);
             match = false;
             break;

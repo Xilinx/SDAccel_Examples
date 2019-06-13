@@ -33,40 +33,39 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 const int c_size = MAX_DIM;
 
 extern "C" {
-void madd(int *c, int *a, int *b,
-          const int dim0, const int dim1) {
-#pragma HLS INTERFACE m_axi port=c offset=slave bundle=gmem
-#pragma HLS INTERFACE m_axi port=a offset=slave bundle=gmem
-#pragma HLS INTERFACE m_axi port=b offset=slave bundle=gmem
-#pragma HLS INTERFACE s_axilite port=c bundle=control 
-#pragma HLS INTERFACE s_axilite port=a bundle=control 
-#pragma HLS INTERFACE s_axilite port=b bundle=control 
-#pragma HLS INTERFACE s_axilite port=dim0 bundle=control
-#pragma HLS INTERFACE s_axilite port=dim1 bundle=control
-#pragma HLS INTERFACE s_axilite port=return bundle=control
-    
+void madd(int *c, int *a, int *b, const int dim0, const int dim1) {
+#pragma HLS INTERFACE m_axi port = c offset = slave bundle = gmem
+#pragma HLS INTERFACE m_axi port = a offset = slave bundle = gmem
+#pragma HLS INTERFACE m_axi port = b offset = slave bundle = gmem
+#pragma HLS INTERFACE s_axilite port = c bundle = control
+#pragma HLS INTERFACE s_axilite port = a bundle = control
+#pragma HLS INTERFACE s_axilite port = b bundle = control
+#pragma HLS INTERFACE s_axilite port = dim0 bundle = control
+#pragma HLS INTERFACE s_axilite port = dim1 bundle = control
+#pragma HLS INTERFACE s_axilite port = return bundle = control
+
     int matA[MAX_DIM * MAX_DIM];
     int matB[MAX_DIM * MAX_DIM];
 
-    madd_readA:  
+madd_readA:
     for (int i = 0; i < dim0 * dim1; ++i) {
-    #pragma HLS PIPELINE II=1
-    #pragma HLS LOOP_TRIPCOUNT min=c_size*c_size max=c_size*c_size
-        matA[i] = a[i]; 
+       #pragma HLS PIPELINE II=1
+       #pragma HLS LOOP_TRIPCOUNT min=c_size*c_size max=c_size*c_size
+        matA[i] = a[i];
     }
 
-    madd_readB:  
+madd_readB:
     for (int i = 0; i < dim0 * dim1; ++i) {
-    #pragma HLS PIPELINE II=1
-    #pragma HLS LOOP_TRIPCOUNT min=c_size*c_size max=c_size*c_size
-        matB[i] = b[i]; 
+       #pragma HLS PIPELINE II=1
+       #pragma HLS LOOP_TRIPCOUNT min=c_size*c_size max=c_size*c_size
+        matB[i] = b[i];
     }
 
-    madd_writeC: 
+madd_writeC:
     for (int i = 0; i < dim0 * dim1; ++i) {
-    #pragma HLS PIPELINE II=1
-    #pragma HLS LOOP_TRIPCOUNT min=c_size*c_size max=c_size*c_size
-        c[i] =  matA[i] + matB[i]; 
+       #pragma HLS PIPELINE II=1
+       #pragma HLS LOOP_TRIPCOUNT min=c_size*c_size max=c_size*c_size
+        c[i] = matA[i] + matB[i];
     }
 }
 }

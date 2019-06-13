@@ -26,32 +26,30 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
+#include "vconv.h"
 #include "xcl2.hpp"
 #include <vector>
-#include "vconv.h"
 
-void vconv_sw(int *in, int *out, int height, int width)
-{
+void vconv_sw(int *in, int *out, int height, int width) {
     int linebuf[K - 1][MAX_COLS] = {};
     int outIdx = 0;
-    for(int col = 0; col < height; ++col) {
-        for(int row = 0; row < width ; ++row) {
+    for (int col = 0; col < height; ++col) {
+        for (int row = 0; row < width; ++row) {
             int in_val = in[col * width + row];
             int out_val = 0;
-            for(int i = 0; i < K; i++) {
+            for (int i = 0; i < K; i++) {
                 int vwin_val = i < (K - 1) ? linebuf[i][row] : in_val;
                 out_val += vwin_val * vcoeff[i];
-        
+
                 if (i > 0)
-                    linebuf[i-1][row] = vwin_val;
+                    linebuf[i - 1][row] = vwin_val;
             }
-            out[outIdx++]  =  out_val;
+            out[outIdx++] = out_val;
         }
     }
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char **argv) {
     if (argc != 2) {
         std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
         return EXIT_FAILURE;
@@ -59,48 +57,50 @@ int main(int argc, char** argv)
 
     std::string binaryFile = argv[1];
 
-    int testWidth    = TEST_WIDTH;
-    int testHeight   = TEST_HEIGHT;
+    int testWidth = TEST_WIDTH;
+    int testHeight = TEST_HEIGHT;
     int testSize = testHeight * testWidth;
 
     cl_int err;
     unsigned fileBufSize;
     //Allocate Memory in Host Memory
     size_t test_size_bytes = sizeof(int) * testSize;
-    std::vector<int,aligned_allocator<int>> source_input(test_size_bytes);
-    std::vector<int,aligned_allocator<int>> source_hw_results(test_size_bytes);
-    std::vector<int,aligned_allocator<int>> source_sw_results(test_size_bytes);
-    
-    // Create the test data and Software Result 
-    for(int i = 0 ; i < testSize; i++){
+    std::vector<int, aligned_allocator<int>> source_input(test_size_bytes);
+    std::vector<int, aligned_allocator<int>> source_hw_results(test_size_bytes);
+    std::vector<int, aligned_allocator<int>> source_sw_results(test_size_bytes);
+
+    // Create the test data and Software Result
+    for (int i = 0; i < testSize; i++) {
         source_input[i] = rand() % testSize;
         source_sw_results[i] = 0;
         source_hw_results[i] = 0;
     }
-    
-    //Running software vconv
-    vconv_sw(source_input.data(),source_sw_results.data(), testHeight, testWidth);
 
-//OPENCL HOST CODE AREA START
+    //Running software vconv
+    vconv_sw(source_input.data(), source_sw_results.data(), testHeight, testWidth);
+
+    //OPENCL HOST CODE AREA START
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
-    OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err)); 
+    OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
-    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    char *fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
-    OCL_CHECK(err, cl::Kernel krnl_vconv(program,"vconv", &err));
+    OCL_CHECK(err, cl::Kernel krnl_vconv(program, "vconv", &err));
 
     //Allocate Buffer in Global Memory
-    OCL_CHECK(err, cl::Buffer buffer_input (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-            test_size_bytes, source_input.data(), &err));
-    OCL_CHECK(err, cl::Buffer buffer_output(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
-            test_size_bytes, source_hw_results.data(), &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_input(
+                  context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, test_size_bytes, source_input.data(), &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_output(
+                  context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, test_size_bytes, source_hw_results.data(), &err));
 
     OCL_CHECK(err, err = krnl_vconv.setArg(0, buffer_input));
     OCL_CHECK(err, err = krnl_vconv.setArg(1, buffer_output));
@@ -108,26 +108,26 @@ int main(int argc, char** argv)
     OCL_CHECK(err, err = krnl_vconv.setArg(3, testWidth));
 
     //Copy input data to device global memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_input},0/* 0 means from host*/));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_input}, 0 /* 0 means from host*/));
 
     //Launch the Kernel
     OCL_CHECK(err, err = q.enqueueTask(krnl_vconv));
 
     //Copy Result from Device Global Memory to Host Local Memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_output},CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_output}, CL_MIGRATE_MEM_OBJECT_HOST));
     q.finish();
 
-//OPENCL HOST CODE AREA END
-    
+    //OPENCL HOST CODE AREA END
+
     // Compare the results of the Device to the simulation
     bool match = true;
-    
+
     std::cout << "Result = " << std::endl;
-    for (int i = 0 ; i < testSize ; i++){
-        if (source_hw_results[i] != source_sw_results[i]){
+    for (int i = 0; i < testSize; i++) {
+        if (source_hw_results[i] != source_sw_results[i]) {
             std::cout << "Error: Result mismatch" << std::endl;
             std::cout << "i = " << i << " CPU result = " << source_sw_results[i]
-                << " Device result = " << source_hw_results[i] << std::endl;
+                      << " Device result = " << source_hw_results[i] << std::endl;
             match = false;
             break;
         }
@@ -135,6 +135,6 @@ int main(int argc, char** argv)
 
     delete[] fileBuf;
 
-    std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl; 
-    return (match ? EXIT_SUCCESS :  EXIT_FAILURE);
+    std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl;
+    return (match ? EXIT_SUCCESS : EXIT_FAILURE);
 }

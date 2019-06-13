@@ -27,10 +27,10 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 
 #include "xcl2.hpp"
 
@@ -40,24 +40,31 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 #endif
 
-char* fileBuf;
-void linear_search_read_datafile(char* filename, float* data, size_t size) {
-    FILE* fp = fopen(filename, "r");
-    if( fp == NULL) {
+char *fileBuf;
+void linear_search_read_datafile(char *filename, float *data, size_t size) {
+    FILE *fp = fopen(filename, "r");
+    if (fp == NULL) {
         printf("ERROR: Could not open file\n");
         exit(EXIT_FAILURE);
     }
 
     for (size_t i = 0; i < size; i++) {
-        fscanf (fp, "%f\n", &data[i]);
+        fscanf(fp, "%f\n", &data[i]);
     }
     fclose(fp);
 }
 
-void linear_search_init( cl::Context *context, cl::CommandQueue *q, std::string &binaryFile, 
-        cl::Program *program, cl::Kernel *krnl, cl::Buffer* dev_targets, cl::Buffer* dev_queries, 
-        cl::Buffer* dev_indices, float *targets, float *queries, unsigned int *indices)
-{
+void linear_search_init(cl::Context *context,
+                        cl::CommandQueue *q,
+                        std::string &binaryFile,
+                        cl::Program *program,
+                        cl::Kernel *krnl,
+                        cl::Buffer *dev_targets,
+                        cl::Buffer *dev_queries,
+                        cl::Buffer *dev_indices,
+                        float *targets,
+                        float *queries,
+                        unsigned int *indices) {
     cl_int err;
     unsigned fileBufSize;
     // get_xil_devices() is a utility API which will find the xilinx
@@ -81,20 +88,37 @@ void linear_search_init( cl::Context *context, cl::CommandQueue *q, std::string 
     // Allocate Buffer in Global Memory
     // Buffers are allocated using CL_MEM_USE_HOST_PTR for efficient memory and Device-to-host communication
     /* Create Buffers padded to 512 bit boundry */
-    OCL_CHECK(err, *dev_targets = cl::Buffer(*context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-            ((TARGETS * DIMS - 1) / 16 + 1) * 16 * sizeof(float), (void*)targets, &err));
+    OCL_CHECK(err,
+              *dev_targets = cl::Buffer(*context,
+                                        CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                        ((TARGETS * DIMS - 1) / 16 + 1) * 16 * sizeof(float),
+                                        (void *)targets,
+                                        &err));
 
-    OCL_CHECK(err, *dev_queries = cl::Buffer(*context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-            ((QUERIES * DIMS - 1) / 16 + 1) * 16 * sizeof(float), (void*)queries, &err));
+    OCL_CHECK(err,
+              *dev_queries = cl::Buffer(*context,
+                                        CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                        ((QUERIES * DIMS - 1) / 16 + 1) * 16 * sizeof(float),
+                                        (void *)queries,
+                                        &err));
 
-    OCL_CHECK(err, *dev_indices = cl::Buffer(*context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-            ((QUERIES - 1) / 16 + 1) * 16 * sizeof(unsigned int), (void*)indices, &err));
+    OCL_CHECK(err,
+              *dev_indices = cl::Buffer(*context,
+                                        CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                        ((QUERIES - 1) / 16 + 1) * 16 * sizeof(unsigned int),
+                                        (void *)indices,
+                                        &err));
 }
 
-unsigned long linear_search_exec(cl::Context *context, cl::CommandQueue *q, cl::Program *program, cl::Kernel *krnl,
-        cl::Buffer* dev_targets, cl::Buffer* dev_queries, cl::Buffer* dev_indices, unsigned int *indices)
-{
-    cl_int err;    
+unsigned long linear_search_exec(cl::Context *context,
+                                 cl::CommandQueue *q,
+                                 cl::Program *program,
+                                 cl::Kernel *krnl,
+                                 cl::Buffer *dev_targets,
+                                 cl::Buffer *dev_queries,
+                                 cl::Buffer *dev_indices,
+                                 unsigned int *indices) {
+    cl_int err;
     cl::Event event;
 
     OCL_CHECK(err, err = krnl->setArg(0, *dev_targets));
@@ -109,13 +133,15 @@ unsigned long linear_search_exec(cl::Context *context, cl::CommandQueue *q, cl::
 
     unsigned long duration = stop - start;
 
-    OCL_CHECK(err, err = q->enqueueReadBuffer(*dev_indices, CL_TRUE, 0, (QUERIES) * sizeof(unsigned int), (void*)indices, NULL, NULL));
+    OCL_CHECK(err,
+              err = q->enqueueReadBuffer(
+                  *dev_indices, CL_TRUE, 0, (QUERIES) * sizeof(unsigned int), (void *)indices, NULL, NULL));
     q->finish();
     delete[] fileBuf;
     return duration;
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
     if (!(argc == 3 || argc == 4)) {
         printf("Usage: %s <XCLBIN File> <queries.txt> <targets.txt> [<ref.txt>]\n", argv[0]);
         return EXIT_FAILURE;
@@ -133,27 +159,27 @@ int main(int argc, char** argv) {
         check_results = 1;
     }
 
-        std::vector<float,aligned_allocator<float>> queries(QUERIES * DIMS);
-        std::vector<float,aligned_allocator<float>> targets(TARGETS * DIMS);
-        std::vector<unsigned int,aligned_allocator<unsigned int>> indices(QUERIES);
-    
+    std::vector<float, aligned_allocator<float>> queries(QUERIES * DIMS);
+    std::vector<float, aligned_allocator<float>> targets(TARGETS * DIMS);
+    std::vector<unsigned int, aligned_allocator<unsigned int>> indices(QUERIES);
+
     if (queries.empty() || targets.empty() || indices.empty()) {
         printf("ERROR: Could not allocate memory!\n");
         return EXIT_FAILURE;
     }
-      
-    linear_search_read_datafile(queries_filename, queries.data(), QUERIES*DIMS);
 
-    for(size_t i = 0; i < QUERIES*DIMS; i++) {
+    linear_search_read_datafile(queries_filename, queries.data(), QUERIES * DIMS);
+
+    for (size_t i = 0; i < QUERIES * DIMS; i++) {
         if (!isfinite(queries[i])) {
             printf("ERROR: Non finite value specified at queries[%ld]\n", i);
             exit(-1);
         }
     }
 
-    linear_search_read_datafile(targets_filename, targets.data(), TARGETS*DIMS);
+    linear_search_read_datafile(targets_filename, targets.data(), TARGETS * DIMS);
 
-    for(size_t i = 0; i < TARGETS*DIMS; i++) {
+    for (size_t i = 0; i < TARGETS * DIMS; i++) {
         if (!isfinite(targets[i])) {
             printf("ERROR: Non Finite value specified at targets[%ld]\n", i);
             exit(-1);
@@ -166,18 +192,27 @@ int main(int argc, char** argv) {
     cl::Kernel krnl;
     cl::Buffer dev_targets, dev_queries, dev_indices;
 
-    linear_search_init(&context, &q, binaryFile, &program, &krnl,
-        &dev_targets, &dev_queries, &dev_indices, targets.data(), queries.data(), indices.data());
+    linear_search_init(&context,
+                       &q,
+                       binaryFile,
+                       &program,
+                       &krnl,
+                       &dev_targets,
+                       &dev_queries,
+                       &dev_indices,
+                       targets.data(),
+                       queries.data(),
+                       indices.data());
 
-    unsigned long duration = linear_search_exec(
-        &context, &q, &program, &krnl, &dev_targets, &dev_queries, &dev_indices, indices.data());
+    unsigned long duration =
+        linear_search_exec(&context, &q, &program, &krnl, &dev_targets, &dev_queries, &dev_indices, indices.data());
 
     printf("Kernel Execution Time: %ld ns\n", duration);
 
-    std::vector<float,aligned_allocator<float>> refs(QUERIES);
+    std::vector<float, aligned_allocator<float>> refs(QUERIES);
 
-    if(check_results == 1) {
-        if(refs.empty()) {
+    if (check_results == 1) {
+        if (refs.empty()) {
             printf("ERROR: Failed to allocate memory!\n");
             return EXIT_FAILURE;
         }
@@ -189,41 +224,53 @@ int main(int argc, char** argv) {
     for (size_t i = 0; i < QUERIES; i++) {
         size_t j = indices[i];
 
-        if(j > TARGETS) {
+        if (j > TARGETS) {
             printf("ERROR: target[%lu] invalid\n", j);
             continue;
         }
 
-        float dist_x = queries[DIMS*i + 0] - targets[DIMS*j + 0];
-        float dist_y = queries[DIMS*i + 1] - targets[DIMS*j + 1];
-        float dist_z = queries[DIMS*i + 2] - targets[DIMS*j + 2];
+        float dist_x = queries[DIMS * i + 0] - targets[DIMS * j + 0];
+        float dist_y = queries[DIMS * i + 1] - targets[DIMS * j + 1];
+        float dist_z = queries[DIMS * i + 2] - targets[DIMS * j + 2];
 
         float dist = dist_x * dist_x + dist_y * dist_y + dist_z * dist_z;
 
-        printf ("Closest to queries[%5lu] = [% 6.2f % 6.2f % 6.2f] is targets[%5lu] = [% 6.2f % 6.2f % 6.2f] : distance = % 7.2f\n",
-                i, queries[DIMS*i + 0],  queries[DIMS*i + 1], queries[DIMS*i + 2],
-                j, targets[DIMS*j + 0], targets[DIMS*j + 1], targets[DIMS*j +2],
-                dist);
+        printf("Closest to queries[%5lu] = [% 6.2f % 6.2f % 6.2f] is targets[%5lu] = [% 6.2f % 6.2f % 6.2f] : distance "
+               "= % "
+               "7.2f\n",
+               i,
+               queries[DIMS * i + 0],
+               queries[DIMS * i + 1],
+               queries[DIMS * i + 2],
+               j,
+               targets[DIMS * j + 0],
+               targets[DIMS * j + 1],
+               targets[DIMS * j + 2],
+               dist);
 
         if (check_results == 1) {
-            size_t k = (size_t) refs[i];
+            size_t k = (size_t)refs[i];
             if (j != k) {
-                float dist_rx = queries[DIMS*i + 0] - targets[DIMS*k + 0];
-                float dist_ry = queries[DIMS*i + 1] - targets[DIMS*k + 1];
-                float dist_rz = queries[DIMS*i + 2] - targets[DIMS*k + 2];
+                float dist_rx = queries[DIMS * i + 0] - targets[DIMS * k + 0];
+                float dist_ry = queries[DIMS * i + 1] - targets[DIMS * k + 1];
+                float dist_rz = queries[DIMS * i + 2] - targets[DIMS * k + 2];
 
                 float dist_r = dist_rx * dist_rx + dist_ry * dist_ry + dist_rz * dist_rz;
 
                 if (dist_r < dist) {
                     printf("ERROR: Closer target at targets[%5lu] = [% 6.2f % 6.2f % 6.2f] : distance = % 7.2f\n",
-                           k, targets[DIMS*k + 0], targets[DIMS*k + 1], targets[DIMS*k + 2], dist_r);
+                           k,
+                           targets[DIMS * k + 0],
+                           targets[DIMS * k + 1],
+                           targets[DIMS * k + 2],
+                           dist_r);
                     pass = 0;
                 }
             }
         }
     }
 
-    if(pass != 1) {
+    if (pass != 1) {
         printf("ERROR: Test Failed\n");
         return EXIT_FAILURE;
     }
@@ -232,4 +279,3 @@ int main(int argc, char** argv) {
 
     return EXIT_SUCCESS;
 }
-

@@ -85,10 +85,10 @@ static const std::pair<cl_int, std::string> map_pairs[] = {
     std::make_pair(CL_INVALID_GLOBAL_WORK_SIZE, TO_STRING(CL_INVALID_GLOBAL_WORK_SIZE)),
     std::make_pair(CL_INVALID_PROPERTY, TO_STRING(CL_INVALID_PROPERTY))};
 
-static const std::map<cl_int, std::string> oclErrorCodes(map_pairs, map_pairs + sizeof(map_pairs) / sizeof(map_pairs[0]));
+static const std::map<cl_int, std::string> oclErrorCodes(map_pairs,
+                                                         map_pairs + sizeof(map_pairs) / sizeof(map_pairs[0]));
 
-const char *oclErrorCode(cl_int code)
-{
+const char *oclErrorCode(cl_int code) {
     std::map<cl_int, std::string>::const_iterator iter = oclErrorCodes.find(code);
     if (iter == oclErrorCodes.end())
         return "UNKNOWN ERROR";

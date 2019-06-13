@@ -28,17 +28,15 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 
 extern "C" {
-void bandwidth(unsigned int *buffer0, unsigned int *buffer1)
-{
-    #pragma HLS INTERFACE m_axi port=buffer0 offset=slave bundle=gmem0
-    #pragma HLS INTERFACE m_axi port=buffer1 offset=slave bundle=gmem1
+void bandwidth(unsigned int *buffer0, unsigned int *buffer1) {
+   #pragma HLS INTERFACE m_axi port=buffer0 offset=slave bundle=gmem0
+   #pragma HLS INTERFACE m_axi port=buffer1 offset=slave bundle=gmem1
 
-    #pragma HLS INTERFACE s_axilite port=buffer0 bundle=control
-    #pragma HLS INTERFACE s_axilite port=buffer1 bundle=control
-    #pragma HLS INTERFACE s_axilite port=return bundle=control
+   #pragma HLS INTERFACE s_axilite port=buffer0 bundle=control
+   #pragma HLS INTERFACE s_axilite port=buffer1 bundle=control
+   #pragma HLS INTERFACE s_axilite port=return bundle=control
 
-    //Intentional empty kernel as this example doesn't require actual 
-    //kernel to work. 
-
+    //Intentional empty kernel as this example doesn't require actual
+    //kernel to work.
 }
 }

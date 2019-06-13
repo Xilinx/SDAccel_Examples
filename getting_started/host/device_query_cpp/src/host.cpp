@@ -47,30 +47,29 @@ using std::vector;
 // Wrap any OpenCL API calls that return error code(cl_int)
 // with the below macro to quickly check for an error
 
-#define ENUM_CASE(ENUM)     \
-    case ENUM:              \
-        printf(#ENUM "\n"); \
+#define ENUM_CASE(ENUM)                                                                                                \
+    case ENUM:                                                                                                         \
+        printf(#ENUM "\n");                                                                                            \
         break
 
-#define BITFIELD_SETUP(type)                  \
-    auto value = convert<type>(field.data()); \
+#define BITFIELD_SETUP(type)                                                                                           \
+    auto value = convert<type>(field.data());                                                                          \
     printf("[ ")
 
-#define BITFIELD_PRINT(FIELD) \
-    if (value & FIELD) {       err =\
-        printf(#FIELD " ");   \
+#define BITFIELD_PRINT(FIELD)                                                                                          \
+    if (value & FIELD) {                                                                                               \
+        err = printf(#FIELD " ");                                                                                      \
     }
 
 #define BITFIELD_END() printf("]\n")
 
-pair<int, const char*> platform_info[] = {
-    {CL_PLATFORM_PROFILE, "profile"},
-    {CL_PLATFORM_VERSION, "version"},
-    {CL_PLATFORM_NAME, "name"},
-    {CL_PLATFORM_VENDOR, "vendor"},
-    {CL_PLATFORM_EXTENSIONS, "extensions"}};
+pair<int, const char *> platform_info[] = {{CL_PLATFORM_PROFILE, "profile"},
+                                           {CL_PLATFORM_VERSION, "version"},
+                                           {CL_PLATFORM_NAME, "name"},
+                                           {CL_PLATFORM_VENDOR, "vendor"},
+                                           {CL_PLATFORM_EXTENSIONS, "extensions"}};
 
-pair<int, const char*> device_info[] = {
+pair<int, const char *> device_info[] = {
     {CL_DEVICE_TYPE, "type"},
     {CL_DEVICE_VENDOR_ID, "vendor id"},
     {CL_DEVICE_MAX_COMPUTE_UNITS, "max compute units"},
@@ -145,10 +144,7 @@ pair<int, const char*> device_info[] = {
     {CL_DEVICE_PREFERRED_INTEROP_USER_SYNC, "preferred interop user sync"},
     {CL_DEVICE_PRINTF_BUFFER_SIZE, "printf buffer size"}};
 
-template <typename T, size_t N>
-int sizeof_array(T (&)[N]) {
-    return N;
-}
+template <typename T, size_t N> int sizeof_array(T (&)[N]) { return N; }
 
 std::string field(1024, '\0');
 
@@ -157,13 +153,10 @@ void print_platform_info(cl::Platform platform) {
     for (int i = 0; i < sizeof_array(platform_info); i++) {
         OCL_CHECK(err, err = platform.getInfo(platform_info[i].first, &field));
         printf("platform %-11s: %s\n", platform_info[i].second, field.c_str());
-        }
+    }
 }
 
-template <typename T>
-T convert(const char* data) {
-    return *reinterpret_cast<const T*>(data);
-}
+template <typename T> T convert(const char *data) { return *reinterpret_cast<const T *>(data); }
 
 void print_device_info(cl::Device device) {
     cl_int err;
@@ -172,175 +165,172 @@ void print_device_info(cl::Device device) {
 
         printf("  device %-32s: ", device_info[i].second);
         switch (device_info[i].first) {
-            case CL_DEVICE_ADDRESS_BITS:
-            case CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE:
-            case CL_DEVICE_MAX_CLOCK_FREQUENCY:
-            case CL_DEVICE_MAX_COMPUTE_UNITS:
-            case CL_DEVICE_MAX_CONSTANT_ARGS:
-            case CL_DEVICE_MAX_READ_IMAGE_ARGS:
-            case CL_DEVICE_MAX_SAMPLERS:
-            case CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS:
-            case CL_DEVICE_MAX_WRITE_IMAGE_ARGS:
-            case CL_DEVICE_MEM_BASE_ADDR_ALIGN:
-            case CL_DEVICE_MIN_DATA_TYPE_ALIGN_SIZE:
-            case CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR:
-            case CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT:
-            case CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT:
-            case CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG:
-            case CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT:
-            case CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE:
-            case CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF:
-            case CL_DEVICE_NATIVE_VECTOR_WIDTH_CHAR:
-            case CL_DEVICE_NATIVE_VECTOR_WIDTH_SHORT:
-            case CL_DEVICE_NATIVE_VECTOR_WIDTH_INT:
-            case CL_DEVICE_NATIVE_VECTOR_WIDTH_LONG:
-            case CL_DEVICE_NATIVE_VECTOR_WIDTH_FLOAT:
-            case CL_DEVICE_NATIVE_VECTOR_WIDTH_DOUBLE:
-            case CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF:
-            case CL_DEVICE_VENDOR_ID:
-            case CL_DEVICE_PARTITION_MAX_SUB_DEVICES:
-            case CL_DEVICE_REFERENCE_COUNT:
-                printf("%d\n", convert<cl_uint>(field.data()));
-                break;
+        case CL_DEVICE_ADDRESS_BITS:
+        case CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE:
+        case CL_DEVICE_MAX_CLOCK_FREQUENCY:
+        case CL_DEVICE_MAX_COMPUTE_UNITS:
+        case CL_DEVICE_MAX_CONSTANT_ARGS:
+        case CL_DEVICE_MAX_READ_IMAGE_ARGS:
+        case CL_DEVICE_MAX_SAMPLERS:
+        case CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS:
+        case CL_DEVICE_MAX_WRITE_IMAGE_ARGS:
+        case CL_DEVICE_MEM_BASE_ADDR_ALIGN:
+        case CL_DEVICE_MIN_DATA_TYPE_ALIGN_SIZE:
+        case CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR:
+        case CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT:
+        case CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT:
+        case CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG:
+        case CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT:
+        case CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE:
+        case CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF:
+        case CL_DEVICE_NATIVE_VECTOR_WIDTH_CHAR:
+        case CL_DEVICE_NATIVE_VECTOR_WIDTH_SHORT:
+        case CL_DEVICE_NATIVE_VECTOR_WIDTH_INT:
+        case CL_DEVICE_NATIVE_VECTOR_WIDTH_LONG:
+        case CL_DEVICE_NATIVE_VECTOR_WIDTH_FLOAT:
+        case CL_DEVICE_NATIVE_VECTOR_WIDTH_DOUBLE:
+        case CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF:
+        case CL_DEVICE_VENDOR_ID:
+        case CL_DEVICE_PARTITION_MAX_SUB_DEVICES:
+        case CL_DEVICE_REFERENCE_COUNT:
+            printf("%d\n", convert<cl_uint>(field.data()));
+            break;
 
-            case CL_DEVICE_AVAILABLE:
-            case CL_DEVICE_COMPILER_AVAILABLE:
-            case CL_DEVICE_ENDIAN_LITTLE:
-            case CL_DEVICE_ERROR_CORRECTION_SUPPORT:
-            case CL_DEVICE_IMAGE_SUPPORT:
-            case CL_DEVICE_HOST_UNIFIED_MEMORY:
-            case CL_DEVICE_LINKER_AVAILABLE:
-            case CL_DEVICE_PREFERRED_INTEROP_USER_SYNC:
-                printf("%s\n",
-                       convert<cl_bool>(field.data()) ? "true" : "false");
-                break;
+        case CL_DEVICE_AVAILABLE:
+        case CL_DEVICE_COMPILER_AVAILABLE:
+        case CL_DEVICE_ENDIAN_LITTLE:
+        case CL_DEVICE_ERROR_CORRECTION_SUPPORT:
+        case CL_DEVICE_IMAGE_SUPPORT:
+        case CL_DEVICE_HOST_UNIFIED_MEMORY:
+        case CL_DEVICE_LINKER_AVAILABLE:
+        case CL_DEVICE_PREFERRED_INTEROP_USER_SYNC:
+            printf("%s\n", convert<cl_bool>(field.data()) ? "true" : "false");
+            break;
 
-            case CL_DEVICE_GLOBAL_MEM_CACHE_SIZE:
-            case CL_DEVICE_GLOBAL_MEM_SIZE:
-            case CL_DEVICE_LOCAL_MEM_SIZE:
-            case CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE:
-            case CL_DEVICE_MAX_MEM_ALLOC_SIZE:
-                printf("%lu\n", convert<cl_ulong>(field.data()));
-                break;
+        case CL_DEVICE_GLOBAL_MEM_CACHE_SIZE:
+        case CL_DEVICE_GLOBAL_MEM_SIZE:
+        case CL_DEVICE_LOCAL_MEM_SIZE:
+        case CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE:
+        case CL_DEVICE_MAX_MEM_ALLOC_SIZE:
+            printf("%lu\n", convert<cl_ulong>(field.data()));
+            break;
 
-            case CL_DEVICE_IMAGE2D_MAX_HEIGHT:
-            case CL_DEVICE_IMAGE2D_MAX_WIDTH:
-            case CL_DEVICE_IMAGE3D_MAX_DEPTH:
-            case CL_DEVICE_IMAGE3D_MAX_HEIGHT:
-            case CL_DEVICE_IMAGE3D_MAX_WIDTH:
-            case CL_DEVICE_MAX_PARAMETER_SIZE:
-            case CL_DEVICE_MAX_WORK_GROUP_SIZE:
-            case CL_DEVICE_PROFILING_TIMER_RESOLUTION:
-            case CL_DEVICE_PRINTF_BUFFER_SIZE:
-            case CL_DEVICE_IMAGE_MAX_BUFFER_SIZE:
-            case CL_DEVICE_IMAGE_MAX_ARRAY_SIZE:
-                printf("%zu\n", convert<size_t>(field.data()));
-                break;
+        case CL_DEVICE_IMAGE2D_MAX_HEIGHT:
+        case CL_DEVICE_IMAGE2D_MAX_WIDTH:
+        case CL_DEVICE_IMAGE3D_MAX_DEPTH:
+        case CL_DEVICE_IMAGE3D_MAX_HEIGHT:
+        case CL_DEVICE_IMAGE3D_MAX_WIDTH:
+        case CL_DEVICE_MAX_PARAMETER_SIZE:
+        case CL_DEVICE_MAX_WORK_GROUP_SIZE:
+        case CL_DEVICE_PROFILING_TIMER_RESOLUTION:
+        case CL_DEVICE_PRINTF_BUFFER_SIZE:
+        case CL_DEVICE_IMAGE_MAX_BUFFER_SIZE:
+        case CL_DEVICE_IMAGE_MAX_ARRAY_SIZE:
+            printf("%zu\n", convert<size_t>(field.data()));
+            break;
 
-            case CL_DEVICE_MAX_WORK_ITEM_SIZES: {
-                size_t max_dim = 0;
-                OCL_CHECK(err, err = device.getInfo(CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, &max_dim));
-        printf("[  ");
-                for (int i = 0; i < (int)max_dim; i++) {
-                    printf("\b%zu  ",
-                           convert<size_t>(&field[i * sizeof(size_t)]));
-                }
-                printf("\b]\n");
-            } break;
+        case CL_DEVICE_MAX_WORK_ITEM_SIZES: {
+            size_t max_dim = 0;
+            OCL_CHECK(err, err = device.getInfo(CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, &max_dim));
+            printf("[  ");
+            for (int i = 0; i < (int)max_dim; i++) {
+                printf("\b%zu  ", convert<size_t>(&field[i * sizeof(size_t)]));
+            }
+            printf("\b]\n");
+        } break;
 
-            case CL_DEVICE_EXTENSIONS:
-            case CL_DEVICE_NAME:
-            case CL_DEVICE_PROFILE:
-            case CL_DEVICE_VENDOR:
-            case CL_DEVICE_VERSION:
-            case CL_DRIVER_VERSION:
-            case CL_DEVICE_BUILT_IN_KERNELS:
-            case CL_DEVICE_OPENCL_C_VERSION:
-                printf("%s\n", field.data());
-                break;
+        case CL_DEVICE_EXTENSIONS:
+        case CL_DEVICE_NAME:
+        case CL_DEVICE_PROFILE:
+        case CL_DEVICE_VENDOR:
+        case CL_DEVICE_VERSION:
+        case CL_DRIVER_VERSION:
+        case CL_DEVICE_BUILT_IN_KERNELS:
+        case CL_DEVICE_OPENCL_C_VERSION:
+            printf("%s\n", field.data());
+            break;
 
-            case CL_DEVICE_TYPE:
-                switch (convert<cl_device_type>(field.data())) {
-                    ENUM_CASE(CL_DEVICE_TYPE_ACCELERATOR);
-                    ENUM_CASE(CL_DEVICE_TYPE_CPU);
-                    ENUM_CASE(CL_DEVICE_TYPE_GPU);
-                    ENUM_CASE(CL_DEVICE_TYPE_DEFAULT);
-                    default:
-                        printf("UNKNOWN\n");
-                }
-                break;
-            case CL_DEVICE_GLOBAL_MEM_CACHE_TYPE:
-                switch (convert<cl_device_mem_cache_type>(field.data())) {
-                    ENUM_CASE(CL_NONE);
-                    ENUM_CASE(CL_READ_ONLY_CACHE);
-                    ENUM_CASE(CL_READ_WRITE_CACHE);
-                    default:
-                        printf("UNKNOWN\n");
-                }
-                break;
-            case CL_DEVICE_LOCAL_MEM_TYPE:
-                switch (convert<cl_device_mem_cache_type>(field.data())) {
-                    ENUM_CASE(CL_LOCAL);
-                    ENUM_CASE(CL_GLOBAL);
-                    default:
-                        printf("UNKNOWN\n");
-                }
-                break;
-            case CL_DEVICE_PARTITION_PROPERTIES:
-                switch (convert<cl_device_mem_cache_type>(field.data())) {
-                    case 0:
-                        printf("NONE\n");
-                        break;
-                        ENUM_CASE(CL_DEVICE_PARTITION_EQUALLY);
-                        ENUM_CASE(CL_DEVICE_PARTITION_BY_COUNTS);
-                        ENUM_CASE(CL_DEVICE_PARTITION_BY_AFFINITY_DOMAIN);
-                    default:
-                        printf("UNKNOWN\n");
-                }
-                break;
-            case CL_DEVICE_QUEUE_PROPERTIES: {
-                BITFIELD_SETUP(cl_command_queue_properties);
-                BITFIELD_PRINT(CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
-                BITFIELD_PRINT(CL_QUEUE_PROFILING_ENABLE);
-                BITFIELD_END();
-            } break;
-            case CL_DEVICE_DOUBLE_FP_CONFIG:
-            case CL_DEVICE_HALF_FP_CONFIG:
-            case CL_DEVICE_SINGLE_FP_CONFIG: {
-                BITFIELD_SETUP(cl_device_fp_config);
-                BITFIELD_PRINT(CL_FP_DENORM);
-                BITFIELD_PRINT(CL_FP_INF_NAN);
-                BITFIELD_PRINT(CL_FP_ROUND_TO_ZERO);
-                BITFIELD_PRINT(CL_FP_ROUND_TO_INF);
-                BITFIELD_PRINT(CL_FP_FMA);
-                BITFIELD_PRINT(CL_FP_SOFT_FLOAT);
-                BITFIELD_END();
-            } break;
-            case CL_DEVICE_EXECUTION_CAPABILITIES: {
-                BITFIELD_SETUP(cl_device_exec_capabilities);
-                BITFIELD_PRINT(CL_EXEC_KERNEL);
-                BITFIELD_PRINT(CL_EXEC_NATIVE_KERNEL);
-                BITFIELD_END();
-            } break;
-            case CL_DEVICE_PARTITION_AFFINITY_DOMAIN: {
-                BITFIELD_SETUP(cl_device_affinity_domain);
-                BITFIELD_PRINT(CL_DEVICE_AFFINITY_DOMAIN_NUMA);
-                BITFIELD_PRINT(CL_DEVICE_AFFINITY_DOMAIN_L4_CACHE);
-                BITFIELD_PRINT(CL_DEVICE_AFFINITY_DOMAIN_L3_CACHE);
-                BITFIELD_PRINT(CL_DEVICE_AFFINITY_DOMAIN_L2_CACHE);
-                BITFIELD_PRINT(CL_DEVICE_AFFINITY_DOMAIN_L1_CACHE);
-                BITFIELD_PRINT(CL_DEVICE_AFFINITY_DOMAIN_NEXT_PARTITIONABLE);
-                BITFIELD_END();
+        case CL_DEVICE_TYPE:
+            switch (convert<cl_device_type>(field.data())) {
+                ENUM_CASE(CL_DEVICE_TYPE_ACCELERATOR);
+                ENUM_CASE(CL_DEVICE_TYPE_CPU);
+                ENUM_CASE(CL_DEVICE_TYPE_GPU);
+                ENUM_CASE(CL_DEVICE_TYPE_DEFAULT);
+            default:
+                printf("UNKNOWN\n");
             }
             break;
-            case CL_DEVICE_PLATFORM: {
-                auto platform =  convert<cl::Platform>(field.data());
-        OCL_CHECK(err, err = platform.getInfo(CL_PLATFORM_NAME, &field));
-                printf("%s\n", field.c_str());
-            } break;
+        case CL_DEVICE_GLOBAL_MEM_CACHE_TYPE:
+            switch (convert<cl_device_mem_cache_type>(field.data())) {
+                ENUM_CASE(CL_NONE);
+                ENUM_CASE(CL_READ_ONLY_CACHE);
+                ENUM_CASE(CL_READ_WRITE_CACHE);
             default:
-                printf("N/A \n");
-                continue;
+                printf("UNKNOWN\n");
+            }
+            break;
+        case CL_DEVICE_LOCAL_MEM_TYPE:
+            switch (convert<cl_device_mem_cache_type>(field.data())) {
+                ENUM_CASE(CL_LOCAL);
+                ENUM_CASE(CL_GLOBAL);
+            default:
+                printf("UNKNOWN\n");
+            }
+            break;
+        case CL_DEVICE_PARTITION_PROPERTIES:
+            switch (convert<cl_device_mem_cache_type>(field.data())) {
+            case 0:
+                printf("NONE\n");
+                break;
+                ENUM_CASE(CL_DEVICE_PARTITION_EQUALLY);
+                ENUM_CASE(CL_DEVICE_PARTITION_BY_COUNTS);
+                ENUM_CASE(CL_DEVICE_PARTITION_BY_AFFINITY_DOMAIN);
+            default:
+                printf("UNKNOWN\n");
+            }
+            break;
+        case CL_DEVICE_QUEUE_PROPERTIES: {
+            BITFIELD_SETUP(cl_command_queue_properties);
+            BITFIELD_PRINT(CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE);
+            BITFIELD_PRINT(CL_QUEUE_PROFILING_ENABLE);
+            BITFIELD_END();
+        } break;
+        case CL_DEVICE_DOUBLE_FP_CONFIG:
+        case CL_DEVICE_HALF_FP_CONFIG:
+        case CL_DEVICE_SINGLE_FP_CONFIG: {
+            BITFIELD_SETUP(cl_device_fp_config);
+            BITFIELD_PRINT(CL_FP_DENORM);
+            BITFIELD_PRINT(CL_FP_INF_NAN);
+            BITFIELD_PRINT(CL_FP_ROUND_TO_ZERO);
+            BITFIELD_PRINT(CL_FP_ROUND_TO_INF);
+            BITFIELD_PRINT(CL_FP_FMA);
+            BITFIELD_PRINT(CL_FP_SOFT_FLOAT);
+            BITFIELD_END();
+        } break;
+        case CL_DEVICE_EXECUTION_CAPABILITIES: {
+            BITFIELD_SETUP(cl_device_exec_capabilities);
+            BITFIELD_PRINT(CL_EXEC_KERNEL);
+            BITFIELD_PRINT(CL_EXEC_NATIVE_KERNEL);
+            BITFIELD_END();
+        } break;
+        case CL_DEVICE_PARTITION_AFFINITY_DOMAIN: {
+            BITFIELD_SETUP(cl_device_affinity_domain);
+            BITFIELD_PRINT(CL_DEVICE_AFFINITY_DOMAIN_NUMA);
+            BITFIELD_PRINT(CL_DEVICE_AFFINITY_DOMAIN_L4_CACHE);
+            BITFIELD_PRINT(CL_DEVICE_AFFINITY_DOMAIN_L3_CACHE);
+            BITFIELD_PRINT(CL_DEVICE_AFFINITY_DOMAIN_L2_CACHE);
+            BITFIELD_PRINT(CL_DEVICE_AFFINITY_DOMAIN_L1_CACHE);
+            BITFIELD_PRINT(CL_DEVICE_AFFINITY_DOMAIN_NEXT_PARTITIONABLE);
+            BITFIELD_END();
+        } break;
+        case CL_DEVICE_PLATFORM: {
+            auto platform = convert<cl::Platform>(field.data());
+            OCL_CHECK(err, err = platform.getInfo(CL_PLATFORM_NAME, &field));
+            printf("%s\n", field.c_str());
+        } break;
+        default:
+            printf("N/A \n");
+            continue;
         }
         field[0] = '\0';
     }
@@ -348,7 +338,7 @@ void print_device_info(cl::Device device) {
 
 // This example prints devices available on this machine and their
 // corresponding capabilities.
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
     // The following call retrieves the total number of platforms available
     cl_uint platform_count;
     cl_int err;

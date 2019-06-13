@@ -38,10 +38,10 @@ memory resources managed by the SDx memory subsystem.
 
 //OpenCL utility layer include
 #include "xcl2.hpp"
-#include <stdlib.h> 
+#include <stdlib.h>
 #include <vector>
 
-//Array Size to access 
+//Array Size to access
 #define DATA_SIZE 8
 
 //Binary File string
@@ -49,60 +49,54 @@ std::string binaryFile;
 
 //CPU implementation of Matrix Multiplication
 //The inputs are of the size (DATA_SIZE x DATA_SIZE)
-void mmult_cpu (
-    int *in1,   //Input Matrix 1
-    int *in2,   //Input Matrix 1
-    int *out,   //Input Matrix 1
-    int dim     //One dimension of matrix
-)
-{
+void mmult_cpu(int *in1, //Input Matrix 1
+               int *in2, //Input Matrix 1
+               int *out, //Input Matrix 1
+               int dim   //One dimension of matrix
+) {
     //Performs Matrix multiply Out = In1 x In2
-    for(int i = 0; i < dim; i++) {
-        for(int j = 0; j < dim; j++) {
-            for(int k = 0; k < dim; k++) {
+    for (int i = 0; i < dim; i++) {
+        for (int j = 0; j < dim; j++) {
+            for (int k = 0; k < dim; k++) {
                 out[i * dim + j] += in1[i * dim + k] * in2[k * dim + j];
             }
         }
     }
-}  
+}
 
 //Functionality to setup OpenCL context and trigger the Kernel
-void mmult_fpga (
-    std::vector<int,aligned_allocator<int>>& source_in1,   //Input Matrix 1
-    std::vector<int,aligned_allocator<int>>& source_in2,   //Input Matrix 2
-    std::vector<int,aligned_allocator<int>>& source_fpga_results,    //Output Matrix
-    int dim                                                //One dimension of matrix
-)
-{
-    int size = dim;    
+void mmult_fpga(std::vector<int, aligned_allocator<int>> &source_in1,          //Input Matrix 1
+                std::vector<int, aligned_allocator<int>> &source_in2,          //Input Matrix 2
+                std::vector<int, aligned_allocator<int>> &source_fpga_results, //Output Matrix
+                int dim                                                        //One dimension of matrix
+) {
+    int size = dim;
     size_t matrix_size_bytes = sizeof(int) * size * size;
 
     unsigned fileBufSize;
-    //The get_xil_devices will return vector of Xilinx Devices 
+    //The get_xil_devices will return vector of Xilinx Devices
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
     //Creating Context and Command Queue for selected Device
     cl::Context context(device);
     cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
-    std::string device_name = device.getInfo<CL_DEVICE_NAME>(); 
+    std::string device_name = device.getInfo<CL_DEVICE_NAME>();
 
-    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    char *fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     cl::Program program(context, devices, bins);
 
-    cl::Kernel kernel(program,"mmult");
+    cl::Kernel kernel(program, "mmult");
 
     cl_int err;
-    cl::Buffer buffer_in1(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-        matrix_size_bytes,source_in1.data(),&err);
-    
-    cl::Buffer buffer_in2(context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-        matrix_size_bytes,source_in2.data());
-    
-    cl::Buffer buffer_output(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-        matrix_size_bytes,source_fpga_results.data(),&err);
+    cl::Buffer buffer_in1(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, matrix_size_bytes, source_in1.data(), &err);
+
+    cl::Buffer buffer_in2(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, matrix_size_bytes, source_in2.data());
+
+    cl::Buffer buffer_output(
+        context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, matrix_size_bytes, source_fpga_results.data(), &err);
 
     /* 
      * Using setArg(), i.e. setting kernel arguments, explicitly before enqueueMigrateMemObjects(), 
@@ -122,19 +116,18 @@ void mmult_fpga (
     kernel.setArg(narg++, a_col);
     kernel.setArg(narg++, b_col);
 
-    q.enqueueMigrateMemObjects({buffer_in1, buffer_in2},0/* 0 means from host*/);
-    
+    q.enqueueMigrateMemObjects({buffer_in1, buffer_in2}, 0 /* 0 means from host*/);
+
     //Launch the kernel
     q.enqueueTask(kernel);
 
-    q.enqueueMigrateMemObjects({buffer_output},CL_MIGRATE_MEM_OBJECT_HOST);
+    q.enqueueMigrateMemObjects({buffer_output}, CL_MIGRATE_MEM_OBJECT_HOST);
     q.finish();
 
     delete[] fileBuf;
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char **argv) {
     if (argc != 2) {
         std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
         return EXIT_FAILURE;
@@ -143,16 +136,16 @@ int main(int argc, char** argv)
     binaryFile = argv[1];
 
     //Allocate Memory in Host Memory
-    int size = DATA_SIZE;    
+    int size = DATA_SIZE;
     size_t matrix_size_bytes = sizeof(int) * size * size;
 
-    std::vector<int,aligned_allocator<int>> source_in1(matrix_size_bytes);
-    std::vector<int,aligned_allocator<int>> source_in2(matrix_size_bytes);
-    std::vector<int,aligned_allocator<int>> source_fpga_results(matrix_size_bytes);
-    std::vector<int,aligned_allocator<int>> source_cpu_results(matrix_size_bytes);
+    std::vector<int, aligned_allocator<int>> source_in1(matrix_size_bytes);
+    std::vector<int, aligned_allocator<int>> source_in2(matrix_size_bytes);
+    std::vector<int, aligned_allocator<int>> source_fpga_results(matrix_size_bytes);
+    std::vector<int, aligned_allocator<int>> source_cpu_results(matrix_size_bytes);
 
-    //Create the test data 
-    for(int i = 0 ; i < DATA_SIZE * DATA_SIZE ; i++){
+    //Create the test data
+    for (int i = 0; i < DATA_SIZE * DATA_SIZE; i++) {
         source_in1[i] = rand() % size;
         source_in2[i] = rand() % size;
         source_cpu_results[i] = 0;
@@ -165,20 +158,19 @@ int main(int argc, char** argv)
     //Compute FPGA Results
     mmult_fpga(source_in1, source_in2, source_fpga_results, size);
 
-    //Compare the results of FPGA to CPU 
+    //Compare the results of FPGA to CPU
     bool match = true;
-    for (int i = 0 ; i < size * size; i++){
-        if (source_fpga_results[i] != source_cpu_results[i]){
+    for (int i = 0; i < size * size; i++) {
+        if (source_fpga_results[i] != source_cpu_results[i]) {
             std::cout << "Error: Result mismatch" << std::endl;
             std::cout << "i = " << i << " CPU result = " << source_cpu_results[i]
-                << " FPGA result = " << source_fpga_results[i] << std::endl;
+                      << " FPGA result = " << source_fpga_results[i] << std::endl;
             match = false;
             break;
         }
     }
 
-    std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl; 
+    std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl;
 
-    return (match ? EXIT_SUCCESS :  EXIT_FAILURE);
+    return (match ? EXIT_SUCCESS : EXIT_FAILURE);
 }
-

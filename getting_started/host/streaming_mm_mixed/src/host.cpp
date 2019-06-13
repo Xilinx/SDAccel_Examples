@@ -21,13 +21,13 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************/
-#include <iostream>
+#include <algorithm>
 #include <cstring>
+#include <iostream>
+#include <string>
 #include <thread>
 #include <unistd.h>
-#include <string>
 #include <vector>
-#include <algorithm>
 
 // This extension file is required for stream APIs
 #include "CL/cl_ext_xilinx.h"
@@ -44,11 +44,9 @@ decltype(&clPollStreams) xcl::Stream::pollStreams = nullptr;
 auto constexpr c_test_size = 256 * 1024 * 1024; //256 MB data
 
 ////////////////////RESET FUNCTION//////////////////////////////////
-int reset(int* a, int*b, int* sw_results, int* hw_results, unsigned int size)
-{
+int reset(int *a, int *b, int *sw_results, int *hw_results, unsigned int size) {
     //Fill the input vectors with data
-    for(size_t i = 0; i < size; i++)
-    {
+    for (size_t i = 0; i < size; i++) {
         a[i] = rand() % size;
         b[i] = rand() % size;
         hw_results[i] = 0;
@@ -57,39 +55,37 @@ int reset(int* a, int*b, int* sw_results, int* hw_results, unsigned int size)
     return 0;
 }
 ///////////////////VERIFY FUNCTION///////////////////////////////////
-bool verify(int* sw_results, int* hw_results, int size)
-{
+bool verify(int *sw_results, int *hw_results, int size) {
     bool match = true;
-    for (int i = 0; i < size; i++){
-        if(sw_results[i] != hw_results[i]){
+    for (int i = 0; i < size; i++) {
+        if (sw_results[i] != hw_results[i]) {
             match = false;
             break;
         }
     }
-    std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl;    
+    std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl;
     return match;
 }
 ////////MAIN FUNCTION//////////
-int main(int argc, char** argv)
-{
+int main(int argc, char **argv) {
     unsigned int size = c_test_size;
-    
-    if(xcl::is_hw_emulation()){
+
+    if (xcl::is_hw_emulation()) {
         size = 4096; // 4KB for HW emulation
-    }else if (xcl::is_emulation()){
-        size = 2 * 1024 * 1024 ; // 4MB for sw emulation
+    } else if (xcl::is_emulation()) {
+        size = 2 * 1024 * 1024; // 4MB for sw emulation
     }
-    
+
     // I/O Data Vectors
-    std::vector<int,aligned_allocator<int>> h_a(size);
-    std::vector<int,aligned_allocator<int>> h_b(size);
-    std::vector<int,aligned_allocator<int>> hw_results(size);
+    std::vector<int, aligned_allocator<int>> h_a(size);
+    std::vector<int, aligned_allocator<int>> h_b(size);
+    std::vector<int, aligned_allocator<int>> hw_results(size);
     std::vector<int> sw_results(size);
 
     if (argc != 2) {
         std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
-		return EXIT_FAILURE;
-	}
+        return EXIT_FAILURE;
+    }
 
     // OpenCL Host Code Begins.
     cl_int err;
@@ -110,7 +106,7 @@ int main(int argc, char** argv)
 
     // Selecting the first available Xilinx device
     device = devices[0];
-    cl_platform_id platform_id = device.getInfo<CL_DEVICE_PLATFORM>(&err); 
+    cl_platform_id platform_id = device.getInfo<CL_DEVICE_PLATFORM>(&err);
 
     //Initialization of streaming class is needed before using it.
     xcl::Stream::init(platform_id);
@@ -132,7 +128,7 @@ int main(int argc, char** argv)
     OCL_CHECK(err, program = cl::Program(context, devices, bins, NULL, &err));
 
     // Creating Kernel
-    OCL_CHECK(err, krnl_vadd  = cl::Kernel(program, "krnl_stream_vadd", &err));
+    OCL_CHECK(err, krnl_vadd = cl::Kernel(program, "krnl_stream_vadd", &err));
 
     std::cout << "Vector Addition of elements 0x" << std::hex << size << std::endl;
 
@@ -143,17 +139,18 @@ int main(int argc, char** argv)
     unsigned int vector_size_bytes = size * sizeof(int);
 
     // Allocate Buffer in Global Memory
-    // Buffers are allocated using CL_MEM_USE_HOST_PTR for efficient memory and 
+    // Buffers are allocated using CL_MEM_USE_HOST_PTR for efficient memory and
     // Device-to-host communication
-    OCL_CHECK(err, cl::Buffer buffer_in2(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-            vector_size_bytes, h_b.data(), &err));
+    OCL_CHECK(
+        err,
+        cl::Buffer buffer_in2(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, vector_size_bytes, h_b.data(), &err));
 
     // Setting Kernel Arguments
     OCL_CHECK(err, err = krnl_vadd.setArg(2, buffer_in2));
     OCL_CHECK(err, err = krnl_vadd.setArg(3, size));
 
     // Copy input data to device global memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_in2}, 0/* 0 means from host*/));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_in2}, 0 /* 0 means from host*/));
 
     // Launch the Kernel
     OCL_CHECK(err, err = q.enqueueTask(krnl_vadd));
@@ -168,7 +165,8 @@ int main(int argc, char** argv)
     //Create write stream for argument 0 and 1 of kernel
     cl_stream write_stream_a;
     ext.flags = 1;
-    OCL_CHECK(ret, write_stream_a = xcl::Stream::createStream(device.get(), CL_STREAM_WRITE_ONLY, CL_STREAM, &ext, &ret));
+    OCL_CHECK(ret,
+              write_stream_a = xcl::Stream::createStream(device.get(), CL_STREAM_WRITE_ONLY, CL_STREAM, &ext, &ret));
 
     //Create read stream for argument 2 of kernel
     cl_stream read_stream;
@@ -176,18 +174,18 @@ int main(int argc, char** argv)
     OCL_CHECK(ret, read_stream = xcl::Stream::createStream(device.get(), CL_STREAM_READ_ONLY, CL_STREAM, &ext, &ret));
 
     // Initiating the WRITE transfer
-    cl_stream_xfer_req wr_req {0};
+    cl_stream_xfer_req wr_req{0};
 
     wr_req.flags = CL_STREAM_EOT;
-    wr_req.priv_data = (void*)"write_a";
+    wr_req.priv_data = (void *)"write_a";
 
     // Thread 1 for writing data to input stream 1 independently in case of default blocking transfers.
     std::thread thr1(xcl::Stream::writeStream, write_stream_a, h_a.data(), vector_size_bytes, &wr_req, &ret);
 
     // Initiating the READ transfer
-    cl_stream_xfer_req rd_req {0};
+    cl_stream_xfer_req rd_req{0};
     rd_req.flags = CL_STREAM_EOT;
-    rd_req.priv_data = (void*)"read";
+    rd_req.priv_data = (void *)"read";
     // Output thread to read the stream data independently in case of default blocking transfers.
     std::thread thr2(xcl::Stream::readStream, read_stream, hw_results.data(), vector_size_bytes, &rd_req, &ret);
 

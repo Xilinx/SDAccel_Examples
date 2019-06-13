@@ -29,8 +29,8 @@ In this example, we will demonstrate how to use Xilinx Streaming APIs for direct
             |          |<<<<<<<<<<<< Output Stream <<<<<<<<<<<|          |
             +----------+                                      +----------+
 */
-#include "ap_int.h"
 #include "ap_axi_sdata.h"
+#include "ap_int.h"
 #include "hls_stream.h"
 
 #define DWIDTH 512
@@ -40,47 +40,47 @@ In this example, we will demonstrate how to use Xilinx Streaming APIs for direct
 typedef qdma_axis<DWIDTH, 0, 0, 0> pkt;
 
 extern "C" {
-void krnl_stream_adder1(hls::stream<pkt> &a, hls::stream<pkt> &output)
-{
-    #pragma HLS INTERFACE axis port=a
-    #pragma HLS INTERFACE axis port=output
-    #pragma HLS INTERFACE s_axilite port=return bundle=control
+void krnl_stream_adder1(hls::stream<pkt> &a, hls::stream<pkt> &output) {
+   #pragma HLS INTERFACE axis port=a
+   #pragma HLS INTERFACE axis port=output
+   #pragma HLS INTERFACE s_axilite port=return bundle=control
 
     bool eos = false;
-    adder1: do{
-    #pragma HLS PIPELINE II=1
+adder1:
+    do {
+       #pragma HLS PIPELINE II=1
         // Reading a stream into packets
         pkt t1 = a.read();
-        
+
         // Packet for output
-        pkt t_out; 
+        pkt t_out;
 
         // Reading data from input packet
         ap_uint<DWIDTH> in1 = t1.get_data();
         ap_uint<DWIDTH> tmpOut;
-        
+
         // Parallel Adder
         for (int j = 0; j < VECTOR_SIZE; j++) {
-        #pragma HLS UNROLL
+           #pragma HLS UNROLL
             ap_uint<DATATYPE_SIZE> temp_a = in1.range(DATATYPE_SIZE * (j + 1) - 1, j * DATATYPE_SIZE);
-            
+
             // Increment operation
-            ap_uint<DATATYPE_SIZE> temp_res  = temp_a + 1;
-       
+            ap_uint<DATATYPE_SIZE> temp_res = temp_a + 1;
+
             tmpOut.range(DATATYPE_SIZE * (j + 1) - 1, j * DATATYPE_SIZE) = temp_res;
         }
 
         // Setting data and configuration to output packet
         t_out.set_data(tmpOut);
         t_out.set_last(t1.get_last());
-        t_out.set_keep(-1) ;          // Enabling all bytes
+        t_out.set_keep(-1); // Enabling all bytes
 
         // Writing packet to output stream
         output.write(t_out);
-        
-        if (t1.get_last()){
+
+        if (t1.get_last()) {
             eos = true;
         }
-    }while(eos == false);
+    } while (eos == false);
 }
 }

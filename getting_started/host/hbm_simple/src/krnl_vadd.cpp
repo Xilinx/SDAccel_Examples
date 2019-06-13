@@ -43,33 +43,33 @@ typedef struct v_datatype {
 } v_dt;
 
 extern "C" {
-void krnl_vadd(
-        const v_dt *in1,        // Read-Only Vector 1
-        const v_dt *in2,        // Read-Only Vector 2
-        v_dt *out_r,            // Output Result for Addition
-        const unsigned int size // Size in integer
-        )
-{
-#pragma HLS INTERFACE m_axi port=in1  offset=slave bundle=gmem0
-#pragma HLS INTERFACE m_axi port=in2  offset=slave bundle=gmem1
-#pragma HLS INTERFACE m_axi port=out_r offset=slave bundle=gmem0
+void krnl_vadd(const v_dt *in1,        // Read-Only Vector 1
+               const v_dt *in2,        // Read-Only Vector 2
+               v_dt *out_r,            // Output Result for Addition
+               const unsigned int size // Size in integer
+) {
+#pragma HLS INTERFACE m_axi port = in1 offset = slave bundle = gmem0
+#pragma HLS INTERFACE m_axi port = in2 offset = slave bundle = gmem1
+#pragma HLS INTERFACE m_axi port = out_r offset = slave bundle = gmem0
 
-#pragma HLS INTERFACE s_axilite port=in1  bundle=control
-#pragma HLS INTERFACE s_axilite port=in2  bundle=control
-#pragma HLS INTERFACE s_axilite port=out_r bundle=control
-#pragma HLS INTERFACE s_axilite port=size bundle=control
-#pragma HLS INTERFACE s_axilite port=return bundle=control
+#pragma HLS INTERFACE s_axilite port = in1 bundle = control
+#pragma HLS INTERFACE s_axilite port = in2 bundle = control
+#pragma HLS INTERFACE s_axilite port = out_r bundle = control
+#pragma HLS INTERFACE s_axilite port = size bundle = control
+#pragma HLS INTERFACE s_axilite port = return bundle = control
 
-#pragma HLS DATA_PACK variable=in1
-#pragma HLS DATA_PACK variable=in2
-#pragma HLS DATA_PACK variable=out_r
+#pragma HLS DATA_PACK variable = in1
+#pragma HLS DATA_PACK variable = in2
+#pragma HLS DATA_PACK variable = out_r
 
-    unsigned int vSize = ((size-1)/VDATA_SIZE)+1;
+    unsigned int vSize = ((size - 1) / VDATA_SIZE) + 1;
 
-    vadd1:for(int i = 0; i < vSize ; i++) {
-    #pragma HLS PIPELINE II=1
-        vadd2:for(int k = 0 ; k < VDATA_SIZE; k ++) {
-        #pragma HLS LOOP_TRIPCOUNT min=c_dt_size max=c_dt_size
+vadd1:
+    for (int i = 0; i < vSize; i++) {
+       #pragma HLS PIPELINE II=1
+    vadd2:
+        for (int k = 0; k < VDATA_SIZE; k++) {
+           #pragma HLS LOOP_TRIPCOUNT min=c_dt_size max=c_dt_size
             out_r[i].data[k] = in1[i].data[k] + in2[i].data[k];
         }
     }

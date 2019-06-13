@@ -26,14 +26,14 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
-#include <memory>
-#include <string>
-#include <iostream>
-#include <assert.h>
-#include <unistd.h>
-#include "smithwaterman.h"
 #include "cmdlineparser.h"
 #include "logger.h"
+#include "smithwaterman.h"
+#include <assert.h>
+#include <iostream>
+#include <memory>
+#include <string>
+#include <unistd.h>
 
 using namespace std;
 using namespace sda;
@@ -41,16 +41,15 @@ using namespace sda::utils;
 
 #include "sw.h"
 
-extern int SSW_par(int, int, int, char**, char**, unsigned int*, unsigned int*, unsigned int*);
+extern int SSW_par(int, int, int, char **, char **, unsigned int *, unsigned int *, unsigned int *);
 
-void intelImpl(int nBlocks, int blkSz, int nThreads, int writeMatchArray, MatchArray* pm)
-{
+void intelImpl(int nBlocks, int blkSz, int nThreads, int writeMatchArray, MatchArray *pm) {
     int totalSz = nBlocks * NUMPACKED * blkSz;
-    unsigned int* maxr = new unsigned int[totalSz];
-    unsigned int* maxc = new unsigned int[totalSz];
-    unsigned int* maxv = new unsigned int[totalSz];
-    char** rd = new char*[totalSz];
-    char** rf = new char*[totalSz];
+    unsigned int *maxr = new unsigned int[totalSz];
+    unsigned int *maxc = new unsigned int[totalSz];
+    unsigned int *maxv = new unsigned int[totalSz];
+    char **rd = new char *[totalSz];
+    char **rf = new char *[totalSz];
     for (int i = 0; i < totalSz; ++i) {
         rd[i] = new char[MAXROW + 1];
         rf[i] = new char[MAXCOL + 1];
@@ -72,11 +71,10 @@ void intelImpl(int nBlocks, int blkSz, int nThreads, int writeMatchArray, MatchA
 }
 
 //pass cmd line options to select opencl device
-int main(int argc, char* argv[])
-{
+int main(int argc, char *argv[]) {
     if (argc != 2) {
         std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
-		return EXIT_FAILURE;
+        return EXIT_FAILURE;
     }
 
     std::string binaryFile = argv[1];
@@ -91,14 +89,16 @@ int main(int argc, char* argv[])
     parser.addSwitch("--device-name", "-d", "OpenCl device name", "fpga0");
     parser.addSwitch("--kernel-file", "-k", "OpenCl kernel file to use");
     parser.addSwitch("--select-device", "-s", "Select from multiple matched devices [0-based index]", "0");
-    parser.addSwitch("--number-of-runs", "-n", "Number of times the kernel runs on the device to compute the average.", "1");
+    parser.addSwitch(
+        "--number-of-runs", "-n", "Number of times the kernel runs on the device to compute the average.", "1");
     parser.addSwitch("--block-size", "-bz", "Number of samples in a block for SmithWaterman", "-1");
     parser.addSwitch("--number-of-blocks", "-nb", "Number of blocks of samples for SmithWaterman", "1");
     parser.addSwitch("--number-of-threads", "-nt", "Number of threads for striped SmitWaterman", "1");
     parser.addSwitch("--double-buffered", "-db", "Double buffred host to fpga communication(now working)", "0");
     parser.addSwitch("--verify-mode", "-vm", "Verify output of FPGA using precomputed ref.txt", "0");
     parser.addSwitch("--write-match-array", "-wm", "Write match array", "0");
-    parser.addSwitch("--zmq-pub-port", "-z", "ZeroMQ publisher port for web visualization. FPGA=5020, CPU=5021", "5020");
+    parser.addSwitch(
+        "--zmq-pub-port", "-z", "ZeroMQ publisher port for web visualization. FPGA=5020, CPU=5021", "5020");
     parser.addSwitch("--output", "-o", "results output file", "result.json");
     parser.setDefaultKey("--kernel-file");
     parser.parse(argc, argv);
@@ -144,10 +144,10 @@ int main(int argc, char* argv[])
     const std::unique_ptr<MatchArray> pMatchInfo(new MatchArray(totalSz, MAXROW, MAXCOL));
 #endif
 
-    //SWAN Execution 
+    //SWAN Execution
     if (strPlatformName == string("intel")) {
         for (int r = 0; r < nRuns; r++) {
-            //SWAN-CPU Intel Intrinsic flow    
+            //SWAN-CPU Intel Intrinsic flow
             intelImpl(nBlocks, blkSz, nThreads, writeMatchArray, pMatchInfo.get());
         }
     } else {
@@ -161,12 +161,18 @@ int main(int argc, char* argv[])
             }
         }
 
-        SmithWatermanApp smithwaterman(strPlatformName, strDeviceName, idxSelectedDevice,
-            strKernelFullPath, strSampleFP, binaryFile, nBlocks, blkSz,
-            doubleBuffered == 0 ? false : true,
-            verifyMode == 0 ? false : true,
-            writeMatchArray == 0 ? false : true,
-            pMatchInfo.get());
+        SmithWatermanApp smithwaterman(strPlatformName,
+                                       strDeviceName,
+                                       idxSelectedDevice,
+                                       strKernelFullPath,
+                                       strSampleFP,
+                                       binaryFile,
+                                       nBlocks,
+                                       blkSz,
+                                       doubleBuffered == 0 ? false : true,
+                                       verifyMode == 0 ? false : true,
+                                       writeMatchArray == 0 ? false : true,
+                                       pMatchInfo.get());
 
         // SWAN-HLS Xilinx SDAccel flow
         bool res = smithwaterman.run(0, nRuns);
@@ -180,4 +186,3 @@ int main(int argc, char* argv[])
 
     return 0;
 }
-

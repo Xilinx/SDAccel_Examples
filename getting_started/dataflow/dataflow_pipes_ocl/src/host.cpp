@@ -33,14 +33,13 @@ Description: SDx Vector Addition using Blocking Pipes Operation
 
 #define INCR_VALUE 10
 
-#include <iostream>
-#include <cstring>
 #include <cstdio>
+#include <cstring>
+#include <iostream>
 #include <vector>
 #include <xcl2.hpp>
 
-int main(int argc, char** argv)
-{
+int main(int argc, char **argv) {
     if (argc != 2) {
         std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
         return EXIT_FAILURE;
@@ -54,40 +53,42 @@ int main(int argc, char** argv)
 
     // Reducing the data size for emulation mode
     char *xcl_mode = getenv("XCL_EMULATION_MODE");
-    if (xcl_mode != NULL){
+    if (xcl_mode != NULL) {
         data_size = 1024;
     }
 
     //Allocate Memory in Host Memory
     size_t vector_size_bytes = sizeof(int) * data_size;
-    std::vector<int,aligned_allocator<int>> source_input     (data_size);
-    std::vector<int,aligned_allocator<int>> source_hw_results(data_size);
-    std::vector<int,aligned_allocator<int>> source_sw_results(data_size);
+    std::vector<int, aligned_allocator<int>> source_input(data_size);
+    std::vector<int, aligned_allocator<int>> source_hw_results(data_size);
+    std::vector<int, aligned_allocator<int>> source_sw_results(data_size);
 
-    // Create the test data and Software Result 
-    for(size_t i = 0 ; i < data_size; i++){
+    // Create the test data and Software Result
+    for (size_t i = 0; i < data_size; i++) {
         source_input[i] = i;
         source_sw_results[i] = i + INCR_VALUE;
         source_hw_results[i] = 0;
     }
 
-//OPENCL HOST CODE AREA START
+    //OPENCL HOST CODE AREA START
     // get_xil_devices() is a utility API which will find the Xilinx
     // platforms and will return list of devices connected to Xilinx platform
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
-    std::cout << "Creating Context..." <<std::endl;
-    OCL_CHECK(err, cl::Context context (device, NULL, NULL, NULL, &err));
-    OCL_CHECK(err, cl::CommandQueue q (context, device, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE | CL_QUEUE_PROFILING_ENABLE, &err));
+    std::cout << "Creating Context..." << std::endl;
+    OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
+    OCL_CHECK(
+        err,
+        cl::CommandQueue q(context, device, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE | CL_QUEUE_PROFILING_ENABLE, &err));
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     // read_binary_file() is a utility API which will load the binaryFile
     // and will return pointer to file buffer.
-    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    char *fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
-    OCL_CHECK(err, cl::Program program (context, devices, bins, NULL, &err));
+    OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel krnl_adder_stage(program, "adder_stage", &err));
     OCL_CHECK(err, cl::Kernel krnl_input_stage(program, "input_stage", &err));
     OCL_CHECK(err, cl::Kernel krnl_output_stage(program, "output_stage", &err));
@@ -95,11 +96,13 @@ int main(int argc, char** argv)
     // Allocate Buffer in Global Memory
     // Buffers are allocated using CL_MEM_USE_HOST_PTR for efficient memory and
     // Device-to-host communication
-    std::cout << "Creating Buffers..." <<std::endl;
-    OCL_CHECK(err, cl::Buffer buffer_input(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-            vector_size_bytes, source_input.data(), &err));
-    OCL_CHECK(err, cl::Buffer buffer_output(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-            vector_size_bytes, source_hw_results.data(), &err));
+    std::cout << "Creating Buffers..." << std::endl;
+    OCL_CHECK(err,
+              cl::Buffer buffer_input(
+                  context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, vector_size_bytes, source_input.data(), &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_output(
+                  context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, vector_size_bytes, source_hw_results.data(), &err));
 
     //Set the Kernel Arguments
     int size = data_size;
@@ -114,7 +117,7 @@ int main(int argc, char** argv)
     // Copy input data to device global memory
     std::cout << "Copying data..." << std::endl;
     cl::Event write_event;
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_input}, 0/*0 means from host*/, NULL, &write_event));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_input}, 0 /*0 means from host*/, NULL, &write_event));
 
     // Launch the Kernel
     std::cout << "Launching Kernel..." << std::endl;
@@ -129,15 +132,15 @@ int main(int argc, char** argv)
     std::cout << "Getting Results..." << std::endl;
     OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_output}, CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());
-//OPENCL HOST CODE AREA END
-    
+    //OPENCL HOST CODE AREA END
+
     // Compare the results of the Device to the simulation
     bool match = true;
-    for (size_t i = 0 ; i < data_size; i++){
-        if (source_hw_results[i] != source_sw_results[i]){
+    for (size_t i = 0; i < data_size; i++) {
+        if (source_hw_results[i] != source_sw_results[i]) {
             std::cout << "Error: Result mismatch" << std::endl;
             std::cout << "i = " << i << " CPU result = " << source_sw_results[i]
-                << " Device result = " << source_hw_results[i] << std::endl;
+                      << " Device result = " << source_hw_results[i] << std::endl;
             match = false;
             break;
         }
@@ -146,5 +149,5 @@ int main(int argc, char** argv)
     delete[] fileBuf;
 
     std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl;
-    return (match ? EXIT_SUCCESS :  EXIT_FAILURE);
+    return (match ? EXIT_SUCCESS : EXIT_FAILURE);
 }

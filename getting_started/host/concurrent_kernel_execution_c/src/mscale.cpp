@@ -34,25 +34,25 @@ const int c_size = MAX_DIM;
 
 extern "C" {
 void mscale(int *inout_r, const int scale, const int dim0, const int dim1) {
-#pragma HLS INTERFACE m_axi port=inout_r offset=slave bundle=gmem
-#pragma HLS INTERFACE s_axilite port=inout_r bundle=control 
-#pragma HLS INTERFACE s_axilite port=scale bundle=control 
-#pragma HLS INTERFACE s_axilite port=dim0 bundle=control 
-#pragma HLS INTERFACE s_axilite port=dim1 bundle=control
-#pragma HLS INTERFACE s_axilite port=return bundle=control  
+#pragma HLS INTERFACE m_axi port = inout_r offset = slave bundle = gmem
+#pragma HLS INTERFACE s_axilite port = inout_r bundle = control
+#pragma HLS INTERFACE s_axilite port = scale bundle = control
+#pragma HLS INTERFACE s_axilite port = dim0 bundle = control
+#pragma HLS INTERFACE s_axilite port = dim1 bundle = control
+#pragma HLS INTERFACE s_axilite port = return bundle = control
 
     int temp[MAX_DIM * MAX_DIM];
 
-    mscale:  
-    for (int i = 0; i < dim0 * dim1; ++i) 
-    #pragma HLS LOOP_TRIPCOUNT min=c_size_*c_size max=c_size*c_size
-    #pragma HLS PIPELINE II=1
+mscale:
+    for (int i = 0; i < dim0 * dim1; ++i)
+       #pragma HLS LOOP_TRIPCOUNT min=c_size_*c_size max=c_size*c_size
+       #pragma HLS PIPELINE II=1
         temp[i] = inout_r[i] * scale;
 
-    mscale_write:  
+mscale_write:
     for (int i = 0; i < dim0 * dim1; ++i)
-    #pragma HLS LOOP_TRIPCOUNT min=c_size*c_size max=c_size*c_size 
-    #pragma HLS PIPELINE II=1
+       #pragma HLS LOOP_TRIPCOUNT min=c_size*c_size max=c_size*c_size
+       #pragma HLS PIPELINE II=1
         inout_r[i] = temp[i];
 }
 }

@@ -31,21 +31,20 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define LENGTH 8
 #define ITERATION 64
-void dummy_op(  std::vector<int,aligned_allocator<int>> & din1,
-                std::vector<int,aligned_allocator<int>> &din2, 
-                std::vector<int,aligned_allocator<int>> &din3,
-                std::vector<int,aligned_allocator<int>> &dout)
-{
+void dummy_op(std::vector<int, aligned_allocator<int>> &din1,
+              std::vector<int, aligned_allocator<int>> &din2,
+              std::vector<int, aligned_allocator<int>> &din3,
+              std::vector<int, aligned_allocator<int>> &dout) {
     for (int i = 0; i < ITERATION; i++) {
         int sum = 0;
-        for (int j = 0; j < LENGTH; j++){
-            sum +=  din1[i*LENGTH+ j] + din2[i*LENGTH+ j] + din3[j];
+        for (int j = 0; j < LENGTH; j++) {
+            sum += din1[i * LENGTH + j] + din2[i * LENGTH + j] + din3[j];
         }
         dout[i] = sum;
     }
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
 
     if (argc != 2) {
         std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
@@ -56,25 +55,25 @@ int main(int argc, char* argv[]) {
 
     size_t total_size = (LENGTH) * (ITERATION);
     //Allocate Memory in Host Memory
-    std::vector<int,aligned_allocator<int>> din1(total_size);
-    std::vector<int,aligned_allocator<int>> din2(total_size);
-    std::vector<int,aligned_allocator<int>> din3(ITERATION);
-    std::vector<int,aligned_allocator<int>> dout(ITERATION);
-    std::vector<int,aligned_allocator<int>> result_krnl(ITERATION);
+    std::vector<int, aligned_allocator<int>> din1(total_size);
+    std::vector<int, aligned_allocator<int>> din2(total_size);
+    std::vector<int, aligned_allocator<int>> din3(ITERATION);
+    std::vector<int, aligned_allocator<int>> dout(ITERATION);
+    std::vector<int, aligned_allocator<int>> result_krnl(ITERATION);
 
-    for (size_t i = 0 ; i < total_size; i++ ){
-        din1[i] = i; 
+    for (size_t i = 0; i < total_size; i++) {
+        din1[i] = i;
         din2[i] = i + 2;
-        if (i < ITERATION){
-            din3[i]  = i + 3;
+        if (i < ITERATION) {
+            din3[i] = i + 3;
             dout[i] = 0;
         }
     }
-    dummy_op(din1,din2,din3,dout);
+    dummy_op(din1, din2, din3, dout);
 
     cl_int err;
     unsigned fileBufSize;
-//OPENCL HOST CODE AREA START
+    //OPENCL HOST CODE AREA START
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
@@ -82,46 +81,50 @@ int main(int argc, char* argv[]) {
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
-    char* fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    char *fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
-    OCL_CHECK(err, cl::Kernel krnl(program,"dummy_op", &err));
+    OCL_CHECK(err, cl::Kernel krnl(program, "dummy_op", &err));
 
     //Allocate Buffer in Global Memory
-    OCL_CHECK(err, cl::Buffer buffer_din1  (context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-            sizeof(int) * total_size, din1.data(), &err));
-    OCL_CHECK(err, cl::Buffer buffer_din2(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-            sizeof(int) * total_size, din2.data(), &err));
-    OCL_CHECK(err, cl::Buffer buffer_din3  (context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-            sizeof(int) * (ITERATION), din3.data(), &err));
-    OCL_CHECK(err, cl::Buffer buffer_dout  (context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-            sizeof(int) * (ITERATION), result_krnl.data(), &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_din1(
+                  context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, sizeof(int) * total_size, din1.data(), &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_din2(
+                  context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, sizeof(int) * total_size, din2.data(), &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_din3(
+                  context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, sizeof(int) * (ITERATION), din3.data(), &err));
+    OCL_CHECK(
+        err,
+        cl::Buffer buffer_dout(
+            context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, sizeof(int) * (ITERATION), result_krnl.data(), &err));
 
     /* Set the kernel arguments */
-    int nargs=0;
-    OCL_CHECK(err, err = krnl.setArg(nargs++,buffer_din1));
-    OCL_CHECK(err, err = krnl.setArg(nargs++,buffer_din2));
-    OCL_CHECK(err, err = krnl.setArg(nargs++,buffer_din3));
-    OCL_CHECK(err, err = krnl.setArg(nargs++,buffer_dout));
+    int nargs = 0;
+    OCL_CHECK(err, err = krnl.setArg(nargs++, buffer_din1));
+    OCL_CHECK(err, err = krnl.setArg(nargs++, buffer_din2));
+    OCL_CHECK(err, err = krnl.setArg(nargs++, buffer_din3));
+    OCL_CHECK(err, err = krnl.setArg(nargs++, buffer_dout));
 
     //Copy input RGB Image to device global memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_din1, buffer_din2, buffer_din3},0/* 0 means from host*/));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_din1, buffer_din2, buffer_din3}, 0 /* 0 means from host*/));
 
     /* Launch the kernel */
     OCL_CHECK(err, err = q.enqueueTask(krnl));
 
-     /* Copy result to local buffer */
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_dout},CL_MIGRATE_MEM_OBJECT_HOST));
+    /* Copy result to local buffer */
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_dout}, CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());
 
     /* Compare the results of the kernel to the simulation */
     int krnl_match = 0;
-    for(int i = 0; i < ITERATION; i++){
-        if(dout[i] != result_krnl[i]){
+    for (int i = 0; i < ITERATION; i++) {
+        if (dout[i] != result_krnl[i]) {
             std::cout << "Error: Result mismatch" << std::endl;
-            std::cout << "i = " << i << " CPU result = " << dout[i]
-                << " Krnl Result = " << result_krnl[i] << std::endl;
+            std::cout << "i = " << i << " CPU result = " << dout[i] << " Krnl Result = " << result_krnl[i] << std::endl;
             krnl_match = 1;
             break;
         }
@@ -129,6 +132,6 @@ int main(int argc, char* argv[]) {
 
     delete[] fileBuf;
 
-    std::cout << "TEST " << (krnl_match ? "FAILED" : "PASSED") << std::endl; 
-    return (krnl_match ? EXIT_FAILURE :  EXIT_SUCCESS);
+    std::cout << "TEST " << (krnl_match ? "FAILED" : "PASSED") << std::endl;
+    return (krnl_match ? EXIT_FAILURE : EXIT_SUCCESS);
 }

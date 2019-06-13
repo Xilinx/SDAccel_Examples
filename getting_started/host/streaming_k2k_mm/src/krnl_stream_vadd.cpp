@@ -21,8 +21,8 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "ap_int.h"
 #include "ap_axi_sdata.h"
+#include "ap_int.h"
 #include "hls_stream.h"
 
 #define DWIDTH 32
@@ -30,23 +30,22 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 typedef ap_axiu<DWIDTH, 0, 0, 0> pkt;
 
 extern "C" {
-void krnl_stream_vadd(
-        int *in1,             // Read-Only Vector 1
-        int *in2,             // Read-Only Vector 2
-        hls::stream<pkt> &out,// Internal Stream
-        int size              // Size in integer
-        )
-{
-#pragma HLS INTERFACE m_axi port=in1  offset=slave bundle=gmem
-#pragma HLS INTERFACE m_axi port=in2  offset=slave bundle=gmem
-#pragma HLS INTERFACE axis port=out
-#pragma HLS INTERFACE s_axilite port=in1  bundle=control
-#pragma HLS INTERFACE s_axilite port=in2  bundle=control
-#pragma HLS INTERFACE s_axilite port=size bundle=control
-#pragma HLS INTERFACE s_axilite port=return bundle=control
+void krnl_stream_vadd(int *in1,              // Read-Only Vector 1
+                      int *in2,              // Read-Only Vector 2
+                      hls::stream<pkt> &out, // Internal Stream
+                      int size               // Size in integer
+) {
+#pragma HLS INTERFACE m_axi port = in1 offset = slave bundle = gmem
+#pragma HLS INTERFACE m_axi port = in2 offset = slave bundle = gmem
+#pragma HLS INTERFACE axis port = out
+#pragma HLS INTERFACE s_axilite port = in1 bundle = control
+#pragma HLS INTERFACE s_axilite port = in2 bundle = control
+#pragma HLS INTERFACE s_axilite port = size bundle = control
+#pragma HLS INTERFACE s_axilite port = return bundle = control
 
-    vadd: for(int i = 0; i < size; i++) {
-    #pragma HLS PIPELINE II=1
+vadd:
+    for (int i = 0; i < size; i++) {
+       #pragma HLS PIPELINE II=1
         int res = in1[i] + in2[i];
         pkt v;
         v.data = res;

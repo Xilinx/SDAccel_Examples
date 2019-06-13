@@ -26,33 +26,32 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include <cstring>
-#include <iostream>
+#include <fcntl.h>
 #include <iomanip>
+#include <iostream>
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 //OpenCV includes
 #include <opencv2/core/core.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 //OpenCL includes
-#include "xcl2.hpp"
 #include "equalizer.h"
+#include "xcl2.hpp"
 
 #include <vector>
 
-int main(int argc, char* argv[])
-{
-    if(argc != 3)
-    {
-        std::cout << "Usage: " << argv[0] << " <XCLBIN File>" <<" <input_image>" << std::endl;
+int main(int argc, char *argv[]) {
+    if (argc != 3) {
+        std::cout << "Usage: " << argv[0] << " <XCLBIN File>"
+                  << " <input_image>" << std::endl;
         return -1;
     }
 
@@ -60,20 +59,19 @@ int main(int argc, char* argv[])
 
     //Read the input image
     std::cout << "Reading input image..." << std::endl;
-    const char* inputFilename = argv[2];
+    const char *inputFilename = argv[2];
 
     cv::Mat inputImageRaw;
 
     inputImageRaw = cv::imread(inputFilename);
 
-    if(!inputImageRaw.data)
-    {
+    if (!inputImageRaw.data) {
         std::cout << "ERROR: Image file not found" << std::endl;
         return -1;
     }
-    
+
     //Convert BGR Image into Gray Image
-    cv::cvtColor(inputImageRaw,inputImageRaw,CV_BGR2GRAY);
+    cv::cvtColor(inputImageRaw, inputImageRaw, CV_BGR2GRAY);
 
     cv::Mat inputImage;
     inputImageRaw.convertTo(inputImage, CV_16U, 255);
@@ -84,71 +82,73 @@ int main(int argc, char* argv[])
     // The get_xil_devices will return vector of Xilinx Devices
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
-    
+
     //Creating Context and Command Queue for selected Device
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
-    char* fileBuf = xcl::read_binary_file(xclBinaryFile, fileBufSize);
+    char *fileBuf = xcl::read_binary_file(xclBinaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
-    
+
     //Getting kernel from program
-    OCL_CHECK(err, cl::Kernel krnl(program,"krnl_equalizer", &err));
+    OCL_CHECK(err, cl::Kernel krnl(program, "krnl_equalizer", &err));
 
     std::cout << "Image Size: " << inputImage.cols << "x" << inputImage.rows << std::endl;
     assert(inputImage.cols == IMAGE_WIDTH_PIXELS);
     assert(inputImage.rows == IMAGE_HEIGHT_PIXELS);
-    
-    std::vector<unsigned short,aligned_allocator<unsigned short>> eqimage(image_size_bytes, 16);
-    std::vector<unsigned short,aligned_allocator<unsigned short>> image(image_size_bytes, 16);
-    
-    for(int i = 0; i < IMAGE_HEIGHT_PIXELS/32; i++) {
-        for(int j = 0; j < IMAGE_WIDTH_PIXELS; j++) {
-            for(int k = 0; k < 32; k++) {
-               image[i*IMAGE_WIDTH_PIXELS*32 + j*32 + k] = inputImage.at<ushort>(i*32 + k,j);
+
+    std::vector<unsigned short, aligned_allocator<unsigned short>> eqimage(image_size_bytes, 16);
+    std::vector<unsigned short, aligned_allocator<unsigned short>> image(image_size_bytes, 16);
+
+    for (int i = 0; i < IMAGE_HEIGHT_PIXELS / 32; i++) {
+        for (int j = 0; j < IMAGE_WIDTH_PIXELS; j++) {
+            for (int k = 0; k < 32; k++) {
+                image[i * IMAGE_WIDTH_PIXELS * 32 + j * 32 + k] = inputImage.at<ushort>(i * 32 + k, j);
             }
         }
     }
 
     // These commands will allocate memory(Buffer) on the FPGA.
-    OCL_CHECK(err, cl::Buffer mem_image(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-            image_size_bytes, image.data(),&err));
+    OCL_CHECK(
+        err,
+        cl::Buffer mem_image(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, image_size_bytes, image.data(), &err));
 
-    OCL_CHECK(err, cl::Buffer mem_eqimage(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-            image_size_bytes, eqimage.data(), &err));
-    
+    OCL_CHECK(err,
+              cl::Buffer mem_eqimage(
+                  context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, image_size_bytes, eqimage.data(), &err));
+
     //set the kernel Arguments
-    int narg=0;
-    OCL_CHECK(err, err = krnl.setArg(narg++,mem_image));
-    OCL_CHECK(err, err = krnl.setArg(narg++,mem_eqimage));
+    int narg = 0;
+    OCL_CHECK(err, err = krnl.setArg(narg++, mem_image));
+    OCL_CHECK(err, err = krnl.setArg(narg++, mem_eqimage));
 
     /* Copy image to memory */
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({mem_image},0/* 0 means from host*/));
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({mem_image}, 0 /* 0 means from host*/));
 
     //Launch the Kernel
     cl::Event event;
     OCL_CHECK(err, err = q.enqueueTask(krnl, NULL, &event));
-    
+
     uint64_t nstimestart, nstimeend;
-    
+
     /* Copy image to mat */
     cv::Mat result_eq;
-    result_eq.create(inputImage.rows,inputImage.cols,CV_16U);
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({mem_eqimage},CL_MIGRATE_MEM_OBJECT_HOST));
+    result_eq.create(inputImage.rows, inputImage.cols, CV_16U);
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({mem_eqimage}, CL_MIGRATE_MEM_OBJECT_HOST));
     q.finish();
 
-    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,&nstimestart));
-    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,&nstimeend));
-    auto duration = nstimeend-nstimestart;
+    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START, &nstimestart));
+    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END, &nstimeend));
+    auto duration = nstimeend - nstimestart;
 
-    for(int i = 0; i < IMAGE_HEIGHT_PIXELS/32; i++) {
-        for(int j = 0; j < IMAGE_WIDTH_PIXELS; j++) {
-            for(int k = 0; k < 32; k++) {
-                result_eq.at<ushort>(i*32 + k, j) = eqimage[i*IMAGE_WIDTH_PIXELS*32 + j*32 + k];
+    for (int i = 0; i < IMAGE_HEIGHT_PIXELS / 32; i++) {
+        for (int j = 0; j < IMAGE_WIDTH_PIXELS; j++) {
+            for (int k = 0; k < 32; k++) {
+                result_eq.at<ushort>(i * 32 + k, j) = eqimage[i * IMAGE_WIDTH_PIXELS * 32 + j * 32 + k];
             }
         }
     }
@@ -164,4 +164,3 @@ int main(int argc, char* argv[])
 
     return 0;
 }
-

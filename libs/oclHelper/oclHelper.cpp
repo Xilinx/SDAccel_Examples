@@ -35,8 +35,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Load file to memory
 //
-static int loadFile2Memory(const char *filename, char **result)
-{
+static int loadFile2Memory(const char *filename, char **result) {
     int size = 0;
 
     std::ifstream stream(filename, std::ifstream::binary);
@@ -61,12 +60,11 @@ static int loadFile2Memory(const char *filename, char **result)
 //
 // Get device version
 //
-static void getDeviceVersion(oclHardware& hardware)
-{
+static void getDeviceVersion(oclHardware &hardware) {
     char versionString[512];
     size_t size = 0;
-    cl_int err = clGetDeviceInfo (hardware.mDevice, CL_DEVICE_VERSION, 511, versionString, &size);
-    if ( err != CL_SUCCESS) {
+    cl_int err = clGetDeviceInfo(hardware.mDevice, CL_DEVICE_VERSION, 511, versionString, &size);
+    if (err != CL_SUCCESS) {
         std::cout << oclErrorCode(err) << "\n";
         return;
     }
@@ -107,10 +105,9 @@ static void getDeviceVersion(oclHardware& hardware)
 //
 // Get OCL hardware
 //
-oclHardware getOclHardware(cl_device_type type)
-{
+oclHardware getOclHardware(cl_device_type type) {
     oclHardware hardware = {0, 0, 0, 0, 0, 0};
-    cl_platform_id platforms[16] = { 0 };
+    cl_platform_id platforms[16] = {0};
     cl_device_id devices[16];
     char platformName[256];
     char deviceName[256];
@@ -150,7 +147,7 @@ oclHardware getOclHardware(cl_device_type type)
             std::cout << oclErrorCode(err) << "\n";
             return hardware;
         }
-        
+
         hardware.mPlatform = platforms[i];
         hardware.mContext = context;
         hardware.mDevice = devices[0];
@@ -167,11 +164,10 @@ oclHardware getOclHardware(cl_device_type type)
 //
 // Get OCL software
 //
-int getOclSoftware(oclSoftware &software, const oclHardware &hardware)
-{
+int getOclSoftware(oclSoftware &software, const oclHardware &hardware) {
     cl_device_type deviceType = CL_DEVICE_TYPE_DEFAULT;
     cl_int err = clGetDeviceInfo(hardware.mDevice, CL_DEVICE_TYPE, sizeof(deviceType), &deviceType, 0);
-    if ( err != CL_SUCCESS) {
+    if (err != CL_SUCCESS) {
         std::cout << oclErrorCode(err) << "\n";
         return -1;
     }
@@ -179,7 +175,7 @@ int getOclSoftware(oclSoftware &software, const oclHardware &hardware)
     unsigned char *kernelCode = 0;
     std::cout << "Loading " << software.mFileName << "\n";
 
-    int size = loadFile2Memory(software.mFileName, (char **) &kernelCode);
+    int size = loadFile2Memory(software.mFileName, (char **)&kernelCode);
     if (size < 0) {
         std::cout << "Failed to load kernel\n";
         return -2;
@@ -187,10 +183,9 @@ int getOclSoftware(oclSoftware &software, const oclHardware &hardware)
 
     if (deviceType == CL_DEVICE_TYPE_ACCELERATOR) {
         size_t n = size;
-        software.mProgram = clCreateProgramWithBinary(hardware.mContext, 1, &hardware.mDevice, &n,
-                                                      (const unsigned char **) &kernelCode, 0, &err);
-    }
-    else {
+        software.mProgram = clCreateProgramWithBinary(
+            hardware.mContext, 1, &hardware.mDevice, &n, (const unsigned char **)&kernelCode, 0, &err);
+    } else {
         software.mProgram = clCreateProgramWithSource(hardware.mContext, 1, (const char **)&kernelCode, 0, &err);
     }
     if (!software.mProgram || (err != CL_SUCCESS)) {
@@ -203,26 +198,24 @@ int getOclSoftware(oclSoftware &software, const oclHardware &hardware)
         std::cout << oclErrorCode(err) << "\n";
         return -4;
     }
-    
-    delete [] kernelCode;
+
+    delete[] kernelCode;
     return 0;
 }
 
 //
 // Release software and hardware
 //
-void release(oclSoftware& software)
-{
+void release(oclSoftware &software) {
     clReleaseKernel(software.mKernel);
     clReleaseProgram(software.mProgram);
 }
 
-void release(oclHardware& hardware)
-{
+void release(oclHardware &hardware) {
     clReleaseCommandQueue(hardware.mQueue);
     clReleaseContext(hardware.mContext);
     if ((hardware.mMajorVersion >= 1) && (hardware.mMinorVersion > 1)) {
-        // Only available in OpenCL >= 1.2   
+        // Only available in OpenCL >= 1.2
         clReleaseDevice(hardware.mDevice);
     }
 }

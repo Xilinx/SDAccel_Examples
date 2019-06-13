@@ -27,51 +27,50 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 
- /*
+/*
    Loop Fusion
 
    Loop fusion is a technique to combine a nested loop with its parent. This
    technique produces more efficient hardware in some cases.
 */
 #define MAX_DIMS 5
-#include <stdlib.h>
 #include <limits.h>
+#include <stdlib.h>
 // This implementation fuses the distance calculation and the iteration through
 // the search space into one loop.
 extern "C" {
-void nearest_neighbor_loop_fusion(int *out_r, const int *points,
-                       const int *search_point, const int len,
-                       const int dim) {
+void nearest_neighbor_loop_fusion(
+    int *out_r, const int *points, const int *search_point, const int len, const int dim) {
 
-#pragma HLS INTERFACE m_axi port=out_r  offset=slave bundle=gmem
-#pragma HLS INTERFACE m_axi port=points offset=slave bundle=gmem
-#pragma HLS INTERFACE m_axi port=search_point offset=slave bundle=gmem
-#pragma HLS INTERFACE s_axilite port=out_r  bundle=control
-#pragma HLS INTERFACE s_axilite port=points  bundle=control
-#pragma HLS INTERFACE s_axilite port=search_point  bundle=control
-#pragma HLS INTERFACE s_axilite port=len  bundle=control
-#pragma HLS INTERFACE s_axilite port=dim  bundle=control
-#pragma HLS INTERFACE s_axilite port=return bundle=control
+#pragma HLS INTERFACE m_axi port = out_r offset = slave bundle = gmem
+#pragma HLS INTERFACE m_axi port = points offset = slave bundle = gmem
+#pragma HLS INTERFACE m_axi port = search_point offset = slave bundle = gmem
+#pragma HLS INTERFACE s_axilite port = out_r bundle = control
+#pragma HLS INTERFACE s_axilite port = points bundle = control
+#pragma HLS INTERFACE s_axilite port = search_point bundle = control
+#pragma HLS INTERFACE s_axilite port = len bundle = control
+#pragma HLS INTERFACE s_axilite port = dim bundle = control
+#pragma HLS INTERFACE s_axilite port = return bundle = control
     int best_i = 0;
     int best_dist = INT_MAX;
     int s_point[MAX_DIMS];
 
-    read: 
+read:
     for (int d = 0; d < dim; ++d) {
-    #pragma HLS PIPELINE II=1
+       #pragma HLS PIPELINE II=1
         s_point[d] = search_point[d];
     }
 
     int dist = 0;
     int iterations = len * dim;
 
-    // This loop iterates through each point and through each of the dimension.
-    // The combined loop performs the same number of iterations as the previous
-    // implementation but this approach give the compiler more opportunity to
-    // optimize the operations.
-    find_best:
+// This loop iterates through each point and through each of the dimension.
+// The combined loop performs the same number of iterations as the previous
+// implementation but this approach give the compiler more opportunity to
+// optimize the operations.
+find_best:
     for (int p = 0, c = 0, itr = 0; itr < iterations; itr++) {
-    #pragma HLS PIPELINE II=1
+       #pragma HLS PIPELINE II=1
         int dx = points[dim * p + c] - s_point[c];
         dist += dx * dx;
         // Defines the end of the dimension calculation(The inner loop in the
@@ -88,9 +87,9 @@ void nearest_neighbor_loop_fusion(int *out_r, const int *points,
             c++;
         }
     }
-    write_best:
+write_best:
     for (int c = 0; c < dim; ++c) {
-    #pragma HLS PIPELINE II=1
+       #pragma HLS PIPELINE II=1
         out_r[c] = points[best_i * dim + c];
     }
 }

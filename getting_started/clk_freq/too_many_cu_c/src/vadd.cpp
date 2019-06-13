@@ -65,7 +65,7 @@ Kernel Description (Good Example) :
 
 */
 
-#include<stdio.h>
+#include <stdio.h>
 
 // Work load of each Work_Item
 #define BUFFER_SIZE 5120
@@ -74,95 +74,106 @@ Kernel Description (Good Example) :
 #define NUM_CU 8
 
 //TRIPCOUNT indentifier
-const int c_size = DATA_SIZE/(BUFFER_SIZE*NUM_CU);
+const int c_size = DATA_SIZE / (BUFFER_SIZE * NUM_CU);
 
 typedef unsigned int uint;
 
-extern "C"
-{
-    void vadd_GOOD(
-            const int *in1, // Read-Only Vector 1
-            const int *in2, // Read-Only Vector 2
-            int *out,       // Output Result
-            int size        // Size of Vector Data
-    )
-    {
-    #pragma HLS INTERFACE m_axi port=in1 offset=slave bundle=gmem
-    #pragma HLS INTERFACE m_axi port=in2 offset=slave bundle=gmem
-    #pragma HLS INTERFACE m_axi port=out offset=slave bundle=gmem
+extern "C" {
+void vadd_GOOD(const int *in1, // Read-Only Vector 1
+               const int *in2, // Read-Only Vector 2
+               int *out,       // Output Result
+               int size        // Size of Vector Data
+) {
+   #pragma HLS INTERFACE m_axi port=in1 offset=slave bundle=gmem
+   #pragma HLS INTERFACE m_axi port=in2 offset=slave bundle=gmem
+   #pragma HLS INTERFACE m_axi port=out offset=slave bundle=gmem
 
-    #pragma HLS INTERFACE s_axilite port=in1 bundle=control
-    #pragma HLS INTERFACE s_axilite port=in2 bundle=control
-    #pragma HLS INTERFACE s_axilite port=out bundle=control
-    #pragma HLS INTERFACE s_axilite port=size bundle=control
-    #pragma HLS INTERFACE s_axilite port=return bundle=control
-    
-        // Local memory to store input and output vectors
-        // Local memory is implemented as BRAM memory blocks
-        int in1_lcl[NUM_CU][BUFFER_SIZE];
-        #pragma HLS ARRAY_PARTITION variable=in1_lcl dim=1 complete
+   #pragma HLS INTERFACE s_axilite port=in1 bundle=control
+   #pragma HLS INTERFACE s_axilite port=in2 bundle=control
+   #pragma HLS INTERFACE s_axilite port=out bundle=control
+   #pragma HLS INTERFACE s_axilite port=size bundle=control
+   #pragma HLS INTERFACE s_axilite port=return bundle=control
 
-        int in2_lcl[NUM_CU][BUFFER_SIZE];
-        #pragma HLS ARRAY_PARTITION variable=in2_lcl dim=1 complete
-        
-        int out_lcl[NUM_CU][BUFFER_SIZE];
-        #pragma HLS ARRAY_PARTITION variable=out_lcl dim=1 complete
-        
-        // Computes vector addition operation iteratively over entire data set of the work item
-        for(int offset = 0; offset < size; offset += NUM_CU*BUFFER_SIZE){
-        #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
-            // Enables burst reads on input vectors from global memory
-            // Each Work_Item asynchronously moves its work load from global memory
-            // to local memory (in1_lcl, in2_lcl) associated per each Work_Group
-            
-            // Burst read for in1_lcl
-            readIn1: for(int itr = 0 , i = 0 , j =0; itr < NUM_CU*BUFFER_SIZE; itr++, j++){
-            #pragma HLS PIPELINE II=1
-                if(j == BUFFER_SIZE) { j = 0 ; i++; }
-                in1_lcl[i][j] = in1[offset + itr];
+    // Local memory to store input and output vectors
+    // Local memory is implemented as BRAM memory blocks
+    int in1_lcl[NUM_CU][BUFFER_SIZE];
+   #pragma HLS ARRAY_PARTITION variable=in1_lcl dim=1 complete
+
+    int in2_lcl[NUM_CU][BUFFER_SIZE];
+   #pragma HLS ARRAY_PARTITION variable=in2_lcl dim=1 complete
+
+    int out_lcl[NUM_CU][BUFFER_SIZE];
+   #pragma HLS ARRAY_PARTITION variable=out_lcl dim=1 complete
+
+    // Computes vector addition operation iteratively over entire data set of the work item
+    for (int offset = 0; offset < size; offset += NUM_CU * BUFFER_SIZE) {
+       #pragma HLS LOOP_TRIPCOUNT min=c_size max=c_size
+        // Enables burst reads on input vectors from global memory
+        // Each Work_Item asynchronously moves its work load from global memory
+        // to local memory (in1_lcl, in2_lcl) associated per each Work_Group
+
+    // Burst read for in1_lcl
+    readIn1:
+        for (int itr = 0, i = 0, j = 0; itr < NUM_CU * BUFFER_SIZE; itr++, j++) {
+           #pragma HLS PIPELINE II=1
+            if (j == BUFFER_SIZE) {
+                j = 0;
+                i++;
             }
-            
-            // Burst read for in2_lcl
-            readIn2: for(int itr = 0 , i = 0 , j =0; itr < NUM_CU*BUFFER_SIZE; itr++, j++){
-            #pragma HLS PIPELINE II=1
-                if(j == BUFFER_SIZE) { j = 0 ; i++; }
-                in2_lcl[i][j] = in2[offset + itr];
+            in1_lcl[i][j] = in1[offset + itr];
+        }
+
+    // Burst read for in2_lcl
+    readIn2:
+        for (int itr = 0, i = 0, j = 0; itr < NUM_CU * BUFFER_SIZE; itr++, j++) {
+           #pragma HLS PIPELINE II=1
+            if (j == BUFFER_SIZE) {
+                j = 0;
+                i++;
             }
+            in2_lcl[i][j] = in2[offset + itr];
+        }
 
-            // Performs vector addition.
+        // Performs vector addition.
 
-            // This computation results in SIMD (Single Instruction Multiple
-            // Data) style of execution over NUM_CU (8) elements
+        // This computation results in SIMD (Single Instruction Multiple
+        // Data) style of execution over NUM_CU (8) elements
 
-            // Unroll increases the work load and helps in achieving parallelism 
+        // Unroll increases the work load and helps in achieving parallelism
 
-            // SDx generates highly optimized design for vector addition in
-            // this Single compute unit (Good Example) example due to high work load
-            // per iteration / compute unit and parallelism exposed through array 
-            // partition and unroll.
-            
-            // Unroll & Pipeline - The inner loop vadd2 is unrolled automatically.
-            // Note that the loop order is changed. This is done since the design
-            // is to do 8 (NUM_CU) operations and compute 8 results in parallel.
-            
-            vadd1: for(int i = 0; i < BUFFER_SIZE; i++){
-            #pragma HLS PIPELINE II=1
-                vadd2: for(int j = 0; j < NUM_CU; j++){
-                    out_lcl[j][i] = in1_lcl[j][i] + in2_lcl[j][i];
-                }
-            }
+        // SDx generates highly optimized design for vector addition in
+        // this Single compute unit (Good Example) example due to high work load
+        // per iteration / compute unit and parallelism exposed through array
+        // partition and unroll.
 
-            // Burst write from kernel to global memory on "out" vector
-            // Each Work_Item writes back results from local buffers to global memory
-            // based on Work_Group which it belongs to.
-            
-            // Burst write from out_lcl
-            writeOut: for(int itr = 0 , i = 0 , j =0; itr < NUM_CU*BUFFER_SIZE; itr++, j++){
-            #pragma HLS PIPELINE II=1
-                if(j == BUFFER_SIZE) { j = 0 ; i++; }
-                out[offset + itr] = out_lcl[i][j];
+        // Unroll & Pipeline - The inner loop vadd2 is unrolled automatically.
+        // Note that the loop order is changed. This is done since the design
+        // is to do 8 (NUM_CU) operations and compute 8 results in parallel.
+
+    vadd1:
+        for (int i = 0; i < BUFFER_SIZE; i++) {
+           #pragma HLS PIPELINE II=1
+        vadd2:
+            for (int j = 0; j < NUM_CU; j++) {
+                out_lcl[j][i] = in1_lcl[j][i] + in2_lcl[j][i];
             }
         }
-        return;
+
+    // Burst write from kernel to global memory on "out" vector
+    // Each Work_Item writes back results from local buffers to global memory
+    // based on Work_Group which it belongs to.
+
+    // Burst write from out_lcl
+    writeOut:
+        for (int itr = 0, i = 0, j = 0; itr < NUM_CU * BUFFER_SIZE; itr++, j++) {
+           #pragma HLS PIPELINE II=1
+            if (j == BUFFER_SIZE) {
+                j = 0;
+                i++;
+            }
+            out[offset + itr] = out_lcl[i][j];
+        }
     }
+    return;
+}
 }

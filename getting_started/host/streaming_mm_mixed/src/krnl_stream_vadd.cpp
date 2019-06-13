@@ -29,8 +29,8 @@ In this example, we will demonstrate how to use Xilinx Streaming APIs for direct
             |          |<<<<<<<<<<<< Output Stream <<<<<<<<<<<|          |
             +----------+                                      +----------+
 */
-#include "ap_int.h"
 #include "ap_axi_sdata.h"
+#include "ap_int.h"
 #include "hls_stream.h"
 
 #define DWIDTH 32
@@ -38,22 +38,21 @@ In this example, we will demonstrate how to use Xilinx Streaming APIs for direct
 typedef qdma_axis<DWIDTH, 0, 0, 0> pkt;
 
 extern "C" {
-void krnl_stream_vadd(
-        hls::stream<pkt> &out,             // Write-Only output Stream
-        hls::stream<pkt> &in1,             // Input Stream 1
-        int* in2,                          // Memory mapped Input Vector 2
-        int size                           // Size in integer
-        )
-{
-#pragma HLS INTERFACE m_axi port=in2  offset=slave bundle=gmem
-#pragma HLS INTERFACE axis port=out
-#pragma HLS INTERFACE axis port=in1
-#pragma HLS INTERFACE s_axilite port=in2  bundle=control
-#pragma HLS INTERFACE s_axilite port=size bundle=control
-#pragma HLS INTERFACE s_axilite port=return bundle=control
+void krnl_stream_vadd(hls::stream<pkt> &out, // Write-Only output Stream
+                      hls::stream<pkt> &in1, // Input Stream 1
+                      int *in2,              // Memory mapped Input Vector 2
+                      int size               // Size in integer
+) {
+#pragma HLS INTERFACE m_axi port = in2 offset = slave bundle = gmem
+#pragma HLS INTERFACE axis port = out
+#pragma HLS INTERFACE axis port = in1
+#pragma HLS INTERFACE s_axilite port = in2 bundle = control
+#pragma HLS INTERFACE s_axilite port = size bundle = control
+#pragma HLS INTERFACE s_axilite port = return bundle = control
 
-    vadd: for(int i = 0; i < size; i++) {
-    #pragma HLS PIPELINE II=1
+vadd:
+    for (int i = 0; i < size; i++) {
+       #pragma HLS PIPELINE II=1
         // Local Packets
         pkt in_buf, out_buf;
 

@@ -37,52 +37,51 @@ Description:
 #include "krnl_vaddmul.h"
 
 extern "C" {
-void krnl_vaddmul(
-        const v_dt *in1, // Read-Only Vector 1
-        const v_dt *in2, // Read-Only Vector 2
-        v_dt *out_add,   // Output Result for ADD
-        v_dt *out_mul,   // Output Result for MUL
-        const unsigned int size,   // Size in integer
-        const unsigned int num_times  // Running the same kernel operations num_times
-        )
-{
-#pragma HLS INTERFACE m_axi port=in1  offset=slave bundle=gmem0
-#pragma HLS INTERFACE m_axi port=in2  offset=slave bundle=gmem1
-#pragma HLS INTERFACE m_axi port=out_add offset=slave bundle=gmem2
-#pragma HLS INTERFACE m_axi port=out_mul offset=slave bundle=gmem3
+void krnl_vaddmul(const v_dt *in1,             // Read-Only Vector 1
+                  const v_dt *in2,             // Read-Only Vector 2
+                  v_dt *out_add,               // Output Result for ADD
+                  v_dt *out_mul,               // Output Result for MUL
+                  const unsigned int size,     // Size in integer
+                  const unsigned int num_times // Running the same kernel operations num_times
+) {
+#pragma HLS INTERFACE m_axi port = in1 offset = slave bundle = gmem0
+#pragma HLS INTERFACE m_axi port = in2 offset = slave bundle = gmem1
+#pragma HLS INTERFACE m_axi port = out_add offset = slave bundle = gmem2
+#pragma HLS INTERFACE m_axi port = out_mul offset = slave bundle = gmem3
 
-#pragma HLS INTERFACE s_axilite port=in1  bundle=control
-#pragma HLS INTERFACE s_axilite port=in2  bundle=control
-#pragma HLS INTERFACE s_axilite port=out_add bundle=control
-#pragma HLS INTERFACE s_axilite port=out_mul bundle=control
+#pragma HLS INTERFACE s_axilite port = in1 bundle = control
+#pragma HLS INTERFACE s_axilite port = in2 bundle = control
+#pragma HLS INTERFACE s_axilite port = out_add bundle = control
+#pragma HLS INTERFACE s_axilite port = out_mul bundle = control
 
-#pragma HLS INTERFACE s_axilite port=size bundle=control
-#pragma HLS INTERFACE s_axilite port=num_times bundle=control
-#pragma HLS INTERFACE s_axilite port=return bundle=control
+#pragma HLS INTERFACE s_axilite port = size bundle = control
+#pragma HLS INTERFACE s_axilite port = num_times bundle = control
+#pragma HLS INTERFACE s_axilite port = return bundle = control
 
-#pragma HLS DATA_PACK variable=in1
-#pragma HLS DATA_PACK variable=in2
-#pragma HLS DATA_PACK variable=out_add
-#pragma HLS DATA_PACK variable=out_mul
+#pragma HLS DATA_PACK variable = in1
+#pragma HLS DATA_PACK variable = in2
+#pragma HLS DATA_PACK variable = out_add
+#pragma HLS DATA_PACK variable = out_mul
 
-    unsigned int vSize = ((size-1)/VDATA_SIZE)+1;
+    unsigned int vSize = ((size - 1) / VDATA_SIZE) + 1;
 
     v_dt tmpIn1, tmpIn2;
     v_dt tmpOutAdd, tmpOutMul;
 
-
     //Running same kernel operation num_times to keep the kernel busy for HBM bandwidth testing
     for (int count = 0; count < num_times; count++) {
-        vops1:for(int i = 0; i < vSize ; i++) {
-        #pragma HLS PIPELINE II=1
-            tmpIn1 = in1[i]; 
+    vops1:
+        for (int i = 0; i < vSize; i++) {
+           #pragma HLS PIPELINE II=1
+            tmpIn1 = in1[i];
             tmpIn2 = in2[i];
 
-            vops2:for(int k = 0 ; k < VDATA_SIZE; k ++) {
+        vops2:
+            for (int k = 0; k < VDATA_SIZE; k++) {
                 tmpOutAdd.data[k] = tmpIn1.data[k] + tmpIn2.data[k];
                 tmpOutMul.data[k] = tmpIn1.data[k] * tmpIn2.data[k];
             }
-        
+
             out_add[i] = tmpOutAdd;
             out_mul[i] = tmpOutMul;
         }
