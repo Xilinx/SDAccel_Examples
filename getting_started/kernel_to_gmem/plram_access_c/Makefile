@@ -35,7 +35,7 @@ XCLBIN := ./xclbin
 
 include ./utils.mk
 
-DSA := $(call device2sandsa, $(DEVICE))
+DSA := $(call device2dsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
 BUILD_DIR_mmult = $(BUILD_DIR)/mmult
@@ -101,6 +101,9 @@ $(EMCONFIG_DIR)/emconfig.json:
 
 check: all
 ifeq ($(findstring xilinx_aws-vu9p-f1-04261818, $(DEVICE)), xilinx_aws-vu9p-f1-04261818)
+$(error Nothing to be done for make)
+endif
+ifeq ($(findstring xilinx:aws-vu9p-f1-04261818:dynamic, $(DEVICE)), xilinx:aws-vu9p-f1-04261818:dynamic)
 $(error Nothing to be done for make)
 endif
 

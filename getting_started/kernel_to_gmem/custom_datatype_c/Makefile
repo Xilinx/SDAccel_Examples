@@ -35,7 +35,7 @@ XCLBIN := ./xclbin
 
 include ./utils.mk
 
-DSA := $(call device2sandsa, $(DEVICE))
+DSA := $(call device2dsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
 BUILD_DIR_rgb_to_hsv = $(BUILD_DIR)/rgb_to_hsv

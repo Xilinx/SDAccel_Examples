@@ -26,7 +26,7 @@ def create_params(target,data):
     target.write("\n")
     target.write("include ./utils.mk\n")
     target.write("\n")
-    target.write("DSA := $(call device2sandsa, $(DEVICE))\n")
+    target.write("DSA := $(call device2dsa, $(DEVICE))\n")
     target.write("BUILD_DIR := ./_x.$(TARGET).$(DSA)\n")
     target.write("\n")
     if "containers" in data:
@@ -497,17 +497,9 @@ def report_gen(target, data):
     target.write("\n")
 
 def device2dsa_gen(target):
-    target.write("#   sanitize_dsa - create a filesystem friendly name from dsa name\n")
-    target.write("#   $(1) - name of dsa\n")
-    target.write("COLON=:\n")
-    target.write("PERIOD=.\n")
-    target.write("UNDERSCORE=_\n")
-    target.write("sanitize_dsa = $(strip $(subst $(PERIOD),$(UNDERSCORE),$(subst $(COLON),$(UNDERSCORE),$(1))))\n")
-    target.write("\n")
-
-    target.write("device2dsa = $(if $(filter $(suffix $(1)),.xpfm),$(shell $(COMMON_REPO)/utility/parsexpmf.py $(1) dsa 2>/dev/null),$(1))\n")
-    target.write("device2sandsa = $(call sanitize_dsa,$(call device2dsa,$(1)))\n")
-    target.write("device2dep = $(if $(filter $(suffix $(1)),.xpfm),$(dir $(1))/$(shell $(COMMON_REPO)/utility/parsexpmf.py $(1) hw 2>/dev/null) $(1),)\n")
+    target.write("#   device2dsa - create a filesystem friendly name from device name\n")
+    target.write("#   $(1) - full name of device\n")
+    target.write("device2dsa = $(strip $(patsubst %.xpfm, % , $(shell basename $(DEVICE))))\n")
     target.write("\n")
 
 def util_checks(target):
@@ -571,7 +563,7 @@ def create_utils(target, data):
     device2dsa_gen(target)
     clean_util(target)
     readme_gen(target)
-
+    return
 
 script, desc_file = argv
 desc = open(desc_file, 'r')
