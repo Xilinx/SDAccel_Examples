@@ -10,8 +10,7 @@ This example of 2ddr to demonstrate on how to use 2ddr DSA. How to create buffer
 ## SUPPORTED PLATFORMS
 Platform | Board             | Software Version
 ---------|-------------------|-----------------
-xilinx_u280_xdma|Xilinx Alveo U280|SDx 2019.1
-xilinx_u250_qdma|Xilinx Alveo U250|SDx 2019.1
+xilinx_aws-vu9p-f1-04261818|Xilinx Only 5.0 Shell|SDx 2019.1
 
 
 ##  DESIGN FILES

@@ -15,6 +15,7 @@
         "xilinx_u200_xdma", 
         "xilinx_u200_qdma", 
         "xilinx_u250_xdma", 
+        "xilinx_u250_qdma", 
         "xilinx_vcu1525_xdma", 
         "xilinx_vcu1525_dynamic",
 	"xilinx_u280_xdma", 
@@ -24,7 +25,8 @@
         "xilinx:u250:xdma", 
         "xilinx:vcu1525:xdma", 
         "xilinx:vcu1525:dynamic",
-	"xilinx:u280:xdma"
+	"xilinx:u280:xdma",
+        "xilinx:u250:qdma" 
     ], 	
     "libs": [
         "xcl2","bitmap"

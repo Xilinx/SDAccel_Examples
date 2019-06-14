@@ -8,6 +8,10 @@ import subprocess
 DSA = 'xilinx_u200_qdma'
 VERSION = 'SDx 2019.1'
 DEVICES = {
+    'xilinx_aws-vu9p-f1-04261818': {
+       'version': '5.0',
+       'name': 'Xilinx Only 5.0 Shell',
+    },	
     'xilinx_u200_qdma': {
        'version': '201910_1',
        'name': 'Xilinx Alveo U200',

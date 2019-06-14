@@ -11,8 +11,7 @@ xilinx:xil-accel-rd-ku115:4ddr-xpr|1024 x 768|3526
 ## SUPPORTED PLATFORMS
 Platform | Board             | Software Version
 ---------|-------------------|-----------------
-xilinx_u280_xdma|Xilinx Alveo U280|SDx 2019.1
-xilinx_u250_qdma|Xilinx Alveo U250|SDx 2019.1
+xilinx_aws-vu9p-f1-04261818|Xilinx Only 5.0 Shell|SDx 2019.1
 
 
 ##  DESIGN FILES

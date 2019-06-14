@@ -25,7 +25,7 @@ help::
 	$(ECHO) ""
 
 # Points to Utility Directory
-COMMON_REPO = ../../
+COMMON_REPO = ../../../
 ABS_COMMON_REPO = $(shell readlink -f $(COMMON_REPO))
 
 TARGETS := hw
@@ -35,21 +35,26 @@ XCLBIN := ./xclbin
 
 include ./utils.mk
 
-DSA := $(call device2dsa, $(DEVICE))
+DSA := $(call device2sandsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
-BUILD_DIR_krnl_idct = $(BUILD_DIR)/krnl_idct
+BUILD_DIR_krnl_kernel_global = $(BUILD_DIR)/krnl_kernel_global
 
 CXX := $(XILINX_SDX)/bin/xcpp
 XOCC := $(XILINX_SDX)/bin/xocc
 
 #Include Libraries
 include $(ABS_COMMON_REPO)/libs/opencl/opencl.mk
+include $(ABS_COMMON_REPO)/libs/xcl2/xcl2.mk
+CXXFLAGS += $(xcl2_CXXFLAGS)
+LDFLAGS += $(xcl2_LDFLAGS)
+HOST_SRCS += $(xcl2_SRCS)
+include config.mk
 
 CXXFLAGS += $(opencl_CXXFLAGS) -Wall -O0 -g -std=c++14
 LDFLAGS += $(opencl_LDFLAGS)
 
-HOST_SRCS += src/idct.cpp
+HOST_SRCS += src/kernel_global_bandwidth.cpp
 
 # Host compiler global settings
 CXXFLAGS += -fmessage-length=0
@@ -57,18 +62,16 @@ LDFLAGS += -lrt -lstdc++
 
 # Kernel compiler global settings
 CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps 
-CLFLAGS += --xp prop:solution.hls_pre_tcl=./src/hls_config.tcl
+CLFLAGS +=  --max_memory_ports bandwidth
 
-# Kernel linker flags
-LDCLFLAGS += --sp krnl_idct_1.m_axi_gmem0:bank0 --sp krnl_idct_1.m_axi_gmem1:bank0 --sp krnl_idct_1.m_axi_gmem2:bank1 --kernel_frequency 250
 
-EXECUTABLE = idct
-CMD_ARGS = $(XCLBIN)/krnl_idct.$(TARGET).$(DSA).xclbin
+EXECUTABLE = kernel_global
+CMD_ARGS = $(XCLBIN)/krnl_kernel_global.$(TARGET).$(DSA).xclbin
 
 EMCONFIG_DIR = $(XCLBIN)/$(DSA)
 
-BINARY_CONTAINERS += $(XCLBIN)/krnl_idct.$(TARGET).$(DSA).xclbin
-BINARY_CONTAINER_krnl_idct_OBJS += $(XCLBIN)/krnl_idct.$(TARGET).$(DSA).xo
+BINARY_CONTAINERS += $(XCLBIN)/krnl_kernel_global.$(TARGET).$(DSA).xclbin
+BINARY_CONTAINER_krnl_kernel_global_OBJS += $(XCLBIN)/bandwidth.$(TARGET).$(DSA).xo
 
 CP = cp -rf
 
@@ -82,12 +85,12 @@ exe: $(EXECUTABLE)
 build: $(BINARY_CONTAINERS)
 
 # Building kernel
-$(XCLBIN)/krnl_idct.$(TARGET).$(DSA).xo: src/krnl_idct.cpp
+$(XCLBIN)/bandwidth.$(TARGET).$(DSA).xo: src/kernel.cl
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_idct) -c -k krnl_idct -I'$(<D)' -o'$@' '$<'
-$(XCLBIN)/krnl_idct.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_idct_OBJS)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_kernel_global) -c -k bandwidth -I'$(<D)' -o'$@' '$<'
+$(XCLBIN)/krnl_kernel_global.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_krnl_kernel_global_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_idct) -l $(LDCLFLAGS) --nk krnl_idct:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_krnl_kernel_global) -l $(LDCLFLAGS) --nk bandwidth:1 -o'$@' $(+)
 
 # Building Host
 $(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
@@ -110,16 +113,10 @@ endif
 ifeq ($(findstring xilinx_u250_xdma, $(DEVICE)), xilinx_u250_xdma)
 $(error Nothing to be done for make)
 endif
-ifeq ($(findstring xilinx_u250_qdma, $(DEVICE)), xilinx_u250_qdma)
-$(error Nothing to be done for make)
-endif
-ifeq ($(findstring xilinx_vcu1525_xdma, $(DEVICE)), xilinx_vcu1525_xdma)
-$(error Nothing to be done for make)
-endif
-ifeq ($(findstring xilinx_vcu1525_dynamic, $(DEVICE)), xilinx_vcu1525_dynamic)
-$(error Nothing to be done for make)
-endif
 ifeq ($(findstring xilinx_u280_xdma, $(DEVICE)), xilinx_u280_xdma)
+$(error Nothing to be done for make)
+endif
+ifeq ($(findstring xilinx_u250_qdma, $(DEVICE)), xilinx_u250_qdma)
 $(error Nothing to be done for make)
 endif
 ifeq ($(findstring xilinx:u280-es1:xdma, $(DEVICE)), xilinx:u280-es1:xdma)
@@ -134,12 +131,6 @@ endif
 ifeq ($(findstring xilinx:u250:xdma, $(DEVICE)), xilinx:u250:xdma)
 $(error Nothing to be done for make)
 endif
-ifeq ($(findstring xilinx:vcu1525:xdma, $(DEVICE)), xilinx:vcu1525:xdma)
-$(error Nothing to be done for make)
-endif
-ifeq ($(findstring xilinx:vcu1525:dynamic, $(DEVICE)), xilinx:vcu1525:dynamic)
-$(error Nothing to be done for make)
-endif
 ifeq ($(findstring xilinx:u280:xdma, $(DEVICE)), xilinx:u280:xdma)
 $(error Nothing to be done for make)
 endif
@@ -149,9 +140,9 @@ endif
 
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu hw_emu))
 	$(CP) $(EMCONFIG_DIR)/emconfig.json .
-	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/krnl_idct.$(TARGET).$(DSA).xclbin
+	XCL_EMULATION_MODE=$(TARGET) ./$(EXECUTABLE) $(XCLBIN)/krnl_kernel_global.$(TARGET).$(DSA).xclbin
 else
-	 ./$(EXECUTABLE) $(XCLBIN)/krnl_idct.$(TARGET).$(DSA).xclbin
+	 ./$(EXECUTABLE) $(XCLBIN)/krnl_kernel_global.$(TARGET).$(DSA).xclbin
 endif
 	sdx_analyze profile -i profile_summary.csv -f html
 
