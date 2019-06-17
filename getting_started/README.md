@@ -63,6 +63,7 @@ Example        | Description           | Key Concepts / Keywords
 [kernel_to_gmem/gmem_2banks_ocl/][]|This example of 2ddr to demonstrate on how to use 2ddr DSA. How to create buffers in each DDR.|__Key__ __Concepts__<br> - Multiple Banks<br>__Keywords__<br> - max_memory_ports<br> - misc:map_connect
 [kernel_to_gmem/gmem_2banks_ocl_5.0_shell/][]|This example of 2ddr to demonstrate on how to use 2ddr DSA. How to create buffers in each DDR.|__Key__ __Concepts__<br> - Multiple Banks<br>__Keywords__<br> - max_memory_ports<br> - misc:map_connect
 [kernel_to_gmem/kernel_global_bandwidth/][]|Bandwidth test of global to local memory.|
+[kernel_to_gmem/kernel_global_bandwidth_5.0_shell/][]|Bandwidth test of global to local memory.|
 [kernel_to_gmem/memcoalesce_hang_c/][]|This example shows Memory Coalesce Deadlock/Hand situation and how to handle it. User can switch between BAD and GOOD case using makefile variable KFLOW.|__Key__ __Concepts__<br> - Memory Coalesce<br> - Memory Deadlock/Hang<br> - Multiple Interfaces<br>__Keywords__<br> - HLS INTERFACE<br> - bundle<br> - m_axi
 [kernel_to_gmem/plram_access_c/][]|This example shows the usage of PLRAM and how to use it with simple matrix multiplication (Row x Col).|__Key__ __Concepts__<br> - SDx Memory Hierarchy<br> - PLRAMs<br>__Keywords__<br> - PLRAM
 [kernel_to_gmem/row_array_2d_c/][]|This is a simple example of accessing each row of data from 2d array|__Key__ __Concepts__<br> - Row of 2D data array access<br>__Keywords__<br> - hls::stream
@@ -157,6 +158,7 @@ Example        | Description           | Key Concepts / Keywords
 [kernel_to_gmem/gmem_2banks_ocl/]:kernel_to_gmem/gmem_2banks_ocl/
 [kernel_to_gmem/gmem_2banks_ocl_5.0_shell/]:kernel_to_gmem/gmem_2banks_ocl_5.0_shell/
 [kernel_to_gmem/kernel_global_bandwidth/]:kernel_to_gmem/kernel_global_bandwidth/
+[kernel_to_gmem/kernel_global_bandwidth_5.0_shell/]:kernel_to_gmem/kernel_global_bandwidth_5.0_shell/
 [kernel_to_gmem/memcoalesce_hang_c/]:kernel_to_gmem/memcoalesce_hang_c/
 [kernel_to_gmem/plram_access_c/]:kernel_to_gmem/plram_access_c/
 [kernel_to_gmem/row_array_2d_c/]:kernel_to_gmem/row_array_2d_c/
