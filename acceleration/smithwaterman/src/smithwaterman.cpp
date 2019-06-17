@@ -46,8 +46,11 @@ typedef struct _eventLog {
     double totalExecute;
 } eventLog;
 
-unsigned int *
-generatePackedNReadRefPair(int N, int readSize, int refSize, unsigned int **maxVal, int computeOutput = 1);
+unsigned int *generatePackedNReadRefPair(int N,
+                                         int readSize,
+                                         int refSize,
+                                         unsigned int **maxVal,
+                                         int computeOutput = 1);
 
 /////////////////////////////////////////////////////////////////////////////////
 static double timestamp() {
@@ -68,8 +71,12 @@ static double computeEventDurationInMS(const cl::Event &event) {
     cl_ulong ts_start = 0, ts_end = 0;
     cl_int err;
     double duration = 0;
-    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START, &ts_start));
-    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END, &ts_end));
+    OCL_CHECK(err,
+              err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,
+                                                     &ts_start));
+    OCL_CHECK(err,
+              err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,
+                                                     &ts_end));
     duration += (cl_double)(ts_end - ts_start) * (cl_double)(1e-06);
 
     return duration;
@@ -94,7 +101,8 @@ static int getToken(FILE *fp, char *tok) {
     return -1;
 }
 
-static int readReadRefFile(char *fname, unsigned int **pairs, unsigned int **maxv, int N) {
+static int
+readReadRefFile(char *fname, unsigned int **pairs, unsigned int **maxv, int N) {
     FILE *fp = fopen(fname, "r");
     char *string = new char[1024];
     int rdSz = 0;
@@ -139,7 +147,8 @@ static int readReadRefFile(char *fname, unsigned int **pairs, unsigned int **max
     return sampleNum;
 }
 
-static int verify(int numSample, unsigned int *outputGolden, unsigned int *output) {
+static int
+verify(int numSample, unsigned int *outputGolden, unsigned int *output) {
     int fail = 0;
     printf("Verifying computed MAXSORE returned to HOST\n");
     for (int i = 0; i < numSample; ++i) {
@@ -151,7 +160,8 @@ static int verify(int numSample, unsigned int *outputGolden, unsigned int *outpu
         if (localFail) {
             printf("Fail %d:", localFail - 1);
             for (int j = 0; j < 3; ++j) {
-                printf("g=%u, m=%u, ", outputGolden[3 * i + j], output[3 * i + j]);
+                printf(
+                    "g=%u, m=%u, ", outputGolden[3 * i + j], output[3 * i + j]);
             }
         }
     }
@@ -194,7 +204,9 @@ SmithWatermanApp::SmithWatermanApp(const string &vendor_name,
     cl::Device device = devices[0];
 
     OCL_CHECK(err, context = cl::Context(device, NULL, NULL, NULL, &err));
-    OCL_CHECK(err, q = cl::CommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(
+        err,
+        q = cl::CommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     OCL_CHECK(err, std::string dev_name = device.getInfo<CL_DEVICE_NAME>(&err));
     std::cout << "Found Device=" << dev_name.c_str() << std::endl;
 
@@ -202,7 +214,9 @@ SmithWatermanApp::SmithWatermanApp(const string &vendor_name,
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, m_program = cl::Program(context, devices, bins, NULL, &err));
-    OCL_CHECK(err, m_clKernelSmithWaterman = cl::Kernel(m_program, "opencl_sw_maxscore", &err));
+    OCL_CHECK(err,
+              m_clKernelSmithWaterman =
+                  cl::Kernel(m_program, "opencl_sw_maxscore", &err));
 }
 
 SmithWatermanApp::~SmithWatermanApp() {
@@ -235,13 +249,27 @@ bool SmithWatermanApp::invoke_kernel(unsigned int *input,
                                      cl::Event events[evtCount],
                                      double eTotal[evtCount]) {
     if (m_useDoubleBuffered) {
-        bool res = invoke_kernel_doublebuffered(input, output, iterNum, sz_input, sz_output, sz_sz, &events[0], eTotal);
+        bool res = invoke_kernel_doublebuffered(input,
+                                                output,
+                                                iterNum,
+                                                sz_input,
+                                                sz_output,
+                                                sz_sz,
+                                                &events[0],
+                                                eTotal);
         if (!res) {
             LogError("Failed Double Buffered SW. Test Failed");
             return false;
         }
     } else {
-        bool res = invoke_kernel_blocking(input, output, iterNum, sz_input, sz_output, sz_sz, &events[0], eTotal);
+        bool res = invoke_kernel_blocking(input,
+                                          output,
+                                          iterNum,
+                                          sz_input,
+                                          sz_output,
+                                          sz_sz,
+                                          &events[0],
+                                          eTotal);
         if (!res) {
             LogError("Failed Blocked SW. Test Failed");
             return false;
@@ -263,13 +291,19 @@ bool SmithWatermanApp::invoke_kernel_blocking(unsigned int *input,
     cl::Kernel kernel = m_clKernelSmithWaterman;
     cl_int err;
     cl::Buffer mem_input;
-    OCL_CHECK(err, mem_input = cl::Buffer(context, CL_MEM_READ_WRITE, sz_input, NULL, &err));
+    OCL_CHECK(err,
+              mem_input =
+                  cl::Buffer(context, CL_MEM_READ_WRITE, sz_input, NULL, &err));
 
     cl::Buffer mem_output;
-    OCL_CHECK(err, mem_output = cl::Buffer(context, CL_MEM_READ_WRITE, sz_output, NULL, &err));
+    OCL_CHECK(err,
+              mem_output = cl::Buffer(
+                  context, CL_MEM_READ_WRITE, sz_output, NULL, &err));
 
     cl::Buffer mem_sz_sz;
-    OCL_CHECK(err, mem_sz_sz = cl::Buffer(context, CL_MEM_READ_WRITE, sz_sz, NULL, &err));
+    OCL_CHECK(err,
+              mem_sz_sz =
+                  cl::Buffer(context, CL_MEM_READ_WRITE, sz_sz, NULL, &err));
 
     err = 0;
 
@@ -287,36 +321,42 @@ bool SmithWatermanApp::invoke_kernel_blocking(unsigned int *input,
         //cout << "In iteration" << iter << "\n";
 
         OCL_CHECK(err,
-                  err = q.enqueueWriteBuffer(mem_input,
-                                             CL_TRUE,
-                                             0,
-                                             sz_input,
-                                             (input + iter * (sz_input / sizeof(unsigned int))),
-                                             NULL,
-                                             &events[evtHostWrite]));
-        OCL_CHECK(err, err = q.enqueueWriteBuffer(mem_sz_sz, CL_TRUE, 0, sz_sz, iterNum, NULL, NULL));
+                  err = q.enqueueWriteBuffer(
+                      mem_input,
+                      CL_TRUE,
+                      0,
+                      sz_input,
+                      (input + iter * (sz_input / sizeof(unsigned int))),
+                      NULL,
+                      &events[evtHostWrite]));
+        OCL_CHECK(err,
+                  err = q.enqueueWriteBuffer(
+                      mem_sz_sz, CL_TRUE, 0, sz_sz, iterNum, NULL, NULL));
 
         //finish all memory writes
         OCL_CHECK(err, err = q.finish());
 
         //call once to guarantee that all buffers are migrated to device memory
-        OCL_CHECK(err, err = q.enqueueTask(kernel, NULL, &events[evtKernelExec]));
+        OCL_CHECK(err,
+                  err = q.enqueueTask(kernel, NULL, &events[evtKernelExec]));
 
         OCL_CHECK(err, err = q.finish());
 
         //read output size
         OCL_CHECK(err,
-                  err = q.enqueueReadBuffer(mem_output,
-                                            CL_TRUE,
-                                            0,
-                                            sz_output,
-                                            (output + iter * (sz_output / sizeof(unsigned int))),
-                                            NULL,
-                                            &events[evtHostRead]));
+                  err = q.enqueueReadBuffer(
+                      mem_output,
+                      CL_TRUE,
+                      0,
+                      sz_output,
+                      (output + iter * (sz_output / sizeof(unsigned int))),
+                      NULL,
+                      &events[evtHostRead]));
 
         OCL_CHECK(err, err = q.finish());
         eTotal[evtHostWrite] += computeEventDurationInMS(events[evtHostWrite]);
-        eTotal[evtKernelExec] += computeEventDurationInMS(events[evtKernelExec]);
+        eTotal[evtKernelExec] +=
+            computeEventDurationInMS(events[evtKernelExec]);
         eTotal[evtHostRead] += computeEventDurationInMS(events[evtHostRead]);
     }
     return true;
@@ -336,17 +376,27 @@ bool SmithWatermanApp::invoke_kernel_doublebuffered(unsigned int *input,
     cl_int err;
 
     cl::Buffer mem_input_ping;
-    OCL_CHECK(err, mem_input_ping = cl::Buffer(context, CL_MEM_READ_WRITE, sz_input, NULL, &err));
+    OCL_CHECK(err,
+              mem_input_ping =
+                  cl::Buffer(context, CL_MEM_READ_WRITE, sz_input, NULL, &err));
     cl::Buffer mem_input_pong;
-    OCL_CHECK(err, mem_input_pong = cl::Buffer(context, CL_MEM_READ_WRITE, sz_input, NULL, &err));
+    OCL_CHECK(err,
+              mem_input_pong =
+                  cl::Buffer(context, CL_MEM_READ_WRITE, sz_input, NULL, &err));
 
     cl::Buffer mem_output_ping;
-    OCL_CHECK(err, mem_output_ping = cl::Buffer(context, CL_MEM_READ_WRITE, sz_output, NULL, &err));
+    OCL_CHECK(err,
+              mem_output_ping = cl::Buffer(
+                  context, CL_MEM_READ_WRITE, sz_output, NULL, &err));
     cl::Buffer mem_output_pong;
-    OCL_CHECK(err, mem_output_pong = cl::Buffer(context, CL_MEM_READ_WRITE, sz_output, NULL, &err));
+    OCL_CHECK(err,
+              mem_output_pong = cl::Buffer(
+                  context, CL_MEM_READ_WRITE, sz_output, NULL, &err));
 
     cl::Buffer mem_sz_sz;
-    OCL_CHECK(err, mem_sz_sz = cl::Buffer(context, CL_MEM_READ_WRITE, sz_sz, NULL, &err));
+    OCL_CHECK(err,
+              mem_sz_sz =
+                  cl::Buffer(context, CL_MEM_READ_WRITE, sz_sz, NULL, &err));
 
     OCL_CHECK(err, err = kernel.setArg(2, mem_sz_sz));
 
@@ -357,23 +407,38 @@ bool SmithWatermanApp::invoke_kernel_doublebuffered(unsigned int *input,
     cout << "Processing " << m_numSamples << " Samples \n";
     if (numIter >= 1) {
         OCL_CHECK(err,
-                  err = q.enqueueWriteBuffer(mem_input_ping, CL_FALSE, 0, sz_input, input, NULL, &ping[evtHostWrite]));
+                  err = q.enqueueWriteBuffer(mem_input_ping,
+                                             CL_FALSE,
+                                             0,
+                                             sz_input,
+                                             input,
+                                             NULL,
+                                             &ping[evtHostWrite]));
         OCL_CHECK(err, err = kernel.setArg(0, mem_input_ping));
         OCL_CHECK(err, err = kernel.setArg(1, mem_output_ping));
 
         if (numIter > 1) {
             OCL_CHECK(err,
-                      err = q.enqueueWriteBuffer(mem_input_pong,
-                                                 CL_FALSE,
-                                                 0,
-                                                 sz_input,
-                                                 (input + (sz_input / sizeof(unsigned int))),
-                                                 NULL,
-                                                 &pong[evtHostWrite]));
+                      err = q.enqueueWriteBuffer(
+                          mem_input_pong,
+                          CL_FALSE,
+                          0,
+                          sz_input,
+                          (input + (sz_input / sizeof(unsigned int))),
+                          NULL,
+                          &pong[evtHostWrite]));
         }
-        std::vector<cl::Event> vec_evt1 = {ping[evtHostRead], ping[evtKernelExec]};
+        std::vector<cl::Event> vec_evt1 = {ping[evtHostRead],
+                                           ping[evtKernelExec]};
         OCL_CHECK(err, err = q.enqueueTask(kernel, NULL, &ping[evtKernelExec]));
-        OCL_CHECK(err, err = q.enqueueReadBuffer(mem_output_ping, CL_FALSE, 0, sz_output, output, &vec_evt1, NULL));
+        OCL_CHECK(err,
+                  err = q.enqueueReadBuffer(mem_output_ping,
+                                            CL_FALSE,
+                                            0,
+                                            sz_output,
+                                            output,
+                                            &vec_evt1,
+                                            NULL));
     }
 
     if (numIter >= 2) {
@@ -383,28 +448,31 @@ bool SmithWatermanApp::invoke_kernel_doublebuffered(unsigned int *input,
         if (numIter > 2) {
             ping[evtHostWrite].wait();
             OCL_CHECK(err,
-                      err = q.enqueueWriteBuffer(mem_input_ping,
-                                                 CL_FALSE,
-                                                 0,
-                                                 sz_input,
-                                                 (input + (sz_input / sizeof(unsigned int))),
-                                                 NULL,
-                                                 &ping[evtHostWrite]));
+                      err = q.enqueueWriteBuffer(
+                          mem_input_ping,
+                          CL_FALSE,
+                          0,
+                          sz_input,
+                          (input + (sz_input / sizeof(unsigned int))),
+                          NULL,
+                          &ping[evtHostWrite]));
         }
 
         //call once to guarentee that all buffers are migrated to device memory
         OCL_CHECK(err, err = q.enqueueTask(kernel, NULL, &pong[evtKernelExec]));
 
         //read output size
-        std::vector<cl::Event> vec_evt2 = {pong[evtHostRead], pong[evtKernelExec]};
+        std::vector<cl::Event> vec_evt2 = {pong[evtHostRead],
+                                           pong[evtKernelExec]};
         OCL_CHECK(err,
-                  err = q.enqueueReadBuffer(mem_output_pong,
-                                            CL_FALSE,
-                                            0,
-                                            sz_output,
-                                            (output + (sz_output / sizeof(unsigned int))),
-                                            &vec_evt2,
-                                            NULL));
+                  err = q.enqueueReadBuffer(
+                      mem_output_pong,
+                      CL_FALSE,
+                      0,
+                      sz_output,
+                      (output + (sz_output / sizeof(unsigned int))),
+                      &vec_evt2,
+                      NULL));
     }
 
     for (int iter = 2; iter < numIter; ++iter) {
@@ -417,29 +485,33 @@ bool SmithWatermanApp::invoke_kernel_doublebuffered(unsigned int *input,
             if (iter < numIter - 1) {
                 ping[evtHostWrite].wait();
                 OCL_CHECK(err,
-                          err = q.enqueueWriteBuffer(mem_input_ping,
-                                                     CL_FALSE,
-                                                     0,
-                                                     sz_input,
-                                                     (input + (iter + 1) * (sz_input / sizeof(unsigned int))),
-                                                     NULL,
-                                                     &ping[evtHostWrite]));
+                          err = q.enqueueWriteBuffer(
+                              mem_input_ping,
+                              CL_FALSE,
+                              0,
+                              sz_input,
+                              (input +
+                               (iter + 1) * (sz_input / sizeof(unsigned int))),
+                              NULL,
+                              &ping[evtHostWrite]));
             }
 
             //finish all memory writes
             OCL_CHECK(err, err = q.finish());
-            OCL_CHECK(err, err = q.enqueueTask(kernel, NULL, &pong[evtKernelExec]));
+            OCL_CHECK(err,
+                      err = q.enqueueTask(kernel, NULL, &pong[evtKernelExec]));
 
             //read output size
             OCL_CHECK(err, err = q.finish());
             OCL_CHECK(err,
-                      err = q.enqueueReadBuffer(mem_output_pong,
-                                                CL_FALSE,
-                                                0,
-                                                sz_output,
-                                                (output + iter * (sz_output / sizeof(unsigned int))),
-                                                NULL,
-                                                &pong[evtHostRead]));
+                      err = q.enqueueReadBuffer(
+                          mem_output_pong,
+                          CL_FALSE,
+                          0,
+                          sz_output,
+                          (output + iter * (sz_output / sizeof(unsigned int))),
+                          NULL,
+                          &pong[evtHostRead]));
         } else { //ping
             OCL_CHECK(err, err = kernel.setArg(0, mem_input_ping));
             OCL_CHECK(err, err = kernel.setArg(1, mem_output_ping));
@@ -447,32 +519,37 @@ bool SmithWatermanApp::invoke_kernel_doublebuffered(unsigned int *input,
             if (iter < numIter - 1) {
                 pong[evtHostWrite].wait();
                 OCL_CHECK(err,
-                          err = q.enqueueWriteBuffer(mem_input_pong,
-                                                     CL_FALSE,
-                                                     0,
-                                                     sz_input,
-                                                     (input + (iter + 1) * (sz_input / sizeof(unsigned int))),
-                                                     NULL,
-                                                     &pong[evtHostWrite]));
+                          err = q.enqueueWriteBuffer(
+                              mem_input_pong,
+                              CL_FALSE,
+                              0,
+                              sz_input,
+                              (input +
+                               (iter + 1) * (sz_input / sizeof(unsigned int))),
+                              NULL,
+                              &pong[evtHostWrite]));
             }
 
             //call once to guarentee that all buffers are migrated to device memory
             OCL_CHECK(err, err = q.finish());
-            OCL_CHECK(err, err = q.enqueueTask(kernel, NULL, &ping[evtKernelExec]));
+            OCL_CHECK(err,
+                      err = q.enqueueTask(kernel, NULL, &ping[evtKernelExec]));
 
             //read output size
             OCL_CHECK(err, err = q.finish());
             OCL_CHECK(err,
-                      err = q.enqueueReadBuffer(mem_output_ping,
-                                                CL_FALSE,
-                                                0,
-                                                sz_output,
-                                                (output + iter * (sz_output / sizeof(unsigned int))),
-                                                NULL,
-                                                &ping[evtHostRead]));
+                      err = q.enqueueReadBuffer(
+                          mem_output_ping,
+                          CL_FALSE,
+                          0,
+                          sz_output,
+                          (output + iter * (sz_output / sizeof(unsigned int))),
+                          NULL,
+                          &ping[evtHostRead]));
         }
         eTotal[evtHostWrite] += computeEventDurationInMS(events[evtHostWrite]);
-        eTotal[evtKernelExec] += computeEventDurationInMS(events[evtKernelExec]);
+        eTotal[evtKernelExec] +=
+            computeEventDurationInMS(events[evtKernelExec]);
         eTotal[evtHostRead] += computeEventDurationInMS(events[evtHostRead]);
     }
     OCL_CHECK(err, err = q.finish());
@@ -507,15 +584,19 @@ bool SmithWatermanApp::run(int idevice, int nruns) {
 
     if (m_verifyMode) {
         cout << "Reading read-ref samples\n";
-        err = readReadRefFile((char *)m_strSampleFP.c_str(), &input, &outputGolden, totalSamples);
+        err = readReadRefFile(
+            (char *)m_strSampleFP.c_str(), &input, &outputGolden, totalSamples);
         if (err != totalSamples) {
             LogError("Unable to read sample file: [%s]", m_strSampleFP.c_str());
             return false;
         }
     } else {
         cout << "Generating read-ref samples\n";
-        input =
-            generatePackedNReadRefPair(totalSamples, MAXROW, MAXCOL, &outputGolden, 0); //do not generate compute output
+        input = generatePackedNReadRefPair(totalSamples,
+                                           MAXROW,
+                                           MAXCOL,
+                                           &outputGolden,
+                                           0); //do not generate compute output
     }
 
     //input buffer size
@@ -541,7 +622,8 @@ bool SmithWatermanApp::run(int idevice, int nruns) {
 
     //execute
     for (int i = 0; i < nruns; i++) {
-        bool res = invoke_kernel(input, output, iterNum, inSz, outSz, szSz, &events[0], eTotal);
+        bool res = invoke_kernel(
+            input, output, iterNum, inSz, outSz, szSz, &events[0], eTotal);
         if (!res) {
             LogError("Failed to encode the input. Test Failed");
             return false;

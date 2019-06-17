@@ -46,110 +46,112 @@ using std::vector;
 
 // Wrap any OpenCL API calls that return error code(cl_int)
 // with the below macro to quickly check for an error
-#define OCL_CHECK(call)                                                                                                \
-    do {                                                                                                               \
-        cl_int err = call;                                                                                             \
-        if (err != CL_SUCCESS) {                                                                                       \
-            printf("Error from " #call ", error code is %d\n", err);                                                   \
-            exit(1);                                                                                                   \
-        }                                                                                                              \
+#define OCL_CHECK(call)                                                        \
+    do {                                                                       \
+        cl_int err = call;                                                     \
+        if (err != CL_SUCCESS) {                                               \
+            printf("Error from " #call ", error code is %d\n", err);           \
+            exit(1);                                                           \
+        }                                                                      \
     } while (0);
 
-#define ENUM_CASE(ENUM)                                                                                                \
-    case ENUM:                                                                                                         \
-        printf(#ENUM "\n");                                                                                            \
+#define ENUM_CASE(ENUM)                                                        \
+    case ENUM:                                                                 \
+        printf(#ENUM "\n");                                                    \
         break
 
-#define BITFIELD_SETUP(type)                                                                                           \
-    auto value = convert<type>(field.data());                                                                          \
+#define BITFIELD_SETUP(type)                                                   \
+    auto value = convert<type>(field.data());                                  \
     printf("[ ")
 
-#define BITFIELD_PRINT(FIELD)                                                                                          \
-    if (value & FIELD) {                                                                                               \
-        printf(#FIELD " ");                                                                                            \
+#define BITFIELD_PRINT(FIELD)                                                  \
+    if (value & FIELD) {                                                       \
+        printf(#FIELD " ");                                                    \
     }
 
 #define BITFIELD_END() printf("]\n")
 
-pair<int, const char *> platform_info[] = {{CL_PLATFORM_PROFILE, "profile"},
-                                           {CL_PLATFORM_VERSION, "version"},
-                                           {CL_PLATFORM_NAME, "name"},
-                                           {CL_PLATFORM_VENDOR, "vendor"},
-                                           {CL_PLATFORM_EXTENSIONS, "extensions"}};
+pair<int, const char *> platform_info[] = {
+    {CL_PLATFORM_PROFILE, "profile"},
+    {CL_PLATFORM_VERSION, "version"},
+    {CL_PLATFORM_NAME, "name"},
+    {CL_PLATFORM_VENDOR, "vendor"},
+    {CL_PLATFORM_EXTENSIONS, "extensions"}};
 
-pair<int, const char *> device_info[] = {{CL_DEVICE_TYPE, "type"},
-                                         {CL_DEVICE_VENDOR_ID, "vendor id"},
-                                         {CL_DEVICE_MAX_COMPUTE_UNITS, "max compute units"},
-                                         {CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, "max work item dimensions"},
-                                         {CL_DEVICE_MAX_WORK_GROUP_SIZE, "max work group size"},
-                                         {CL_DEVICE_MAX_WORK_ITEM_SIZES, "max work item sizes"},
-                                         {CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR, "preferred vector width char"},
-                                         {CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT, "preferred vector width short"},
-                                         {CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT, "preferred vector width int"},
-                                         {CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG, "preferred vector width long"},
-                                         {CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT, "preferred vector width float"},
-                                         {CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE, "preferred vector width double"},
-                                         {CL_DEVICE_MAX_CLOCK_FREQUENCY, "max clock frequency"},
-                                         {CL_DEVICE_ADDRESS_BITS, "address bits"},
-                                         {CL_DEVICE_MAX_READ_IMAGE_ARGS, "max read image args"},
-                                         {CL_DEVICE_MAX_WRITE_IMAGE_ARGS, "max write image args"},
-                                         {CL_DEVICE_MAX_MEM_ALLOC_SIZE, "max mem alloc size"},
-                                         {CL_DEVICE_IMAGE2D_MAX_WIDTH, "image2d max width"},
-                                         {CL_DEVICE_IMAGE2D_MAX_HEIGHT, "image2d max height"},
-                                         {CL_DEVICE_IMAGE3D_MAX_WIDTH, "image3d max width"},
-                                         {CL_DEVICE_IMAGE3D_MAX_HEIGHT, "image3d max height"},
-                                         {CL_DEVICE_IMAGE3D_MAX_DEPTH, "image3d max depth"},
-                                         {CL_DEVICE_IMAGE_SUPPORT, "image support"},
-                                         {CL_DEVICE_MAX_PARAMETER_SIZE, "max parameter size"},
-                                         {CL_DEVICE_MAX_SAMPLERS, "max samplers"},
-                                         {CL_DEVICE_MEM_BASE_ADDR_ALIGN, "mem base addr align"},
-                                         {CL_DEVICE_MIN_DATA_TYPE_ALIGN_SIZE, "min data type align size"},
-                                         {CL_DEVICE_SINGLE_FP_CONFIG, "single fp config"},
-                                         {CL_DEVICE_GLOBAL_MEM_CACHE_TYPE, "global mem cache type"},
-                                         {CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE, "global mem cacheline size"},
-                                         {CL_DEVICE_GLOBAL_MEM_CACHE_SIZE, "global mem cache size"},
-                                         {CL_DEVICE_GLOBAL_MEM_SIZE, "global mem size"},
-                                         {CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE, "max constant buffer size"},
-                                         {CL_DEVICE_MAX_CONSTANT_ARGS, "max constant args"},
-                                         {CL_DEVICE_LOCAL_MEM_TYPE, "local mem type"},
-                                         {CL_DEVICE_LOCAL_MEM_SIZE, "local mem size"},
-                                         {CL_DEVICE_ERROR_CORRECTION_SUPPORT, "error correction support"},
-                                         {CL_DEVICE_PROFILING_TIMER_RESOLUTION, "profiling timer resolution"},
-                                         {CL_DEVICE_ENDIAN_LITTLE, "endian little"},
-                                         {CL_DEVICE_AVAILABLE, "available"},
-                                         {CL_DEVICE_COMPILER_AVAILABLE, "compiler available"},
-                                         {CL_DEVICE_EXECUTION_CAPABILITIES, "execution capabilities"},
-                                         {CL_DEVICE_QUEUE_PROPERTIES, "queue properties"},
-                                         {CL_DEVICE_NAME, "name"},
-                                         {CL_DEVICE_VENDOR, "vendor"},
-                                         {CL_DRIVER_VERSION, "version"},
-                                         {CL_DEVICE_PROFILE, "profile"},
-                                         {CL_DEVICE_VERSION, "version"},
-                                         {CL_DEVICE_EXTENSIONS, "extensions"},
-                                         {CL_DEVICE_PLATFORM, "platform"},
-                                         {CL_DEVICE_DOUBLE_FP_CONFIG, "double fp config"},
-                                         {CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF, "preferred vector width half"},
-                                         {CL_DEVICE_HOST_UNIFIED_MEMORY, "host unified memory"},
-                                         {CL_DEVICE_NATIVE_VECTOR_WIDTH_CHAR, "native vector width char"},
-                                         {CL_DEVICE_NATIVE_VECTOR_WIDTH_SHORT, "native vector width short"},
-                                         {CL_DEVICE_NATIVE_VECTOR_WIDTH_INT, "native vector width int"},
-                                         {CL_DEVICE_NATIVE_VECTOR_WIDTH_LONG, "native vector width long"},
-                                         {CL_DEVICE_NATIVE_VECTOR_WIDTH_FLOAT, "native vector width float"},
-                                         {CL_DEVICE_NATIVE_VECTOR_WIDTH_DOUBLE, "native vector width double"},
-                                         {CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF, "native vector width half"},
-                                         {CL_DEVICE_OPENCL_C_VERSION, "opencl c version"},
-                                         {CL_DEVICE_LINKER_AVAILABLE, "linker available"},
-                                         {CL_DEVICE_BUILT_IN_KERNELS, "built in kernels"},
-                                         {CL_DEVICE_IMAGE_MAX_BUFFER_SIZE, "image max buffer size"},
-                                         {CL_DEVICE_IMAGE_MAX_ARRAY_SIZE, "image max array size"},
-                                         {CL_DEVICE_PARENT_DEVICE, "parent device"},
-                                         {CL_DEVICE_PARTITION_MAX_SUB_DEVICES, "partition max sub devices"},
-                                         {CL_DEVICE_PARTITION_PROPERTIES, "partition properties"},
-                                         {CL_DEVICE_PARTITION_AFFINITY_DOMAIN, "partition affinity domain"},
-                                         {CL_DEVICE_PARTITION_TYPE, "partition type"},
-                                         {CL_DEVICE_REFERENCE_COUNT, "reference count"},
-                                         {CL_DEVICE_PREFERRED_INTEROP_USER_SYNC, "preferred interop user sync"},
-                                         {CL_DEVICE_PRINTF_BUFFER_SIZE, "printf buffer size"}};
+pair<int, const char *> device_info[] = {
+    {CL_DEVICE_TYPE, "type"},
+    {CL_DEVICE_VENDOR_ID, "vendor id"},
+    {CL_DEVICE_MAX_COMPUTE_UNITS, "max compute units"},
+    {CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, "max work item dimensions"},
+    {CL_DEVICE_MAX_WORK_GROUP_SIZE, "max work group size"},
+    {CL_DEVICE_MAX_WORK_ITEM_SIZES, "max work item sizes"},
+    {CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR, "preferred vector width char"},
+    {CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT, "preferred vector width short"},
+    {CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT, "preferred vector width int"},
+    {CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG, "preferred vector width long"},
+    {CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT, "preferred vector width float"},
+    {CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE, "preferred vector width double"},
+    {CL_DEVICE_MAX_CLOCK_FREQUENCY, "max clock frequency"},
+    {CL_DEVICE_ADDRESS_BITS, "address bits"},
+    {CL_DEVICE_MAX_READ_IMAGE_ARGS, "max read image args"},
+    {CL_DEVICE_MAX_WRITE_IMAGE_ARGS, "max write image args"},
+    {CL_DEVICE_MAX_MEM_ALLOC_SIZE, "max mem alloc size"},
+    {CL_DEVICE_IMAGE2D_MAX_WIDTH, "image2d max width"},
+    {CL_DEVICE_IMAGE2D_MAX_HEIGHT, "image2d max height"},
+    {CL_DEVICE_IMAGE3D_MAX_WIDTH, "image3d max width"},
+    {CL_DEVICE_IMAGE3D_MAX_HEIGHT, "image3d max height"},
+    {CL_DEVICE_IMAGE3D_MAX_DEPTH, "image3d max depth"},
+    {CL_DEVICE_IMAGE_SUPPORT, "image support"},
+    {CL_DEVICE_MAX_PARAMETER_SIZE, "max parameter size"},
+    {CL_DEVICE_MAX_SAMPLERS, "max samplers"},
+    {CL_DEVICE_MEM_BASE_ADDR_ALIGN, "mem base addr align"},
+    {CL_DEVICE_MIN_DATA_TYPE_ALIGN_SIZE, "min data type align size"},
+    {CL_DEVICE_SINGLE_FP_CONFIG, "single fp config"},
+    {CL_DEVICE_GLOBAL_MEM_CACHE_TYPE, "global mem cache type"},
+    {CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE, "global mem cacheline size"},
+    {CL_DEVICE_GLOBAL_MEM_CACHE_SIZE, "global mem cache size"},
+    {CL_DEVICE_GLOBAL_MEM_SIZE, "global mem size"},
+    {CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE, "max constant buffer size"},
+    {CL_DEVICE_MAX_CONSTANT_ARGS, "max constant args"},
+    {CL_DEVICE_LOCAL_MEM_TYPE, "local mem type"},
+    {CL_DEVICE_LOCAL_MEM_SIZE, "local mem size"},
+    {CL_DEVICE_ERROR_CORRECTION_SUPPORT, "error correction support"},
+    {CL_DEVICE_PROFILING_TIMER_RESOLUTION, "profiling timer resolution"},
+    {CL_DEVICE_ENDIAN_LITTLE, "endian little"},
+    {CL_DEVICE_AVAILABLE, "available"},
+    {CL_DEVICE_COMPILER_AVAILABLE, "compiler available"},
+    {CL_DEVICE_EXECUTION_CAPABILITIES, "execution capabilities"},
+    {CL_DEVICE_QUEUE_PROPERTIES, "queue properties"},
+    {CL_DEVICE_NAME, "name"},
+    {CL_DEVICE_VENDOR, "vendor"},
+    {CL_DRIVER_VERSION, "version"},
+    {CL_DEVICE_PROFILE, "profile"},
+    {CL_DEVICE_VERSION, "version"},
+    {CL_DEVICE_EXTENSIONS, "extensions"},
+    {CL_DEVICE_PLATFORM, "platform"},
+    {CL_DEVICE_DOUBLE_FP_CONFIG, "double fp config"},
+    {CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF, "preferred vector width half"},
+    {CL_DEVICE_HOST_UNIFIED_MEMORY, "host unified memory"},
+    {CL_DEVICE_NATIVE_VECTOR_WIDTH_CHAR, "native vector width char"},
+    {CL_DEVICE_NATIVE_VECTOR_WIDTH_SHORT, "native vector width short"},
+    {CL_DEVICE_NATIVE_VECTOR_WIDTH_INT, "native vector width int"},
+    {CL_DEVICE_NATIVE_VECTOR_WIDTH_LONG, "native vector width long"},
+    {CL_DEVICE_NATIVE_VECTOR_WIDTH_FLOAT, "native vector width float"},
+    {CL_DEVICE_NATIVE_VECTOR_WIDTH_DOUBLE, "native vector width double"},
+    {CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF, "native vector width half"},
+    {CL_DEVICE_OPENCL_C_VERSION, "opencl c version"},
+    {CL_DEVICE_LINKER_AVAILABLE, "linker available"},
+    {CL_DEVICE_BUILT_IN_KERNELS, "built in kernels"},
+    {CL_DEVICE_IMAGE_MAX_BUFFER_SIZE, "image max buffer size"},
+    {CL_DEVICE_IMAGE_MAX_ARRAY_SIZE, "image max array size"},
+    {CL_DEVICE_PARENT_DEVICE, "parent device"},
+    {CL_DEVICE_PARTITION_MAX_SUB_DEVICES, "partition max sub devices"},
+    {CL_DEVICE_PARTITION_PROPERTIES, "partition properties"},
+    {CL_DEVICE_PARTITION_AFFINITY_DOMAIN, "partition affinity domain"},
+    {CL_DEVICE_PARTITION_TYPE, "partition type"},
+    {CL_DEVICE_REFERENCE_COUNT, "reference count"},
+    {CL_DEVICE_PREFERRED_INTEROP_USER_SYNC, "preferred interop user sync"},
+    {CL_DEVICE_PRINTF_BUFFER_SIZE, "printf buffer size"}};
 
 template <typename T, size_t N> int sizeof_array(T (&)[N]) { return N; }
 
@@ -157,16 +159,26 @@ std::string field(1024, '\0');
 
 void print_platform_info(cl_platform_id platform) {
     for (int i = 0; i < sizeof_array(platform_info); i++) {
-        clGetPlatformInfo(platform, platform_info[i].first, field.size(), (void *)field.data(), nullptr);
+        clGetPlatformInfo(platform,
+                          platform_info[i].first,
+                          field.size(),
+                          (void *)field.data(),
+                          nullptr);
         printf("platform %-11s: %s\n", platform_info[i].second, field.c_str());
     }
 }
 
-template <typename T> T convert(const char *data) { return *reinterpret_cast<const T *>(data); }
+template <typename T> T convert(const char *data) {
+    return *reinterpret_cast<const T *>(data);
+}
 
 void print_device_info(cl_device_id device) {
     for (int i = 0; i < sizeof_array(device_info); i++) {
-        clGetDeviceInfo(device, device_info[i].first, field.size(), (void *)field.data(), nullptr);
+        clGetDeviceInfo(device,
+                        device_info[i].first,
+                        field.size(),
+                        (void *)field.data(),
+                        nullptr);
 
         printf("  device %-32s: ", device_info[i].second);
         switch (device_info[i].first) {
@@ -236,7 +248,11 @@ void print_device_info(cl_device_id device) {
 
         case CL_DEVICE_MAX_WORK_ITEM_SIZES: {
             size_t max_dim = 0;
-            clGetDeviceInfo(device, CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, sizeof(size_t), &max_dim, nullptr);
+            clGetDeviceInfo(device,
+                            CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS,
+                            sizeof(size_t),
+                            &max_dim,
+                            nullptr);
             printf("[  ");
             for (int i = 0; i < (int)max_dim; i++) {
                 printf("\b%zu  ", convert<size_t>(&field[i * sizeof(size_t)]));
@@ -330,7 +346,11 @@ void print_device_info(cl_device_id device) {
         } break;
         case CL_DEVICE_PLATFORM: {
             auto platform = convert<cl_platform_id>(field.data());
-            clGetPlatformInfo(platform, CL_PLATFORM_NAME, field.size(), (void *)field.data(), nullptr);
+            clGetPlatformInfo(platform,
+                              CL_PLATFORM_NAME,
+                              field.size(),
+                              (void *)field.data(),
+                              nullptr);
             printf("%s\n", field.c_str());
         } break;
         default:
@@ -353,11 +373,20 @@ int main(int argc, char **argv) {
     for (int p = 0; p < (int)platform_count; ++p) {
         print_platform_info(platforms[p]);
         cl_uint device_count = 0;
-        OCL_CHECK(clGetDeviceIDs(platforms[p], CL_DEVICE_TYPE_ALL, 0, nullptr, &device_count));
+        OCL_CHECK(clGetDeviceIDs(
+            platforms[p], CL_DEVICE_TYPE_ALL, 0, nullptr, &device_count));
         vector<cl_device_id> devices(device_count);
-        OCL_CHECK(clGetDeviceIDs(platforms[p], CL_DEVICE_TYPE_ALL, device_count, devices.data(), nullptr));
+        OCL_CHECK(clGetDeviceIDs(platforms[p],
+                                 CL_DEVICE_TYPE_ALL,
+                                 device_count,
+                                 devices.data(),
+                                 nullptr));
         for (int d = 0; d < (int)device_count; ++d) {
-            clGetDeviceInfo(devices[d], CL_DEVICE_NAME, field.size(), (void *)field.data(), nullptr);
+            clGetDeviceInfo(devices[d],
+                            CL_DEVICE_NAME,
+                            field.size(),
+                            (void *)field.data(),
+                            nullptr);
             printf("Device %d: %s\n", d, field.c_str());
             print_device_info(devices[d]);
             continue;

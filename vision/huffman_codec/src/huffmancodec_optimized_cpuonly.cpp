@@ -67,7 +67,8 @@ void write_ht_node(u32 *pht_current, const struct FLAT_HTREE *pnode) {
     pht_current[OFFSET_WEIGHT] = pnode->weight;
     pht_current[OFFSET_CHILDREN] = (u32)((u32)(pnode->lc << 16) | pnode->rc);
     pht_current[OFFSET_CODE] = pnode->code;
-    pht_current[OFFSET_SYM_BITLEN] = (u32)((u32)(pnode->symbol << 16) | pnode->bitlen);
+    pht_current[OFFSET_SYM_BITLEN] =
+        (u32)((u32)(pnode->symbol << 16) | pnode->bitlen);
 }
 
 void read_ht_node(const u32 *pht_current, struct FLAT_HTREE *pnode) {
@@ -118,7 +119,10 @@ u8 bit_writer(/* __global */ u8 *ptr, u32 *p_total_bit_count, u8 bit) {
 
 u8 is_bit_set(u8 byte, u8 index) { return ((byte & (1 << index)) & 0xFF) != 0; }
 
-u8 multiple_bits_writer(/* __global */ u8 *ptr, u32 *p_total_bit_count, u32 bits, u32 len) {
+u8 multiple_bits_writer(/* __global */ u8 *ptr,
+                        u32 *p_total_bit_count,
+                        u32 bits,
+                        u32 len) {
     u8 bytes_written = 0;
 
     if (len == 0)
@@ -139,7 +143,10 @@ u8 multiple_bits_writer(/* __global */ u8 *ptr, u32 *p_total_bit_count, u32 bits
     return bytes_written;
 }
 
-int bit_reader(/* __global */ u8 *ptr, u32 *p_total_bits_read, u32 count_bits, u32 *output) {
+int bit_reader(/* __global */ u8 *ptr,
+               u32 *p_total_bits_read,
+               u32 count_bits,
+               u32 *output) {
     if (count_bits == 0)
         return 0;
 
@@ -352,7 +359,8 @@ void encode(/* __global */ uchar *in_data,
     u32 total_payload_bytes = (total_payload_bits + 7) / 8;
 
     //compute estimate based on our formula
-    u32 estimate_total = 10 + 2 * ctLeaves + total_bitcode_dict_bytes + total_payload_bytes + 2;
+    u32 estimate_total =
+        10 + 2 * ctLeaves + total_bitcode_dict_bytes + total_payload_bytes + 2;
 
     //return size if this is the first pass
     if (fetch_size_only == 1) {
@@ -392,7 +400,8 @@ void encode(/* __global */ uchar *in_data,
         struct FLAT_HTREE node;
         read_ht_node(&ht[i * ENTRY_STRIDE], &node);
 
-        int nbytes = multiple_bits_writer(ptr, &total_bits_written, node.code, node.bitlen);
+        int nbytes = multiple_bits_writer(
+            ptr, &total_bits_written, node.code, node.bitlen);
         ptr += nbytes;
         total_bytes += nbytes;
     }
@@ -428,7 +437,8 @@ void encode(/* __global */ uchar *in_data,
         read_ht_node(&ht[ht_index * ENTRY_STRIDE], &node);
 
         //count the output bits
-        int nbytes = multiple_bits_writer(ptr, &total_bits_written, node.code, node.bitlen);
+        int nbytes = multiple_bits_writer(
+            ptr, &total_bits_written, node.code, node.bitlen);
         ptr += nbytes;
         total_bytes += nbytes;
     }
@@ -519,7 +529,8 @@ void decode(/* __global */ uchar *in_data,
     u32 total_bits_read = 0;
     for (u32 i = 0; i < ctLeaves; i++) {
         //read bitcode
-        int nbytes = bit_reader(ptr, &total_bits_read, leaf_bitlen[i], &leaf_bitcodes[i]);
+        int nbytes = bit_reader(
+            ptr, &total_bits_read, leaf_bitlen[i], &leaf_bitcodes[i]);
         ptr += nbytes;
 
         //check
@@ -654,7 +665,8 @@ void decode(/* __global */ uchar *in_data,
         //read
         read_ht_node(&ht[current * ENTRY_STRIDE], &node);
 
-        bool isleaf = (node.rc == C_INVALID_LINK) && (node.lc == C_INVALID_LINK);
+        bool isleaf =
+            (node.rc == C_INVALID_LINK) && (node.lc == C_INVALID_LINK);
         if (isleaf) {
             out_data[index_out_buf++] = node.symbol;
             current = ht_root;

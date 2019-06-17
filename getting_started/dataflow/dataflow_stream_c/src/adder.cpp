@@ -76,7 +76,8 @@ Description:
 const int c_size = DATA_SIZE;
 
 // Read Data from Global Memory and write into Stream inStream
-static void read_input(unsigned int *in, hls::stream<unsigned int> &inStream, int size) {
+static void
+read_input(unsigned int *in, hls::stream<unsigned int> &inStream, int size) {
 mem_rd:
     for (int i = 0; i < size; i++) {
        #pragma HLS PIPELINE II=1
@@ -87,7 +88,10 @@ mem_rd:
 }
 
 // Read Input data from inStream and write the result into outStream
-static void compute_add(hls::stream<unsigned int> &inStream, hls::stream<unsigned int> &outStream, int inc, int size) {
+static void compute_add(hls::stream<unsigned int> &inStream,
+                        hls::stream<unsigned int> &outStream,
+                        int inc,
+                        int size) {
 execute:
     for (int i = 0; i < size; i++) {
        #pragma HLS PIPELINE II=1
@@ -99,7 +103,9 @@ execute:
 }
 
 // Read result from outStream and write the result to Global Memory
-static void write_result(unsigned int *out, hls::stream<unsigned int> &outStream, int size) {
+static void write_result(unsigned int *out,
+                         hls::stream<unsigned int> &outStream,
+                         int size) {
 mem_wr:
     for (int i = 0; i < size; i++) {
        #pragma HLS PIPELINE II=1

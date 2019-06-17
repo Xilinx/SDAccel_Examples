@@ -109,7 +109,7 @@ int main(int argc, char **argv) {
 
     // Selecting the first available Xilinx device
     device = devices[0];
-    cl_platform_id platform_id = device.getInfo<CL_DEVICE_PLATFORM>(&err);
+    auto platform_id = device.getInfo<CL_DEVICE_PLATFORM>(&err);
 
     //Initialization of streaming class is needed before using it.
     xcl::Stream::init(platform_id);
@@ -118,7 +118,9 @@ int main(int argc, char **argv) {
     OCL_CHECK(err, context = cl::Context(device, NULL, NULL, NULL, &err));
 
     // Creating Command Queue
-    OCL_CHECK(err, q = cl::CommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(
+        err,
+        q = cl::CommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
 
     // read_binary_file() is a utility API which will load the binaryFile
     // and will return the pointer to file buffer.
@@ -131,9 +133,11 @@ int main(int argc, char **argv) {
     OCL_CHECK(err, program = cl::Program(context, devices, bins, NULL, &err));
 
     // Creating Kernel
-    OCL_CHECK(err, krnl_adder1 = cl::Kernel(program, "myadder1:{myadder1_1}", &err));
+    OCL_CHECK(err,
+              krnl_adder1 = cl::Kernel(program, "myadder1:{myadder1_1}", &err));
 
-    std::cout << "Vector Increment of elements 0x" << std::hex << size << " by 1" << std::endl;
+    std::cout << "Vector Increment of elements 0x" << std::hex << size
+              << " by 1" << std::endl;
 
     // Reset the data vectors
     reset(h_a.data(), sw_results.data(), hw_results.data(), size);
@@ -152,12 +156,15 @@ int main(int argc, char **argv) {
     cl_stream write_stream_a;
     ext.flags = 1;
     OCL_CHECK(ret,
-              write_stream_a = xcl::Stream::createStream(device.get(), CL_STREAM_WRITE_ONLY, CL_STREAM, &ext, &ret));
+              write_stream_a = xcl::Stream::createStream(
+                  device.get(), CL_STREAM_WRITE_ONLY, CL_STREAM, &ext, &ret));
 
     //Create read stream for argument 2 of kernel
     cl_stream read_stream;
     ext.flags = 0;
-    OCL_CHECK(ret, read_stream = xcl::Stream::createStream(device.get(), CL_STREAM_READ_ONLY, CL_STREAM, &ext, &ret));
+    OCL_CHECK(ret,
+              read_stream = xcl::Stream::createStream(
+                  device.get(), CL_STREAM_READ_ONLY, CL_STREAM, &ext, &ret));
 
     // Initiating the WRITE transfer
     cl_stream_xfer_req wr_req{0};
@@ -166,14 +173,24 @@ int main(int argc, char **argv) {
     wr_req.priv_data = (void *)"write_a";
 
     // Thread 1 for writing data to input stream 1 independently in case of default blocking transfers.
-    std::thread thr1(xcl::Stream::writeStream, write_stream_a, h_a.data(), vector_size_bytes, &wr_req, &ret);
+    std::thread thr1(xcl::Stream::writeStream,
+                     write_stream_a,
+                     h_a.data(),
+                     vector_size_bytes,
+                     &wr_req,
+                     &ret);
 
     // Initiating the READ transfer
     cl_stream_xfer_req rd_req{0};
     rd_req.flags = CL_STREAM_EOT;
     rd_req.priv_data = (void *)"read";
     // Output thread to read the stream data independently in case of default blocking transfers.
-    std::thread thr2(xcl::Stream::readStream, read_stream, hw_results.data(), vector_size_bytes, &rd_req, &ret);
+    std::thread thr2(xcl::Stream::readStream,
+                     read_stream,
+                     hw_results.data(),
+                     vector_size_bytes,
+                     &rd_req,
+                     &ret);
 
     // Waiting for all the threads to complete their respective operations.
     thr1.join();

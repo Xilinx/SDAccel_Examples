@@ -31,8 +31,14 @@
   @param  x  integer to be rounded (in place)
   @discussion x will be modified.
 */
-#define kroundup32(x)                                                                                                  \
-    (--(x), (x) |= (x) >> 1, (x) |= (x) >> 2, (x) |= (x) >> 4, (x) |= (x) >> 8, (x) |= (x) >> 16, ++(x))
+#define kroundup32(x)                                                          \
+    (--(x),                                                                    \
+     (x) |= (x) >> 1,                                                          \
+     (x) |= (x) >> 2,                                                          \
+     (x) |= (x) >> 4,                                                          \
+     (x) |= (x) >> 8,                                                          \
+     (x) |= (x) >> 16,                                                         \
+     ++(x))
 
 KSEQ_INIT(gzFile, gzread);
 
@@ -72,12 +78,14 @@ void freeSeq(kseq_t *seq) {
     free(seq->seq.s);
 }
 
-static void ssw_write(const s_align *a,
-                      const kseq_t *ref_seq,
-                      const kseq_t *read,
-                      const char *read_seq, // strand == 0: original read; strand == 1: reverse complement read
-                      const int8_t *table,
-                      int8_t strand) { // 0: forward aligned ; 1: reverse complement aligned
+static void ssw_write(
+    const s_align *a,
+    const kseq_t *ref_seq,
+    const kseq_t *read,
+    const char *
+        read_seq, // strand == 0: original read; strand == 1: reverse complement read
+    const int8_t *table,
+    int8_t strand) { // 0: forward aligned ; 1: reverse complement aligned
 
     //fprintf(stdout, "target_name: %s\nquery_name: %s\noptimal_alignment_score: %d\t", ref_seq->name.s, read->name.s, a->score1);
     //if (a->score2 > 0) fprintf(stdout, "suboptimal_alignment_score: %d\t", a->score2);
@@ -121,7 +129,8 @@ static void ssw_write(const s_align *a,
                 uint32_t l = (count == 0 && left > 0) ? left : length;
                 for (i = 0; i < l; ++i) {
                     if (letter == 'M') {
-                        if (table[(int)*(ref_seq->seq.s + q)] == table[(int)*(read_seq + p)])
+                        if (table[(int)*(ref_seq->seq.s + q)] ==
+                            table[(int)*(read_seq + p)])
                             fprintf(stdout, "|");
                         else
                             fprintf(stdout, "*");
@@ -198,12 +207,17 @@ void deleteSSWData(int niter, int numsample, kseq_t **read, kseq_t **ref) {
     free(*ref);
 }
 
-float SSW(
-    int numsample, int tid, kseq_t *read, kseq_t *ref, unsigned int *maxr, unsigned int *maxc, unsigned int *maxv) {
+float SSW(int numsample,
+          int tid,
+          kseq_t *read,
+          kseq_t *ref,
+          unsigned int *maxr,
+          unsigned int *maxc,
+          unsigned int *maxv) {
 
     kseq_t *read_seq, *ref_seq;
-    int32_t l, m, k, match = 2, mismatch = 2, gap_open = 3, gap_extension = 1, path = 0, n = 5, s1 = 67108864, s2 = 128,
-                     filter = 0;
+    int32_t l, m, k, match = 2, mismatch = 2, gap_open = 3, gap_extension = 1,
+                     path = 0, n = 5, s1 = 67108864, s2 = 128, filter = 0;
     int8_t *mata = (int8_t *)calloc(25, sizeof(int8_t));
     const int8_t *mat = mata;
     int8_t *ref_num = (int8_t *)malloc(s1);
@@ -213,20 +227,28 @@ float SSW(
     float total_cups = 0;
 
     /* This table is used to transform nucleotide letters into numbers. */
-    int8_t nt_table[128] = {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
-                            4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
-                            4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0, 4, 1, 4, 4, 4, 2, 4, 4, 4, 4, 4, 4,
-                            4, 4, 4, 4, 4, 4, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0, 4, 1, 4, 4, 4, 2,
-                            4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4};
+    int8_t nt_table[128] = {
+        4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+        4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+        4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0,
+        4, 1, 4, 4, 4, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 4, 4,
+        4, 4, 4, 4, 4, 4, 4, 4, 4, 0, 4, 1, 4, 4, 4, 2, 4, 4, 4, 4, 4, 4,
+        4, 4, 4, 4, 4, 4, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4};
 
     int8_t *table = nt_table;
-    fprintf(stdout, "Processing %d samples using Intel Vector Instruction Set in Thread %d\n", numsample, tid);
+    fprintf(stdout,
+            "Processing %d samples using Intel Vector Instruction Set in "
+            "Thread %d\n",
+            numsample,
+            tid);
 
     // initialize scoring matrix for genome sequences
     for (l = k = 0; LIKELY(l < 4); ++l) {
         for (m = 0; LIKELY(m < 4); ++m)
-            mata[k++] = l == m ? match : -mismatch; /* weight_match : -weight_mismatch */
-        mata[k++] = 0;                              // ambiguous base
+            mata[k++] = l == m
+                            ? match
+                            : -mismatch; /* weight_match : -weight_mismatch */
+        mata[k++] = 0;                   // ambiguous base
     }
     for (m = 0; LIKELY(m < 5); ++m)
         mata[k++] = 0;
@@ -279,10 +301,12 @@ float SSW(
                                    &maxr[ii],
                                    &maxc[ii],
                                    &maxv[ii]);
-                if (result_rc && result_rc->score1 > result->score1 && result_rc->score1 >= filter) {
+                if (result_rc && result_rc->score1 > result->score1 &&
+                    result_rc->score1 >= filter) {
                     ssw_write(result_rc, ref_seq, read_seq, read_rc, table, 1);
                 } else if (result && result->score1 >= filter) {
-                    ssw_write(result, ref_seq, read_seq, read_seq->seq.s, table, 0);
+                    ssw_write(
+                        result, ref_seq, read_seq, read_seq->seq.s, table, 0);
                 } else if (!result)
                     return 1;
                 if (result_rc)

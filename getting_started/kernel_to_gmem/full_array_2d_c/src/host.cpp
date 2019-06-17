@@ -59,12 +59,15 @@ int main(int argc, char **argv) {
     const char *xcl_emu = getenv("XCL_EMULATION_MODE");
     if (xcl_emu && !strcmp(xcl_emu, "hw_emu")) {
         test_matrix_dim = 16;
-        std::cout << "Data Size Reduced to  " << test_matrix_dim << " for Hardware Emulation" << std::endl;
+        std::cout << "Data Size Reduced to  " << test_matrix_dim
+                  << " for Hardware Emulation" << std::endl;
     }
     int dim = test_matrix_dim;
     int matrix_size = dim * dim;
     if (dim > MAX_MATRIX_DIM) {
-        std::cout << "Size is bigger than internal buffer size, please use a size smaller than 256!" << std::endl;
+        std::cout << "Size is bigger than internal buffer size, please use a "
+                     "size smaller than 256!"
+                  << std::endl;
         return EXIT_FAILURE;
     }
     //Allocate Memory in Host Memory
@@ -85,14 +88,17 @@ int main(int argc, char **argv) {
     mmult_sw(source_input_a, source_input_b, source_sw_results, dim);
 
     //OPENCL HOST CODE AREA START
-    std::vector<cl::Device> devices = xcl::get_xil_devices();
-    cl::Device device = devices[0];
+    auto devices = xcl::get_xil_devices();
+    auto device = devices[0];
 
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
-    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
-    OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
+    OCL_CHECK(
+        err,
+        cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(err,
+              std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
-    char *fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
@@ -100,15 +106,23 @@ int main(int argc, char **argv) {
 
     //Allocate Buffer in Global Memory
     OCL_CHECK(err,
-              cl::Buffer buffer_a(
-                  context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, matrix_size_in_bytes, source_input_a.data(), &err));
+              cl::Buffer buffer_a(context,
+                                  CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                  matrix_size_in_bytes,
+                                  source_input_a.data(),
+                                  &err));
     OCL_CHECK(err,
-              cl::Buffer buffer_b(
-                  context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, matrix_size_in_bytes, source_input_b.data(), &err));
-    OCL_CHECK(
-        err,
-        cl::Buffer buffer_c(
-            context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, matrix_size_in_bytes, source_hw_results.data(), &err));
+              cl::Buffer buffer_b(context,
+                                  CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                  matrix_size_in_bytes,
+                                  source_input_b.data(),
+                                  &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_c(context,
+                                  CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                                  matrix_size_in_bytes,
+                                  source_hw_results.data(),
+                                  &err));
 
     OCL_CHECK(err, err = krnl_mmult.setArg(0, buffer_a));
     OCL_CHECK(err, err = krnl_mmult.setArg(1, buffer_b));
@@ -116,13 +130,17 @@ int main(int argc, char **argv) {
     OCL_CHECK(err, err = krnl_mmult.setArg(3, dim));
 
     //Migrate  input data to device global memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_a, buffer_b}, 0 /* 0 means from host*/));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_a, buffer_b},
+                                               0 /* 0 means from host*/));
 
     //Launch the Kernel
     OCL_CHECK(err, err = q.enqueueTask(krnl_mmult));
 
     //Copy Result from Device Global Memory to Host Local Memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_c}, CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_c},
+                                               CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());
     //OPENCL HOST CODE AREA END
 
@@ -132,7 +150,8 @@ int main(int argc, char **argv) {
         if (source_hw_results[i] != source_sw_results[i]) {
             std::cout << "Error: Result mismatch" << std::endl;
             std::cout << "i = " << i << " CPU result = " << source_sw_results[i]
-                      << " Device result = " << source_hw_results[i] << std::endl;
+                      << " Device result = " << source_hw_results[i]
+                      << std::endl;
             match = 1;
             break;
         }

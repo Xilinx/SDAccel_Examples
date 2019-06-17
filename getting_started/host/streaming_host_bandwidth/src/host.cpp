@@ -87,8 +87,12 @@ double calc_throput(cl::Event &wait_event, size_t vector_size_bytes) {
     unsigned long start, stop;
     cl_int err;
 
-    OCL_CHECK(err, err = wait_event.getProfilingInfo<unsigned long>(CL_PROFILING_COMMAND_START, &start));
-    OCL_CHECK(err, err = wait_event.getProfilingInfo<unsigned long>(CL_PROFILING_COMMAND_END, &stop));
+    OCL_CHECK(err,
+              err = wait_event.getProfilingInfo<unsigned long>(
+                  CL_PROFILING_COMMAND_START, &start));
+    OCL_CHECK(err,
+              err = wait_event.getProfilingInfo<unsigned long>(
+                  CL_PROFILING_COMMAND_END, &stop));
     unsigned long duration = stop - start;
     double throput = (double)vector_size_bytes / (double)duration * 1E3 * 2;
     return throput;
@@ -113,7 +117,8 @@ int main(int argc, char **argv) {
     }
 
     auto binaryFile = argv[1];
-    std::cout << "Vector Increment of elements 0x" << std::hex << size << " by 1 " << std::endl;
+    std::cout << "Vector Increment of elements 0x" << std::hex << size
+              << " by 1 " << std::endl;
 
     // Reset the data vectors
     reset(h_a.data(), sw_results.data(), hw_results.data(), size);
@@ -145,7 +150,9 @@ int main(int argc, char **argv) {
     OCL_CHECK(err, context = cl::Context(device, NULL, NULL, NULL, &err));
 
     // Creating Command Queue
-    OCL_CHECK(err, q = cl::CommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(
+        err,
+        q = cl::CommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
 
     // read_binary_file() is a utility API which will load the binaryFile
     // and will return the pointer to file buffer.
@@ -158,7 +165,8 @@ int main(int argc, char **argv) {
     OCL_CHECK(err, program = cl::Program(context, devices, bins, NULL, &err));
 
     // Creating Kernel
-    OCL_CHECK(err, krnl_adder1 = cl::Kernel(program, "krnl_stream_adder1", &err));
+    OCL_CHECK(err,
+              krnl_adder1 = cl::Kernel(program, "krnl_stream_adder1", &err));
 
     size_t vector_size_bytes = size * sizeof(int);
 
@@ -173,17 +181,23 @@ int main(int argc, char **argv) {
     cl_stream write_stream_a;
     ext.flags = 0;
     OCL_CHECK(ret,
-              write_stream_a = xcl::Stream::createStream(device.get(), CL_STREAM_WRITE_ONLY, CL_STREAM, &ext, &ret));
+              write_stream_a = xcl::Stream::createStream(
+                  device.get(), CL_STREAM_WRITE_ONLY, CL_STREAM, &ext, &ret));
 
     //Create read stream for argument 1 of kernel
     cl_stream read_stream;
     ext.flags = 1;
-    OCL_CHECK(ret, read_stream = xcl::Stream::createStream(device.get(), CL_STREAM_READ_ONLY, CL_STREAM, &ext, &ret));
+    OCL_CHECK(ret,
+              read_stream = xcl::Stream::createStream(
+                  device.get(), CL_STREAM_READ_ONLY, CL_STREAM, &ext, &ret));
 
     // Running the Kernel with blocking Stream APIs
-    std::cout << "############################################################\n";
-    std::cout << "                     Blocking Stream                        \n";
-    std::cout << "############################################################\n";
+    std::cout
+        << "############################################################\n";
+    std::cout
+        << "                     Blocking Stream                        \n";
+    std::cout
+        << "############################################################\n";
 
     // Launch the Kernel
     cl::Event b_wait_event;
@@ -196,14 +210,24 @@ int main(int argc, char **argv) {
     b_wr_req.priv_data = (void *)"b_write_a";
 
     // Thread 1 for writing data to input stream 1 independently in case of default blocking transfers.
-    std::thread thr1(xcl::Stream::writeStream, write_stream_a, h_a.data(), vector_size_bytes, &b_wr_req, &ret);
+    std::thread thr1(xcl::Stream::writeStream,
+                     write_stream_a,
+                     h_a.data(),
+                     vector_size_bytes,
+                     &b_wr_req,
+                     &ret);
 
     // Initiating the READ transfer
     cl_stream_xfer_req b_rd_req{0};
     b_rd_req.flags = CL_STREAM_EOT;
     b_rd_req.priv_data = (void *)"b_read";
     // Output thread to read the stream data independently in case of default blocking transfers.
-    std::thread thr2(xcl::Stream::readStream, read_stream, hw_results.data(), vector_size_bytes, &b_rd_req, &ret);
+    std::thread thr2(xcl::Stream::readStream,
+                     read_stream,
+                     hw_results.data(),
+                     vector_size_bytes,
+                     &b_rd_req,
+                     &ret);
 
     // Waiting for all the threads to complete their respective operations.
     thr1.join();
@@ -222,9 +246,12 @@ int main(int argc, char **argv) {
     reset(h_a.data(), sw_results.data(), hw_results.data(), size);
 
     //Running the kernel with non-blocking Stream APIs
-    std::cout << "############################################################\n";
-    std::cout << "                  Non-Blocking Stream                       \n";
-    std::cout << "############################################################\n";
+    std::cout
+        << "############################################################\n";
+    std::cout
+        << "                  Non-Blocking Stream                       \n";
+    std::cout
+        << "############################################################\n";
 
     // Launch the Kernel
     cl::Event nb_wait_event;
@@ -237,19 +264,29 @@ int main(int argc, char **argv) {
     nb_wr_req.priv_data = (void *)"nb_write_a";
 
     // Writing data to input stream 1 independently in case of non-blocking transfers.
-    OCL_CHECK(ret, xcl::Stream::writeStream(write_stream_a, h_a.data(), vector_size_bytes, &nb_wr_req, &ret));
+    OCL_CHECK(
+        ret,
+        xcl::Stream::writeStream(
+            write_stream_a, h_a.data(), vector_size_bytes, &nb_wr_req, &ret));
 
     // Initiating the READ transfer
     cl_stream_xfer_req nb_rd_req{0};
     nb_rd_req.flags = CL_STREAM_EOT | CL_STREAM_NONBLOCKING;
     nb_rd_req.priv_data = (void *)"nb_read";
     // Reading the stream data independently in case of non-blocking transfers.
-    OCL_CHECK(ret, xcl::Stream::readStream(read_stream, hw_results.data(), vector_size_bytes, &nb_rd_req, &ret));
+    OCL_CHECK(ret,
+              xcl::Stream::readStream(read_stream,
+                                      hw_results.data(),
+                                      vector_size_bytes,
+                                      &nb_rd_req,
+                                      &ret));
 
     // Checking the request completion
     cl_streams_poll_req_completions poll_req[2]{0, 0}; // 2 Requests
     auto num_compl = 2;
-    OCL_CHECK(ret, xcl::Stream::pollStreams(device.get(), poll_req, 2, 2, &num_compl, 50000, &ret));
+    OCL_CHECK(ret,
+              xcl::Stream::pollStreams(
+                  device.get(), poll_req, 2, 2, &num_compl, 50000, &ret));
     // Blocking API, waits for 2 poll request completion or 50000ms, whichever occurs first.
 
     // Ensuring all OpenCL objects are released.

@@ -77,18 +77,22 @@ int main(int argc, char **argv) {
     }
 
     //Running software vconv
-    vconv_sw(source_input.data(), source_sw_results.data(), testHeight, testWidth);
+    vconv_sw(
+        source_input.data(), source_sw_results.data(), testHeight, testWidth);
 
     //OPENCL HOST CODE AREA START
-    std::vector<cl::Device> devices = xcl::get_xil_devices();
-    cl::Device device = devices[0];
+    auto devices = xcl::get_xil_devices();
+    auto device = devices[0];
 
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
-    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
-    OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
+    OCL_CHECK(
+        err,
+        cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(err,
+              std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
-    char *fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
@@ -96,11 +100,17 @@ int main(int argc, char **argv) {
 
     //Allocate Buffer in Global Memory
     OCL_CHECK(err,
-              cl::Buffer buffer_input(
-                  context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, test_size_bytes, source_input.data(), &err));
+              cl::Buffer buffer_input(context,
+                                      CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                      test_size_bytes,
+                                      source_input.data(),
+                                      &err));
     OCL_CHECK(err,
-              cl::Buffer buffer_output(
-                  context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, test_size_bytes, source_hw_results.data(), &err));
+              cl::Buffer buffer_output(context,
+                                       CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                                       test_size_bytes,
+                                       source_hw_results.data(),
+                                       &err));
 
     OCL_CHECK(err, err = krnl_vconv.setArg(0, buffer_input));
     OCL_CHECK(err, err = krnl_vconv.setArg(1, buffer_output));
@@ -108,13 +118,17 @@ int main(int argc, char **argv) {
     OCL_CHECK(err, err = krnl_vconv.setArg(3, testWidth));
 
     //Copy input data to device global memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_input}, 0 /* 0 means from host*/));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_input},
+                                               0 /* 0 means from host*/));
 
     //Launch the Kernel
     OCL_CHECK(err, err = q.enqueueTask(krnl_vconv));
 
     //Copy Result from Device Global Memory to Host Local Memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_output}, CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_output},
+                                               CL_MIGRATE_MEM_OBJECT_HOST));
     q.finish();
 
     //OPENCL HOST CODE AREA END
@@ -127,7 +141,8 @@ int main(int argc, char **argv) {
         if (source_hw_results[i] != source_sw_results[i]) {
             std::cout << "Error: Result mismatch" << std::endl;
             std::cout << "i = " << i << " CPU result = " << source_sw_results[i]
-                      << " Device result = " << source_hw_results[i] << std::endl;
+                      << " Device result = " << source_hw_results[i]
+                      << std::endl;
             match = false;
             break;
         }

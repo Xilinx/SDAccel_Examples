@@ -46,7 +46,11 @@ using std::numeric_limits;
 using std::uniform_int_distribution;
 using std::vector;
 
-void find_nearest_neighbor(int *out, const int dim, int *search_points, int *points, const int num_points);
+void find_nearest_neighbor(int *out,
+                           const int dim,
+                           int *search_points,
+                           int *points,
+                           const int num_points);
 
 int gen_random() {
     static default_random_engine e;
@@ -55,7 +59,8 @@ int gen_random() {
     return dist(e);
 }
 
-void verify(vector<int, aligned_allocator<int>> &gold, vector<int, aligned_allocator<int>> &test) {
+void verify(vector<int, aligned_allocator<int>> &gold,
+            vector<int, aligned_allocator<int>> &test) {
     bool match = true;
     match = equal(begin(gold), end(gold), begin(test));
 
@@ -99,33 +104,46 @@ int main(int argc, char **argv) {
     print_point(input);
 
     vector<int, aligned_allocator<int>> gold(num_dims);
-    find_nearest_neighbor(gold.data(), num_dims, input.data(), data.data(), num_points);
+    find_nearest_neighbor(
+        gold.data(), num_dims, input.data(), data.data(), num_points);
     printf("Nearest Neighbor: ");
     print_point(gold);
 
     size_t array_size_bytes = num_points * num_dims * sizeof(int);
-    std::vector<cl::Device> devices = xcl::get_xil_devices();
-    cl::Device device = devices[0];
+    auto devices = xcl::get_xil_devices();
+    auto device = devices[0];
 
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
-    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
-    OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
+    OCL_CHECK(
+        err,
+        cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(err,
+              std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     //Create Program
-    char *fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
 
     OCL_CHECK(err,
-              cl::Buffer buffer_out(
-                  context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, num_dims * sizeof(int), out.data(), &err));
-    OCL_CHECK(
-        err,
-        cl::Buffer buffer_points(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, array_size_bytes, data.data(), &err));
+              cl::Buffer buffer_out(context,
+                                    CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                                    num_dims * sizeof(int),
+                                    out.data(),
+                                    &err));
     OCL_CHECK(err,
-              cl::Buffer buffer_in(
-                  context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, num_dims * sizeof(int), input.data(), &err));
+              cl::Buffer buffer_points(context,
+                                       CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                       array_size_bytes,
+                                       data.data(),
+                                       &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_in(context,
+                                   CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                   num_dims * sizeof(int),
+                                   input.data(),
+                                   &err));
 
     printf("|--------------------------------+-------------------------|\n"
            "| Kernel                         |    Wall-Clock Time (ns) |\n"
@@ -141,24 +159,34 @@ int main(int argc, char **argv) {
     OCL_CHECK(err, err = kernel.setArg(4, num_dims));
 
     // copy the input arrays to memories allocated on the device
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_points, buffer_in}, 0 /* 0 means from host*/));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_points, buffer_in},
+                                               0 /* 0 means from host*/));
 
     cl::Event event;
     uint64_t nstimestart, nstimeend;
     OCL_CHECK(err, err = q.enqueueTask(kernel, NULL, &event));
     q.finish();
 
-    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START, &nstimestart));
-    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END, &nstimeend));
+    OCL_CHECK(err,
+              err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,
+                                                     &nstimestart));
+    OCL_CHECK(err,
+              err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,
+                                                     &nstimeend));
     auto simple_time = nstimeend - nstimestart;
     printf("| %-30s | %23lu |\n", "Nearest Neighbor: simple", simple_time);
 
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_out}, CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_out},
+                                               CL_MIGRATE_MEM_OBJECT_HOST));
     q.finish();
     verify(gold, out);
 
     // set kernel parameters
-    OCL_CHECK(err, cl::Kernel kernel_loop(program, "nearest_neighbor_loop_fusion", &err));
+    OCL_CHECK(
+        err,
+        cl::Kernel kernel_loop(program, "nearest_neighbor_loop_fusion", &err));
     OCL_CHECK(err, err = kernel_loop.setArg(0, buffer_out));
     OCL_CHECK(err, err = kernel_loop.setArg(1, buffer_points));
     OCL_CHECK(err, err = kernel_loop.setArg(2, buffer_in));
@@ -168,24 +196,36 @@ int main(int argc, char **argv) {
     OCL_CHECK(err, err = q.enqueueTask(kernel_loop, NULL, &event));
     q.finish();
 
-    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START, &nstimestart));
-    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END, &nstimeend));
+    OCL_CHECK(err,
+              err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,
+                                                     &nstimestart));
+    OCL_CHECK(err,
+              err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,
+                                                     &nstimeend));
     auto loop_time = nstimeend - nstimestart;
     printf("| %-30s | %23lu |\n", "Nearest Neighbor: loop fusion", loop_time);
 
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_out}, CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_out},
+                                               CL_MIGRATE_MEM_OBJECT_HOST));
     q.finish();
 
     verify(gold, out);
     delete[] fileBuf;
     printf("|--------------------------------+-------------------------|\n");
-    printf("Note: Wall Clock Time is meaningful for real hardware execution only, not for emulation.\n");
-    printf("Please refer to profile summary for kernel execution time for hardware emulation.\n");
+    printf("Note: Wall Clock Time is meaningful for real hardware execution "
+           "only, not for emulation.\n");
+    printf("Please refer to profile summary for kernel execution time for "
+           "hardware emulation.\n");
     printf("TEST PASSED\n");
     return EXIT_SUCCESS;
 }
 
-void find_nearest_neighbor(int *out, const int dim, int *search_points, int *points, const int num_points) {
+void find_nearest_neighbor(int *out,
+                           const int dim,
+                           int *search_points,
+                           int *points,
+                           const int num_points) {
     // points is the list of data points that need to be searched for the given
     // point (x, y)
     //

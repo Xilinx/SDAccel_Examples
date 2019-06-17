@@ -94,11 +94,13 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MAX_HBM_BANKCOUNT 32
 #define BANK_NAME(n) n | XCL_MEM_TOPOLOGY
 const int bank[MAX_HBM_BANKCOUNT] = {
-    BANK_NAME(0),  BANK_NAME(1),  BANK_NAME(2),  BANK_NAME(3),  BANK_NAME(4),  BANK_NAME(5),  BANK_NAME(6),
-    BANK_NAME(7),  BANK_NAME(8),  BANK_NAME(9),  BANK_NAME(10), BANK_NAME(11), BANK_NAME(12), BANK_NAME(13),
-    BANK_NAME(14), BANK_NAME(15), BANK_NAME(16), BANK_NAME(17), BANK_NAME(18), BANK_NAME(19), BANK_NAME(20),
-    BANK_NAME(21), BANK_NAME(22), BANK_NAME(23), BANK_NAME(24), BANK_NAME(25), BANK_NAME(26), BANK_NAME(27),
-    BANK_NAME(28), BANK_NAME(29), BANK_NAME(30), BANK_NAME(31)};
+    BANK_NAME(0),  BANK_NAME(1),  BANK_NAME(2),  BANK_NAME(3),  BANK_NAME(4),
+    BANK_NAME(5),  BANK_NAME(6),  BANK_NAME(7),  BANK_NAME(8),  BANK_NAME(9),
+    BANK_NAME(10), BANK_NAME(11), BANK_NAME(12), BANK_NAME(13), BANK_NAME(14),
+    BANK_NAME(15), BANK_NAME(16), BANK_NAME(17), BANK_NAME(18), BANK_NAME(19),
+    BANK_NAME(20), BANK_NAME(21), BANK_NAME(22), BANK_NAME(23), BANK_NAME(24),
+    BANK_NAME(25), BANK_NAME(26), BANK_NAME(27), BANK_NAME(28), BANK_NAME(29),
+    BANK_NAME(30), BANK_NAME(31)};
 
 // Function for verifying results
 bool verify(std::vector<int, aligned_allocator<int>> &source_sw_results,
@@ -109,7 +111,8 @@ bool verify(std::vector<int, aligned_allocator<int>> &source_sw_results,
         if (source_hw_results[i] != source_sw_results[i]) {
             std::cout << "Error: Result mismatch" << std::endl;
             std::cout << "i = " << i << " CPU result = " << source_sw_results[i]
-                      << " Device result = " << source_hw_results[i] << std::endl;
+                      << " Device result = " << source_hw_results[i]
+                      << std::endl;
             check = false;
             break;
         }
@@ -148,19 +151,25 @@ double run_krnl(cl::Context &context,
     //Creating Buffers
     OCL_CHECK(err,
               cl::Buffer buffer_input1(context,
-                                       CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR,
+                                       CL_MEM_READ_ONLY |
+                                           CL_MEM_EXT_PTR_XILINX |
+                                           CL_MEM_USE_HOST_PTR,
                                        sizeof(uint32_t) * size,
                                        &inBufExt1,
                                        &err));
     OCL_CHECK(err,
               cl::Buffer buffer_input2(context,
-                                       CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR,
+                                       CL_MEM_READ_ONLY |
+                                           CL_MEM_EXT_PTR_XILINX |
+                                           CL_MEM_USE_HOST_PTR,
                                        sizeof(uint32_t) * size,
                                        &inBufExt2,
                                        &err));
     OCL_CHECK(err,
               cl::Buffer buffer_output(context,
-                                       CL_MEM_WRITE_ONLY | CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR,
+                                       CL_MEM_WRITE_ONLY |
+                                           CL_MEM_EXT_PTR_XILINX |
+                                           CL_MEM_USE_HOST_PTR,
                                        sizeof(uint32_t) * size,
                                        &outBufExt,
                                        &err));
@@ -172,7 +181,9 @@ double run_krnl(cl::Context &context,
     OCL_CHECK(err, err = (kernel).setArg(3, size));
 
     // Copy input data to Device Global Memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_input1, buffer_input2}, 0 /* 0 means from host*/));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_input1, buffer_input2},
+                                               0 /* 0 means from host*/));
     q.finish();
 
     std::chrono::duration<double> kernel_time(0);
@@ -185,7 +196,9 @@ double run_krnl(cl::Context &context,
     kernel_time = std::chrono::duration<double>(kernel_end - kernel_start);
 
     // Copy Result from Device Global Memory to Host Local Memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_output}, CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_output},
+                                               CL_MIGRATE_MEM_OBJECT_HOST));
     q.finish();
 
     return kernel_time.count();
@@ -206,7 +219,9 @@ int main(int argc, char *argv[]) {
 
     // Creating Context and Command Queue for selected Device
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
-    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(
+        err,
+        cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
 
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
@@ -223,8 +238,9 @@ int main(int argc, char *argv[]) {
     unsigned int dataSize = 64 * 1024 * 1024;
     if (xcl::is_emulation()) {
         dataSize = 1024;
-        std::cout << "Original Dataset is reduced for faster execution on emulation flow. Data size=" << dataSize
-                  << std::endl;
+        std::cout << "Original Dataset is reduced for faster execution on "
+                     "emulation flow. Data size="
+                  << dataSize << std::endl;
     }
 
     std::vector<int, aligned_allocator<int>> source_in1(dataSize);
@@ -245,11 +261,14 @@ int main(int argc, char *argv[]) {
     const int numBuf = 3; // Since three buffers are being used
     int bank_assign[numBuf];
 
-    std::cout << "Running CASE 1  : Single HBM for all three Buffers " << std::endl;
+    std::cout << "Running CASE 1  : Single HBM for all three Buffers "
+              << std::endl;
     if (!xcl::is_emulation()) {
         dataSize = 16 * 1024 * 1024;
         std::cout << "Picking Buffer size " << dataSize * sizeof(uint32_t)
-                  << " so that all three buffer should fit into Single HBM (max 256MB)" << std::endl;
+                  << " so that all three buffer should fit into Single HBM "
+                     "(max 256MB)"
+                  << std::endl;
     }
 
     std::cout << "Each buffer is allocated with same HBM bank." << std::endl;
@@ -260,8 +279,14 @@ int main(int argc, char *argv[]) {
         bank_assign[j] = bank[0];
     }
 
-    kernel_time_in_sec =
-        run_krnl(context, q, kernel_vadd, source_in1, source_in2, source_hw_results, bank_assign, dataSize);
+    kernel_time_in_sec = run_krnl(context,
+                                  q,
+                                  kernel_vadd,
+                                  source_in1,
+                                  source_in2,
+                                  source_hw_results,
+                                  bank_assign,
+                                  dataSize);
     match = verify(source_sw_results, source_hw_results, dataSize);
 
     // Multiplying the actual data size by 3 because three buffers are being used.
@@ -271,17 +296,19 @@ int main(int argc, char *argv[]) {
 
     std::cout << "[CASE 1] THROUGHPUT = " << result << " GB/s" << std::endl;
 
-    std::cout << "Running CASE 2: Three Separate Banks for Three Buffers" << std::endl;
+    std::cout << "Running CASE 2: Three Separate Banks for Three Buffers"
+              << std::endl;
     if (!xcl::is_emulation()) {
-        std::cout
-            << "For This case each buffer will be having different HBM, so buffer size is picked to utilize full HBM"
-            << std::endl;
-        dataSize = 64 * 1024 * 1024;
-        std::cout << "vector size is " << dataSize * sizeof(uint32_t) << " as maximum possible inside single HBM"
+        std::cout << "For This case each buffer will be having different HBM, "
+                     "so buffer size is picked to utilize full HBM"
                   << std::endl;
+        dataSize = 64 * 1024 * 1024;
+        std::cout << "vector size is " << dataSize * sizeof(uint32_t)
+                  << " as maximum possible inside single HBM" << std::endl;
     }
 
-    std::cout << "Each buffer is allocated with different HBM bank." << std::endl;
+    std::cout << "Each buffer is allocated with different HBM bank."
+              << std::endl;
     std::cout << "input 1 -> bank 1 " << std::endl;
     std::cout << "input 2 -> bank 2 " << std::endl;
     std::cout << "output  -> bank 3 " << std::endl;
@@ -289,8 +316,14 @@ int main(int argc, char *argv[]) {
         bank_assign[j] = bank[j + 1];
     }
 
-    kernel_time_in_sec =
-        run_krnl(context, q, kernel_vadd, source_in1, source_in2, source_hw_results, bank_assign, dataSize);
+    kernel_time_in_sec = run_krnl(context,
+                                  q,
+                                  kernel_vadd,
+                                  source_in1,
+                                  source_in2,
+                                  source_hw_results,
+                                  bank_assign,
+                                  dataSize);
     match = verify(source_sw_results, source_hw_results, dataSize);
 
     result = 3 * dataSize * sizeof(uint32_t);

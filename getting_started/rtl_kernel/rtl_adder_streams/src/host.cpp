@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
     std::string binaryFile = argv[1];
 
     //Allocate Memory in Host Memory
-    size_t vector_size_bytes = sizeof(int) * DATA_SIZE;
+    auto vector_size_bytes = sizeof(int) * DATA_SIZE;
 
     std::vector<int, aligned_allocator<int>> source_input(DATA_SIZE);
     std::vector<int, aligned_allocator<int>> source_hw_results(DATA_SIZE);
@@ -63,33 +63,48 @@ int main(int argc, char **argv) {
     cl_int err;
     unsigned fileBufSize;
     //Create Program and Kernels.
-    std::vector<cl::Device> devices = xcl::get_xil_devices();
-    cl::Device device = devices[0];
+    auto devices = xcl::get_xil_devices();
+    auto device = devices[0];
 
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
-    OCL_CHECK(
-        err,
-        cl::CommandQueue q(context, device, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE | CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(err,
+              cl::CommandQueue q(context,
+                                 device,
+                                 CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE |
+                                     CL_QUEUE_PROFILING_ENABLE,
+                                 &err));
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
 
-    char *fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
-    OCL_CHECK(err, cl::Kernel krnl_adder_stage(program, "krnl_adder_stage_rtl", &err));
-    OCL_CHECK(err, cl::Kernel krnl_input_stage(program, "krnl_input_stage_rtl", &err));
-    OCL_CHECK(err, cl::Kernel krnl_output_stage(program, "krnl_output_stage_rtl", &err));
+    OCL_CHECK(
+        err,
+        cl::Kernel krnl_adder_stage(program, "krnl_adder_stage_rtl", &err));
+    OCL_CHECK(
+        err,
+        cl::Kernel krnl_input_stage(program, "krnl_input_stage_rtl", &err));
+    OCL_CHECK(
+        err,
+        cl::Kernel krnl_output_stage(program, "krnl_output_stage_rtl", &err));
 
     //Allocate Buffer in Global Memory
     OCL_CHECK(err,
-              cl::Buffer buffer_input(
-                  context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, vector_size_bytes, source_input.data(), &err));
+              cl::Buffer buffer_input(context,
+                                      CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                      vector_size_bytes,
+                                      source_input.data(),
+                                      &err));
     OCL_CHECK(err,
-              cl::Buffer buffer_output(
-                  context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, vector_size_bytes, source_hw_results.data(), &err));
+              cl::Buffer buffer_output(context,
+                                       CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                                       vector_size_bytes,
+                                       source_hw_results.data(),
+                                       &err));
 
-    int inc = INCR_VALUE;
-    int size = DATA_SIZE;
+    auto inc = INCR_VALUE;
+    auto size = DATA_SIZE;
     //Set the Kernel Arguments
     OCL_CHECK(err, err = krnl_input_stage.setArg(0, buffer_input));
     OCL_CHECK(err, err = krnl_input_stage.setArg(1, size));
@@ -100,7 +115,10 @@ int main(int argc, char **argv) {
 
     //Copy input data to device global memory
     cl::Event write_event;
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_input}, 0 /* 0 means from host*/, NULL, &write_event));
+    OCL_CHECK(
+        err,
+        err = q.enqueueMigrateMemObjects(
+            {buffer_input}, 0 /* 0 means from host*/, NULL, &write_event));
 
     //Launch the Kernel
     std::vector<cl::Event> eventVec;
@@ -113,7 +131,9 @@ int main(int argc, char **argv) {
     OCL_CHECK(err, err = q.finish());
 
     //Copy Result from Device Global Memory to Host Local Memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_output}, CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_output},
+                                               CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());
 
     //OPENCL HOST CODE AREA END
@@ -124,7 +144,8 @@ int main(int argc, char **argv) {
         if (source_hw_results[i] != source_sw_results[i]) {
             std::cout << "Error: Result mismatch" << std::endl;
             std::cout << "i = " << i << " CPU result = " << source_sw_results[i]
-                      << " Device result = " << source_hw_results[i] << std::endl;
+                      << " Device result = " << source_hw_results[i]
+                      << std::endl;
             match = 1;
             break;
         }

@@ -47,27 +47,28 @@ using std::vector;
 // Wrap any OpenCL API calls that return error code(cl_int)
 // with the below macro to quickly check for an error
 
-#define ENUM_CASE(ENUM)                                                                                                \
-    case ENUM:                                                                                                         \
-        printf(#ENUM "\n");                                                                                            \
+#define ENUM_CASE(ENUM)                                                        \
+    case ENUM:                                                                 \
+        printf(#ENUM "\n");                                                    \
         break
 
-#define BITFIELD_SETUP(type)                                                                                           \
-    auto value = convert<type>(field.data());                                                                          \
+#define BITFIELD_SETUP(type)                                                   \
+    auto value = convert<type>(field.data());                                  \
     printf("[ ")
 
-#define BITFIELD_PRINT(FIELD)                                                                                          \
-    if (value & FIELD) {                                                                                               \
-        err = printf(#FIELD " ");                                                                                      \
+#define BITFIELD_PRINT(FIELD)                                                  \
+    if (value & FIELD) {                                                       \
+        err = printf(#FIELD " ");                                              \
     }
 
 #define BITFIELD_END() printf("]\n")
 
-pair<int, const char *> platform_info[] = {{CL_PLATFORM_PROFILE, "profile"},
-                                           {CL_PLATFORM_VERSION, "version"},
-                                           {CL_PLATFORM_NAME, "name"},
-                                           {CL_PLATFORM_VENDOR, "vendor"},
-                                           {CL_PLATFORM_EXTENSIONS, "extensions"}};
+pair<int, const char *> platform_info[] = {
+    {CL_PLATFORM_PROFILE, "profile"},
+    {CL_PLATFORM_VERSION, "version"},
+    {CL_PLATFORM_NAME, "name"},
+    {CL_PLATFORM_VENDOR, "vendor"},
+    {CL_PLATFORM_EXTENSIONS, "extensions"}};
 
 pair<int, const char *> device_info[] = {
     {CL_DEVICE_TYPE, "type"},
@@ -140,7 +141,8 @@ pair<int, const char *> device_info[] = {
     {CL_DEVICE_PARTITION_PROPERTIES, "partition properties"},
     {CL_DEVICE_PARTITION_AFFINITY_DOMAIN, "partition affinity domain"},
     {CL_DEVICE_PARTITION_TYPE, "partition type"},
-    {CL_DEVICE_REFERENCE_COUNT, "reference countplatforms[p].getDevices(CL_DEVICE_TYPE_ALL, &devices)"},
+    {CL_DEVICE_REFERENCE_COUNT,
+     "reference countplatforms[p].getDevices(CL_DEVICE_TYPE_ALL, &devices)"},
     {CL_DEVICE_PREFERRED_INTEROP_USER_SYNC, "preferred interop user sync"},
     {CL_DEVICE_PRINTF_BUFFER_SIZE, "printf buffer size"}};
 
@@ -156,7 +158,9 @@ void print_platform_info(cl::Platform platform) {
     }
 }
 
-template <typename T> T convert(const char *data) { return *reinterpret_cast<const T *>(data); }
+template <typename T> T convert(const char *data) {
+    return *reinterpret_cast<const T *>(data);
+}
 
 void print_device_info(cl::Device device) {
     cl_int err;
@@ -231,7 +235,9 @@ void print_device_info(cl::Device device) {
 
         case CL_DEVICE_MAX_WORK_ITEM_SIZES: {
             size_t max_dim = 0;
-            OCL_CHECK(err, err = device.getInfo(CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, &max_dim));
+            OCL_CHECK(err,
+                      err = device.getInfo(CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS,
+                                           &max_dim));
             printf("[  ");
             for (int i = 0; i < (int)max_dim; i++) {
                 printf("\b%zu  ", convert<size_t>(&field[i * sizeof(size_t)]));
@@ -350,7 +356,8 @@ int main(int argc, char **argv) {
         print_platform_info(platforms[p]);
         cl_uint device_count = 0;
         std::vector<cl::Device> devices;
-        OCL_CHECK(err, err = platforms[p].getDevices(CL_DEVICE_TYPE_ALL, &devices));
+        OCL_CHECK(err,
+                  err = platforms[p].getDevices(CL_DEVICE_TYPE_ALL, &devices));
         device_count = devices.size();
 
         for (int d = 0; d < (int)device_count; ++d) {

@@ -62,12 +62,14 @@ adder1:
         // Parallel Adder
         for (int j = 0; j < VECTOR_SIZE; j++) {
            #pragma HLS UNROLL
-            ap_uint<DATATYPE_SIZE> temp_a = in1.range(DATATYPE_SIZE * (j + 1) - 1, j * DATATYPE_SIZE);
+            ap_uint<DATATYPE_SIZE> temp_a =
+                in1.range(DATATYPE_SIZE * (j + 1) - 1, j * DATATYPE_SIZE);
 
             // Increment operation
             ap_uint<DATATYPE_SIZE> temp_res = temp_a + 1;
 
-            tmpOut.range(DATATYPE_SIZE * (j + 1) - 1, j * DATATYPE_SIZE) = temp_res;
+            tmpOut.range(DATATYPE_SIZE * (j + 1) - 1, j * DATATYPE_SIZE) =
+                temp_res;
         }
 
         // Setting data and configuration to output packet

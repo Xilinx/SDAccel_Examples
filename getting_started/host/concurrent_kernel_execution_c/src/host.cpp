@@ -110,9 +110,13 @@ void event_cb(cl_event event1, cl_int cmd_status, void *data) {
     cl_int err;
     cl_command_type command;
     cl::Event event(event1, true);
-    OCL_CHECK(err, err = event.getInfo<cl_command_type>(CL_EVENT_COMMAND_TYPE, &command));
+    OCL_CHECK(
+        err,
+        err = event.getInfo<cl_command_type>(CL_EVENT_COMMAND_TYPE, &command));
     cl_int status;
-    OCL_CHECK(err, err = event.getInfo<cl_int>(CL_EVENT_COMMAND_EXECUTION_STATUS, &status));
+    OCL_CHECK(err,
+              err = event.getInfo<cl_int>(CL_EVENT_COMMAND_EXECUTION_STATUS,
+                                          &status));
 
     const char *command_str;
     const char *status_str;
@@ -141,14 +145,17 @@ void event_cb(cl_event event1, cl_int cmd_status, void *data) {
         status_str = "Completed";
         break;
     }
-    printf("%s %s %s\n", status_str, reinterpret_cast<char *>(data), command_str);
+    printf(
+        "%s %s %s\n", status_str, reinterpret_cast<char *>(data), command_str);
     fflush(stdout);
 }
 
 // Sets the callback for a particular event
 void set_callback(cl::Event event, const char *queue_name) {
     cl_int err;
-    OCL_CHECK(err, err = event.setCallback(CL_COMPLETE, event_cb, (void *)queue_name));
+    OCL_CHECK(err,
+              err =
+                  event.setCallback(CL_COMPLETE, event_cb, (void *)queue_name));
 }
 
 // Verify the result of the out put buffers
@@ -176,8 +183,12 @@ void multiple_command_queues(cl::Context &context,
                              cl::Buffer &buffer_f,
                              size_t size_in_bytes) {
     cl_int err;
-    OCL_CHECK(err, cl::CommandQueue ordered_queue1(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
-    OCL_CHECK(err, cl::CommandQueue ordered_queue2(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(err,
+              cl::CommandQueue ordered_queue1(
+                  context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(err,
+              cl::CommandQueue ordered_queue2(
+                  context, device, CL_QUEUE_PROFILING_ENABLE, &err));
 
     // copy the input arrays to input memory allocated on the accelerator
     // devices
@@ -192,7 +203,8 @@ void multiple_command_queues(cl::Context &context,
     printf("[Ordered Queue 1]: Enqueueing scale kernel\n");
     OCL_CHECK(
         err,
-        err = ordered_queue1.enqueueNDRangeKernel(kernel_mscale, offset, global, local, nullptr, &kernel_events[0]));
+        err = ordered_queue1.enqueueNDRangeKernel(
+            kernel_mscale, offset, global, local, nullptr, &kernel_events[0]));
 
     set_callback(kernel_events[0], "scale");
 
@@ -204,7 +216,9 @@ void multiple_command_queues(cl::Context &context,
 
     printf("[Ordered Queue 1]: Enqueueing addition kernel\n");
     OCL_CHECK(
-        err, err = ordered_queue1.enqueueNDRangeKernel(kernel_madd, offset, global, local, nullptr, &kernel_events[1]));
+        err,
+        err = ordered_queue1.enqueueNDRangeKernel(
+            kernel_madd, offset, global, local, nullptr, &kernel_events[1]));
 
     set_callback(kernel_events[1], "addition");
 
@@ -216,9 +230,10 @@ void multiple_command_queues(cl::Context &context,
     OCL_CHECK(err, err = kernel_mmult.setArg(4, MAT_DIM1));
 
     printf("[Ordered Queue 2]: Enqueueing matrix multiplication kernel\n");
-    OCL_CHECK(err,
-              err =
-                  ordered_queue2.enqueueNDRangeKernel(kernel_mmult, offset, global, local, nullptr, &kernel_events[2]));
+    OCL_CHECK(
+        err,
+        err = ordered_queue2.enqueueNDRangeKernel(
+            kernel_mmult, offset, global, local, nullptr, &kernel_events[2]));
     set_callback(kernel_events[2], "matrix multiplication");
 
     const size_t array_size = MAT_DIM0 * MAT_DIM1;
@@ -229,20 +244,35 @@ void multiple_command_queues(cl::Context &context,
     vector<cl::Event> transfer_events(3);
     printf("[Ordered Queue 1]: Enqueueing Read Buffer A\n");
     OCL_CHECK(err,
-              err = ordered_queue1.enqueueReadBuffer(
-                  buffer_a, CL_FALSE, 0, size_in_bytes, A.data(), nullptr, &transfer_events[0]));
+              err = ordered_queue1.enqueueReadBuffer(buffer_a,
+                                                     CL_FALSE,
+                                                     0,
+                                                     size_in_bytes,
+                                                     A.data(),
+                                                     nullptr,
+                                                     &transfer_events[0]));
     set_callback(transfer_events[0], "A");
 
     printf("[Ordered Queue 1]: Enqueueing Read Buffer C\n");
     OCL_CHECK(err,
-              err = ordered_queue1.enqueueReadBuffer(
-                  buffer_c, CL_FALSE, 0, size_in_bytes, C.data(), nullptr, &transfer_events[1]));
+              err = ordered_queue1.enqueueReadBuffer(buffer_c,
+                                                     CL_FALSE,
+                                                     0,
+                                                     size_in_bytes,
+                                                     C.data(),
+                                                     nullptr,
+                                                     &transfer_events[1]));
     set_callback(transfer_events[1], "C");
 
     printf("[Ordered Queue 2]: Enqueueing Read Buffer F\n");
     OCL_CHECK(err,
-              err = ordered_queue2.enqueueReadBuffer(
-                  buffer_f, CL_FALSE, 0, size_in_bytes, F.data(), nullptr, &transfer_events[2]));
+              err = ordered_queue2.enqueueReadBuffer(buffer_f,
+                                                     CL_FALSE,
+                                                     0,
+                                                     size_in_bytes,
+                                                     F.data(),
+                                                     nullptr,
+                                                     &transfer_events[2]));
     set_callback(transfer_events[2], "F");
 
     printf("[Ordered Queue 1]: Waiting\n");
@@ -268,18 +298,31 @@ void out_of_order_queue(cl::Context &context,
     vector<cl::Event> kernel_wait_events;
 
     // We are creating an out of order queue here.
-    OCL_CHECK(err,
-              cl::CommandQueue ooo_queue(
-                  context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err));
+    OCL_CHECK(
+        err,
+        cl::CommandQueue ooo_queue(context,
+                                   device,
+                                   CL_QUEUE_PROFILING_ENABLE |
+                                       CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE,
+                                   &err));
 
     // Clear values in the result buffers
     {
         int zero = 0;
         int one = 1;
         vector<cl::Event> fill_events(3);
-        OCL_CHECK(err, err = ooo_queue.enqueueFillBuffer(buffer_a, one, 0, size_in_bytes, nullptr, &fill_events[0]));
-        OCL_CHECK(err, err = ooo_queue.enqueueFillBuffer(buffer_c, zero, 0, size_in_bytes, nullptr, &fill_events[1]));
-        OCL_CHECK(err, err = ooo_queue.enqueueFillBuffer(buffer_f, zero, 0, size_in_bytes, nullptr, &fill_events[2]));
+        OCL_CHECK(
+            err,
+            err = ooo_queue.enqueueFillBuffer(
+                buffer_a, one, 0, size_in_bytes, nullptr, &fill_events[0]));
+        OCL_CHECK(
+            err,
+            err = ooo_queue.enqueueFillBuffer(
+                buffer_c, zero, 0, size_in_bytes, nullptr, &fill_events[1]));
+        OCL_CHECK(
+            err,
+            err = ooo_queue.enqueueFillBuffer(
+                buffer_f, zero, 0, size_in_bytes, nullptr, &fill_events[2]));
         OCL_CHECK(err, err = cl::Event::waitForEvents(fill_events));
     }
 
@@ -292,7 +335,10 @@ void out_of_order_queue(cl::Context &context,
     OCL_CHECK(err, err = kernel_mscale.setArg(3, MAT_DIM1));
 
     printf("[OOO Queue]: Enqueueing scale kernel\n");
-    OCL_CHECK(err, err = ooo_queue.enqueueNDRangeKernel(kernel_mscale, offset, global, local, nullptr, &ooo_events[0]));
+    OCL_CHECK(
+        err,
+        err = ooo_queue.enqueueNDRangeKernel(
+            kernel_mscale, offset, global, local, nullptr, &ooo_events[0]));
     set_callback(ooo_events[0], "scale");
 
     // set OpenCL kernel parameters to add scaled matrix A and matrix B
@@ -311,12 +357,13 @@ void out_of_order_queue(cl::Context &context,
     kernel_wait_events.push_back(ooo_events[0]);
 
     OCL_CHECK(err,
-              err = ooo_queue.enqueueNDRangeKernel(kernel_madd,
-                                                   offset,
-                                                   global,
-                                                   local,
-                                                   &kernel_wait_events, // Event from previous call
-                                                   &ooo_events[1]));
+              err = ooo_queue.enqueueNDRangeKernel(
+                  kernel_madd,
+                  offset,
+                  global,
+                  local,
+                  &kernel_wait_events, // Event from previous call
+                  &ooo_events[1]));
     set_callback(ooo_events[1], "addition");
 
     // set OpenCL kernel parameters to multiply matrix D and E */
@@ -331,12 +378,13 @@ void out_of_order_queue(cl::Context &context,
     // parallel to the previous calls.
     printf("[OOO Queue]: Enqueueing matrix multiplication kernel\n");
     OCL_CHECK(err,
-              err = ooo_queue.enqueueNDRangeKernel(kernel_mmult,
-                                                   offset,
-                                                   global,
-                                                   local,
-                                                   nullptr, // Does not depend on previous call
-                                                   &ooo_events[2]));
+              err = ooo_queue.enqueueNDRangeKernel(
+                  kernel_mmult,
+                  offset,
+                  global,
+                  local,
+                  nullptr, // Does not depend on previous call
+                  &ooo_events[2]));
     set_callback(ooo_events[2], "matrix multiplication");
 
     const size_t array_size = MAT_DIM0 * MAT_DIM1;
@@ -349,16 +397,26 @@ void out_of_order_queue(cl::Context &context,
     kernel_wait_events.resize(0);
     kernel_wait_events.push_back(ooo_events[1]);
     OCL_CHECK(err,
-              err = ooo_queue.enqueueReadBuffer(
-                  buffer_a, CL_FALSE, 0, size_in_bytes, A.data(), &kernel_wait_events, &ooo_events[3]));
+              err = ooo_queue.enqueueReadBuffer(buffer_a,
+                                                CL_FALSE,
+                                                0,
+                                                size_in_bytes,
+                                                A.data(),
+                                                &kernel_wait_events,
+                                                &ooo_events[3]));
     set_callback(ooo_events[3], "A");
 
     printf("[OOO Queue]: Enqueueing Read Buffer C (depends on addition)\n");
     kernel_wait_events.resize(0);
     kernel_wait_events.push_back(ooo_events[1]);
     OCL_CHECK(err,
-              err = ooo_queue.enqueueReadBuffer(
-                  buffer_c, CL_FALSE, 0, size_in_bytes, C.data(), &kernel_wait_events, &ooo_events[4]));
+              err = ooo_queue.enqueueReadBuffer(buffer_c,
+                                                CL_FALSE,
+                                                0,
+                                                size_in_bytes,
+                                                C.data(),
+                                                &kernel_wait_events,
+                                                &ooo_events[4]));
     set_callback(ooo_events[4], "C");
 
     // Depends on the matrix multiplication kernel
@@ -367,8 +425,13 @@ void out_of_order_queue(cl::Context &context,
     kernel_wait_events.resize(0);
     kernel_wait_events.push_back(ooo_events[2]);
     OCL_CHECK(err,
-              err = ooo_queue.enqueueReadBuffer(
-                  buffer_f, CL_FALSE, 0, size_in_bytes, F.data(), &kernel_wait_events, &ooo_events[5]));
+              err = ooo_queue.enqueueReadBuffer(buffer_f,
+                                                CL_FALSE,
+                                                0,
+                                                size_in_bytes,
+                                                F.data(),
+                                                &kernel_wait_events,
+                                                &ooo_events[5]));
     set_callback(ooo_events[5], "F");
 
     // Block until all operations have completed
@@ -404,7 +467,8 @@ int main(int argc, char **argv) {
     auto device = devices[0];
 
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
-    OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
+    OCL_CHECK(err,
+              std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     // read_binary_file() is a utility API which will load the binaryFile
     // and will return pointer to file buffer.
@@ -421,12 +485,41 @@ int main(int argc, char **argv) {
     // Buffers are allocated using CL_MEM_USE_HOST_PTR for efficient memory and
     // Device-to-host communication
     OCL_CHECK(err,
-              cl::Buffer buffer_a(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, size_in_bytes, A.data(), &err));
-    OCL_CHECK(err, cl::Buffer buffer_b(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, size_in_bytes, B.data(), &err));
-    OCL_CHECK(err, cl::Buffer buffer_c(context, CL_MEM_ALLOC_HOST_PTR | CL_MEM_WRITE_ONLY, size_in_bytes, NULL, &err));
-    OCL_CHECK(err, cl::Buffer buffer_d(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, size_in_bytes, D.data(), &err));
-    OCL_CHECK(err, cl::Buffer buffer_e(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, size_in_bytes, E.data(), &err));
-    OCL_CHECK(err, cl::Buffer buffer_f(context, CL_MEM_ALLOC_HOST_PTR | CL_MEM_WRITE_ONLY, size_in_bytes, NULL, &err));
+              cl::Buffer buffer_a(context,
+                                  CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+                                  size_in_bytes,
+                                  A.data(),
+                                  &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_b(context,
+                                  CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                  size_in_bytes,
+                                  B.data(),
+                                  &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_c(context,
+                                  CL_MEM_ALLOC_HOST_PTR | CL_MEM_WRITE_ONLY,
+                                  size_in_bytes,
+                                  NULL,
+                                  &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_d(context,
+                                  CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                  size_in_bytes,
+                                  D.data(),
+                                  &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_e(context,
+                                  CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                  size_in_bytes,
+                                  E.data(),
+                                  &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_f(context,
+                                  CL_MEM_ALLOC_HOST_PTR | CL_MEM_WRITE_ONLY,
+                                  size_in_bytes,
+                                  NULL,
+                                  &err));
 
     // Use multiple command queues to execute the kernels
     multiple_command_queues(context,
@@ -459,7 +552,8 @@ int main(int argc, char **argv) {
     delete[] fileBuf;
 
     printf("View the timeline trace in SDx for a visual overview of the\n"
-           "execution of this example. Refer to the \"Timeline Trace\" section of\n"
+           "execution of this example. Refer to the \"Timeline Trace\" section "
+           "of\n"
            "the SDx Development Environment Methodology Guide for additional\n"
            "details.\n");
 

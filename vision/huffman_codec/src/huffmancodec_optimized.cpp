@@ -57,13 +57,16 @@ HuffmanOptimized::HuffmanOptimized(string &strBitmapFP, string &binaryFile) {
     //store path to input bitmap
     m_strBitmapFP = strBitmapFP;
 
-    std::vector<cl::Device> devices = xcl::get_xil_devices();
-    cl::Device device = devices[0];
+    auto devices = xcl::get_xil_devices();
+    auto device = devices[0];
 
     //Creating Context and Command Queue for selected Device
     OCL_CHECK(err, context = cl::Context(device, NULL, NULL, NULL, &err));
-    OCL_CHECK(err, q = cl::CommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
-    OCL_CHECK(err, std::string deviceName = device.getInfo<CL_DEVICE_NAME>(&err));
+    OCL_CHECK(
+        err,
+        q = cl::CommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(err,
+              std::string deviceName = device.getInfo<CL_DEVICE_NAME>(&err));
 
     fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
@@ -72,8 +75,10 @@ HuffmanOptimized::HuffmanOptimized(string &strBitmapFP, string &binaryFile) {
     OCL_CHECK(err, m_program = cl::Program(context, devices, bins, NULL, &err));
 
     //kernels
-    OCL_CHECK(err, m_clKernelHuffmanEncoder = cl::Kernel(m_program, "encode", &err));
-    OCL_CHECK(err, m_clKernelHuffmanDecoder = cl::Kernel(m_program, "decode", &err));
+    OCL_CHECK(err,
+              m_clKernelHuffmanEncoder = cl::Kernel(m_program, "encode", &err));
+    OCL_CHECK(err,
+              m_clKernelHuffmanDecoder = cl::Kernel(m_program, "decode", &err));
 }
 
 HuffmanOptimized::~HuffmanOptimized() {
@@ -99,8 +104,12 @@ double HuffmanOptimized::computeEventDurationInMS(const cl::Event &event) {
     cl_ulong ts_start = 0, ts_end = 0;
     cl_int err;
     double duration = 0;
-    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START, &ts_start));
-    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END, &ts_end));
+    OCL_CHECK(err,
+              err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,
+                                                     &ts_start));
+    OCL_CHECK(err,
+              err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,
+                                                     &ts_end));
     duration += (cl_double)(ts_end - ts_start) * (cl_double)(1e-06);
 
     return duration;
@@ -125,11 +134,17 @@ bool HuffmanOptimized::invoke_kernel(cl::Kernel krnl,
 
     //create input and output buffers size for 24 bpp image
 
-    OCL_CHECK(err, cl::Buffer mem_input(context, CL_MEM_READ_WRITE, sz_input, NULL, &err));
+    OCL_CHECK(
+        err,
+        cl::Buffer mem_input(context, CL_MEM_READ_WRITE, sz_input, NULL, &err));
 
-    OCL_CHECK(err, cl::Buffer mem_output(context, CL_MEM_READ_WRITE, sz_input, NULL, &err));
+    OCL_CHECK(err,
+              cl::Buffer mem_output(
+                  context, CL_MEM_READ_WRITE, sz_input, NULL, &err));
 
-    OCL_CHECK(err, cl::Buffer mem_sz_output(context, CL_MEM_READ_WRITE, sizeof(u32), NULL, &err));
+    OCL_CHECK(err,
+              cl::Buffer mem_sz_output(
+                  context, CL_MEM_READ_WRITE, sizeof(u32), NULL, &err));
 
     //execute kernel
     /*!
@@ -154,7 +169,10 @@ bool HuffmanOptimized::invoke_kernel(cl::Kernel krnl,
     LogInfo("Write input data to device buffer");
 
     //copy input dataset to OpenCL buffer
-    OCL_CHECK(err, err = q.enqueueWriteBuffer(mem_input, CL_TRUE, 0, sz_input, vec_input.data(), NULL, NULL));
+    OCL_CHECK(
+        err,
+        err = q.enqueueWriteBuffer(
+            mem_input, CL_TRUE, 0, sz_input, vec_input.data(), NULL, NULL));
 
     //finish all memory writes
     q.finish();
@@ -167,13 +185,23 @@ bool HuffmanOptimized::invoke_kernel(cl::Kernel krnl,
     LogInfo("EX1: to make sure all buffers are migrated to device");
 
     //call once to guarentee that all buffers are migrated to device memory
-    OCL_CHECK(err, err = q.enqueueNDRangeKernel(krnl, 0, global, local, NULL, &events[evtHostWrite]));
+    OCL_CHECK(err,
+              err = q.enqueueNDRangeKernel(
+                  krnl, 0, global, local, NULL, &events[evtHostWrite]));
     q.finish();
 
-    LogInfo("EX1: Readback the output size required for the actual kernel execution");
+    LogInfo("EX1: Readback the output size required for the actual kernel "
+            "execution");
 
     //read output size
-    OCL_CHECK(err, err = q.enqueueReadBuffer(mem_sz_output, CL_TRUE, 0, sizeof(u32), (void *)&sz_output, NULL, NULL));
+    OCL_CHECK(err,
+              err = q.enqueueReadBuffer(mem_sz_output,
+                                        CL_TRUE,
+                                        0,
+                                        sizeof(u32),
+                                        (void *)&sz_output,
+                                        NULL,
+                                        NULL));
     q.finish();
 
     LogInfo("EX1: sz_input = %u, sz_output = %u", sz_input, sz_output);
@@ -181,7 +209,9 @@ bool HuffmanOptimized::invoke_kernel(cl::Kernel krnl,
     vec_output.resize(sz_output);
     std::fill(vec_output.begin(), vec_output.end(), 0);
 
-    OCL_CHECK(err, cl::Buffer mem_output_sz(context, CL_MEM_READ_WRITE, sz_output, NULL, &err));
+    OCL_CHECK(err,
+              cl::Buffer mem_output_sz(
+                  context, CL_MEM_READ_WRITE, sz_output, NULL, &err));
 
     //set output again
     OCL_CHECK(err, err = krnl.setArg(2, sizeof(cl_mem), &mem_output_sz));
@@ -196,20 +226,34 @@ bool HuffmanOptimized::invoke_kernel(cl::Kernel krnl,
     LogInfo("Write output data to device buffer");
 
     //copy input dataset to OpenCL buffer
-    OCL_CHECK(err, err = q.enqueueWriteBuffer(mem_output_sz, CL_TRUE, 0, sz_output, vec_output.data(), NULL, NULL));
+    OCL_CHECK(err,
+              err = q.enqueueWriteBuffer(mem_output_sz,
+                                         CL_TRUE,
+                                         0,
+                                         sz_output,
+                                         vec_output.data(),
+                                         NULL,
+                                         NULL));
 
     LogInfo("EX2: Real execution of the algorithm to fill the output");
 
     //call a second time to measure on-chip throughput
-    OCL_CHECK(err, err = q.enqueueNDRangeKernel(krnl, 0, global, local, NULL, &events[evtKernelExec]));
+    OCL_CHECK(err,
+              err = q.enqueueNDRangeKernel(
+                  krnl, 0, global, local, NULL, &events[evtKernelExec]));
 
     q.finish();
 
     LogInfo("EX2: Readback the results from codec");
     //copy results back from OpenCL buffer
     OCL_CHECK(err,
-              err = q.enqueueReadBuffer(
-                  mem_output_sz, CL_TRUE, 0, sz_output, (void *)vec_output.data(), NULL, &events[evtHostRead]));
+              err = q.enqueueReadBuffer(mem_output_sz,
+                                        CL_TRUE,
+                                        0,
+                                        sz_output,
+                                        (void *)vec_output.data(),
+                                        NULL,
+                                        &events[evtHostRead]));
 
     q.finish();
 
@@ -228,7 +272,8 @@ int HuffmanOptimized::enc(const vector<u8> &in_data, vector<u8> &out_data) {
 
     //encode image
     LogInfo("Invoking encoder");
-    bool res = invoke_kernel(m_clKernelHuffmanEncoder, in_data, out_data, &events[0]);
+    bool res =
+        invoke_kernel(m_clKernelHuffmanEncoder, in_data, out_data, &events[0]);
     if (!res) {
         LogError("Failed to encode the input. Test Failed");
         return false;
@@ -259,7 +304,8 @@ int HuffmanOptimized::dec(const vector<u8> &in_data, vector<u8> &out_data) {
 
     //encode image
     LogInfo("Invoking encoder");
-    bool res = invoke_kernel(m_clKernelHuffmanDecoder, in_data, out_data, &events[0]);
+    bool res =
+        invoke_kernel(m_clKernelHuffmanDecoder, in_data, out_data, &events[0]);
     if (!res) {
         LogError("Failed to encode the input. Test Failed");
         return false;
@@ -313,7 +359,8 @@ bool HuffmanOptimized::run(int idevice, int nruns) {
 
     //encode image
     LogInfo("Invoking encoder");
-    bool res = invoke_kernel(m_clKernelHuffmanEncoder, vec_in, vec_encoded_data, &events[0]);
+    bool res = invoke_kernel(
+        m_clKernelHuffmanEncoder, vec_in, vec_encoded_data, &events[0]);
     if (!res) {
         LogError("Failed to encode the input. Test Failed");
         return false;
@@ -326,7 +373,10 @@ bool HuffmanOptimized::run(int idevice, int nruns) {
 
     //decode image
     LogInfo("Invoking decoder");
-    res |= invoke_kernel(m_clKernelHuffmanDecoder, vec_encoded_data, vec_decoded_data, &events[0]);
+    res |= invoke_kernel(m_clKernelHuffmanDecoder,
+                         vec_encoded_data,
+                         vec_decoded_data,
+                         &events[0]);
     if (!res) {
         LogError("Failed to decode the output. Test Failed");
         return false;
@@ -373,7 +423,8 @@ bool HuffmanOptimized::run(int idevice, int nruns) {
 
     //write decoded bmp
     string strOutputFP = "decoded.bmp";
-    LogInfo("Image decoded OK. Check the output image file: %s", strOutputFP.c_str());
+    LogInfo("Image decoded OK. Check the output image file: %s",
+            strOutputFP.c_str());
     inputbmp.pixels = reinterpret_cast<uint32_t *>(&vec_decoded_data[0]);
     writebmp((char *)strOutputFP.c_str(), &inputbmp);
 

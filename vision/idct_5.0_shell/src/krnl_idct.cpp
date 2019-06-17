@@ -57,7 +57,10 @@ Idct algorithm description used to describe the actual synthesizable
 idct behavior. 
 
 *************************************************************************** */
-void idct(const int16_t block[64], const uint16_t q[64], int16_t outp[64], bool ignore_dc) {
+void idct(const int16_t block[64],
+          const uint16_t q[64],
+          int16_t outp[64],
+          bool ignore_dc) {
    #pragma HLS INLINE
 
     int32_t intermed[64];
@@ -81,7 +84,9 @@ void idct(const int16_t block[64], const uint16_t q[64], int16_t outp[64], bool 
     // Horizontal 1-D IDCT.
     for (int y = 0; y < 8; ++y) {
         int y8 = y * 8;
-        int32_t x0 = (((ignore_dc && y == 0) ? 0 : (block[y8 + 0] * q[y8 + 0]) << 11)) + 128;
+        int32_t x0 =
+            (((ignore_dc && y == 0) ? 0 : (block[y8 + 0] * q[y8 + 0]) << 11)) +
+            128;
         int32_t x1 = (block[y8 + 4] * q[y8 + 4]) << 11;
         int32_t x2 = block[y8 + 6] * q[y8 + 6];
         int32_t x3 = block[y8 + 2] * q[y8 + 2];
@@ -90,7 +95,8 @@ void idct(const int16_t block[64], const uint16_t q[64], int16_t outp[64], bool 
         int32_t x6 = block[y8 + 5] * q[y8 + 5];
         int32_t x7 = block[y8 + 3] * q[y8 + 3];
         // If all the AC components are zero, then the IDCT is trivial.
-        if (x1 == 0 && x2 == 0 && x3 == 0 && x4 == 0 && x5 == 0 && x6 == 0 && x7 == 0) {
+        if (x1 == 0 && x2 == 0 && x3 == 0 && x4 == 0 && x5 == 0 && x6 == 0 &&
+            x7 == 0) {
             int32_t dc = (x0 - 128) >> 8; // coefficients[0] << 3
             intermed[y8 + 0] = dc;
             intermed[y8 + 1] = dc;
@@ -209,7 +215,10 @@ Dataflow block used to interface from input memory to streaming input
 channels.
 
 *************************************************************************** */
-template <typename out_t> void read_blocks(const out_t *in, hls::stream<out_t> &out, unsigned int blocks) {
+template <typename out_t>
+void read_blocks(const out_t *in,
+                 hls::stream<out_t> &out,
+                 unsigned int blocks) {
     for (unsigned int i = 0; i < blocks * 2; i++) {
        #pragma HLS loop_tripcount min=2048 max=2048
        #pragma HLS PIPELINE II=1
@@ -279,7 +288,9 @@ Dataflow block used to interface from streaming output channel to
 output memory.
 
 *************************************************************************** */
-void write_blocks(ap_int<512> *out, hls::stream<int512_t> &in, unsigned int blocks) {
+void write_blocks(ap_int<512> *out,
+                  hls::stream<int512_t> &in,
+                  unsigned int blocks) {
     for (unsigned int i = 0; i < blocks * 2; i++) {
        #pragma HLS loop_tripcount min=2048 max=2048
        #pragma HLS PIPELINE II=1
@@ -295,8 +306,11 @@ Top idct kernel function, used to clearly isolate and identify
 dataflow blocks.
 
 *************************************************************************** */
-void krnl_idct_dataflow(
-    const ap_int<512> *block, const ap_uint<512> *q, ap_int<512> *voutp, int ignore_dc, unsigned int blocks) {
+void krnl_idct_dataflow(const ap_int<512> *block,
+                        const ap_uint<512> *q,
+                        ap_int<512> *voutp,
+                        int ignore_dc,
+                        unsigned int blocks) {
    #pragma HLS DATAFLOW
 
     hls::stream<int512_t> iblock("input_stream1");
@@ -320,8 +334,11 @@ Kernel idct interface definition.
 
 *************************************************************************** */
 extern "C" {
-void krnl_idct(
-    const ap_int<512> *block, const ap_uint<512> *q, ap_int<512> *voutp, int ignore_dc, unsigned int blocks) {
+void krnl_idct(const ap_int<512> *block,
+               const ap_uint<512> *q,
+               ap_int<512> *voutp,
+               int ignore_dc,
+               unsigned int blocks) {
    #pragma HLS INTERFACE m_axi     port=block     offset=slave bundle=gmem0
    #pragma HLS INTERFACE s_axilite port=block                  bundle=control
    #pragma HLS INTERFACE m_axi     port=q         offset=slave bundle=gmem1

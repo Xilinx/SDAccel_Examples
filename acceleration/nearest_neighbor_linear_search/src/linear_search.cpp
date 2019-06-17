@@ -69,12 +69,15 @@ void linear_search_init(cl::Context *context,
     unsigned fileBufSize;
     // get_xil_devices() is a utility API which will find the xilinx
     // platforms and will return list of devices connected to Xilinx platform
-    std::vector<cl::Device> devices = xcl::get_xil_devices();
-    cl::Device device = devices[0];
+    auto devices = xcl::get_xil_devices();
+    auto device = devices[0];
 
     OCL_CHECK(err, *context = cl::Context(device, NULL, NULL, NULL, &err));
-    OCL_CHECK(err, *q = cl::CommandQueue(*context, device, CL_QUEUE_PROFILING_ENABLE, &err));
-    OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
+    OCL_CHECK(err,
+              *q = cl::CommandQueue(
+                  *context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(err,
+              std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     // read_binary_file() is a utility API which will load the binaryFile
     // and will return pointer to file buffer.
@@ -91,21 +94,24 @@ void linear_search_init(cl::Context *context,
     OCL_CHECK(err,
               *dev_targets = cl::Buffer(*context,
                                         CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                                        ((TARGETS * DIMS - 1) / 16 + 1) * 16 * sizeof(float),
+                                        ((TARGETS * DIMS - 1) / 16 + 1) * 16 *
+                                            sizeof(float),
                                         (void *)targets,
                                         &err));
 
     OCL_CHECK(err,
               *dev_queries = cl::Buffer(*context,
                                         CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                                        ((QUERIES * DIMS - 1) / 16 + 1) * 16 * sizeof(float),
+                                        ((QUERIES * DIMS - 1) / 16 + 1) * 16 *
+                                            sizeof(float),
                                         (void *)queries,
                                         &err));
 
     OCL_CHECK(err,
               *dev_indices = cl::Buffer(*context,
                                         CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                                        ((QUERIES - 1) / 16 + 1) * 16 * sizeof(unsigned int),
+                                        ((QUERIES - 1) / 16 + 1) * 16 *
+                                            sizeof(unsigned int),
                                         (void *)indices,
                                         &err));
 }
@@ -128,14 +134,23 @@ unsigned long linear_search_exec(cl::Context *context,
     OCL_CHECK(err, err = q->enqueueTask(*krnl, NULL, &event));
 
     unsigned long start, stop;
-    OCL_CHECK(err, err = event.getProfilingInfo<unsigned long>(CL_PROFILING_COMMAND_START, &start));
-    OCL_CHECK(err, err = event.getProfilingInfo<unsigned long>(CL_PROFILING_COMMAND_END, &stop));
+    OCL_CHECK(err,
+              err = event.getProfilingInfo<unsigned long>(
+                  CL_PROFILING_COMMAND_START, &start));
+    OCL_CHECK(err,
+              err = event.getProfilingInfo<unsigned long>(
+                  CL_PROFILING_COMMAND_END, &stop));
 
     unsigned long duration = stop - start;
 
     OCL_CHECK(err,
-              err = q->enqueueReadBuffer(
-                  *dev_indices, CL_TRUE, 0, (QUERIES) * sizeof(unsigned int), (void *)indices, NULL, NULL));
+              err = q->enqueueReadBuffer(*dev_indices,
+                                         CL_TRUE,
+                                         0,
+                                         (QUERIES) * sizeof(unsigned int),
+                                         (void *)indices,
+                                         NULL,
+                                         NULL));
     q->finish();
     delete[] fileBuf;
     return duration;
@@ -143,7 +158,9 @@ unsigned long linear_search_exec(cl::Context *context,
 
 int main(int argc, char **argv) {
     if (!(argc == 3 || argc == 4)) {
-        printf("Usage: %s <XCLBIN File> <queries.txt> <targets.txt> [<ref.txt>]\n", argv[0]);
+        printf(
+            "Usage: %s <XCLBIN File> <queries.txt> <targets.txt> [<ref.txt>]\n",
+            argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -168,7 +185,8 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
-    linear_search_read_datafile(queries_filename, queries.data(), QUERIES * DIMS);
+    linear_search_read_datafile(
+        queries_filename, queries.data(), QUERIES * DIMS);
 
     for (size_t i = 0; i < QUERIES * DIMS; i++) {
         if (!isfinite(queries[i])) {
@@ -177,7 +195,8 @@ int main(int argc, char **argv) {
         }
     }
 
-    linear_search_read_datafile(targets_filename, targets.data(), TARGETS * DIMS);
+    linear_search_read_datafile(
+        targets_filename, targets.data(), TARGETS * DIMS);
 
     for (size_t i = 0; i < TARGETS * DIMS; i++) {
         if (!isfinite(targets[i])) {
@@ -204,8 +223,14 @@ int main(int argc, char **argv) {
                        queries.data(),
                        indices.data());
 
-    unsigned long duration =
-        linear_search_exec(&context, &q, &program, &krnl, &dev_targets, &dev_queries, &dev_indices, indices.data());
+    unsigned long duration = linear_search_exec(&context,
+                                                &q,
+                                                &program,
+                                                &krnl,
+                                                &dev_targets,
+                                                &dev_queries,
+                                                &dev_indices,
+                                                indices.data());
 
     printf("Kernel Execution Time: %ld ns\n", duration);
 
@@ -235,7 +260,8 @@ int main(int argc, char **argv) {
 
         float dist = dist_x * dist_x + dist_y * dist_y + dist_z * dist_z;
 
-        printf("Closest to queries[%5lu] = [% 6.2f % 6.2f % 6.2f] is targets[%5lu] = [% 6.2f % 6.2f % 6.2f] : distance "
+        printf("Closest to queries[%5lu] = [% 6.2f % 6.2f % 6.2f] is "
+               "targets[%5lu] = [% 6.2f % 6.2f % 6.2f] : distance "
                "= % "
                "7.2f\n",
                i,
@@ -255,10 +281,12 @@ int main(int argc, char **argv) {
                 float dist_ry = queries[DIMS * i + 1] - targets[DIMS * k + 1];
                 float dist_rz = queries[DIMS * i + 2] - targets[DIMS * k + 2];
 
-                float dist_r = dist_rx * dist_rx + dist_ry * dist_ry + dist_rz * dist_rz;
+                float dist_r =
+                    dist_rx * dist_rx + dist_ry * dist_ry + dist_rz * dist_rz;
 
                 if (dist_r < dist) {
-                    printf("ERROR: Closer target at targets[%5lu] = [% 6.2f % 6.2f % 6.2f] : distance = % 7.2f\n",
+                    printf("ERROR: Closer target at targets[%5lu] = [% 6.2f % "
+                           "6.2f % 6.2f] : distance = % 7.2f\n",
                            k,
                            targets[DIMS * k + 0],
                            targets[DIMS * k + 1],

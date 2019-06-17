@@ -51,11 +51,13 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MAX_HBM_BANKCOUNT 32
 #define BANK_NAME(n) n | XCL_MEM_TOPOLOGY
 const int bank[MAX_HBM_BANKCOUNT] = {
-    BANK_NAME(0),  BANK_NAME(1),  BANK_NAME(2),  BANK_NAME(3),  BANK_NAME(4),  BANK_NAME(5),  BANK_NAME(6),
-    BANK_NAME(7),  BANK_NAME(8),  BANK_NAME(9),  BANK_NAME(10), BANK_NAME(11), BANK_NAME(12), BANK_NAME(13),
-    BANK_NAME(14), BANK_NAME(15), BANK_NAME(16), BANK_NAME(17), BANK_NAME(18), BANK_NAME(19), BANK_NAME(20),
-    BANK_NAME(21), BANK_NAME(22), BANK_NAME(23), BANK_NAME(24), BANK_NAME(25), BANK_NAME(26), BANK_NAME(27),
-    BANK_NAME(28), BANK_NAME(29), BANK_NAME(30), BANK_NAME(31)};
+    BANK_NAME(0),  BANK_NAME(1),  BANK_NAME(2),  BANK_NAME(3),  BANK_NAME(4),
+    BANK_NAME(5),  BANK_NAME(6),  BANK_NAME(7),  BANK_NAME(8),  BANK_NAME(9),
+    BANK_NAME(10), BANK_NAME(11), BANK_NAME(12), BANK_NAME(13), BANK_NAME(14),
+    BANK_NAME(15), BANK_NAME(16), BANK_NAME(17), BANK_NAME(18), BANK_NAME(19),
+    BANK_NAME(20), BANK_NAME(21), BANK_NAME(22), BANK_NAME(23), BANK_NAME(24),
+    BANK_NAME(25), BANK_NAME(26), BANK_NAME(27), BANK_NAME(28), BANK_NAME(29),
+    BANK_NAME(30), BANK_NAME(31)};
 
 // Function for verifying results
 bool verify(std::vector<int, aligned_allocator<int>> &source_sw_add_results,
@@ -66,16 +68,22 @@ bool verify(std::vector<int, aligned_allocator<int>> &source_sw_add_results,
     bool check = true;
     for (size_t i = 0; i < size; i++) {
         if (source_hw_add_results[i] != source_sw_add_results[i]) {
-            std::cout << "Error: Result mismatch in Addition Operation" << std::endl;
-            std::cout << "i = " << i << " CPU result = " << source_sw_add_results[i]
-                      << " Device result = " << source_hw_add_results[i] << std::endl;
+            std::cout << "Error: Result mismatch in Addition Operation"
+                      << std::endl;
+            std::cout << "i = " << i
+                      << " CPU result = " << source_sw_add_results[i]
+                      << " Device result = " << source_hw_add_results[i]
+                      << std::endl;
             check = false;
             break;
         }
         if (source_hw_mul_results[i] != source_sw_mul_results[i]) {
-            std::cout << "Error: Result mismatch in Multiplication Operation" << std::endl;
-            std::cout << "i = " << i << " CPU result = " << source_sw_mul_results[i]
-                      << " Device result = " << source_hw_mul_results[i] << std::endl;
+            std::cout << "Error: Result mismatch in Multiplication Operation"
+                      << std::endl;
+            std::cout << "i = " << i
+                      << " CPU result = " << source_sw_mul_results[i]
+                      << " Device result = " << source_hw_mul_results[i]
+                      << std::endl;
             check = false;
             break;
         }
@@ -89,10 +97,12 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    unsigned int dataSize = 64 * 1024 * 1024; //taking maximum possible data size value for an HBM bank
+    unsigned int dataSize =
+        64 * 1024 *
+        1024; //taking maximum possible data size value for an HBM bank
     unsigned int num_times =
         1024; //num_times specify, number of times a kernel will execute the same operation. This is needed
-              //to keep the kernel busy to test the actual bandwidth of all banks running concurrently.
+        //to keep the kernel busy to test the actual bandwidth of all banks running concurrently.
 
     //reducing the test data capacity to run faster in emulation mode
     if (xcl::is_emulation()) {
@@ -127,8 +137,12 @@ int main(int argc, char *argv[]) {
 
     // Initializing output vectors to zero
     for (size_t i = 0; i < NUM_KERNEL; i++) {
-        std::fill(source_hw_add_results[i].begin(), source_hw_add_results[i].end(), 0);
-        std::fill(source_hw_mul_results[i].begin(), source_hw_mul_results[i].end(), 0);
+        std::fill(source_hw_add_results[i].begin(),
+                  source_hw_add_results[i].end(),
+                  0);
+        std::fill(source_hw_mul_results[i].begin(),
+                  source_hw_mul_results[i].end(),
+                  0);
     }
 
     // OPENCL HOST CODE AREA START
@@ -138,9 +152,12 @@ int main(int argc, char *argv[]) {
 
     // Creating Context and Command Queue (Out of order) for selected Device
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
-    OCL_CHECK(
-        err,
-        cl::CommandQueue q(context, device, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE | CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(err,
+              cl::CommandQueue q(context,
+                                 device,
+                                 CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE |
+                                     CL_QUEUE_PROFILING_ENABLE,
+                                 &err));
 
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
@@ -159,14 +176,18 @@ int main(int argc, char *argv[]) {
 
     for (int i = 0; i < NUM_KERNEL; i++) {
         std::string cu_id = std::to_string(i + 1);
-        std::string krnl_name_full = krnl_name + ":{" + "krnl_vaddmul_" + cu_id + "}";
+        std::string krnl_name_full =
+            krnl_name + ":{" + "krnl_vaddmul_" + cu_id + "}";
 
-        printf("Creating a kernel [%s] for CU(%d)\n", krnl_name_full.c_str(), i + 1);
+        printf("Creating a kernel [%s] for CU(%d)\n",
+               krnl_name_full.c_str(),
+               i + 1);
 
         //Here Kernel object is created by specifying kernel name along with compute unit.
         //For such case, this kernel object can only access the specific Compute unit
 
-        OCL_CHECK(err, krnls[i] = cl::Kernel(program, krnl_name_full.c_str(), &err));
+        OCL_CHECK(err,
+                  krnls[i] = cl::Kernel(program, krnl_name_full.c_str(), &err));
     }
 
     std::vector<cl_mem_ext_ptr_t> inBufExt1(NUM_KERNEL);
@@ -204,35 +225,45 @@ int main(int argc, char *argv[]) {
     //Creating Buffers
     for (int i = 0; i < NUM_KERNEL; i++) {
         OCL_CHECK(err,
-                  buffer_input1[i] = cl::Buffer(context,
-                                                CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR,
-                                                sizeof(uint32_t) * dataSize,
-                                                &inBufExt1[i],
-                                                &err));
+                  buffer_input1[i] =
+                      cl::Buffer(context,
+                                 CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX |
+                                     CL_MEM_USE_HOST_PTR,
+                                 sizeof(uint32_t) * dataSize,
+                                 &inBufExt1[i],
+                                 &err));
         OCL_CHECK(err,
-                  buffer_input2[i] = cl::Buffer(context,
-                                                CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR,
-                                                sizeof(uint32_t) * dataSize,
-                                                &inBufExt2[i],
-                                                &err));
+                  buffer_input2[i] =
+                      cl::Buffer(context,
+                                 CL_MEM_READ_ONLY | CL_MEM_EXT_PTR_XILINX |
+                                     CL_MEM_USE_HOST_PTR,
+                                 sizeof(uint32_t) * dataSize,
+                                 &inBufExt2[i],
+                                 &err));
         OCL_CHECK(err,
-                  buffer_output_add[i] = cl::Buffer(context,
-                                                    CL_MEM_WRITE_ONLY | CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR,
-                                                    sizeof(uint32_t) * dataSize,
-                                                    &outAddBufExt[i],
-                                                    &err));
+                  buffer_output_add[i] =
+                      cl::Buffer(context,
+                                 CL_MEM_WRITE_ONLY | CL_MEM_EXT_PTR_XILINX |
+                                     CL_MEM_USE_HOST_PTR,
+                                 sizeof(uint32_t) * dataSize,
+                                 &outAddBufExt[i],
+                                 &err));
         OCL_CHECK(err,
-                  buffer_output_mul[i] = cl::Buffer(context,
-                                                    CL_MEM_WRITE_ONLY | CL_MEM_EXT_PTR_XILINX | CL_MEM_USE_HOST_PTR,
-                                                    sizeof(uint32_t) * dataSize,
-                                                    &outMulBufExt[i],
-                                                    &err));
+                  buffer_output_mul[i] =
+                      cl::Buffer(context,
+                                 CL_MEM_WRITE_ONLY | CL_MEM_EXT_PTR_XILINX |
+                                     CL_MEM_USE_HOST_PTR,
+                                 sizeof(uint32_t) * dataSize,
+                                 &outMulBufExt[i],
+                                 &err));
     }
 
     // Copy input data to Device Global Memory
     for (int i = 0; i < NUM_KERNEL; i++) {
         OCL_CHECK(err,
-                  err = q.enqueueMigrateMemObjects({buffer_input1[i], buffer_input2[i]}, 0 /* 0 means from host*/));
+                  err = q.enqueueMigrateMemObjects(
+                      {buffer_input1[i], buffer_input2[i]},
+                      0 /* 0 means from host*/));
     }
     q.finish();
 
@@ -263,17 +294,21 @@ int main(int argc, char *argv[]) {
 
     // Copy Result from Device Global Memory to Host Local Memory
     for (int i = 0; i < NUM_KERNEL; i++) {
-        OCL_CHECK(
-            err,
-            err = q.enqueueMigrateMemObjects({buffer_output_add[i], buffer_output_mul[i]}, CL_MIGRATE_MEM_OBJECT_HOST));
+        OCL_CHECK(err,
+                  err = q.enqueueMigrateMemObjects(
+                      {buffer_output_add[i], buffer_output_mul[i]},
+                      CL_MIGRATE_MEM_OBJECT_HOST));
     }
     q.finish();
 
     bool match = true;
 
     for (int i = 0; i < NUM_KERNEL; i++) {
-        match = verify(
-            source_sw_add_results, source_sw_mul_results, source_hw_add_results[i], source_hw_mul_results[i], dataSize);
+        match = verify(source_sw_add_results,
+                       source_sw_mul_results,
+                       source_hw_add_results[i],
+                       source_hw_mul_results[i],
+                       dataSize);
     }
 
     // Multiplying the actual data size by 4 because four buffers are being used.

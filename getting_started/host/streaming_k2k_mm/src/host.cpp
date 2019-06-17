@@ -37,7 +37,12 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 auto constexpr c_test_size = 256 * 1024 * 1024; //256 MB data
 
 ////////////////////RESET FUNCTION//////////////////////////////////
-int reset(int *a, int *b, int *c, int *sw_results, int *hw_results, unsigned int size) {
+int reset(int *a,
+          int *b,
+          int *c,
+          int *sw_results,
+          int *hw_results,
+          unsigned int size) {
     //Fill the input vectors with data
     for (size_t i = 0; i < size; i++) {
         a[i] = rand() % size;
@@ -108,8 +113,11 @@ int main(int argc, char **argv) {
 
     // Creating Command Queue
     OCL_CHECK(err,
-              q = cl::CommandQueue(
-                  context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err));
+              q = cl::CommandQueue(context,
+                                   device,
+                                   CL_QUEUE_PROFILING_ENABLE |
+                                       CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE,
+                                   &err));
 
     // read_binary_file() is a utility API which will load the binaryFile
     // and will return the pointer to file buffer.
@@ -125,10 +133,16 @@ int main(int argc, char **argv) {
     OCL_CHECK(err, krnl_vadd = cl::Kernel(program, "krnl_stream_vadd", &err));
     OCL_CHECK(err, krnl_vmult = cl::Kernel(program, "krnl_stream_vmult", &err));
 
-    std::cout << "Vector Addition and Multiplication of elements 0x" << std::hex << size << std::endl;
+    std::cout << "Vector Addition and Multiplication of elements 0x" << std::hex
+              << size << std::endl;
 
     // Reset the data vectors
-    reset(h_a.data(), h_b.data(), h_c.data(), sw_results.data(), hw_results.data(), size);
+    reset(h_a.data(),
+          h_b.data(),
+          h_c.data(),
+          sw_results.data(),
+          hw_results.data(),
+          size);
 
     //Running the kernel
     unsigned int vector_size_bytes = size * sizeof(int);
@@ -136,18 +150,30 @@ int main(int argc, char **argv) {
     // Allocate Buffer in Global Memory
     // Buffers are allocated using CL_MEM_USE_HOST_PTR for efficient memory and
     // Device-to-host communication
-    OCL_CHECK(
-        err,
-        cl::Buffer buffer_in1(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, vector_size_bytes, h_a.data(), &err));
-    OCL_CHECK(
-        err,
-        cl::Buffer buffer_in2(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, vector_size_bytes, h_b.data(), &err));
-    OCL_CHECK(
-        err,
-        cl::Buffer buffer_in3(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, vector_size_bytes, h_c.data(), &err));
     OCL_CHECK(err,
-              cl::Buffer buffer_output(
-                  context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, vector_size_bytes, hw_results.data(), &err));
+              cl::Buffer buffer_in1(context,
+                                    CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                    vector_size_bytes,
+                                    h_a.data(),
+                                    &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_in2(context,
+                                    CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                    vector_size_bytes,
+                                    h_b.data(),
+                                    &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_in3(context,
+                                    CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                    vector_size_bytes,
+                                    h_c.data(),
+                                    &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_output(context,
+                                       CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                                       vector_size_bytes,
+                                       hw_results.data(),
+                                       &err));
 
     // Setting Kernel Arguments
     OCL_CHECK(err, err = krnl_vadd.setArg(0, buffer_in1));
@@ -159,7 +185,10 @@ int main(int argc, char **argv) {
     OCL_CHECK(err, err = krnl_vmult.setArg(3, size));
 
     // Copy input data to device global memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_in1, buffer_in2, buffer_in3}, 0 /* 0 means from host*/));
+    OCL_CHECK(
+        err,
+        err = q.enqueueMigrateMemObjects({buffer_in1, buffer_in2, buffer_in3},
+                                         0 /* 0 means from host*/));
 
     // Launch the Kernel
     OCL_CHECK(err, err = q.enqueueTask(krnl_vadd));
@@ -167,7 +196,9 @@ int main(int argc, char **argv) {
     q.finish();
 
     // Copy Result from Device Global Memory to Host Local Memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_output}, CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_output},
+                                               CL_MIGRATE_MEM_OBJECT_HOST));
     q.finish();
     // OpenCL Host Code Ends
 

@@ -97,8 +97,11 @@ int main(int argc, char **argv) {
 
     // Creating Command Queue
     OCL_CHECK(err,
-              q = cl::CommandQueue(
-                  context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err));
+              q = cl::CommandQueue(context,
+                                   device,
+                                   CL_QUEUE_PROFILING_ENABLE |
+                                       CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE,
+                                   &err));
 
     // read_binary_file() is a utility API which will load the binaryFile
     // and will return the pointer to file buffer.
@@ -117,10 +120,12 @@ int main(int argc, char **argv) {
     for (int i = 0; i < NCU; i++) {
         cu_id = std::to_string(i + 1);
         std::string krnl_name_full = krnl_name + ":{" + "vadd_" + cu_id + "}";
-        printf("Creating a kernel [%s] for CU(%d)\n", krnl_name_full.c_str(), i);
+        printf(
+            "Creating a kernel [%s] for CU(%d)\n", krnl_name_full.c_str(), i);
         //Here Kernel object is created by specifying kernel name along with compute unit.
         //For such case, this kernel object can only access the specific Compute unit
-        OCL_CHECK(err, krnls[i] = cl::Kernel(program, krnl_name_full.c_str(), &err));
+        OCL_CHECK(err,
+                  krnls[i] = cl::Kernel(program, krnl_name_full.c_str(), &err));
     }
 
     // Creating Buffers
@@ -130,15 +135,26 @@ int main(int argc, char **argv) {
     std::vector<cl::Buffer> buffer_output(NCU);
     for (int i = 0; i < NCU; i++) {
         OCL_CHECK(err,
-                  buffer_in1[i] = cl::Buffer(
-                      context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, vector_size_bytes, source_in1.data(), &err));
+                  buffer_in1[i] =
+                      cl::Buffer(context,
+                                 CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                 vector_size_bytes,
+                                 source_in1.data(),
+                                 &err));
         OCL_CHECK(err,
-                  buffer_in2[i] = cl::Buffer(
-                      context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, vector_size_bytes, source_in2.data(), &err));
-        OCL_CHECK(
-            err,
-            buffer_output[i] = cl::Buffer(
-                context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, vector_size_bytes, source_hw_results.data(), &err));
+                  buffer_in2[i] =
+                      cl::Buffer(context,
+                                 CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                 vector_size_bytes,
+                                 source_in2.data(),
+                                 &err));
+        OCL_CHECK(err,
+                  buffer_output[i] =
+                      cl::Buffer(context,
+                                 CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                                 vector_size_bytes,
+                                 source_hw_results.data(),
+                                 &err));
     }
 
     for (int i = 0; i < NCU; i++) {
@@ -154,7 +170,10 @@ int main(int argc, char **argv) {
         OCL_CHECK(err, err = krnls[i].setArg(narg++, NCU));
 
         //Copy input data to device global memory
-        OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_in1[i], buffer_in2[i]}, 0 /* 0 means from host*/));
+        OCL_CHECK(err,
+                  err =
+                      q.enqueueMigrateMemObjects({buffer_in1[i], buffer_in2[i]},
+                                                 0 /* 0 means from host*/));
 
         //Launch the Kernel
         OCL_CHECK(err, err = q.enqueueTask(krnls[i]));
@@ -164,7 +183,9 @@ int main(int argc, char **argv) {
 
     //Copy Result from Device Global Memory to Host Local Memory
     for (int i = 0; i < NCU; i++) {
-        OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_output[i]}, CL_MIGRATE_MEM_OBJECT_HOST));
+        OCL_CHECK(err,
+                  err = q.enqueueMigrateMemObjects({buffer_output[i]},
+                                                   CL_MIGRATE_MEM_OBJECT_HOST));
     }
     OCL_CHECK(err, err = q.finish());
 

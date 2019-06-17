@@ -169,11 +169,20 @@ outputLoop:
                         for (int j = 0; j < WSize; j++) {
                            #pragma HLS PIPELINE II=1
                             // Calculates padding boundaries in X & Y direction
-                            int xVal = x * Stride + j - Padding, yVal = y * Stride + i - Padding;
+                            int xVal = x * Stride + j - Padding,
+                                yVal = y * Stride + i - Padding;
 
-                            if (yVal >= 0 && yVal < ISize && xVal >= 0 && xVal < ISize) {
-                                acc += (short)img_lcl[(input * ISize + yVal) * ISize + xVal] *
-                                       (short)wgt_lcl[((output * i_chan + input) * WSize + i) * WSize + j];
+                            if (yVal >= 0 && yVal < ISize && xVal >= 0 &&
+                                xVal < ISize) {
+                                acc +=
+                                    (short)
+                                        img_lcl[(input * ISize + yVal) * ISize +
+                                                xVal] *
+                                    (short)wgt_lcl[((output * i_chan + input) *
+                                                        WSize +
+                                                    i) *
+                                                       WSize +
+                                                   j];
                             }
                         }
                     }

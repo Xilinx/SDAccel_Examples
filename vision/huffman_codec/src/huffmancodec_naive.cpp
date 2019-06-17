@@ -145,7 +145,8 @@ string HuffmanNaiveImpl::bitcode_to_string(const BitCode &code) {
     return str;
 }
 
-string HuffmanNaiveImpl::htree_symbols_tostring(const HTreeNode *pnode, bool inhex) {
+string HuffmanNaiveImpl::htree_symbols_tostring(const HTreeNode *pnode,
+                                                bool inhex) {
     if (!pnode)
         return string("");
 
@@ -173,8 +174,11 @@ void HuffmanNaiveImpl::print_codebook(const CodeBook &book) {
 
         counter++;
 
-        printf(
-            "Symbol [%d] 0x%x = [%c] --> %s\n", counter, it->first, it->first, bitcode_to_string(it->second).c_str());
+        printf("Symbol [%d] 0x%x = [%c] --> %s\n",
+               counter,
+               it->first,
+               it->first,
+               bitcode_to_string(it->second).c_str());
     }
 }
 
@@ -199,9 +203,14 @@ int HuffmanNaiveImpl::enc(const vector<u8> &in_data, vector<u8> &out_data) {
         LogInfo("There are %u unique symbols", alphabet.size());
 
     //2. Create Huffman tree using priority queue
-    std::priority_queue<HTreeNode *, std::vector<HTreeNode *>, GreaterThanByWeight> pq;
+    std::priority_queue<HTreeNode *,
+                        std::vector<HTreeNode *>,
+                        GreaterThanByWeight>
+        pq;
 
-    for (map<u8, u32>::const_iterator it = alphabet.begin(); it != alphabet.end(); ++it) {
+    for (map<u8, u32>::const_iterator it = alphabet.begin();
+         it != alphabet.end();
+         ++it) {
         HTreeNode *pnode = new HTreeNode();
         pnode->symbols.push_back(it->first);
         pnode->weight = (float)it->second / (float)(in_data.size());
@@ -216,7 +225,8 @@ int HuffmanNaiveImpl::enc(const vector<u8> &in_data, vector<u8> &out_data) {
     if (top) {
         string strData = htree_symbols_tostring(top);
         if (m_verbose)
-            LogInfo("Current front item is: %s, %f", strData.c_str(), top->weight);
+            LogInfo(
+                "Current front item is: %s, %f", strData.c_str(), top->weight);
     }
 
     //build the tree
@@ -230,8 +240,10 @@ int HuffmanNaiveImpl::enc(const vector<u8> &in_data, vector<u8> &out_data) {
 
         //create a combined node
         HTreeNode *pnode = new HTreeNode();
-        pnode->symbols.insert(pnode->symbols.end(), s0->symbols.begin(), s0->symbols.end());
-        pnode->symbols.insert(pnode->symbols.end(), s1->symbols.begin(), s1->symbols.end());
+        pnode->symbols.insert(
+            pnode->symbols.end(), s0->symbols.begin(), s0->symbols.end());
+        pnode->symbols.insert(
+            pnode->symbols.end(), s1->symbols.begin(), s1->symbols.end());
         pnode->weight = s0->weight + s1->weight;
         pnode->left = s0;
         pnode->right = s1;
@@ -328,17 +340,20 @@ int HuffmanNaiveImpl::enc(const vector<u8> &in_data, vector<u8> &out_data) {
     }
 
     //write bit-lengths
-    for (CodeBook::const_iterator it = codebook.begin(); it != codebook.end(); it++) {
+    for (CodeBook::const_iterator it = codebook.begin(); it != codebook.end();
+         it++) {
         out_data.push_back(it->second.bitlen); //code
     }
 
     //write bit codes
-    for (CodeBook::const_iterator it = codebook.begin(); it != codebook.end(); it++) {
+    for (CodeBook::const_iterator it = codebook.begin(); it != codebook.end();
+         it++) {
         out_data.push_back(it->second.code); //code
     }
 
     //write alphabet
-    for (CodeBook::const_iterator it = codebook.begin(); it != codebook.end(); it++) {
+    for (CodeBook::const_iterator it = codebook.begin(); it != codebook.end();
+         it++) {
         out_data.push_back(it->first);
     }
 
@@ -581,7 +596,10 @@ void HuffmanNaiveImpl::print_huffman_tree(const HTreeNode *root) {
         //string strbin = binary_string(pc->code);
         //print bitcode based on its length in binary
         string strBitCode = bitcode_to_string(pc->bitcode);
-        printf("[%s, c=%s, w=%.3f] ", str.c_str(), strBitCode.c_str(), pc->weight * 100.0);
+        printf("[%s, c=%s, w=%.3f] ",
+               str.c_str(),
+               strBitCode.c_str(),
+               pc->weight * 100.0);
 
         if (pc->left && pc->right) {
             q.push(pc->left);
@@ -600,7 +618,8 @@ void HuffmanNaiveImpl::print_huffman_tree(const HTreeNode *root) {
     printf("==========================================\n");
 }
 
-int HuffmanNaiveImpl::htree_depth_recursive(const HTreeNode *root, int current_depth) {
+int HuffmanNaiveImpl::htree_depth_recursive(const HTreeNode *root,
+                                            int current_depth) {
     if (root->left && root->right) {
         int depth_left = htree_depth_recursive(root->left, current_depth + 1);
         int depth_right = htree_depth_recursive(root->right, current_depth + 1);

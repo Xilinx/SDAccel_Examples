@@ -97,7 +97,10 @@ mem_rd:
 }
 
 //adder(): Read Input data from inStream and write the result into outStream
-static void adder(hls::stream<int> &inStream, hls::stream<int> &outStream, int incr, int size) {
+static void adder(hls::stream<int> &inStream,
+                  hls::stream<int> &outStream,
+                  int incr,
+                  int size) {
 execute:
     for (int i = 0; i < size; i++) {
        #pragma HLS PIPELINE II=1

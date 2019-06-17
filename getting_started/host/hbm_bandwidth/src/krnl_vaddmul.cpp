@@ -37,12 +37,13 @@ Description:
 #include "krnl_vaddmul.h"
 
 extern "C" {
-void krnl_vaddmul(const v_dt *in1,             // Read-Only Vector 1
-                  const v_dt *in2,             // Read-Only Vector 2
-                  v_dt *out_add,               // Output Result for ADD
-                  v_dt *out_mul,               // Output Result for MUL
-                  const unsigned int size,     // Size in integer
-                  const unsigned int num_times // Running the same kernel operations num_times
+void krnl_vaddmul(
+    const v_dt *in1,             // Read-Only Vector 1
+    const v_dt *in2,             // Read-Only Vector 2
+    v_dt *out_add,               // Output Result for ADD
+    v_dt *out_mul,               // Output Result for MUL
+    const unsigned int size,     // Size in integer
+    const unsigned int num_times // Running the same kernel operations num_times
 ) {
 #pragma HLS INTERFACE m_axi port = in1 offset = slave bundle = gmem0
 #pragma HLS INTERFACE m_axi port = in2 offset = slave bundle = gmem1

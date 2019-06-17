@@ -44,7 +44,8 @@ int main(int argc, char *argv[]) {
     BitmapInterface image(bitmapFilename.data());
     bool result = image.readBitmapFile();
     if (!result) {
-        std::cout << "ERROR:Unable to Read Input Bitmap File " << bitmapFilename.data() << std::endl;
+        std::cout << "ERROR:Unable to Read Input Bitmap File "
+                  << bitmapFilename.data() << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -52,7 +53,8 @@ int main(int argc, char *argv[]) {
     BitmapInterface goldenImage(goldenFilename.data());
     result = goldenImage.readBitmapFile();
     if (!result) {
-        std::cout << "ERROR:Unable to Read Golden Bitmap File " << goldenFilename.data() << std::endl;
+        std::cout << "ERROR:Unable to Read Golden Bitmap File "
+                  << goldenFilename.data() << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -75,8 +77,11 @@ int main(int argc, char *argv[]) {
     auto device = devices[0];
 
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
-    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
-    OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
+    OCL_CHECK(
+        err,
+        cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(err,
+              std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
@@ -85,11 +90,18 @@ int main(int argc, char *argv[]) {
     OCL_CHECK(err, cl::Kernel kernel(program, "apply_watermark", &err));
 
     OCL_CHECK(err,
-              cl::Buffer buffer_inImage(
-                  context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, image_size_bytes, inImage.data(), &err));
-    OCL_CHECK(err,
-              cl::Buffer buffer_outImage(
-                  context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, image_size_bytes, outImage.data(), &err));
+              cl::Buffer buffer_inImage(context,
+                                        CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
+                                        image_size_bytes,
+                                        inImage.data(),
+                                        &err));
+    OCL_CHECK(
+        err,
+        cl::Buffer buffer_outImage(context,
+                                   CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                                   image_size_bytes,
+                                   outImage.data(),
+                                   &err));
 
     OCL_CHECK(err, err = kernel.setArg(0, buffer_inImage));
     OCL_CHECK(err, err = kernel.setArg(1, buffer_outImage));
@@ -97,26 +109,34 @@ int main(int argc, char *argv[]) {
     OCL_CHECK(err, err = kernel.setArg(3, height));
 
     //Copy input Image to device global memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_inImage}, 0 /* 0 means from host*/));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_inImage},
+                                               0 /* 0 means from host*/));
 
     //Launch the Kernel
     OCL_CHECK(err, err = q.enqueueNDRangeKernel(kernel, 0, 1, 1, NULL, NULL));
 
     //Copy Result from Device Global Memory to Host Local Memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_outImage}, CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_outImage},
+                                               CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());
     //OPENCL HOST CODE AREA END
 
     //Compare Golden Image with Output image
     bool match = 0;
-    if (image.getHeight() != goldenImage.getHeight() || image.getWidth() != goldenImage.getWidth()) {
+    if (image.getHeight() != goldenImage.getHeight() ||
+        image.getWidth() != goldenImage.getWidth()) {
         match = 1;
     } else {
         int *goldImgPtr = goldenImage.bitmap();
         for (unsigned int i = 0; i < image.numPixels(); i++) {
             if (outImage[i] != goldImgPtr[i]) {
                 match = 1;
-                printf("Pixel %d Mismatch Output %x and Expected %x \n", i, outImage[i], goldImgPtr[i]);
+                printf("Pixel %d Mismatch Output %x and Expected %x \n",
+                       i,
+                       outImage[i],
+                       goldImgPtr[i]);
                 break;
             }
         }

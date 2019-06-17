@@ -54,7 +54,9 @@ bool is_number(const std::string &s) {
     return !s.empty() && it == s.end();
 }
 
-bool starts_with(const string &src, const string &sub) { return (src.find(sub) == 0); }
+bool starts_with(const string &src, const string &sub) {
+    return (src.find(sub) == 0);
+}
 
 CmdLineParser::CmdLineParser() {
     // TODO Auto-generated constructor stub
@@ -92,7 +94,8 @@ bool CmdLineParser::addSwitch(const CmdSwitch &s) {
 
     //check input
     if (cmd.key.find("--") != 0 || cmd.key.length() < 3) {
-        LogError("The input key is invalid. Please start with -- and keep a length >= 3");
+        LogError("The input key is invalid. Please start with -- and keep a "
+                 "length >= 3");
         return false;
     }
 
@@ -106,13 +109,16 @@ bool CmdLineParser::addSwitch(const CmdSwitch &s) {
         string temp = "-" + cmd.key[2];
 
         int i = 3;
-        while (m_mapShortcutKeys.find(temp) != m_mapShortcutKeys.end() && (size_t)i < cmd.key.length()) {
+        while (m_mapShortcutKeys.find(temp) != m_mapShortcutKeys.end() &&
+               (size_t)i < cmd.key.length()) {
             temp = "-" + s.key[i];
             i++;
         }
 
         cmd.shortcut = temp;
-        LogInfo("Automatic shortcut assigned %s to %s", temp.c_str(), cmd.key.c_str());
+        LogInfo("Automatic shortcut assigned %s to %s",
+                temp.c_str(),
+                cmd.key.c_str());
     }
 
     if (s.istoggle) {
@@ -133,8 +139,11 @@ bool CmdLineParser::addSwitch(const CmdSwitch &s) {
     return true;
 }
 
-bool CmdLineParser::addSwitch(
-    const string &name, const string &shortcut, const string &desc, const string &default_value, bool istoggle) {
+bool CmdLineParser::addSwitch(const string &name,
+                              const string &shortcut,
+                              const string &desc,
+                              const string &default_value,
+                              bool istoggle) {
 
     CmdSwitch s;
     s.key = name;
@@ -155,7 +164,8 @@ bool CmdLineParser::setDefaultKey(const char *key) {
         CmdSwitch *pcmd = m_mapKeySwitch[m_strDefaultKey];
         if (pcmd != NULL) {
             if (pcmd->istoggle) {
-                LogError("Boolean command line options can not be used as default keys");
+                LogError("Boolean command line options can not be used as "
+                         "default keys");
                 return false;
             }
         }
@@ -208,9 +218,11 @@ int CmdLineParser::parse(int argc, char *argv[]) {
             iskey = true;
         }
         //default key, the value for default key is the last argument
-        else if (isNextTokenKey == false && m_strDefaultKey.length() > 0 && i == argc - 2) {
+        else if (isNextTokenKey == false && m_strDefaultKey.length() > 0 &&
+                 i == argc - 2) {
             if (m_mapKeySwitch.find(m_strDefaultKey) == m_mapKeySwitch.end()) {
-                LogError("Unrecognized default key %s", m_strDefaultKey.c_str());
+                LogError("Unrecognized default key %s",
+                         m_strDefaultKey.c_str());
                 printHelp();
                 return -1;
             }
@@ -348,7 +360,10 @@ void CmdLineParser::printHelp() {
                    pcmd->desc.c_str(),
                    pcmd->default_value.c_str());
         else
-            printf("\t%s, %s\t\t%s\n", pcmd->key.c_str(), pcmd->shortcut.c_str(), pcmd->desc.c_str());
+            printf("\t%s, %s\t\t%s\n",
+                   pcmd->key.c_str(),
+                   pcmd->shortcut.c_str(),
+                   pcmd->desc.c_str());
     }
 }
 

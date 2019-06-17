@@ -45,14 +45,15 @@ int main(int argc, char *argv[]) {
     BitmapInterface image(bitmapFilename.data());
     bool result = image.readBitmapFile();
     if (!result) {
-        std::cout << "ERROR:Unable to Read Input Bitmap File " << bitmapFilename.data() << std::endl;
+        std::cout << "ERROR:Unable to Read Input Bitmap File "
+                  << bitmapFilename.data() << std::endl;
         return EXIT_FAILURE;
     }
-    int width = image.getWidth();
-    int height = image.getHeight();
+    auto width = image.getWidth();
+    auto height = image.getHeight();
 
     //Allocate Memory in Host Memory
-    size_t image_size = image.numPixels();
+    auto image_size = image.numPixels();
     size_t image_size_bytes = image_size * sizeof(int);
     std::vector<int, aligned_allocator<int>> inputImage(image_size);
     std::vector<int, aligned_allocator<int>> outImage(image_size);
@@ -62,25 +63,36 @@ int main(int argc, char *argv[]) {
 
     //OPENCL HOST CODE AREA START
 
-    std::vector<cl::Device> devices = xcl::get_xil_devices();
-    cl::Device device = devices[0];
+    auto devices = xcl::get_xil_devices();
+    auto device = devices[0];
 
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
-    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
-    OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
+    OCL_CHECK(
+        err,
+        cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(err,
+              std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
-    char *fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
-    OCL_CHECK(err, cl::Kernel krnl_applyWatermark(program, "apply_watermark", &err));
+    OCL_CHECK(err,
+              cl::Kernel krnl_applyWatermark(program, "apply_watermark", &err));
 
     OCL_CHECK(err,
-              cl::Buffer buffer_inImage(
-                  context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, image_size_bytes, inputImage.data(), &err));
-    OCL_CHECK(err,
-              cl::Buffer buffer_outImage(
-                  context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, image_size_bytes, outImage.data(), &err));
+              cl::Buffer buffer_inImage(context,
+                                        CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
+                                        image_size_bytes,
+                                        inputImage.data(),
+                                        &err));
+    OCL_CHECK(
+        err,
+        cl::Buffer buffer_outImage(context,
+                                   CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
+                                   image_size_bytes,
+                                   outImage.data(),
+                                   &err));
 
     /* 
      * Using setArg(), i.e. setting kernel arguments, explicitly before enqueueMigrateMemObjects(), 
@@ -94,13 +106,17 @@ int main(int argc, char *argv[]) {
     krnl_applyWatermark.setArg(3, height);
 
     //Copy input Image to device global memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_inImage}, 0 /* 0 means from host*/));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_inImage},
+                                               0 /* 0 means from host*/));
 
     //Launch the Kernel
     OCL_CHECK(err, err = q.enqueueTask(krnl_applyWatermark));
 
     //Copy Result from Device Global Memory to Host Local Memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_outImage}, CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_outImage},
+                                               CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());
     //OPENCL HOST CODE AREA END
 
@@ -112,17 +128,22 @@ int main(int argc, char *argv[]) {
         BitmapInterface goldenImage(goldenFilename.data());
         result = goldenImage.readBitmapFile();
         if (!result) {
-            std::cout << "ERROR:Unable to Read Golden Bitmap File " << goldenFilename.data() << std::endl;
+            std::cout << "ERROR:Unable to Read Golden Bitmap File "
+                      << goldenFilename.data() << std::endl;
             return EXIT_FAILURE;
         }
-        if (image.getHeight() != goldenImage.getHeight() || image.getWidth() != goldenImage.getWidth()) {
+        if (image.getHeight() != goldenImage.getHeight() ||
+            image.getWidth() != goldenImage.getWidth()) {
             match = 0;
         } else {
             int *goldImgPtr = goldenImage.bitmap();
             for (unsigned int i = 0; i < image.numPixels(); i++) {
                 if (outImage[i] != goldImgPtr[i]) {
                     match = 0;
-                    printf("Pixel %d Mismatch Output %x and Expected %x \n", i, outImage[i], goldImgPtr[i]);
+                    printf("Pixel %d Mismatch Output %x and Expected %x \n",
+                           i,
+                           outImage[i],
+                           goldImgPtr[i]);
                     break;
                 }
             }

@@ -54,8 +54,12 @@ Description:
 uint64_t get_duration_ns(const cl::Event &event) {
     cl_int err;
     uint64_t nstimestart, nstimeend;
-    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START, &nstimestart));
-    OCL_CHECK(err, event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END, &nstimeend));
+    OCL_CHECK(err,
+              err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,
+                                                     &nstimestart));
+    OCL_CHECK(
+        err,
+        event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END, &nstimeend));
     return (nstimeend - nstimestart);
 }
 
@@ -76,12 +80,21 @@ void convGolden(int *weight, int *image, int *out, int i_chan, int o_chan) {
                         for (int j = 0; j < WSize; j++) {
 
                             // Calculate input padding boundaries
-                            int xVal = x * Stride + j - Padding, yVal = y * Stride + i - Padding;
+                            int xVal = x * Stride + j - Padding,
+                                yVal = y * Stride + i - Padding;
 
                             // Convolution operation
-                            if (yVal >= 0 && yVal < ISize && xVal >= 0 && xVal < ISize) {
-                                acc += (short)image[(input * ISize + yVal) * ISize + xVal] *
-                                       (short)weight[((output * WInChan + input) * WSize + i) * WSize + j];
+                            if (yVal >= 0 && yVal < ISize && xVal >= 0 &&
+                                xVal < ISize) {
+                                acc +=
+                                    (short)
+                                        image[(input * ISize + yVal) * ISize +
+                                              xVal] *
+                                    (short)weight[((output * WInChan + input) *
+                                                       WSize +
+                                                   i) *
+                                                      WSize +
+                                                  j];
                             }
                         }
                         // Update each output pixel / output filter
@@ -119,22 +132,32 @@ uint64_t run_opencl_cnn(std::vector<cl::Device> &devices,
         OCL_CHECK(err, krnl_cnn_conv = cl::Kernel(program, "cnn_BAD", &err));
     }
 
-    std::cout << "Starting " << (good ? "GOOD" : "BAD") << " Kernel" << std::endl;
+    std::cout << "Starting " << (good ? "GOOD" : "BAD") << " Kernel"
+              << std::endl;
 
     size_t image_size_bytes = sizeof(int) * i_chan * ISize * ISize;
     size_t weight_size_bytes = sizeof(int) * o_chan * WInChan * WSize * WSize;
     size_t output_size_bytes = sizeof(int) * o_chan * OSize * OSize;
 
     // Allocate Buffer in Global Memory
-    OCL_CHECK(
-        err,
-        cl::Buffer buffer_image(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, image_size_bytes, image.data(), &err));
     OCL_CHECK(err,
-              cl::Buffer buffer_weight(
-                  context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, weight_size_bytes, weight.data(), &err));
+              cl::Buffer buffer_image(context,
+                                      CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                      image_size_bytes,
+                                      image.data(),
+                                      &err));
     OCL_CHECK(err,
-              cl::Buffer buffer_output(
-                  context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, output_size_bytes, output.data(), &err));
+              cl::Buffer buffer_weight(context,
+                                       CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                                       weight_size_bytes,
+                                       weight.data(),
+                                       &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_output(context,
+                                       CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                                       output_size_bytes,
+                                       output.data(),
+                                       &err));
 
     //Set the Kernel Arguments
     int narg = 0;
@@ -145,7 +168,9 @@ uint64_t run_opencl_cnn(std::vector<cl::Device> &devices,
     OCL_CHECK(err, err = krnl_cnn_conv.setArg(narg++, i_chan));
     OCL_CHECK(err, err = krnl_cnn_conv.setArg(narg++, o_chan));
 
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_image, buffer_weight}, 0 /* 0 means from host*/));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_image, buffer_weight},
+                                               0 /* 0 means from host*/));
 
     std::cout << "Begin " << (good ? "GOOD" : "BAD") << " Kernel" << std::endl;
 
@@ -160,7 +185,9 @@ uint64_t run_opencl_cnn(std::vector<cl::Device> &devices,
         cl::NDRange global_size = work_group;
         cl::NDRange local_size = work_item_per_group;
 
-        OCL_CHECK(err, err = q.enqueueNDRangeKernel(krnl_cnn_conv, 0, global_size, local_size, NULL, &event));
+        OCL_CHECK(err,
+                  err = q.enqueueNDRangeKernel(
+                      krnl_cnn_conv, 0, global_size, local_size, NULL, &event));
         OCL_CHECK(err, err = q.finish());
 
         duration = get_duration_ns(event);
@@ -172,11 +199,14 @@ uint64_t run_opencl_cnn(std::vector<cl::Device> &devices,
     }
 
     //Copy Result from Device Global Memory to Host Local Memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_output}, CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_output},
+                                               CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());
     delete[] fileBuf;
 
-    std::cout << "Finished " << (good ? "GOOD" : "BAD") << " Kernel" << std::endl;
+    std::cout << "Finished " << (good ? "GOOD" : "BAD") << " Kernel"
+              << std::endl;
     return duration;
 }
 
@@ -200,9 +230,12 @@ int main(int argc, char **argv) {
 
         size = o_chan * OSize * OSize;
 
-        printf("\nOriginal Dataset is Reduced for Faster Execution of Hardware Emulation Flow\n");
-        printf("\t#Input_Channels (IChan)            = %d (Original : 96 )\n", i_chan);
-        printf("\t#Weight_Output_Channels (WOutChan) = %d (Original : 256)\n\n", o_chan);
+        printf("\nOriginal Dataset is Reduced for Faster Execution of Hardware "
+               "Emulation Flow\n");
+        printf("\t#Input_Channels (IChan)            = %d (Original : 96 )\n",
+               i_chan);
+        printf("\t#Weight_Output_Channels (WOutChan) = %d (Original : 256)\n\n",
+               o_chan);
     }
 
     // Allocate Memory in Host (Image, Weights and Output)
@@ -212,9 +245,12 @@ int main(int argc, char **argv) {
 
     std::vector<int, aligned_allocator<int>> image(image_size_bytes);
     std::vector<int, aligned_allocator<int>> weight(weight_size_bytes);
-    std::vector<int, aligned_allocator<int>> source_good_hw_results(output_size_bytes);
-    std::vector<int, aligned_allocator<int>> source_bad_hw_results(output_size_bytes);
-    std::vector<int, aligned_allocator<int>> source_sw_results(output_size_bytes);
+    std::vector<int, aligned_allocator<int>> source_good_hw_results(
+        output_size_bytes);
+    std::vector<int, aligned_allocator<int>> source_bad_hw_results(
+        output_size_bytes);
+    std::vector<int, aligned_allocator<int>> source_sw_results(
+        output_size_bytes);
 
     // Initialize Image, Weights & Output Host Buffers
     for (int i = 0; i < i_chan * ISize * ISize; i++)
@@ -224,9 +260,11 @@ int main(int argc, char **argv) {
         weight[i] = i % 255;
 
     for (int i = 0; i < o_chan * OSize * OSize; i++)
-        source_sw_results[i] = source_good_hw_results[i] = source_bad_hw_results[i] = 0;
+        source_sw_results[i] = source_good_hw_results[i] =
+            source_bad_hw_results[i] = 0;
 
-    convGolden(weight.data(), image.data(), source_sw_results.data(), i_chan, o_chan);
+    convGolden(
+        weight.data(), image.data(), source_sw_results.data(), i_chan, o_chan);
 
     //OPENCL HOST CODE AREA START
     //Create Program and Kernels
@@ -234,7 +272,9 @@ int main(int argc, char **argv) {
     cl::Device device = devices[0];
 
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
-    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(
+        err,
+        cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     auto device_name = device.getInfo<CL_DEVICE_NAME>();
     std::string binaryFile;
 
@@ -274,9 +314,12 @@ int main(int argc, char **argv) {
          * the hardware thus there's no reason to check the results */
         if (bad_duration != 0) {
             if (source_bad_hw_results[i] != source_sw_results[i]) {
-                std::cout << "Error: Result mismatch in bad kernel" << std::endl;
-                std::cout << "i = " << i << " CPU result = " << source_sw_results[i]
-                          << " Device result = " << source_bad_hw_results[i] << std::endl;
+                std::cout << "Error: Result mismatch in bad kernel"
+                          << std::endl;
+                std::cout << "i = " << i
+                          << " CPU result = " << source_sw_results[i]
+                          << " Device result = " << source_bad_hw_results[i]
+                          << std::endl;
                 match = false;
                 break;
             }
@@ -284,7 +327,8 @@ int main(int argc, char **argv) {
         if (source_good_hw_results[i] != source_sw_results[i]) {
             std::cout << "Error: Result mismatch in good kernel" << std::endl;
             std::cout << "i = " << i << " CPU result = " << source_sw_results[i]
-                      << " Device result = " << source_good_hw_results[i] << std::endl;
+                      << " Device result = " << source_good_hw_results[i]
+                      << std::endl;
             match = false;
             break;
         }

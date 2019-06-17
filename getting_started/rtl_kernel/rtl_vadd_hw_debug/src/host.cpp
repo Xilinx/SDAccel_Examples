@@ -49,9 +49,9 @@ int main(int argc, char **argv) {
 
     std::string binaryFile = argv[1];
 
-    int size = DATA_SIZE;
+    auto size = DATA_SIZE;
     //Allocate Memory in Host Memory
-    size_t vector_size_bytes = sizeof(int) * size;
+    auto vector_size_bytes = sizeof(int) * size;
     std::vector<int, aligned_allocator<int>> source_input1(size);
     std::vector<int, aligned_allocator<int>> source_input2(size);
     std::vector<int, aligned_allocator<int>> source_hw_results(size);
@@ -69,14 +69,16 @@ int main(int argc, char **argv) {
     //Create Program and Kernel
     cl_int err;
     unsigned fileBufSize;
-    std::vector<cl::Device> devices = xcl::get_xil_devices();
-    cl::Device device = devices[0];
+    auto devices = xcl::get_xil_devices();
+    auto device = devices[0];
 
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
-    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
-    std::string device_name = device.getInfo<CL_DEVICE_NAME>();
+    OCL_CHECK(
+        err,
+        cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    auto device_name = device.getInfo<CL_DEVICE_NAME>();
 
-    char *fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
@@ -90,14 +92,23 @@ int main(int argc, char **argv) {
 
     //Allocate Buffer in Global Memory
     OCL_CHECK(err,
-              cl::Buffer buffer_r1(
-                  context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, vector_size_bytes, source_input1.data(), &err));
+              cl::Buffer buffer_r1(context,
+                                   CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                   vector_size_bytes,
+                                   source_input1.data(),
+                                   &err));
     OCL_CHECK(err,
-              cl::Buffer buffer_r2(
-                  context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, vector_size_bytes, source_input2.data(), &err));
+              cl::Buffer buffer_r2(context,
+                                   CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                   vector_size_bytes,
+                                   source_input2.data(),
+                                   &err));
     OCL_CHECK(err,
-              cl::Buffer buffer_w(
-                  context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, vector_size_bytes, source_hw_results.data(), &err));
+              cl::Buffer buffer_w(context,
+                                  CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                                  vector_size_bytes,
+                                  source_hw_results.data(),
+                                  &err));
 
     //Set the Kernel Arguments
     OCL_CHECK(err, err = krnl_vadd.setArg(0, buffer_r1));
@@ -106,13 +117,17 @@ int main(int argc, char **argv) {
     OCL_CHECK(err, err = krnl_vadd.setArg(3, size));
 
     //Copy input data to device global memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_r1, buffer_r2}, 0 /* 0 means from host*/));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_r1, buffer_r2},
+                                               0 /* 0 means from host*/));
 
     //Launch the Kernel
     OCL_CHECK(err, err = q.enqueueTask(krnl_vadd));
 
     //Copy Result from Device Global Memory to Host Local Memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_w}, CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_w},
+                                               CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());
 
     //OPENCL HOST CODE AREA END
@@ -122,8 +137,10 @@ int main(int argc, char **argv) {
     for (int i = 0; i < size; i++) {
         if (source_hw_results[i] != source_sw_results[i]) {
             std::cout << "Error: Result mismatch" << std::endl;
-            std::cout << "i = " << i << " Software result = " << source_sw_results[i]
-                      << " Device result = " << source_hw_results[i] << std::endl;
+            std::cout << "i = " << i
+                      << " Software result = " << source_sw_results[i]
+                      << " Device result = " << source_hw_results[i]
+                      << std::endl;
             match = 1;
             break;
         }

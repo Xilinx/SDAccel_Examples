@@ -87,7 +87,9 @@ int main(int argc, char *argv[]) {
         image.assign(input.datastart, input.dataend);
     } else {
         for (int i = 0; i < input.rows; ++i) {
-            image.insert(image.end(), input.ptr<uchar>(i), input.ptr<uchar>(i) + input.cols);
+            image.insert(image.end(),
+                         input.ptr<uchar>(i),
+                         input.ptr<uchar>(i) + input.cols);
         }
     }
 
@@ -97,11 +99,14 @@ int main(int argc, char *argv[]) {
 
     std::cout << "Calculating Max Energy..." << std::endl;
     short inputMax = getAbsMax(input);
-    std::cout << "inputBits = " << ceil(log2(inputMax)) << " coefMax = 2" << std::endl;
+    std::cout << "inputBits = " << ceil(log2(inputMax)) << " coefMax = 2"
+              << std::endl;
     long long max_bits = (long long)inputMax * 2 * 3 * 3;
-    std::cout << "Max Energy = " << ceil(log2(max_bits)) + 1 << " Bits" << std::endl;
+    std::cout << "Max Energy = " << ceil(log2(max_bits)) + 1 << " Bits"
+              << std::endl;
 
-    std::cout << "Image Dimensions: " << input.cols << "x" << input.rows << std::endl;
+    std::cout << "Image Dimensions: " << input.cols << "x" << input.rows
+              << std::endl;
 
     assert(input.cols == IMAGE_WIDTH);
     assert(input.rows <= IMAGE_HEIGHT);
@@ -109,17 +114,20 @@ int main(int argc, char *argv[]) {
     // OPENCL HOST CODE AREA START
     // get_xil_devices() is a utility API which will find the xilinx
     // platforms and will return list of devices connected to Xilinx platform
-    std::vector<cl::Device> devices = xcl::get_xil_devices();
-    cl::Device device = devices[0];
+    auto devices = xcl::get_xil_devices();
+    auto device = devices[0];
 
     std::cout << "Creating Context..." << std::endl;
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
-    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
-    OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
+    OCL_CHECK(
+        err,
+        cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(err,
+              std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     // read_binary_file() is a utility API which will load the binaryFile
     // and will return pointer to file buffer.
-    char *fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
@@ -135,12 +143,13 @@ int main(int argc, char *argv[]) {
                                   ((img_size - 1) / 32 + 1) * sizeof(cl_uint16),
                                   image.data(),
                                   &err));
-    OCL_CHECK(err,
-              cl::Buffer devOutput(context,
-                                   CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-                                   ((img_size - 1) / 32 + 1) * sizeof(cl_uint16),
-                                   outimage.data(),
-                                   &err));
+    OCL_CHECK(
+        err,
+        cl::Buffer devOutput(context,
+                             CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                             ((img_size - 1) / 32 + 1) * sizeof(cl_uint16),
+                             outimage.data(),
+                             &err));
 
     std::cout << "Setting Arguments..." << std::endl;
     OCL_CHECK(err, err = krnl_sobel.setArg(0, devInput));
@@ -148,7 +157,9 @@ int main(int argc, char *argv[]) {
 
     // Copy input data to device global memory
     std::cout << "Copying Buffers to device..." << std::endl;
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({devInput}, 0 /*0 means from host*/));
+    OCL_CHECK(
+        err,
+        err = q.enqueueMigrateMemObjects({devInput}, 0 /*0 means from host*/));
 
     // Launch the Kernel
     // For HLS kernels global and local size is always (1,1,1). So, it is recommended
@@ -158,11 +169,17 @@ int main(int argc, char *argv[]) {
 
     // Copy Result from Device Global Memory to Host Local Memory
     std::cout << "Getting Result..." << std::endl;
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({devOutput}, CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({devOutput},
+                                               CL_MIGRATE_MEM_OBJECT_HOST));
     q.finish();
     uint64_t nstimestart, nstimeend;
-    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START, &nstimestart));
-    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END, &nstimeend));
+    OCL_CHECK(err,
+              err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,
+                                                     &nstimestart));
+    OCL_CHECK(err,
+              err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,
+                                                     &nstimeend));
 
     auto duration = nstimeend - nstimestart;
 

@@ -61,7 +61,8 @@ typedef ap_uint<DATAWIDTH> TYPE;
 int saturatedAdd(int x, int y);
 
 //TRIPCOUNT identifier
-const unsigned int c_image_size = 2 * (DATAWIDTH * WATERMARK_HEIGHT * WATERMARK_WIDTH * CHANNELS) / DATA_SIZE;
+const unsigned int c_image_size =
+    2 * (DATAWIDTH * WATERMARK_HEIGHT * WATERMARK_WIDTH * CHANNELS) / DATA_SIZE;
 
 extern "C" {
 void apply_watermark(TYPE *input, TYPE *output, int width, int height) {
@@ -131,8 +132,8 @@ image_traverse:
             //Calculating WaterMark x and y index
             int w_idx = tmp_y % WATERMARK_HEIGHT;
             int w_idy = tmp_x % WATERMARK_WIDTH;
-            tmp.range(32 * (i + 1) - 1, 32 * i) =
-                saturatedAdd(tmp.range(32 * (i + 1) - 1, 32 * i), watermark[w_idy][w_idx]);
+            tmp.range(32 * (i + 1) - 1, 32 * i) = saturatedAdd(
+                tmp.range(32 * (i + 1) - 1, 32 * i), watermark[w_idy][w_idx]);
         }
 
         //Write the Next 16 Pixels result to output memory

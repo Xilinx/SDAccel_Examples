@@ -77,13 +77,20 @@ string GetTimeStamp() { return ""; }
 
 // trim from start
 string &ltrim(std::string &s) {
-    s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
+    s.erase(s.begin(),
+            std::find_if(s.begin(),
+                         s.end(),
+                         std::not1(std::ptr_fun<int, int>(std::isspace))));
     return s;
 }
 
 // trim from end
 string &rtrim(std::string &s) {
-    s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+    s.erase(std::find_if(s.rbegin(),
+                         s.rend(),
+                         std::not1(std::ptr_fun<int, int>(std::isspace)))
+                .base(),
+            s.end());
     return s;
 }
 
@@ -123,15 +130,27 @@ void LogWrapper(int etype, const char *file, int line, const char *desc, ...) {
         //source
         switch (etype) {
         case (sda::etError): {
-            snprintf(header, sizeof(header), "ERROR: [%s:%d]", strFileLoc.c_str(), line);
+            snprintf(header,
+                     sizeof(header),
+                     "ERROR: [%s:%d]",
+                     strFileLoc.c_str(),
+                     line);
             break;
         }
         case (sda::etInfo): {
-            snprintf(header, sizeof(header), "INFO: [%s:%d]", strFileLoc.c_str(), line);
+            snprintf(header,
+                     sizeof(header),
+                     "INFO: [%s:%d]",
+                     strFileLoc.c_str(),
+                     line);
             break;
         }
         case (sda::etWarning): {
-            snprintf(header, sizeof(header), "WARN: [%s:%d]", strFileLoc.c_str(), line);
+            snprintf(header,
+                     sizeof(header),
+                     "WARN: [%s:%d]",
+                     strFileLoc.c_str(),
+                     line);
             break;
         }
         }
@@ -148,7 +167,8 @@ void LogWrapper(int etype, const char *file, int line, const char *desc, ...) {
         char buffer[64];
         struct tm timeinfo;
         localtime_s(&timeinfo, &rawtime);
-        asctime_s(timeinfo, buffer, sizeof(buffer)) snprintf(buffer, sizeof(buffer), "TIME: [%s]", asctime(timeinfo));
+        asctime_s(timeinfo, buffer, sizeof(buffer))
+            snprintf(buffer, sizeof(buffer), "TIME: [%s]", asctime(timeinfo));
         strTime = string(buffer);
 #else
         char buffer[64];
@@ -175,7 +195,8 @@ void LogWrapper(int etype, const char *file, int line, const char *desc, ...) {
     }
 
     //combine
-    string strOut = strHeader + string(" ") + strTime + string(" ") + strMsg + string("\n");
+    string strOut =
+        strHeader + string(" ") + strTime + string(" ") + strMsg + string("\n");
 
     //display
     cout << strOut;

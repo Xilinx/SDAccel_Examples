@@ -108,7 +108,8 @@ int main(int argc, char *argv[]) {
     unsigned fileBufSize;
 
     if (argc != 4 && argc != 5) {
-        std::cout << "Usage: " << argv[0] << " <XCLBIN File> <input> <coef> [<golden>]" << std::endl;
+        std::cout << "Usage: " << argv[0]
+                  << " <XCLBIN File> <input> <coef> [<golden>]" << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -138,27 +139,33 @@ int main(int argc, char *argv[]) {
     short inputMax = getAbsMax(input, IMAGE_HEIGHT, IMAGE_WIDTH);
     short coefMax = getAbsMax(coef, FILTER_HEIGHT, FILTER_WIDTH);
 
-    std::cout << "inputBits = " << ceil(log2(inputMax)) << " coefMax = " << ceil(log2(coefMax)) << std::endl;
-    long long max_bits = (long long)inputMax * coefMax * FILTER_HEIGHT * FILTER_WIDTH;
+    std::cout << "inputBits = " << ceil(log2(inputMax))
+              << " coefMax = " << ceil(log2(coefMax)) << std::endl;
+    long long max_bits =
+        (long long)inputMax * coefMax * FILTER_HEIGHT * FILTER_WIDTH;
     cv::Mat output(IMAGE_HEIGHT, IMAGE_WIDTH, CV_16S);
     output.reshape(0);
 
-    std::cout << "Max Energy = " << ceil(log2(max_bits)) + 1 << " Bits" << std::endl;
+    std::cout << "Max Energy = " << ceil(log2(max_bits)) + 1 << " Bits"
+              << std::endl;
 
     // OPENCL HOST CODE AREA START
     // get_xil_devices() is a utility API which will find the Xilinx
     // platforms and will return list of devices connected to Xilinx platform
-    std::vector<cl::Device> devices = xcl::get_xil_devices();
-    cl::Device device = devices[0];
+    auto devices = xcl::get_xil_devices();
+    auto device = devices[0];
 
     std::cout << "Creating Context..." << std::endl;
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
-    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
-    OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
+    OCL_CHECK(
+        err,
+        cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(err,
+              std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     // read_binary_file() ia a utility API which will load the binaryFile
     // and will return pointer to file buffer.
-    char *fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
@@ -171,19 +178,22 @@ int main(int argc, char *argv[]) {
     OCL_CHECK(err,
               cl::Buffer devCoef(context,
                                  CL_MEM_COPY_HOST_PTR | CL_MEM_READ_ONLY,
-                                 ((FILTER_HEIGHT * FILTER_WIDTH - 1) / 32 + 1) * sizeof(cl_uint16),
+                                 ((FILTER_HEIGHT * FILTER_WIDTH - 1) / 32 + 1) *
+                                     sizeof(cl_uint16),
                                  coef.data,
                                  &err));
     OCL_CHECK(err,
               cl::Buffer devInput(context,
                                   CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-                                  ((IMAGE_HEIGHT * IMAGE_WIDTH - 1) / 32 + 1) * sizeof(cl_uint16),
+                                  ((IMAGE_HEIGHT * IMAGE_WIDTH - 1) / 32 + 1) *
+                                      sizeof(cl_uint16),
                                   vecInput.data(),
                                   &err));
     OCL_CHECK(err,
               cl::Buffer devOutput(context,
                                    CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-                                   ((IMAGE_HEIGHT * IMAGE_WIDTH - 1) / 32 + 1) * sizeof(cl_uint16),
+                                   ((IMAGE_HEIGHT * IMAGE_WIDTH - 1) / 32 + 1) *
+                                       sizeof(cl_uint16),
                                    vecOutput.data(),
                                    &err));
 
@@ -194,7 +204,9 @@ int main(int argc, char *argv[]) {
 
     // Copy input data to device global memory
     std::cout << "Copying data..." << std::endl;
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({devCoef, devInput}, 0 /*0 means from host*/));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({devCoef, devInput},
+                                               0 /*0 means from host*/));
 
     // Launch the Kernel
     // For HLS kernels global and local size is always (1,1,1). So, it is recommended
@@ -204,18 +216,25 @@ int main(int argc, char *argv[]) {
 
     // Copy Result from Device Global Memory to Host Local Memory
     std::cout << "Getting Results..." << std::endl;
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({devOutput}, CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({devOutput},
+                                               CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());
     uint64_t nstimestart, nstimeend;
-    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START, &nstimestart));
-    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END, &nstimeend));
+    OCL_CHECK(err,
+              err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,
+                                                     &nstimestart));
+    OCL_CHECK(err,
+              err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,
+                                                     &nstimeend));
 
     auto duration = nstimeend - nstimestart;
 
     std::cout << "Kernel Duration: " << duration << " ns" << std::endl;
     //OPENCL HOST CODE AREA ENDS
 
-    std::memcpy(output.data, vecOutput.data(), vecOutput.size() * sizeof(double));
+    std::memcpy(
+        output.data, vecOutput.data(), vecOutput.size() * sizeof(double));
 
     short outputMax = getAbsMax(output, IMAGE_HEIGHT, IMAGE_WIDTH);
     std::cout << "outputBits = " << ceil(log2(outputMax)) << std::endl;
@@ -227,7 +246,8 @@ int main(int argc, char *argv[]) {
     if (validate) {
         std::cout << "Validate" << std::endl;
         std::string goldenFileName(argv[4]);
-        cv::Mat golden = readFloatTxtFile(goldenFileName, IMAGE_HEIGHT, IMAGE_WIDTH);
+        cv::Mat golden =
+            readFloatTxtFile(goldenFileName, IMAGE_HEIGHT, IMAGE_WIDTH);
 
         cv::imwrite("golden.bmp", golden);
     }

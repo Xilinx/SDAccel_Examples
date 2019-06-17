@@ -45,7 +45,8 @@ int writebmp(char *filename, struct bmp_t *bitmap) {
     bitmap->header.dibplane = 1;
     bitmap->header.dibdepth = 24;
     bitmap->header.dibcompression = 0;
-    bitmap->header.dibsize = (bitmap->width) * (bitmap->height) * (bitmap->header.dibdepth / 8);
+    bitmap->header.dibsize =
+        (bitmap->width) * (bitmap->height) * (bitmap->header.dibdepth / 8);
     bitmap->header.dibhor = 2835;
     bitmap->header.dibver = 2835;
     bitmap->header.dibpal = 0;
@@ -55,7 +56,8 @@ int writebmp(char *filename, struct bmp_t *bitmap) {
     bitmap->header.headerB = 'B';
     bitmap->header.headerM = 'M';
     bitmap->header.headerpixelsoffset = 54;
-    bitmap->header.headerbmpsize = bitmap->header.dibsize + bitmap->header.headerpixelsoffset;
+    bitmap->header.headerbmpsize =
+        bitmap->header.dibsize + bitmap->header.headerpixelsoffset;
     bitmap->header.headerapp0 = 0;
     bitmap->header.headerapp1 = 0;
 
@@ -145,7 +147,8 @@ int readbmp(char *filename, struct bmp_t *bitmap) {
         return -2;
     if (bitmap->header.dibcompression != 0)
         return -2;
-    if (bitmap->header.dibsize != (bitmap->header.dibwidth * bitmap->header.dibheight * 3))
+    if (bitmap->header.dibsize !=
+        (bitmap->header.dibwidth * bitmap->header.dibheight * 3))
         return -2;
     //dibsize do nothing yet
     //dibhor unused

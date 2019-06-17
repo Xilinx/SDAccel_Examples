@@ -66,7 +66,11 @@ int gen_random() {
     return dist(e);
 }
 
-void compute_dot(int *result, const int *X, const int *Y, const int *Z, const int num_vertices) {
+void compute_dot(int *result,
+                 const int *X,
+                 const int *Y,
+                 const int *Z,
+                 const int num_vertices) {
     for (int t = 0; t < num_vertices; ++t) {
         result[t] = X[t] * X[t];
         result[t] += Y[t] * Y[t];
@@ -74,7 +78,8 @@ void compute_dot(int *result, const int *X, const int *Y, const int *Z, const in
     }
 }
 
-void verify(const vector<int, aligned_allocator<int>> &gold, const vector<int, aligned_allocator<int>> &results) {
+void verify(const vector<int, aligned_allocator<int>> &gold,
+            const vector<int, aligned_allocator<int>> &results) {
     if (!equal(begin(gold), end(gold), begin(results))) {
         printf("TEST FAILED\n");
         exit(EXIT_FAILURE);
@@ -114,27 +119,36 @@ int main(int argc, char **argv) {
     }
     // Calculate gold result
     vector<int, aligned_allocator<int>> gold(VERTEX_COUNT);
-    compute_dot(gold.data(), soa_vertices.x.data(), soa_vertices.y.data(), soa_vertices.z.data(), VERTEX_COUNT);
+    compute_dot(gold.data(),
+                soa_vertices.x.data(),
+                soa_vertices.y.data(),
+                soa_vertices.z.data(),
+                VERTEX_COUNT);
 
-    std::vector<cl::Device> devices = xcl::get_xil_devices();
-    cl::Device device = devices[0];
+    auto devices = xcl::get_xil_devices();
+    auto device = devices[0];
 
     //Creating Context and Command Queue for selected Device
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
-    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
-    OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
+    OCL_CHECK(
+        err,
+        cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(err,
+              std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
-    char *fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
 
     // Allocate memory on the FPGA
-    OCL_CHECK(
-        err,
-        cl::Buffer buffer_result(
-            context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE, results.size() * sizeof(int), results.data(), &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_result(context,
+                                       CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE,
+                                       results.size() * sizeof(int),
+                                       results.data(),
+                                       &err));
     OCL_CHECK(err,
               cl::Buffer buffer_x(context,
                                   CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
@@ -176,20 +190,28 @@ int main(int argc, char **argv) {
     OCL_CHECK(err, err = kernel_aos.setArg(nargs++, VERTEX_COUNT));
 
     // Transfer the entire array to the FPGA
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_pts}, 0 /* 0 means from host*/));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_pts},
+                                               0 /* 0 means from host*/));
 
     OCL_CHECK(err, err = q.enqueueTask(kernel_aos, NULL, &event));
 
     q.finish();
 
-    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START, &nstimestart));
-    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END, &nstimeend));
+    OCL_CHECK(err,
+              err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,
+                                                     &nstimestart));
+    OCL_CHECK(err,
+              err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,
+                                                     &nstimeend));
 
     auto aos_time = nstimeend - nstimestart;
     printf("| %-22s  | %23lu |\n", "dot: Array of Structs", aos_time);
 
     // Transfer the results back from the FPGA
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_result}, CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_result},
+                                               CL_MIGRATE_MEM_OBJECT_HOST));
     q.finish();
     verify(gold, results);
 
@@ -202,27 +224,37 @@ int main(int argc, char **argv) {
     OCL_CHECK(err, err = kernel_soa.setArg(nargs++, VERTEX_COUNT));
 
     // Transfer data from host to the FPGA
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_x, buffer_y, buffer_z}, 0 /* 0 means from host*/));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_x, buffer_y, buffer_z},
+                                               0 /* 0 means from host*/));
 
     OCL_CHECK(err, err = q.enqueueTask(kernel_soa, NULL, &event));
     q.finish();
 
-    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START, &nstimestart));
-    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END, &nstimeend));
+    OCL_CHECK(err,
+              err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,
+                                                     &nstimestart));
+    OCL_CHECK(err,
+              err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,
+                                                     &nstimeend));
 
     auto soa_time = nstimeend - nstimestart;
     printf("| %-22s  | %23lu |\n", "dot: Struct of Arrays", soa_time);
 
     // Get the results from the FPGA
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_result}, CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_result},
+                                               CL_MIGRATE_MEM_OBJECT_HOST));
     q.finish();
     verify(gold, results);
 
     delete[] fileBuf;
 
     printf("|-------------------------+-------------------------|\n");
-    printf("Note: Wall Clock Time is meaningful for real hardware execution only, not for emulation.\n");
-    printf("Please refer to profile summary for kernel execution time for hardware emulation.\n");
+    printf("Note: Wall Clock Time is meaningful for real hardware execution "
+           "only, not for emulation.\n");
+    printf("Please refer to profile summary for kernel execution time for "
+           "hardware emulation.\n");
     printf("TEST PASSED\n\n");
     return EXIT_SUCCESS;
 }

@@ -37,7 +37,7 @@ extern "C" {
 void matmul_partition(const int *in1, // Read-Only Matrix 1
                       const int *in2, // Read-Only Matrix 2
                       int *out_r,     // Output Result
-                      int dim) {      // Matrix Dimension. Assuming Square Matrix
+                      int dim) { // Matrix Dimension. Assuming Square Matrix
 #pragma HLS INTERFACE m_axi port = in1 offset = slave bundle = gmem
 #pragma HLS INTERFACE m_axi port = in2 offset = slave bundle = gmem
 #pragma HLS INTERFACE m_axi port = out_r offset = slave bundle = gmem

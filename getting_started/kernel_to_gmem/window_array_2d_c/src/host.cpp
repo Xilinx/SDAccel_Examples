@@ -41,9 +41,12 @@ int main(int argc, char **argv) {
 
     //Allocate Memory in Host Memory
     size_t vector_size_bytes = sizeof(DTYPE) * BLOCK_SIZE;
-    std::vector<DTYPE, aligned_allocator<DTYPE>> a(BLOCK_SIZE);    // original data set given to device
-    std::vector<DTYPE, aligned_allocator<DTYPE>> c(BLOCK_SIZE);    // results returned from device
-    std::vector<DTYPE, aligned_allocator<DTYPE>> sw_c(BLOCK_SIZE); // results returned from software
+    std::vector<DTYPE, aligned_allocator<DTYPE>> a(
+        BLOCK_SIZE); // original data set given to device
+    std::vector<DTYPE, aligned_allocator<DTYPE>> c(
+        BLOCK_SIZE); // results returned from device
+    std::vector<DTYPE, aligned_allocator<DTYPE>> sw_c(
+        BLOCK_SIZE); // results returned from software
 
     // Create the test data and Software Result
     int alpha = 3;
@@ -56,24 +59,36 @@ int main(int argc, char **argv) {
     //OPENCL HOST CODE AREA START
     cl_int err;
     unsigned fileBufSize;
-    std::vector<cl::Device> devices = xcl::get_xil_devices();
-    cl::Device device = devices[0];
+    auto devices = xcl::get_xil_devices();
+    auto device = devices[0];
 
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
-    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
-    OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
+    OCL_CHECK(
+        err,
+        cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(err,
+              std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
-    char *fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
-    OCL_CHECK(err, cl::Kernel krnl_window_array_2d(program, "window_array_2d", &err));
+    OCL_CHECK(
+        err, cl::Kernel krnl_window_array_2d(program, "window_array_2d", &err));
 
     //Allocate Buffer in Global Memory
     OCL_CHECK(err,
-              cl::Buffer buffer_a(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, vector_size_bytes, a.data(), &err));
+              cl::Buffer buffer_a(context,
+                                  CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                  vector_size_bytes,
+                                  a.data(),
+                                  &err));
     OCL_CHECK(err,
-              cl::Buffer buffer_c(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, vector_size_bytes, c.data(), &err));
+              cl::Buffer buffer_c(context,
+                                  CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                                  vector_size_bytes,
+                                  c.data(),
+                                  &err));
 
     //Set the Kernel Arguments
     int nargs = 0;
@@ -82,13 +97,17 @@ int main(int argc, char **argv) {
     OCL_CHECK(err, err = krnl_window_array_2d.setArg(nargs++, alpha));
 
     //Copy input data to device global memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_a}, 0 /* 0 means from host*/));
+    OCL_CHECK(
+        err,
+        err = q.enqueueMigrateMemObjects({buffer_a}, 0 /* 0 means from host*/));
 
     //Launch the Kernel
     OCL_CHECK(err, err = q.enqueueTask(krnl_window_array_2d));
 
     //Copy Result from Device Global Memory to Host Local Memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_c}, CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_c},
+                                               CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());
 
     //OPENCL HOST CODE AREA END
@@ -99,15 +118,19 @@ int main(int argc, char **argv) {
         if (c[i] == sw_c[i]) {
             correct++;
         } else {
-            std::cout << std::endl << " wrong sw " << sw_c[i] << " hw " << c[i] << ": index " << std::endl;
+            std::cout << std::endl
+                      << " wrong sw " << sw_c[i] << " hw " << c[i] << ": index "
+                      << std::endl;
         }
     }
 
     delete[] fileBuf;
 
     // Print a brief summary detailing the results
-    std::cout << "Computed '" << correct << "/" << BLOCK_SIZE << "' correct values!" << std::endl;
+    std::cout << "Computed '" << correct << "/" << BLOCK_SIZE
+              << "' correct values!" << std::endl;
 
-    std::cout << "TEST " << (correct != BLOCK_SIZE ? "FAILED" : "PASSED") << std::endl;
+    std::cout << "TEST " << (correct != BLOCK_SIZE ? "FAILED" : "PASSED")
+              << std::endl;
     return (correct != BLOCK_SIZE ? EXIT_FAILURE : EXIT_SUCCESS);
 }

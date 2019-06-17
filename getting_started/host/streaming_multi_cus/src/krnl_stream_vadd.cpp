@@ -38,7 +38,9 @@ In this example, we will demonstrate how to use Xilinx Streaming APIs for direct
 typedef qdma_axis<DWIDTH, 0, 0, 0> pkt;
 
 extern "C" {
-void krnl_stream_vadd(hls::stream<pkt> &a, hls::stream<pkt> &b, hls::stream<pkt> &output) {
+void krnl_stream_vadd(hls::stream<pkt> &a,
+                      hls::stream<pkt> &b,
+                      hls::stream<pkt> &output) {
    #pragma HLS INTERFACE axis port=a
    #pragma HLS INTERFACE axis port=b
    #pragma HLS INTERFACE axis port=output

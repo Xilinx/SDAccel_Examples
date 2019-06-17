@@ -43,16 +43,24 @@ class Timer {
   public:
     Timer() { reset(); }
     long long stop() {
-        std::chrono::high_resolution_clock::time_point timeEnd = std::chrono::high_resolution_clock::now();
-        return std::chrono::duration_cast<std::chrono::microseconds>(timeEnd - mTimeStart).count();
+        std::chrono::high_resolution_clock::time_point timeEnd =
+            std::chrono::high_resolution_clock::now();
+        return std::chrono::duration_cast<std::chrono::microseconds>(timeEnd -
+                                                                     mTimeStart)
+            .count();
     }
     void reset() { mTimeStart = std::chrono::high_resolution_clock::now(); }
 };
 
-static int host_to_dev(cl::CommandQueue commands, int buff_size, std::vector<cl::Memory> &mems, std::ostream &strm) {
+static int host_to_dev(cl::CommandQueue commands,
+                       int buff_size,
+                       std::vector<cl::Memory> &mems,
+                       std::ostream &strm) {
     cl_int err;
     Timer timer;
-    OCL_CHECK(err, err = commands.enqueueMigrateMemObjects(mems, 0 /* 0 means from host*/));
+    OCL_CHECK(err,
+              err = commands.enqueueMigrateMemObjects(
+                  mems, 0 /* 0 means from host*/));
 
     commands.finish();
 
@@ -63,15 +71,22 @@ static int host_to_dev(cl::CommandQueue commands, int buff_size, std::vector<cl:
     throput /= timer_stop2;
     double dbuff_size = (double)(buff_size) / 1024; // convert to KB
     std::cout << "OpenCL migration BW host to device: " << throput << " MB/s"
-              << " for buffer size " << dbuff_size << " KB with " << mems.size() << " buffers\n";
-    strm << "Host to Card, " << dbuff_size << " KB, " << mems.size() << ", " << throput << "\n";
+              << " for buffer size " << dbuff_size << " KB with " << mems.size()
+              << " buffers\n";
+    strm << "Host to Card, " << dbuff_size << " KB, " << mems.size() << ", "
+         << throput << "\n";
     return CL_SUCCESS;
 }
 
-static int dev_to_host(cl::CommandQueue commands, int buff_size, std::vector<cl::Memory> &mems, std::ostream &strm) {
+static int dev_to_host(cl::CommandQueue commands,
+                       int buff_size,
+                       std::vector<cl::Memory> &mems,
+                       std::ostream &strm) {
     cl_int err;
     Timer timer;
-    OCL_CHECK(err, err = commands.enqueueMigrateMemObjects(mems, CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err,
+              err = commands.enqueueMigrateMemObjects(
+                  mems, CL_MIGRATE_MEM_OBJECT_HOST));
 
     commands.finish();
 
@@ -82,8 +97,10 @@ static int dev_to_host(cl::CommandQueue commands, int buff_size, std::vector<cl:
     throput /= timer_stop2;
     double dbuff_size = (double)(buff_size) / 1024; // convert to KB
     std::cout << "OpenCL migration BW device to host: " << throput << " MB/s"
-              << " for buffer size " << dbuff_size << " KB with " << mems.size() << " buffers\n";
-    strm << "Card to Host, " << dbuff_size << " KB, " << mems.size() << ", " << throput << "\n";
+              << " for buffer size " << dbuff_size << " KB with " << mems.size()
+              << " buffers\n";
+    strm << "Card to Host, " << dbuff_size << " KB, " << mems.size() << ", "
+         << throput << "\n";
     return CL_SUCCESS;
 }
 
@@ -94,12 +111,18 @@ static int bidirectional(cl::CommandQueue commands,
                          std::ostream &strm) {
     cl_int err;
     //Writing to avoid read-without-write case in DDR
-    OCL_CHECK(err, err = commands.enqueueMigrateMemObjects(mems2, 0 /* 0 means from host*/));
+    OCL_CHECK(err,
+              err = commands.enqueueMigrateMemObjects(
+                  mems2, 0 /* 0 means from host*/));
     commands.finish();
 
     Timer timer;
-    OCL_CHECK(err, err = commands.enqueueMigrateMemObjects(mems1, 0 /* 0 means from host*/));
-    OCL_CHECK(err, err = commands.enqueueMigrateMemObjects(mems2, CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err,
+              err = commands.enqueueMigrateMemObjects(
+                  mems1, 0 /* 0 means from host*/));
+    OCL_CHECK(err,
+              err = commands.enqueueMigrateMemObjects(
+                  mems2, CL_MIGRATE_MEM_OBJECT_HOST));
 
     commands.finish();
 
@@ -110,9 +133,10 @@ static int bidirectional(cl::CommandQueue commands,
     throput /= timer_stop2;
     double dbuff_size = (double)(buff_size) / 1024; // convert to KB
     std::cout << "OpenCL migration BW "
-              << " overall:" << throput << " MB/s for buffer size " << dbuff_size << " KB with " << mems1.size()
-              << " buffers\n";
-    strm << "Card to Host, " << dbuff_size << " KB, " << mems1.size() << ", " << throput << "\n";
+              << " overall:" << throput << " MB/s for buffer size "
+              << dbuff_size << " KB with " << mems1.size() << " buffers\n";
+    strm << "Card to Host, " << dbuff_size << " KB, " << mems1.size() << ", "
+         << throput << "\n";
     return CL_SUCCESS;
 }
 
@@ -150,10 +174,15 @@ int main(int argc, char **argv) {
 
     //Creating Context and Command Queue for selected Device
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
+    OCL_CHECK(
+        err,
+        cl::CommandQueue command_queue(
+            context,
+            device,
+            CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE,
+            &err));
     OCL_CHECK(err,
-              cl::CommandQueue command_queue(
-                  context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err));
-    OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
+              std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
     // read_binary() command will find the OpenCL binary file
@@ -181,11 +210,15 @@ int main(int argc, char **argv) {
             OCL_CHECK(err,
                       mems[i] =
                           cl::Buffer(context,
-                                     (cl_mem_flags)(CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE | CL_MEM_EXT_PTR_XILINX),
+                                     (cl_mem_flags)(CL_MEM_ALLOC_HOST_PTR |
+                                                    CL_MEM_READ_WRITE |
+                                                    CL_MEM_EXT_PTR_XILINX),
                                      nxtcnt,
                                      &bufExt[i],
                                      &err));
-            OCL_CHECK(err, err = command_queue.enqueueFillBuffer<int>((cl::Buffer &)mems[i], i, 0, nxtcnt, 0, 0));
+            OCL_CHECK(err,
+                      err = command_queue.enqueueFillBuffer<int>(
+                          (cl::Buffer &)mems[i], i, 0, nxtcnt, 0, 0));
         }
 
         if (err != CL_SUCCESS) {
@@ -226,19 +259,27 @@ int main(int argc, char **argv) {
             OCL_CHECK(err,
                       mems1[i] =
                           cl::Buffer(context,
-                                     (cl_mem_flags)(CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE | CL_MEM_EXT_PTR_XILINX),
+                                     (cl_mem_flags)(CL_MEM_ALLOC_HOST_PTR |
+                                                    CL_MEM_READ_WRITE |
+                                                    CL_MEM_EXT_PTR_XILINX),
                                      nxtcnt,
                                      &bufExt1[i],
                                      &err));
-            OCL_CHECK(err, err = command_queue.enqueueFillBuffer<int>((cl::Buffer &)mems1[i], i, 0, nxtcnt, 0, 0));
+            OCL_CHECK(err,
+                      err = command_queue.enqueueFillBuffer<int>(
+                          (cl::Buffer &)mems1[i], i, 0, nxtcnt, 0, 0));
             OCL_CHECK(err,
                       mems2[i] =
                           cl::Buffer(context,
-                                     (cl_mem_flags)(CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE | CL_MEM_EXT_PTR_XILINX),
+                                     (cl_mem_flags)(CL_MEM_ALLOC_HOST_PTR |
+                                                    CL_MEM_READ_WRITE |
+                                                    CL_MEM_EXT_PTR_XILINX),
                                      nxtcnt,
                                      &bufExt2[i],
                                      &err));
-            OCL_CHECK(err, err = command_queue.enqueueFillBuffer<int>((cl::Buffer &)mems2[i], i, 0, nxtcnt, 0, 0));
+            OCL_CHECK(err,
+                      err = command_queue.enqueueFillBuffer<int>(
+                          (cl::Buffer &)mems2[i], i, 0, nxtcnt, 0, 0));
         }
 
         if (err != CL_SUCCESS) {

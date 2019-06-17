@@ -32,8 +32,9 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using std::vector;
 
 static const int DATA_SIZE = 1024;
-static const std::string error_message = "Error: Result mismatch:\n"
-                                         "i = %d CPU result = %d Device result = %d\n";
+static const std::string error_message =
+    "Error: Result mismatch:\n"
+    "i = %d CPU result = %d Device result = %d\n";
 
 // This example illustrates the very simple OpenCL example that performs
 // an addition on two vectors
@@ -61,8 +62,11 @@ int main(int argc, char **argv) {
 
     //Creating Context and Command Queue for selected Device
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
-    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
-    OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
+    OCL_CHECK(
+        err,
+        cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(err,
+              std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
     // read_binary() command will find the OpenCL binary file created using the
@@ -78,15 +82,24 @@ int main(int argc, char **argv) {
     // be used to reference the memory locations on the device. The cl::Buffer
     // object cannot be referenced directly and must be passed to other OpenCL
     // functions.
-    OCL_CHECK(
-        err,
-        cl::Buffer buffer_a(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, size_in_bytes, source_a.data(), &err));
-    OCL_CHECK(
-        err,
-        cl::Buffer buffer_b(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, size_in_bytes, source_b.data(), &err));
     OCL_CHECK(err,
-              cl::Buffer buffer_result(
-                  context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, size_in_bytes, source_results.data(), &err));
+              cl::Buffer buffer_a(context,
+                                  CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                  size_in_bytes,
+                                  source_a.data(),
+                                  &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_b(context,
+                                  CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                  size_in_bytes,
+                                  source_b.data(),
+                                  &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_result(context,
+                                       CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                                       size_in_bytes,
+                                       source_results.data(),
+                                       &err));
 
     // This call will extract a kernel out of the program we loaded in the
     // previous line. A kernel is an OpenCL function that is executed on the
@@ -104,7 +117,9 @@ int main(int argc, char **argv) {
     // application and into the buffer_a and buffer_b cl::Buffer objects. The data
     // will be be transferred from system memory over PCIe to the FPGA on-board
     // DDR memory.
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_a, buffer_b}, 0 /* 0 means from host*/));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_a, buffer_b},
+                                               0 /* 0 means from host*/));
 
     //Launch the Kernel
     OCL_CHECK(err, err = q.enqueueTask(krnl_vector_add));
@@ -112,7 +127,9 @@ int main(int argc, char **argv) {
     // The result of the previous kernel execution will need to be retrieved in
     // order to view the results. This call will write the data from the
     // buffer_result cl_mem object to the source_results vector
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_result}, CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_result},
+                                               CL_MIGRATE_MEM_OBJECT_HOST));
     q.finish();
 
     int match = 0;

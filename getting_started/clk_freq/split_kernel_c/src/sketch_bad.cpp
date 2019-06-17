@@ -72,7 +72,8 @@ Kernel Description (Bad Example) :
 // Get a 3x3 window based on the current position (row, col)
 // The function is inlined, if the parent loop is pipelined,
 // the loop fillWindow is automatically unrolled.
-void getWindow(int *image, uint rgbWindow[SIZE], int row, int col, int width, int height) {
+void getWindow(
+    int *image, uint rgbWindow[SIZE], int row, int col, int width, int height) {
 #pragma HLS INLINE
 
     // Holds the rows/lines from which the data is to be picked
@@ -96,11 +97,13 @@ void getWindow(int *image, uint rgbWindow[SIZE], int row, int col, int width, in
 // inlined into a loop that is pipelined.
 fillWindow:
     for (int i = 0; i < WINDOW; i++) {
-        rgbWindow[i * WINDOW + 0] =
-            (col == 0) ? image[lineAddr[i] * width + col] : image[lineAddr[i] * width + col - 1];
+        rgbWindow[i * WINDOW + 0] = (col == 0)
+                                        ? image[lineAddr[i] * width + col]
+                                        : image[lineAddr[i] * width + col - 1];
         rgbWindow[i * WINDOW + 1] = image[lineAddr[i] * width + col];
-        rgbWindow[i * WINDOW + 2] =
-            (col == width - 1) ? image[lineAddr[i] * width + col] : image[lineAddr[i] * width + col + 1];
+        rgbWindow[i * WINDOW + 2] = (col == width - 1)
+                                        ? image[lineAddr[i] * width + col]
+                                        : image[lineAddr[i] * width + col + 1];
     }
 }
 
@@ -144,7 +147,12 @@ boostHeight:
         for (int col = 0; col < width; col++) {
            #pragma HLS LOOP_TRIPCOUNT min=c_width max=c_width
            #pragma HLS PIPELINE
-            getWindow(image, rgbWindow, row, col, width, height); // Get pixels within 3x3 aperture
+            getWindow(image,
+                      rgbWindow,
+                      row,
+                      col,
+                      width,
+                      height); // Get pixels within 3x3 aperture
 
             // Boost Value of the 3x3 rgbWindow
             // getBoost() is defined in kernels/boost_helper.h
@@ -161,7 +169,12 @@ medianHeight:
         for (int col = 0; col < width; col++) {
            #pragma HLS LOOP_TRIPCOUNT min=c_width max=c_width
            #pragma HLS PIPELINE
-            getWindow(image, rgbWindow, row, col, width, height); // Get pixels within 3x3 aperture
+            getWindow(image,
+                      rgbWindow,
+                      row,
+                      col,
+                      width,
+                      height); // Get pixels within 3x3 aperture
 
             // Median of the 3x3 rgbWindow
             // getMedian() is defined in kernels/median_helper.h

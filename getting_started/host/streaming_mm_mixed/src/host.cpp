@@ -115,7 +115,9 @@ int main(int argc, char **argv) {
     OCL_CHECK(err, context = cl::Context(device, NULL, NULL, NULL, &err));
 
     // Creating Command Queue
-    OCL_CHECK(err, q = cl::CommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(
+        err,
+        q = cl::CommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
 
     // read_binary_file() is a utility API which will load the binaryFile
     // and will return the pointer to file buffer.
@@ -130,7 +132,8 @@ int main(int argc, char **argv) {
     // Creating Kernel
     OCL_CHECK(err, krnl_vadd = cl::Kernel(program, "krnl_stream_vadd", &err));
 
-    std::cout << "Vector Addition of elements 0x" << std::hex << size << std::endl;
+    std::cout << "Vector Addition of elements 0x" << std::hex << size
+              << std::endl;
 
     // Reset the data vectors
     reset(h_a.data(), h_b.data(), sw_results.data(), hw_results.data(), size);
@@ -141,16 +144,21 @@ int main(int argc, char **argv) {
     // Allocate Buffer in Global Memory
     // Buffers are allocated using CL_MEM_USE_HOST_PTR for efficient memory and
     // Device-to-host communication
-    OCL_CHECK(
-        err,
-        cl::Buffer buffer_in2(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, vector_size_bytes, h_b.data(), &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_in2(context,
+                                    CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                    vector_size_bytes,
+                                    h_b.data(),
+                                    &err));
 
     // Setting Kernel Arguments
     OCL_CHECK(err, err = krnl_vadd.setArg(2, buffer_in2));
     OCL_CHECK(err, err = krnl_vadd.setArg(3, size));
 
     // Copy input data to device global memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_in2}, 0 /* 0 means from host*/));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_in2},
+                                               0 /* 0 means from host*/));
 
     // Launch the Kernel
     OCL_CHECK(err, err = q.enqueueTask(krnl_vadd));
@@ -166,12 +174,15 @@ int main(int argc, char **argv) {
     cl_stream write_stream_a;
     ext.flags = 1;
     OCL_CHECK(ret,
-              write_stream_a = xcl::Stream::createStream(device.get(), CL_STREAM_WRITE_ONLY, CL_STREAM, &ext, &ret));
+              write_stream_a = xcl::Stream::createStream(
+                  device.get(), CL_STREAM_WRITE_ONLY, CL_STREAM, &ext, &ret));
 
     //Create read stream for argument 2 of kernel
     cl_stream read_stream;
     ext.flags = 0;
-    OCL_CHECK(ret, read_stream = xcl::Stream::createStream(device.get(), CL_STREAM_READ_ONLY, CL_STREAM, &ext, &ret));
+    OCL_CHECK(ret,
+              read_stream = xcl::Stream::createStream(
+                  device.get(), CL_STREAM_READ_ONLY, CL_STREAM, &ext, &ret));
 
     // Initiating the WRITE transfer
     cl_stream_xfer_req wr_req{0};
@@ -180,14 +191,24 @@ int main(int argc, char **argv) {
     wr_req.priv_data = (void *)"write_a";
 
     // Thread 1 for writing data to input stream 1 independently in case of default blocking transfers.
-    std::thread thr1(xcl::Stream::writeStream, write_stream_a, h_a.data(), vector_size_bytes, &wr_req, &ret);
+    std::thread thr1(xcl::Stream::writeStream,
+                     write_stream_a,
+                     h_a.data(),
+                     vector_size_bytes,
+                     &wr_req,
+                     &ret);
 
     // Initiating the READ transfer
     cl_stream_xfer_req rd_req{0};
     rd_req.flags = CL_STREAM_EOT;
     rd_req.priv_data = (void *)"read";
     // Output thread to read the stream data independently in case of default blocking transfers.
-    std::thread thr2(xcl::Stream::readStream, read_stream, hw_results.data(), vector_size_bytes, &rd_req, &ret);
+    std::thread thr2(xcl::Stream::readStream,
+                     read_stream,
+                     hw_results.data(),
+                     vector_size_bytes,
+                     &rd_req,
+                     &ret);
 
     // Waiting for all the threads to complete their respective operations.
     thr1.join();

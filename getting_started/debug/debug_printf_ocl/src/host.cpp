@@ -46,25 +46,33 @@ int main(int argc, char *argv[]) {
     std::vector<int, aligned_allocator<int>> result_krnl(LENGTH);
 
     // OPENCL HOST CODE AREA START
-    std::vector<cl::Device> devices = xcl::get_xil_devices();
-    cl::Device device = devices[0];
+    auto devices = xcl::get_xil_devices();
+    auto device = devices[0];
 
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
-    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(
+        err,
+        cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
 
-    char *fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel kernel(program, "krnl_vadd", &err));
 
     OCL_CHECK(err,
-              cl::Buffer buffer_a(
-                  context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 4 * vector_size_bytes, source_a.data(), &err));
+              cl::Buffer buffer_a(context,
+                                  CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                  4 * vector_size_bytes,
+                                  source_a.data(),
+                                  &err));
     OCL_CHECK(err,
-              cl::Buffer buffer_e(
-                  context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, vector_size_bytes, result_krnl.data(), &err));
+              cl::Buffer buffer_e(context,
+                                  CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                                  vector_size_bytes,
+                                  result_krnl.data(),
+                                  &err));
 
     //Create the test data and run the vector addition locally
     for (int i = 0; i < LENGTH; i++) {
@@ -72,39 +80,51 @@ int main(int argc, char *argv[]) {
         source_a[4 * i + 1] = 2 * i;
         source_a[4 * i + 2] = 3 * i;
         source_a[4 * i + 3] = 4 * i;
-        result_sim[i] = source_a[4 * i] + source_a[4 * i + 1] + source_a[4 * i + 2] + source_a[4 * i + 3];
+        result_sim[i] = source_a[4 * i] + source_a[4 * i + 1] +
+                        source_a[4 * i + 2] + source_a[4 * i + 3];
     }
 
     OCL_CHECK(err, err = kernel.setArg(0, buffer_a));
     OCL_CHECK(err, err = kernel.setArg(1, buffer_e));
 
     // Copy input vectors to memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_a}, 0 /* 0 means from host*/));
+    OCL_CHECK(
+        err,
+        err = q.enqueueMigrateMemObjects({buffer_a}, 0 /* 0 means from host*/));
 
     //Launch the Kernel
     OCL_CHECK(err,
-              err = q.enqueueNDRangeKernel(
-                  kernel, 0, cl::NDRange(LENGTH, 1, 1), cl::NDRange(WORKGROUP_SIZE, 1, 1), NULL, NULL));
+              err = q.enqueueNDRangeKernel(kernel,
+                                           0,
+                                           cl::NDRange(LENGTH, 1, 1),
+                                           cl::NDRange(WORKGROUP_SIZE, 1, 1),
+                                           NULL,
+                                           NULL));
 
     // Copy result to local buffer
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_e}, CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_e},
+                                               CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());
 
     // OPENCL HOST CODE AREA END
 
     // Compare the results of the kernel to the simulation
     int krnl_match = 0;
-    std::cout << "Checking against expected results and printing every 16th result (in 1024 additions)..." << std::endl;
+    std::cout << "Checking against expected results and printing every 16th "
+                 "result (in 1024 additions)..."
+              << std::endl;
     for (int i = 0; i < LENGTH; i++) {
         if (result_sim[i] != result_krnl[i]) {
             std::cout << "Error: Result mismatch" << std::endl;
-            std::cout << "i = " << i << " CPU result = " << result_sim[i] << " Krnl Result = " << result_krnl[i]
-                      << std::endl;
+            std::cout << "i = " << i << " CPU result = " << result_sim[i]
+                      << " Krnl Result = " << result_krnl[i] << std::endl;
             krnl_match = 1;
             break;
         } else {
             if (i % 16 == 0)
-                std::cout << "Result Match: i = " << i << " CPU result = " << result_sim[i]
+                std::cout << "Result Match: i = " << i
+                          << " CPU result = " << result_sim[i]
                           << " Krnl Result = " << result_krnl[i] << std::endl;
         }
     }

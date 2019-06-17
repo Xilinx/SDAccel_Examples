@@ -55,11 +55,13 @@ int main(int argc, char **argv) {
     FILE *output_file;
 
     size_t vector_size_bytes = sizeof(unsigned short) * Y_SIZE * X_SIZE;
-    std::vector<unsigned short, aligned_allocator<unsigned short>> input_image(Y_SIZE * X_SIZE);
+    std::vector<unsigned short, aligned_allocator<unsigned short>> input_image(
+        Y_SIZE * X_SIZE);
     cl_int err;
     unsigned fileBufSize;
 
-    std::vector<unsigned short, aligned_allocator<unsigned short>> output_image(Y_SIZE * X_SIZE);
+    std::vector<unsigned short, aligned_allocator<unsigned short>> output_image(
+        Y_SIZE * X_SIZE);
 
     // Read the bit map file into memory and allocate memory for the final image
     std::cout << "Reading input image...\n";
@@ -72,35 +74,48 @@ int main(int argc, char **argv) {
     }
     printf("\n");
     printf("   Reading RAW Image\n");
-    size_t items_read = fread(input_image.data(), vector_size_bytes, 1, input_file);
+    size_t items_read =
+        fread(input_image.data(), vector_size_bytes, 1, input_file);
     printf("   Bytes read = %d\n\n", (int)(items_read * sizeof input_image));
 
-    std::vector<cl::Device> devices = xcl::get_xil_devices();
-    cl::Device device = devices[0];
+    auto devices = xcl::get_xil_devices();
+    auto device = devices[0];
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
 
-    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(
+        err,
+        cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
 
-    OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
-    char *fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    OCL_CHECK(err,
+              std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
+    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel krnl(program, "affine_kernel", &err));
 
     OCL_CHECK(err,
-              cl::Buffer imageToDevice(
-                  context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, vector_size_bytes, input_image.data(), &err));
-    OCL_CHECK(err,
-              cl::Buffer imageFromDevice(
-                  context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, vector_size_bytes, output_image.data(), &err));
+              cl::Buffer imageToDevice(context,
+                                       CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                       vector_size_bytes,
+                                       input_image.data(),
+                                       &err));
+    OCL_CHECK(
+        err,
+        cl::Buffer imageFromDevice(context,
+                                   CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                                   vector_size_bytes,
+                                   output_image.data(),
+                                   &err));
 
     // Set the kernel arguments
     OCL_CHECK(err, err = krnl.setArg(0, imageToDevice));
     OCL_CHECK(err, err = krnl.setArg(1, imageFromDevice));
 
     /* Copy input vectors to memory */
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({imageToDevice}, 0 /* 0 means from host*/));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({imageToDevice},
+                                               0 /* 0 means from host*/));
 
     // Launch the kernel
     OCL_CHECK(err, err = q.enqueueTask(krnl));
@@ -113,14 +128,18 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({imageFromDevice}, CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({imageFromDevice},
+                                               CL_MIGRATE_MEM_OBJECT_HOST));
     q.finish();
 
     delete[] fileBuf;
 
     printf("   Writing RAW Image\n");
-    size_t items_written = fwrite(output_image.data(), vector_size_bytes, 1, output_file);
-    printf("   Bytes written = %d\n\n", (int)(items_written * sizeof output_image));
+    size_t items_written =
+        fwrite(output_image.data(), vector_size_bytes, 1, output_file);
+    printf("   Bytes written = %d\n\n",
+           (int)(items_written * sizeof output_image));
 
     return 0;
 }

@@ -53,8 +53,9 @@ rd_loop_i:
                 for (int n = 0; n < TILE_WIDTH; ++n) {
                    #pragma HLS PIPELINE II=1
                     // should burst TILE_WIDTH in WORD beat
-                    tile[m][n] = inx[TILE_HEIGHT * TILE_PER_ROW * TILE_WIDTH * i + TILE_PER_ROW * TILE_WIDTH * m +
-                                     TILE_WIDTH * j + n];
+                    tile[m][n] =
+                        inx[TILE_HEIGHT * TILE_PER_ROW * TILE_WIDTH * i +
+                            TILE_PER_ROW * TILE_WIDTH * m + TILE_WIDTH * j + n];
                 }
             }
         rd_loop_m:
@@ -91,8 +92,9 @@ wr_loop_i:
             wr_loop_n:
                 for (int n = 0; n < TILE_WIDTH; ++n) {
                    #pragma HLS PIPELINE II=1
-                    outx[TILE_HEIGHT * TILE_PER_ROW * TILE_WIDTH * i + TILE_PER_ROW * TILE_WIDTH * m + TILE_WIDTH * j +
-                         n] = tile[m][n];
+                    outx[TILE_HEIGHT * TILE_PER_ROW * TILE_WIDTH * i +
+                         TILE_PER_ROW * TILE_WIDTH * m + TILE_WIDTH * j + n] =
+                        tile[m][n];
                 }
             }
         }

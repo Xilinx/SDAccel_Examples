@@ -55,7 +55,8 @@ diff_t linear_search_compute_elem(unsigned int target_x,
                                   unsigned int query_z) {
    #pragma HLS INLINE
 
-    ap_fixed<32, 16> target_x_fixed, target_y_fixed, target_z_fixed, query_x_fixed, query_y_fixed, query_z_fixed;
+    ap_fixed<32, 16> target_x_fixed, target_y_fixed, target_z_fixed,
+        query_x_fixed, query_y_fixed, query_z_fixed;
     target_x_fixed.range(31, 0) = target_x;
     target_y_fixed.range(31, 0) = target_y;
     target_z_fixed.range(31, 0) = target_z;
@@ -63,7 +64,8 @@ diff_t linear_search_compute_elem(unsigned int target_x,
     query_y_fixed.range(31, 0) = query_y;
     query_z_fixed.range(31, 0) = query_z;
 
-    ap_fixed<17, 8, AP_TRN, AP_SAT> target_x_trn, target_y_trn, target_z_trn, query_x_trn, query_y_trn, query_z_trn;
+    ap_fixed<17, 8, AP_TRN, AP_SAT> target_x_trn, target_y_trn, target_z_trn,
+        query_x_trn, query_y_trn, query_z_trn;
     target_x_trn = target_x_fixed;
     target_y_trn = target_y_fixed;
     target_z_trn = target_z_fixed;
@@ -166,13 +168,15 @@ COMPUTE_LOOP:
 
             for (size_t j = 0; j < COMPUTE_QUERIES; j++) {
                 for (size_t k = 0; k < COMPUTE_TARGETS; k++) {
-                    if (t * COMPUTE_TARGETS + k < TARGETS && q * COMPUTE_QUERIES + j < QUERIES) {
-                        ldists[j][k] = linear_search_compute_elem(ltargets[k][0],
-                                                                  ltargets[k][1],
-                                                                  ltargets[k][2],
-                                                                  lqueries[j][0],
-                                                                  lqueries[j][1],
-                                                                  lqueries[j][2]);
+                    if (t * COMPUTE_TARGETS + k < TARGETS &&
+                        q * COMPUTE_QUERIES + j < QUERIES) {
+                        ldists[j][k] =
+                            linear_search_compute_elem(ltargets[k][0],
+                                                       ltargets[k][1],
+                                                       ltargets[k][2],
+                                                       lqueries[j][0],
+                                                       lqueries[j][1],
+                                                       lqueries[j][2]);
                     } else {
                         /* Set to positive infinity */
                         ldists[j][k].range(37, 0) = 0x3FFFFFFFFFL;
@@ -205,11 +209,14 @@ void linear_search(float *targets, float *queries, unsigned int *indices) {
 #pragma HLS ARRAY_PARTITION variable = queries_buf complete dim = 2
 #pragma HLS ARRAY_PARTITION variable = queries_buf complete dim = 3
 #else
-    unsigned int ***queries_buf = (unsigned int ***)malloc(sizeof(unsigned int **) * QUERY_BLOCKS);
+    unsigned int ***queries_buf =
+        (unsigned int ***)malloc(sizeof(unsigned int **) * QUERY_BLOCKS);
     for (int i = 0; i < QUERY_BLOCKS; i++) {
-        queries_buf[i] = (unsigned int **)malloc(sizeof(unsigned int *) * COMPUTE_QUERIES);
+        queries_buf[i] =
+            (unsigned int **)malloc(sizeof(unsigned int *) * COMPUTE_QUERIES);
         for (int j = 0; j < COMPUTE_QUERIES; j++) {
-            queries_buf[i][j] = (unsigned int *)malloc(sizeof(unsigned int) * DIMS);
+            queries_buf[i][j] =
+                (unsigned int *)malloc(sizeof(unsigned int) * DIMS);
         }
     }
 #endif
@@ -229,11 +236,14 @@ QUERIES_LOOP:
 #pragma HLS ARRAY_PARTITION variable = targets_buf complete dim = 2
 #pragma HLS ARRAY_PARTITION variable = targets_buf complete dim = 3
 #else
-    unsigned int ***targets_buf = (unsigned int ***)malloc(sizeof(unsigned int **) * TARGET_BLOCKS);
+    unsigned int ***targets_buf =
+        (unsigned int ***)malloc(sizeof(unsigned int **) * TARGET_BLOCKS);
     for (int i = 0; i < TARGET_BLOCKS; i++) {
-        targets_buf[i] = (unsigned int **)malloc(sizeof(unsigned int *) * COMPUTE_TARGETS);
+        targets_buf[i] =
+            (unsigned int **)malloc(sizeof(unsigned int *) * COMPUTE_TARGETS);
         for (int j = 0; j < COMPUTE_TARGETS; j++) {
-            targets_buf[i][j] = (unsigned int *)malloc(sizeof(unsigned int) * DIMS);
+            targets_buf[i][j] =
+                (unsigned int *)malloc(sizeof(unsigned int) * DIMS);
         }
     }
 #endif
@@ -252,9 +262,11 @@ TARGETS_LOOP:
     unsigned int indices_buf[QUERY_BLOCKS][COMPUTE_QUERIES];
 #pragma HLS ARRAY_PARTITION variable = indices_buf complete dim = 2
 #else
-    unsigned int **indices_buf = (unsigned int **)malloc(sizeof(unsigned int *) * QUERY_BLOCKS);
+    unsigned int **indices_buf =
+        (unsigned int **)malloc(sizeof(unsigned int *) * QUERY_BLOCKS);
     for (int i = 0; i < QUERY_BLOCKS; i++) {
-        indices_buf[i] = (unsigned int *)malloc(sizeof(unsigned int) * COMPUTE_QUERIES);
+        indices_buf[i] =
+            (unsigned int *)malloc(sizeof(unsigned int) * COMPUTE_QUERIES);
     }
 #endif
 

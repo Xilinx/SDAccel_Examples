@@ -61,24 +61,29 @@ static void print_huffman_encoded_data(vector<u8> data) {
 
     std::cout << "BITCODE: ";
     for (size_t i = 0; i < bitcode_bytes; i++) {
-        std::cout << std::hex << std::setfill('0') << std::setw(2) << (unsigned)data[5 + 2 * s + i];
+        std::cout << std::hex << std::setfill('0') << std::setw(2)
+                  << (unsigned)data[5 + 2 * s + i];
     }
     std::cout << std::endl;
 
     size_t o = 5 + 2 * s + bitcode_bytes;
-    u32 payload_size = (data[o + 0]) | (data[o + 1] << 4) | (data[o + 2] << 8) | (data[o + 3] << 16);
+    u32 payload_size = (data[o + 0]) | (data[o + 1] << 4) | (data[o + 2] << 8) |
+                       (data[o + 3] << 16);
     size_t payload_rem = data[o + 4];
 
-    std::cout << std::dec << "Payload Size: " << payload_size - 1 << " bytes + " << payload_rem << " bits" << std::endl;
+    std::cout << std::dec << "Payload Size: " << payload_size - 1 << " bytes + "
+              << payload_rem << " bits" << std::endl;
 
     std::cout << "PAYLOAD: ";
     for (size_t i = 0; i < payload_size - 1; i++) {
-        std::cout << std::hex << std::setfill('0') << std::setw(2) << (unsigned)data[o + 4 + i];
+        std::cout << std::hex << std::setfill('0') << std::setw(2)
+                  << (unsigned)data[o + 4 + i];
     }
     u8 mask = 0xFF >> (8 - payload_rem);
     u8 last = data[o + 4 + payload_size - 1] & mask;
 
-    std::cout << std::hex << (unsigned)last << " (" << (unsigned)mask << ")" << std::endl;
+    std::cout << std::hex << (unsigned)last << " (" << (unsigned)mask << ")"
+              << std::endl;
 }
 
 static bool unit_test_codec(ICodec *pHuffmanCodec, ICodec *pHuffmanCodecGold) {
@@ -112,7 +117,11 @@ static bool unit_test_codec(ICodec *pHuffmanCodec, ICodec *pHuffmanCodecGold) {
             LogInfo("Test [%u of %u] PASS (%s)", i + 1, total, out_str.c_str());
             ctPassed++;
         } else {
-            LogError("Test [%u of %u] Failed! (input: %s, output: %s)", i + 1, total, msgs[i].c_str(), out_str.c_str());
+            LogError("Test [%u of %u] Failed! (input: %s, output: %s)",
+                     i + 1,
+                     total,
+                     msgs[i].c_str(),
+                     out_str.c_str());
         }
     }
 
@@ -131,16 +140,21 @@ int main(int argc, char *argv[]) {
 
     //parse commandline
     CmdLineParser parser;
-    parser.addSwitch("--bitmap", "-b", "input bitmap file path", "rect_1024.bmp");
+    parser.addSwitch(
+        "--bitmap", "-b", "input bitmap file path", "rect_1024.bmp");
     parser.addSwitch("--kernel-file", "-k", "OpenCl kernel file to use");
     parser.addSwitch(
-        "--number-of-runs", "-n", "Number of times the kernel runs on the device to compute the average.", "1");
+        "--number-of-runs",
+        "-n",
+        "Number of times the kernel runs on the device to compute the average.",
+        "1");
     parser.setDefaultKey("--kernel-file");
     parser.parse(argc, argv);
 
     //bitmap file exist?
     if (!is_file(parser.value("bitmap"))) {
-        LogError("Input bitmap file: %s does not exist!", parser.value("bitmap").c_str());
+        LogError("Input bitmap file: %s does not exist!",
+                 parser.value("bitmap").c_str());
         parser.printHelp();
         return -1;
     }

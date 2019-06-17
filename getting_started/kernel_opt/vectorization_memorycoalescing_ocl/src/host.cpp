@@ -69,8 +69,10 @@ int main(int argc, char *argv[]) {
 
     std::vector<int, aligned_allocator<int>> source_in1(vector_size_bytes);
     std::vector<int, aligned_allocator<int>> source_in2(vector_size_bytes);
-    std::vector<int, aligned_allocator<int>> source_hw_results(vector_size_bytes);
-    std::vector<int, aligned_allocator<int>> source_sw_results(vector_size_bytes);
+    std::vector<int, aligned_allocator<int>> source_hw_results(
+        vector_size_bytes);
+    std::vector<int, aligned_allocator<int>> source_sw_results(
+        vector_size_bytes);
 
     //Create the test data
     for (int i = 0; i < DATA_SIZE; i++) {
@@ -81,14 +83,17 @@ int main(int argc, char *argv[]) {
     }
 
     //OPENCL HOST CODE AREA START
-    std::vector<cl::Device> devices = xcl::get_xil_devices();
-    cl::Device device = devices[0];
+    auto devices = xcl::get_xil_devices();
+    auto device = devices[0];
 
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
-    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
-    OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
+    OCL_CHECK(
+        err,
+        cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(err,
+              std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
-    char *fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
@@ -96,14 +101,23 @@ int main(int argc, char *argv[]) {
 
     //Allocate Buffer in Global Memory
     OCL_CHECK(err,
-              cl::Buffer buffer_in1(
-                  context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, vector_size_bytes, source_in1.data(), &err));
+              cl::Buffer buffer_in1(context,
+                                    CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                    vector_size_bytes,
+                                    source_in1.data(),
+                                    &err));
     OCL_CHECK(err,
-              cl::Buffer buffer_in2(
-                  context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, vector_size_bytes, source_in2.data(), &err));
+              cl::Buffer buffer_in2(context,
+                                    CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                    vector_size_bytes,
+                                    source_in2.data(),
+                                    &err));
     OCL_CHECK(err,
-              cl::Buffer buffer_output(
-                  context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, vector_size_bytes, source_hw_results.data(), &err));
+              cl::Buffer buffer_output(context,
+                                       CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                                       vector_size_bytes,
+                                       source_hw_results.data(),
+                                       &err));
 
     OCL_CHECK(err, err = kernel.setArg(0, buffer_in1));
     OCL_CHECK(err, err = kernel.setArg(1, buffer_in2));
@@ -111,28 +125,36 @@ int main(int argc, char *argv[]) {
     OCL_CHECK(err, err = kernel.setArg(3, size));
 
     //Copy input data to device global memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_in1, buffer_in2}, 0 /*0 means from host*/));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_in1, buffer_in2},
+                                               0 /*0 means from host*/));
 
     size_t global = 16; // global domain size calculation
     size_t local = 16;  // local domain size calculation
 
     //Launch the Kernel
-    OCL_CHECK(err, err = q.enqueueNDRangeKernel(kernel, 0, global, local, NULL, NULL));
+    OCL_CHECK(err,
+              err =
+                  q.enqueueNDRangeKernel(kernel, 0, global, local, NULL, NULL));
 
     //Copy back the results from device global memory to host memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_output}, CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_output},
+                                               CL_MIGRATE_MEM_OBJECT_HOST));
     q.finish();
 
     //OPENCL HOST CODE AREA END
 
     //Compute Software Results
-    softwareGold(source_in1.data(), source_in2.data(), source_sw_results.data(), size);
+    softwareGold(
+        source_in1.data(), source_in2.data(), source_sw_results.data(), size);
 
     //Compare the results of device to the software
     bool match = true;
     for (int i = 0; i < DATA_SIZE; i++) {
         if (source_sw_results[i] != source_hw_results[i]) {
-            printf("Mismatch: %d in1 = %d  in2 = %d \t sw_res = %d \t hw_res = %d\n",
+            printf("Mismatch: %d in1 = %d  in2 = %d \t sw_res = %d \t hw_res = "
+                   "%d\n",
                    i,
                    source_in1[i],
                    source_in2[i],

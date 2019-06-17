@@ -42,7 +42,10 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 typedef short int16_t;
 typedef unsigned short uint16_t;
 
-void idctSoft(const int16_t block[64], const uint16_t q[64], int16_t outp[64], bool ignore_dc);
+void idctSoft(const int16_t block[64],
+              const uint16_t q[64],
+              int16_t outp[64],
+              bool ignore_dc);
 
 /* *************************************************************************** 
 
@@ -148,7 +151,11 @@ class oclDct {
     oclDct();
     ~oclDct();
 
-    void init(cl_context context, cl_device_id device, cl_kernel krnl, cl_command_queue q, size_t blocks);
+    void init(cl_context context,
+              cl_device_id device,
+              cl_kernel krnl,
+              cl_command_queue q,
+              size_t blocks);
 
     void write(size_t start,
                std::vector<int16_t, aligned_allocator<int16_t>> *blocks,
@@ -208,7 +215,11 @@ kernel interaction class. All general openCL objects are expected to
 be allocated externally and provided to the kernel interaction class.
 
 *************************************************************************** */
-void oclDct::init(cl_context context, cl_device_id device, cl_kernel krnl, cl_command_queue q, size_t numBlocks64) {
+void oclDct::init(cl_context context,
+                  cl_device_id device,
+                  cl_kernel krnl,
+                  cl_command_queue q,
+                  size_t numBlocks64) {
     mContext = context;
     mDevice = device;
     mKernel = krnl;
@@ -216,7 +227,8 @@ void oclDct::init(cl_context context, cl_device_id device, cl_kernel krnl, cl_co
 
     mNumBlocks64 = numBlocks64;
 
-    assert(mNumBlocks64 == numBlocks64); // check that there was not a truncation
+    assert(mNumBlocks64 ==
+           numBlocks64); // check that there was not a truncation
     mInit = true;
     mCount = 0;
     mHasRun = false;
@@ -268,8 +280,11 @@ void oclDct::write(size_t start,
                                   blocks->data() + mNumBlocks64 * 64 * start,
                                   &err);
 
-    mInBuffer[1] =
-        clCreateBuffer(mContext, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 64 * sizeof(uint16_t), q->data(), &err);
+    mInBuffer[1] = clCreateBuffer(mContext,
+                                  CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                  64 * sizeof(uint16_t),
+                                  q->data(),
+                                  &err);
 
     // Move Buffer over output vector
     mOutBuffer[0] = clCreateBuffer(mContext,
@@ -299,7 +314,8 @@ void oclDct::run() {
     clSetKernelArg(mKernel, 4, sizeof(unsigned int), &mNumBlocks64);
 
     // Schedule actual writing of data
-    clEnqueueMigrateMemObjects(mQ, 2, mInBuffer, 0, 0, nullptr, &inEvVec[mCount]);
+    clEnqueueMigrateMemObjects(
+        mQ, 2, mInBuffer, 0, 0, nullptr, &inEvVec[mCount]);
 
     clEnqueueTask(mQ, mKernel, 1, &inEvVec[mCount], &runEvVec[mCount]);
 }
@@ -312,7 +328,13 @@ This function enqueues the read back operation of the results of the idct.
 
 *************************************************************************** */
 void oclDct::read() {
-    clEnqueueMigrateMemObjects(mQ, 1, mOutBuffer, CL_MIGRATE_MEM_OBJECT_HOST, 1, &runEvVec[mCount], &outEvVec[mCount]);
+    clEnqueueMigrateMemObjects(mQ,
+                               1,
+                               mOutBuffer,
+                               CL_MIGRATE_MEM_OBJECT_HOST,
+                               1,
+                               &runEvVec[mCount],
+                               &outEvVec[mCount]);
     mCount++;
 }
 
@@ -379,7 +401,10 @@ void runCPU(size_t blocks,
             std::vector<int16_t, aligned_allocator<int16_t>> &golden_vpout,
             bool ignore_dc) {
     for (size_t i = 0; i < blocks; i++) {
-        idctSoft(&source_block[i * 64], &source_q[0], &golden_vpout[i * 64], ignore_dc);
+        idctSoft(&source_block[i * 64],
+                 &source_q[0],
+                 &golden_vpout[i * 64],
+                 ignore_dc);
     }
 }
 
@@ -442,9 +467,11 @@ int main(int argc, char *argv[]) {
         numBlocks64 = 256;
     }
 
-    std::cout << "FPGA number of 64*int16_t blocks per transfer: " << numBlocks64 << std::endl;
+    std::cout << "FPGA number of 64*int16_t blocks per transfer: "
+              << numBlocks64 << std::endl;
     if (blocks % (threads * numBlocks64) != 0) {
-        std::cout << "Error: The current implementation supports only full banks to be transfered"
+        std::cout << "Error: The current implementation supports only full "
+                     "banks to be transfered"
                   << " per thread" << std::endl;
         exit(1);
     }
@@ -472,8 +499,16 @@ int main(int argc, char *argv[]) {
     bool found = false;
     for (int p = 0; p < (int)platform_count; ++p) {
         platform_id = platforms[p];
-        clGetPlatformInfo(platform_id, CL_PLATFORM_VENDOR, 1000, (void *)cl_platform_vendor, NULL);
-        clGetPlatformInfo(platform_id, CL_PLATFORM_NAME, 1000, (void *)cl_platform_name, NULL);
+        clGetPlatformInfo(platform_id,
+                          CL_PLATFORM_VENDOR,
+                          1000,
+                          (void *)cl_platform_vendor,
+                          NULL);
+        clGetPlatformInfo(platform_id,
+                          CL_PLATFORM_NAME,
+                          1000,
+                          (void *)cl_platform_name,
+                          NULL);
         if (!strcmp(cl_platform_vendor, "Xilinx")) {
             found = true;
             break;
@@ -484,7 +519,8 @@ int main(int argc, char *argv[]) {
         return err;
     }
 
-    err = clGetDeviceIDs(platform_id, CL_DEVICE_TYPE_ACCELERATOR, 1, &device_id, NULL);
+    err = clGetDeviceIDs(
+        platform_id, CL_DEVICE_TYPE_ACCELERATOR, 1, &device_id, NULL);
     if (err != CL_SUCCESS) {
         std::cout << "FAILED TEST - Device\n";
         return err;
@@ -496,7 +532,8 @@ int main(int argc, char *argv[]) {
         return err;
     }
 
-    clGetDeviceInfo(device_id, CL_DEVICE_NAME, 1000, (void *)cl_device_name, NULL);
+    clGetDeviceInfo(
+        device_id, CL_DEVICE_NAME, 1000, (void *)cl_device_name, NULL);
 
     std::cout << "DEVICE: " << cl_device_name << std::endl;
 
@@ -507,16 +544,25 @@ int main(int argc, char *argv[]) {
 
     printf("INFO: Loaded file\n");
 
-    cl_program program = clCreateProgramWithBinary(
-        context, 1, (const cl_device_id *)&device_id, &krnl_size, (const unsigned char **)&krnl_bin, NULL, &err);
+    cl_program program =
+        clCreateProgramWithBinary(context,
+                                  1,
+                                  (const cl_device_id *)&device_id,
+                                  &krnl_size,
+                                  (const unsigned char **)&krnl_bin,
+                                  NULL,
+                                  &err);
 
     // Create Kernel
     std::cout << "Create Kernel: krnl_idct" << std::endl;
-    cl_kernel krnl = clCreateKernel(program, "krnl_idct", &err);
+    auto krnl = clCreateKernel(program, "krnl_idct", &err);
 
     // Create Command Queue
-    cl_command_queue q = clCreateCommandQueue(
-        context, device_id, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err);
+    auto q = clCreateCommandQueue(context,
+                                  device_id,
+                                  CL_QUEUE_PROFILING_ENABLE |
+                                      CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE,
+                                  &err);
 
     // Create compute units
     std::cout << "Create Compute Unit" << std::endl;
@@ -534,7 +580,14 @@ int main(int argc, char *argv[]) {
     // *********** Accelerator execution **********
     std::cout << "Running FPGA version" << std::endl;
     auto fpga_begin = std::chrono::high_resolution_clock::now();
-    runFPGA(blocks, source_block, source_q, result_vpout, q, ignore_dc, cu, numBlocks64);
+    runFPGA(blocks,
+            source_block,
+            source_q,
+            result_vpout,
+            q,
+            ignore_dc,
+            cu,
+            numBlocks64);
     auto fpga_end = std::chrono::high_resolution_clock::now();
 
     // *********** OpenCL Host Code cleanup **********
@@ -552,7 +605,10 @@ int main(int argc, char *argv[]) {
     for (size_t i = 0; i < 64 * blocks; i++) {
         if (result_vpout[i] != golden_vpout[i]) {
             printf("Error: Result mismatch\n");
-            printf("i = %d CPU result = %d Krnl Result = %d\n", (int)i, golden_vpout[i], result_vpout[i]);
+            printf("i = %d CPU result = %d Krnl Result = %d\n",
+                   (int)i,
+                   golden_vpout[i],
+                   result_vpout[i]);
             krnl_match = 1;
             break;
         }
@@ -569,15 +625,22 @@ int main(int argc, char *argv[]) {
         std::chrono::duration<double> cpu_duration = cpu_end - cpu_begin;
         std::chrono::duration<double> fpga_duration = fpga_end - fpga_begin;
 
-        std::cout << "CPU Time:        " << cpu_duration.count() << " s" << std::endl;
-        std::cout << "CPU Throughput:  " << (double)blocks * 128 / cpu_duration.count() / (1024.0 * 1024.0) << " MB/s"
+        std::cout << "CPU Time:        " << cpu_duration.count() << " s"
                   << std::endl;
-        std::cout << "FPGA Time:       " << fpga_duration.count() << " s" << std::endl;
-        std::cout << "FPGA Throughput: " << (double)blocks * 128 / fpga_duration.count() / (1024.0 * 1024.0) << " MB/s"
+        std::cout << "CPU Throughput:  "
+                  << (double)blocks * 128 / cpu_duration.count() /
+                         (1024.0 * 1024.0)
+                  << " MB/s" << std::endl;
+        std::cout << "FPGA Time:       " << fpga_duration.count() << " s"
                   << std::endl;
+        std::cout << "FPGA Throughput: "
+                  << (double)blocks * 128 / fpga_duration.count() /
+                         (1024.0 * 1024.0)
+                  << " MB/s" << std::endl;
         std::cout << "FPGA PCIe Throughput: "
-                  << (2 * (double)blocks * 128 + 128) / fpga_duration.count() / (1024.0 * 1024.0) << " MB/s"
-                  << std::endl;
+                  << (2 * (double)blocks * 128 + 128) / fpga_duration.count() /
+                         (1024.0 * 1024.0)
+                  << " MB/s" << std::endl;
     } else {
         std::cout << "RUN COMPLETE" << std::endl;
     }
@@ -593,7 +656,10 @@ Original software implementation of IDCT algorithm used to generate
 golden reference data.
 
 *************************************************************************** */
-void idctSoft(const int16_t block[64], const uint16_t q[64], int16_t outp[64], bool ignore_dc) {
+void idctSoft(const int16_t block[64],
+              const uint16_t q[64],
+              int16_t outp[64],
+              bool ignore_dc) {
     int32_t intermed[64];
 
     const uint16_t w1 = 2841; // 2048*sqrt(2)*cos(1*pi/16)
@@ -615,7 +681,9 @@ void idctSoft(const int16_t block[64], const uint16_t q[64], int16_t outp[64], b
     // Horizontal 1-D IDCT.
     for (int y = 0; y < 8; ++y) {
         int y8 = y * 8;
-        int32_t x0 = (((ignore_dc && y == 0) ? 0 : (block[y8 + 0] * q[y8 + 0]) << 11)) + 128;
+        int32_t x0 =
+            (((ignore_dc && y == 0) ? 0 : (block[y8 + 0] * q[y8 + 0]) << 11)) +
+            128;
         int32_t x1 = (block[y8 + 4] * q[y8 + 4]) << 11;
         int32_t x2 = block[y8 + 6] * q[y8 + 6];
         int32_t x3 = block[y8 + 2] * q[y8 + 2];
@@ -624,7 +692,8 @@ void idctSoft(const int16_t block[64], const uint16_t q[64], int16_t outp[64], b
         int32_t x6 = block[y8 + 5] * q[y8 + 5];
         int32_t x7 = block[y8 + 3] * q[y8 + 3];
         // If all the AC components are zero, then the IDCT is trivial.
-        if (x1 == 0 && x2 == 0 && x3 == 0 && x4 == 0 && x5 == 0 && x6 == 0 && x7 == 0) {
+        if (x1 == 0 && x2 == 0 && x3 == 0 && x4 == 0 && x5 == 0 && x6 == 0 &&
+            x7 == 0) {
             int32_t dc = (x0 - 128) >> 8; // coefficients[0] << 3
             intermed[y8 + 0] = dc;
             intermed[y8 + 1] = dc;

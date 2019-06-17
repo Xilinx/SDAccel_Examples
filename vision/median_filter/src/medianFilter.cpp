@@ -49,7 +49,8 @@ void checkErrorStatus(cl_int error, const char *message) {
 
 int main(int argc, char *argv[]) {
     if (argc < 3 || argc > 4) {
-        printf("Usage: %s <xclbin> <input bitmap> <golden bitmap(optional)>\n", argv[0]);
+        printf("Usage: %s <xclbin> <input bitmap> <golden bitmap(optional)>\n",
+               argv[0]);
         return -1;
     }
 
@@ -67,8 +68,10 @@ int main(int argc, char *argv[]) {
     if (!result) {
         return EXIT_FAILURE;
     }
-    std::vector<int, aligned_allocator<int>> inputImage(image.numPixels() * sizeof(int));
-    std::vector<int, aligned_allocator<int>> outImage(image.numPixels() * sizeof(int));
+    std::vector<int, aligned_allocator<int>> inputImage(image.numPixels() *
+                                                        sizeof(int));
+    std::vector<int, aligned_allocator<int>> outImage(image.numPixels() *
+                                                      sizeof(int));
     if (inputImage.empty() || outImage.empty()) {
         fprintf(stderr, "Unable to allocate the host memory!\n");
         return 0;
@@ -86,8 +89,8 @@ int main(int argc, char *argv[]) {
     unsigned fileBufSize;
 
     // The get_xil_devices will return vector of Xilinx Devices
-    std::vector<cl::Device> devices = xcl::get_xil_devices();
-    cl::Device device = devices[0];
+    auto devices = xcl::get_xil_devices();
+    auto device = devices[0];
 
     // Creating Context and Command Queue for selected Device
     cl::Context context(device);
@@ -97,17 +100,21 @@ int main(int argc, char *argv[]) {
 
     // read_binary_file() command will find the OpenCL binary file created using the
     // xocc compiler load into OpenCL Binary and return pointer to file buffer.
-    char *fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     cl::Program program(context, devices, bins);
 
     // These commands will allocate memory on the FPGA. The cl::Buffer objects can
     // be used to reference the memory locations on the device.
-    cl::Buffer buffer_input(
-        context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, image.numPixels() * sizeof(int), inputImage.data());
-    cl::Buffer buffer_output(
-        context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, image.numPixels() * sizeof(int), outImage.data());
+    cl::Buffer buffer_input(context,
+                            CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
+                            image.numPixels() * sizeof(int),
+                            inputImage.data());
+    cl::Buffer buffer_output(context,
+                             CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
+                             image.numPixels() * sizeof(int),
+                             outImage.data());
 
     cl::Event kernel_Event, read_Event, write_Event;
 
@@ -124,7 +131,8 @@ int main(int argc, char *argv[]) {
     // These commands will load the input_image and output_image vectors from the host
     // application into the buffer_input and buffer_output cl::Buffer objects.
     std::cout << "Writing input image to buffer...\n";
-    err = q.enqueueMigrateMemObjects({buffer_input}, 0 /* 0 means from host*/, NULL, &write_Event);
+    err = q.enqueueMigrateMemObjects(
+        {buffer_input}, 0 /* 0 means from host*/, NULL, &write_Event);
 
     checkErrorStatus(err, "Unable to enqueue write buffer");
 
@@ -139,7 +147,8 @@ int main(int argc, char *argv[]) {
     std::cout << "Reading output image and writing to file...\n";
     eventList.clear();
     eventList.push_back(kernel_Event);
-    err = q.enqueueMigrateMemObjects({buffer_output}, CL_MIGRATE_MEM_OBJECT_HOST, &eventList, &read_Event);
+    err = q.enqueueMigrateMemObjects(
+        {buffer_output}, CL_MIGRATE_MEM_OBJECT_HOST, &eventList, &read_Event);
     checkErrorStatus(err, "Unable to enqueue read buffer");
 
     q.flush();
@@ -152,18 +161,23 @@ int main(int argc, char *argv[]) {
         BitmapInterface goldenImage(goldenFilename);
         result = goldenImage.readBitmapFile();
         if (!result) {
-            std::cout << "ERROR:Unable to Read Golden Bitmap File " << goldenFilename << std::endl;
+            std::cout << "ERROR:Unable to Read Golden Bitmap File "
+                      << goldenFilename << std::endl;
             return EXIT_FAILURE;
         }
         //Compare Golden Image with Output image
-        if (image.getHeight() != goldenImage.getHeight() || image.getWidth() != goldenImage.getWidth()) {
+        if (image.getHeight() != goldenImage.getHeight() ||
+            image.getWidth() != goldenImage.getWidth()) {
             match = false;
         } else {
             int *goldImgPtr = goldenImage.bitmap();
             for (unsigned int i = 0; i < image.numPixels(); i++) {
                 if (outImage[i] != goldImgPtr[i]) {
                     match = false;
-                    printf("Pixel %d Mismatch Output %x and Expected %x \n", i, outImage[i], goldImgPtr[i]);
+                    printf("Pixel %d Mismatch Output %x and Expected %x \n",
+                           i,
+                           outImage[i],
+                           goldImgPtr[i]);
                     break;
                 }
             }

@@ -39,8 +39,11 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // This implementation fuses the distance calculation and the iteration through
 // the search space into one loop.
 extern "C" {
-void nearest_neighbor_loop_fusion(
-    int *out_r, const int *points, const int *search_point, const int len, const int dim) {
+void nearest_neighbor_loop_fusion(int *out_r,
+                                  const int *points,
+                                  const int *search_point,
+                                  const int len,
+                                  const int dim) {
 
 #pragma HLS INTERFACE m_axi port = out_r offset = slave bundle = gmem
 #pragma HLS INTERFACE m_axi port = points offset = slave bundle = gmem

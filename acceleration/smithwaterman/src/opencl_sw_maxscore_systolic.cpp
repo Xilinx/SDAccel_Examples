@@ -58,7 +58,14 @@ short **localMat;
 static short colIter = 0;
 #endif
 
-void updatePE(pe *pex, uint2_t d, uint2_t q, short n, short nw, short w, short r, short c) {
+void updatePE(pe *pex,
+              uint2_t d,
+              uint2_t q,
+              short n,
+              short nw,
+              short w,
+              short r,
+              short c) {
 #pragma HLS PIPELINE II = 1
     short max = 0;
     short match = (d == q) ? MATCH : MISS_MATCH;
@@ -92,7 +99,8 @@ void executePE(short r, short c, pe *pex, pe *ppex, uint2_t *d, uint2_t *q) {
     updatePE(pex, d1, q1, n, nw, w, r, c);
 }
 
-void executeFirstPE(short r, short c, pe *p, uint2_t *d, uint2_t *q, short nw, short w) {
+void executeFirstPE(
+    short r, short c, pe *p, uint2_t *d, uint2_t *q, short nw, short w) {
 #pragma HLS PIPELINE II = 1
     short n;
     if (r == 0) {
@@ -106,8 +114,15 @@ void executeFirstPE(short r, short c, pe *p, uint2_t *d, uint2_t *q, short nw, s
 }
 
 template <int FACTOR>
-void swCoreB(
-    uint2_t *d, uint2_t *q, short *maxr, short *maxc, short *maxv, short *iterB, pe *myPE, short stripe, short rows) {
+void swCoreB(uint2_t *d,
+             uint2_t *q,
+             short *maxr,
+             short *maxc,
+             short *maxv,
+             short *iterB,
+             pe *myPE,
+             short stripe,
+             short rows) {
 #pragma HLS inline
 #pragma HLS array partition variable = d cyclic factor = FACTOR
     int i, loop;
@@ -145,8 +160,13 @@ void swCoreB(
 }
 
 /*Only columns*/
-void swSystolicBlocking(
-    uint2_t d[MAXCOL], uint2_t q[MAXROW], short *maxr, short *maxc, short *maxv, short rows, short cols) {
+void swSystolicBlocking(uint2_t d[MAXCOL],
+                        uint2_t q[MAXROW],
+                        short *maxr,
+                        short *maxc,
+                        short *maxv,
+                        short rows,
+                        short cols) {
     pe myPE[MAXPE];
     short iterB[MAXROW];
 #pragma HLS inline
@@ -167,7 +187,11 @@ void swSystolicBlocking(
     }
 }
 
-void simpleSW(uint2_t refSeq[MAXCOL], uint2_t readSeq[MAXROW], short *maxr, short *maxc, short *maxv) {
+void simpleSW(uint2_t refSeq[MAXCOL],
+              uint2_t readSeq[MAXROW],
+              short *maxr,
+              short *maxc,
+              short *maxv) {
 #pragma HLS inline region off
     *maxv = MINVAL;
     int row, col;
@@ -209,12 +233,17 @@ void simpleSW(uint2_t refSeq[MAXCOL], uint2_t readSeq[MAXROW], short *maxr, shor
     }
 }
 
-void sw(uint2_t d[MAXCOL], uint2_t q[MAXROW], short *maxr, short *maxc, short *maxv) {
+void sw(uint2_t d[MAXCOL],
+        uint2_t q[MAXROW],
+        short *maxr,
+        short *maxc,
+        short *maxv) {
 #pragma HLS inline region off
     swSystolicBlocking(d, q, maxr, maxc, maxv, MAXROW, MAXCOL);
 }
 
-template <int BUFFERSZ> void intTo2bit(unsigned int *buffer, uint2_t *buffer2b) {
+template <int BUFFERSZ>
+void intTo2bit(unsigned int *buffer, uint2_t *buffer2b) {
     int i, j;
 #pragma HLS PIPELINE II = 1
     for (i = 0; i < BUFFERSZ; ++i) {
@@ -224,7 +253,8 @@ template <int BUFFERSZ> void intTo2bit(unsigned int *buffer, uint2_t *buffer2b) 
     }
 }
 
-template <int FACTOR> void swInt(unsigned int *readRefPacked, short *maxr, short *maxc, short *maxv) {
+template <int FACTOR>
+void swInt(unsigned int *readRefPacked, short *maxr, short *maxc, short *maxv) {
 #pragma HLS function_instantiate variable = maxv
     uint2_t d2bit[MAXCOL];
     uint2_t q2bit[MAXROW];
@@ -235,7 +265,8 @@ template <int FACTOR> void swInt(unsigned int *readRefPacked, short *maxr, short
     sw(d2bit, q2bit, maxr, maxc, maxv);
 }
 
-void swMaxScore(unsigned int readRefPacked[NUMPACKED][PACKEDSZ], short out[NUMPACKED][3]) {
+void swMaxScore(unsigned int readRefPacked[NUMPACKED][PACKEDSZ],
+                short out[NUMPACKED][3]) {
     /*instantiate NUMPACKED PE*/
     for (int i = 0; i < NUMPACKED; ++i) {
        #pragma HLS UNROLL
@@ -265,7 +296,9 @@ void opencl_sw_maxscore(unsigned int *input, unsigned int *output, int *size) {
     int loop = 0;
     for (loop = 0; loop < numIter; loop++) {
         /*read from device memory to BRAM*/
-        memcpy(readRefPacked, (unsigned int *)(input + loop * PACKEDSZ * NUMPACKED), UINTSZ * PACKEDSZ * NUMPACKED);
+        memcpy(readRefPacked,
+               (unsigned int *)(input + loop * PACKEDSZ * NUMPACKED),
+               UINTSZ * PACKEDSZ * NUMPACKED);
         swMaxScore(readRefPacked, out);
         /*PE OUT to outbuf*/
         for (int i = 0; i < NUMPACKED; ++i) {
@@ -275,7 +308,9 @@ void opencl_sw_maxscore(unsigned int *input, unsigned int *output, int *size) {
             outbuf[3 * i + 2] = out[i][2];
         }
         /*outbuf to device memory*/
-        memcpy((unsigned int *)(output + 3 * NUMPACKED * loop), outbuf, sizeof(unsigned int) * 3 * NUMPACKED);
+        memcpy((unsigned int *)(output + 3 * NUMPACKED * loop),
+               outbuf,
+               sizeof(unsigned int) * 3 * NUMPACKED);
     }
     return;
 }

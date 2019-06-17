@@ -65,25 +65,27 @@ void mmult_cpu(int *in1, //Input Matrix 1
 }
 
 //Functionality to setup OpenCL context and trigger the Kernel
-void mmult_fpga(std::vector<int, aligned_allocator<int>> &source_in1,          //Input Matrix 1
-                std::vector<int, aligned_allocator<int>> &source_in2,          //Input Matrix 2
-                std::vector<int, aligned_allocator<int>> &source_fpga_results, //Output Matrix
-                int dim                                                        //One dimension of matrix
+void mmult_fpga(
+    std::vector<int, aligned_allocator<int>> &source_in1, //Input Matrix 1
+    std::vector<int, aligned_allocator<int>> &source_in2, //Input Matrix 2
+    std::vector<int, aligned_allocator<int>>
+        &source_fpga_results, //Output Matrix
+    int dim                   //One dimension of matrix
 ) {
     int size = dim;
     size_t matrix_size_bytes = sizeof(int) * size * size;
 
     unsigned fileBufSize;
     //The get_xil_devices will return vector of Xilinx Devices
-    std::vector<cl::Device> devices = xcl::get_xil_devices();
-    cl::Device device = devices[0];
+    auto devices = xcl::get_xil_devices();
+    auto device = devices[0];
 
     //Creating Context and Command Queue for selected Device
     cl::Context context(device);
     cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
-    std::string device_name = device.getInfo<CL_DEVICE_NAME>();
+    auto device_name = device.getInfo<CL_DEVICE_NAME>();
 
-    char *fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     cl::Program program(context, devices, bins);
@@ -91,12 +93,22 @@ void mmult_fpga(std::vector<int, aligned_allocator<int>> &source_in1,          /
     cl::Kernel kernel(program, "mmult");
 
     cl_int err;
-    cl::Buffer buffer_in1(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, matrix_size_bytes, source_in1.data(), &err);
+    cl::Buffer buffer_in1(context,
+                          CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                          matrix_size_bytes,
+                          source_in1.data(),
+                          &err);
 
-    cl::Buffer buffer_in2(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, matrix_size_bytes, source_in2.data());
+    cl::Buffer buffer_in2(context,
+                          CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                          matrix_size_bytes,
+                          source_in2.data());
 
-    cl::Buffer buffer_output(
-        context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, matrix_size_bytes, source_fpga_results.data(), &err);
+    cl::Buffer buffer_output(context,
+                             CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                             matrix_size_bytes,
+                             source_fpga_results.data(),
+                             &err);
 
     /* 
      * Using setArg(), i.e. setting kernel arguments, explicitly before enqueueMigrateMemObjects(), 
@@ -116,7 +128,8 @@ void mmult_fpga(std::vector<int, aligned_allocator<int>> &source_in1,          /
     kernel.setArg(narg++, a_col);
     kernel.setArg(narg++, b_col);
 
-    q.enqueueMigrateMemObjects({buffer_in1, buffer_in2}, 0 /* 0 means from host*/);
+    q.enqueueMigrateMemObjects({buffer_in1, buffer_in2},
+                               0 /* 0 means from host*/);
 
     //Launch the kernel
     q.enqueueTask(kernel);
@@ -141,8 +154,10 @@ int main(int argc, char **argv) {
 
     std::vector<int, aligned_allocator<int>> source_in1(matrix_size_bytes);
     std::vector<int, aligned_allocator<int>> source_in2(matrix_size_bytes);
-    std::vector<int, aligned_allocator<int>> source_fpga_results(matrix_size_bytes);
-    std::vector<int, aligned_allocator<int>> source_cpu_results(matrix_size_bytes);
+    std::vector<int, aligned_allocator<int>> source_fpga_results(
+        matrix_size_bytes);
+    std::vector<int, aligned_allocator<int>> source_cpu_results(
+        matrix_size_bytes);
 
     //Create the test data
     for (int i = 0; i < DATA_SIZE * DATA_SIZE; i++) {
@@ -153,7 +168,8 @@ int main(int argc, char **argv) {
     }
 
     //Compute CPU Results
-    mmult_cpu(source_in1.data(), source_in2.data(), source_cpu_results.data(), size);
+    mmult_cpu(
+        source_in1.data(), source_in2.data(), source_cpu_results.data(), size);
 
     //Compute FPGA Results
     mmult_fpga(source_in1, source_in2, source_fpga_results, size);
@@ -163,8 +179,10 @@ int main(int argc, char **argv) {
     for (int i = 0; i < size * size; i++) {
         if (source_fpga_results[i] != source_cpu_results[i]) {
             std::cout << "Error: Result mismatch" << std::endl;
-            std::cout << "i = " << i << " CPU result = " << source_cpu_results[i]
-                      << " FPGA result = " << source_fpga_results[i] << std::endl;
+            std::cout << "i = " << i
+                      << " CPU result = " << source_cpu_results[i]
+                      << " FPGA result = " << source_fpga_results[i]
+                      << std::endl;
             match = false;
             break;
         }

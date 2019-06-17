@@ -42,10 +42,14 @@ using namespace std;
 using namespace jsonxx;
 #endif
 
-extern void uintTouint2Array(int bufferSz, unsigned int *buffer, short *buffer2b);
+extern void
+uintTouint2Array(int bufferSz, unsigned int *buffer, short *buffer2b);
 
 #ifdef PUB_ZMQ
-MatchArray::MatchArray(int nSamples, int rdSz, int rfSz, const zmq::socket_t *ppub)
+MatchArray::MatchArray(int nSamples,
+                       int rdSz,
+                       int rfSz,
+                       const zmq::socket_t *ppub)
 #else
 MatchArray::MatchArray(int nSamples, int rdSz, int rfSz)
 #endif
@@ -87,7 +91,8 @@ void MatchArray::populateArray(unsigned int *pairs, unsigned int *maxval) {
     for (int i = 0; i < numSamples; ++i) {
         unsigned int *onepair = pairs + numInt * i;
         uintTouint2Array(readSize / UINTNUMBP, onepair, readSeqT);
-        uintTouint2Array(refSize / UINTNUMBP, onepair + readSize / UINTNUMBP, refSeqT);
+        uintTouint2Array(
+            refSize / UINTNUMBP, onepair + readSize / UINTNUMBP, refSeqT);
         for (int j = 0; j < readSize; ++j) {
             readStrings[i][j] = bases[readSeqT[j]];
         }
@@ -105,7 +110,11 @@ void MatchArray::populateArray(unsigned int *pairs, unsigned int *maxval) {
     delete[] refSeqT;
 }
 
-void MatchArray::populateArray(char **rd, char **rf, unsigned int *mr, unsigned int *mc, unsigned int *mv) {
+void MatchArray::populateArray(char **rd,
+                               char **rf,
+                               unsigned int *mr,
+                               unsigned int *mc,
+                               unsigned int *mv) {
     for (int i = 0; i < numSamples; ++i) {
         strcpy(readStrings[i], rd[i]);
         strcpy(refStrings[i], rf[i]);

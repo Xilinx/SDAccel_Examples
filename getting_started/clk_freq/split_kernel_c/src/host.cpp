@@ -81,10 +81,12 @@ void software_sketch(int *image, int *output, int width, int height) {
             // inlined into a loop that is pipelined.
             for (int i = 0; i < WINDOW; i++) {
                 rgbWindow[i * WINDOW + 0] =
-                    (col == 0) ? image[lineAddr[i] * width + col] : image[lineAddr[i] * width + col - 1];
+                    (col == 0) ? image[lineAddr[i] * width + col]
+                               : image[lineAddr[i] * width + col - 1];
                 rgbWindow[i * WINDOW + 1] = image[lineAddr[i] * width + col];
                 rgbWindow[i * WINDOW + 2] =
-                    (col == width - 1) ? image[lineAddr[i] * width + col] : image[lineAddr[i] * width + col + 1];
+                    (col == width - 1) ? image[lineAddr[i] * width + col]
+                                       : image[lineAddr[i] * width + col + 1];
             }
 
             // Boost Value of the 3x3 rgbWindow
@@ -117,10 +119,12 @@ void software_sketch(int *image, int *output, int width, int height) {
             // inlined into a loop that is pipelined.
             for (int i = 0; i < WINDOW; i++) {
                 rgbWindow[i * WINDOW + 0] =
-                    (col == 0) ? image[lineAddr[i] * width + col] : image[lineAddr[i] * width + col - 1];
+                    (col == 0) ? image[lineAddr[i] * width + col]
+                               : image[lineAddr[i] * width + col - 1];
                 rgbWindow[i * WINDOW + 1] = image[lineAddr[i] * width + col];
                 rgbWindow[i * WINDOW + 2] =
-                    (col == width - 1) ? image[lineAddr[i] * width + col] : image[lineAddr[i] * width + col + 1];
+                    (col == width - 1) ? image[lineAddr[i] * width + col]
+                                       : image[lineAddr[i] * width + col + 1];
             }
 
             // Median of the 3x3 rgbWindow
@@ -172,19 +176,27 @@ void run_opencl_sketch(std::vector<cl::Device> &devices,
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     cl::Kernel krnl_process_image;
     if (good) {
-        OCL_CHECK(err, krnl_process_image = cl::Kernel(program, "sketch_GOOD", &err));
+        OCL_CHECK(
+            err, krnl_process_image = cl::Kernel(program, "sketch_GOOD", &err));
     } else {
-        OCL_CHECK(err, krnl_process_image = cl::Kernel(program, "sketch_BAD", &err));
+        OCL_CHECK(err,
+                  krnl_process_image = cl::Kernel(program, "sketch_BAD", &err));
     }
 
     //Allocate Buffer in Global Memory
     OCL_CHECK(err,
-              cl::Buffer buffer_input(
-                  context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, image_size_bytes, hw_inImage.data(), &err));
+              cl::Buffer buffer_input(context,
+                                      CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                      image_size_bytes,
+                                      hw_inImage.data(),
+                                      &err));
 
     OCL_CHECK(err,
-              cl::Buffer buffer_output(
-                  context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, image_size_bytes, hw_outImage.data(), &err));
+              cl::Buffer buffer_output(context,
+                                       CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                                       image_size_bytes,
+                                       hw_outImage.data(),
+                                       &err));
 
     std::cout << "Writing input image to buffer...\n";
 
@@ -197,7 +209,9 @@ void run_opencl_sketch(std::vector<cl::Device> &devices,
     OCL_CHECK(err, err = krnl_process_image.setArg(narg++, height));
 
     //Copy input data to device global memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_input}, 0 /* 0 means from host*/));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_input},
+                                               0 /* 0 means from host*/));
 
     std::cout << "Launching Kernels...." << std::endl;
 
@@ -206,7 +220,9 @@ void run_opencl_sketch(std::vector<cl::Device> &devices,
     std::cout << "Kernel Execution Finished...." << std::endl;
 
     //Copy Result from Device Global Memory to Host Local Memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_output}, CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_output},
+                                               CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());
     delete[] fileBuf;
 }
@@ -228,7 +244,8 @@ int main(int argc, char **argv) {
 
     bool result = image.readBitmapFile();
     if (!result) {
-        std::cout << "Error reading bitmap file : " << bitmapFilename << std::endl;
+        std::cout << "Error reading bitmap file : " << bitmapFilename
+                  << std::endl;
         return -1;
     }
 
@@ -237,8 +254,10 @@ int main(int argc, char **argv) {
 
     if (width > MAX_WIDTH || height > MAX_HEIGHT) {
         std::cout << "Error file larger than max dimension" << std::endl;
-        std::cout << "Current File of size : " << height << "x" << width << std::endl;
-        std::cout << "Max Supported size is " << MAX_HEIGHT << "x" << MAX_WIDTH << std::endl;
+        std::cout << "Current File of size : " << height << "x" << width
+                  << std::endl;
+        std::cout << "Max Supported size is " << MAX_HEIGHT << "x" << MAX_WIDTH
+                  << std::endl;
         return -1;
     }
 
@@ -260,15 +279,36 @@ int main(int argc, char **argv) {
     auto device = devices[0];
 
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
-    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(
+        err,
+        cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     auto device_name = device.getInfo<CL_DEVICE_NAME>();
     std::string binaryFile;
 
     binaryFile = argv[1];
-    run_opencl_sketch(devices, q, context, device_name, binaryFile, true, hw_inImage, hw_outImage, size, width, height);
+    run_opencl_sketch(devices,
+                      q,
+                      context,
+                      device_name,
+                      binaryFile,
+                      true,
+                      hw_inImage,
+                      hw_outImage,
+                      size,
+                      width,
+                      height);
     binaryFile = argv[2];
-    run_opencl_sketch(
-        devices, q, context, device_name, binaryFile, false, hw_inImage, hw_outImage, size, width, height);
+    run_opencl_sketch(devices,
+                      q,
+                      context,
+                      device_name,
+                      binaryFile,
+                      false,
+                      hw_inImage,
+                      hw_outImage,
+                      size,
+                      width,
+                      height);
 
     //OPENCL HOST CODE AREA END
 
@@ -280,8 +320,8 @@ int main(int argc, char **argv) {
     for (int i = 0; i < size; i++) {
         if (sw_outImage[i] != hw_outImage[i]) {
             std::cout << "Error: Result mismatch" << std::endl;
-            std::cout << "i = " << i << " CPU result = " << sw_outImage[i] << " Device result = " << hw_outImage[i]
-                      << std::endl;
+            std::cout << "i = " << i << " CPU result = " << sw_outImage[i]
+                      << " Device result = " << hw_outImage[i] << std::endl;
             match = 1;
             break;
         }

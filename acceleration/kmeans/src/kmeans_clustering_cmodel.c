@@ -151,7 +151,8 @@ float **kmeans_clustering_cmodel(float **feature, /* in: [npoints][nfeatures] */
 
         for (i = 0; i < npoints; i++) {
             /* find the index of nestest cluster centers */
-            index = find_nearest_point(feature[i], nfeatures, clusters, nclusters);
+            index =
+                find_nearest_point(feature[i], nfeatures, clusters, nclusters);
             /* if membership changes, increase delta by 1 */
             if (membership[i] != index)
                 delta += 1.0;

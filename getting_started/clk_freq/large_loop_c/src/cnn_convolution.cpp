@@ -164,7 +164,8 @@ convYaxis:
                 // Convolution operation
                 if (yVal >= 0 && yVal < ISize && xVal >= 0 && xVal < ISize) {
                     acc[input][i][j] =
-                        (short)img_lcl[input][yVal * ISize + xVal] * (short)wgt_lcl[input][i * WSize + j];
+                        (short)img_lcl[input][yVal * ISize + xVal] *
+                        (short)wgt_lcl[input][i * WSize + j];
                 } else {
                     acc[input][i][j] = 0;
                 }
@@ -267,7 +268,8 @@ outThread:
         outXaxis:
             for (int x = 0; x < OSize; x++) {
                 // Perform convolution for the current 'pixel'
-                convolution_operation(img_lcl, wgt_lcl, out_lcl, output, y, x, i_chan);
+                convolution_operation(
+                    img_lcl, wgt_lcl, out_lcl, output, y, x, i_chan);
             }
         }
 

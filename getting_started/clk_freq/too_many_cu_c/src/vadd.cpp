@@ -114,7 +114,8 @@ void vadd_GOOD(const int *in1, // Read-Only Vector 1
 
     // Burst read for in1_lcl
     readIn1:
-        for (int itr = 0, i = 0, j = 0; itr < NUM_CU * BUFFER_SIZE; itr++, j++) {
+        for (int itr = 0, i = 0, j = 0; itr < NUM_CU * BUFFER_SIZE;
+             itr++, j++) {
            #pragma HLS PIPELINE II=1
             if (j == BUFFER_SIZE) {
                 j = 0;
@@ -125,7 +126,8 @@ void vadd_GOOD(const int *in1, // Read-Only Vector 1
 
     // Burst read for in2_lcl
     readIn2:
-        for (int itr = 0, i = 0, j = 0; itr < NUM_CU * BUFFER_SIZE; itr++, j++) {
+        for (int itr = 0, i = 0, j = 0; itr < NUM_CU * BUFFER_SIZE;
+             itr++, j++) {
            #pragma HLS PIPELINE II=1
             if (j == BUFFER_SIZE) {
                 j = 0;
@@ -165,7 +167,8 @@ void vadd_GOOD(const int *in1, // Read-Only Vector 1
 
     // Burst write from out_lcl
     writeOut:
-        for (int itr = 0, i = 0, j = 0; itr < NUM_CU * BUFFER_SIZE; itr++, j++) {
+        for (int itr = 0, i = 0, j = 0; itr < NUM_CU * BUFFER_SIZE;
+             itr++, j++) {
            #pragma HLS PIPELINE II=1
             if (j == BUFFER_SIZE) {
                 j = 0;

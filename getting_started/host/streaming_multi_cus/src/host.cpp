@@ -116,10 +116,14 @@ int main(int argc, char **argv) {
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
 
     // Creating Command Queue
-    OCL_CHECK(
-        err,
-        cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err));
-    OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
+    OCL_CHECK(err,
+              cl::CommandQueue q(context,
+                                 device,
+                                 CL_QUEUE_PROFILING_ENABLE |
+                                     CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE,
+                                 &err));
+    OCL_CHECK(err,
+              std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     // read_binary_file() is a utility API which will load the binaryFile
     // and will return the pointer to file buffer.
@@ -137,8 +141,10 @@ int main(int argc, char **argv) {
     for (int i = 0; i < NCU; i++) {
         cu_id = std::to_string(i + 1);
         auto krnl_name_full = krnl_name + ":{" + "vadd_" + cu_id + "}";
-        printf("Creating a kernel [%s] for CU(%d)\n", krnl_name_full.c_str(), i);
-        OCL_CHECK(err, krnls[i] = cl::Kernel(program, krnl_name_full.c_str(), &err));
+        printf(
+            "Creating a kernel [%s] for CU(%d)\n", krnl_name_full.c_str(), i);
+        OCL_CHECK(err,
+                  krnls[i] = cl::Kernel(program, krnl_name_full.c_str(), &err));
     }
 
     // Streams
@@ -157,18 +163,22 @@ int main(int argc, char **argv) {
         // Create write stream for argument 0 and 1 of kernel
         std::cout << "\n Creating Stream for CU: " << i;
         ext.flags = 0;
-        OCL_CHECK(ret,
-                  write_stream_a[i] =
-                      xcl::Stream::createStream(device.get(), CL_STREAM_WRITE_ONLY, CL_STREAM, &ext, &ret));
+        OCL_CHECK(
+            ret,
+            write_stream_a[i] = xcl::Stream::createStream(
+                device.get(), CL_STREAM_WRITE_ONLY, CL_STREAM, &ext, &ret));
         ext.flags = 1;
-        OCL_CHECK(ret,
-                  write_stream_b[i] =
-                      xcl::Stream::createStream(device.get(), CL_STREAM_WRITE_ONLY, CL_STREAM, &ext, &ret));
+        OCL_CHECK(
+            ret,
+            write_stream_b[i] = xcl::Stream::createStream(
+                device.get(), CL_STREAM_WRITE_ONLY, CL_STREAM, &ext, &ret));
 
         //Create read stream for argument 2 of kernel
         ext.flags = 2;
-        OCL_CHECK(ret,
-                  read_stream[i] = xcl::Stream::createStream(device.get(), CL_STREAM_READ_ONLY, CL_STREAM, &ext, &ret));
+        OCL_CHECK(
+            ret,
+            read_stream[i] = xcl::Stream::createStream(
+                device.get(), CL_STREAM_READ_ONLY, CL_STREAM, &ext, &ret));
     }
 
     // Launch the Kernel
@@ -190,24 +200,33 @@ int main(int argc, char **argv) {
 
         std::cout << "\n Writing Stream write_stream_a[" << i << "]";
         OCL_CHECK(ret,
-                  xcl::Stream::writeStream(
-                      write_stream_a[i], (h_a.data() + i * no_of_elem), vector_size_bytes, &wr_req, &ret));
+                  xcl::Stream::writeStream(write_stream_a[i],
+                                           (h_a.data() + i * no_of_elem),
+                                           vector_size_bytes,
+                                           &wr_req,
+                                           &ret));
 
         auto write_tag_b = "write_b_" + std::to_string(i);
         wr_req.priv_data = (void *)write_tag_b.c_str();
 
         std::cout << "\n Writing Stream write_stream_b[" << i << "]";
         OCL_CHECK(ret,
-                  xcl::Stream::writeStream(
-                      write_stream_b[i], (h_b.data() + i * no_of_elem), vector_size_bytes, &wr_req, &ret));
+                  xcl::Stream::writeStream(write_stream_b[i],
+                                           (h_b.data() + i * no_of_elem),
+                                           vector_size_bytes,
+                                           &wr_req,
+                                           &ret));
 
         auto read_tag = "read_" + std::to_string(i);
         rd_req.priv_data = (void *)read_tag.c_str();
 
         std::cout << "\n Reading Stream read_stream[" << i << "]";
         OCL_CHECK(ret,
-                  xcl::Stream::readStream(
-                      read_stream[i], (hw_results.data() + i * no_of_elem), vector_size_bytes, &rd_req, &ret));
+                  xcl::Stream::readStream(read_stream[i],
+                                          (hw_results.data() + i * no_of_elem),
+                                          vector_size_bytes,
+                                          &rd_req,
+                                          &ret));
     }
 
     // Sync for the async streaming
@@ -215,10 +234,21 @@ int main(int argc, char **argv) {
 
     // Checking the request completions
     cl_streams_poll_req_completions *poll_req;
-    poll_req = (cl_streams_poll_req_completions *)malloc(sizeof(cl_streams_poll_req_completions) * num_compl);
+    poll_req = (cl_streams_poll_req_completions *)malloc(
+        sizeof(cl_streams_poll_req_completions) * num_compl);
     memset(poll_req, 0, sizeof(cl_streams_poll_req_completions) * num_compl);
-    printf("\n clPollStreams for (%d) events (CU: %d, axis_in: 2, axis_out: 1)\n", num_compl, NCU);
-    OCL_CHECK(ret, xcl::Stream::pollStreams(device.get(), poll_req, num_compl, num_compl, &num_compl, 50000, &ret));
+    printf(
+        "\n clPollStreams for (%d) events (CU: %d, axis_in: 2, axis_out: 1)\n",
+        num_compl,
+        NCU);
+    OCL_CHECK(ret,
+              xcl::Stream::pollStreams(device.get(),
+                                       poll_req,
+                                       num_compl,
+                                       num_compl,
+                                       &num_compl,
+                                       50000,
+                                       &ret));
 
     // Compare the device results with software results
     bool match = verify(sw_results.data(), hw_results.data(), size);

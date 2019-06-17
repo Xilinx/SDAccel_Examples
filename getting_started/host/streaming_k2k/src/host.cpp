@@ -44,7 +44,12 @@ decltype(&clPollStreams) xcl::Stream::pollStreams = nullptr;
 auto constexpr c_test_size = 256 * 1024 * 1024; //256 MB data
 
 ////////////////////RESET FUNCTION//////////////////////////////////
-int reset(int *a, int *b, int *c, int *sw_results, int *hw_results, unsigned int size) {
+int reset(int *a,
+          int *b,
+          int *c,
+          int *sw_results,
+          int *hw_results,
+          unsigned int size) {
     //Fill the input vectors with data
     for (size_t i = 0; i < size; i++) {
         a[i] = rand() % size;
@@ -89,10 +94,16 @@ int main(int argc, char **argv) {
     }
 
     auto binaryFile = argv[1];
-    std::cout << "Vector Addition and Multiplication of elements 0x" << std::hex << size << std::endl;
+    std::cout << "Vector Addition and Multiplication of elements 0x" << std::hex
+              << size << std::endl;
 
     // Reset the data vectors
-    reset(h_a.data(), h_b.data(), h_c.data(), sw_results.data(), hw_results.data(), size);
+    reset(h_a.data(),
+          h_b.data(),
+          h_c.data(),
+          sw_results.data(),
+          hw_results.data(),
+          size);
 
     // OpenCL Setup
     // OpenCL objects
@@ -123,8 +134,11 @@ int main(int argc, char **argv) {
 
     // Creating Command Queue
     OCL_CHECK(err,
-              q = cl::CommandQueue(
-                  context, device, CL_QUEUE_PROFILING_ENABLE | CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err));
+              q = cl::CommandQueue(context,
+                                   device,
+                                   CL_QUEUE_PROFILING_ENABLE |
+                                       CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE,
+                                   &err));
 
     // read_binary_file() is a utility API which will load the binaryFile
     // and will return the pointer to file buffer.
@@ -155,18 +169,23 @@ int main(int argc, char **argv) {
     cl_stream write_stream_a, write_stream_b, write_stream_c;
     ext1.flags = 0;
     OCL_CHECK(ret,
-              write_stream_a = xcl::Stream::createStream(device.get(), CL_STREAM_WRITE_ONLY, CL_STREAM, &ext1, &ret));
+              write_stream_a = xcl::Stream::createStream(
+                  device.get(), CL_STREAM_WRITE_ONLY, CL_STREAM, &ext1, &ret));
     ext1.flags = 1;
     OCL_CHECK(ret,
-              write_stream_b = xcl::Stream::createStream(device.get(), CL_STREAM_WRITE_ONLY, CL_STREAM, &ext1, &ret));
+              write_stream_b = xcl::Stream::createStream(
+                  device.get(), CL_STREAM_WRITE_ONLY, CL_STREAM, &ext1, &ret));
     ext2.flags = 0;
     OCL_CHECK(ret,
-              write_stream_c = xcl::Stream::createStream(device.get(), CL_STREAM_WRITE_ONLY, CL_STREAM, &ext2, &ret));
+              write_stream_c = xcl::Stream::createStream(
+                  device.get(), CL_STREAM_WRITE_ONLY, CL_STREAM, &ext2, &ret));
 
     //Create read stream for argument 2 of kernel
     cl_stream read_stream;
     ext2.flags = 2;
-    OCL_CHECK(ret, read_stream = xcl::Stream::createStream(device.get(), CL_STREAM_READ_ONLY, CL_STREAM, &ext2, &ret));
+    OCL_CHECK(ret,
+              read_stream = xcl::Stream::createStream(
+                  device.get(), CL_STREAM_READ_ONLY, CL_STREAM, &ext2, &ret));
 
     OCL_CHECK(err, err = q.enqueueTask(krnl_vadd));
     OCL_CHECK(err, err = q.enqueueTask(krnl_vmult));
@@ -178,27 +197,41 @@ int main(int argc, char **argv) {
     wr_req.priv_data = (void *)"write_a";
 
     // Writing data to input stream 1 independently in case of non-blocking transfers.
-    OCL_CHECK(ret, xcl::Stream::writeStream(write_stream_a, h_a.data(), vector_size_bytes, &wr_req, &ret));
+    OCL_CHECK(
+        ret,
+        xcl::Stream::writeStream(
+            write_stream_a, h_a.data(), vector_size_bytes, &wr_req, &ret));
 
     wr_req.priv_data = (void *)"write_b";
     // Writing data to input stream 2 independently in case of non-blocking transfers.
-    OCL_CHECK(ret, xcl::Stream::writeStream(write_stream_b, h_b.data(), vector_size_bytes, &wr_req, &ret));
+    OCL_CHECK(
+        ret,
+        xcl::Stream::writeStream(
+            write_stream_b, h_b.data(), vector_size_bytes, &wr_req, &ret));
 
     wr_req.priv_data = (void *)"write_c";
     // Writing data to input stream 2 independently in case of non-blocking transfers.
-    OCL_CHECK(ret, xcl::Stream::writeStream(write_stream_c, h_c.data(), vector_size_bytes, &wr_req, &ret));
+    OCL_CHECK(
+        ret,
+        xcl::Stream::writeStream(
+            write_stream_c, h_c.data(), vector_size_bytes, &wr_req, &ret));
 
     // Initiating the READ transfer
     cl_stream_xfer_req rd_req{0};
     rd_req.flags = CL_STREAM_EOT | CL_STREAM_NONBLOCKING;
     rd_req.priv_data = (void *)"read";
     // Read the stream data independently in case of non-blocking transfers.
-    OCL_CHECK(ret, xcl::Stream::readStream(read_stream, hw_results.data(), vector_size_bytes, &rd_req, &ret));
+    OCL_CHECK(
+        ret,
+        xcl::Stream::readStream(
+            read_stream, hw_results.data(), vector_size_bytes, &rd_req, &ret));
 
     // Checking the request completion
     cl_streams_poll_req_completions poll_req[4]{0, 0, 0, 0}; // 4 Requests
     auto num_compl = 4;
-    OCL_CHECK(ret, xcl::Stream::pollStreams(device.get(), poll_req, 4, 4, &num_compl, 50000, &ret));
+    OCL_CHECK(ret,
+              xcl::Stream::pollStreams(
+                  device.get(), poll_req, 4, 4, &num_compl, 50000, &ret));
     // Blocking API, waits for 4 poll request completion or 50000ms, whichever occurs first.
 
     // Ensuring all OpenCL objects are released.

@@ -113,7 +113,8 @@ void event_cb(cl_event event1, cl_int cmd_status, void *data) {
     cl::Event event(event1, true);
     OCL_CHECK(err, err = event.getInfo(CL_EVENT_COMMAND_TYPE, &command));
     cl_int status;
-    OCL_CHECK(err, err = event.getInfo(CL_EVENT_COMMAND_EXECUTION_STATUS, &status));
+    OCL_CHECK(err,
+              err = event.getInfo(CL_EVENT_COMMAND_EXECUTION_STATUS, &status));
     const char *command_str;
     const char *status_str;
     switch (command) {
@@ -152,14 +153,19 @@ void event_cb(cl_event event1, cl_int cmd_status, void *data) {
         status_str = "Completed";
         break;
     }
-    printf("[%s]: %s %s\n", reinterpret_cast<char *>(data), status_str, command_str);
+    printf("[%s]: %s %s\n",
+           reinterpret_cast<char *>(data),
+           status_str,
+           command_str);
     fflush(stdout);
 }
 
 // Sets the callback for a particular event
 void set_callback(cl::Event event, const char *queue_name) {
     cl_int err;
-    OCL_CHECK(err, err = event.setCallback(CL_COMPLETE, event_cb, (void *)queue_name));
+    OCL_CHECK(err,
+              err =
+                  event.setCallback(CL_COMPLETE, event_cb, (void *)queue_name));
 }
 
 int main(int argc, char **argv) {
@@ -183,8 +189,12 @@ int main(int argc, char **argv) {
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
     // This example will use an out of order command queue. The default command
     // queue created by cl::CommandQueue is an inorder command queue.
-    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err));
-    OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
+    OCL_CHECK(
+        err,
+        cl::CommandQueue q(
+            context, device, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err));
+    OCL_CHECK(err,
+              std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     // read_binary_file() is a utility API which will load the binaryFile
     // and will return the pointer to file buffer.
@@ -214,7 +224,8 @@ int main(int argc, char **argv) {
     vector<cl::Event> read_events(2);
     cl::Buffer buffer_a[2], buffer_b[2], buffer_c[2];
 
-    for (size_t iteration_idx = 0; iteration_idx < num_iterations; iteration_idx++) {
+    for (size_t iteration_idx = 0; iteration_idx < num_iterations;
+         iteration_idx++) {
         int flag = iteration_idx % 2;
 
         if (iteration_idx >= 2) {
@@ -226,23 +237,26 @@ int main(int argc, char **argv) {
         // Device-to-host communication
         std::cout << "Creating Buffers..." << std::endl;
         OCL_CHECK(err,
-                  buffer_a[flag] = cl::Buffer(context,
-                                              CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
-                                              bytes_per_iteration,
-                                              &A[iteration_idx * elements_per_iteration],
-                                              &err));
+                  buffer_a[flag] =
+                      cl::Buffer(context,
+                                 CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
+                                 bytes_per_iteration,
+                                 &A[iteration_idx * elements_per_iteration],
+                                 &err));
         OCL_CHECK(err,
-                  buffer_b[flag] = cl::Buffer(context,
-                                              CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
-                                              bytes_per_iteration,
-                                              &B[iteration_idx * elements_per_iteration],
-                                              &err));
+                  buffer_b[flag] =
+                      cl::Buffer(context,
+                                 CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
+                                 bytes_per_iteration,
+                                 &B[iteration_idx * elements_per_iteration],
+                                 &err));
         OCL_CHECK(err,
-                  buffer_c[flag] = cl::Buffer(context,
-                                              CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
-                                              bytes_per_iteration,
-                                              &device_result[iteration_idx * elements_per_iteration],
-                                              &err));
+                  buffer_c[flag] = cl::Buffer(
+                      context,
+                      CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
+                      bytes_per_iteration,
+                      &device_result[iteration_idx * elements_per_iteration],
+                      &err));
 
         vector<cl::Event> write_event(1);
 
@@ -256,9 +270,12 @@ int main(int argc, char **argv) {
         // Because we are passing the write_event, it returns an event object
         // that identifies this particular command and can be used to query
         // or queue a wait for this particular command to complete.
-        OCL_CHECK(err,
-                  err = q.enqueueMigrateMemObjects(
-                      {buffer_a[flag], buffer_b[flag]}, 0 /*0 means from host*/, NULL, &write_event[0]));
+        OCL_CHECK(
+            err,
+            err = q.enqueueMigrateMemObjects({buffer_a[flag], buffer_b[flag]},
+                                             0 /*0 means from host*/,
+                                             NULL,
+                                             &write_event[0]));
         set_callback(write_event[0], "ooo_queue");
 
         printf("Enqueueing NDRange kernel.\n");
@@ -268,7 +285,9 @@ int main(int argc, char **argv) {
         //Launch the Kernel
         std::vector<cl::Event> waitList;
         waitList.push_back(write_event[0]);
-        OCL_CHECK(err, err = q.enqueueNDRangeKernel(krnl_vadd, 0, 1, 1, &waitList, &kernel_events[flag]));
+        OCL_CHECK(err,
+                  err = q.enqueueNDRangeKernel(
+                      krnl_vadd, 0, 1, 1, &waitList, &kernel_events[flag]));
         set_callback(kernel_events[flag], "ooo_queue");
 
         // Copy Result from Device Global Memory to Host Local Memory
@@ -279,8 +298,10 @@ int main(int argc, char **argv) {
         // potentially overlap the next kernel call as well as the next read
         // operations
         OCL_CHECK(err,
-                  err = q.enqueueMigrateMemObjects(
-                      {buffer_c[flag]}, CL_MIGRATE_MEM_OBJECT_HOST, &eventList, &read_events[flag]));
+                  err = q.enqueueMigrateMemObjects({buffer_c[flag]},
+                                                   CL_MIGRATE_MEM_OBJECT_HOST,
+                                                   &eventList,
+                                                   &read_events[flag]));
         set_callback(read_events[flag], "ooo_queue");
 
         OCL_CHECK(err, err = read_events[flag].wait());
@@ -297,7 +318,10 @@ int main(int argc, char **argv) {
         int host_result = A[i] + B[i];
         if (device_result[i] != host_result) {
             printf("Error: Result mismatch:\n");
-            printf("i = %d CPU result = %d Device result = %d\n", i, host_result, device_result[i]);
+            printf("i = %d CPU result = %d Device result = %d\n",
+                   i,
+                   host_result,
+                   device_result[i]);
             match = false;
             break;
         }

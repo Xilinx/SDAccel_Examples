@@ -63,7 +63,8 @@ static int loadFile2Memory(const char *filename, char **result) {
 static void getDeviceVersion(oclHardware &hardware) {
     char versionString[512];
     size_t size = 0;
-    cl_int err = clGetDeviceInfo(hardware.mDevice, CL_DEVICE_VERSION, 511, versionString, &size);
+    cl_int err = clGetDeviceInfo(
+        hardware.mDevice, CL_DEVICE_VERSION, 511, versionString, &size);
     if (err != CL_SUCCESS) {
         std::cout << oclErrorCode(err) << "\n";
         return;
@@ -120,7 +121,8 @@ oclHardware getOclHardware(cl_device_type type) {
     }
 
     for (cl_uint i = 0; i < platformCount; i++) {
-        err = clGetPlatformInfo(platforms[i], CL_PLATFORM_NAME, 256, platformName, 0);
+        err = clGetPlatformInfo(
+            platforms[i], CL_PLATFORM_NAME, 256, platformName, 0);
         if (err != CL_SUCCESS) {
             std::cout << oclErrorCode(err) << "\n";
             return hardware;
@@ -137,12 +139,15 @@ oclHardware getOclHardware(cl_device_type type) {
             return hardware;
         }
 
-        cl_context_properties contextData[3] = {CL_CONTEXT_PLATFORM, (cl_context_properties)platforms[i], 0};
-        cl_context context = clCreateContextFromType(contextData, type, 0, 0, &err);
+        cl_context_properties contextData[3] = {
+            CL_CONTEXT_PLATFORM, (cl_context_properties)platforms[i], 0};
+        cl_context context =
+            clCreateContextFromType(contextData, type, 0, 0, &err);
         if (err != CL_SUCCESS) {
             continue;
         }
-        cl_command_queue queue = clCreateCommandQueue(context, devices[0], 0, &err);
+        cl_command_queue queue =
+            clCreateCommandQueue(context, devices[0], 0, &err);
         if (err != CL_SUCCESS) {
             std::cout << oclErrorCode(err) << "\n";
             return hardware;
@@ -155,7 +160,8 @@ oclHardware getOclHardware(cl_device_type type) {
         getDeviceVersion(hardware);
         std::cout << "Platform = " << platformName << "\n";
         std::cout << "Device = " << deviceName << "\n";
-        std::cout << "OpenCL Version = " << hardware.mMajorVersion << '.' << hardware.mMinorVersion << "\n";
+        std::cout << "OpenCL Version = " << hardware.mMajorVersion << '.'
+                  << hardware.mMinorVersion << "\n";
         return hardware;
     }
     return hardware;
@@ -166,7 +172,8 @@ oclHardware getOclHardware(cl_device_type type) {
 //
 int getOclSoftware(oclSoftware &software, const oclHardware &hardware) {
     cl_device_type deviceType = CL_DEVICE_TYPE_DEFAULT;
-    cl_int err = clGetDeviceInfo(hardware.mDevice, CL_DEVICE_TYPE, sizeof(deviceType), &deviceType, 0);
+    cl_int err = clGetDeviceInfo(
+        hardware.mDevice, CL_DEVICE_TYPE, sizeof(deviceType), &deviceType, 0);
     if (err != CL_SUCCESS) {
         std::cout << oclErrorCode(err) << "\n";
         return -1;
@@ -183,17 +190,25 @@ int getOclSoftware(oclSoftware &software, const oclHardware &hardware) {
 
     if (deviceType == CL_DEVICE_TYPE_ACCELERATOR) {
         size_t n = size;
-        software.mProgram = clCreateProgramWithBinary(
-            hardware.mContext, 1, &hardware.mDevice, &n, (const unsigned char **)&kernelCode, 0, &err);
+        software.mProgram =
+            clCreateProgramWithBinary(hardware.mContext,
+                                      1,
+                                      &hardware.mDevice,
+                                      &n,
+                                      (const unsigned char **)&kernelCode,
+                                      0,
+                                      &err);
     } else {
-        software.mProgram = clCreateProgramWithSource(hardware.mContext, 1, (const char **)&kernelCode, 0, &err);
+        software.mProgram = clCreateProgramWithSource(
+            hardware.mContext, 1, (const char **)&kernelCode, 0, &err);
     }
     if (!software.mProgram || (err != CL_SUCCESS)) {
         std::cout << oclErrorCode(err) << "\n";
         return -3;
     }
 
-    software.mKernel = clCreateKernel(software.mProgram, software.mKernelName, NULL);
+    software.mKernel =
+        clCreateKernel(software.mProgram, software.mKernelName, NULL);
     if (software.mKernel == 0) {
         std::cout << oclErrorCode(err) << "\n";
         return -4;

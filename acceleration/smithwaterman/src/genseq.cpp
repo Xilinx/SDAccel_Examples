@@ -61,7 +61,8 @@ command_e command() {
     return BP;
 }
 
-void genSeq(int readSize, int refSize, int readLoc, short *readSeq, short *refSeq) {
+void genSeq(
+    int readSize, int refSize, int readLoc, short *readSeq, short *refSeq) {
     int readCount = 0;
     int i;
     for (i = 0; i < refSize; ++i) {
@@ -109,8 +110,14 @@ void printMatrix(int readSize, int refSize, short **mat, char *msg) {
     }
 }
 
-void computeMatrix(
-    int readSize, int refSize, short *readSeq, short *refSeq, short **mat, short *maxr, short *maxc, short *maxv) {
+void computeMatrix(int readSize,
+                   int refSize,
+                   short *readSeq,
+                   short *refSeq,
+                   short **mat,
+                   short *maxr,
+                   short *maxc,
+                   short *maxv) {
     *maxv = MINVAL;
     int row, col;
     for (col = 0; col < refSize; col++) {
@@ -156,7 +163,11 @@ void compareMatrix(int readSize, int refSize, short **matRef, short **matComp) {
     for (row = 0; row < readSize; ++row) {
         for (col = 0; col < refSize; col++) {
             if (matRef[row][col] != matComp[row][col]) {
-                printf("Difference at (%d, %d). Ref=%d, Computed=%d\n", row, col, matRef[row][col], matComp[row][col]);
+                printf("Difference at (%d, %d). Ref=%d, Computed=%d\n",
+                       row,
+                       col,
+                       matRef[row][col],
+                       matComp[row][col]);
                 error++;
             }
         }
@@ -232,8 +243,11 @@ void compareSeq(int sz, short *seq, short *seqT, char *s) {
     }
 }
 
-unsigned int *
-generatePackedNReadRefPair(int N, int readSize, int refSize, unsigned int **maxVal, int computeOutput = 1) {
+unsigned int *generatePackedNReadRefPair(int N,
+                                         int readSize,
+                                         int refSize,
+                                         unsigned int **maxVal,
+                                         int computeOutput = 1) {
     int numInt = READREFUINTSZ(readSize, refSize);
     unsigned int *pairs = new unsigned int[N * numInt];
     short *readSeq = new short[readSize];
@@ -255,7 +269,14 @@ generatePackedNReadRefPair(int N, int readSize, int refSize, unsigned int **maxV
         makeSeq(readSize, refSize, readSeq, refSeq);
         //compute max ref value
         if (computeOutput) {
-            computeMatrix(readSize, refSize, readSeq, refSeq, matRef, &maxr, &maxc, &maxv);
+            computeMatrix(readSize,
+                          refSize,
+                          readSeq,
+                          refSeq,
+                          matRef,
+                          &maxr,
+                          &maxc,
+                          &maxv);
             (*maxVal)[3 * i + 0] = maxr;
             (*maxVal)[3 * i + 1] = maxc;
             (*maxVal)[3 * i + 2] = maxv;
@@ -263,10 +284,16 @@ generatePackedNReadRefPair(int N, int readSize, int refSize, unsigned int **maxV
         //convert to packed
         uint2TouintArray(readSize, readSeq, readSeqP);
         uint2TouintArray(refSize, refSeq, refSeqP);
-        memcpy((pairs + offset), readSeqP, sizeof(unsigned int) * readSize / UINTNUMBP);
+        memcpy((pairs + offset),
+               readSeqP,
+               sizeof(unsigned int) * readSize / UINTNUMBP);
         uintTouint2Array(readSize / UINTNUMBP, (pairs + offset), readSeqT);
-        memcpy((pairs + offset + readSize / UINTNUMBP), refSeqP, sizeof(unsigned int) * refSize / UINTNUMBP);
-        uintTouint2Array(refSize / UINTNUMBP, (pairs + offset + readSize / UINTNUMBP), refSeqT);
+        memcpy((pairs + offset + readSize / UINTNUMBP),
+               refSeqP,
+               sizeof(unsigned int) * refSize / UINTNUMBP);
+        uintTouint2Array(refSize / UINTNUMBP,
+                         (pairs + offset + readSize / UINTNUMBP),
+                         refSeqT);
     }
     delete[] readSeqP;
     delete[] refSeqP;
@@ -278,7 +305,10 @@ generatePackedNReadRefPair(int N, int readSize, int refSize, unsigned int **maxV
     return pairs;
 }
 
-void writeReadRefFile(char *fname, unsigned int *pairs, unsigned int *maxVals, int N) {
+void writeReadRefFile(char *fname,
+                      unsigned int *pairs,
+                      unsigned int *maxVals,
+                      int N) {
     FILE *fp = fopen(fname, "w");
     fprintf(fp, "rdsz,%d\n", MAXROW);
     fprintf(fp, "refsz,%d\n", MAXCOL);
@@ -318,7 +348,10 @@ int getToken(FILE *fp, char *tok) {
     return -1;
 }
 
-int readReadRefFile(char *fname, unsigned int **pairs, unsigned int **maxv, int N) {
+int readReadRefFile(char *fname,
+                    unsigned int **pairs,
+                    unsigned int **maxv,
+                    int N) {
     FILE *fp = fopen(fname, "r");
     char *string = new char[1024];
     int rdSz = 0;
@@ -363,7 +396,10 @@ int readReadRefFile(char *fname, unsigned int **pairs, unsigned int **maxv, int 
     return numSamples;
 }
 
-void printPackedNReadRefPair(unsigned int *pairs, int N, int readSize, int refSize) {
+void printPackedNReadRefPair(unsigned int *pairs,
+                             int N,
+                             int readSize,
+                             int refSize) {
     int numInt = READREFUINTSZ(readSize, refSize);
     short *readSeq = new short[readSize];
     short *refSeq = new short[refSize];
@@ -379,7 +415,8 @@ void printPackedNReadRefPair(unsigned int *pairs, int N, int readSize, int refSi
         uintTouint2Array(readSize / UINTNUMBP, readSeqP, readSeq);
         printf("Read%d:", i);
         printSeq(readSize, readSeq);
-        memcpy(refSeqP, (pairs + offset + readSz), sizeof(unsigned int) * refSz);
+        memcpy(
+            refSeqP, (pairs + offset + readSz), sizeof(unsigned int) * refSz);
         uintTouint2Array(refSize / UINTNUMBP, refSeqP, refSeq);
         printf("Ref %d:", i);
         printSeq(refSize, refSeq);

@@ -53,12 +53,13 @@ int main(int argc, char *argv[]) {
     BitmapInterface image(bitmapFilename.data());
     bool result = image.readBitmapFile();
     if (!result) {
-        std::cout << "ERROR:Unable to Read Bitmap File " << bitmapFilename.data() << std::endl;
+        std::cout << "ERROR:Unable to Read Bitmap File "
+                  << bitmapFilename.data() << std::endl;
         return EXIT_FAILURE;
     }
 
     //Allocate Memory in Host Memory
-    int image_size = image.numPixels();
+    auto image_size = image.numPixels();
     size_t image_size_bytes = sizeof(int) * image_size;
     std::vector<int, aligned_allocator<int>> hwRgbImage(image_size);
     std::vector<int, aligned_allocator<int>> hwHsvImage(image_size);
@@ -69,14 +70,17 @@ int main(int argc, char *argv[]) {
     memcpy(hwRgbImage.data(), image.bitmap(), image_size_bytes);
 
     //OPENCL HOST CODE AREA START
-    std::vector<cl::Device> devices = xcl::get_xil_devices();
-    cl::Device device = devices[0];
+    auto devices = xcl::get_xil_devices();
+    auto device = devices[0];
 
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
-    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
-    OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
+    OCL_CHECK(
+        err,
+        cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    OCL_CHECK(err,
+              std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
-    char *fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
@@ -84,25 +88,36 @@ int main(int argc, char *argv[]) {
 
     //Allocate Buffer in Global Memory
     OCL_CHECK(err,
-              cl::Buffer buffer_rgbImage(
-                  context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, image_size_bytes, hwRgbImage.data(), &err));
+              cl::Buffer buffer_rgbImage(context,
+                                         CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
+                                         image_size_bytes,
+                                         hwRgbImage.data(),
+                                         &err));
 
-    OCL_CHECK(err,
-              cl::Buffer buffer_hsvImage(
-                  context, CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR, image_size_bytes, hwHsvImage.data(), &err));
+    OCL_CHECK(
+        err,
+        cl::Buffer buffer_hsvImage(context,
+                                   CL_MEM_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
+                                   image_size_bytes,
+                                   hwHsvImage.data(),
+                                   &err));
 
     OCL_CHECK(err, err = krnl_rgb2hsv.setArg(0, buffer_rgbImage));
     OCL_CHECK(err, err = krnl_rgb2hsv.setArg(1, buffer_hsvImage));
     OCL_CHECK(err, err = krnl_rgb2hsv.setArg(2, image_size));
 
     //Copy input RGB Image to device global memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_rgbImage}, 0 /* 0 means from host*/));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_rgbImage},
+                                               0 /* 0 means from host*/));
 
     //Launch the Kernel
     OCL_CHECK(err, err = q.enqueueTask(krnl_rgb2hsv));
 
     //Copy Result from Device Global Memory to Host Local Memory
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_hsvImage}, CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_hsvImage},
+                                               CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());
 
     //OPENCL HOST CODE AREA END
@@ -111,7 +126,8 @@ int main(int argc, char *argv[]) {
     sw_RgbToHsv(image.bitmap(), swHsvImage.data(), image.numPixels());
 
     //Compare the results of the Device to the Sw Based
-    int match = compareImages(swHsvImage.data(), hwHsvImage.data(), image.numPixels());
+    int match =
+        compareImages(swHsvImage.data(), hwHsvImage.data(), image.numPixels());
 
     //Converting Generated HSV to back to RGB and Writing RGB file to disk
     sw_HsvToRgb(hwHsvImage.data(), outRgbImage.data(), image.numPixels());
@@ -129,7 +145,8 @@ int main(int argc, char *argv[]) {
 void sw_RgbToHsv(int *in, int *out, size_t image_size) {
     RGBcolor rgb;
     HSVcolor hsv;
-    for (size_t i = 0; i < image_size; out[i] = hsv.h | (hsv.s << 8) | (hsv.v << 16), i++) {
+    for (size_t i = 0; i < image_size;
+         out[i] = hsv.h | (hsv.s << 8) | (hsv.v << 16), i++) {
         rgb.r = (in[i]) & 0xff;
         rgb.g = ((in[i]) & 0xff00) >> 8;
         rgb.b = ((in[i]) & 0xff0000) >> 16;
@@ -164,7 +181,8 @@ void sw_RgbToHsv(int *in, int *out, size_t image_size) {
 void sw_HsvToRgb(int *in, int *out, size_t image_size) {
     RGBcolor rgb;
     HSVcolor hsv;
-    for (size_t i = 0; i < image_size; out[i] = rgb.r | (rgb.g << 8) | (rgb.b << 16), i++) {
+    for (size_t i = 0; i < image_size;
+         out[i] = rgb.r | (rgb.g << 8) | (rgb.b << 16), i++) {
         hsv.h = in[i] & 0xff;
         hsv.s = (in[i] & 0xff00) >> 8;
         hsv.v = (in[i] & 0xff0000) >> 16;
@@ -233,7 +251,8 @@ int compareImages(int *_in, int *_out, size_t image_size) {
         out = out & 0xffffff;
         if (in != out) {
             cnt++;
-            std::cout << "ERROR: Pixel=" << i << " mismatch Expected=" << in << " and Got=" << out << std::endl;
+            std::cout << "ERROR: Pixel=" << i << " mismatch Expected=" << in
+                      << " and Got=" << out << std::endl;
             return EXIT_FAILURE;
         }
     }

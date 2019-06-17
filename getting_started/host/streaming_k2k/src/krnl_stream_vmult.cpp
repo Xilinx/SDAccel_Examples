@@ -44,7 +44,9 @@ typedef qdma_axis<DWIDTH, 0, 0, 0> pkt;
 typedef ap_axiu<DWIDTH, 0, 0, 0> trans_pkt;
 
 extern "C" {
-void krnl_stream_vmult(hls::stream<pkt> &a, hls::stream<trans_pkt> &b, hls::stream<pkt> &output) {
+void krnl_stream_vmult(hls::stream<pkt> &a,
+                       hls::stream<trans_pkt> &b,
+                       hls::stream<pkt> &output) {
    #pragma HLS INTERFACE axis port=a
    #pragma HLS INTERFACE axis port=b
    #pragma HLS INTERFACE axis port=output

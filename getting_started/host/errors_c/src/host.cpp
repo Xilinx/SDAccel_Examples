@@ -37,9 +37,9 @@ using std::streamsize;
 using std::string;
 using std::vector;
 
-#define ERROR_CASE(err)                                                                                                \
-    case err:                                                                                                          \
-        return #err;                                                                                                   \
+#define ERROR_CASE(err)                                                        \
+    case err:                                                                  \
+        return #err;                                                           \
         break
 
 const char *error_string(cl_int error_code) {
@@ -108,8 +108,9 @@ const char *error_string(cl_int error_code) {
     return nullptr;
 }
 
-static const char *error_message = "Error: Result mismatch:\n"
-                                   "i = %d CPU result = %d Device result = %d\n";
+static const char *error_message =
+    "Error: Result mismatch:\n"
+    "i = %d CPU result = %d Device result = %d\n";
 
 vector<unsigned char> readBinary(const std::string &fileName) {
     ifstream file(fileName, ios::binary | ios::ate);
@@ -140,13 +141,14 @@ int main(int argc, char **argv) {
     cl_int err;
 
     if ((err = clGetPlatformIDs(0, nullptr, nullptr))) {
-        printf("Received Expected Error calling clGetPlatformIDs: %s\n"
-               "\tThis error is usually caused by a failed OpenCL installation or "
-               "if both the platforms and num_platforms parameters are null. In "
-               "this case we passed incorrect values to the function. We "
-               "intentionally threw this error so we will not be exiting the "
-               "program. \n\n",
-               error_string(err));
+        printf(
+            "Received Expected Error calling clGetPlatformIDs: %s\n"
+            "\tThis error is usually caused by a failed OpenCL installation or "
+            "if both the platforms and num_platforms parameters are null. In "
+            "this case we passed incorrect values to the function. We "
+            "intentionally threw this error so we will not be exiting the "
+            "program. \n\n",
+            error_string(err));
         // Normally you would exit the program if this call returned an error
         // but in
         // this case we will continue processing after fixing the command
@@ -164,8 +166,9 @@ int main(int argc, char **argv) {
     }
 
     if (num_platforms == 0) {
-        printf("No platforms were found. This could be caused because the OpenCL "
-               "icd was not installed in the /etc/OpenCL/vendors directory.\n");
+        printf(
+            "No platforms were found. This could be caused because the OpenCL "
+            "icd was not installed in the /etc/OpenCL/vendors directory.\n");
         printf("TEST FAILED\n");
         exit(EXIT_FAILURE);
     }
@@ -179,8 +182,11 @@ int main(int argc, char **argv) {
 
     string platform_name(1024, '\0');
     size_t actual_size = 0;
-    if ((err = clGetPlatformInfo(
-             platforms[0], CL_PLATFORM_NAME, platform_name.size(), (void *)platform_name.data(), &actual_size))) {
+    if ((err = clGetPlatformInfo(platforms[0],
+                                 CL_PLATFORM_NAME,
+                                 platform_name.size(),
+                                 (void *)platform_name.data(),
+                                 &actual_size))) {
         printf("Error: Could not determine platform name!\n");
         printf("TEST FAILED\n");
         exit(EXIT_FAILURE);
@@ -188,46 +194,54 @@ int main(int argc, char **argv) {
     printf("Platform Name: %s\n", platform_name.c_str());
 
     cl_uint num_devices = 0;
-    if ((err = clGetDeviceIDs(platforms[0], CL_DEVICE_TYPE_CPU, 0, nullptr, &num_devices))) {
-        printf("Received Expected Error calling clGetDeviceIDs: %s\n"
-               "This error appears when we try to create a device and no devices "
-               "are found on the platform. In this case we passed "
-               "CL_DEVICE_TYPE_CPU as the device type which is not available on "
-               "the %s platform. We intentionally threw this error so we will not "
-               "be exiting the program.\n\n",
-               error_string(err),
-               platform_name.c_str());
+    if ((err = clGetDeviceIDs(
+             platforms[0], CL_DEVICE_TYPE_CPU, 0, nullptr, &num_devices))) {
+        printf(
+            "Received Expected Error calling clGetDeviceIDs: %s\n"
+            "This error appears when we try to create a device and no devices "
+            "are found on the platform. In this case we passed "
+            "CL_DEVICE_TYPE_CPU as the device type which is not available on "
+            "the %s platform. We intentionally threw this error so we will not "
+            "be exiting the program.\n\n",
+            error_string(err),
+            platform_name.c_str());
     }
     cl_device_id device_id = 0;
-    if ((err = clGetDeviceIDs(platforms[0], CL_DEVICE_TYPE_ALL, 1, &device_id, nullptr))) {
-        printf("Fatal Error calling clGetDeviceIDs: %s\n"
-               "Unexpected error getting device IDs. This may happen if you are "
-               "Targeting hardware or software emulation and the "
-               "XCL_EMULATION_MODE environment variable is not set. Also makeyou "
-               "have set the you have run the emconfigutil to setup the emulation "
-               "environment.\n\n",
-               error_string(err));
+    if ((err = clGetDeviceIDs(
+             platforms[0], CL_DEVICE_TYPE_ALL, 1, &device_id, nullptr))) {
+        printf(
+            "Fatal Error calling clGetDeviceIDs: %s\n"
+            "Unexpected error getting device IDs. This may happen if you are "
+            "Targeting hardware or software emulation and the "
+            "XCL_EMULATION_MODE environment variable is not set. Also makeyou "
+            "have set the you have run the emconfigutil to setup the emulation "
+            "environment.\n\n",
+            error_string(err));
         printf("TEST FAILED\n");
         exit(EXIT_FAILURE);
     }
 
-    cl_context_properties props[3] = {CL_CONTEXT_PLATFORM, (cl_context_properties)platforms[0], 0};
+    cl_context_properties props[3] = {
+        CL_CONTEXT_PLATFORM, (cl_context_properties)platforms[0], 0};
     // clCreate* function calls return the object so they return error codes
     // using
     // pointers to cl_int as their last parameters
-    cl_context context = clCreateContext(props, 0, &device_id, nullptr, nullptr, &err);
+    cl_context context =
+        clCreateContext(props, 0, &device_id, nullptr, nullptr, &err);
     if (err) {
-        printf("Received Expected Error calling clCreateContext: %s\n"
-               "\tMost clCreate* calls accept error codes as their last parameter "
-               "instead of returning the error value. This error occured because "
-               "we passed 0 for the num_devices varaible. We intentionally threw "
-               "this error so we will not be exiting the program.\n\n",
-               error_string(err));
+        printf(
+            "Received Expected Error calling clCreateContext: %s\n"
+            "\tMost clCreate* calls accept error codes as their last parameter "
+            "instead of returning the error value. This error occured because "
+            "we passed 0 for the num_devices varaible. We intentionally threw "
+            "this error so we will not be exiting the program.\n\n",
+            error_string(err));
     }
 
     context = clCreateContext(props, 1, &device_id, nullptr, nullptr, &err);
 
-    cl_command_queue command_queue = clCreateCommandQueue(context, device_id, CL_QUEUE_PROFILING_ENABLE, &err);
+    cl_command_queue command_queue = clCreateCommandQueue(
+        context, device_id, CL_QUEUE_PROFILING_ENABLE, &err);
     if (err) {
         printf("Fatal Error calling clCreateCommandQueue: %s\n"
                "Unexpected error creating a command queue.\n\n",
@@ -241,23 +255,30 @@ int main(int argc, char **argv) {
     vector<unsigned char> incorrect_binary = readBinary(wrong_binary_file_path);
     size_t binary_size = incorrect_binary.size();
     const unsigned char *incorrect_binary_data = incorrect_binary.data();
-    cl_program program =
-        clCreateProgramWithBinary(context, 1, &device_id, &binary_size, &incorrect_binary_data, NULL, &err);
+    cl_program program = clCreateProgramWithBinary(context,
+                                                   1,
+                                                   &device_id,
+                                                   &binary_size,
+                                                   &incorrect_binary_data,
+                                                   NULL,
+                                                   &err);
     if (err) {
-        printf("Received Expected Error calling clCreateProgramWithBinary: %s\n"
-               "Errors caused during program creation are usually due to invalid "
-               "binaries. The binary may be targeting a different device or dsa. "
-               "It may also have been currupted or incorrectly read from disk. We "
-               "intentionally caused this error so we will not be exiting the "
-               "program.\n\n",
-               error_string(err));
+        printf(
+            "Received Expected Error calling clCreateProgramWithBinary: %s\n"
+            "Errors caused during program creation are usually due to invalid "
+            "binaries. The binary may be targeting a different device or dsa. "
+            "It may also have been currupted or incorrectly read from disk. We "
+            "intentionally caused this error so we will not be exiting the "
+            "program.\n\n",
+            error_string(err));
     }
 
     std::vector<unsigned char> binary = readBinary(binary_file_path);
     binary_size = binary.size();
     const unsigned char *binary_data = binary.data();
 
-    program = clCreateProgramWithBinary(context, 1, &device_id, &binary_size, &binary_data, NULL, &err);
+    program = clCreateProgramWithBinary(
+        context, 1, &device_id, &binary_size, &binary_data, NULL, &err);
     if (err) {
         printf("Fatal Error calling clCreateProgramWithBinary: %s\n"
                "Unexpected error creating a program from binary. Make sure you "
@@ -269,35 +290,39 @@ int main(int argc, char **argv) {
 
     cl_kernel kernel = clCreateKernel(program, "InvalidKernelName", &err);
     if (err) {
-        printf("Received Expected Error calling clCreateKernel: %s\n"
-               "Errors calling clCreateKernel are usually caused if the name "
-               "passed into the function does not match a kernel in the binary. "
-               "We intentionally caused this error so we will not be exiting the "
-               "program.\n\n",
-               error_string(err));
+        printf(
+            "Received Expected Error calling clCreateKernel: %s\n"
+            "Errors calling clCreateKernel are usually caused if the name "
+            "passed into the function does not match a kernel in the binary. "
+            "We intentionally caused this error so we will not be exiting the "
+            "program.\n\n",
+            error_string(err));
     }
 
     kernel = clCreateKernel(program, "vector_add", &err);
     if (err) {
-        printf("Fatal Error calling clCreateKernel: %s\n"
-               "Unexpected error when creating kernel. Make sure you passed the "
-               "correct binary into the executable of this program.\n\n",
-               error_string(err));
+        printf(
+            "Fatal Error calling clCreateKernel: %s\n"
+            "Unexpected error when creating kernel. Make sure you passed the "
+            "correct binary into the executable of this program.\n\n",
+            error_string(err));
         printf("TEST FAILED\n");
         exit(EXIT_FAILURE);
     }
 
-    cl_mem buffer_a = clCreateBuffer(context, CL_MEM_READ_ONLY, 0, nullptr, &err);
+    cl_mem buffer_a =
+        clCreateBuffer(context, CL_MEM_READ_ONLY, 0, nullptr, &err);
     if (err) {
-        printf("Received Expected Error calling clCreateBuffer: %s\n"
-               "There can be several reasons for buffer creation to fail. It "
-               "could be because device could not allocate enough memory for this "
-               "buffer. The pointer could be null and either CL_MEM_USE_HOST_PTR "
-               "or CL_MEM_COPY_HOST_PTR are passed into the flags parameter. In "
-               "this case we passed zero(0) as the size of the buffer. We "
-               "intentionally caused this error so we will not be exiting the "
-               "program.\n\n",
-               error_string(err));
+        printf(
+            "Received Expected Error calling clCreateBuffer: %s\n"
+            "There can be several reasons for buffer creation to fail. It "
+            "could be because device could not allocate enough memory for this "
+            "buffer. The pointer could be null and either CL_MEM_USE_HOST_PTR "
+            "or CL_MEM_COPY_HOST_PTR are passed into the flags parameter. In "
+            "this case we passed zero(0) as the size of the buffer. We "
+            "intentionally caused this error so we will not be exiting the "
+            "program.\n\n",
+            error_string(err));
     }
 
     size_t size = elements * sizeof(int);
@@ -307,13 +332,15 @@ int main(int argc, char **argv) {
         printf("TEST FAILED\n");
         exit(EXIT_FAILURE);
     }
-    cl_mem buffer_b = clCreateBuffer(context, CL_MEM_READ_ONLY, size, nullptr, &err);
+    cl_mem buffer_b =
+        clCreateBuffer(context, CL_MEM_READ_ONLY, size, nullptr, &err);
     if (err) {
         printf("Fatal Error calling clCreateBuffer: %s\n", error_string(err));
         printf("TEST FAILED\n");
         exit(EXIT_FAILURE);
     }
-    cl_mem buffer_result = clCreateBuffer(context, CL_MEM_WRITE_ONLY, size, nullptr, &err);
+    cl_mem buffer_result =
+        clCreateBuffer(context, CL_MEM_WRITE_ONLY, size, nullptr, &err);
     if (err) {
         printf("Fatal Error calling clCreateBuffer: %s\n", error_string(err));
         printf("TEST FAILED\n");
@@ -346,39 +373,84 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    if ((err = clEnqueueWriteBuffer(command_queue, buffer_a, CL_FALSE, 0, size + 1, A.data(), 0, nullptr, nullptr))) {
-        printf("Received Expected Error calling clEnqueueWriteBuffer: %s\n"
-               "Errors calling clEnqueueWriteBuffer tend to occure due to invalid "
-               "pointers or invalid size of the transfer. Make sure that the host "
-               "pointer is correct and that you are transferring less than the "
-               "size of the buffer. Here we tried to transfer data that was "
-               "larger than the size of the buffer. We intentionally caused this "
-               "error so we will not be exiting the program.\n\n",
-               error_string(err));
+    if ((err = clEnqueueWriteBuffer(command_queue,
+                                    buffer_a,
+                                    CL_FALSE,
+                                    0,
+                                    size + 1,
+                                    A.data(),
+                                    0,
+                                    nullptr,
+                                    nullptr))) {
+        printf(
+            "Received Expected Error calling clEnqueueWriteBuffer: %s\n"
+            "Errors calling clEnqueueWriteBuffer tend to occure due to invalid "
+            "pointers or invalid size of the transfer. Make sure that the host "
+            "pointer is correct and that you are transferring less than the "
+            "size of the buffer. Here we tried to transfer data that was "
+            "larger than the size of the buffer. We intentionally caused this "
+            "error so we will not be exiting the program.\n\n",
+            error_string(err));
     }
 
-    if ((err = clEnqueueWriteBuffer(command_queue, buffer_a, CL_FALSE, 0, size, A.data(), 0, nullptr, nullptr))) {
-        printf("Fatal Error calling clEnqueueWriteBuffer: %s\n", error_string(err));
+    if ((err = clEnqueueWriteBuffer(command_queue,
+                                    buffer_a,
+                                    CL_FALSE,
+                                    0,
+                                    size,
+                                    A.data(),
+                                    0,
+                                    nullptr,
+                                    nullptr))) {
+        printf("Fatal Error calling clEnqueueWriteBuffer: %s\n",
+               error_string(err));
         printf("TEST FAILED\n");
         exit(EXIT_FAILURE);
     }
 
-    if ((err = clEnqueueWriteBuffer(command_queue, buffer_b, CL_FALSE, 0, size, B.data(), 0, nullptr, nullptr))) {
-        printf("Fatal Error calling clEnqueueWriteBuffer: %s\n", error_string(err));
+    if ((err = clEnqueueWriteBuffer(command_queue,
+                                    buffer_b,
+                                    CL_FALSE,
+                                    0,
+                                    size,
+                                    B.data(),
+                                    0,
+                                    nullptr,
+                                    nullptr))) {
+        printf("Fatal Error calling clEnqueueWriteBuffer: %s\n",
+               error_string(err));
         printf("TEST FAILED\n");
         exit(EXIT_FAILURE);
     }
 
     size_t global = 1;
     size_t local = 1;
-    if ((err = clEnqueueNDRangeKernel(command_queue, kernel, 1, nullptr, &global, &local, 0, nullptr, nullptr))) {
-        printf("Fatal Error calling clEnqueueNDRangeKernel: %s\n", error_string(err));
+    if ((err = clEnqueueNDRangeKernel(command_queue,
+                                      kernel,
+                                      1,
+                                      nullptr,
+                                      &global,
+                                      &local,
+                                      0,
+                                      nullptr,
+                                      nullptr))) {
+        printf("Fatal Error calling clEnqueueNDRangeKernel: %s\n",
+               error_string(err));
         printf("TEST FAILED\n");
         exit(EXIT_FAILURE);
     }
 
-    if ((err = clEnqueueReadBuffer(command_queue, buffer_result, CL_TRUE, 0, size, C.data(), 0, nullptr, nullptr))) {
-        printf("Fatal Error calling clEnqueueWriteBuffer: %s\n", error_string(err));
+    if ((err = clEnqueueReadBuffer(command_queue,
+                                   buffer_result,
+                                   CL_TRUE,
+                                   0,
+                                   size,
+                                   C.data(),
+                                   0,
+                                   nullptr,
+                                   nullptr))) {
+        printf("Fatal Error calling clEnqueueWriteBuffer: %s\n",
+               error_string(err));
         printf("TEST FAILED\n");
         exit(EXIT_FAILURE);
     }

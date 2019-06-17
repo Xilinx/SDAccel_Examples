@@ -53,7 +53,11 @@ typedef struct soa_struct {
 // to int16 (512bit) which is bigger than int3 (96bit) so will provide faster access.
 
 extern "C" {
-void dot_soa(int16 *result, const int16 *X, const int16 *Y, const int16 *Z, const int num_vertices) {
+void dot_soa(int16 *result,
+             const int16 *X,
+             const int16 *Y,
+             const int16 *Z,
+             const int num_vertices) {
 #pragma HLS INTERFACE m_axi port = result offset = slave bundle = gmem
 #pragma HLS INTERFACE m_axi port = X offset = slave bundle = gmem
 #pragma HLS INTERFACE m_axi port = Y offset = slave bundle = gmem
@@ -110,7 +114,9 @@ void dot_soa(int16 *result, const int16 *X, const int16 *Y, const int16 *Z, cons
         compute2:
             for (int k = 0; k < VERTEX_COUNT / N; k++)
                #pragma HLS LOOP_TRIPCOUNT min=c_iter max=c_iter
-                out[j].var[k] = lx[j].var[k] * lx[j].var[k] + ly[j].var[k] * ly[j].var[k] + lz[j].var[k] * lz[j].var[k];
+                out[j].var[k] = lx[j].var[k] * lx[j].var[k] +
+                                ly[j].var[k] * ly[j].var[k] +
+                                lz[j].var[k] * lz[j].var[k];
         }
 
     store_r:

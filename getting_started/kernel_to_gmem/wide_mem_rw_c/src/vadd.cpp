@@ -41,7 +41,8 @@ Description:
 #define BUFFER_SIZE 128
 #define DATAWIDTH 512
 #define DATATYPE_SIZE 32
-#define VECTOR_SIZE (DATAWIDTH / DATATYPE_SIZE) // vector size is 16 (512/32 = 16)
+#define VECTOR_SIZE                                                            \
+    (DATAWIDTH / DATATYPE_SIZE) // vector size is 16 (512/32 = 16)
 typedef ap_uint<DATAWIDTH> uint512_dt;
 typedef ap_uint<DATATYPE_SIZE> din_type;
 typedef ap_uint<DATATYPE_SIZE + 1> dout_type;
@@ -111,10 +112,13 @@ void vadd(const uint512_dt *in1, // Read-Only Vector 1
         v2_parallel_add:
             for (int i = 0; i < VECTOR_SIZE; i++) {
                #pragma HLS UNROLL
-                val1 = tmpV1.range(DATATYPE_SIZE * (i + 1) - 1, i * DATATYPE_SIZE);
-                val2 = tmpV2.range(DATATYPE_SIZE * (i + 1) - 1, i * DATATYPE_SIZE);
-                res = val1 + val2;                                                  // Vector Addition
-                tmpOut.range(DATATYPE_SIZE * (i + 1) - 1, i * DATATYPE_SIZE) = res; // Strobe Writing
+                val1 =
+                    tmpV1.range(DATATYPE_SIZE * (i + 1) - 1, i * DATATYPE_SIZE);
+                val2 =
+                    tmpV2.range(DATATYPE_SIZE * (i + 1) - 1, i * DATATYPE_SIZE);
+                res = val1 + val2; // Vector Addition
+                tmpOut.range(DATATYPE_SIZE * (i + 1) - 1, i * DATATYPE_SIZE) =
+                    res; // Strobe Writing
             }
             result_local[j] = tmpOut;
         }

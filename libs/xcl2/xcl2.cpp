@@ -41,7 +41,9 @@ std::vector<cl::Device> get_devices(const std::string &vendor_name) {
     cl::Platform platform;
     for (i = 0; i < platforms.size(); i++) {
         platform = platforms[i];
-        OCL_CHECK(err, std::string platformName = platform.getInfo<CL_PLATFORM_NAME>(&err));
+        OCL_CHECK(err,
+                  std::string platformName =
+                      platform.getInfo<CL_PLATFORM_NAME>(&err));
         if (platformName == vendor_name) {
             std::cout << "Found Platform" << std::endl;
             std::cout << "Platform Name: " << platformName.c_str() << std::endl;
@@ -54,7 +56,8 @@ std::vector<cl::Device> get_devices(const std::string &vendor_name) {
     }
     //Getting ACCELERATOR Devices and selecting 1st such device
     std::vector<cl::Device> devices;
-    OCL_CHECK(err, err = platform.getDevices(CL_DEVICE_TYPE_ACCELERATOR, &devices));
+    OCL_CHECK(err,
+              err = platform.getDevices(CL_DEVICE_TYPE_ACCELERATOR, &devices));
     return devices;
 }
 
@@ -64,7 +67,8 @@ char *read_binary_file(const std::string &xclbin_file_name, unsigned &nb) {
     std::cout << "INFO: Reading " << xclbin_file_name << std::endl;
 
     if (access(xclbin_file_name.c_str(), R_OK) != 0) {
-        printf("ERROR: %s xclbin not available please build\n", xclbin_file_name.c_str());
+        printf("ERROR: %s xclbin not available please build\n",
+               xclbin_file_name.c_str());
         exit(EXIT_FAILURE);
     }
     //Loading XCL Bin into char buffer

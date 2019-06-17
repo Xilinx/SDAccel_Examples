@@ -48,8 +48,12 @@ arrays are partitioned and the innermost loop is unrolled in the kernel.
 uint64_t get_duration_ns(const cl::Event &event) {
     cl_int err;
     uint64_t nstimestart, nstimeend;
-    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START, &nstimestart));
-    OCL_CHECK(err, err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END, &nstimeend));
+    OCL_CHECK(err,
+              err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_START,
+                                                     &nstimestart));
+    OCL_CHECK(err,
+              err = event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END,
+                                                     &nstimeend));
     return (nstimeend - nstimestart);
 }
 
@@ -71,11 +75,13 @@ void mmult_cpu(int *in1, //Input Matrix 1
 }
 
 //Functionality to setup OpenCL context and trigger the Kernel
-uint64_t mmult_fpga(std::vector<int, aligned_allocator<int>> &source_in1,          //Input Matrix 1
-                    std::vector<int, aligned_allocator<int>> &source_in2,          //Input Matrix 2
-                    std::vector<int, aligned_allocator<int>> &source_fpga_results, //Output Matrix
-                    int dim,                                                       //One dimension of matrix
-                    std::string &binaryFile                                        //Binary file string
+uint64_t mmult_fpga(
+    std::vector<int, aligned_allocator<int>> &source_in1, //Input Matrix 1
+    std::vector<int, aligned_allocator<int>> &source_in2, //Input Matrix 2
+    std::vector<int, aligned_allocator<int>>
+        &source_fpga_results, //Output Matrix
+    int dim,                  //One dimension of matrix
+    std::string &binaryFile   //Binary file string
 ) {
     cl_int err;
     unsigned fileBufSize;
@@ -83,19 +89,21 @@ uint64_t mmult_fpga(std::vector<int, aligned_allocator<int>> &source_in1,       
     size_t matrix_size_bytes = sizeof(int) * size * size;
 
     //The get_xil_devices will return vector of Xilinx Devices
-    std::vector<cl::Device> devices = xcl::get_xil_devices();
-    cl::Device device = devices[0];
+    auto devices = xcl::get_xil_devices();
+    auto device = devices[0];
 
     //Creating Context and Command Queue for selected Device
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
-    OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
-    std::string device_name = device.getInfo<CL_DEVICE_NAME>();
+    OCL_CHECK(
+        err,
+        cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
+    auto device_name = device.getInfo<CL_DEVICE_NAME>();
 
     //read_binary() command will find the OpenCL binary file created using the
     //xocc compiler load into OpenCL Binary and return a pointer to file buffer
     //and it can contain many functions which can be executed on the
     //device.
-    char *fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
     cl::Program::Binaries bins{{fileBuf, fileBufSize}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
@@ -110,15 +118,23 @@ uint64_t mmult_fpga(std::vector<int, aligned_allocator<int>> &source_in1,       
     //The cl::Buffer object cannot be referenced directly and must be passed
     //to other OpenCL functions.
     OCL_CHECK(err,
-              cl::Buffer buffer_in1(
-                  context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, matrix_size_bytes, source_in1.data(), &err));
+              cl::Buffer buffer_in1(context,
+                                    CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                    matrix_size_bytes,
+                                    source_in1.data(),
+                                    &err));
     OCL_CHECK(err,
-              cl::Buffer buffer_in2(
-                  context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, matrix_size_bytes, source_in2.data(), &err));
-    OCL_CHECK(
-        err,
-        cl::Buffer buffer_output(
-            context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, matrix_size_bytes, source_fpga_results.data(), &err));
+              cl::Buffer buffer_in2(context,
+                                    CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                                    matrix_size_bytes,
+                                    source_in2.data(),
+                                    &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_output(context,
+                                       CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
+                                       matrix_size_bytes,
+                                       source_fpga_results.data(),
+                                       &err));
 
     //Set the kernel arguments
     int narg = 0;
@@ -131,7 +147,9 @@ uint64_t mmult_fpga(std::vector<int, aligned_allocator<int>> &source_in1,       
     //application into the buffer_in1 and buffer_in2 cl::Buffer objects. The data
     //will be be transferred from system memory over PCIe to the FPGA on-board
     //DDR memory.
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_in1, buffer_in2}, 0 /* 0 means from host*/));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_in1, buffer_in2},
+                                               0 /* 0 means from host*/));
 
     cl::Event event;
     uint64_t kernel_duration = 0;
@@ -142,7 +160,9 @@ uint64_t mmult_fpga(std::vector<int, aligned_allocator<int>> &source_in1,       
     //The result of the previous kernel execution will need to be retrieved in
     //order to view the results. This call will write the data from the
     //buffer_output cl_mem object to the source_fpga_results vector
-    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_output}, CL_MIGRATE_MEM_OBJECT_HOST));
+    OCL_CHECK(err,
+              err = q.enqueueMigrateMemObjects({buffer_output},
+                                               CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());
     delete[] fileBuf;
 
@@ -161,7 +181,8 @@ int main(int argc, char **argv) {
 
     if (DATA_SIZE > MAX_SIZE) {
         std::cout << "Size is bigger than internal buffer size,"
-                  << " please use a size smaller than " << MAX_SIZE << "!" << std::endl;
+                  << " please use a size smaller than " << MAX_SIZE << "!"
+                  << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -180,8 +201,10 @@ int main(int argc, char **argv) {
     //user create Buffer/Mem Object.
     std::vector<int, aligned_allocator<int>> source_in1(matrix_size_bytes);
     std::vector<int, aligned_allocator<int>> source_in2(matrix_size_bytes);
-    std::vector<int, aligned_allocator<int>> source_fpga_results(matrix_size_bytes);
-    std::vector<int, aligned_allocator<int>> source_cpu_results(matrix_size_bytes);
+    std::vector<int, aligned_allocator<int>> source_fpga_results(
+        matrix_size_bytes);
+    std::vector<int, aligned_allocator<int>> source_cpu_results(
+        matrix_size_bytes);
 
     //Create the test data and Software Result
     for (int i = 0; i < DATA_SIZE * DATA_SIZE; i++) {
@@ -194,18 +217,22 @@ int main(int argc, char **argv) {
     uint64_t kernel_duration = 0;
 
     //Compute CPU Results
-    mmult_cpu(source_in1.data(), source_in2.data(), source_cpu_results.data(), size);
+    mmult_cpu(
+        source_in1.data(), source_in2.data(), source_cpu_results.data(), size);
 
     //Compute FPGA Results
-    kernel_duration = mmult_fpga(source_in1, source_in2, source_fpga_results, size, binaryFile);
+    kernel_duration = mmult_fpga(
+        source_in1, source_in2, source_fpga_results, size, binaryFile);
 
     //Compare the results of the FPGA to CPU
     bool match = true;
     for (int i = 0; i < size * size; i++) {
         if (source_fpga_results[i] != source_cpu_results[i]) {
             std::cout << "Error: Result mismatch" << std::endl;
-            std::cout << "i = " << i << " CPU result = " << source_cpu_results[i]
-                      << " FPGA result = " << source_fpga_results[i] << std::endl;
+            std::cout << "i = " << i
+                      << " CPU result = " << source_cpu_results[i]
+                      << " FPGA result = " << source_fpga_results[i]
+                      << std::endl;
             match = false;
             break;
         }
@@ -213,8 +240,10 @@ int main(int argc, char **argv) {
 
     std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl;
 
-    std::cout << "Wall Clock Time (Kernel execution): " << kernel_duration << std::endl;
-    std::cout << "Note: Wall Clock Time is meaningful for real hardware execution only,"
+    std::cout << "Wall Clock Time (Kernel execution): " << kernel_duration
+              << std::endl;
+    std::cout << "Note: Wall Clock Time is meaningful for real hardware "
+                 "execution only,"
               << "not for emulation." << std::endl;
 
     return (match ? EXIT_SUCCESS : EXIT_FAILURE);

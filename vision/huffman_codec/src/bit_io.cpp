@@ -63,7 +63,9 @@ void BitStorage::reset() {
     m_storage.push_back(0);
 }
 
-bool BitStorage::is_bit_set(u8 byte, u8 index) { return ((byte & (1 << index)) & 0xFF) != 0; }
+bool BitStorage::is_bit_set(u8 byte, u8 index) {
+    return ((byte & (1 << index)) & 0xFF) != 0;
+}
 
 int BitStorage::read(int count_bits) const {
     assert(count_bits > 0);

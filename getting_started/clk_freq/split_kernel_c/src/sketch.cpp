@@ -95,7 +95,10 @@ Kernel Description (Good Example) :
 
 // Fetch input image from global memory and write to boost_in & med_in streams.
 // This stage supplies inputs to the boost and median stages.
-void input_stage(int *input, hls::stream<uint> &boost_in, hls::stream<uint> &med_in, int size) {
+void input_stage(int *input,
+                 hls::stream<uint> &boost_in,
+                 hls::stream<uint> &med_in,
+                 int size) {
 // Burst Read on input and write to boost_in & med_in streams.
 readInput:
     for (int i = 0; i < size; i++) {
@@ -108,7 +111,10 @@ readInput:
 }
 
 // Boost filter
-void boost_stage(hls::stream<uint> &boost_in, hls::stream<uint> &boost_out, int width, int height) {
+void boost_stage(hls::stream<uint> &boost_in,
+                 hls::stream<uint> &boost_out,
+                 int width,
+                 int height) {
     // The line buffer holds the current rows of interest
     uint linebuf[BOOST_WINDOW + 1][MAX_WIDTH];
    #pragma HLS ARRAY_PARTITION variable=linebuf complete dim=1
@@ -174,7 +180,10 @@ boostHeight:
 }
 
 // Median filter
-void median_stage(hls::stream<uint> &med_in, hls::stream<uint> &med_out, int width, int height) {
+void median_stage(hls::stream<uint> &med_in,
+                  hls::stream<uint> &med_out,
+                  int width,
+                  int height) {
     // The line buffer holds the current rows of interest
     uint linebuf[MEDIAN_WINDOW + 1][MAX_WIDTH];
    #pragma HLS ARRAY_PARTITION variable=linebuf complete dim=1
@@ -239,7 +248,10 @@ medianHeight:
 }
 
 // Sketch filter
-void sketch_stage(hls::stream<uint> &boost_out, hls::stream<uint> &med_out, hls::stream<uint> &sketch_out, int size) {
+void sketch_stage(hls::stream<uint> &boost_out,
+                  hls::stream<uint> &med_out,
+                  hls::stream<uint> &sketch_out,
+                  int size) {
     uint boost_input, median_input;
 
 // Read inputs from the boost_out and med_out streams.
@@ -255,7 +267,10 @@ sketchLoop:
     }
 }
 
-void output_stage(int *output, hls::stream<uint> &sketch_out, int width, int height) {
+void output_stage(int *output,
+                  hls::stream<uint> &sketch_out,
+                  int width,
+                  int height) {
     // Holds Flipped Image Row
     uint result[MAX_WIDTH];
 
@@ -297,13 +312,14 @@ void sketch_GOOD(int *input, int *output, int width, int height) {
    #pragma HLS INTERFACE s_axilite port=return bundle=control
 
     // Input Image Streams for Boost and Median Kernels
-    hls::stream<uint> boost_in("boost_inputstream"), med_in("median_inputstream");
+    hls::stream<uint> boost_in("boost_inputstream"),
+        med_in("median_inputstream");
    #pragma HLS STREAM variable=boost_in depth=16
    #pragma HLS STREAM variable=med_in depth=16
 
     // Output Streams for Boost, Median and Sketch
-    hls::stream<uint> boost_out("boost_outputstream"), med_out("median_outputstream"),
-        sketch_out("sketch_outputstream");
+    hls::stream<uint> boost_out("boost_outputstream"),
+        med_out("median_outputstream"), sketch_out("sketch_outputstream");
    #pragma HLS STREAM variable=boost_out depth=16
    #pragma HLS STREAM variable=med_out depth=16
    #pragma HLS STREAM variable=sketch_out depth=16

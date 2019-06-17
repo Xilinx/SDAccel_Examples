@@ -102,18 +102,22 @@ int main(int argc, char **argv) {
     //"<Full Arg>",  "<Short Arg>", "<Description>",                "<Default>");
     parser.addSwitch("--xclbin_file", "-x", "input binary file string", "");
     parser.addSwitch("--input_file", "-i", "input test data file", "");
-    parser.addSwitch("--compare_file", "-c", "Compare File to compare result", "");
-    parser.addSwitch("--max_nclusters", "-m", "maximum number of clusters allowed", "5");
-    parser.addSwitch("--min_nclusters", "-n", "minimum number of clusters allowed", "5");
+    parser.addSwitch(
+        "--compare_file", "-c", "Compare File to compare result", "");
+    parser.addSwitch(
+        "--max_nclusters", "-m", "maximum number of clusters allowed", "5");
+    parser.addSwitch(
+        "--min_nclusters", "-n", "minimum number of clusters allowed", "5");
     parser.addSwitch("--threshold", "-t", "thresold value", "0.001");
-    parser.addSwitch("--output", "-o", "output cluster center coordinates", "0");
+    parser.addSwitch(
+        "--output", "-o", "output cluster center coordinates", "0");
     parser.addSwitch("--global_size", "-g", "Specify Global Size", "1");
     parser.parse(argc, argv);
 
     //read settings
-    std::string binaryFile = parser.value("xclbin_file");
-    std::string filename = parser.value("input_file");
-    std::string goldenfile = parser.value("compare_file");
+    auto binaryFile = parser.value("xclbin_file");
+    auto filename = parser.value("input_file");
+    auto goldenfile = parser.value("compare_file");
 
     max_nclusters = parser.value_to_int("max_nclusters");
     min_nclusters = parser.value_to_int("min_nclusters");
@@ -200,34 +204,41 @@ int main(int argc, char **argv) {
 
     // error check for clusters
     if (npoints < min_nclusters) {
-        printf("Error: min_nclusters(%d) > npoints(%d) -- cannot proceed\n", min_nclusters, npoints);
+        printf("Error: min_nclusters(%d) > npoints(%d) -- cannot proceed\n",
+               min_nclusters,
+               npoints);
         exit(EXIT_FAILURE);
     }
 
     srand(7); /* seed for future random number generator */
     memcpy(
-        features[0], buf, npoints * nfeatures * sizeof(float)); /* now features holds 2-dimensional array of features */
+        features[0],
+        buf,
+        npoints * nfeatures *
+            sizeof(
+                float)); /* now features holds 2-dimensional array of features */
     free(buf);
 
     /* ======================= core of the clustering ===================*/
 
     //FPGA Based cluster
     cluster_centres = NULL;
-    status = cluster(fpga,
-                     npoints,       /* number of data points */
-                     nfeatures,     /* number of features for each point */
-                     features,      /* array: [npoints][nfeatures] */
-                     min_nclusters, /* range of min to max number of clusters */
-                     max_nclusters,
-                     threshold,        /* loop termination factor */
-                     &best_nclusters,  /* return: number between min and max */
-                     &cluster_centres, /* return: [best_nclusters][nfeatures] */
-                     &rmse,            /* Root Mean Squared Error */
-                     isRMSE,           /* calculate RMSE */
-                     nloops,           /* number of iteration for each number of clusters */
-                     binaryFile,       /* Binary file string */
-                     index,
-                     goldenfile.c_str());
+    status =
+        cluster(fpga,
+                npoints,       /* number of data points */
+                nfeatures,     /* number of features for each point */
+                features,      /* array: [npoints][nfeatures] */
+                min_nclusters, /* range of min to max number of clusters */
+                max_nclusters,
+                threshold,        /* loop termination factor */
+                &best_nclusters,  /* return: number between min and max */
+                &cluster_centres, /* return: [best_nclusters][nfeatures] */
+                &rmse,            /* Root Mean Squared Error */
+                isRMSE,           /* calculate RMSE */
+                nloops, /* number of iteration for each number of clusters */
+                binaryFile, /* Binary file string */
+                index,
+                goldenfile.c_str());
 
     //cluster_timing = omp_get_wtime() - cluster_timing;
 
@@ -262,7 +273,10 @@ int main(int argc, char **argv) {
     } else {
         if (nloops != 1) { // single k, multiple iteration
             if (isRMSE)    // if calculated RMSE
-                printf("Number of trials to approach the best RMSE of %.3f is %d\n", rmse, index + 1);
+                printf("Number of trials to approach the best RMSE of %.3f is "
+                       "%d\n",
+                       rmse,
+                       index + 1);
         } else {        // single k, single iteration
             if (isRMSE) // if calculated RMSE
                 printf("Root Mean Squared Error: %.3f\n", rmse);

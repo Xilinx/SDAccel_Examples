@@ -74,27 +74,28 @@ float min_rmse_ref = FLT_MAX;
 /* reference min_rmse value */
 
 /*---< cluster() >-----------------------------------------------------------*/
-int cluster(FPGA_KMEANS *fpga,
-            int npoints,       /* number of data points */
-            int nfeatures,     /* number of attributes for each point */
-            float **features,  /* array: [npoints][nfeatures] */
-            int min_nclusters, /* range of min to max number of clusters */
-            int max_nclusters,
-            float threshold,          /* loop terminating factor */
-            int *best_nclusters,      /* out: number between min and max with lowest RMSE */
-            float ***cluster_centres, /* out: [best_nclusters][nfeatures] */
-            float *min_rmse,          /* out: minimum RMSE */
-            int isRMSE,               /* calculate RMSE */
-            int nloops,               /* number of iteration for each number of clusters */
-            std::string &binaryFile,  /* Binary file string */
-            int &index,
-            const char *goldenFile) {
-    int nclusters;               /* number of clusters k */
-    int status = 0;              /* Return status*/
-    index = 0;                   /* number of iteration to reach the best RMSE */
-    float rmse;                  /* RMSE for each clustering */
-    int *membership;             /* which cluster a data point belongs to */
-    int *cmodel_membership;      /* which cluster a data point belongs to */
+int cluster(
+    FPGA_KMEANS *fpga,
+    int npoints,       /* number of data points */
+    int nfeatures,     /* number of attributes for each point */
+    float **features,  /* array: [npoints][nfeatures] */
+    int min_nclusters, /* range of min to max number of clusters */
+    int max_nclusters,
+    float threshold,     /* loop terminating factor */
+    int *best_nclusters, /* out: number between min and max with lowest RMSE */
+    float ***cluster_centres, /* out: [best_nclusters][nfeatures] */
+    float *min_rmse,          /* out: minimum RMSE */
+    int isRMSE,               /* calculate RMSE */
+    int nloops, /* number of iteration for each number of clusters */
+    std::string &binaryFile, /* Binary file string */
+    int &index,
+    const char *goldenFile) {
+    int nclusters;          /* number of clusters k */
+    int status = 0;         /* Return status*/
+    index = 0;              /* number of iteration to reach the best RMSE */
+    float rmse;             /* RMSE for each clustering */
+    int *membership;        /* which cluster a data point belongs to */
+    int *cmodel_membership; /* which cluster a data point belongs to */
     float **tmp_cluster_centres; /* hold coordinates of cluster centers */
     int i;
 
@@ -130,8 +131,8 @@ int cluster(FPGA_KMEANS *fpga,
             printf("Running Device execution \n");
             clock_gettime(CLOCK_MONOTONIC, &d_start);
             /* initialize initial cluster centers, CUDA calls (@ kmeans_cuda.cu) */
-            tmp_cluster_centres =
-                fpga->fpga_kmeans_clustering(features, nfeatures, npoints, nclusters, threshold, membership);
+            tmp_cluster_centres = fpga->fpga_kmeans_clustering(
+                features, nfeatures, npoints, nclusters, threshold, membership);
             clock_gettime(CLOCK_MONOTONIC, &d_end);
             d_time = time_elapsed(d_start, d_end);
             printf("Device execution Time %f ms\n", d_time);
@@ -141,10 +142,17 @@ int cluster(FPGA_KMEANS *fpga,
             struct timespec h_start, h_end;
             double h_time;
             int iteration;
-            float **tmp_cmodel_cluster_centres; /* hold coordinates of cluster centers of Cmodel */
+            float **
+                tmp_cmodel_cluster_centres; /* hold coordinates of cluster centers of Cmodel */
             clock_gettime(CLOCK_MONOTONIC, &h_start);
-            tmp_cmodel_cluster_centres = kmeans_clustering_cmodel(
-                features, nfeatures, npoints, nclusters, threshold, &iteration, cmodel_membership);
+            tmp_cmodel_cluster_centres =
+                kmeans_clustering_cmodel(features,
+                                         nfeatures,
+                                         npoints,
+                                         nclusters,
+                                         threshold,
+                                         &iteration,
+                                         cmodel_membership);
             clock_gettime(CLOCK_MONOTONIC, &h_end);
             h_time = time_elapsed(h_start, h_end);
             printf("Host execution Time %f ms\n", h_time);
@@ -159,15 +167,16 @@ int cluster(FPGA_KMEANS *fpga,
             }
             float mismatch_rate = float(100 * mismatch) / npoints;
             if (mismatch_rate > 10) {
-                printf("ERROR::FAILED:Based on C-Model: Points Membership Mismatch %d Mismatch Rate %.3f \n",
+                printf("ERROR::FAILED:Based on C-Model: Points Membership "
+                       "Mismatch %d Mismatch Rate %.3f \n",
                        mismatch,
                        mismatch_rate);
                 status = 1;
             } else {
-                printf(
-                    "PASSED:Based on C-Model: Points membership with Match Rate %.3f and mismatch %d with Cmodel. \n",
-                    100.0 - mismatch_rate,
-                    mismatch);
+                printf("PASSED:Based on C-Model: Points membership with Match "
+                       "Rate %.3f and mismatch %d with Cmodel. \n",
+                       100.0 - mismatch_rate,
+                       mismatch);
             }
             if (tmp_cmodel_cluster_centres) {
                 free((tmp_cmodel_cluster_centres)[0]);
@@ -190,12 +199,14 @@ int cluster(FPGA_KMEANS *fpga,
                 }
                 float mismatch_rate = float(100 * mismatch) / npoints;
                 if (mismatch_rate > 10) {
-                    printf("ERROR::FAILED:Based on Golden File: Points Membership Mismatch %d Mismatch Rate %.4f \n",
+                    printf("ERROR::FAILED:Based on Golden File: Points "
+                           "Membership Mismatch %d Mismatch Rate %.4f \n",
                            mismatch,
                            mismatch_rate);
                     status = 1;
                 } else {
-                    printf("PASSED:Based on Golden File: Points membership with Match Rate %.4f and mismatches only %d "
+                    printf("PASSED:Based on Golden File: Points membership "
+                           "with Match Rate %.4f and mismatches only %d "
                            "compare "
                            "to GoldenFile. \n",
                            100.0 - mismatch_rate,
@@ -217,13 +228,18 @@ int cluster(FPGA_KMEANS *fpga,
 
             /* find the number of clusters with the best RMSE */
             if (isRMSE) {
-                rmse = rms_err(features, nfeatures, npoints, tmp_cluster_centres, nclusters);
+                rmse = rms_err(features,
+                               nfeatures,
+                               npoints,
+                               tmp_cluster_centres,
+                               nclusters);
 
                 if (rmse < min_rmse_ref) {
-                    min_rmse_ref = rmse;         //update reference min RMSE
-                    *min_rmse = min_rmse_ref;    //update return min RMSE
-                    *best_nclusters = nclusters; //update optimum number of clusters
-                    index = i;                   //update number of iteration to reach best RMSE
+                    min_rmse_ref = rmse;      //update reference min RMSE
+                    *min_rmse = min_rmse_ref; //update return min RMSE
+                    *best_nclusters =
+                        nclusters; //update optimum number of clusters
+                    index = i; //update number of iteration to reach best RMSE
                 }
             }
         }

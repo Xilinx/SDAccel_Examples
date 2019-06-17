@@ -49,7 +49,10 @@ mem_rd:
 }
 
 // Read Input data from inStream and write the result into outStream
-static void vconv_compute(hls::stream<int> &inStream, hls::stream<int> &outStream, int height, int width) {
+static void vconv_compute(hls::stream<int> &inStream,
+                          hls::stream<int> &outStream,
+                          int height,
+                          int width) {
     int linebuf[K - 1][MAX_COLS] = {};
 #pragma HLS ARRAY_PARTITION variable = linebuf dim = 1 complete
 VConvH:

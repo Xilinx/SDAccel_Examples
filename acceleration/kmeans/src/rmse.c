@@ -97,9 +97,11 @@ float rms_err(float **feature, /* [npoints][nfeatures] */
 
     /* calculate and sum the sqaure of euclidean distance*/
     for (i = 0; i < npoints; i++) {
-        nearest_cluster_index = find_nearest_point(feature[i], nfeatures, cluster_centres, nclusters);
+        nearest_cluster_index = find_nearest_point(
+            feature[i], nfeatures, cluster_centres, nclusters);
 
-        sum_euclid += euclid_dist_2(feature[i], cluster_centres[nearest_cluster_index], nfeatures);
+        sum_euclid += euclid_dist_2(
+            feature[i], cluster_centres[nearest_cluster_index], nfeatures);
     }
     /* divide by n, then take sqrt */
     ret = sqrt(sum_euclid / npoints);
