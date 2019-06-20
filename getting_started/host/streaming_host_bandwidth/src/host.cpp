@@ -62,8 +62,8 @@ auto constexpr c_test_size = 256 * 1024 * 1024; // 256 MB data
 ////////////////////RESET FUNCTION///////////////////////////
 int reset(int *a, int *sw_results, int *hw_results, int size) {
     //Fill the input vectors with data
+    std::generate(a, a + size, std::rand);
     for (int i = 0; i < size; i++) {
-        a[i] = rand() % size;
         hw_results[i] = 0;
         sw_results[i] = a[i] + 1;
     }

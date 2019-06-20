@@ -28,7 +28,6 @@ In this example, we will demonstrate how each compute unit can be connected to d
 #include <string>
 #include <unistd.h>
 #include <vector>
-
 // This file is required for OpenCL C++ wrapper APIs
 #include "xcl2.hpp"
 

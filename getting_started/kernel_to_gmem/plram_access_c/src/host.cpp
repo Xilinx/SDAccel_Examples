@@ -38,9 +38,9 @@ memory resources managed by the SDx memory subsystem.
 
 //OpenCL utility layer include
 #include "xcl2.hpp"
+#include <algorithm>
 #include <stdlib.h>
 #include <vector>
-
 //Array Size to access
 #define DATA_SIZE 8
 
@@ -160,9 +160,10 @@ int main(int argc, char **argv) {
         matrix_size_bytes);
 
     //Create the test data
+    std::generate(source_in1.begin(), source_in1.end(), std::rand);
+
+    std::generate(source_in2.begin(), source_in2.end(), std::rand);
     for (int i = 0; i < DATA_SIZE * DATA_SIZE; i++) {
-        source_in1[i] = rand() % size;
-        source_in2[i] = rand() % size;
         source_cpu_results[i] = 0;
         source_fpga_results[i] = 0;
     }

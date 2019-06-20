@@ -37,6 +37,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  ******************************************************************************************/
 
+#include <algorithm>
 #include <iostream>
 #include <stdint.h>
 #include <stdlib.h>
@@ -102,7 +103,7 @@ int main(int argc, char *argv[]) {
         1024; //taking maximum possible data size value for an HBM bank
     unsigned int num_times =
         1024; //num_times specify, number of times a kernel will execute the same operation. This is needed
-        //to keep the kernel busy to test the actual bandwidth of all banks running concurrently.
+    //to keep the kernel busy to test the actual bandwidth of all banks running concurrently.
 
     //reducing the test data capacity to run faster in emulation mode
     if (xcl::is_emulation()) {
@@ -128,9 +129,9 @@ int main(int argc, char *argv[]) {
     }
 
     // Create the test data
+    std::generate(source_in1.begin(), source_in1.end(), std::rand);
+    std::generate(source_in2.begin(), source_in2.end(), std::rand);
     for (size_t i = 0; i < dataSize; i++) {
-        source_in1[i] = rand() % dataSize;
-        source_in2[i] = rand() % dataSize;
         source_sw_add_results[i] = source_in1[i] + source_in2[i];
         source_sw_mul_results[i] = source_in1[i] * source_in2[i];
     }

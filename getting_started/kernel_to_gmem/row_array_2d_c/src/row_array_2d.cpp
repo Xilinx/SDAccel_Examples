@@ -89,7 +89,7 @@ void row_array_2d(DTYPE *inx, DTYPE *outx, int alpha) {
 #pragma HLS INTERFACE s_axilite port = return bundle = control
 
     my_data_fifo inFifo;
-    //By default the FIFO depth is 2, user can change the depth by using suc#pragma HLS stream variable=inFifo depth=256
+    //By default the FIFO depth is 2, user can change the depth by using #pragma HLS stream variable=inFifo depth=256
     my_data_fifo outFifo;
 
 // Dataflow enables task level pipelining, allowing functions and loops to execute concurrently. Used to minimize interval. More details please refer to UG902.

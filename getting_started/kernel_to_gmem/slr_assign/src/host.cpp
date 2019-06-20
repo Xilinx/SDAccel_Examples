@@ -28,6 +28,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 
 #include "xcl2.hpp"
+#include <algorithm>
 #include <vector>
 #define DATA_SIZE 4096
 
@@ -61,12 +62,10 @@ int main(int argc, char **argv) {
     std::vector<int, aligned_allocator<int>> C(DATA_SIZE);
 
     // Create the test data
-    for (int i = 0; i < DATA_SIZE; i++) {
-        A[i] = rand() % DATA_SIZE;
-        B[i] = rand() % DATA_SIZE;
-        temp[i] = rand() % DATA_SIZE;
-        C[i] = rand() % DATA_SIZE;
-    }
+    std::generate(A.begin(), A.end(), std::rand);
+    std::generate(B.begin(), B.end(), std::rand);
+    std::generate(temp.begin(), temp.end(), std::rand);
+    std::generate(C.begin(), C.end(), std::rand);
 
     auto devices = xcl::get_xil_devices();
     auto device = devices[0];

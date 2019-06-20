@@ -82,13 +82,13 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  *  *****************************************************************************************/
 
+#include "xcl2.hpp"
+#include <algorithm>
 #include <iostream>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <vector>
-
-#include "xcl2.hpp"
 
 //Number of HBM Banks required
 #define MAX_HBM_BANKCOUNT 32
@@ -249,9 +249,10 @@ int main(int argc, char *argv[]) {
     std::vector<int, aligned_allocator<int>> source_sw_results(dataSize);
 
     // Create the test data
+    std::generate(source_in1.begin(), source_in1.end(), std::rand);
+    std::generate(source_in2.begin(), source_in2.end(), std::rand);
+
     for (size_t i = 0; i < dataSize; i++) {
-        source_in1[i] = rand() % dataSize;
-        source_in2[i] = rand() % dataSize;
         source_sw_results[i] = source_in1[i] + source_in2[i];
         source_hw_results[i] = 0;
     }

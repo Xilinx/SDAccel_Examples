@@ -48,11 +48,11 @@ Limitation:
 
 #include "multi_krnl.h"
 #include "xcl2.hpp"
+#include <algorithm>
 #include <stdlib.h>
 #include <sys/wait.h>
 #include <unistd.h>
 #include <vector>
-
 bool run_kernel(std::string &binaryFile, int krnl_id) {
     cl_int err;
     unsigned fileBufSize;
@@ -70,9 +70,9 @@ bool run_kernel(std::string &binaryFile, int krnl_id) {
     std::vector<int, aligned_allocator<int>> result_hw(LENGTH);
 
     /* Create the test data and run the vector addition locally */
+    std::generate(source_a.begin(), source_a.end(), std::rand);
+    std::generate(source_b.begin(), source_b.end(), std::rand);
     for (int i = 0; i < LENGTH; i++) {
-        source_a[i] = rand() % LENGTH;
-        source_b[i] = rand() % LENGTH;
         result_hw[i] = 0;
         switch (krnl_id) {
         case 0:

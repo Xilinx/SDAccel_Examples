@@ -28,6 +28,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********/
 
 #include "xcl2.hpp"
+#include <algorithm>
 #include <vector>
 #define DATA_SIZE 4096
 
@@ -53,9 +54,9 @@ int main(int argc, char **argv) {
     std::vector<int, aligned_allocator<int>> source_sw_results(DATA_SIZE);
 
     // Create the test data
+    std::generate(source_in1.begin(), source_in1.end(), std::rand);
+    std::generate(source_in2.begin(), source_in2.end(), std::rand);
     for (int i = 0; i < DATA_SIZE; i++) {
-        source_in1[i] = rand() % DATA_SIZE;
-        source_in2[i] = rand() % DATA_SIZE;
         source_sw_results[i] = source_in1[i] + source_in2[i];
         source_hw_results[i] = 0;
     }

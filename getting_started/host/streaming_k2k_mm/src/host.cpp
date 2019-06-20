@@ -44,10 +44,10 @@ int reset(int *a,
           int *hw_results,
           unsigned int size) {
     //Fill the input vectors with data
+    std::generate(a, a + size, std::rand);
+    std::generate(b, b + size, std::rand);
+    std::generate(c, c + size, std::rand);
     for (size_t i = 0; i < size; i++) {
-        a[i] = rand() % size;
-        b[i] = rand() % size;
-        c[i] = rand() % size;
         hw_results[i] = 0;
         sw_results[i] = (a[i] + b[i]) * c[i];
     }
