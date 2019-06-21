@@ -30,7 +30,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //based on http://en.wikipedia.org/wiki/BMP_file_formt
 //Copyright Xilinx
 
-
+#include <cstdint>
 #ifndef __SIMPLE_BMP
 #define __SIMPLE_BMP
 
