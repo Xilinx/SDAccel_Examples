@@ -30,6 +30,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fenv.h>
 #include <math.h>
 #include <vector>
+#include <algorithm>
 
 float get_rand() {
     float ret = ((float)rand() / (float)(RAND_MAX)) * 1.0f - 0.5f;
@@ -90,8 +91,8 @@ int main(int argc, char *argv[]) {
 
     float sum = 0;
     /* Create the test data and run the vector addition locally */
+    std::generate(in.begin(),in.end(),get_rand);	
     for (unsigned i = 0; i < length; i++) {
-        in[i] = get_rand();
         out[i] = (sum += in[i]);
     }
 

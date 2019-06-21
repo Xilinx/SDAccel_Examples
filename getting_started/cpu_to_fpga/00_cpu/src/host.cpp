@@ -33,7 +33,7 @@ This is a simple example of Matrix Multiplication.
 
 #include <iostream>
 #include <stdlib.h>
-
+#include <algorithm>
 //Array size to access
 #define DATA_SIZE 64
 
@@ -62,9 +62,9 @@ int main(int argc, char **argv) {
     int *source_cpu_results = (int *)malloc(matrix_size_bytes);
 
     //Creates the data
+    std::generate(source_in1,source_in1+size*size,std::rand);
+    std::generate(source_in2,source_in2+size*size,std::rand);
     for (int index = 0; index < size * size; index++) {
-        source_in1[index] = rand() % size;
-        source_in2[index] = rand() % size;
         source_cpu_results[index] = 0;
     }
 

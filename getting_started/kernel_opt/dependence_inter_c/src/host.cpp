@@ -29,6 +29,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "vconv.h"
 #include "xcl2.hpp"
 #include <vector>
+#include <algorithm>
 
 void vconv_sw(int *in, int *out, int height, int width) {
     int linebuf[K - 1][MAX_COLS] = {};
@@ -70,8 +71,8 @@ int main(int argc, char **argv) {
     std::vector<int, aligned_allocator<int>> source_sw_results(test_size_bytes);
 
     // Create the test data and Software Result
+    std::generate(source_input.begin(),source_input.end(),std::rand);
     for (int i = 0; i < testSize; i++) {
-        source_input[i] = rand() % testSize;
         source_sw_results[i] = 0;
         source_hw_results[i] = 0;
     }
