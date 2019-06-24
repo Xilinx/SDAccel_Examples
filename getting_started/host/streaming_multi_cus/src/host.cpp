@@ -83,6 +83,8 @@ int main(int argc, char **argv) {
     std::vector<int, aligned_allocator<int>> hw_results(size);
     std::vector<int> sw_results(size);
 
+    reset(h_a.data(), h_b.data(), sw_results.data(), hw_results.data(), size);
+
     if (argc != 2) {
         std::cout << "Usage: " << argv[0] << " <XCLBIN File>" << std::endl;
         return EXIT_FAILURE;
