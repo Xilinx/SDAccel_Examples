@@ -6,7 +6,7 @@ Example shows an optimized Inverse Discrete Cosine Transfom. Optimizations are a
 ## SUPPORTED PLATFORMS
 Platform | Board             | Software Version
 ---------|-------------------|-----------------
-xilinx_aws-vu9p-f1-04261818|Xilinx Only 5.0 Shell|SDx 2019.1
+Xilinx|5.0 Shell only|SDx 2019.1
 
 
 ##  DESIGN FILES

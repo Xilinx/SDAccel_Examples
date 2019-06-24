@@ -7,11 +7,14 @@ import subprocess
 
 DSA = 'xilinx_u200_qdma'
 VERSION = 'SDx 2019.1'
-DEVICES = {
+AWS_DEVICES = {
     'xilinx_aws-vu9p-f1-04261818': {
        'version': '5.0',
-       'name': 'Xilinx Only 5.0 Shell',
-    },	
+       'name': '5.0 Shell only',
+    }	
+}
+
+DEVICES = {
     'xilinx_u200_qdma': {
        'version': '201910_1',
        'name': 'Xilinx Alveo U200',
@@ -95,24 +98,34 @@ def requirements(target,data):
     target.write("---------|-------------------|-----------------\n")
 
     boards = []
-    if 'board' in data:
-        board = data['board']
-        boards = [word for word in DEVICES if word in board]
-    else:
-        nboard = []
-        if 'nboard' in data:
-            nboard = data['nboard']
-        boards = [word for word in DEVICES if word not in nboard]
+    if 'shell' in data['example']:
+	boards = [word for word in AWS_DEVICES]
+    else:			
+        if 'board' in data:
+            board = data['board']
+            boards = [word for word in DEVICES if word in board]
+        else:
+            nboard = []
+            if 'nboard' in data:
+                nboard = data['nboard']
+            boards = [word for word in DEVICES if word not in nboard]
 
     for board in boards:
-        target.write(board)
+	if 'shell' in data['example']:
+		target.write("Xilinx")
+	else:
+        	target.write(board)
         target.write("|")
-        target.write(DEVICES[board]['name'])
+	if 'shell' in data['example']:
+	    target.write(AWS_DEVICES[board]['name'])
+	else:	
+            target.write(DEVICES[board]['name'])
         target.write("|")
         target.write(VERSION)
         target.write("\n")
-    target.write("\n\n") 
+    target.write("\n\n")
     return
+
 
 def hierarchy(target):
     target.write("##  DESIGN FILES\n")
@@ -131,6 +144,15 @@ def hierarchy(target):
 
 def commandargs(target,data):
     target.write("##  COMMAND LINE ARGUMENTS\n")
+    if 'libs' in data:
+	if 'opencv' in data['libs']:
+		target.write("***OpenCV for Example Applications***")
+		target.write("\n\n")
+		target.write("This application requires OpenCV runtime libraries. If the host does not have OpenCV installed use the Xilinx included libraries with the following command:")
+		target.write("\n\n")
+		target.write("`export LD_LIBRARY_PATH=$XILINX_SDX/lnx64/tools/opencv/:$LD_LIBRARY_PATH`")
+		target.write("\n\n") 
+    	
     target.write("Once the environment has been configured, the application can be executed by\n")
     target.write("```\n")
     if not "cmd_args" in data:

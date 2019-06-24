@@ -31,6 +31,12 @@ src/krnl_convolve.cl
 ```
 
 ##  COMMAND LINE ARGUMENTS
+***OpenCV for Example Applications***
+
+This application requires OpenCV runtime libraries. If the host does not have OpenCV installed use the Xilinx included libraries with the following command:
+
+`export LD_LIBRARY_PATH=$XILINX_SDX/lnx64/tools/opencv/:$LD_LIBRARY_PATH`
+
 Once the environment has been configured, the application can be executed by
 ```
 ./convolve <krnl_convolve XCLBIN> ./data/input_buffer_raw.txt ./data/filter_buffer_raw.txt ./data/output_buffer_raw.txt
