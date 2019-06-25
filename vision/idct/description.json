@@ -8,8 +8,10 @@
         "Linux"
     ],
    "nboard": [
+        "xilinx_u50_xdma",
         "xilinx_vcu1525_dynamic", 
-        "xilinx_aws-vu9p-f1-04261818", 
+        "xilinx_aws-vu9p-f1-04261818",
+        "xilinx:u50:xdma", 
         "xilinx:vcu1525:dynamic", 
         "xilinx:aws-vu9p-f1-04261818:dynamic"
     ],  

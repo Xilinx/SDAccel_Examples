@@ -8,12 +8,14 @@
         "Linux"
     ],
    "nboard": [
+	"xilinx_u50_xdma",
         "xilinx_u280-es1_xdma", 
         "xilinx_u200_xdma", 
         "xilinx_u200_qdma", 
         "xilinx_u250_xdma", 
 	"xilinx_u280_xdma", 
 	"xilinx_u250_qdma",
+	"xilinx:u50:xdma",
         "xilinx:u280-es1:xdma", 
         "xilinx:u200:xdma", 
         "xilinx:u200:qdma", 

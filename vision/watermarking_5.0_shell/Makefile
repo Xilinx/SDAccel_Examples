@@ -103,6 +103,9 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
+ifeq ($(findstring xilinx_u50_xdma, $(DEVICE)), xilinx_u50_xdma)
+$(error Nothing to be done for make)
+endif
 ifeq ($(findstring xilinx_u280-es1_xdma, $(DEVICE)), xilinx_u280-es1_xdma)
 $(error Nothing to be done for make)
 endif
@@ -125,6 +128,9 @@ ifeq ($(findstring xilinx_vcu1525_dynamic, $(DEVICE)), xilinx_vcu1525_dynamic)
 $(error Nothing to be done for make)
 endif
 ifeq ($(findstring xilinx_u280_xdma, $(DEVICE)), xilinx_u280_xdma)
+$(error Nothing to be done for make)
+endif
+ifeq ($(findstring xilinx:u50:xdma, $(DEVICE)), xilinx:u50:xdma)
 $(error Nothing to be done for make)
 endif
 ifeq ($(findstring xilinx:u280-es1:xdma, $(DEVICE)), xilinx:u280-es1:xdma)

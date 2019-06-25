@@ -35,7 +35,7 @@ XCLBIN := ./xclbin
 
 include ./utils.mk
 
-DSA := $(call device2sandsa, $(DEVICE))
+DSA := $(call device2dsa, $(DEVICE))
 BUILD_DIR := ./_x.$(TARGET).$(DSA)
 
 BUILD_DIR_krnl_kernel_global = $(BUILD_DIR)/krnl_kernel_global
@@ -101,6 +101,9 @@ $(EMCONFIG_DIR)/emconfig.json:
 	emconfigutil --platform $(DEVICE) --od $(EMCONFIG_DIR)
 
 check: all
+ifeq ($(findstring xilinx_u50_xdma, $(DEVICE)), xilinx_u50_xdma)
+$(error Nothing to be done for make)
+endif
 ifeq ($(findstring xilinx_u280-es1_xdma, $(DEVICE)), xilinx_u280-es1_xdma)
 $(error Nothing to be done for make)
 endif
@@ -117,6 +120,9 @@ ifeq ($(findstring xilinx_u280_xdma, $(DEVICE)), xilinx_u280_xdma)
 $(error Nothing to be done for make)
 endif
 ifeq ($(findstring xilinx_u250_qdma, $(DEVICE)), xilinx_u250_qdma)
+$(error Nothing to be done for make)
+endif
+ifeq ($(findstring xilinx:u50:xdma, $(DEVICE)), xilinx:u50:xdma)
 $(error Nothing to be done for make)
 endif
 ifeq ($(findstring xilinx:u280-es1:xdma, $(DEVICE)), xilinx:u280-es1:xdma)
