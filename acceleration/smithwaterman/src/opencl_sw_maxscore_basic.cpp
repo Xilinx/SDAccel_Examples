@@ -105,7 +105,8 @@ void swInt(unsigned int *readRefPacked, short *maxr, short *maxc, short *maxv) {
 #pragma HLS function_instantiate variable = maxv
     uint2_t d2bit[MAXCOL];
     uint2_t q2bit[MAXROW];
-#pragma HLS array partition variable = d2bit, q2bit cyclic factor = FACTOR
+#pragma HLS array partition variable = d2bit cyclic factor = FACTOR
+#pragma HLS array partition variable = q2bit cyclic factor = FACTOR
 
     intTo2bit<MAXCOL / 16>((readRefPacked + MAXROW / 16), d2bit);
     intTo2bit<MAXROW / 16>(readRefPacked, q2bit);
