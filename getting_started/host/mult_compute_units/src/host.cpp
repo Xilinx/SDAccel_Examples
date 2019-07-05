@@ -38,18 +38,6 @@ multiple compute units and run them concurrently.
 auto constexpr data_size = 4 * 4096;
 auto constexpr num_cu = 4;
 
-///////////////////VERIFY FUNCTION/////////////////////
-bool verify(int *sw_results, int *hw_results, int size) {
-    bool match = true;
-    for (int i = 0; i < size; i++) {
-        if (sw_results[i] != hw_results[i]) {
-            match = false;
-            break;
-        }
-    }
-    std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl;
-    return match;
-}
 //////////////MAIN FUNCTION//////////////
 int main(int argc, char **argv) {
     if (argc != 2) {
@@ -65,10 +53,10 @@ int main(int argc, char **argv) {
     std::vector<int, aligned_allocator<int>> source_in2(data_size);
     std::vector<int, aligned_allocator<int>> source_hw_results(data_size);
     std::vector<int> sw_results(data_size);
+    
     //Create test data
     std::generate(source_in1.begin(), source_in1.end(), std::rand);
     std::generate(source_in2.begin(), source_in2.end(), std::rand);
-    std::fill(source_hw_results.begin(), source_hw_results.end(), 0);
     for (int i = 0; i < data_size; i++) {
         sw_results[i] = source_in1[i] + source_in2[i];
     }
@@ -164,6 +152,10 @@ int main(int argc, char **argv) {
     }
     OCL_CHECK(err, err = q.finish());
 
-    bool match = verify(sw_results.data(), source_hw_results.data(), data_size);
+    //Verify results
+    bool match = std::equal(
+        sw_results.begin(), sw_results.end(), source_hw_results.begin());
+    std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl;
+
     return (match ? EXIT_SUCCESS : EXIT_FAILURE);
 }
