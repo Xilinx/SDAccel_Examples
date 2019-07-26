@@ -46,7 +46,6 @@ int main(int argc, char **argv) {
     }
     std::string binaryFile = argv[1];
     cl_int err;
-    unsigned fileBufSize;
 
     // I/O data vectors
     std::vector<int, aligned_allocator<int>> source_in1(data_size);
@@ -79,8 +78,8 @@ int main(int argc, char **argv) {
 
     //read_binary_file() is a utility API which will load the binaryFile
     //and will return the pointer to file buffer.
-    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
-    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
+   auto fileBuf = xcl::read_binary_file(binaryFile);
+   cl::Program::Binaries bins{{fileBuf.data(), fileBuf.size()}};
     devices.resize(1);
 
     // Creating Program

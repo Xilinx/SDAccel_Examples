@@ -88,7 +88,6 @@ uint64_t mmult_fpga(
     std::string &binaryFile   //Binary file string
 ) {
     cl_int err;
-    unsigned fileBufSize;
     int size = dim;
     size_t matrix_size_bytes = sizeof(int) * size * size;
 
@@ -107,8 +106,8 @@ uint64_t mmult_fpga(
     //xocc compiler load into OpenCL Binary and return a pointer to file buffer
     //and it can contain many functions which can be executed on the
     //device.
-    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
-    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
+   auto fileBuf = xcl::read_binary_file(binaryFile);
+   cl::Program::Binaries bins{{fileBuf.data(), fileBuf.size()}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
 
@@ -168,7 +167,6 @@ uint64_t mmult_fpga(
               err = q.enqueueMigrateMemObjects({buffer_output},
                                                CL_MIGRATE_MEM_OBJECT_HOST));
     OCL_CHECK(err, err = q.finish());
-    delete[] fileBuf;
 
     kernel_duration = get_duration_ns(event);
 

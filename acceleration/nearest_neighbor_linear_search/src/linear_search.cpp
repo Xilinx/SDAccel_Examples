@@ -40,7 +40,6 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 #endif
 
-char *fileBuf;
 void linear_search_read_datafile(char *filename, float *data, size_t size) {
     FILE *fp = fopen(filename, "r");
     if (fp == NULL) {
@@ -66,7 +65,6 @@ void linear_search_init(cl::Context *context,
                         float *queries,
                         unsigned int *indices) {
     cl_int err;
-    unsigned fileBufSize;
     // get_xil_devices() is a utility API which will find the xilinx
     // platforms and will return list of devices connected to Xilinx platform
     auto devices = xcl::get_xil_devices();
@@ -81,8 +79,8 @@ void linear_search_init(cl::Context *context,
 
     // read_binary_file() is a utility API which will load the binaryFile
     // and will return pointer to file buffer.
-    fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
-    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
+   auto fileBuf = xcl::read_binary_file(binaryFile);
+   cl::Program::Binaries bins{{fileBuf.data(), fileBuf.size()}};
     devices.resize(1);
 
     OCL_CHECK(err, *program = cl::Program(*context, devices, bins, NULL, &err));
@@ -152,7 +150,6 @@ unsigned long linear_search_exec(cl::Context *context,
                                          NULL,
                                          NULL));
     q->finish();
-    delete[] fileBuf;
     return duration;
 }
 

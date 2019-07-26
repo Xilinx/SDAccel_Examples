@@ -55,7 +55,6 @@ int main(int argc, char **argv) {
 
     size_t vector_size_bytes = sizeof(int) * DATA_SIZE;
     cl_int err;
-    unsigned fileBufSize;
     std::vector<int, aligned_allocator<int>> A(DATA_SIZE);
     std::vector<int, aligned_allocator<int>> B(DATA_SIZE);
     std::vector<int, aligned_allocator<int>> temp(DATA_SIZE);
@@ -86,8 +85,8 @@ int main(int argc, char **argv) {
     {
         printf("INFO: loading vmul kernel\n");
 
-        auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
-        cl::Program::Binaries bins{{fileBuf, fileBufSize}};
+       auto fileBuf = xcl::read_binary_file(binaryFile);
+       cl::Program::Binaries bins{{fileBuf.data(), fileBuf.size()}};
         devices.resize(1);
         OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
         OCL_CHECK(err, cl::Kernel vector_mult(program, "vmult", &err));
@@ -129,12 +128,11 @@ int main(int argc, char **argv) {
                   err = q.enqueueMigrateMemObjects({buffer_mul_out},
                                                    CL_MIGRATE_MEM_OBJECT_HOST));
         q.finish();
-        delete[] fileBuf;
     }
     {
         printf("loading vadd kernel\n");
-        auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
-        cl::Program::Binaries bins{{fileBuf, fileBufSize}};
+       auto fileBuf = xcl::read_binary_file(binaryFile);
+       cl::Program::Binaries bins{{fileBuf.data(), fileBuf.size()}};
         devices.resize(1);
         OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
         OCL_CHECK(err, cl::Kernel vector_add(program, "vadd", &err));
@@ -167,7 +165,6 @@ int main(int argc, char **argv) {
                   err = q.enqueueMigrateMemObjects({buffer_vadd_out},
                                                    CL_MIGRATE_MEM_OBJECT_HOST));
         q.finish();
-        delete[] fileBuf;
     }
     // OPENCL HOST CODE AREA END
 

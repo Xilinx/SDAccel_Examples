@@ -64,13 +64,12 @@ void vadd(int *a, int size, int inc_value) {
         //boundary checks
         if ((i + BURSTBUFFERSIZE) > size)
             chunk_size = size - i;
-	//burst read
-	for (int j = 0; j < chunk_size; j++) {
-		#pragma HLS LOOP_TRIPCOUNT min = c_size_min max = c_size_max
-		#pragma HLS PIPELINE II=1
-		burstbuffer[j] = a[i+j];
-	}
-
+        //burst read
+        for (int j = 0; j < chunk_size; j++) {
+           #pragma HLS LOOP_TRIPCOUNT min = c_size_min max = c_size_max
+           #pragma HLS PIPELINE II=1
+            burstbuffer[j] = a[i + j];
+        }
 
     //calculate and write results to global memory, the sequential write in a for loop can be inferred to a memory burst access
     calc_write:

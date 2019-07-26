@@ -68,8 +68,8 @@ HuffmanOptimized::HuffmanOptimized(string &strBitmapFP, string &binaryFile) {
     OCL_CHECK(err,
               std::string deviceName = device.getInfo<CL_DEVICE_NAME>(&err));
 
-    fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
-    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
+   auto fileBuf = xcl::read_binary_file(binaryFile);
+   cl::Program::Binaries bins{{fileBuf.data(), fileBuf.size()}};
 
     devices.resize(1);
     OCL_CHECK(err, m_program = cl::Program(context, devices, bins, NULL, &err));
@@ -83,7 +83,6 @@ HuffmanOptimized::HuffmanOptimized(string &strBitmapFP, string &binaryFile) {
 
 HuffmanOptimized::~HuffmanOptimized() {
     // TODO Auto-generated destructor stub
-    delete[] fileBuf;
 }
 
 double HuffmanOptimized::timestamp() {

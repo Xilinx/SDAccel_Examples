@@ -41,7 +41,6 @@ int main(int argc, char **argv) {
     std::string binaryFile = argv[1];
     size_t vector_size_bytes = sizeof(int) * DATA_SIZE;
     cl_int err;
-    unsigned fileBufSize;
     // Allocate Memory in Host Memory
     // When creating a buffer with user pointer (CL_MEM_USE_HOST_PTR), under the hood user ptr
     // is used if it is properly aligned. when not aligned, runtime had no choice but to create
@@ -74,8 +73,8 @@ int main(int argc, char **argv) {
 
     // read_binary_file() is a utility API which will load the binaryFile
     // and will return the pointer to file buffer.
-    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
-    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
+    auto fileBuf = xcl::read_binary_file(binaryFile);
+    cl::Program::Binaries bins{{fileBuf.data(), fileBuf.size()}};
 
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
@@ -138,8 +137,6 @@ int main(int argc, char **argv) {
             break;
         }
     }
-
-    delete[] fileBuf;
 
     std::cout << "TEST " << (match ? "PASSED" : "FAILED") << std::endl;
     return (match ? EXIT_SUCCESS : EXIT_FAILURE);

@@ -64,7 +64,6 @@ short getAbsMax(cv::Mat mat) {
 int main(int argc, char *argv[]) {
     cl_int err;
     cl::Event event;
-    unsigned fileBufSize;
 
     if (argc != 3) {
         std::cout << "Usage: " << argv[0] << " <XCLBIN File>"
@@ -127,8 +126,8 @@ int main(int argc, char *argv[]) {
 
     // read_binary_file() is a utility API which will load the binaryFile
     // and will return pointer to file buffer.
-    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
-    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
+   auto fileBuf = xcl::read_binary_file(binaryFile);
+   cl::Program::Binaries bins{{fileBuf.data(), fileBuf.size()}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel krnl_sobel(program, "krnl_sobel", &err));
@@ -196,7 +195,6 @@ int main(int argc, char *argv[]) {
     cv::imwrite("input.bmp", input);
     cv::imwrite("output.bmp", output);
 
-    delete[] fileBuf;
 
     std::cout << "Completed Successfully" << std::endl;
 
