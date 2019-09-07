@@ -64,6 +64,7 @@ CLFLAGS += -t $(TARGET) --platform $(DEVICE) --save-temps
 
 
 
+
 EXECUTABLE = host
 CMD_ARGS = $(XCLBIN)/cnn_GOOD.$(TARGET).$(DSA).xclbin $(XCLBIN)/cnn_BAD.$(TARGET).$(DSA).xclbin
 
@@ -97,7 +98,7 @@ $(XCLBIN)/cnn_GOOD.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_cnn_GOOD_OBJS)
 	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_cnn_GOOD) -l $(LDCLFLAGS) --nk cnn_GOOD:4 -o'$@' $(+)
 $(XCLBIN)/cnn_BAD.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_cnn_BAD_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_cnn_BAD) -l $(LDCLFLAGS) --nk cnn_BAD:1 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_cnn_BAD) -l $(LDCLFLAGS) --sp cnn_BAD_1.m_axi_gmem:DDR[1] --nk cnn_BAD:1 -o'$@' $(+)
 
 # Building Host
 $(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
