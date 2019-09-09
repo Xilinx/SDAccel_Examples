@@ -87,7 +87,7 @@ $(XCLBIN)/vadd.$(TARGET).$(DSA).xo: src/vadd.cpp
 	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_vadd) -c -k vadd -I'$(<D)' -o'$@' '$<'
 $(XCLBIN)/vadd.$(TARGET).$(DSA).xclbin: $(BINARY_CONTAINER_vadd_OBJS)
 	mkdir -p $(XCLBIN)
-	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_vadd) -l $(LDCLFLAGS) --nk vadd:4:vadd_1.vadd_2.vadd_3.vadd_4 -o'$@' $(+)
+	$(XOCC) $(CLFLAGS) --temp_dir $(BUILD_DIR_vadd) -l $(LDCLFLAGS) --nk vadd:4 -o'$@' $(+)
 
 # Building Host
 $(EXECUTABLE): check-xrt $(HOST_SRCS) $(HOST_HDRS)
