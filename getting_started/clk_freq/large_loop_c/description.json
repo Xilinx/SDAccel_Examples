@@ -32,7 +32,7 @@
                     "name": "cnn_BAD", 
                     "location": "src/cnn_convolution_bad.cpp"
                 }
-            ],
+            ]
 	}
     ],
     "contributors" : [

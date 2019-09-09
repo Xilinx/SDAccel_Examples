@@ -20,6 +20,10 @@ DEVICES = {
        'name': 'Xilinx Alveo U200',
        'nae':  'nx5u_xdma_201830_1'
     },
+    'xilinx_u50_xdma': {
+       'version': '201910_1',
+       'name': 'Xilinx Alveo U50'
+    },
     'xilinx_u280_xdma': {
        'version': '201910_1',
        'name': 'Xilinx Alveo U280'

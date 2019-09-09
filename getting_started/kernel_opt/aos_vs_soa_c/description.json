@@ -11,6 +11,10 @@
     "libs": [
         "xcl2"
     ],
+    "nboard": [
+        "xilinx_u50_xdma", 
+        "xilinx:u50:xdma" 
+    ], 
     "host_exe": "aos_vs_soa",
     "cmd_args": "BUILD/dot.xclbin",
     "containers": [
