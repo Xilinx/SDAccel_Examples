@@ -12,7 +12,6 @@ Platform | Board             | Software Version
 ---------|-------------------|-----------------
 xilinx_u50_xdma|Xilinx Alveo U50|SDx 2019.1
 xilinx_u280_xdma|Xilinx Alveo U280|SDx 2019.1
-xilinx_u280-es1_xdma|Xilinx Alveo U280|SDx 2019.1
 
 
 ##  DESIGN FILES

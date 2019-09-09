@@ -28,11 +28,6 @@ DEVICES = {
        'version': '201910_1',
        'name': 'Xilinx Alveo U280'
     },
-    'xilinx_u280-es1_xdma': {
-       'version': '201910_1',
-       'name': 'Xilinx Alveo U280',
-       'nae':  'nx7u_xdma_201830_1'
-    },
     'xilinx_u200_xdma': {
        'version': '201830_1',
        'name': 'Xilinx Alveo U200',
