@@ -105,7 +105,6 @@ cv::Mat readFloatTxtFile(std::string fileName, size_t rows, size_t cols) {
 int main(int argc, char *argv[]) {
     cl_int err;
     cl::Event event;
-    unsigned fileBufSize;
 
     if (argc != 4 && argc != 5) {
         std::cout << "Usage: " << argv[0]
@@ -165,8 +164,8 @@ int main(int argc, char *argv[]) {
 
     // read_binary_file() ia a utility API which will load the binaryFile
     // and will return pointer to file buffer.
-    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
-    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
+   auto fileBuf = xcl::read_binary_file(binaryFile);
+   cl::Program::Binaries bins{{fileBuf.data(), fileBuf.size()}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel krnl_convolve(program, "krnl_convolve", &err));
@@ -251,8 +250,6 @@ int main(int argc, char *argv[]) {
 
         cv::imwrite("golden.bmp", golden);
     }
-
-    delete[] fileBuf;
 
     std::cout << "Completed Successfully" << std::endl;
     return EXIT_SUCCESS;

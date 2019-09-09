@@ -79,7 +79,6 @@ int main(int argc, char *argv[]) {
     size_t image_size_bytes =
         sizeof(unsigned short) * IMAGE_WIDTH_PIXELS * IMAGE_HEIGHT_PIXELS;
     cl_int err;
-    unsigned fileBufSize;
     // The get_xil_devices will return vector of Xilinx Devices
     auto devices = xcl::get_xil_devices();
     auto device = devices[0];
@@ -93,8 +92,8 @@ int main(int argc, char *argv[]) {
               std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
     std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
-    auto fileBuf = xcl::read_binary_file(xclBinaryFile, fileBufSize);
-    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
+    auto fileBuf = xcl::read_binary_file(xclBinaryFile);
+   cl::Program::Binaries bins{{fileBuf.data(), fileBuf.size()}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
 
@@ -176,7 +175,6 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    delete[] fileBuf;
 
     std::cout << "Kernel Duration: " << duration << " ns" << std::endl;
 

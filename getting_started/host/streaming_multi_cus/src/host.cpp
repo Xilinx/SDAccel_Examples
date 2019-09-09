@@ -98,7 +98,6 @@ int main(int argc, char **argv) {
 
     // OpenCL Host Code Begins
     cl_int err;
-    unsigned fileBufSize;
 
     int no_of_elem = size / NCU;
 
@@ -129,8 +128,8 @@ int main(int argc, char **argv) {
 
     // read_binary_file() is a utility API which will load the binaryFile
     // and will return the pointer to file buffer.
-    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
-    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
+   auto fileBuf = xcl::read_binary_file(binaryFile);
+   cl::Program::Binaries bins{{fileBuf.data(), fileBuf.size()}};
     devices.resize(1);
 
     // Creating Program

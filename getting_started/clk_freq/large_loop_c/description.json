@@ -33,7 +33,7 @@
                     "location": "src/cnn_convolution_bad.cpp"
                 }
             ]
-        }
+	}
     ],
     "contributors" : [
         {
@@ -47,5 +47,6 @@
             "hw": "1"
         }
         ]
-    }
+    },
+    "match_makefile" : "false"
 }

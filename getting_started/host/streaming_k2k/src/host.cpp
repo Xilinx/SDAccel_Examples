@@ -117,7 +117,6 @@ int main(int argc, char **argv) {
     // Error Status variable
     cl_int err;
 
-    unsigned fileBufSize;
     // get_xil_devices() is a utility API which will find the xilinx
     // platforms and will return list of devices connected to Xilinx platform
     auto devices = xcl::get_xil_devices();
@@ -142,9 +141,9 @@ int main(int argc, char **argv) {
 
     // read_binary_file() is a utility API which will load the binaryFile
     // and will return the pointer to file buffer.
-    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
+   auto fileBuf = xcl::read_binary_file(binaryFile);
 
-    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
+   cl::Program::Binaries bins{{fileBuf.data(), fileBuf.size()}};
     devices.resize(1);
 
     // Creating Program

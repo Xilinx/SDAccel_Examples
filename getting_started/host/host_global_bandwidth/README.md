@@ -7,9 +7,10 @@ Host to global memory bandwidth test
 Platform | Board             | Software Version
 ---------|-------------------|-----------------
 xilinx_u200_qdma|Xilinx Alveo U200|SDx 2019.1
-xilinx_u280_xdma|Xilinx Alveo U280|SDx 2019.1
+xilinx_u50_xdma|Xilinx Alveo U50|SDx 2019.1
 xilinx_u250_qdma|Xilinx Alveo U250|SDx 2019.1
 xilinx_u200_xdma|Xilinx Alveo U200|SDx 2019.1
+xilinx_u280_xdma|Xilinx Alveo U280|SDx 2019.1
 xilinx_u250_xdma|Xilinx Alveo U250|SDx 2019.1
 
 

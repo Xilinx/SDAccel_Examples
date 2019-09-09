@@ -199,7 +199,6 @@ SmithWatermanApp::SmithWatermanApp(const string &vendor_name,
     m_writeMatchArray = writeMatchArray;
 
     cl_int err;
-    unsigned fileBufSize;
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
 
@@ -210,8 +209,8 @@ SmithWatermanApp::SmithWatermanApp(const string &vendor_name,
     OCL_CHECK(err, std::string dev_name = device.getInfo<CL_DEVICE_NAME>(&err));
     std::cout << "Found Device=" << dev_name.c_str() << std::endl;
 
-    fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
-    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
+   auto fileBuf = xcl::read_binary_file(binaryFile);
+   cl::Program::Binaries bins{{fileBuf.data(), fileBuf.size()}};
     devices.resize(1);
     OCL_CHECK(err, m_program = cl::Program(context, devices, bins, NULL, &err));
     OCL_CHECK(err,
@@ -223,7 +222,6 @@ SmithWatermanApp::~SmithWatermanApp() {
     cl_int err;
     OCL_CHECK(err, err = q.flush());
     OCL_CHECK(err, err = q.finish());
-    delete[] fileBuf;
 }
 
 bool SmithWatermanApp::unit_test_kernel_cpu() {

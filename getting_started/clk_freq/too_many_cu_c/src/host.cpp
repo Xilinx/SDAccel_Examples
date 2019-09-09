@@ -60,10 +60,9 @@ bool run_opencl_vadd(
     std::vector<int, aligned_allocator<int>> &source_in2,
     std::vector<int, aligned_allocator<int>> &source_hw_results) {
     cl_int err;
-    unsigned fileBufSize;
 
-    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
-    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
+   auto fileBuf = xcl::read_binary_file(binaryFile);
+   cl::Program::Binaries bins{{fileBuf.data(), fileBuf.size()}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     cl::Kernel krnl_vector_add;
@@ -150,7 +149,6 @@ bool run_opencl_vadd(
         OCL_CHECK(err, err = q.finish());
         std::cout << "Kernel Execution Finished...." << std::endl;
     }
-    delete[] fileBuf;
     return true;
 }
 int main(int argc, char **argv) {

@@ -58,7 +58,6 @@ int main(int argc, char **argv) {
     std::vector<unsigned short, aligned_allocator<unsigned short>> input_image(
         Y_SIZE * X_SIZE);
     cl_int err;
-    unsigned fileBufSize;
 
     std::vector<unsigned short, aligned_allocator<unsigned short>> output_image(
         Y_SIZE * X_SIZE);
@@ -88,8 +87,8 @@ int main(int argc, char **argv) {
 
     OCL_CHECK(err,
               std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
-    auto fileBuf = xcl::read_binary_file(binaryFile, fileBufSize);
-    cl::Program::Binaries bins{{fileBuf, fileBufSize}};
+   auto fileBuf = xcl::read_binary_file(binaryFile);
+   cl::Program::Binaries bins{{fileBuf.data(), fileBuf.size()}};
     devices.resize(1);
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
     OCL_CHECK(err, cl::Kernel krnl(program, "affine_kernel", &err));
@@ -133,7 +132,6 @@ int main(int argc, char **argv) {
                                                CL_MIGRATE_MEM_OBJECT_HOST));
     q.finish();
 
-    delete[] fileBuf;
 
     printf("   Writing RAW Image\n");
     size_t items_written =

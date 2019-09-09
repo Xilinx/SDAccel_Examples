@@ -1,0 +1,43 @@
+{
+    "runtime": ["OpenCL"],
+    "example": "Stream Chain Matrix Multiplication (C)",
+    "overview": [
+        "This is a kernel containing the cascaded Matrix Multiplication using dataflow. ap_ctrl_chain is enabled for this kernel to showcase how multiple enqueue of Kernel calls can be overlapped to give higher performance. ap_ctrl_chain allow kernel to start processing of next kernel operation before completing the current kernel operation."
+    ],
+  "nboard": [
+        "xilinx_aws-vu9p-f1-04261818", 
+        "xilinx:aws-vu9p-f1-04261818:dynamic"
+    ], 
+
+    "key_concepts": [ "ap_ctrl_chain", "PLRAM"],
+    "os": [
+        "Linux"
+    ],
+    "host_srcs": "src/host.cpp",
+    "linker": {
+        "options": [ "-pthread" ]
+    },
+    "host_exe": "vadd_mmult",
+    "cmd_args": "BUILD/krnl_stream_mmult.xclbin",
+    "libs": [
+        "xcl2"
+    ],
+    "containers": [
+    {
+       "name": "krnl_stream_mmult", 
+       "ldclflags": "--sp krnl_stream_mmult_1.m_axi_gmem0:DDR[0] --sp krnl_stream_mmult_1.m_axi_gmem1:DDR[1] --sp krnl_stream_mmult_1.m_axi_gmem2:PLRAM[0] --sp krnl_stream_mmult_1.m_axi_gmem3:PLRAM[1]",
+       "accelerators": [
+        {
+            "name": "krnl_stream_mmult", 
+            "location": "src/krnl_stream_mmult.cpp"
+        }
+       ]
+     }
+    ],
+    "contributors" : [
+        {
+            "group": "Xilinx",
+            "url" : "http://www.xilinx.com"
+        }
+    ]
+}
