@@ -4,6 +4,10 @@
     "overview": [
         "This is simple example of using AXI4-master interface for burst read and write"
     ],
+    "nboard": [
+        "xilinx_u50_xdma",
+        "xilinx:u50:xdma"    
+    ],
     "key_concepts": [ "burst access"],
     "keywords": [ "param:compiler.interfaceWrBurstLen", "param:compiler.interfaceRdBurstLen" ],
     "os": [

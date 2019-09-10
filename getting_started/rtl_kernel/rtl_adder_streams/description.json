@@ -11,6 +11,10 @@
     "libs": [
         "xcl2"
     ],
+    "nboard": [
+        "xilinx_u50_xdma",    
+        "xilinx:u50:xdma"    
+    ],
     "config_make": "config.mk",
     "output_files": "tmp_kernel_pack* packaged_kernel* _x* *.xo",
     "host_exe": "host",

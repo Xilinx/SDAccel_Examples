@@ -12,6 +12,10 @@
     "libs": [
         "xcl2"
     ],
+    "nboard": [
+        "xilinx_u50_xdma",
+        "xilinx:u50:xdma"
+    ],
     "host_exe": "host",
     "cmd_args": "BUILD/cnn_GOOD.xclbin BUILD/cnn_BAD.xclbin",
     "containers" : [
