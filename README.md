@@ -1,6 +1,8 @@
 SDAccel Example Repository
 ===========================
 
+Note: Please do not use this repository for Xilinx Latest Vitis Tool Chain. A entire new Repository is moved here: https://github.com/Xilinx/Vitis_Accel_Examples for Xilinx new Vitis Tool chain. Use SDAccel Examples repository for Xilinx previously released product SDAccel or SDx.
+
 Welcome to the SDAccel example repository. This repository contains the latest examples to get you started with application optimization targeting Xilinx PCIe FPGA acceleration boards. All examples are ready to be compiled and executed on SDAccel supported boards and accelerated cloud service partners. The repository is organized as follows:
 
 1. PREREQUISITE
